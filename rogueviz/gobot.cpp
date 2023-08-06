@@ -34,6 +34,7 @@ vector<cell*> ac;
 map<cell*, int> indices;
 
 const int Free = 2;
+const int Unowned = 3;
 
 struct boarddata {
   vector<int> taken, owner;
@@ -97,7 +98,7 @@ int str_to_index(string s) {
   else return val + isize(chars) * (str_to_index(s.substr(1)) + 1);
   }
 
-color_t player_colors[2] = {0x202020FF, 0xFFFFFFFF};
+color_t player_colors[4] = {0x202020FF, 0xFFFFFFFF, 0, 0xFFD500FF};
 
 bool draw_go(cell *c, const shiftmatrix& V) {
   if(c->wall == waSea) c->wall = waChasm;
@@ -306,6 +307,35 @@ bool mark_owned(string s, int who) {
   return true;
   }
 
+bool set_owner_auto() {
+  int N = isize(ac);
+  for(int at=0; at<N; at++) if(current.taken[at] == Free) current.owner[at] = Free;
+
+  for(int pos=0; pos<N; pos++) if(current.taken[pos] == Free && current.owner[pos] == Free) {
+    dfs d;
+    d.visit(pos);
+    int t0 = 0, t1 = 0;
+    for(int i=0; i<isize(d.q); i++) {
+      int at = d.q[i];
+      if(current.taken[at] == Free) {
+        for(int j: neigh_indices(at)) d.visit(j);
+        }
+      else if(current.taken[at] == 0) t0++;
+      else if(current.taken[at] == 1) t1++;
+      }
+    for(int i=0; i<isize(d.q); i++) {
+      int at = d.q[i];
+      auto& o = current.owner[at];
+      if(t0 && t1) o = Unowned;
+      else if(t0) o = 0;
+      else if(t1) o = 1;
+      else return true; /* all free */
+      }
+    }
+
+  return true;
+  }
+
 string mouse_label() {
   if(!indices.count(mouseover)) return "?";
   return index_to_str(indices[mouseover]);
@@ -440,6 +470,9 @@ void accept_command(string s) {
       "labels 0..3 - show (0) no labels, (1) labels on unowned, (2) labels on empty, (3) all labels\n"
       "ob [where] - own area as black\n"
       "ow [where] - own area as white\n"
+      "of [where] - the area is free\n"
+      "oc [where] - the area is common\n"
+      "oauto - own automatically\n"
       "score - view the score\n"
       "hires - take a 1000x1000 screenshot\n"
       "restart - restart\n"
@@ -461,8 +494,13 @@ void accept_command(string s) {
   if(tokens[0] == "clear" && t == 1) 
     clear_owner_marks();
 
-  if(tokens[0] == "ow" || tokens[0] == "ob") 
-    set_owner(tokens, tokens[0][1] == 'w');
+  if(tokens[0] == "ob") set_owner(tokens, 0);
+  if(tokens[0] == "ow") set_owner(tokens, 1);
+  if(tokens[0] == "of") set_owner(tokens, 2);
+  if(tokens[0] == "oc") set_owner(tokens, 3);
+
+  if(tokens[0] == "oauto")
+    set_owner_auto();
   
   if(tokens[0] == "undo") {
     if(history.empty())
@@ -474,22 +512,24 @@ void accept_command(string s) {
     }
 
   if(tokens[0] == "score") {
-    array<int, 2> owned_by, stones;
+    array<int, 4> owned_by, stones;
     for(int i=0; i<2; i++)
       owned_by[i] = stones[i] = 0;
 
     for(int i=0; i<isize(ac); i++)
       if(current.taken[i] != Free)
         stones[current.taken[i]]++;
-      else if(current.owner[i] != Free)
-        owned_by[current.owner[i]]++;
+      else owned_by[current.owner[i]]++;
     
     shstream ss;
     println(ss, "black: ", stones[0], " stones, ", owned_by[0], " area, ", current.captures[1], " prisoners");
     println(ss, "white: ", stones[1], " stones, ", owned_by[1], " area, ", current.captures[0], " prisoners");
+    print(ss, "board size: ", isize(ac));
+    if(owned_by[2]) print(ss, " free: ", owned_by[2]);
+    if(owned_by[3]) print(ss, " common: ", owned_by[3]);
     
     go_message(ss.s);
-   }
+    }
 
   if(tokens[0] == "restart") {
     save_backup();
