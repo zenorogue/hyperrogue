@@ -735,6 +735,24 @@ int rugArgs() {
 
   else if(argis("-go-save")) save_go();
 
+  else if(argis("-go-video")) {
+    save_backup();
+    shift(); string s = args();
+    shift(); int fpmove = argi();
+    shift(); int ffinal = argi();
+    int N = isize(history);
+    anims::noframes = N * fpmove + ffinal;
+    anims::period = anims::noframes;
+
+    int a = addHook(anims::hooks_anim, 100, [&] {
+      current = history[min(ticks / fpmove, N-1)];
+      });
+    anims::videofile = s;
+    anims::record_video_std();
+    delHook(anims::hooks_anim, a);
+    undo();
+    }
+
   else return 1;
   return 0;
   }
