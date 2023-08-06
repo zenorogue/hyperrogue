@@ -708,6 +708,8 @@ EX bool mouseaiming(bool shmupon) {
 /* visualization only -- the HyperRogue movement keys should move the camera */
 EX bool game_keys_scroll;
 
+EX purehookset hooks_control;
+
 EX void mainloopiter() {
   GLWRAP;
   DEBB(DF_GRAPH, ("main loop\n"));
@@ -973,6 +975,8 @@ EX void mainloopiter() {
   vrhr::vr_control();
   #endif
   achievement_pump();  
+
+  callhooks(hooks_control);
 
   for(auto d: dialog::key_queue) {
     println(hlog, "handling key ", d);
