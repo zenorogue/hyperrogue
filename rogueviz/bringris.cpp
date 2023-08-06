@@ -61,6 +61,8 @@ namespace subquotient {
 
 namespace bringris {
 
+multi::config scfg_bringris;
+
 struct bgeometry {
   string name;
   string cap;
@@ -1346,7 +1348,7 @@ void settings_menu() {
   dialog::addItem("visuals & Virtual Reality", 'v');
   dialog::add_action_push(visual_menu);
   dialog::addItem("configure keys", 'k');
-  dialog::add_action_push(multi::get_key_configurer(1, move_names, "Bringris keys"));
+  dialog::add_action_push(multi::get_key_configurer(1, move_names, "Bringris keys", scfg_bringris));
 
   #if CAP_AUDIO
   add_edit(effvolume);
@@ -1612,7 +1614,7 @@ void run() {
       explore = false;
 
     if(state == tsFalling && !paused) {
-      multi::handleInput(0);
+      multi::handleInput(0, scfg_bringris);
       bool consumed = false;
       for(int i=0; i<bmLast; i++)
         if(multi::actionspressed[16+i] && !multi::lactionpressed[16+i]) {
@@ -2038,16 +2040,12 @@ int args() {
   }
 
 void change_default_key(int key, int val) {
-  char* t = multi::scfg.keyaction;
+  char* t = scfg_bringris.keyaction;
   t[key] = val;
-  set_saver_default(t[key]);
   }
 
 void default_config() {
-  for(int i=0; i<512; i++)
-    if(multi::scfg.keyaction[i] >= 16 && multi::scfg.keyaction[i] < 32)
-      change_default_key(i, 0);
-  
+  clear_config(scfg_bringris);
   change_default_key('s', 16 + 0);
   change_default_key('a', 16 + 1);
   change_default_key('w', 16 + 2);
@@ -2057,6 +2055,7 @@ void default_config() {
   change_default_key(' ', 16 + 6);
   change_default_key('\r',16 + 7);
   change_default_key('p', 16 + 8);
+  sconfig_savers(scfg_bringris, "bringris");
 
   addsaver(bgeom, "bringris-geometry");
   addsaver(use_raycaster, "bringris-ray");

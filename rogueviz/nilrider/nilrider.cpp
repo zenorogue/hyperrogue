@@ -39,6 +39,8 @@
 
 namespace nilrider {
 
+multi::config scfg_nilrider;
+
 /** is the game paused? */
 bool paused = false;
 
@@ -83,7 +85,7 @@ void sync_music(eLand l) {
 bool turn(int delta) {
   if(planning_mode && !view_replay) return false;
 
-  multi::get_actions();
+  multi::get_actions(scfg_nilrider);
   auto& a = multi::actionspressed;
   auto& la = multi::lactionpressed;
 
@@ -246,7 +248,7 @@ void run() {
   dialog::add_key_action(PSEUDOKEY_SIM, toggle_replay);
   dialog::display();
 
-  char* t = multi::scfg.keyaction;
+  char* t = scfg_nilrider.keyaction;
   for(int i=1; i<512; i++) {
     auto& ka = dialog::key_actions;
     if(t[i] == 16+5) ka[i] = ka[PSEUDOKEY_PAUSE];
@@ -363,7 +365,7 @@ void settings() {
   dialog::addItem("projection", 'P');
   dialog::add_action_push(nil_projection);
   dialog::addItem("configure keys", 'k');
-  dialog::add_action_push(multi::get_key_configurer(1, move_names, "Nilrider keys"));
+  dialog::add_action_push(multi::get_key_configurer(1, move_names, "Nilrider keys", scfg_nilrider));
 
   #if CAP_AUDIO
   add_edit(effvolume);
@@ -540,17 +542,13 @@ void main_menu() {
 bool on;
 
 void change_default_key(int key, int val) {
-  char* t = multi::scfg.keyaction;
+  char* t = scfg_nilrider.keyaction;
   t[key] = val;
-  #if CAP_CONFIG
-  set_saver_default(t[key]);
-  #endif
   }
 
 void nilrider_keys() {
-  for(int i=0; i<512; i++)
-    if(multi::scfg.keyaction[i] >= 16 && multi::scfg.keyaction[i] < 32)
-      change_default_key(i, 0);
+  clear_config(scfg_nilrider);
+  
   change_default_key('s', 16 + 0);
   change_default_key('a', 16 + 1);
   change_default_key('w', 16 + 2);
@@ -564,6 +562,8 @@ void nilrider_keys() {
   change_default_key('b', 16 + 6);
   change_default_key('r', 16 + 7);
   change_default_key('v', 16 + 8);
+
+  sconfig_savers(scfg_nilrider, "nilrider");
   }
 
 bool nilrider_music(eLand& l) {

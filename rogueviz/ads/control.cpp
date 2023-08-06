@@ -2,6 +2,8 @@ namespace hr {
 
 namespace ads_game {
 
+multi::config scfg_ads;
+
 vector<string> move_names = { "acc down", "acc left", "acc up", "acc right", "fire", "pause", "display times", "switch spin", "menu", "[paused] future", "(paused] past", "[paused] move switch" };
 
 void fire() {
@@ -80,7 +82,7 @@ void fire() {
 
 bool handleKey(int sym, int uni) {
   if(cmode & sm::NORMAL) {
-    char* t = multi::scfg.keyaction;
+    char* t = scfg_ads.keyaction;
     if(t[sym] >= 16 && t[sym] < 32) return true;
     if(sym == 'v') pushScreen(game_menu);
     if(sym == SDLK_ESCAPE) pushScreen(game_menu);
@@ -139,7 +141,7 @@ ld read_movement() {
   }
 
 bool ads_turn(int idelta) {
-  multi::handleInput(idelta);
+  multi::handleInput(idelta, scfg_ads);
   ld delta = idelta / 1000.;
   
   if(!(cmode & sm::NORMAL)) return false;

@@ -45,14 +45,12 @@ namespace hr {
 namespace ads_game {
 
 void change_default_key(int key, int val) {
-  char* t = multi::scfg.keyaction;
+  char* t = scfg_ads.keyaction;
   t[key] = val;
-  #if CAP_CONFIG
-  set_saver_default(t[key]);
-  #endif
   }
 
 void set_default_keys() {
+  clear_config(scfg_ads);
   change_default_key('s', 16 + 0);
   change_default_key('a', 16 + 1);
   change_default_key('w', 16 + 2);
@@ -65,6 +63,7 @@ void set_default_keys() {
   change_default_key('i', 16 + 9);
   change_default_key('k', 16 + 10);
   change_default_key('l', 16 + 11);
+  sconfig_savers(scfg_ads, "ads");
   }
 
 void restart() {
@@ -132,8 +131,6 @@ void run_ads_game() {
   }
 
 void set_config() {
-  set_default_keys();
-
   nohelp = true;
   nomenukey = true;
   no_find_player = true;
@@ -265,6 +262,8 @@ auto hook1=
       if(arg::curphase == 3) pushScreen(pick_the_game);
       });
 #endif
+
+auto hook2 = addHook(hooks_configfile, 100, set_default_keys);
 
 }
 }
