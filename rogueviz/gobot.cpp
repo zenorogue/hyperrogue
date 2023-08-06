@@ -8,6 +8,8 @@
 // -canvas i -fillmodel ff801080 -noscr -geo Bring -gp 5 1 -unrectified -go-local -smart 1
 // (add -run before -go-local if you want to select your board manually (press F10 after selecting the board)
 
+// run online: ./hyper-go -canvas i -fillmodel ff801080 -noscr -geo Bring -gp 5 1 -unrectified -smart 3 -shot-1000 -shotxy 500 500 -shott 1 -gobot -go-discord
+
 /** \file gobot.cpp
  *  \brief bot to play Go via Discord
  */
@@ -15,7 +17,7 @@
 #define AEGIS 0
 
 #if AEGIS
-#include <aegis.hpp>
+#include <dpp/dpp.h>
 #endif
 
 #include "rogueviz.h"
@@ -140,13 +142,14 @@ void undo() {
   }
 
 #if AEGIS
-aegis::gateway::events::message_create* cur;
+dpp::message_create_t* cur;
+dpp::cluster *pbot;
 #endif
 
 int shot_state;
 
 #if AEGIS
-std::vector<aegis::future<aegis::gateway::objects::message> > old_shots;
+// std::vector<dpp::future<dpp::message> > old_shots;
 #endif
 
 void clean_old_shots() {
@@ -172,25 +175,12 @@ void take_shot() {
     while(shot_state == 1) usleep(1000);
     shot_state = 0;
     
-    aegis::create_message_t msg;
-    aegis::rest::aegis_file f;
-    f.name = "go-board.png";
-    
-    FILE *ff = fopen("go-temp.png", "r");
-    if(!ff) {
-      println(hlog, "file missing?!");
-      return;
-      }
-    int c;
-    while((c = fgetc(ff)) >= 0) f.data.push_back(c);
-    fclose(ff);
-    println(hlog, "file size = ", int(f.data.size()));
+    dpp::message msg(cur->msg.channel_id, "");
+    msg.add_file("go-board.png", dpp::utility::read_file("go-temp.png"));
+    pbot->message_create(msg);
 
-    msg.file(f);
-    println(hlog, "file attached");
     clean_old_shots();
     // old_shots.push_back();
-    cur->msg.get_channel().create_message(msg);
     println(hlog, "message sent");
     }
   #else
@@ -207,8 +197,10 @@ void go_message(string s) {
   addMessage(s);
 
   #if AEGIS
-  if(cur)
-    cur->msg.get_channel().create_message(s);
+  if(cur) {
+    dpp::message msg(cur->msg.channel_id, s);
+    pbot->message_create(msg);
+    }
   #endif
   }
 
@@ -367,7 +359,7 @@ void clear_owner_marks() {
   }
 
 void accept_command(string s) {
-  println(hlog, "accepting command: ", s);
+  println(hlog, "accepting command: '", s, "'");
   vector<string> tokens;
   string ctoken;
   for(char c: s + " ")
@@ -498,17 +490,26 @@ std::thread bot_thread;
 void go_discord() {
 #if AEGIS
   bot_thread = std::thread([] {
-    aegis::core bot(aegis::create_bot_t().log_level(spdlog::level::trace).token(AEGIS_TOKEN));
+    println(hlog, "starting bot");
+    uint64_t intents = dpp::i_default_intents | dpp::i_message_content;
+    dpp::cluster bot(AEGIS_TOKEN, intents);
+    pbot = &bot;
     std::mutex lock;
-    bot.set_on_message_create([&](auto obj) {
-      if(obj.msg.get_channel().get_name() != "go") return;
+    println(hlog, "on_message_create");
+    bot.on_message_create([&](auto obj) {
+      if(obj.msg.channel_id != 820590567397261352LL) {
+        println(hlog, "message '", obj.msg.content, "' on wrong channel");
+        return;
+        }
       std::unique_lock<std::mutex> lk(lock);
       cur = &obj;
-      accept_command(obj.msg.get_content());
+      accept_command(obj.msg.content);
       cur = nullptr; 
       });
-    bot.run();
-    bot.yield();
+    println(hlog, "starting bot");
+    bot.start(dpp::st_wait);
+    println(hlog, "done");
+    // bot.yield();
     });
 #endif
   }
