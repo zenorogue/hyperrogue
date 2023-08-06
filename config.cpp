@@ -4032,6 +4032,7 @@ template<class T, class U> void lps_add_typed(local_parameter_set& lps, T&val, T
       d2->dft = nvalue;
       d2->last_value = d1->last_value;
       d2->clone_from(d1);
+      lps.swaps.emplace_back(d1, &*d2);
       params[d2->parameter_name] = std::move(d2);
       }
     }
