@@ -74,6 +74,7 @@ struct setting {
     println(hlog, "cannot load this parameter");
     exit(1);
     }
+  virtual void swap_with(setting *s) { throw hr_exception("swap_with not defined"); }
   };
 #endif
 
@@ -116,6 +117,13 @@ template<class T> struct enum_setting : list_setting {
   void load_from(const string& s) override {
     *value = (T) parseint(s);
     }
+  virtual void swap_with(setting *s) {
+    auto d = dynamic_cast<enum_setting<T>*> (s);
+    if(!d) throw hr_exception("illegal swap_with on enum_setting");
+    swap(*value, *(d->value));
+    swap(last_value, d->last_value);
+    }
+  virtual void clone_from(enum_setting<T> *e) { options = e->options; }
   };
 
 struct float_setting : public setting {
@@ -141,6 +149,16 @@ struct float_setting : public setting {
   cld get_cld() override { return *value; }
   void set_cld(cld x) override { *value = real(x); }
   void load_from(const string& s) override;
+  virtual void swap_with(setting *s) {
+    auto d = dynamic_cast<float_setting*> (s);
+    if(!d) throw hr_exception("illegal swap_with on float_setting");
+    swap(*value, *(d->value));
+    swap(last_value, d->last_value);
+    }
+  virtual void clone_from(float_setting *e) {
+    min_value = e->min_value;
+    max_value = e->max_value;
+    }
   };
 
 struct float_setting_dft : public float_setting {
@@ -193,6 +211,14 @@ struct bool_setting : public setting {
   void load_from(const string& s) override {
     *value = parseint(s);
     }
+
+  virtual void swap_with(setting *s) {
+    auto d = dynamic_cast<bool_setting*> (s);
+    if(!d) throw hr_exception("illegal swap_with on bool_setting");
+    swap(*value, *(d->value));
+    swap(last_value, d->last_value);
+    }
+  virtual void clone_from(bool_setting *e) { }
   };
 
 struct custom_setting : public setting {  
@@ -3884,5 +3910,68 @@ auto ah_config =
   addHook(hooks_args, 0, read_param_args) + 
   addHook(hooks_args, 0, read_gamemode_args) + addHook(hooks_args, 0, read_color_args);
 #endif
+
+/* local parameter, for another game */
+
+#if HDR
+struct local_parameter_set {
+  string label;
+  vector<pair<setting*, setting*>> swaps;
+  void pswitch();
+  local_parameter_set(string l) : label(l) {}
+  };
+#endif
+
+local_parameter_set* current_lps;
+
+void local_parameter_set::pswitch() {
+  for(auto s: swaps) {
+    swap(s.first->parameter_name, s.second->parameter_name);
+    swap(s.first->config_name, s.second->config_name);
+    s.first->swap_with(s.second);
+    }
+  }
+
+EX void lps_enable(local_parameter_set *lps) {
+  if(current_lps) current_lps->pswitch();
+  current_lps = lps;
+  if(current_lps) current_lps->pswitch();
+  }
+
+template<class T> vector<std::unique_ptr<T>> lps_of_type;
+
+template<class T, class U> void lps_add_typed(local_parameter_set& lps, T&val, T nvalue) {
+  int found = 0;
+  for(auto& fs: params) {
+    if(fs.second->affects(&val)) {
+      found++;
+      lps_of_type<T>.emplace_back(std::make_unique<T> (nvalue));
+      auto d1 = dynamic_cast<U*> (&*fs.second);
+      if(!d1) throw hr_exception("lps_add not int_setting");
+      auto d2 = std::make_unique<U> ();
+      d2->parameter_name = lps.label + d1->parameter_name;
+      d2->config_name = lps.label + d1->config_name;
+      d2->menu_item_name = lps.label + d1->menu_item_name;
+      d2->value = &*(lps_of_type<T>.back());
+      d2->dft = nvalue;
+      d2->last_value = d1->last_value;
+      d2->clone_from(d1);
+      params[d2->parameter_name] = std::move(d2);
+      }
+    }
+  if(found != 1) println(hlog, "lps_add found = ", found);
+  }
+
+EX void lps_add(local_parameter_set& lps, int& val, int nvalue) {
+  lps_add_typed<int, int_setting> (lps, val, nvalue);
+  }
+
+EX void lps_add(local_parameter_set& lps, bool& val, bool nvalue) {
+  lps_add_typed<bool, bool_setting> (lps, val, nvalue);
+  }
+
+EX void lps_add(local_parameter_set& lps, ld& val, ld nvalue) {
+  lps_add_typed<ld, float_setting> (lps, val, nvalue);
+  }
 
 }
