@@ -449,7 +449,7 @@ void pop_and_push_replays() {
   }
 #endif
 
-reaction_t on_quit = [] { exit(0); }; 
+reaction_t on_quit = [] { quitmainloop = true; };
 
 void restart() {
   clear_path(curlev);
