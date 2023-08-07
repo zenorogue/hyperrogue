@@ -786,54 +786,31 @@ EX namespace nilv {
     }
 
   hyperpoint christoffel(const hyperpoint Position, const hyperpoint Velocity, const hyperpoint Transported, ld model = model_used) {
-    /* to do: write these formulas in model */
-    if(model == nmSym) {
-      hyperpoint c; c[3] = 0;
-      ld x = Position[0]; ld y = Position[1]; ld diag = (y*y-x*x)/8;
-      c[ 0 ] = 0
-       + Velocity[ 0 ] * Transported[ 1 ] * ( -y/4 )
-       + Velocity[ 1 ] * Transported[ 0 ] * ( -y/4 )
-       + Velocity[ 1 ] * Transported[ 1 ] * ( x/2 )
-       + Velocity[ 1 ] * Transported[ 2 ] * ( -1/2. )
-       + Velocity[ 2 ] * Transported[ 1 ] * ( -1/2. );
-      c[ 1 ] = 0
-       + Velocity[ 0 ] * Transported[ 0 ] * ( y/2 )
-       + Velocity[ 0 ] * Transported[ 1 ] * ( -x/4 )
-       + Velocity[ 0 ] * Transported[ 2 ] * ( 1/2. )
-       + Velocity[ 1 ] * Transported[ 0 ] * ( -x/4 )
-       + Velocity[ 2 ] * Transported[ 0 ] * ( 1/2. );
-      c[ 2 ] = 0
-       + Velocity[ 0 ] * Transported[ 0 ] * ( x*y/4 )
-       + Velocity[ 0 ] * Transported[ 1 ] * diag
-       + Velocity[ 0 ] * Transported[ 2 ] * ( x/4 )
-       + Velocity[ 1 ] * Transported[ 0 ] * diag
-       + Velocity[ 1 ] * Transported[ 1 ] * ( -x*y/4 )
-       + Velocity[ 1 ] * Transported[ 2 ] * ( y/4 )
-       + Velocity[ 2 ] * Transported[ 0 ] * ( x/4 )
-       + Velocity[ 2 ] * Transported[ 1 ] * ( y/4 );
-      return c;
-      }
-    if(model == nmHeis) {
-      ld x = Position[0];
-      return point3(
-        x * Velocity[1] * Transported[1] - 0.5 * (Velocity[1] * Transported[2] + Velocity[2] * Transported[1]),
-        -.5 * x * (Velocity[1] * Transported[0] + Velocity[0] * Transported[1]) + .5 * (Velocity[2] * Transported[0] + Velocity[0] * Transported[2]),
-        -.5 * (x*x-1) * (Velocity[1] * Transported[0] + Velocity[0] * Transported[1]) + .5 * x * (Velocity[2] * Transported[0] + Velocity[0] * Transported[2])
-        );
-      }
-    else {
-      hyperpoint P = Position;
-      hyperpoint V = Velocity;
-      hyperpoint T = Transported;
-      convert_ref(P, model_used, nmHeis);
-      convert_tangent_ref(P, V, model_used, nmHeis);
-      convert_tangent_ref(P, T, model_used, nmHeis);
-      auto res = christoffel(P, V, T, nmHeis);
-
-      auto T1 = T + res;
-      convert_tangent_ref(P + V, T1, nmHeis, model_used);
-      return T1 - Transported;
-      }
+    hyperpoint c; c[3] = 0;
+    ld x = Position[0]; ld y = Position[1];
+    auto mu = model;
+    c[ 0 ] = 0
+     + Velocity[ 0 ] * Transported[ 1 ] * ( y*(mu - 1)/4 )
+     + Velocity[ 1 ] * Transported[ 0 ] * ( y*(mu - 1)/4 )
+     + Velocity[ 1 ] * Transported[ 1 ] * ( x*(mu + 1)/2 )
+     + Velocity[ 1 ] * Transported[ 2 ] * ( -1/2. )
+     + Velocity[ 2 ] * Transported[ 1 ] * ( -1/2. );
+    c[ 1 ] = 0
+     + Velocity[ 0 ] * Transported[ 0 ] * ( y*(1 - mu)/2 )
+     + Velocity[ 0 ] * Transported[ 1 ] * ( -x*(mu + 1)/4 )
+     + Velocity[ 0 ] * Transported[ 2 ] * ( 1/2. )
+     + Velocity[ 1 ] * Transported[ 0 ] * ( -x*(mu + 1)/4 )
+     + Velocity[ 2 ] * Transported[ 0 ] * ( 1/2. );
+    c[ 2 ] = 0
+     + Velocity[ 0 ] * Transported[ 0 ] * ( x*y*(1 - mu*mu)/4 )
+     + Velocity[ 0 ] * Transported[ 1 ] * ( -mu*mu*x*x/8 + mu*mu*y*y/8 - mu*x*x/4 - mu*y*y/4 + mu/2 - x*x/8 + y*y/8 )
+     + Velocity[ 0 ] * Transported[ 2 ] * ( x*(mu + 1)/4 )
+     + Velocity[ 1 ] * Transported[ 0 ] * ( -mu*mu*x*x/8 + mu*mu*y*y/8 - mu*x*x/4 - mu*y*y/4 + mu/2 - x*x/8 + y*y/8 )
+     + Velocity[ 1 ] * Transported[ 1 ] * ( x*y*(mu*mu - 1)/4 )
+     + Velocity[ 1 ] * Transported[ 2 ] * ( y*(1 - mu)/4 )
+     + Velocity[ 2 ] * Transported[ 0 ] * ( x*(mu + 1)/4 )
+     + Velocity[ 2 ] * Transported[ 1 ] * ( y*(1 - mu)/4 );
+    return c;
     }
 
   EX hyperpoint formula_exp(hyperpoint v) {
