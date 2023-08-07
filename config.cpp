@@ -238,6 +238,30 @@ struct color_setting : public setting {
   virtual void clone_from(color_setting *e) { has_alpha = e->has_alpha; }
   };
 
+struct char_setting : public setting {
+  char *value;
+  char dft;
+  void add_as_saver() override;
+  bool affects(void *v) override { return v == value; }
+  void show_edit_option(int key) override;
+  cld get_cld() override { return *value; }
+  void set_cld(cld x) override { *value = floor(real(x)+.5); }
+
+  void load_from(const string& s) override {
+    if(s == "\\0") value = 0;
+    else sscanf(s.c_str(), "%c", value);
+    }
+
+  virtual void swap_with(setting *s) {
+    auto d = dynamic_cast<char_setting*> (s);
+    if(!d) throw hr_exception("illegal swap_with on char_setting");
+    swap(*value, *(d->value));
+    swap(last_value, d->last_value);
+    }
+
+  virtual void clone_from(char_setting *e) { }
+  };
+
 struct bool_setting : public setting {
   bool *value;
   bool dft;
@@ -393,6 +417,12 @@ void color_setting::add_as_saver() {
 #endif
   }
 
+void char_setting::add_as_saver() {
+#if CAP_CONFIG
+  addsaver(*value, config_name, dft);
+#endif
+  }
+
 void bool_setting::add_as_saver() { 
 #if CAP_CONFIG
   addsaver(*value, config_name, dft);
@@ -470,6 +500,11 @@ void color_setting::show_edit_option(int key) {
     dialog::colorAlpha = has_alpha;
     dialog::dialogflags |= sm::SIDE;
     });
+  }
+
+void char_setting::show_edit_option(int key) {
+  string s = s0; s += value;
+  dialog::addSelItem(XLAT(menu_item_name), s, key);
   }
 
 EX float_setting *param_f(ld& val, const string p, const string s, ld dft) {
@@ -574,6 +609,21 @@ EX color_setting *param_color(color_t& val, const string s, bool has_alpha, colo
   u->last_value = dft;
   u->dft = dft;
   u->has_alpha = has_alpha;
+  val = dft;
+  u->add_as_saver();
+  auto f = &*u;
+  params[u->parameter_name] = std::move(u);
+  return f;
+  }
+
+EX char_setting *param_char(char& val, const string s, char dft) {
+  unique_ptr<char_setting> u ( new char_setting );
+  u->parameter_name = param_esc(s);
+  u->config_name = s;
+  u->menu_item_name = s;
+  u->value = &val;
+  u->last_value = dft;
+  u->dft = dft;
   val = dft;
   u->add_as_saver();
   auto f = &*u;
@@ -809,6 +859,8 @@ EX void initConfig() {
   param_b(reg3::cubes_reg3, "cubes_reg3");
   param_f(linepatterns::tree_starter, "tree_starter")
   -> editable(0, 1, 0.05, "tree-drawing parameter", "How much of edges to draw for tree patterns (to show how the tree edges are oriented).", 't');
+
+  param_char(patterns::whichCanvas, "whichCanvas", 'r');
 
   param_b(arb::apeirogon_consistent_coloring, "apeirogon_consistent_coloring", true)
   -> editable("apeirogon_consistent_coloring", 'c');
@@ -4048,6 +4100,10 @@ EX void lps_add(local_parameter_set& lps, int& val, int nvalue) {
 
 EX void lps_add(local_parameter_set& lps, bool& val, bool nvalue) {
   lps_add_typed<bool, bool_setting> (lps, val, nvalue);
+  }
+
+EX void lps_add(local_parameter_set& lps, char& val, char nvalue) {
+  lps_add_typed<char, char_setting> (lps, val, nvalue);
   }
 
 EX void lps_add(local_parameter_set& lps, ld& val, ld nvalue) {
