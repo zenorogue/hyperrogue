@@ -803,10 +803,10 @@ EX namespace nilv {
       convert_tangent_ref(P, V, model_used, nmHeis);
       convert_tangent_ref(P, T, model_used, nmHeis);
       auto res = christoffel(P, V, T, nmHeis);
-      convert_tangent_ref(P, res, nmHeis, model_used);
-      // this is acceleration, not tangent, so:
-      res[2] += (model_used-nmHeis) * V[0] * V[1];
-      return res;
+
+      auto T1 = T + res;
+      convert_tangent_ref(P + V, T1, nmHeis, model_used);
+      return T1 - Transported;
       }
     }
 
