@@ -1625,7 +1625,7 @@ void run() {
       }
 
     dialog::handleNavigation(sym, uni);
-    if(in_menu && sym == 'q' && !ISWEB) exit(0);
+    if(in_menu && sym == 'q' && !ISWEB) quitmainloop = true;
     if(sym == '-') {
       if(!which_pointer) {
         int ax = mousex * 3 / xstart;
@@ -1987,12 +1987,15 @@ void create_game() {
   vid.axes3 = false;
   }
 
+local_parameter_set lps_bringris("bringris:");
+
 void init_all() {
   enable_bgeom();
   vid.texture_step = 8;
   showstartmenu = false;
   pushScreen(run);  
   in_bringris = true;
+  lps_enable(&lps_bringris);
   }
 
 int args() {
@@ -2057,17 +2060,23 @@ void default_config() {
   change_default_key('p', 16 + 8);
   sconfig_savers(scfg_bringris, "bringris");
 
-  addsaver(bgeom, "bringris-geometry");
-  addsaver(use_raycaster, "bringris-ray");
-  addsaver(draw_per_level, "draw-per-level");
-  addsaver(use_equidistant, "bringris-equidistant");
-  addsaver(flashes, "bringris-flashes");
+  param_i(bgeom, "bringris-geometry", 0);
+  lps_add(lps_bringris, ray::want_use, ray::want_use);
+  #if CAP_VR
+  lps_add_enum(lps_bringris, vrhr::hsm, vrhr::hsm);
+  lps_add_enum(lps_bringris, vrhr::eyes, vrhr::eyes);
+  #endif
+
+  param_b(use_raycaster, "bringris-ray");
+  param_i(draw_per_level, "draw-per-level");
+  param_b(use_equidistant, "bringris-equidistant");
+  param_b(flashes, "bringris-flashes");
   }
 
 auto hooks = 
     addHook(hooks_args, 100, args)
   + addHook(hooks_frame, 100, bringris_frame)
-  + addHook(hooks_configfile, 100, default_config)
+  + addHook(hooks_configfile, 300, default_config)
   + addHook(dialog::hooks_display_dialog, 100, [] () {
       if(dialog::items[0].body == "Bringris keys") {
         dialog::addBreak(200);
