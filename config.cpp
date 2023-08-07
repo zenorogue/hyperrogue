@@ -75,6 +75,7 @@ struct setting {
     exit(1);
     }
   virtual void swap_with(setting *s) { throw hr_exception("swap_with not defined"); }
+  virtual void clone_to(struct local_parameter_set& lps, void* nvalue) { throw hr_exception("clone_to not defined"); }
   };
 #endif
 
@@ -124,6 +125,7 @@ template<class T> struct enum_setting : list_setting {
     swap(last_value, d->last_value);
     }
   virtual void clone_from(enum_setting<T> *e) { options = e->options; }
+  virtual void clone_to(struct local_parameter_set& lps, void* nvalue);
   };
 
 struct float_setting : public setting {
@@ -4078,7 +4080,7 @@ template<class T, class U> void lps_add_typed(local_parameter_set& lps, T&val, T
       found++;
       lps_of_type<T>.emplace_back(std::make_unique<T> (nvalue));
       auto d1 = dynamic_cast<U*> (&*fs.second);
-      if(!d1) throw hr_exception("lps_add not int_setting");
+      if(!d1) throw hr_exception("lps_add not correct type of setting");
       auto d2 = std::make_unique<U> ();
       d2->parameter_name = lps.label + d1->parameter_name;
       d2->config_name = lps.label + d1->config_name;
@@ -4112,6 +4114,23 @@ EX void lps_add(local_parameter_set& lps, ld& val, ld nvalue) {
 
 EX void lps_add(local_parameter_set& lps, color_t& val, color_t nvalue) {
   lps_add_typed<color_t, color_setting> (lps, val, nvalue);
+  }
+
+#if HDR
+template<class T> void lps_add_enum(local_parameter_set& lps, T& val, T nvalue) {
+  int found = 0;
+  for(auto& fs: params) {
+    if(fs.second->affects(&val)) {
+      found++;
+      fs.second->clone_to(lps, &nvalue);
+      }
+    }
+  if(found != 1) println(hlog, "lps_add found = ", found);
+  }
+#endif
+
+template<class T> void enum_setting<T>::clone_to(struct local_parameter_set& lps, void* nvalue) {
+  lps_add_typed<T, enum_setting<T>> (lps, *value, *((T*)nvalue));
   }
 
 }
