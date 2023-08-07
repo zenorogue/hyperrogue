@@ -862,7 +862,7 @@ EX void initConfig() {
   param_f(linepatterns::tree_starter, "tree_starter")
   -> editable(0, 1, 0.05, "tree-drawing parameter", "How much of edges to draw for tree patterns (to show how the tree edges are oriented).", 't');
 
-  param_char(patterns::whichCanvas, "whichCanvas", 'r');
+  param_char(patterns::whichCanvas, "whichCanvas", 0);
 
   param_b(arb::apeirogon_consistent_coloring, "apeirogon_consistent_coloring", true)
   -> editable("apeirogon_consistent_coloring", 'c');
