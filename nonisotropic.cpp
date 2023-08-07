@@ -787,6 +787,32 @@ EX namespace nilv {
 
   hyperpoint christoffel(const hyperpoint Position, const hyperpoint Velocity, const hyperpoint Transported, ld model = model_used) {
     /* to do: write these formulas in model */
+    if(model == nmSym) {
+      hyperpoint c; c[3] = 0;
+      ld x = Position[0]; ld y = Position[1]; ld diag = (y*y-x*x)/8;
+      c[ 0 ] = 0
+       + Velocity[ 0 ] * Transported[ 1 ] * ( -y/4 )
+       + Velocity[ 1 ] * Transported[ 0 ] * ( -y/4 )
+       + Velocity[ 1 ] * Transported[ 1 ] * ( x/2 )
+       + Velocity[ 1 ] * Transported[ 2 ] * ( -1/2. )
+       + Velocity[ 2 ] * Transported[ 1 ] * ( -1/2. );
+      c[ 1 ] = 0
+       + Velocity[ 0 ] * Transported[ 0 ] * ( y/2 )
+       + Velocity[ 0 ] * Transported[ 1 ] * ( -x/4 )
+       + Velocity[ 0 ] * Transported[ 2 ] * ( 1/2. )
+       + Velocity[ 1 ] * Transported[ 0 ] * ( -x/4 )
+       + Velocity[ 2 ] * Transported[ 0 ] * ( 1/2. );
+      c[ 2 ] = 0
+       + Velocity[ 0 ] * Transported[ 0 ] * ( x*y/4 )
+       + Velocity[ 0 ] * Transported[ 1 ] * diag
+       + Velocity[ 0 ] * Transported[ 2 ] * ( x/4 )
+       + Velocity[ 1 ] * Transported[ 0 ] * diag
+       + Velocity[ 1 ] * Transported[ 1 ] * ( -x*y/4 )
+       + Velocity[ 1 ] * Transported[ 2 ] * ( y/4 )
+       + Velocity[ 2 ] * Transported[ 0 ] * ( x/4 )
+       + Velocity[ 2 ] * Transported[ 1 ] * ( y/4 );
+      return c;
+      }
     if(model == nmHeis) {
       ld x = Position[0];
       return point3(
