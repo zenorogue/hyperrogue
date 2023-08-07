@@ -585,13 +585,14 @@ void default_settings() {
   lps_add(lps_nilrider, vid.cells_drawn_limit, 1);
   lps_add(lps_nilrider, (color_t&) patterns::canvasback, 0);
   lps_add(lps_nilrider, smooth_scrolling, true);
-  lps_add(lps_nilrider, mapeditor::drawplayer, true);
+  lps_add(lps_nilrider, mapeditor::drawplayer, false);
   lps_add(lps_nilrider, backcolor, 0xC0C0FFFF);
   lps_add(lps_nilrider, logfog, 1);
+  lps_add(lps_nilrider, patterns::whichCanvas, 0);
 
   #if CAP_VR
-  lps_add(lps_nilrider, vrhr::hsm, vrhr::eHeadset::reference);
-  lps_add(lps_nilrider, vrhr::eyes, vrhr::eEyes::equidistant);
+  lps_add_enum(lps_nilrider, vrhr::hsm, vrhr::eHeadset::reference);
+  lps_add_enum(lps_nilrider, vrhr::eyes, vrhr::eEyes::equidistant);
   lps_add(lps_nilrider, vrhr::absolute_unit_in_meters, 6);
   #endif
   }
@@ -634,11 +635,11 @@ void initialize_all() {
   variation = eVariation::pure;
   nil_set_geodesic();
   enable_canvas();
+  lps_enable(&lps_nilrider);
   initialize();
   poly_outline = 0xFF;
   pushScreen(pick_game);
   start_game();
-  lps_enable(&lps_nilrider);
   }
 
 auto celldemo = arg::add3("-unilcycle", initialize) + arg::add3("-unilplan", [] { planning_mode = true; }) + arg::add3("-viewsim", [] { view_replay = true; })
