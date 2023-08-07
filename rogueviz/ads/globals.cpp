@@ -113,6 +113,8 @@ ads_object *main_rock;
 
 extern string copyright_shown;
 
+extern local_parameter_set lps_relhell;
+
 int XSCALE = 48;
 int YSCALE = 48;
 int talpha = 32;
@@ -124,6 +126,7 @@ void reset_textures();
 void ds_restart();
 void run_ads_game_std();
 void run_ds_game();
+void run_ds_game_std();
 
 /** in the replay mode */
 bool rev_replay;

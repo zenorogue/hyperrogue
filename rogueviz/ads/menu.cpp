@@ -232,7 +232,7 @@ void pick_the_game() {
   dialog::addBreak(100);
 
   dialog::addBigItem("de Sitter space", '2');
-  dialog::add_action([] { popScreen(); run_ds_game(); clearMessages(); });
+  dialog::add_action([] { popScreen(); run_ds_game_std(); clearMessages(); });
   dialog::addInfo(XLAT("avoid energy balls, but do not let the main star run away!"));
 
   dialog::addBreak(100);

@@ -130,21 +130,30 @@ void run_ads_game() {
   restart();
   }
 
+local_parameter_set lps_relhell("relhell:");
+
+void default_settings() {
+  set_default_keys();
+
+  lps_add_enum(lps_relhell, nohelp, 1);
+  lps_add(lps_relhell, nomenukey, true);
+  lps_add(lps_relhell, no_find_player, true);
+  lps_add(lps_relhell, showstartmenu, false);
+  lps_add(lps_relhell, mapeditor::drawplayer, false);
+  lps_add(lps_relhell, vid.drawmousecircle, false);
+  lps_add(lps_relhell, draw_centerover, false);
+  lps_add(lps_relhell, vid.axes3, false);
+  lps_add(lps_relhell, patterns::whichCanvas, 'r');
+  lps_add(lps_relhell, patterns::rwalls, 0);
+  }
+
 void set_config() {
-  nohelp = true;
-  nomenukey = true;
-  no_find_player = true;
-  showstartmenu = false;
-  mapeditor::drawplayer = false;
-  vid.drawmousecircle = false;
-  draw_centerover = false;
-  vid.axes3 = false;
+  lps_enable(&lps_relhell);
   enable_canvas();
-  patterns::whichCanvas = 'r';
-  patterns::rwalls = 0;
   }
 
 void run_ads_game_std() {
+  set_config();
   set_geometry(gNormal);
   set_variation(eVariation::pure);
   run_ads_game();
@@ -256,14 +265,15 @@ auto shot_hooks =
 #ifdef RELHELL
 auto hook1=
     addHook(hooks_config, 100, [] {
-      set_config();
+      lps_enable(&lps_relhell);
+      enable_canvas();
       if(arg::curphase == 1)
         conffile = "relhell.ini";
       if(arg::curphase == 3) pushScreen(pick_the_game);
       });
 #endif
 
-auto hook2 = addHook(hooks_configfile, 100, set_default_keys);
+auto hook2 = addHook(hooks_configfile, 300, default_settings);
 
 }
 }

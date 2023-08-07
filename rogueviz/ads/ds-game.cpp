@@ -737,6 +737,12 @@ void run_ds_game() {
   rogueviz::rv_hook(anims::hooks_anim, 100, replay_animation);
   }
 
+void run_ds_game_std() {
+  lps_enable(&lps_relhell);
+  enable_canvas();
+  run_ds_game();
+  }
+
 auto ds_hooks = 
   arg::add3("-ds-game", run_ds_game);
 
