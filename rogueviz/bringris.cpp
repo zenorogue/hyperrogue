@@ -61,6 +61,10 @@ namespace subquotient {
 
 namespace bringris {
 
+local_parameter_set lps_bringris("bringris:");
+local_parameter_set lps_bringris_explore("bringris:explore:", &lps_bringris);
+local_parameter_set lps_bringris_play("bringris:play:", &lps_bringris);
+
 multi::config scfg_bringris;
 
 struct bgeometry {
@@ -1182,12 +1186,10 @@ void draw_screen(int xstart, bool show_next) {
   
   if(explore) {
     gamescreen();
-    mouseaim_sensitivity = 0.01;
-    camera_speed = 2;
-    smooth_scrolling = true;
+    lps_enable(&lps_bringris_explore);
     }
   else {  
-    mouseaim_sensitivity = 0;
+    lps_enable(&lps_bringris_play);
     NLP = Id;
     View = pView;
     if(nil) {
@@ -1970,27 +1972,11 @@ void create_game() {
   camera_level = well_size + max_piece + camera;
   
   playermoved = false;
-  ray::want_use = 2;
-  ray::exp_decay_poly = 200;
   ray::max_iter_current() = solnil ? 600 : 200;
-  ray::fixed_map = true;
-  mapeditor::drawplayer = false;
-  // sightranges[geometry] = 1;
-  
-    
-  vid.fov = 90;
-  vid.plevel_factor = 0.5;
-  // vid.grid = true;
 
-  mouseaim_sensitivity = 0;  
-  
   start_new_game();
   state = tsPreGame;
-
-  vid.axes3 = false;
   }
-
-local_parameter_set lps_bringris("bringris:");
 
 void init_all() {
   lps_enable(&lps_bringris);
@@ -2069,6 +2055,20 @@ void default_config() {
   lps_add(lps_bringris, vrhr::hsm, vrhr::hsm);
   lps_add(lps_bringris, vrhr::eyes, vrhr::eyes);
   #endif
+
+  lps_add(lps_bringris, ray::exp_decay_poly, 200);
+  lps_add(lps_bringris, ray::fixed_map, true);
+  lps_add(lps_bringris, mapeditor::drawplayer, false);
+
+  lps_add(lps_bringris, vid.fov, 90);
+  lps_add(lps_bringris, vid.plevel_factor, 0.5);
+  lps_add(lps_bringris, vid.axes3, false);
+
+  lps_add(lps_bringris_explore, mouseaim_sensitivity, 0.01);
+  lps_add(lps_bringris_explore, camera_speed, 2);
+  lps_add(lps_bringris_explore, smooth_scrolling, true);
+
+  lps_add(lps_bringris_play, mouseaim_sensitivity, 0);
 
   param_b(use_raycaster, "bringris-ray");
   param_i(draw_per_level, "draw-per-level");
