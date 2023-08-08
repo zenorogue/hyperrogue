@@ -499,7 +499,7 @@ transmatrix exp_parser::parsematrix(int prio) {
       at += 4;
       ld angle = validate_real(parsepar());
       if(unit == -1) return lorentz(c0, c1, angle);
-      else return cspin(c0, c1, angle);
+      else return cspin(c0, c1, unit * angle);
       }
     }
   transmatrix res;
