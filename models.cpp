@@ -119,17 +119,14 @@ EX namespace models {
   EX ld rotation_xz = 90;
   EX ld rotation_xy2 = 90;
   EX int do_rotate = 1;
-  EX ld ocos, osin, ocos_yz, osin_yz;
   EX ld cos_ball, sin_ball;
   EX bool model_straight, model_straight_yz;
 
+  EX void apply_ori(hyperpoint& h) { if(!model_straight) h = pconf.mori().get() * h; }
+  EX void apply_iori(hyperpoint& h) { if(!model_straight) h = iso_inverse(pconf.mori().get()) * h; }
   #if HDR
-    // screen coordinates to logical coordinates: apply_orientation(x,y)
+  // screen coordinates to logical coordinates: apply_orientation(x,y)
   // logical coordinates back to screen coordinates: apply_orientation(y,x)
-  template<class A>
-  void apply_orientation(A& x, A& y) { if(!model_straight) tie(x,y) = make_pair(x*ocos + y*osin, y*ocos - x*osin); }
-  template<class A>
-  void apply_orientation_yz(A& x, A& y) { if(!model_straight_yz) tie(x,y) = make_pair(x*ocos_yz + y*osin_yz, y*ocos_yz - x*osin_yz); }
   template<class A>
   void apply_ball(A& x, A& y) { tie(x,y) = make_pair(x*cos_ball + y*sin_ball, y*cos_ball - x*sin_ball); }
   #endif
@@ -151,12 +148,8 @@ EX namespace models {
   EX void configure() {
     ld ball = -pconf.ballangle * degree;
     cos_ball = cos(ball), sin_ball = sin(ball);
-    ocos = cos(pconf.model_orientation * degree);
-    osin = sin(pconf.model_orientation * degree);
-    ocos_yz = cos(pconf.model_orientation_yz * degree);
-    osin_yz = sin(pconf.model_orientation_yz * degree);
-    model_straight = (ocos > 1 - 1e-9);
-    model_straight_yz = GDIM == 2 || (ocos_yz > 1-1e-9);
+    model_straight = (pconf.mori().get()[0][0] > 1 - 1e-9);
+    model_straight_yz = GDIM == 2 || (pconf.mori().get()[2][2] > 1-1e-9);
     if(history::on) history::apply();
     
     if(!euclid) {
@@ -474,7 +467,7 @@ EX namespace models {
       add_edit(vpconf.alpha);
       }
                                   
-    if(has_orientation(vpmodel)) {
+    /* TODO if(has_orientation(vpmodel)) {
       dialog::addSelItem(XLAT("model orientation"), fts(vpconf.model_orientation) + "°", 'l');
       dialog::add_action([] () {
         dialog::editNumber(vpconf.model_orientation, 0, 360, 90, 0, XLAT("model orientation"), "");
@@ -485,13 +478,13 @@ EX namespace models {
           dialog::editNumber(vpconf.model_orientation_yz, 0, 360, 90, 0, XLAT("model orientation (y/z plane)"), "");
           });
         }
-      }
+      } */
      
     if(among(vpmodel, mdPerspective, mdHorocyclic) && nil) {
-      dialog::addSelItem(XLAT("model orientation"), fts(vpconf.model_orientation) + "°", 'l');
+      /* TODO dialog::addSelItem(XLAT("model orientation"), fts(vpconf.model_orientation) + "°", 'l');
       dialog::add_action([] () {
         dialog::editNumber(vpconf.model_orientation, 0, 360, 90, 0, XLAT("model orientation"), "");
-        });
+        }); */
       dialog::addSelItem(XLAT("rotational or Heisenberg"), fts(vpconf.rotational_nil), 'L');
       dialog::add_action([] () {
         dialog::editNumber(vpconf.rotational_nil, 0, 1, 1, 1, XLAT("1 = Heisenberg, 0 = rotational"), "");
@@ -850,7 +843,7 @@ EX namespace models {
       }
     else if(argis("-mori")) { 
       PHASEFROM(2); 
-      shift_arg_formula(vpconf.model_orientation);
+      shift_arg_formula_matrix(vpconf.mori());
       }
     else if(argis("-mets")) { 
       PHASEFROM(2); 
@@ -867,11 +860,6 @@ EX namespace models {
     else if(argis("-mnil")) { 
       PHASEFROM(2); 
       shift_arg_formula(vpconf.rotational_nil);
-      }
-    else if(argis("-mori2")) { 
-      PHASEFROM(2); 
-      shift_arg_formula(vpconf.model_orientation);
-      shift_arg_formula(vpconf.model_orientation_yz);
       }
     else if(argis("-crot")) { 
       PHASEFROM(2); 
@@ -987,8 +975,8 @@ EX namespace models {
       addsaverenum(p.model, pp+"used model", mdDisk);
       if(&p.model == &pmodel) param_custom(pmodel, "projection|Poincare|Klein|half-plane|perspective", menuitem_projection, '1');
 
-      param_f(p.model_orientation, pp+"mori", sp+"model orientation", 0);
-      param_f(p.model_orientation_yz, pp+"mori_yz", sp+"model orientation-yz", 0);
+      // TODO param_f(p.model_orientation, pp+"mori", sp+"model orientation", 0);
+      // TODO param_f(p.model_orientation_yz, pp+"mori_yz", sp+"model orientation-yz", 0);
 
       param_f(p.top_z, sp+"topz", 5)
       -> editable(1, 20, .25, "maximum z coordinate to show", "maximum z coordinate to show", 'l');       

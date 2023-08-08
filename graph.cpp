@@ -3400,11 +3400,12 @@ EX void drawaura() {
     ld s = sin(rr);
 
     if(joukowsky) {
-      ld c1 = c, s1 = s;
+      hyperpoint v(c, s, 0, 1);
       if(inversion)
-        models::apply_orientation(s1, c1);
+        models::apply_iori(v);
       else        
-        models::apply_orientation(c1, s1);
+        models::apply_ori(v);
+      ld c1 = v[0], s1 = v[1];
 
       ld& mt = pconf.model_transition;
       ld mt2 = 1 - mt;

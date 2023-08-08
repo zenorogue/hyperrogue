@@ -129,6 +129,8 @@ struct exp_parser {
 
   cld parse(int prio = 0);
 
+  transmatrix parsematrix(int prio = 0);
+
   ld rparse(int prio = 0) { return validate_real(parse(prio)); }
   int iparse(int prio = 0) { return int(floor(rparse(prio) + .5)); }
 
@@ -470,10 +472,78 @@ cld exp_parser::parse(int prio) {
   return res;
   }
 
+int coord_id(char ch) {
+  if(ch == 'x') return 0;
+  if(ch == 'y') return 1;
+  if(ch == 'z') return 2;
+  if(ch == 'w') return 3;
+  if(ch == 't') return MDIM-1;
+  return -1;
+  }
+
+ld angle_unit(char ch) {
+  if(ch == 'r') return 1;
+  if(ch == 'd') return degree;
+  if(ch == 't') return TAU;
+  if(ch == 'l') return -1;
+  return 0;
+  }
+
+transmatrix exp_parser::parsematrix(int prio) {
+  skip_white();
+  if(s[at] && s[at+1] && s[at+2] && s[at+3] == '(') {
+    ld unit = angle_unit(s[at]);
+    int c0 = coord_id(s[at+1]);
+    int c1 = coord_id(s[at+2]);
+    if(c0 >= 0 && c1 >= 0 && c0 != c1 && unit) {
+      at += 4;
+      ld angle = validate_real(parsepar());
+      if(unit == -1) return lorentz(c0, c1, angle);
+      else return cspin(c0, c1, angle);
+      }
+    }
+  transmatrix res;
+  if(next() == '(') {
+    at++;
+    res = parsematrix(); 
+    force_eat(")");
+    }
+  else {
+    string token = next_token();
+    if(token == "id") res = Id;
+    else if(token == "view") res = View;
+    else throw hr_parse_exception("unknown matrix: " + token);
+    }
+  while(true) {
+    skip_white();
+    if(next() == '*' && prio <= 20) at++, res = res * parsematrix(30);
+    }
+  return res;
+  }
+
 EX ld parseld(const string& s) {
   exp_parser ep;
   ep.s = s;
   return ep.rparse();
+  }
+
+EX transmatrix parsematrix(const string& s) {
+  exp_parser ep;
+  ep.s = s;
+  return ep.parsematrix();
+  }
+
+EX trans23 parsematrix23(const string& s) {
+  trans23 t;
+  #if MAXMDIM == 3
+  t.v2 = t.v3 = parsematrix(s);
+  #else
+  auto& dim = cginf.g.homogeneous_dimension;
+  dynamicval<int> d1(dim, dim);
+  dim = 3; t.v2 = parsematrix(s);
+  dim = 4; t.v3 = parsematrix(s);
+  #endif
+  return t;
   }
 
 EX int parseint(const string& s) {

@@ -1365,7 +1365,7 @@ EX void apply() {
 
   if(ballangle_rotation) {
     if(models::has_orientation(vpconf.model))
-      vpconf.model_orientation += ballangle_rotation * 360 * t / period;
+      vpconf.mori() = trans23(spin(ballangle_rotation * 360 * t / period)) * vpconf.mori();
     else
       vpconf.ballangle += ballangle_rotation * 360 * t / period;
     }
@@ -1925,7 +1925,7 @@ startanim null_animation { "", no_init, [] { gamescreen(); }};
 #if CAP_STARTANIM
 startanim joukowsky { "Joukowsky transform", no_init, [] {
   dynamicval<eModel> dm(pmodel, mdJoukowskyInverted);
-  dynamicval<ld> dt(pconf.model_orientation, ticks / 25.);
+  dynamicval<trans23> dt(pconf.mori(), spin( ticks / 25. ));
   dynamicval<int> dv(vid.use_smart_range, 2);
   dynamicval<ld> ds(pconf.scale, 1/4.);
   models::configure();
@@ -1936,7 +1936,7 @@ startanim joukowsky { "Joukowsky transform", no_init, [] {
 
 startanim bandspin { "spinning in the band model", no_init, [] {
   dynamicval<eModel> dm(pmodel, mdBand);
-  dynamicval<ld> dt(pconf.model_orientation, ticks / 25.);
+  dynamicval<trans23> dt(pconf.mori(), spin( ticks / 25. ));
   dynamicval<int> dv(vid.use_smart_range, 2);
   models::configure();
   gamescreen();

@@ -203,6 +203,25 @@ constexpr transmatrix Id = diag(1,1,1,1);
 /** zero matrix */
 constexpr transmatrix Zero = diag(0,0,0,0);
 
+/** a transmatrix with 2D and 3D version, useful for configuration */
+struct trans23 {
+  transmatrix v2, v3;
+  transmatrix& get() { return MDIM == 3 ? v2 : v3; }
+  trans23() { v2 = Id; v3 = Id; }
+  trans23(const transmatrix& T) { v2 = T; v3 = T; }
+  trans23(const transmatrix& T2, const transmatrix& T3) { v2 = T2; v3 = T3; }
+  trans23 operator * (trans23 T) {
+    trans23 t;
+    auto& dim = cginf.g.homogeneous_dimension;
+    dynamicval<int> d1(dim, dim);
+    dim = 3; t.v2 = v2 * T.v2;
+    dim = 4; t.v3 = v3 * T.v3;
+    return t;
+    }
+  };
+
+inline trans23 *gen_trans23() { return new trans23; }
+
 /** mirror image */
 constexpr transmatrix Mirror = diag(1,-1,1,1);
 
@@ -1165,6 +1184,16 @@ EX transmatrix iso_inverse(const transmatrix& T) {
     return U;
     }
   return inverse(T);
+  }
+
+/** inverse a guaranteed rotation */
+EX transmatrix rot_inverse(const transmatrix& T) {
+  return transpose(T);
+  }
+
+/** inverse a guaranteed rotation */
+EX trans23 rot_inverse(const trans23& T) {
+  return trans23(rot_inverse(T.v2), rot_inverse(T.v3));
   }
 
 /** \brief T inverse a matrix T = O*S, where O is isometry and S is a scaling matrix (todo optimize) */

@@ -953,7 +953,7 @@ EX void showStartMenu() {
       specialland = racing::race_lands[rand() % isize(racing::race_lands)];
       start_game();
       pmodel = mdBand;
-      pconf.model_orientation = racing::race_angle;
+      pconf.mori() = racing::race_angle;
       racing::race_advance = 1;
       vid.yshift = 0;
       pconf.camera_angle = 0;

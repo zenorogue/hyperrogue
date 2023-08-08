@@ -698,7 +698,7 @@ EX void reset_race() {
 
 bool inrec = false;
 
-EX ld race_angle = 90;
+EX trans23 race_angle = cspin90(0, 1);
 
 EX bool force_standard_centering() {
   return nonisotropic || mhybrid || quotient || closed_or_bounded;
@@ -793,7 +793,7 @@ EX bool set_view() {
     }
   if(GDIM == 3 && WDIM == 2)
     View = spin180() * cspin(2, 1, 90._deg + shmup::playerturny[multi::cpid]) * spin270() * View;
-  else if(GDIM == 2) View = spin(race_angle * degree) * View;
+  else if(GDIM == 2) View = race_angle.v2 * View;
   return true;
   }
 
@@ -846,7 +846,7 @@ auto hook =
     })
 + addHook(hooks_configfile, 100, [] {
     param_f(racing::race_advance, "race_advance");
-    param_f(racing::race_angle, "race_angle");
+    // TODO param_f(racing::race_angle, "race_angle");
     param_i(racing::ghosts_to_show, "race_ghosts_to_show");
     param_i(racing::ghosts_to_save, "race_ghosts_to_save");
     param_b(racing::guiding, "race_guiding");
@@ -982,7 +982,7 @@ void race_projection() {
   dialog::addBoolItem(XLAT("band"), pmodel == mdBand, '2');
   dialog::add_action([] () {
     pmodel = mdBand;
-    pconf.model_orientation = race_angle;
+    pconf.mori() = race_angle;
     race_advance = 1;
     vid.yshift = 0;
     pconf.camera_angle = 0;
@@ -996,7 +996,7 @@ void race_projection() {
   dialog::addBoolItem(XLAT("half-plane"), pmodel == mdHalfplane, '3');
   dialog::add_action([] () {
     pmodel = mdHalfplane;
-    pconf.model_orientation = race_angle + 90;
+    pconf.mori() = race_angle * spin90();
     race_advance = 0.5;
     vid.yshift = 0;
     pconf.camera_angle = 0;
@@ -1035,11 +1035,11 @@ void race_projection() {
   else dialog::addBreak(100);
         
   if(GDIM == 2) {
-    dialog::addSelItem(XLAT("race angle"), fts(race_angle), 'a');
+    // TODO dialog::addSelItem(XLAT("race angle"), fts(race_angle), 'a');
     dialog::add_action([] () { 
-      dialog::editNumber(race_angle, 0, 360, 15, 90, XLAT("race angle"), "");
-      int q = pconf.model_orientation - race_angle;
-      dialog::reaction = [q] () { pconf.model_orientation = race_angle + q; };
+      // TODO dialog::editNumber(race_angle, 0, 360, 15, 90, XLAT("race angle"), "");
+      auto q = rot_inverse(race_angle) * pconf.mori();
+      dialog::reaction = [q] () { pconf.mori() = race_angle * q; };
       });
     }
 

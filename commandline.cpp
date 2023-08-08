@@ -119,6 +119,10 @@ EX namespace arg {
     #endif
     if(old != x && r) r();
     }
+
+  EX void shift_arg_formula_matrix(struct hr::trans23& x) {
+    shift(); x = parsematrix23(args()); // TODO animate
+    }
   
   #if HDR
 

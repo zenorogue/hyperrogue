@@ -56,10 +56,12 @@ EX map<unsigned, shared_ptr<glhr::GLprogram>> matched_programs;
 
 glhr::glmatrix model_orientation_gl() {
   glhr::glmatrix s = glhr::id;
-  for(int a=0; a<GDIM; a++)
-    models::apply_orientation(s[a][1], s[a][0]);
-  if(GDIM == 3) for(int a=0; a<GDIM; a++)
-    models::apply_orientation_yz(s[a][2], s[a][1]);
+  for(int a=0; a<GDIM; a++) {
+    hyperpoint row;
+    for(int b=0; b<4; b++) row[b] = s[a][b];
+    models::apply_iori(row);
+    for(int b=0; b<4; b++) s[a][b] = row[b];
+    }
   return s;
   }
 
@@ -769,8 +771,8 @@ void display_data::set_projection(int ed, ld shift) {
     }
 
   if(selected->uRotNil != -1) {
-    glUniform1f(selected->uRotCos, models::ocos);
-    glUniform1f(selected->uRotSin, models::osin);
+    glUniform1f(selected->uRotCos, pconf.mori().get()[0][0]);
+    glUniform1f(selected->uRotSin, pconf.mori().get()[1][0]);
     glUniform1f(selected->uRotNil, pconf.rotational_nil);
     }
 
@@ -786,10 +788,12 @@ void display_data::set_projection(int ed, ld shift) {
       pp = glhr::tmtogl_transpose(NLP) * pp;
 
     if(get_shader_flags() & SF_ORIENT) {
-      if(GDIM == 3) for(int a=0; a<4; a++) 
-        models::apply_orientation_yz(pp[a][1], pp[a][2]);
-      for(int a=0; a<4; a++) 
-        models::apply_orientation(pp[a][0], pp[a][1]);
+      for(int a=0; a<4; a++)  {
+        hyperpoint row;
+        for(int b=0; b<4; b++) row[b] = pp[a][b];
+        models::apply_ori(row);
+        for(int b=0; b<4; b++) pp[a][b] = row[b];
+        }
       }
     
     glUniformMatrix4fv(selected->uPP, 1, 0, pp.as_array());

@@ -925,13 +925,29 @@ ld period_at(ld y) {
     }     
   }
 
+void apply_ori_gl(glvertex& g) {
+  auto Ori = pconf.mori().v2;
+  tie(g[0], g[1]) = make_pair(
+    Ori[0][0] * g[0] + Ori[0][1] * g[1],
+    Ori[1][0] * g[0] + Ori[1][1] * g[1]
+    );
+  }
+
+void apply_iori_gl(glvertex& g) {
+  auto Ori = pconf.mori().v2;
+  tie(g[0], g[1]) = make_pair(
+    Ori[0][0] * g[0] + Ori[1][0] * g[1],
+    Ori[0][1] * g[0] + Ori[1][1] * g[1]
+    );
+  }
+
 void adjust(bool tinf) {
 
   periods.resize(isize(glcoords));
   
   if(!models::model_straight)
     for(auto& g: glcoords)
-      models::apply_orientation(g[0], g[1]);
+      apply_ori_gl(g);
 
   for(int i = 0; i<isize(glcoords); i++) periods[i] = period_at(glcoords[i][1]);  
     
@@ -989,7 +1005,7 @@ void adjust(bool tinf) {
   if(abs(first - last) < 1e-6) {
     if(!models::model_straight)
       for(auto& g: glcoords)
-        models::apply_orientation(g[1], g[0]);
+        apply_iori_gl(g);
     }
   else {
     if(tinf) { 
@@ -1020,7 +1036,7 @@ void adjust(bool tinf) {
       }
     if(!models::model_straight)
       for(auto& g: glcoords)
-        models::apply_orientation(g[1], g[0]);
+        apply_iori_gl(g);
     // we have already looped
     loop_min = loop_max = 0;  
     }
@@ -1667,7 +1683,7 @@ bool broken_projection(dqi_poly& p0) {
     int fail = 0;
     int last_fail;
 
-    for(auto& h: all) models::apply_orientation(h[0], h[1]);
+    for(auto& h: all) models::apply_ori(h);
 
     auto break_in_xz = [&] (hyperpoint a, hyperpoint b, int xcoord, int zcoord) {
       return a[xcoord] * b[xcoord] <= 0 && (a[xcoord] * (b[zcoord]+zlow) - b[xcoord] * (a[zcoord]+zlow)) * (a[xcoord] - b[xcoord]) < 0;
@@ -1692,7 +1708,7 @@ bool broken_projection(dqi_poly& p0) {
 
     /* we don't rotate h's back, just change p.V */
     for(int i=0; i<3; i++)
-      models::apply_orientation(p.V.T[i][0], p.V.T[i][1]);
+      models::apply_ori(p.V.T[i]);
 
     if(fail) {
       if(p0.tinf) return true;
@@ -1875,8 +1891,8 @@ void dqi_poly::draw() {
           shiftpoint h2 = V * glhr::gltopoint((*tab)[offset+(i+1)%cnt]);
           
           hyperpoint ah1 = h1.h, ah2 = h2.h;
-          models::apply_orientation(ah1[0], ah1[1]);
-          models::apply_orientation(ah2[0], ah2[1]);
+          models::apply_ori(ah1);
+          models::apply_ori(ah2);
           if(ah1[1] * ah2[1] > 0) continue;
           ld c1 = ah1[1], c2 = -ah2[1];
           if(c1 < 0) c1 = -c1, c2 = -c2;
@@ -2030,8 +2046,8 @@ void dqi_poly::draw() {
   
     if(l || lastl) { 
       for(int i=0; i<isize(glcoords); i++) {
-        glcoords[i][0] += models::ocos * cyl::periods[i] * (l - lastl);
-        glcoords[i][1] += models::osin * cyl::periods[i] * (l - lastl);
+        glcoords[i][0] += pconf.mori().get()[0][0] * cyl::periods[i] * (l - lastl);
+        glcoords[i][1] += pconf.mori().get()[1][0] * cyl::periods[i] * (l - lastl);
         }
       lastl = l;
       }
