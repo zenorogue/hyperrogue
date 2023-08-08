@@ -204,6 +204,28 @@ struct color_setting : public setting {
     }
   };
 
+struct matrix_setting : public setting {
+  trans23 *value;
+  trans23 dft;
+  trans23 last_value_matrix;
+  supersaver *make_saver() override;
+  bool affects(void *v) override { return v == value; }
+  void show_edit_option(int key) override;
+  cld get_cld() override { return 0; }
+  void set_cld(cld x) override { }
+  matrix_setting *editable(string menu_item_name, string help_text, char key) {
+    this->is_editable = true;
+    this->menu_item_name = menu_item_name;
+    this->help_text = help_text;
+    default_key = key;
+    return this;
+    }
+
+  void load_from(const string& s) override {
+    *value = parsematrix23(s);
+    }
+  };
+
 struct char_setting : public setting {
   char *value;
   char dft;
@@ -362,6 +384,34 @@ template<> struct saver<string> : dsaver<string> {
   virtual void swap_with(supersaver *s) { swap(val, ((saver<string>*)s)->val); }
   };
 
+template<> struct saver<trans23> : supersaver {
+
+  trans23& val;
+  trans23 dft;
+
+  explicit saver(trans23& _val) : val(_val) { }
+
+  void reset() override { val = dft; }
+  bool affects(void* v) override { return v == &val; }
+  void set_default() override { dft = val; }
+  bool dosave() override { return !eqmatrix(val.v2, dft.v2) || !eqmatrix(val.v3, dft.v3); }
+
+  string save() override {
+    shstream ss;
+    for(int a=0; a<4; a++) for(int b=0; b<4; b++) print(ss, val.v2[a][b], " ");
+    for(int a=0; a<4; a++) for(int b=0; b<4; b++) print(ss, val.v3[a][b], " ");
+    return ss.s;
+    }
+  void load(const string& s) override {
+    shstream ss;
+    ss.s = s;
+    for(int a=0; a<4; a++) for(int b=0; b<4; b++) scan(ss, val.v2[a][b]);
+    for(int a=0; a<4; a++) for(int b=0; b<4; b++) scan(ss, val.v3[a][b]);
+    }
+  virtual void clone(struct local_parameter_set& lps, void *value) override { addsaver(*(trans23*) value, lps.label + name); }
+  virtual void swap_with(supersaver *s) override { swap(val, ((saver<trans23>*)s)->val); }
+  };
+
 template<> struct saver<ld> : dsaver<ld> {
   explicit saver(ld& val) : dsaver<ld>(val) { }
   string save() override { return fts(val, 10); }
@@ -392,6 +442,14 @@ supersaver *int_setting::make_saver() {
   }
 
 supersaver* color_setting::make_saver() {
+#if CAP_CONFIG
+  return addsaver(*value, config_name, dft);
+#else
+  return nullptr;
+#endif
+  }
+
+supersaver* matrix_setting::make_saver() {
 #if CAP_CONFIG
   return addsaver(*value, config_name, dft);
 #else
@@ -485,6 +543,13 @@ void color_setting::show_edit_option(int key) {
     dialog::openColorDialog(*value);
     dialog::colorAlpha = has_alpha;
     dialog::dialogflags |= sm::SIDE;
+    });
+  }
+
+void matrix_setting::show_edit_option(int key) {
+  dialog::addMatrixItem(XLAT(menu_item_name), *value, key);
+  dialog::add_action([this] () {
+    dialog::editMatrix(*value, XLAT(menu_item_name), help_text);
     });
   }
 
@@ -596,6 +661,20 @@ EX color_setting *param_color(color_t& val, const string s, bool has_alpha, colo
   u->dft = dft;
   u->has_alpha = has_alpha;
   val = dft;
+  u->register_saver();
+  auto f = &*u;
+  params[u->parameter_name] = std::move(u);
+  return f;
+  }
+
+EX matrix_setting *param_matrix(trans23& val, const string s) {
+  unique_ptr<matrix_setting> u ( new matrix_setting );
+  u->parameter_name = param_esc(s);
+  u->config_name = s;
+  u->menu_item_name = s;
+  u->value = &val;
+  u->last_value_matrix = val;
+  u->dft = val;
   u->register_saver();
   auto f = &*u;
   params[u->parameter_name] = std::move(u);

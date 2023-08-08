@@ -17,7 +17,7 @@ EX namespace dialog {
 
   static const int DONT_SHOW = 16;
 
-  enum tDialogItem {diTitle, diItem, diBreak, diHelp, diInfo, diIntSlider, diSlider, diBigItem, diKeyboard, diCustom, diColorItem, diListStart, diListEnd};
+  enum tDialogItem {diTitle, diItem, diBreak, diHelp, diInfo, diIntSlider, diSlider, diBigItem, diKeyboard, diCustom, diColorItem, diListStart, diListEnd, diMatrixItem};
 
   struct item {
     tDialogItem type;
@@ -29,6 +29,7 @@ EX namespace dialog {
     double param;
     int p1, p2, p3;
     int position;
+    void *ptr;
     reaction_t customfun;
     item(tDialogItem t = diBreak);
     };
@@ -266,6 +267,20 @@ EX namespace dialog {
     it.type = diColorItem;
     it.colorv = displaycolor(value);
     it.param = value & 0xFF;
+    }
+
+  ld as_degrees(transmatrix T) {
+     hyperpoint h = T * point31(1, 0, 0);
+     ld alpha = atan2(h[1], h[0]);
+     return alpha / degree;
+     }
+
+  EX void addMatrixItem(string body, trans23& value, int key) {
+    addSelItem(body, COLORBAR, key);
+    auto& it = items.back();
+    it.type = diMatrixItem;
+    it.ptr = &value;
+    it.value = fts(as_degrees(value.get())) + "°";
     }
 
   EX void addHelp(string body) {
@@ -708,7 +723,7 @@ EX namespace dialog {
         displayfr(dcenter, mid, 2, dfsize * I.scale/100, I.body, I.color, 8);
         if(xthis) getcstat = I.key;
         }
-      else if(among(I.type, diItem, diBigItem, diColorItem)) {
+      else if(among(I.type, diItem, diBigItem, diColorItem, diMatrixItem)) {
         bool xthis = (mousey >= top && mousey < tothei);
         if(cmode & sm::DIALOG_STRICT_X)
           xthis = xthis && (mousex >= dcenter - dialogwidth/2 && mousex <= dcenter + dialogwidth/2);
@@ -1345,6 +1360,28 @@ EX namespace dialog {
     #if CAP_ANIMATIONS
     anims::get_parameter_animation(x, ne.s);
     #endif
+    }
+
+  EX void editMatrix(trans23& x, string title, string help) {
+    static ld angle = as_degrees(x.get());
+    ne.editwhat = &angle;
+    ne.s = disp(angle);
+    ne.vmin = -180;
+    ne.vmax = 180;
+    ne.step = 90;
+    ne.dft = 0;
+    ne.title = title;
+    ne.help = help;
+    ne.sc = identity;
+    ne.intval = NULL;
+    dialogflags = 0;
+    if(cmode & sm::SIDE) dialogflags |= sm::MAYDARK | sm::SIDE;
+    cmode |= sm::NUMBER;
+    pushScreen(drawNumberDialog);
+    reaction = [&] { x = spin(angle * degree); };
+    reaction_final = reaction;
+    extra_options = reaction_t();
+    ne.animatable = true;
     }
 
   EX void editNumber(int& x, int vmin, int vmax, ld step, int dft, string title, string help) {

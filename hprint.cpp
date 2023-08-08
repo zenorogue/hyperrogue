@@ -442,6 +442,13 @@ EX shiftpoint kz(shiftpoint h) {
   return h;
   }
 
+EX bool scan(shstream& hs, ld& val) {
+  int npos;
+  int qty = sscanf(hs.s.c_str() + hs.pos, "%lf%n", &val, &npos);
+  if(qty == 1) { hs.pos += npos; return true; }
+  return false;
+  }
+
 #if HDR
 template<class T> vector<T> kz(vector<T> v) {
   for(auto& el: v) el = kz(el);

@@ -846,7 +846,7 @@ auto hook =
     })
 + addHook(hooks_configfile, 100, [] {
     param_f(racing::race_advance, "race_advance");
-    // TODO param_f(racing::race_angle, "race_angle");
+    param_matrix(racing::race_angle, "race_angle");
     param_i(racing::ghosts_to_show, "race_ghosts_to_show");
     param_i(racing::ghosts_to_save, "race_ghosts_to_save");
     param_b(racing::guiding, "race_guiding");
@@ -1035,11 +1035,12 @@ void race_projection() {
   else dialog::addBreak(100);
         
   if(GDIM == 2) {
-    // TODO dialog::addSelItem(XLAT("race angle"), fts(race_angle), 'a');
-    dialog::add_action([] () { 
-      // TODO dialog::editNumber(race_angle, 0, 360, 15, 90, XLAT("race angle"), "");
+    dialog::addMatrixItem(XLAT("race angle"), race_angle, 'a');
+    dialog::add_action([] () {
+      dialog::editMatrix(race_angle, XLAT("model orientation"), "");
       auto q = rot_inverse(race_angle) * pconf.mori();
-      dialog::reaction = [q] () { pconf.mori() = race_angle * q; };
+      auto last = dialog::reaction;
+      dialog::reaction = [q, last] () { last(); pconf.mori() = race_angle * q; };
       });
     }
 

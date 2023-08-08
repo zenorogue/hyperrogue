@@ -467,24 +467,18 @@ EX namespace models {
       add_edit(vpconf.alpha);
       }
                                   
-    /* TODO if(has_orientation(vpmodel)) {
-      dialog::addSelItem(XLAT("model orientation"), fts(vpconf.model_orientation) + "°", 'l');
+    if(has_orientation(vpmodel)) {
+      dialog::addMatrixItem(XLAT("model orientation"), vpconf.mori(), 'l');
       dialog::add_action([] () {
-        dialog::editNumber(vpconf.model_orientation, 0, 360, 90, 0, XLAT("model orientation"), "");
+        dialog::editMatrix(vpconf.mori(), XLAT("model orientation"), "");
         });
-      if(GDIM == 3) {
-        dialog::addSelItem(XLAT("model orientation (y/z plane)"), fts(vpconf.model_orientation_yz) + "°", 'L');
-        dialog::add_action([] () {
-          dialog::editNumber(vpconf.model_orientation_yz, 0, 360, 90, 0, XLAT("model orientation (y/z plane)"), "");
-          });
-        }
-      } */
+      }
      
     if(among(vpmodel, mdPerspective, mdHorocyclic) && nil) {
-      /* TODO dialog::addSelItem(XLAT("model orientation"), fts(vpconf.model_orientation) + "°", 'l');
+      dialog::addMatrixItem(XLAT("model orientation"), vpconf.mori(), 'l');
       dialog::add_action([] () {
-        dialog::editNumber(vpconf.model_orientation, 0, 360, 90, 0, XLAT("model orientation"), "");
-        }); */
+        dialog::editMatrix(vpconf.mori(), XLAT("model orientation"), "");
+        });
       dialog::addSelItem(XLAT("rotational or Heisenberg"), fts(vpconf.rotational_nil), 'L');
       dialog::add_action([] () {
         dialog::editNumber(vpconf.rotational_nil, 0, 1, 1, 1, XLAT("1 = Heisenberg, 0 = rotational"), "");
@@ -975,8 +969,7 @@ EX namespace models {
       addsaverenum(p.model, pp+"used model", mdDisk);
       if(&p.model == &pmodel) param_custom(pmodel, "projection|Poincare|Klein|half-plane|perspective", menuitem_projection, '1');
 
-      // TODO param_f(p.model_orientation, pp+"mori", sp+"model orientation", 0);
-      // TODO param_f(p.model_orientation_yz, pp+"mori_yz", sp+"model orientation-yz", 0);
+      param_matrix(p.mori(), pp+"mori");
 
       param_f(p.top_z, sp+"topz", 5)
       -> editable(1, 20, .25, "maximum z coordinate to show", "maximum z coordinate to show", 'l');       
