@@ -45,27 +45,22 @@ void switch_spacetime() {
       geometry = gSpace435;
       variation = eVariation::pure;
       swap(currentmap, map_hyp);
-      pmodel = hv_klein ? mdDisk : mdPerspective;
-      if(hv_klein) pconf.alpha = 0;
       check_cgi();
       cgi.require_basics();
       cgi.use_count++;
-      vid.grid = true;
       stdgridcolor = 0xFFFFFFFF;
 
       initcells();
       initgame();
-      vid.fov = 150;
-      models::desitter_projections = true;
+      lps_enable(&(hv_klein ? lps_relhell_ds_spacetime_klein : lps_relhell_ds_spacetime_pers));
       }
 
     else if(hyperbolic) {
       geometry = gSphere;
       variation = eVariation::bitruncated;
       swap(currentmap, map_hyp);
-      pmodel = mdDisk;
-      pconf.scale = .95;
       check_cgi();
+      lps_enable(&lps_relhell_space);
       }
 
     }
@@ -75,22 +70,16 @@ void switch_spacetime() {
     cgi.use_count++;
     if(hyperbolic) {
       hybrid::switch_to_actual();
-      pmodel = mdRelPerspective;
       hyperpoint res;
-      nonisotropic_weird_transforms = true;
       NLP = Id;
       Duality = Id;
       for(int a=0; a<4; a++) for(int b=0; b<4; b++) Duality[a][b] = (a^2) == b;
-      vid.fov = 150;
-      vid.grid = false;
-      slr::range_xy = 2;
-      slr::range_z = 2;
+      lps_enable(&lps_relhell_ads_spacetime);
       }
 
     else if(mhybrid) {
       hybrid::switch_to_underlying();
-      pmodel = mdDisk;
-      pconf.scale = .95;
+      lps_enable(&lps_relhell_space);
       }
     cgi.use_count++;
     }

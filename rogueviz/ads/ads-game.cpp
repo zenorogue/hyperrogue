@@ -128,15 +128,26 @@ void run_ads_game() {
   cwt.at = centerover = currentmap->gamestart();
 
   restart();
+
+  rogueviz::on_cleanup_or_next([] {
+    switch_spacetime_to(true);
+    });
   }
 
 local_parameter_set lps_relhell("relhell:");
 
+local_parameter_set lps_relhell_space("relhell:space:", &lps_relhell);
+local_parameter_set lps_relhell_ds_spacetime("relhell:ds:", &lps_relhell);
+local_parameter_set lps_relhell_ads_spacetime("relhell:ads:", &lps_relhell);
+local_parameter_set lps_relhell_ds_spacetime_klein("relhell:ads:klein:", &lps_relhell_ds_spacetime);
+local_parameter_set lps_relhell_ds_spacetime_pers("relhell:ads:pers:", &lps_relhell_ds_spacetime);
+
 void default_settings() {
   set_default_keys();
 
-  lps_add_enum(lps_relhell, nohelp, 1);
+  lps_add(lps_relhell, nohelp, 1);
   lps_add(lps_relhell, nomenukey, true);
+  lps_add(lps_relhell, nomap, true);
   lps_add(lps_relhell, no_find_player, true);
   lps_add(lps_relhell, showstartmenu, false);
   lps_add(lps_relhell, mapeditor::drawplayer, false);
@@ -145,6 +156,24 @@ void default_settings() {
   lps_add(lps_relhell, vid.axes3, false);
   lps_add(lps_relhell, patterns::whichCanvas, 'r');
   lps_add(lps_relhell, patterns::rwalls, 0);
+  lps_add(lps_relhell, vid.fov, 150.);
+
+  lps_add(lps_relhell_ds_spacetime_klein, pmodel, mdDisk);
+
+  lps_add(lps_relhell_ds_spacetime_klein, pconf.alpha, 0.);
+  lps_add(lps_relhell_ds_spacetime_pers, pmodel, mdPerspective);
+  lps_add(lps_relhell_ds_spacetime, vid.grid, true);
+  lps_add(lps_relhell_ds_spacetime, stdgridcolor, 0xFFFFFFFF);
+  lps_add(lps_relhell_ds_spacetime, models::desitter_projections, true);
+
+  lps_add(lps_relhell_space, pmodel, mdDisk);
+  lps_add(lps_relhell_space, pconf.scale, .95);
+
+  lps_add(lps_relhell_ads_spacetime, pmodel, mdRelPerspective);
+  lps_add(lps_relhell_ads_spacetime, nonisotropic_weird_transforms, true);
+  lps_add(lps_relhell_ads_spacetime, vid.grid, false);
+  lps_add(lps_relhell_ads_spacetime, slr::range_xy, 2.);
+  lps_add(lps_relhell_ads_spacetime, slr::range_z, 2.);
   }
 
 void set_config() {
@@ -156,6 +185,7 @@ void run_ads_game_std() {
   set_config();
   set_geometry(gNormal);
   set_variation(eVariation::pure);
+  lps_enable(&lps_relhell_space);
   run_ads_game();
   showstartmenu = false;
   }

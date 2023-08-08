@@ -113,7 +113,7 @@ ads_object *main_rock;
 
 extern string copyright_shown;
 
-extern local_parameter_set lps_relhell;
+extern local_parameter_set lps_relhell, lps_relhell_space, lps_relhell_ads_spacetime, lps_relhell_ds_spacetime_pers, lps_relhell_ds_spacetime_klein;
 
 int XSCALE = 48;
 int YSCALE = 48;

@@ -735,10 +735,14 @@ void run_ds_game() {
   rogueviz::rv_hook(hooks_prestats, 100, display_rsrc);
   rogueviz::rv_hook(hooks_handleKey, 0, handleKey);
   rogueviz::rv_hook(anims::hooks_anim, 100, replay_animation);
+
+  rogueviz::on_cleanup_or_next([] {
+    main_rock = nullptr;
+    });
   }
 
 void run_ds_game_std() {
-  lps_enable(&lps_relhell);
+  lps_enable(&lps_relhell_space);
   enable_canvas();
   run_ds_game();
   }
