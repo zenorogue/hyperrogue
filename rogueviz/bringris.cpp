@@ -1625,7 +1625,10 @@ void run() {
       }
 
     dialog::handleNavigation(sym, uni);
-    if(in_menu && sym == 'q' && !ISWEB) quitmainloop = true;
+    if(in_menu && sym == 'q' && !ISWEB) {
+      in_bringris = false;
+      quitmainloop = true;
+      }
     if(sym == '-') {
       if(!which_pointer) {
         int ax = mousex * 3 / xstart;
@@ -1990,12 +1993,12 @@ void create_game() {
 local_parameter_set lps_bringris("bringris:");
 
 void init_all() {
+  lps_enable(&lps_bringris);
   enable_bgeom();
   vid.texture_step = 8;
   showstartmenu = false;
   pushScreen(run);  
   in_bringris = true;
-  lps_enable(&lps_bringris);
   }
 
 int args() {
