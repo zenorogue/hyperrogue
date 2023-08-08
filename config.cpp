@@ -243,7 +243,7 @@ struct custom_setting : public setting {
   function<bool(void*)> custom_affect;
   void show_edit_option(int key) override { custom_viewer(key); }
   cld get_cld() override { return custom_value(); }
-  supersaver *make_saver() override;
+  supersaver *make_saver() { throw hr_exception("make_saver for custom_setting"); }
   void set_cld(cld x) override { }
   bool affects(void *v) override { return custom_affect(v); }
   };
@@ -352,30 +352,6 @@ template<> struct saver<unsigned> : dsaver<unsigned> {
   void load(const string& s) override { val = (unsigned) strtoll(s.c_str(), NULL, 16); }
   virtual void clone(struct local_parameter_set& lps, void *value) override { addsaver(*(unsigned*) value, lps.label + name); }
   virtual void swap_with(supersaver *s) { swap(val, ((saver<unsigned>*)s)->val); }
-  };
-
-template<> struct saver<eVariation> : dsaver<eVariation> {
-  explicit saver(eVariation& val) : dsaver<eVariation>(val) { }
-  string save() override { return its((int) val); }
-  void load(const string& s) override { val = (eVariation) atoi(s.c_str()); }
-  virtual void clone(struct local_parameter_set& lps, void *value) override { addsaverenum(*(eVariation*) value, lps.label + name); }
-  virtual void swap_with(supersaver *s) { swap(val, ((saver<eVariation>*)s)->val); }
-  };
-
-template<> struct saver<eGeometry> : dsaver<eGeometry> {
-  explicit saver(eGeometry& val) : dsaver<eGeometry>(val) { }
-  string save() override { return its((int) val); }
-  void load(const string& s) override { val = (eGeometry) atoi(s.c_str()); }
-  virtual void clone(struct local_parameter_set& lps, void *value) override { addsaverenum(*(eGeometry*) value, lps.label + name); }
-  virtual void swap_with(supersaver *s) { swap(val, ((saver<eGeometry>*)s)->val); }
-  };
-
-template<> struct saver<eModel> : dsaver<eModel> {
-  explicit saver(eModel& val) : dsaver<eModel>(val) { }
-  string save() override { return its((int) val); }
-  void load(const string& s) override { val = (eModel) atoi(s.c_str()); }
-  virtual void clone(struct local_parameter_set& lps, void *value) override { addsaverenum(*(eModel*) value, lps.label + name); }
-  virtual void swap_with(supersaver *s) { swap(val, ((saver<eModel>*)s)->val); }
   };
 
 template<> struct saver<string> : dsaver<string> {
