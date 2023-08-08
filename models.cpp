@@ -985,7 +985,7 @@ EX namespace models {
       auto_restrict = [&p] { return &vpconf == &p; };
 
       addsaverenum(p.model, pp+"used model", mdDisk);
-      param_custom(pmodel, "projection|Poincare|Klein|half-plane|perspective", menuitem_projection, '1');
+      if(&p.model == &pmodel) param_custom(pmodel, "projection|Poincare|Klein|half-plane|perspective", menuitem_projection, '1');
 
       param_f(p.model_orientation, pp+"mori", sp+"model orientation", 0);
       param_f(p.model_orientation_yz, pp+"mori_yz", sp+"model orientation-yz", 0);
@@ -1083,6 +1083,7 @@ EX namespace models {
       param_i(p.back_and_front, sp+"backandfront", 0);
 
       addsaver(p.alpha, sp+"projection", 1);
+      if(&p.model == &pmodel)
       param_custom(p.alpha, sp+"projection", menuitem_projection_distance, 'p')
       ->help_text = "projection distance|Gans Klein Poincare orthographic stereographic";
 
