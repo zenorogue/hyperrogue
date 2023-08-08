@@ -24,6 +24,7 @@ void reset_textures() {
   }
 
 void init_textures() {
+  if(!earth_textures.empty()) return;
   earth_textures.clear();
   string dir = "ds-images/";
   fhstream f(dir + "list.txt", "rt");
