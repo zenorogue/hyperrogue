@@ -4051,27 +4051,32 @@ void local_parameter_set::pswitch() {
   }
 
 EX void lps_enable(local_parameter_set *lps) {
+  if(lps == current_lps) return;
   if(current_lps) current_lps->pswitch();
   current_lps = lps;
   if(current_lps) current_lps->pswitch();
   }
 
 #if HDR
-template<class T> vector<std::unique_ptr<T>> lps_of_type;
+//template<class T> vector<std::unique_ptr<T>> lps_of_type;
+extern vector<void*> lps_of_type;
 
 template<class T, class U> void lps_add(local_parameter_set& lps, T&val, U nvalue) {
   int found = 0;
   for(auto& fs: savers) {
     if(fs->affects(&val)) {
       found++;
-      lps_of_type<T>.emplace_back(std::make_unique<T> (nvalue));
+      T* nv = new T(nvalue);
+      lps_of_type.emplace_back(nv);
       println(hlog, lps.label, " found saver: ", fs->name);
-      fs->clone(lps, &*(lps_of_type<T>.back()));
+      fs->clone(lps, nv);
       return;
       }
     }
   if(found != 1) println(hlog, lps.label, " saver not found");
   }
 #endif
+
+vector<void*> lps_of_type;
 
 }
