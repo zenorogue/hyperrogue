@@ -30,6 +30,8 @@ struct supersaver {
   virtual bool affects(void* v) { return false; }
   virtual void set_default() = 0;
   virtual ~supersaver() = default;
+  virtual void swap_with(supersaver*) = 0;
+  virtual void clone(struct local_parameter_set& lps, void *value) = 0;
   };
 
 typedef vector<shared_ptr<supersaver>> saverlist;
@@ -46,9 +48,11 @@ struct setting {
   char default_key;
   cld last_value;
   bool is_editable;
+  supersaver *saver;
   virtual bool available() { if(restrict) return restrict(); return true; }
   virtual bool affects(void *v) { return false; }
-  virtual void add_as_saver() {}
+  virtual supersaver *make_saver() { return nullptr; }
+  virtual void register_saver() { saver = make_saver(); }
   void show_edit_option() { show_edit_option(default_key); }
   virtual void show_edit_option(int key) {
     println(hlog, "default called!"); }
@@ -71,11 +75,10 @@ struct setting {
   setting *set_reaction(const reaction_t& r);
   virtual ~setting() = default;
   virtual void load_from(const string& s) {
+    if(saver) { saver->load(s); return; }
     println(hlog, "cannot load this parameter");
     exit(1);
     }
-  virtual void swap_with(setting *s) { throw hr_exception("swap_with not defined"); }
-  virtual void clone_to(struct local_parameter_set& lps, void* nvalue) { throw hr_exception("clone_to not defined"); }
   };
 #endif
 
@@ -112,20 +115,12 @@ template<class T> struct enum_setting : list_setting {
   int get_value() override { return (int) *value; }
   void set_value(int i) override { *value = (T) i; }
   bool affects(void* v) override { return v == value; }
-  void add_as_saver() override;
+  supersaver *make_saver() override;
   cld get_cld() override { return get_value(); }
   virtual void set_cld(cld x) { set_value(floor(real(x)+.5)); }
   void load_from(const string& s) override {
     *value = (T) parseint(s);
     }
-  virtual void swap_with(setting *s) {
-    auto d = dynamic_cast<enum_setting<T>*> (s);
-    if(!d) throw hr_exception("illegal swap_with on enum_setting");
-    swap(*value, *(d->value));
-    swap(last_value, d->last_value);
-    }
-  virtual void clone_from(enum_setting<T> *e) { options = e->options; }
-  virtual void clone_to(struct local_parameter_set& lps, void* nvalue);
   };
 
 struct float_setting : public setting {
@@ -145,22 +140,12 @@ struct float_setting : public setting {
     }
   function<void(float_setting*)> modify_me;
   float_setting *modif(const function<void(float_setting*)>& r) { modify_me = r; return this; }
-  void add_as_saver() override;
+  supersaver *make_saver() override;
   bool affects(void *v) override { return v == value; }
   void show_edit_option(int key) override;
   cld get_cld() override { return *value; }
   void set_cld(cld x) override { *value = real(x); }
   void load_from(const string& s) override;
-  virtual void swap_with(setting *s) {
-    auto d = dynamic_cast<float_setting*> (s);
-    if(!d) throw hr_exception("illegal swap_with on float_setting");
-    swap(*value, *(d->value));
-    swap(last_value, d->last_value);
-    }
-  virtual void clone_from(float_setting *e) {
-    min_value = e->min_value;
-    max_value = e->max_value;
-    }
   };
 
 struct float_setting_dft : public float_setting {
@@ -174,7 +159,7 @@ struct int_setting : public setting {
   int dft;
   int min_value, max_value;
   ld step;
-  void add_as_saver() override;
+  supersaver *make_saver() override;
   function<void(int_setting*)> modify_me;
   int_setting *modif(const function<void(int_setting*)>& r) { modify_me = r; return this; }
   bool affects(void *v) override { return v == value; }
@@ -195,25 +180,13 @@ struct int_setting : public setting {
   void load_from(const string& s) override {
     *value = parseint(s);
     }
-
-  virtual void swap_with(setting *s) {
-    auto d = dynamic_cast<int_setting*> (s);
-    if(!d) throw hr_exception("illegal swap_with on int_setting");
-    swap(*value, *(d->value));
-    swap(last_value, d->last_value);
-    }
-
-  virtual void clone_from(int_setting *e) {
-    min_value = e->min_value;
-    max_value = e->max_value;
-    }
   };
 
 struct color_setting : public setting {
   color_t *value;
   color_t dft;
   bool has_alpha;
-  void add_as_saver() override;
+  supersaver *make_saver() override;
   bool affects(void *v) override { return v == value; }
   void show_edit_option(int key) override;
   cld get_cld() override { return *value; }
@@ -229,21 +202,12 @@ struct color_setting : public setting {
   void load_from(const string& s) override {
     sscanf(s.c_str(), "%x", value);
     }
-
-  virtual void swap_with(setting *s) {
-    auto d = dynamic_cast<color_setting*> (s);
-    if(!d) throw hr_exception("illegal swap_with on color_setting");
-    swap(*value, *(d->value));
-    swap(last_value, d->last_value);
-    }
-
-  virtual void clone_from(color_setting *e) { has_alpha = e->has_alpha; }
   };
 
 struct char_setting : public setting {
   char *value;
   char dft;
-  void add_as_saver() override;
+  supersaver *make_saver() override;
   bool affects(void *v) override { return v == value; }
   void show_edit_option(int key) override;
   cld get_cld() override { return *value; }
@@ -253,21 +217,12 @@ struct char_setting : public setting {
     if(s == "\\0") value = 0;
     else sscanf(s.c_str(), "%c", value);
     }
-
-  virtual void swap_with(setting *s) {
-    auto d = dynamic_cast<char_setting*> (s);
-    if(!d) throw hr_exception("illegal swap_with on char_setting");
-    swap(*value, *(d->value));
-    swap(last_value, d->last_value);
-    }
-
-  virtual void clone_from(char_setting *e) { }
   };
 
 struct bool_setting : public setting {
   bool *value;
   bool dft;
-  void add_as_saver() override;
+  supersaver *make_saver() override;
   reaction_t switcher;
   bool_setting* editable(string cap, char key ) {
     is_editable = true;
@@ -280,26 +235,27 @@ struct bool_setting : public setting {
   void load_from(const string& s) override {
     *value = parseint(s);
     }
-
-  virtual void swap_with(setting *s) {
-    auto d = dynamic_cast<bool_setting*> (s);
-    if(!d) throw hr_exception("illegal swap_with on bool_setting");
-    swap(*value, *(d->value));
-    swap(last_value, d->last_value);
-    }
-  virtual void clone_from(bool_setting *e) { }
   };
 
-struct custom_setting : public setting {  
+struct custom_setting : public setting {
   function<void(char)> custom_viewer;
   function<cld()> custom_value;
   function<bool(void*)> custom_affect;
   void show_edit_option(int key) override { custom_viewer(key); }
   cld get_cld() override { return custom_value(); }
+  supersaver *make_saver() override;
   void set_cld(cld x) override { }
   bool affects(void *v) override { return custom_affect(v); }
   };
   
+struct local_parameter_set {
+  string label;
+  local_parameter_set* extends;
+  vector<pair<supersaver*, supersaver*>> swaps;
+  void pswitch();
+  local_parameter_set(string l, local_parameter_set *ext = nullptr) : label(l), extends(ext) {}
+  };
+
 #if CAP_CONFIG
 
 template<class T> struct dsaver : supersaver {
@@ -314,15 +270,16 @@ template<class T> struct dsaver : supersaver {
 
 template<class T> struct saver : dsaver<T> {};
 
-template<class T, class U, class V> void addsaver(T& i, U name, V dft) {
+template<class T, class U, class V> supersaver* addsaver(T& i, U name, V dft) {
   auto s = make_shared<saver<T>> (i);
   s->dft = dft;
   s->name = name;
   savers.push_back(s);
+  return &*s;
   }
 
-template<class T> void addsaver(T& i, string name) {
-  addsaver(i, name, i);
+template<class T> supersaver* addsaver(T& i, string name) {
+  return addsaver(i, name, i);
   }
 
 template<class T> void removesaver(T& val) {
@@ -337,6 +294,8 @@ template<class T> void set_saver_default(T& val) {
       sav->set_default();
   }
 
+template<class T, class U> supersaver *addsaverenum(T& i, U name);
+
 template<class T> struct saverenum : supersaver {
   T& val;
   T dft;
@@ -347,47 +306,84 @@ template<class T> struct saverenum : supersaver {
   void load(const string& s) override { val = (T) atoi(s.c_str()); }
   bool affects(void* v) override { return v == &val; }
   void set_default() override { dft = val; }
+  void clone(struct local_parameter_set& lps, void *value) override { addsaverenum(*(T*) value, lps.label + name); }
+  void swap_with(supersaver *s) { swap(val, ((saverenum<T>*)s)->val); }
   };
 
-template<class T, class U> void addsaverenum(T& i, U name, T dft) {
+template<class T, class U> supersaver *addsaverenum(T& i, U name, T dft) {
   auto s = make_shared<saverenum<T>> (i);
   s->dft = dft;
   s->name = name;
   savers.push_back(s);
+  return &*s;
   }
 
-template<class T, class U> void addsaverenum(T& i, U name) {
-  addsaverenum(i, name, i);
+template<class T, class U> supersaver *addsaverenum(T& i, U name) {
+  return addsaverenum(i, name, i);
   }
 
 template<> struct saver<int> : dsaver<int> {
   explicit saver(int& val) : dsaver<int>(val) { }
   string save() override { return its(val); }
   void load(const string& s) override { val = atoi(s.c_str()); }
+  virtual void clone(struct local_parameter_set& lps, void *value) override { addsaver(*(int*) value, lps.label + name); }
+  virtual void swap_with(supersaver *s) { swap(val, ((saver<int>*)s)->val); }
   };
 
 template<> struct saver<char> : dsaver<char> {
   explicit saver(char& val) : dsaver<char>(val) { }
   string save() override { return its(val); }
   void load(const string& s) override { val = atoi(s.c_str()); }
+  virtual void clone(struct local_parameter_set& lps, void *value) override { addsaver(*(char*) value, lps.label + name); }
+  virtual void swap_with(supersaver *s) { swap(val, ((saver<char>*)s)->val); }
   };
 
 template<> struct saver<bool> : dsaver<bool> {
   explicit saver(bool& val) : dsaver<bool>(val) { }
   string save() override { return val ? "yes" : "no"; }
   void load(const string& s) override { val = isize(s) && s[0] == 'y'; }
+  virtual void clone(struct local_parameter_set& lps, void *value) override { addsaver(*(bool*) value, lps.label + name); }
+  virtual void swap_with(supersaver *s) { swap(val, ((saver<bool>*)s)->val); }
   };
 
 template<> struct saver<unsigned> : dsaver<unsigned> {
   explicit saver(unsigned& val) : dsaver<unsigned>(val) { }
   string save() override { return itsh(val); }
   void load(const string& s) override { val = (unsigned) strtoll(s.c_str(), NULL, 16); }
+  virtual void clone(struct local_parameter_set& lps, void *value) override { addsaver(*(unsigned*) value, lps.label + name); }
+  virtual void swap_with(supersaver *s) { swap(val, ((saver<unsigned>*)s)->val); }
+  };
+
+template<> struct saver<eVariation> : dsaver<eVariation> {
+  explicit saver(eVariation& val) : dsaver<eVariation>(val) { }
+  string save() override { return its((int) val); }
+  void load(const string& s) override { val = (eVariation) atoi(s.c_str()); }
+  virtual void clone(struct local_parameter_set& lps, void *value) override { addsaverenum(*(eVariation*) value, lps.label + name); }
+  virtual void swap_with(supersaver *s) { swap(val, ((saver<eVariation>*)s)->val); }
+  };
+
+template<> struct saver<eGeometry> : dsaver<eGeometry> {
+  explicit saver(eGeometry& val) : dsaver<eGeometry>(val) { }
+  string save() override { return its((int) val); }
+  void load(const string& s) override { val = (eGeometry) atoi(s.c_str()); }
+  virtual void clone(struct local_parameter_set& lps, void *value) override { addsaverenum(*(eGeometry*) value, lps.label + name); }
+  virtual void swap_with(supersaver *s) { swap(val, ((saver<eGeometry>*)s)->val); }
+  };
+
+template<> struct saver<eModel> : dsaver<eModel> {
+  explicit saver(eModel& val) : dsaver<eModel>(val) { }
+  string save() override { return its((int) val); }
+  void load(const string& s) override { val = (eModel) atoi(s.c_str()); }
+  virtual void clone(struct local_parameter_set& lps, void *value) override { addsaverenum(*(eModel*) value, lps.label + name); }
+  virtual void swap_with(supersaver *s) { swap(val, ((saver<eModel>*)s)->val); }
   };
 
 template<> struct saver<string> : dsaver<string> {
   explicit saver(string& val) : dsaver<string>(val) { }
   string save() override { return val; }
   void load(const string& s) override { val = s; }
+  virtual void clone(struct local_parameter_set& lps, void *value) override { addsaver(*(string*) value, lps.label + name); }
+  virtual void swap_with(supersaver *s) { swap(val, ((saver<string>*)s)->val); }
   };
 
 template<> struct saver<ld> : dsaver<ld> {
@@ -397,37 +393,49 @@ template<> struct saver<ld> : dsaver<ld> {
     if(s == "0.0000000000e+000") ; // ignore!
     else val = atof(s.c_str()); 
     }
+  virtual void clone(struct local_parameter_set& lps, void *value) override { addsaver(*(ld*) value, lps.label + name); }
+  virtual void swap_with(supersaver *s) { swap(val, ((saver<ld>*)s)->val); }
   };
 #endif
 #endif
 
-void float_setting::add_as_saver() { 
+supersaver *float_setting::make_saver() {
 #if CAP_CONFIG
-  addsaver(*value, config_name, dft);
+  return addsaver(*value, config_name, dft);
+#else
+  return nullptr;
 #endif
   }
 
-void int_setting::add_as_saver() { 
+supersaver *int_setting::make_saver() {
 #if CAP_CONFIG
-  addsaver(*value, config_name, dft);
+  return addsaver(*value, config_name, dft);
+#else
+  return nullptr;
 #endif
   }
 
-void color_setting::add_as_saver() {
+supersaver* color_setting::make_saver() {
 #if CAP_CONFIG
-  addsaver(*value, config_name, dft);
+  return addsaver(*value, config_name, dft);
+#else
+  return nullptr;
 #endif
   }
 
-void char_setting::add_as_saver() {
+supersaver *char_setting::make_saver() {
 #if CAP_CONFIG
-  addsaver(*value, config_name, dft);
+  return addsaver(*value, config_name, dft);
+#else
+  return nullptr;
 #endif
   }
 
-void bool_setting::add_as_saver() { 
+supersaver *bool_setting::make_saver() {
 #if CAP_CONFIG
-  addsaver(*value, config_name, dft);
+  return addsaver(*value, config_name, dft);
+#else
+  return nullptr;
 #endif
   }
 
@@ -527,7 +535,7 @@ EX float_setting *param_f(ld& val, const string p, const string s, ld dft) {
   u->step = dft / 10;
   u->dft = dft;
   val = dft;
-  u->add_as_saver();
+  u->register_saver();
   auto f = &*u;
   params[u->parameter_name] = std::move(u);
   return f;
@@ -545,7 +553,7 @@ EX float_setting_dft *param_fd(ld& val, const string s, ld dft IS(use_the_defaul
   u->step = 1;
   u->dft = dft;
   val = dft;
-  u->add_as_saver();
+  u->register_saver();
   auto f = &*u;
   params[u->parameter_name] = std::move(u);
   return f;
@@ -578,7 +586,7 @@ EX int_setting *param_i(int& val, const string s, int dft) {
     u->min_value = 0;
     u->max_value = 2 * dft;
     }
-  u->add_as_saver();
+  u->register_saver();
   auto f = &*u;
   params[u->parameter_name] = std::move(u);
   return f;
@@ -596,7 +604,7 @@ EX bool_setting *param_b(bool& val, const string s, bool dft) {
   u->dft = dft;
   u->switcher = [&val] { val = !val; };
   val = dft;
-  u->add_as_saver();
+  u->register_saver();
   auto f = &*u;
   params[u->parameter_name] = std::move(u);
   return f;
@@ -612,7 +620,7 @@ EX color_setting *param_color(color_t& val, const string s, bool has_alpha, colo
   u->dft = dft;
   u->has_alpha = has_alpha;
   val = dft;
-  u->add_as_saver();
+  u->register_saver();
   auto f = &*u;
   params[u->parameter_name] = std::move(u);
   return f;
@@ -627,7 +635,7 @@ EX char_setting *param_char(char& val, const string s, char dft) {
   u->last_value = dft;
   u->dft = dft;
   val = dft;
-  u->add_as_saver();
+  u->register_saver();
   auto f = &*u;
   params[u->parameter_name] = std::move(u);
   return f;
@@ -638,10 +646,11 @@ EX color_setting *param_color(color_t& val, const string s, bool has_alpha) { re
 EX bool_setting *param_b(bool& val, const string s) { return param_b(val, s, val); }
 
 #if HDR
-template<class T> void enum_setting<T>::add_as_saver() { 
+template<class T> supersaver* enum_setting<T>::make_saver() {
 #if CAP_CONFIG
-  addsaverenum(*value, config_name, dft);
+  return addsaverenum(*value, config_name, dft);
 #endif
+  return nullptr;
   }
 
 template<class T> enum_setting<T> *param_enum(T& val, const string p, const string s, T dft) {
@@ -653,7 +662,7 @@ template<class T> enum_setting<T> *param_enum(T& val, const string p, const stri
   u->dft = dft;
   val = dft;
   u->last_value = u->get_cld();
-  u->add_as_saver();
+  u->register_saver();
   auto f = &*u;
   params[p] = std::move(u);
   return f;
@@ -4046,22 +4055,13 @@ auto ah_config =
 
 /* local parameter, for another game */
 
-#if HDR
-struct local_parameter_set {
-  string label;
-  vector<pair<setting*, setting*>> swaps;
-  void pswitch();
-  local_parameter_set(string l) : label(l) {}
-  };
-#endif
-
 local_parameter_set* current_lps;
 
 void local_parameter_set::pswitch() {
+  if(extends) extends->pswitch();
   for(auto s: swaps) {
-    swap(s.first->parameter_name, s.second->parameter_name);
-    swap(s.first->config_name, s.second->config_name);
     s.first->swap_with(s.second);
+    swap(s.first->name, s.second->name);
     }
   }
 
@@ -4071,66 +4071,22 @@ EX void lps_enable(local_parameter_set *lps) {
   if(current_lps) current_lps->pswitch();
   }
 
+#if HDR
 template<class T> vector<std::unique_ptr<T>> lps_of_type;
 
-template<class T, class U> void lps_add_typed(local_parameter_set& lps, T&val, T nvalue) {
+template<class T, class U> void lps_add(local_parameter_set& lps, T&val, U nvalue) {
   int found = 0;
-  for(auto& fs: params) {
-    if(fs.second->affects(&val)) {
+  for(auto& fs: savers) {
+    if(fs->affects(&val)) {
       found++;
       lps_of_type<T>.emplace_back(std::make_unique<T> (nvalue));
-      auto d1 = dynamic_cast<U*> (&*fs.second);
-      if(!d1) throw hr_exception("lps_add not correct type of setting");
-      auto d2 = std::make_unique<U> ();
-      d2->parameter_name = lps.label + d1->parameter_name;
-      d2->config_name = lps.label + d1->config_name;
-      d2->menu_item_name = lps.label + d1->menu_item_name;
-      d2->value = &*(lps_of_type<T>.back());
-      d2->dft = nvalue;
-      d2->last_value = d1->last_value;
-      d2->clone_from(d1);
-      lps.swaps.emplace_back(d1, &*d2);
-      params[d2->parameter_name] = std::move(d2);
+      println(hlog, lps.label, " found saver: ", fs->name);
+      fs->clone(lps, &*(lps_of_type<T>.back()));
+      return;
       }
     }
-  if(found != 1) println(hlog, "lps_add found = ", found);
-  }
-
-EX void lps_add(local_parameter_set& lps, int& val, int nvalue) {
-  lps_add_typed<int, int_setting> (lps, val, nvalue);
-  }
-
-EX void lps_add(local_parameter_set& lps, bool& val, bool nvalue) {
-  lps_add_typed<bool, bool_setting> (lps, val, nvalue);
-  }
-
-EX void lps_add(local_parameter_set& lps, char& val, char nvalue) {
-  lps_add_typed<char, char_setting> (lps, val, nvalue);
-  }
-
-EX void lps_add(local_parameter_set& lps, ld& val, ld nvalue) {
-  lps_add_typed<ld, float_setting> (lps, val, nvalue);
-  }
-
-EX void lps_add(local_parameter_set& lps, color_t& val, color_t nvalue) {
-  lps_add_typed<color_t, color_setting> (lps, val, nvalue);
-  }
-
-#if HDR
-template<class T> void lps_add_enum(local_parameter_set& lps, T& val, T nvalue) {
-  int found = 0;
-  for(auto& fs: params) {
-    if(fs.second->affects(&val)) {
-      found++;
-      fs.second->clone_to(lps, &nvalue);
-      }
-    }
-  if(found != 1) println(hlog, "lps_add found = ", found);
+  if(found != 1) println(hlog, lps.label, " saver not found");
   }
 #endif
-
-template<class T> void enum_setting<T>::clone_to(struct local_parameter_set& lps, void* nvalue) {
-  lps_add_typed<T, enum_setting<T>> (lps, *value, *((T*)nvalue));
-  }
 
 }
