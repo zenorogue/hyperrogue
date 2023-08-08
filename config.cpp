@@ -848,6 +848,11 @@ EX void initConfig() {
   -> editable(0, 1, 0.05, "tree-drawing parameter", "How much of edges to draw for tree patterns (to show how the tree edges are oriented).", 't');
 
   param_char(patterns::whichCanvas, "whichCanvas", 0);
+  param_i(patterns::rwalls, "randomwalls");
+
+  param_b(vid.grid, "grid");
+  param_b(models::desitter_projections, "desitter_projections", false);
+  param_b(nonisotropic_weird_transforms, "nonisotropic_weird_transforms", false);
 
   param_b(arb::apeirogon_consistent_coloring, "apeirogon_consistent_coloring", true)
   -> editable("apeirogon_consistent_coloring", 'c');
@@ -2859,6 +2864,10 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
       });
   
   addsaver(vid.auto_eye, "auto-eyelevel", false);
+
+  param_b(nomenukey, "nomenukey");
+  param_b(showstartmenu, "showstartmenu");
+  param_b(draw_centerover, "draw_centerover");
 
   param_enum(nohelp, "help_messages", "help_messages", 0)
   -> editable({
