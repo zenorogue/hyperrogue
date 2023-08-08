@@ -144,6 +144,14 @@ template<class T> struct val_setting : public setting {
 
   virtual bool anim_unchanged() { return *value == anim_value; }
   virtual void anim_restore() { *value = anim_value; if(reaction) reaction(); }
+
+  virtual void load_from_raw(const string& s) { throw hr_exception("load_from_raw not defined"); }
+
+  void load_from(const string& s) override {
+    auto bak = *value;
+    load_from_raw(s);
+    if(*value != bak && reaction) reaction();
+    }
   bool load_from_animation(const string& s) override {
     if(anim_value != *value) return false;
     load_from(s);
@@ -174,7 +182,7 @@ struct float_setting : public val_setting<ld> {
   float_setting *modif(const function<void(float_setting*)>& r) { modify_me = r; return this; }
   supersaver *make_saver() override;
   void show_edit_option(int key) override;
-  void load_from(const string& s) override;
+  void load_from_raw(const string& s) override { *value = parseld(s); }
   virtual cld get_cld() override { return *value; }
   };
 
@@ -204,9 +212,7 @@ struct int_setting : public val_setting<int> {
 
   virtual cld get_cld() override { return *value; }
 
-  void load_from(const string& s) override {
-    *value = parseint(s);
-    }
+  void load_from_raw(const string& s) override { *value = parseint(s); }
 
   virtual void check_change() {
     if(*value != last_value) {
@@ -228,9 +234,7 @@ struct color_setting : public val_setting<color_t> {
     return this;
     }
 
-  void load_from(const string& s) override {
-    sscanf(s.c_str(), "%x", value);
-    }
+  void load_from_raw(const string& s) override { sscanf(s.c_str(), "%x", value); }
   };
 
 struct matrix_setting : public val_setting<trans23> {
@@ -244,15 +248,15 @@ struct matrix_setting : public val_setting<trans23> {
     return this;
     }
 
-  void load_from(const string& s) override;
+  void load_from_raw(const string& s) override { *value = parsematrix23(s); }
   };
 
 struct char_setting : public val_setting<char> {
   supersaver *make_saver() override;
   void show_edit_option(int key) override;
 
-  void load_from(const string& s) override {
-    if(s == "\\0") value = 0;
+  void load_from_raw(const string& s) override {
+    if(s == "\\0") *value = 0;
     else sscanf(s.c_str(), "%c", value);
     }
   };
@@ -265,9 +269,9 @@ struct bool_setting : public val_setting<bool> {
     menu_item_name = cap; default_key = key; return this; 
     } 
   void show_edit_option(int key) override;
-  void load_from(const string& s) override {
-    *value = parseint(s);
-    }
+
+  void load_from_raw(const string& s) override { *value = parseint(s); }
+
   virtual cld get_cld() override { return *value; }
   };
 
@@ -488,20 +492,6 @@ supersaver *bool_setting::make_saver() {
 #else
   return nullptr;
 #endif
-  }
-
-void float_setting::load_from(const string& s) {
-  auto res = parseld(s);
-  auto bak = *value;
-  *value = res;
-  if(res != bak && reaction) reaction();
-  }
-
-void matrix_setting::load_from(const string& s) {
-  auto res = parsematrix23(s);
-  auto bak = *value;
-  *value = res;
-  if(res != bak && reaction) reaction();
   }
 
 void non_editable() {

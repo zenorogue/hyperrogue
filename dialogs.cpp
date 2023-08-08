@@ -1101,7 +1101,7 @@ EX namespace dialog {
       if(ne.intval) *ne.intval = ldtoint(*ne.editwhat);
       #if CAP_ANIMATIONS
       if(ne.animatable) {
-        auto p = anims::find_param(ne.editwhat);
+        auto p = anims::find_param(ne.intval ? (void*) ne.intval : (void*) ne.editwhat);
         if(p) p->load_as_animation(ne.s);
         }
       #endif
@@ -1388,7 +1388,7 @@ EX namespace dialog {
   EX void editNumber(int& x, int vmin, int vmax, ld step, int dft, string title, string help) {
     editNumber(ne.intbuf, vmin, vmax, step, dft, title, help);
     ne.intbuf = x; ne.intval = &x; ne.s = its(x);
-    ne.animatable = false;
+    ne.animatable = true;
     }
   
   EX void helpToEdit(int& x, int vmin, int vmax, int step, int dft) {
