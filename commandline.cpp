@@ -112,18 +112,15 @@ EX namespace arg {
     return strtoll(argcs(), NULL, 16);
     }
   
+  int parameter_id;
+
   EX void shift_arg_formula(ld& x, const reaction_t& r IS(reaction_t())) {
-    shift(); ld old = x; x = argf(); 
-    #if CAP_ANIMATIONS
-    anims::animate_parameter(x, args(), r); 
-    #endif
-    if(old != x && r) r();
+    shift();
+    auto par = anims::find_param(&x);
+    if(!par) par = param_f(x, "tmp_parameter_" + its(parameter_id++))->set_reaction(r);
+    par->load_as_animation(args());
     }
 
-  EX void shift_arg_formula_matrix(struct hr::trans23& x) {
-    shift(); x = parsematrix23(args()); // TODO animate
-    }
-  
   #if HDR
 
   // an useful macro

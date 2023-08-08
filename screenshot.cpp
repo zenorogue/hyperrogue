@@ -792,10 +792,10 @@ EX void take(string fname, const function<void()>& what IS(default_screenshot_co
   #endif
   
   vector<bool> chg;
-  for(auto ap: anims::aps) chg.push_back(*ap.value == ap.last);
+  for(auto& ap: anims::aps) chg.push_back(ap.par->anim_unchanged());
   finalizer f([&] { 
     for(int i=0; i<isize(anims::aps); i++) 
-      if(chg[i]) *anims::aps[i].value = anims::aps[i].last;
+      if(chg[i]) anims::aps[i].par->anim_restore();
     });
   
   if(intra::in) what();
@@ -1176,30 +1176,43 @@ EX void moved() {
 
 #if HDR
 struct animated_parameter {
-  ld *value;
-  ld last;
+  setting *par;
   string formula;
-  reaction_t reaction;
   };
 #endif
 
 EX vector<animated_parameter> aps;
 
-EX void deanimate(ld &x) {
+EX setting *find_param(void *x) {
+  for(auto& fs: params)
+    if(fs.second->affects(x))
+      return &*fs.second;
+  return nullptr;
+  }
+
+EX void deanimate(setting *p) {
   for(int i=0; i<isize(aps); i++) 
-    if(aps[i].value == &x)
+    if(aps[i].par == p)
       aps.erase(aps.begin() + (i--));
   }
 
-EX void get_parameter_animation(ld &x, string &s) {
+EX void get_parameter_animation(setting *p, string &s) {
   for(auto &ap: aps)
-    if(ap.value == &x && ap.last == x)
+    if(ap.par == p && ap.par->anim_unchanged())
       s = ap.formula;
   }
 
-EX void animate_parameter(ld &x, string f, const reaction_t& r) {
-  deanimate(x);
-  aps.emplace_back(animated_parameter{&x, x, f, r});
+EX void animate_parameter(ld &x, string f) {
+  auto par = find_param(&x);
+  if(!par) { println(hlog, "parameter not animatable"); return; }
+  deanimate(par);
+  aps.emplace_back(animated_parameter{par, f});
+  }
+
+EX void animate_setting(setting *par, string f) {
+  if(!par) { println(hlog, "parameter not animatable"); return; }
+  deanimate(par);
+  aps.emplace_back(animated_parameter{par, f});
   }
 
 int ap_changes;
@@ -1207,17 +1220,12 @@ int ap_changes;
 void apply_animated_parameters() {
   ap_changes = 0;
   for(auto &ap: aps) {
-    if(*ap.value != ap.last) continue;
     try {
-      *ap.value = parseld(ap.formula);
+      if(ap.par->load_from_animation(ap.formula))
+        ap_changes++;
       }
     catch(hr_parse_exception&) {
       continue;
-      }
-    if(*ap.value != ap.last) {
-      if(ap.reaction) ap.reaction();
-      ap_changes++;
-      ap.last = *ap.value;
       }
     }
   }

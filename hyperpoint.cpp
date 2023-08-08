@@ -210,6 +210,8 @@ struct trans23 {
   trans23() { v2 = Id; v3 = Id; }
   trans23(const transmatrix& T) { v2 = T; v3 = T; }
   trans23(const transmatrix& T2, const transmatrix& T3) { v2 = T2; v3 = T3; }
+  bool operator == (const trans23& b) const;
+  bool operator != (const trans23& b) const { return !(self == b); }
   trans23 operator * (trans23 T) {
     trans23 t;
     auto& dim = cginf.g.homogeneous_dimension;
@@ -253,6 +255,8 @@ constexpr hyperpoint C03 = hyperpoint(0,0,0,1);
 /** C0 is the origin in our space */
 #define C0 (MDIM == 3 ? C02 : C03)
 #endif
+
+bool trans23::operator == (const trans23& b) const { return eqmatrix(v2, b.v2) && eqmatrix(v3, b.v3); }
 
 // basic functions and types
 //===========================

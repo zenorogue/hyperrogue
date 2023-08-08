@@ -1082,7 +1082,7 @@ EX namespace dialog {
     if(ne.intval) *ne.editwhat = *ne.intval;
     ne.s = disp(*ne.editwhat);
     #if CAP_ANIMATIONS
-    anims::deanimate(*ne.editwhat);
+    anims::deanimate(anims::find_param(ne.editwhat));
     #endif
     }
   
@@ -1100,7 +1100,10 @@ EX namespace dialog {
       *ne.editwhat = x;
       if(ne.intval) *ne.intval = ldtoint(*ne.editwhat);
       #if CAP_ANIMATIONS
-      if(ne.animatable) anims::animate_parameter(*ne.editwhat, ne.s, reaction ? reaction : reaction_final);    
+      if(ne.animatable) {
+        auto p = anims::find_param(ne.editwhat);
+        if(p) p->load_as_animation(ne.s);
+        }
       #endif
       if(reaction) reaction();
       }
@@ -1173,9 +1176,7 @@ EX namespace dialog {
       dialog::addHelp(XLAT("Parameter names"));
     dialog::addBreak(50);
     for(auto& ap: anims::aps) {
-      string what = "?";
-      for(auto& p: params) if(p.second->affects(ap.value)) what = p.first;
-      dialog::addInfo(what + " = " + ap.formula);
+      dialog::addInfo(ap.par->parameter_name + " = " + ap.formula);
       }
     #endif
     dialog::addBreak(50);
@@ -1358,7 +1359,7 @@ EX namespace dialog {
     extra_options = reaction_t();
     ne.animatable = true;
     #if CAP_ANIMATIONS
-    anims::get_parameter_animation(x, ne.s);
+    anims::get_parameter_animation(anims::find_param(&x), ne.s);
     #endif
     }
 
@@ -1381,7 +1382,7 @@ EX namespace dialog {
     reaction = [&] { x = spin(angle * degree); };
     reaction_final = reaction;
     extra_options = reaction_t();
-    ne.animatable = true;
+    ne.animatable = false;
     }
 
   EX void editNumber(int& x, int vmin, int vmax, ld step, int dft, string title, string help) {

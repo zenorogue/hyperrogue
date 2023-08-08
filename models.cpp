@@ -835,10 +835,6 @@ EX namespace models {
       PHASEFROM(2); 
       shift_arg_formula(vpconf.halfplane_scale);
       }
-    else if(argis("-mori")) { 
-      PHASEFROM(2); 
-      shift_arg_formula_matrix(vpconf.mori());
-      }
     else if(argis("-mets")) { 
       PHASEFROM(2); 
       shift_arg_formula(vpconf.euclid_to_sphere);

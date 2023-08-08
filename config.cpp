@@ -46,7 +46,6 @@ struct setting {
   string help_text;
   reaction_t reaction;
   char default_key;
-  cld last_value;
   bool is_editable;
   supersaver *saver;
   virtual bool available() { if(restrict) return restrict(); return true; }
@@ -59,16 +58,8 @@ struct setting {
   virtual string search_key() { 
     return parameter_name + "|" + config_name + "|" + menu_item_name + "|" + help_text;
     }
-  virtual cld get_cld() = 0;
-  virtual void set_cld(cld x) = 0;
   explicit setting() { restrict = auto_restrict; is_editable = false; }
-  virtual void check_change() {
-    cld val = get_cld();
-    if(val != last_value) {
-      last_value = val;
-      add_to_changed(this);
-      }
-    }
+  virtual void check_change() { }
   reaction_t sets;
   setting *set_sets(const reaction_t& s) { sets = s; return this; }
   setting *set_extra(const reaction_t& r);
@@ -79,6 +70,15 @@ struct setting {
     println(hlog, "cannot load this parameter");
     exit(1);
     }
+  virtual bool load_from_animation(const string& s) {
+    load_from(s); return false;
+    }
+  virtual void load_as_animation(const string& s) {
+    load_from(s);
+    }
+  virtual bool anim_unchanged() { return true; }
+  virtual void anim_restore() { }
+  virtual cld get_cld() { throw hr_exception("parameter has no complex value"); }
   };
 #endif
 
@@ -110,22 +110,54 @@ struct list_setting : setting {
   };
 
 template<class T> struct enum_setting : list_setting {
-  T *value;
+  T *value, last_value;
   T dft;
   int get_value() override { return (int) *value; }
   void set_value(int i) override { *value = (T) i; }
   bool affects(void* v) override { return v == value; }
   supersaver *make_saver() override;
-  cld get_cld() override { return get_value(); }
-  virtual void set_cld(cld x) { set_value(floor(real(x)+.5)); }
   void load_from(const string& s) override {
     *value = (T) parseint(s);
     }
+  virtual void check_change() {
+    if(*value != last_value) {
+      last_value = *value;
+      add_to_changed(this);
+      }
+    }
   };
 
-struct float_setting : public setting {
-  ld *value;
-  ld dft;
+namespace anims {
+  extern void animate_setting(setting*, string);
+  }
+
+template<class T> struct val_setting : public setting {
+  T *value, last_value, anim_value, dft;
+
+  bool affects(void *v) override { return v == value; }
+  virtual void check_change() {
+    if(*value != last_value) {
+      last_value = *value;
+      add_to_changed(this);
+      }
+    }
+
+  virtual bool anim_unchanged() { return *value == anim_value; }
+  virtual void anim_restore() { *value = anim_value; if(reaction) reaction(); }
+  bool load_from_animation(const string& s) override {
+    if(anim_value != *value) return false;
+    load_from(s);
+    anim_value = *value;
+    return true;
+    }
+  void load_as_animation(const string& s) override {
+    load_from(s);
+    anim_value = *value;
+    anims::animate_setting(this, s);
+    }
+  };
+
+struct float_setting : public val_setting<ld> {
   ld min_value, max_value, step;
   string unit;
   float_setting *editable(ld min_value, ld max_value, ld step, string menu_item_name, string help_text, char key) {
@@ -141,11 +173,9 @@ struct float_setting : public setting {
   function<void(float_setting*)> modify_me;
   float_setting *modif(const function<void(float_setting*)>& r) { modify_me = r; return this; }
   supersaver *make_saver() override;
-  bool affects(void *v) override { return v == value; }
   void show_edit_option(int key) override;
-  cld get_cld() override { return *value; }
-  void set_cld(cld x) override { *value = real(x); }
   void load_from(const string& s) override;
+  virtual cld get_cld() override { return *value; }
   };
 
 struct float_setting_dft : public float_setting {
@@ -154,18 +184,13 @@ struct float_setting_dft : public float_setting {
   float_setting_dft* set_hint(const function<ld()>& f) { get_hint = f; return this; }
   };
 
-struct int_setting : public setting {
-  int *value;
-  int dft;
+struct int_setting : public val_setting<int> {
   int min_value, max_value;
   ld step;
   supersaver *make_saver() override;
   function<void(int_setting*)> modify_me;
   int_setting *modif(const function<void(int_setting*)>& r) { modify_me = r; return this; }
-  bool affects(void *v) override { return v == value; }
   void show_edit_option(int key) override;
-  cld get_cld() override { return *value; }
-  void set_cld(cld x) override { *value = floor(real(x)+.5); }
   int_setting *editable(int min_value, int max_value, ld step, string menu_item_name, string help_text, char key) {
     this->is_editable = true;
     this->min_value = min_value;
@@ -177,20 +202,24 @@ struct int_setting : public setting {
     return this;
     }
 
+  virtual cld get_cld() override { return *value; }
+
   void load_from(const string& s) override {
     *value = parseint(s);
     }
+
+  virtual void check_change() {
+    if(*value != last_value) {
+      last_value = *value;
+      add_to_changed(this);
+      }
+    }
   };
 
-struct color_setting : public setting {
-  color_t *value;
-  color_t dft;
+struct color_setting : public val_setting<color_t> {
   bool has_alpha;
   supersaver *make_saver() override;
-  bool affects(void *v) override { return v == value; }
   void show_edit_option(int key) override;
-  cld get_cld() override { return *value; }
-  void set_cld(cld x) override { *value = floor(real(x)+.5); }
   color_setting *editable(string menu_item_name, string help_text, char key) {
     this->is_editable = true;
     this->menu_item_name = menu_item_name;
@@ -204,15 +233,9 @@ struct color_setting : public setting {
     }
   };
 
-struct matrix_setting : public setting {
-  trans23 *value;
-  trans23 dft;
-  trans23 last_value_matrix;
+struct matrix_setting : public val_setting<trans23> {
   supersaver *make_saver() override;
-  bool affects(void *v) override { return v == value; }
   void show_edit_option(int key) override;
-  cld get_cld() override { return 0; }
-  void set_cld(cld x) override { }
   matrix_setting *editable(string menu_item_name, string help_text, char key) {
     this->is_editable = true;
     this->menu_item_name = menu_item_name;
@@ -221,19 +244,12 @@ struct matrix_setting : public setting {
     return this;
     }
 
-  void load_from(const string& s) override {
-    *value = parsematrix23(s);
-    }
+  void load_from(const string& s) override;
   };
 
-struct char_setting : public setting {
-  char *value;
-  char dft;
+struct char_setting : public val_setting<char> {
   supersaver *make_saver() override;
-  bool affects(void *v) override { return v == value; }
   void show_edit_option(int key) override;
-  cld get_cld() override { return *value; }
-  void set_cld(cld x) override { *value = floor(real(x)+.5); }
 
   void load_from(const string& s) override {
     if(s == "\\0") value = 0;
@@ -241,33 +257,34 @@ struct char_setting : public setting {
     }
   };
 
-struct bool_setting : public setting {
-  bool *value;
-  bool dft;
+struct bool_setting : public val_setting<bool> {
   supersaver *make_saver() override;
   reaction_t switcher;
   bool_setting* editable(string cap, char key ) {
     is_editable = true;
     menu_item_name = cap; default_key = key; return this; 
     } 
-  bool affects(void *v) override { return v == value; }
   void show_edit_option(int key) override;
-  cld get_cld() override { return *value ? 1 : 0; }
-  void set_cld(cld x) override { *value = real(x) >= 0.5; }
   void load_from(const string& s) override {
     *value = parseint(s);
     }
+  virtual cld get_cld() override { return *value; }
   };
 
 struct custom_setting : public setting {
+  cld last_value;
   function<void(char)> custom_viewer;
   function<cld()> custom_value;
   function<bool(void*)> custom_affect;
   void show_edit_option(int key) override { custom_viewer(key); }
-  cld get_cld() override { return custom_value(); }
   supersaver *make_saver() { throw hr_exception("make_saver for custom_setting"); }
-  void set_cld(cld x) override { }
   bool affects(void *v) override { return custom_affect(v); }
+  virtual void check_change() {
+    if(custom_value() != last_value) {
+      last_value = custom_value();
+      add_to_changed(this);
+      }
+    }
   };
   
 struct local_parameter_set {
@@ -474,9 +491,17 @@ supersaver *bool_setting::make_saver() {
   }
 
 void float_setting::load_from(const string& s) {
-  *value = parseld(s);
-  anims::animate_parameter(*value, s, reaction);
-  if(reaction) reaction();
+  auto res = parseld(s);
+  auto bak = *value;
+  *value = res;
+  if(res != bak && reaction) reaction();
+  }
+
+void matrix_setting::load_from(const string& s) {
+  auto res = parsematrix23(s);
+  auto bak = *value;
+  *value = res;
+  if(res != bak && reaction) reaction();
   }
 
 void non_editable() {
@@ -673,7 +698,7 @@ EX matrix_setting *param_matrix(trans23& val, const string s) {
   u->config_name = s;
   u->menu_item_name = s;
   u->value = &val;
-  u->last_value_matrix = val;
+  u->last_value = val;
   u->dft = val;
   u->register_saver();
   auto f = &*u;
@@ -716,7 +741,7 @@ template<class T> enum_setting<T> *param_enum(T& val, const string p, const stri
   u->value = &val;
   u->dft = dft;
   val = dft;
-  u->last_value = u->get_cld();
+  u->last_value = dft;
   u->register_saver();
   auto f = &*u;
   params[p] = std::move(u);
@@ -4088,7 +4113,7 @@ EX int read_param_args() {
     println(hlog, "parameter unknown: ", name);
     exit(1);
     }
-  params[name]->load_from(value);
+  params[name]->load_as_animation(value);
   return 0;
   }
 
