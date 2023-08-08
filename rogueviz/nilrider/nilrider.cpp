@@ -591,8 +591,8 @@ void default_settings() {
   lps_add(lps_nilrider, patterns::whichCanvas, 0);
 
   #if CAP_VR
-  lps_add_enum(lps_nilrider, vrhr::hsm, vrhr::eHeadset::reference);
-  lps_add_enum(lps_nilrider, vrhr::eyes, vrhr::eEyes::equidistant);
+  lps_add(lps_nilrider, vrhr::hsm, vrhr::eHeadset::reference);
+  lps_add(lps_nilrider, vrhr::eyes, vrhr::eEyes::equidistant);
   lps_add(lps_nilrider, vrhr::absolute_unit_in_meters, 6);
   #endif
   }

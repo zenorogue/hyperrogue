@@ -2063,8 +2063,8 @@ void default_config() {
   param_i(bgeom, "bringris-geometry", 0);
   lps_add(lps_bringris, ray::want_use, ray::want_use);
   #if CAP_VR
-  lps_add_enum(lps_bringris, vrhr::hsm, vrhr::hsm);
-  lps_add_enum(lps_bringris, vrhr::eyes, vrhr::eyes);
+  lps_add(lps_bringris, vrhr::hsm, vrhr::hsm);
+  lps_add(lps_bringris, vrhr::eyes, vrhr::eyes);
   #endif
 
   param_b(use_raycaster, "bringris-ray");
