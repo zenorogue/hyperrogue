@@ -605,7 +605,7 @@ EX namespace dialog {
 
     color_t cols[3] = {0xFF0000FF, 0x00FF00FF, 0x0000FFFF};
     for(int a=0; a<dim-1; a++) {
-      auto pt = pts[a]; pt[2] = 1; pt[3] = 1; println(hlog, pt);
+      auto pt = pts[a]; pt[2] = 1; pt[3] = 1;
       curvepoint(hyperpoint(0,0,1,1));
       curvepoint(pt);
       // queueline(V * hyperpoint(0,0,1,1), V * pt, cols[a], 0);
