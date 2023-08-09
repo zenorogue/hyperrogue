@@ -2360,9 +2360,9 @@ EX void projectionDialog() {
       dialog::add_action([] () { *dialog::get_ne().editwhat = -1; vpconf.scale = 1; dialog::get_ne().s = "-1"; });
       }
     dialog::addItem(sphere ? "orthographic" : "Gans model", 'O');
-    dialog::add_action([] () { vpconf.alpha = vpconf.scale = 999; dialog::get_ne().s = dialog::disp(vpconf.alpha); });
+    dialog::add_action([] () { vpconf.alpha = vpconf.scale = 999; dialog::get_ne().reset_str(); });
     dialog::addItem(sphere ? "towards orthographic" : "towards Gans model", 'T');
-    dialog::add_action([] () { double d = 1.1; vpconf.alpha *= d; vpconf.scale *= d; dialog::get_ne().s = dialog::disp(vpconf.alpha); });
+    dialog::add_action([] () { double d = 1.1; vpconf.alpha *= d; vpconf.scale *= d; dialog::get_ne().reset_str(); });
     };
   }
 

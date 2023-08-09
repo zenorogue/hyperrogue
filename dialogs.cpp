@@ -48,7 +48,7 @@ EX namespace dialog {
   const static scaler asinhic100 = {[] (ld x) { return asinh(x*100); }, [] (ld x) { return sinh(x)/100; }, false};
  
   /** extendable dialog */
-  struct extdialog {
+  struct extdialog : funbase {
     string title, help;
     int dialogflags;
     reaction_t reaction;
@@ -73,17 +73,19 @@ EX namespace dialog {
     void draw() override;
     void apply_edit();
     void apply_slider();
+    string disp(ld x);
+    void reset_str() { s = disp(*editwhat); }
     };
 #endif
 
   EX number_dialog& get_ne() {
-    auto ptr = screens.back().target<number_dialog>();
+    auto ptr = dynamic_cast<number_dialog*> (screens.back().target_base());
     if(!ptr) throw hr_exception("get_ne() called without number dialog");
     return *ptr;
     }
 
   EX extdialog& get_di() {
-    auto ptr = screens.back().target<extdialog>();
+    auto ptr = dynamic_cast<extdialog*> (screens.back().target_base());
     if(!ptr) throw hr_exception("get_di() called without extdialog");
     return *ptr;
     }
@@ -1167,10 +1169,9 @@ EX namespace dialog {
     else return int(x-.5);
     }
   
-  EX string disp(ld x) { 
-    auto& ne = get_ne();
-    if(ne.dialogflags & sm::HEXEDIT) return "0x" + itsh((unsigned long long)(x));
-    if(ne.intval) return its(ldtoint(x));
+  string number_dialog::disp(ld x) {
+    if(dialogflags & sm::HEXEDIT) return "0x" + itsh((unsigned long long)(x));
+    if(intval) return its(ldtoint(x));
     return fts(x);
     }
 
@@ -1179,7 +1180,7 @@ EX namespace dialog {
     if(ne.intval) *ne.intval = ldtoint(*ne.editwhat);
     if(ne.reaction) ne.reaction();
     if(ne.intval) *ne.editwhat = *ne.intval;
-    ne.s = disp(*ne.editwhat);
+    reset_str();
     #if CAP_ANIMATIONS
     anims::deanimate(anims::find_param(ne.editwhat));
     #endif
@@ -1188,7 +1189,7 @@ EX namespace dialog {
   EX void use_hexeditor() {
     auto& ne = get_ne();
     ne.dialogflags |= sm::HEXEDIT;
-    ne.s = disp(*ne.editwhat);
+    ne.reset_str();
     }
   
   void number_dialog::apply_edit() {
@@ -1460,7 +1461,6 @@ EX namespace dialog {
   EX void editNumber(ld& x, ld vmin, ld vmax, ld step, ld dft, string title, string help) {
     number_dialog ne;
     ne.editwhat = &x;
-    ne.s = disp(x);
     ne.vmin = vmin;
     ne.vmax = vmax;
     ne.step = step;
@@ -1473,6 +1473,7 @@ EX namespace dialog {
     #if CAP_ANIMATIONS
     anims::get_parameter_animation(anims::find_param(&x), ne.s);
     #endif
+    ne.reset_str();
     pushScreen(ne);
     }
 
