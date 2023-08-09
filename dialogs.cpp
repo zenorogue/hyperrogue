@@ -558,6 +558,42 @@ EX namespace dialog {
       }
     }
 
+  EX void visualize_matrix(const trans23& T, ld x, ld y, ld r) {
+    vector<hyperpoint> pts;
+    for(int a=0; a<MDIM-1; a++) {
+      hyperpoint h = C0; h[a] = r;
+      pts.push_back(rot_inverse(T.get()) * h);
+      }
+    int dim = MDIM;
+
+    flat_model_enabler fme;
+    initquickqueue();
+    ld pix = 1 / (2 * cgi.hcrossf / cgi.crossf);
+    shiftmatrix V = shiftless(atscreenpos(x, y, pix));
+
+    for(int i=0; i<=360; i++)
+      curvepoint(hyperpoint(r * sin(i*degree), r*cos(i*degree), 1, 1));
+    queuecurve(V, 0xFFFFFFFF, 0x202020FF, PPR::LINE);
+
+    color_t cols[3] = {0xFF0000FF, 0x00FF00FF, 0x0000FFFF};
+    for(int a=0; a<dim-1; a++) {
+      auto pt = pts[a]; pt[2] = 1; pt[3] = 1; println(hlog, pt);
+      curvepoint(hyperpoint(0,0,1,1));
+      curvepoint(pt);
+      // queueline(V * hyperpoint(0,0,1,1), V * pt, cols[a], 0);
+      queuecurve(V, cols[a], 0, PPR::LINE);
+      }
+    if(dim == 4) for(int a=0; a<dim-1; a++) {
+      auto pt = pts[a]; ld val = pt[2] * vid.fsize / r / 5; pt[2] = 1; pt[3] = 1;
+      curvepoint(hyperpoint(0, val, 1, 1));
+      curvepoint(hyperpoint(-val, -val*sqrt(3)/2, 1, 1));
+      curvepoint(hyperpoint(+val, -val*sqrt(3)/2, 1, 1));
+      curvepoint(hyperpoint(0, val, 1, 1));
+      queuecurve(V * rgpushxto0(pt), cols[a], cols[a] & 0xFFFFFF80, PPR::LINE);
+      }
+    quickqueue();
+    }
+
   EX void display() {
 
     callhooks(hooks_display_dialog);
@@ -765,8 +801,10 @@ EX namespace dialog {
             }
           else {
             int siz = dfsize * I.scale/100;
-            while(siz > 6 && textwidth(siz, I.value) >= vid.xres - valuex) siz--;
+            while(siz > 6 && textwidth(siz, I.value) + (I.type == diMatrixItem ? siz : 0) >= vid.xres - valuex) siz--;
             displayfr(valuex, mid, 2, siz, I.value, I.colorv, 0);
+
+            if(I.type == diMatrixItem) visualize_matrix(*((trans23*)I.ptr), valuex + textwidth(siz, "-359.999o") + siz/2, mid, siz/2);
             }
           }
         if(xthis) getcstat = I.key;
