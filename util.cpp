@@ -491,6 +491,7 @@ ld angle_unit(char ch) {
 
 transmatrix exp_parser::parsematrix(int prio) {
   skip_white();
+  transmatrix res;
   if(s[at] && s[at+1] && s[at+2] && s[at+3] == '(') {
     ld unit = angle_unit(s[at]);
     int c0 = coord_id(s[at+1]);
@@ -498,12 +499,17 @@ transmatrix exp_parser::parsematrix(int prio) {
     if(c0 >= 0 && c1 >= 0 && c0 != c1 && unit) {
       at += 4;
       ld angle = validate_real(parsepar());
-      if(unit == -1) return lorentz(c0, c1, angle);
-      else return cspin(c0, c1, unit * angle);
+      if(unit == -1) res = lorentz(c0, c1, angle);
+      else res = cspin(c0, c1, unit * angle);
+      goto mulwhile;
       }
     }
-  transmatrix res;
-  if(next() == '(') {
+  if(eat("inv(")) {
+    res = parsematrix();
+    force_eat(")");
+    res = inverse(res);
+    }
+  else if(next() == '(') {
     at++;
     res = parsematrix(); 
     force_eat(")");
@@ -512,11 +518,14 @@ transmatrix exp_parser::parsematrix(int prio) {
     string token = next_token();
     if(token == "id") res = Id;
     else if(token == "view") res = View;
+    else if(token == "mori") res = pconf.mori().get();
     else throw hr_parse_exception("unknown matrix: " + token);
     }
+  mulwhile:
   while(true) {
     skip_white();
     if(next() == '*' && prio <= 20) at++, res = res * parsematrix(30);
+    else break;
     }
   return res;
   }
