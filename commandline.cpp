@@ -260,24 +260,18 @@ int arg::readCommon() {
   else if(argis("-draw")) {
     PHASE(3); start_game(); drawscreen();
     }
-  else if(argis("-rotate")) {
+  else if(argis("-sview")) {
     PHASE(3);  start_game();
-    shift(); ld a = argf();
-    shift(); ld b = argf();
-    View = View * spin(TAU * a / b);
     playermoved = false;
+    transmatrix T = View;
+    shift(); View = parsematrix(args());
+    println(hlog, "View is set to ", View);
+    current_display->which_copy = View * inverse(T) * current_display->which_copy;
     }
   else if(argis("-rotate-up")) {
     start_game();
     shiftmatrix S = ggmatrix(cwt.at->master->move(0)->c7);
     View = spin90() * spintox(S.T*C0) * View;
-    playermoved = false;
-    }
-  else if(argis("-rotate3")) {
-    PHASE(3);  start_game();
-    shift(); ld a = argf();
-    shift(); ld b = argf();
-    View = View * cspin(1, 2, TAU * a / b);
     playermoved = false;
     }
   else if(argis("-face-vertex")) {
@@ -289,20 +283,6 @@ int arg::readCommon() {
   else if(argis("-face-face")) {
     PHASE(3);  start_game();
     View = cspin90(0, 2);
-    }
-  else if(argis("-grotate")) {
-    PHASE(3);  start_game();
-    shift(); int i = argi();
-    shift(); int j = argi();
-    shift(); View = View * cspin(i, j, argf());
-    playermoved = false;
-    }
-  else if(argis("-grotatei")) {
-    PHASE(3);  start_game();
-    shift(); int i = argi();
-    shift(); int j = argi();
-    shift(); rotate_view(cspin(i, j, argf()));
-    playermoved = false;
     }
   else if(argis("-center-vertex")) {
     PHASE(3); shift(); int i = argi();
@@ -319,10 +299,6 @@ int arg::readCommon() {
       rotate_view(spintox(h));
       rotate_view(cspin90(0, 2));
       }
-    }
-  else if(argis("-cview")) {
-    PHASE(3);  start_game();
-    View = Id; playermoved = false;
     }
   else if(argis("-exit")) {
     PHASE(3);

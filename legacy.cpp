@@ -326,6 +326,38 @@ int read_legacy_args() {
     stop_game();
     land_structure = lsNiceWalls;
     }
+  else if(argis("-grotate")) {
+    PHASE(3);  start_game();
+    shift(); int i = argi();
+    shift(); int j = argi();
+    shift(); View = View * cspin(i, j, argf());
+    playermoved = false;
+    }
+  else if(argis("-grotatei")) {
+    PHASE(3);  start_game();
+    shift(); int i = argi();
+    shift(); int j = argi();
+    shift(); rotate_view(cspin(i, j, argf()));
+    playermoved = false;
+    }
+  else if(argis("-rotate")) {
+    PHASE(3);  start_game();
+    shift(); ld a = argf();
+    shift(); ld b = argf();
+    View = View * spin(TAU * a / b);
+    playermoved = false;
+    }
+  else if(argis("-rotate3")) {
+    PHASE(3);  start_game();
+    shift(); ld a = argf();
+    shift(); ld b = argf();
+    View = View * cspin(1, 2, TAU * a / b);
+    playermoved = false;
+    }
+  else if(argis("-cview")) {
+    PHASE(3);  start_game();
+    View = Id; playermoved = false;
+    }
   else return 1;
   return 0;
   }
