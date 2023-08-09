@@ -1500,7 +1500,7 @@ EX void show() {
     dialog::add_action([]() { 
       draw_cut = true;
       dialog::editNumber(cut_level, -1, 1, 0.1, 0, XLAT("cut level"), ""); 
-      dialog::extra_options = [] {
+      dialog::get_di().extra_options = [] {
         dialog::addItem(XLAT("disable"), 'D');
         dialog::add_action([] { draw_cut = false; popScreen(); });
         };
@@ -1512,7 +1512,7 @@ EX void show() {
   dialog::add_action([] {
     dialog::editNumber(crystal_period, 0, 16, 2, 0, XLAT("Crystal torus"), 
       XLAT("Z_k^d instead of Z^d. Only works with k even."));
-    dialog::reaction_final = [] {
+    dialog::get_di().reaction_final = [] {
       if(cryst) stop_game();
       set_crystal_period_flags();
       if(cryst) start_game();

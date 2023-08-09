@@ -690,7 +690,7 @@ EX void menuitem_binary_width(char key) {
   dialog::addSelItem(XLAT("binary tiling width"), fts(vid.binary_width), key);
   dialog::add_action([] {
     dialog::editNumber(vid.binary_width, 0, 2, 0.1, 1, XLAT("binary tiling width"), "");
-    dialog::reaction = [] () {
+    dialog::get_ne().reaction = [] () {
       #if CAP_TEXTURE
       texture::config.remap();
       #endif
@@ -705,7 +705,7 @@ EX void menuitem_nilwidth(char key) {
   dialog::addSelItem(XLAT("Nil width"), fts(nilv::nilwidth), key);
   dialog::add_action([] {
     dialog::editNumber(nilv::nilwidth, 0.01, 2, 0.1, 1, XLAT("Nil width"), "");
-    dialog::reaction = ray::reset_raycaster;
+    dialog::get_ne().reaction = ray::reset_raycaster;
     dialog::bound_low(0.01);
     });
   }
@@ -719,7 +719,7 @@ EX void edit_stretch() {
       "Value of 0 means not stretched, -1 means S2xE or H2xE (works only in the limit). (Must be > -1)"
       )
     );
-  dialog::reaction = [] { if(abs(stretch::factor+1) < 1e-3) stretch::factor = -.9; ray::reset_raycaster(); };
+  dialog::get_ne().reaction = [] { if(abs(stretch::factor+1) < 1e-3) stretch::factor = -.9; ray::reset_raycaster(); };
   }
 
 #if HDR
@@ -1013,7 +1013,7 @@ EX void showEuclideanMenu() {
     dialog::addSelItem(XLAT("Z-level height factor"), fts(vid.plevel_factor), 'Z');
     dialog::add_action([] {
       dialog::editNumber(vid.plevel_factor, 0, 2, 0.1, 0.7, XLAT("Z-level height factor"), "");
-      dialog::reaction = ray::reset_raycaster;
+      dialog::get_ne().reaction = ray::reset_raycaster;
       });
     }
   else if(mhybrid) {
@@ -1067,7 +1067,7 @@ EX void showEuclideanMenu() {
         );
       dialog::bound_low(0);
       dialog::bound_up(1);
-      dialog::extra_options = [] () { rots::draw_underlying(true); };
+      dialog::get_di().extra_options = [] () { rots::draw_underlying(true); };
       });
     }
   #endif
@@ -1086,11 +1086,11 @@ EX void showEuclideanMenu() {
     dialog::add_action([] {
       dialog::editNumber(bounded_mine_quantity, 0, bounded_mine_max, 1, (bounded_mine_max+5)/10, 
         XLAT("number of mines"), "");
-      dialog::reaction = [] {
+      dialog::get_ne().reaction = [] {
         if(bounded_mine_quantity < 0) bounded_mine_quantity = 0;
         if(bounded_mine_quantity > bounded_mine_max) bounded_mine_quantity = bounded_mine_max;
         };
-      dialog::reaction_final = [] {
+      dialog::get_ne().reaction_final = [] {
         bounded_mine_percentage = bounded_mine_quantity * 1. / bounded_mine_max;
         stop_game();
         start_game();

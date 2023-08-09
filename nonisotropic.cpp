@@ -1626,7 +1626,7 @@ EX namespace hybrid {
         start_game();
         };
       };
-    dialog::extra_options = [=] () { 
+    dialog::get_di().extra_options = [=] () {
       if(rotspace) {
         int e_steps = cgi.psl_steps / gcd(cgi.single_step, cgi.psl_steps); 
         bool ubounded = PIU(closed_manifold);
@@ -1645,7 +1645,7 @@ EX namespace hybrid {
         dialog::addSelItem( XLAT("non-periodic"), its(0), 'N');
         dialog::add_action(set_s(0, true));
         }
-      dialog::reaction_final = set_s(s, false);
+      dialog::get_di().reaction_final = set_s(s, false);
       };
     }
 
@@ -1787,7 +1787,7 @@ EX namespace product {
       dialog::editNumber(s, 0, 16, 1, 0, XLAT("rotation", "Z"), 
         XLAT("Works if the underlying space is symmetric.")
         );
-      dialog::reaction_final = [] {
+      dialog::get_di().reaction_final = [] {
         if(s == cspin) return;
         stop_game();
         cspin = s;

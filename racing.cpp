@@ -1039,8 +1039,8 @@ void race_projection() {
     dialog::add_action([] () {
       dialog::editMatrix(race_angle, XLAT("model orientation"), "");
       auto q = rot_inverse(race_angle) * pconf.mori();
-      auto last = dialog::reaction;
-      dialog::reaction = [q, last] () { last(); pconf.mori() = race_angle * q; };
+      auto last = dialog::get_ne().reaction;
+      dialog::get_ne().reaction = [q, last] () { last(); pconf.mori() = race_angle * q; };
       });
     }
 

@@ -2828,7 +2828,7 @@ EX void menu() {
   dialog::addSelItem(XLAT("intensity of random coloring"), its(intensity), 'i');
   dialog::add_action([] { 
     dialog::editNumber(intensity, 0, 255, 5, 15, "", "");
-    dialog::reaction = random_fog;
+    dialog::get_di().reaction = random_fog;
     });
 
   dialog::addItem(XLAT("color randomly"), 'r');
@@ -2838,14 +2838,14 @@ EX void menu() {
   dialog::add_action([&] {
     enable();
     dialog::openColorDialog(vmap[centerover]); 
-    dialog::dialogflags |= sm::SIDE;      
+    dialog::get_di().dialogflags |= sm::SIDE;
     });
 
   dialog::addColorItem("color cell under player", vmap.count(cwt.at) ? vmap[cwt.at] : 0, 'p');
   dialog::add_action([&] {
     enable();
     dialog::openColorDialog(vmap[cwt.at]); 
-    dialog::dialogflags |= sm::SIDE;      
+    dialog::get_di().dialogflags |= sm::SIDE;
     });
   
   dialog::addBreak(150);
@@ -2895,8 +2895,8 @@ EX void configure() {
   dialog::add_action([&] {
     if(hard_limit >= NO_LIMIT) hard_limit = 10;
     dialog::editNumber(hard_limit, 0, 100, 1, 10, XLAT("hard limit"), "");
-    dialog::reaction = reset_raycaster;
-    dialog::extra_options = [] {
+    dialog::get_di().reaction = reset_raycaster;
+    dialog::get_di().extra_options = [] {
       dialog::addItem("no limit", 'N');
       dialog::add_action([] { hard_limit = NO_LIMIT; reset_raycaster(); });
       };
@@ -2906,7 +2906,7 @@ EX void configure() {
     dialog::addSelItem(XLAT("reflective walls"), fts(reflect_val), 'R');
     dialog::add_action([&] {
       dialog::editNumber(reflect_val, 0, 1, 0.1, 0, XLAT("reflective walls"), "");
-      dialog::reaction = reset_raycaster;
+      dialog::get_di().reaction = reset_raycaster;
       });
     }
 
@@ -2920,7 +2920,7 @@ EX void configure() {
         XLAT("max step"), "affects the precision of solving the geodesic equation in Solv");
       dialog::scaleLog();
       dialog::bound_low(1e-9);
-      dialog::reaction = reset_raycaster;
+      dialog::get_di().reaction = reset_raycaster;
       });
 
     dialog::addSelItem(XLAT("min step"), fts(minstep), 'n');
@@ -2928,7 +2928,7 @@ EX void configure() {
       dialog::editNumber(minstep, 1e-6, 1, 0.1, 0.001, XLAT("min step"), "how precisely should we find out when do cross the cell boundary");
       dialog::scaleLog();
       dialog::bound_low(1e-9);
-      dialog::reaction = reset_raycaster;
+      dialog::get_di().reaction = reset_raycaster;
       });
     }
 
@@ -2938,19 +2938,19 @@ EX void configure() {
   dialog::addSelItem(XLAT("iterations"), its(max_iter_current()), 's');
   dialog::add_action([&] {
     dialog::editNumber(max_iter_current(), 0, 600, 1, 60, XLAT("iterations"), "in H3/H2xE/E3 this is the number of cell boundaries; in nonisotropic, the number of simulation steps");
-    dialog::reaction = reset_raycaster;
+    dialog::get_di().reaction = reset_raycaster;
     });
 
   dialog::addSelItem(XLAT("max cells"), its(max_cells), 's');
   dialog::add_action([&] {
     dialog::editNumber(max_cells, 16, 131072, 0.1, 4096, XLAT("max cells"), "");
     dialog::scaleLog();
-    dialog::extra_options = [] {
+    dialog::get_di().extra_options = [] {
       dialog::addBoolItem_action("generate", rays_generate, 'G');
       dialog::addColorItem(XLAT("out-of-range color"), color_out_of_range, 'X');
       dialog::add_action([] { 
         dialog::openColorDialog(color_out_of_range); 
-        dialog::dialogflags |= sm::SIDE;
+        dialog::get_di().dialogflags |= sm::SIDE;
         });
       };
     });

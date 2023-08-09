@@ -2725,7 +2725,7 @@ EX namespace mapeditor {
 
     if(uni == 'z' && GDIM == 3) {
       dialog::editNumber(front_edit, 0, 5, 0.1, 0.5, XLAT("z-level"), "");
-      dialog::extra_options = [] () {
+      dialog::get_di().extra_options = [] () {
         dialog::addBoolItem(XLAT("The distance from the camera to added points."), front_config == eFront::sphere_camera, 'A');
         dialog::add_action([] { front_config = eFront::sphere_camera; });
         dialog::addBoolItem(XLAT("place points at fixed radius"), front_config == eFront::sphere_center, 'B');
@@ -2854,7 +2854,7 @@ EX namespace mapeditor {
           static string text = "";
           dialog::edit_string(text, "", "");
           shiftpoint h = mh;
-          dialog::reaction_final = [h] {
+          dialog::get_di().reaction_final = [h] {
             if(text != "")
               dt_add_text(h, dtwidth * 50, text);
             };
@@ -2956,7 +2956,7 @@ EX namespace mapeditor {
   
       if(uni == 'p') {
         dialog::openColorDialog(colortouse);
-        dialog::reaction = [] () {
+        dialog::get_di().reaction = [] () {
           drawHandleKey(COLORKEY, COLORKEY);
           };
         }

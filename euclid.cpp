@@ -963,7 +963,7 @@ EX namespace euc {
       dialog::addItem("special manifolds", 'S');
       dialog::add_action([] {
         dialog::editNumber(quotient_size, 1, 12, 1, 2, "special manifold size", "");
-        dialog::extra_options = [] {
+        dialog::get_di().extra_options = [] {
           auto q = quotient_size;
           torus_config_option(XLAT("third-turn space"), 'A', make_third_turn(q,0,q));
           torus_config_option(XLAT("quarter-turn space"), 'B', make_quarter_turn(q,0,q));
@@ -1046,7 +1046,7 @@ EX namespace euc {
               "not implemented.)"
               )
               );
-            dialog::extra_options = show_fundamental;
+            dialog::get_di().extra_options = show_fundamental;
             });
           }
         }

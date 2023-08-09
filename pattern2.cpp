@@ -1783,7 +1783,7 @@ EX namespace patterns {
   EX void edit_rwalls() {
     if(WDIM == 2) return;
     dialog::editNumber(rwalls, 0, 100, 10, 50, XLAT("probability of a wall (%)"), "");
-    dialog::reaction = [] { stop_game(); start_game(); };
+    dialog::get_di().reaction = [] { stop_game(); start_game(); };
     }  
 
   EX int generateCanvas(cell *c) {
@@ -2115,7 +2115,7 @@ EX namespace patterns {
           6, 0xFFFFFFFF, 0x101010FF, 0x404040FF, 0x808080FF, 0x800000FF, unsigned(linf[laCanvas].color >> 2) << 8
           }; 
         dialog::openColorDialog(c, canvasbacks);
-        dialog::reaction = [instant] () {
+        dialog::get_di().reaction = [instant] () {
           if(instant) {
             stop_game();
             whichCanvas = 'g';
@@ -2128,7 +2128,7 @@ EX namespace patterns {
             canvasback = c >> 8;
             }
           };
-        dialog::reaction_final = edit_rwalls;
+        dialog::get_di().reaction_final = edit_rwalls;
         }
       else if(uni == 'i') {
         if(instant) 
@@ -2171,8 +2171,8 @@ EX namespace patterns {
         
         dialog::edit_string(color_formula, "formula", s);
 
-        dialog::extra_options = dialog::parser_help;
-        dialog::reaction_final = [instant] () { 
+        dialog::get_di().extra_options = dialog::parser_help;
+        dialog::get_di().reaction_final = [instant] () {
           if(instant) stop_game();
           whichCanvas = 'f';
           if(instant) {
@@ -3102,7 +3102,7 @@ EX namespace linepatterns {
           dialog::addColorItem(name, lp->color, 'a'+(id++));
           dialog::add_action([lp] () { 
             dialog::openColorDialog(lp->color, NULL);
-            dialog::dialogflags |= sm::MAYDARK | sm::SIDE;
+            dialog::get_di().dialogflags |= sm::MAYDARK | sm::SIDE;
             });
           }
         else {

@@ -83,7 +83,7 @@ struct setting {
 #endif
 
 setting *setting::set_extra(const reaction_t& r) {
-  auto s = sets; set_sets([s, r] { if(s) s(); dialog::extra_options = r; }); return this;
+  auto s = sets; set_sets([s, r] { if(s) s(); dialog::get_di().extra_options = r; }); return this;
   }
 
 setting *setting::set_reaction(const reaction_t& r) {
@@ -506,8 +506,8 @@ void float_setting::show_edit_option(int key) {
     add_to_changed(this);
     dialog::editNumber(*value, min_value, max_value, step, dft, XLAT(menu_item_name), help_text); 
     if(sets) sets();
-    if(reaction) dialog::reaction = reaction;
-    if(!is_editable) dialog::extra_options = non_editable;
+    if(reaction) dialog::get_di().reaction = reaction;
+    if(!is_editable) dialog::get_di().extra_options = non_editable;
     });
   }
 
@@ -520,10 +520,10 @@ void float_setting_dft::show_edit_option(int key) {
     if(*value == use_the_default_value) *value = get_hint();
     dialog::editNumber(*value, min_value, max_value, step, dft, XLAT(menu_item_name), help_text);
     if(sets) sets();
-    if(reaction) dialog::reaction = reaction;
-    if(!is_editable) dialog::extra_options = non_editable;
-    auto eo = dialog::extra_options;
-    dialog::extra_options = [eo, this] {
+    if(reaction) dialog::get_di().reaction = reaction;
+    if(!is_editable) dialog::get_di().extra_options = non_editable;
+    auto eo = dialog::get_di().extra_options;
+    dialog::get_di().extra_options = [eo, this] {
       dialog::addSelItem(XLAT("use the default value"), "", 'D');
       dialog::add_action([this] { *value = use_the_default_value; });
       if(eo) eo();
@@ -538,8 +538,8 @@ void int_setting::show_edit_option(int key) {
     add_to_changed(this);
     dialog::editNumber(*value, min_value, max_value, step, dft, XLAT(menu_item_name), help_text); 
     if(sets) sets();
-    if(reaction) dialog::reaction = reaction;
-    if(!is_editable) dialog::extra_options = non_editable;
+    if(reaction) dialog::get_di().reaction = reaction;
+    if(!is_editable) dialog::get_di().extra_options = non_editable;
     });
   }
 
@@ -557,7 +557,7 @@ void color_setting::show_edit_option(int key) {
   dialog::add_action([this] () {
     dialog::openColorDialog(*value);
     dialog::colorAlpha = has_alpha;
-    dialog::dialogflags |= sm::SIDE;
+    dialog::get_di().dialogflags |= sm::SIDE;
     });
   }
 
@@ -1029,11 +1029,11 @@ EX void initConfig() {
 
   param_b(less_in_landscape, "less_in_landscape", false)
   ->editable("less items/kills in landscape", 'L')
-  -> set_sets([] { dialog::reaction_final = [] { println(hlog, "Reset"); vid.killreduction = 0; }; });
+  -> set_sets([] { dialog::get_di().reaction_final = [] { println(hlog, "Reset"); vid.killreduction = 0; }; });
 
   param_b(less_in_portrait, "less_in_portrait", false)
   ->editable("less items/kills in portrait", 'P')
-  -> set_sets([] { dialog::reaction_final = [] { println(hlog, "Reset"); vid.killreduction = 0; }; });
+  -> set_sets([] { dialog::get_di().reaction_final = [] { println(hlog, "Reset"); vid.killreduction = 0; }; });
   
   // basic graphics
   
@@ -1059,7 +1059,7 @@ EX void initConfig() {
 
   param_i(menu_darkening, "menu_darkening", 2)
   -> editable(0, 8, 1, "menu map darkening", "A larger number means darker game map in the background. Set to 8 to disable the background.", 'd')
-  -> set_sets([] { dialog::bound_low(0); dialog::bound_up(8); dialog::dialogflags |= sm::DARKEN; });
+  -> set_sets([] { dialog::bound_low(0); dialog::bound_up(8); dialog::get_di().dialogflags |= sm::DARKEN; });
   param_b(centered_menus, "centered_menus", false)
   -> editable("centered menus in widescreen", 'c');
 
@@ -1084,15 +1084,15 @@ EX void initConfig() {
     )
   -> set_extra([] {
       dialog::addSelItem(XLAT("chevron (periodic)"), "0", 'C');
-      dialog::add_action([] { dialog::ne.s = "0"; dialog::apply_edit(); });
+      dialog::add_action([] { dialog::get_ne().s = "0"; dialog::get_ne().apply_edit(); });
       dialog::addSelItem(XLAT("hat"), "1", 'H');
-      dialog::add_action([] { dialog::ne.s = "1"; dialog::apply_edit(); });
+      dialog::add_action([] { dialog::get_ne().s = "1"; dialog::get_ne().apply_edit(); });
       dialog::addSelItem(XLAT("spectre"), "3-√3", 'T');
-      dialog::add_action([] { dialog::ne.s = "3 - sqrt(3)"; dialog::apply_edit(); });
+      dialog::add_action([] { dialog::get_ne().s = "3 - sqrt(3)"; dialog::get_ne().apply_edit(); });
       dialog::addSelItem(XLAT("turtle"), "1.5", 'T');
-      dialog::add_action([] { dialog::ne.s = "1.5"; dialog::apply_edit(); });
+      dialog::add_action([] { dialog::get_ne().s = "1.5"; dialog::get_ne().apply_edit(); });
       dialog::addSelItem(XLAT("comma (periodic)"), "2", ',');
-      dialog::add_action([] { dialog::ne.s = "2"; dialog::apply_edit(); });
+      dialog::add_action([] { dialog::get_ne().s = "2"; dialog::get_ne().apply_edit(); });
       })
   -> set_reaction(hat::reshape);
 
@@ -1122,27 +1122,27 @@ EX void initConfig() {
   
   param_i(vid.fullscreen_x, "fullscreen_x", 1280)
   -> editable(640, 3840, 640, "fullscreen resolution to use (X)", "", 'x')
-  -> set_sets([] { dialog::bound_low(640); dialog::reaction_final = do_request_resolution_change; });
+  -> set_sets([] { dialog::bound_low(640); dialog::get_di().reaction_final = do_request_resolution_change; });
   
   param_i(vid.fullscreen_y, "fullscreen_y", 1024)
   -> editable(480, 2160, 480, "fullscreen resolution to use (Y)", "", 'x')
-  -> set_sets([] { dialog::bound_low(480); dialog::reaction_final = do_request_resolution_change; });
+  -> set_sets([] { dialog::bound_low(480); dialog::get_di().reaction_final = do_request_resolution_change; });
 
   param_i(vid.window_x, "window_x", 1280)
   -> editable(160, 3840, 160, "window resolution to use (X)", "", 'x')
-  -> set_sets([] { dialog::bound_low(160); dialog::reaction_final = do_request_resolution_change; });
+  -> set_sets([] { dialog::bound_low(160); dialog::get_di().reaction_final = do_request_resolution_change; });
 
   param_i(vid.window_y, "window_y", 1024)
   -> editable(120, 2160, 120, "window resolution to use (Y)", "", 'x')
-  -> set_sets([] { dialog::bound_low(120); dialog::reaction_final = do_request_resolution_change; });
+  -> set_sets([] { dialog::bound_low(120); dialog::get_di().reaction_final = do_request_resolution_change; });
 
   param_f(vid.window_rel_x, "window_rel_x", .9)
   -> editable(.1, 1, .1, "screen size percentage to use (X)", "", 'x')
-  -> set_sets([] { dialog::bound_low(.1); dialog::reaction_final = do_request_resolution_change; });
+  -> set_sets([] { dialog::bound_low(.1); dialog::get_di().reaction_final = do_request_resolution_change; });
 
   param_f(vid.window_rel_y, "window_rel_y", .9)
   -> editable(.1, 1, .1, "screen size percentage to use (Y)", "", 'x')
-  -> set_sets([] { dialog::bound_low(.1); dialog::reaction_final = do_request_resolution_change; });
+  -> set_sets([] { dialog::bound_low(.1); dialog::get_di().reaction_final = do_request_resolution_change; });
 
   param_b(vid.darkhepta, "mark heptagons", false);
   
@@ -1763,7 +1763,7 @@ EX void menuitem_sightrange_bonus(char c) {
       XLAT("Roughly 42% cells are on the edge of your sight range. Reducing "
       "the sight range makes HyperRogue work faster, but also makes "
       "the game effectively harder."));
-    dialog::reaction = doOvergenerate;
+    dialog::get_di().reaction = doOvergenerate;
     dialog::bound_low(1-getDistLimit());
     dialog::bound_up(allowIncreasedSight() ? euclid ? 99 : gp::dist_2() * 5 : 0);
     });
@@ -1899,9 +1899,9 @@ EX void menuitem_sightrange(char c IS('c')) {
 
 EX void sets_sfx_volume() {
 #if CAP_AUDIO
-  dialog::dialogflags = sm::NOSCR;
+  dialog::get_di().dialogflags = sm::NOSCR;
   #if ISANDROID
-  dialog::reaction = [] () {
+  dialog::get_di().reaction = [] () {
     settingsChanged = true;
     };
   #endif
@@ -1912,8 +1912,8 @@ EX void sets_sfx_volume() {
 
 EX void sets_music_volume() {
 #if CAP_AUDIO
-  dialog::dialogflags = sm::NOSCR;
-  dialog::reaction = [] () {
+  dialog::get_di().dialogflags = sm::NOSCR;
+  dialog::get_di().reaction = [] () {
     #if CAP_SDLAUDIO
     Mix_VolumeMusic(musicvolume);
     #endif
@@ -1924,7 +1924,7 @@ EX void sets_music_volume() {
   dialog::bound_low(0);
   dialog::bound_up(MIX_MAX_VOLUME);
   #if CAP_SDLAUDIO
-  dialog::extra_options = [] {
+  dialog::get_di().extra_options = [] {
     dialog::addBoolItem_action(XLAT("play music when out of focus"), music_out_of_focus, 'A');
     };
   #endif
@@ -2165,7 +2165,7 @@ EX void edit_whatever(char type, int index) {
     dialog::editNumber(whateveri[index], -10, 10, 1, 0, XLAT("whatever"), 
       "i:" + its(index));
     }
-  dialog::extra_options = [type, index] {
+  dialog::get_di().extra_options = [type, index] {
     dialog::addItem(XLAT("integer"), 'X');
     dialog::add_action( [index] { popScreen(); edit_whatever('i', index); });
     dialog::addItem(XLAT("float"), 'Y');
@@ -2265,7 +2265,7 @@ EX void configureInterface() {
       "as it precisely shows the direction we are going. However, the option is available in all modes."
       ));
     dialog::bound_low(0);
-    dialog::extra_options = [] {
+    dialog::get_di().extra_options = [] {
       dialog::addColorItem(XLAT("crosshair color"), crosshair_color, 'X');
       dialog::add_action([] { dialog::openColorDialog(crosshair_color); });
       };
@@ -2343,7 +2343,7 @@ EX void projectionDialog() {
     "and the Gans model is obtained by orthogonal projection. "
     "See also the conformal mode (in the special modes menu) "
     "for more models."));
-  dialog::extra_options = [] () {
+  dialog::get_di().extra_options = [] () {
     dialog::addBreak(100);
     if(GDIM == 2) dialog::addHelp(XLAT(
       "If we are viewing an equidistant g absolute units below a plane, "
@@ -2352,17 +2352,17 @@ EX void projectionDialog() {
       "tanh(g)/tanh(c) units below the center. This in turn corresponds to "
       "the Poincaré model for g=c, and Klein-Beltrami model for g=0."));
     dialog::addSelItem(sphere ? "stereographic" : "Poincaré model", "1", 'P');
-    dialog::add_action([] () { *dialog::ne.editwhat = 1; vpconf.scale = 1; dialog::ne.s = "1"; });
+    dialog::add_action([] () { *dialog::get_ne().editwhat = 1; vpconf.scale = 1; dialog::get_ne().s = "1"; });
     dialog::addSelItem(sphere ? "gnomonic" : "Klein model", "0", 'K');
-    dialog::add_action([] () { *dialog::ne.editwhat = 0; vpconf.scale = 1; dialog::ne.s = "0"; });
+    dialog::add_action([] () { *dialog::get_ne().editwhat = 0; vpconf.scale = 1; dialog::get_ne().s = "0"; });
     if(hyperbolic) {
       dialog::addSelItem("inverted Poincaré model", "-1", 'I');
-      dialog::add_action([] () { *dialog::ne.editwhat = -1; vpconf.scale = 1; dialog::ne.s = "-1"; });
+      dialog::add_action([] () { *dialog::get_ne().editwhat = -1; vpconf.scale = 1; dialog::get_ne().s = "-1"; });
       }
     dialog::addItem(sphere ? "orthographic" : "Gans model", 'O');
-    dialog::add_action([] () { vpconf.alpha = vpconf.scale = 999; dialog::ne.s = dialog::disp(vpconf.alpha); });
+    dialog::add_action([] () { vpconf.alpha = vpconf.scale = 999; dialog::get_ne().s = dialog::disp(vpconf.alpha); });
     dialog::addItem(sphere ? "towards orthographic" : "towards Gans model", 'T');
-    dialog::add_action([] () { double d = 1.1; vpconf.alpha *= d; vpconf.scale *= d; dialog::ne.s = dialog::disp(vpconf.alpha); });
+    dialog::add_action([] () { double d = 1.1; vpconf.alpha *= d; vpconf.scale *= d; dialog::get_ne().s = dialog::disp(vpconf.alpha); });
     };
   }
 
@@ -2413,7 +2413,7 @@ EX void add_edit_fov(char key IS('f'), bool pop IS(false)) {
         "a quick implementation, so parameter values too close to 1 may "
         "be buggy (outside of raycasting); try e.g. 0.9 instead."
         );
-    dialog::extra_options = [quick] {
+    dialog::get_di().extra_options = [quick] {
       dialog::addSelItem(XLAT("Panini projection"), fts(panini_alpha), 'P');
       dialog::add_action([quick] {
         popScreen();
@@ -2423,9 +2423,9 @@ EX void add_edit_fov(char key IS('f'), bool pop IS(false)) {
             "which allows very wide field-of-view values.\n\n") + quick
             );
         #if CAP_GL
-        dialog::reaction = reset_all_shaders;
+        dialog::get_di().reaction = reset_all_shaders;
         #endif
-        dialog::extra_options = [] {
+        dialog::get_di().extra_options = [] {
           add_edit_fov('F', true);
           };
         });
@@ -2438,9 +2438,9 @@ EX void add_edit_fov(char key IS('f'), bool pop IS(false)) {
             "which allows very wide field-of-view values.\n\n") + quick
             );
         #if CAP_GL
-        dialog::reaction = reset_all_shaders;
+        dialog::get_di().reaction = reset_all_shaders;
         #endif
-        dialog::extra_options = [] {
+        dialog::get_di().extra_options = [] {
           add_edit_fov('F', true);
           };
         });
@@ -2539,7 +2539,7 @@ EX void add_edit_wall_quality(char c) {
       );
     dialog::bound_low(1);
     dialog::bound_up(128);
-    dialog::reaction = [] {
+    dialog::get_di().reaction = [] {
       #if MAXMDIM >= 4
       if(floor_textures) {
         delete floor_textures;
@@ -2561,8 +2561,8 @@ EX void edit_levellines(char c) {
         "This feature superimposes level lines on the rendered screen. These lines depend on the Z coordinate. In 3D hyperbolic the Z coordinate is taken from the Klein model. "
         "Level lines can be used to observe the curvature: circles correspond to positive curvature, while hyperbolas correspond to negative. See e.g. the Hypersian Rug mode.")
       );
-    dialog::reaction = ray::reset_raycaster;
-    dialog::extra_options = [] {
+    dialog::get_di().reaction = ray::reset_raycaster;
+    dialog::get_di().extra_options = [] {
       dialog::addBoolItem(XLAT("disable textures"), disable_texture, 'T');
       dialog::add_action([] { ray::reset_raycaster(); disable_texture = !disable_texture; });
       dialog::addItem(XLAT("disable level lines"), 'D');
@@ -2833,7 +2833,7 @@ EX void show3D() {
         XLAT("Rotate the camera. Can be used to obtain a first person perspective, "
         "or third person perspective when combined with Y shift.")
         );
-      dialog::extra_options = [] {
+      dialog::get_di().extra_options = [] {
         dialog::addBoolItem(XLAT("render behind the camera"), vpconf.back_and_front, 'R');
         dialog::add_action([] { vpconf.back_and_front = !vpconf.back_and_front; });
         };
@@ -2844,7 +2844,7 @@ EX void show3D() {
     dialog::add_action([] () { vid.fixed_facing = !vid.fixed_facing; 
       if(vid.fixed_facing) {
         dialog::editNumber(vid.fixed_facing_dir, 0, 360, 15, 90, "", "");
-        dialog::dialogflags |= sm::CENTER;
+        dialog::get_di().dialogflags |= sm::CENTER;
         }
       });
     }
@@ -2875,7 +2875,7 @@ EX void show3D() {
     dialog::addSelItem(XLAT("radar size"), fts(vid.radarsize), 'r');
     dialog::add_action([] () {
       dialog::editNumber(vid.radarsize, 0, 360, 15, 90, "", XLAT("set to 0 to disable"));
-      dialog::extra_options = [] () { draw_radar(true); };
+      dialog::get_di().extra_options = [] () { draw_radar(true); };
       });
     }
   
@@ -2902,7 +2902,7 @@ EX void show3D() {
     dialog::addSelItem(XLAT("radar range"), fts(vid.radarrange), 'R');
     dialog::add_action([] () {
       dialog::editNumber(vid.radarrange, 0, 10, 0.5, 2, "", XLAT(""));
-      dialog::extra_options = [] () { draw_radar(true); };
+      dialog::get_di().extra_options = [] () { draw_radar(true); };
       });
     }
   if(GDIM == 3) add_edit_wall_quality('W');
@@ -2944,13 +2944,13 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
   param_f(vid.eye, "eyelevel", 0)
     ->editable(-5, 5, .1, "eye level", "", 'E')
     ->set_extra([] {
-      dialog::dialogflags |= sm::CENTER;
+      dialog::get_di().dialogflags |= sm::CENTER;
       vid.tc_camera = ticks;
     
       dialog::addHelp(XLAT("In the FPP mode, the camera will be set at this altitude (before applying shifts)."));
 
       dialog::addBoolItem(XLAT("auto-adjust to eyes on the player model"), vid.auto_eye, 'O');
-      dialog::reaction = [] { vid.auto_eye = false; };
+      dialog::get_di().reaction = [] { vid.auto_eye = false; };
       dialog::add_action([] () {
         vid.auto_eye = !vid.auto_eye;
         geom3::do_auto_eye();
@@ -3315,9 +3315,9 @@ EX void edit_color_table(colortable& ct, const reaction_t& r IS(reaction_t()), b
         if(!(ct[i] & 0x1000000)) return;
         }
       dialog::openColorDialog(ct[i]); 
-      dialog::reaction = r; 
+      dialog::get_di().reaction = r; 
       dialog::colorAlpha = false;
-      dialog::dialogflags |= sm::SIDE;
+      dialog::get_di().dialogflags |= sm::SIDE;
       });
     }
 
@@ -3346,28 +3346,28 @@ EX void show_color_dialog() {
   dialog::init(XLAT("colors & aura"));
 
   dialog::addColorItem(XLAT("background"), addalpha(backcolor), 'b');
-  dialog::add_action([] () { dialog::openColorDialog(backcolor); dialog::colorAlpha = false; dialog::dialogflags |= sm::SIDE; });
+  dialog::add_action([] () { dialog::openColorDialog(backcolor); dialog::colorAlpha = false; dialog::get_di().dialogflags |= sm::SIDE; });
   
   if(WDIM == 2 && GDIM == 3 && hyperbolic)
     dialog::addBoolItem_action(XLAT("cool fog effect"), context_fog, 'B');
 
   dialog::addColorItem(XLAT("foreground"), addalpha(forecolor), 'f');
-  dialog::add_action([] () { dialog::openColorDialog(forecolor); dialog::colorAlpha = false; dialog::dialogflags |= sm::SIDE; });
+  dialog::add_action([] () { dialog::openColorDialog(forecolor); dialog::colorAlpha = false; dialog::get_di().dialogflags |= sm::SIDE; });
 
   dialog::addColorItem(XLAT("borders"), addalpha(bordcolor), 'o');
-  dialog::add_action([] () { dialog::openColorDialog(bordcolor); dialog::colorAlpha = false; dialog::dialogflags |= sm::SIDE; });
+  dialog::add_action([] () { dialog::openColorDialog(bordcolor); dialog::colorAlpha = false; dialog::get_di().dialogflags |= sm::SIDE; });
 
   dialog::addColorItem(XLAT("projection boundary"), ringcolor, 'r');
-  dialog::add_action([] () { dialog::openColorDialog(ringcolor); dialog::dialogflags |= sm::SIDE; });
+  dialog::add_action([] () { dialog::openColorDialog(ringcolor); dialog::get_di().dialogflags |= sm::SIDE; });
 
   dialog::addSelItem(XLAT("boundary width multiplier"), fts(vid.multiplier_ring), 'R');
   dialog::add_action([] () { dialog::editNumber(vid.multiplier_ring, 0, 10, 1, 1, XLAT("boundary width multiplier"), ""); });
 
   dialog::addColorItem(XLAT("projection background"), modelcolor, 'c');
-  dialog::add_action([] () { dialog::openColorDialog(modelcolor); dialog::dialogflags |= sm::SIDE; });
+  dialog::add_action([] () { dialog::openColorDialog(modelcolor); dialog::get_di().dialogflags |= sm::SIDE; });
 
   dialog::addColorItem(XLAT("standard grid color"), stdgridcolor, 'g');
-  dialog::add_action([] () { vid.grid = true; dialog::openColorDialog(stdgridcolor); dialog::dialogflags |= sm::SIDE; });
+  dialog::add_action([] () { vid.grid = true; dialog::openColorDialog(stdgridcolor); dialog::get_di().dialogflags |= sm::SIDE; });
   
   dialog::addSelItem(XLAT("grid width multiplier"), fts(vid.multiplier_grid), 'G');
   dialog::add_action([] () { dialog::editNumber(vid.multiplier_grid, 0, 10, 1, 1, XLAT("grid width multiplier"), ""); });
@@ -3377,10 +3377,10 @@ EX void show_color_dialog() {
     XLAT("In the orthogonal projection, objects on the other side of the sphere are drawn darker.")); dialog::bound_low(0); });
 
   dialog::addColorItem(XLAT("projection period"), periodcolor, 'p');
-  dialog::add_action([] () { dialog::openColorDialog(periodcolor); dialog::dialogflags |= sm::SIDE; });
+  dialog::add_action([] () { dialog::openColorDialog(periodcolor); dialog::get_di().dialogflags |= sm::SIDE; });
 
   dialog::addColorItem(XLAT("dialogs"), addalpha(dialog::dialogcolor), 'd');
-  dialog::add_action([] () { dialog::openColorDialog(dialog::dialogcolor); dialog::colorAlpha = false; dialog::dialogflags |= sm::SIDE; });
+  dialog::add_action([] () { dialog::openColorDialog(dialog::dialogcolor); dialog::colorAlpha = false; dialog::get_di().dialogflags |= sm::SIDE; });
 
   dialog::addBreak(50);
   if(specialland == laCanvas && colortables.count(patterns::whichCanvas)) {
@@ -3449,7 +3449,7 @@ EX void show_color_dialog() {
       else 
         dialog::openColorDialog(floorcolors[c->land]);
       dialog::colorAlpha = false;
-      dialog::dialogflags |= sm::SIDE;
+      dialog::get_di().dialogflags |= sm::SIDE;
       return;
       }
     else dialog::handleNavigation(sym, uni);
@@ -3577,7 +3577,7 @@ EX void configureMouse() {
   dialog::add_action([] {
     dialog::editNumber(vid.mobilecompasssize, 0, 100, 10, 20, XLAT("compass size"), XLAT("0 to disable"));
     // we need to check the moves
-    dialog::reaction = checkmove;
+    dialog::get_di().reaction = checkmove;
     dialog::bound_low(0);
     });
 

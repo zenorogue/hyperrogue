@@ -809,7 +809,7 @@ void expansion_analyzer::view_distances_dialog() {
     scrolling_distances = false;
     dialog::editNumber(last_distance, 0, 3000, 1, 0, XLAT("display distances up to"), "");
     dialog::bound_low(0);
-    dialog::extra_options = [] {
+    dialog::get_di().extra_options = [] {
       add_edit(auto_extend);
       };
     });

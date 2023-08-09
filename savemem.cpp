@@ -273,7 +273,7 @@ EX void show_memory_menu() {
       );
     dialog::bound_low(0);
     dialog::bound_up(max_reserve);
-    dialog::reaction = apply_memory_reserve;
+    dialog::get_di().reaction = apply_memory_reserve;
     });
 #endif
 

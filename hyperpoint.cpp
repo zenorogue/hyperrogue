@@ -207,6 +207,7 @@ constexpr transmatrix Zero = diag(0,0,0,0);
 struct trans23 {
   transmatrix v2, v3;
   transmatrix& get() { return MDIM == 3 ? v2 : v3; }
+  const transmatrix& get() const { return MDIM == 3 ? v2 : v3; }
   trans23() { v2 = Id; v3 = Id; }
   trans23(const transmatrix& T) { v2 = T; v3 = T; }
   trans23(const transmatrix& T2, const transmatrix& T3) { v2 = T2; v3 = T3; }

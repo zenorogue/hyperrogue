@@ -757,7 +757,7 @@ EX void show_surfaces() {
       dialog::editNumber(hyper_b, -1, 1, .05, 1, XLAT("parameter"),
         XLAT("Controls the inner radius.")
         );
-      dialog::reaction = [] () {
+      dialog::get_ne().reaction = [] () {
         if(sh == dsHyperlike) run_shape(sh);
         };
       }
@@ -772,7 +772,7 @@ EX void show_surfaces() {
       dialog::editNumber(precision, 1, 10000, 0, 100, XLAT("precision"),
         XLAT("Computing these models involves integrals and differential equations, which are currently solved numerically. This controls the precision.")
         );
-      dialog::ne.step = .1;
+      dialog::get_ne().step = .1;
       dialog::scaleLog();
       }
     else if(uni == 'c') {

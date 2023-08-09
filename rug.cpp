@@ -1635,7 +1635,7 @@ EX void show() {
       renderonce = !renderonce;
     else if(uni == 'G') {
       dialog::editNumber(move_on_touch, -1, 1, .1, 0, XLAT("move on touch"), "");
-      dialog::extra_options = anims::rug_angle_options;
+      dialog::get_ne().extra_options = anims::rug_angle_options;
       }
     else if(uni == 'A') {
       dialog::editNumber(anticusp_factor, 0, 1.5, .1, 0, XLAT("anti-crossing"),
@@ -1649,7 +1649,7 @@ EX void show() {
         XLAT("The more vertices, the more accurate the Hypersian Rug model is. "
         "However, a number too high might make the model slow to compute and render.")
         );
-      dialog::reaction = [] () { err_zero_current = err_zero; };
+      dialog::get_ne().reaction = [] () { err_zero_current = err_zero; };
       }
     else if(uni == 'r') 
       addMessage(XLAT("This just shows the 'z' coordinate of the selected point."));
@@ -1667,7 +1667,7 @@ EX void show() {
         static bool adjust_distance = true;
         static ld last;
         last = modelscale;
-        dialog::extra_options = [] () {
+        dialog::get_ne().extra_options = [] () {
           dialog::addBoolItem_action(XLAT("adjust points"), adjust_points, 'P');
           if(adjust_points)
             dialog::addBoolItem_action(XLAT("center on camera"), camera_center, 'C');
@@ -1676,7 +1676,7 @@ EX void show() {
           dialog::addBoolItem_action(XLAT("adjust edges"), adjust_edges, 'E');
           dialog::addBoolItem_action(XLAT("adjust distance"), adjust_distance, 'D');
           };
-        dialog::reaction = [] () {
+        dialog::get_ne().reaction = [] () {
           if(!last || !modelscale) return;
           if(!camera_center) push_all_points(2, model_distance);
           for(auto p:points) {
@@ -1700,7 +1700,7 @@ EX void show() {
         "In the orthogonal projection this just controls the scale.")
         );
       old_distance = model_distance;
-      dialog::reaction = [] () { 
+      dialog::get_di().reaction = [] () {
         if(rug::rugged && perspective()) {
           using_rugview rv;
           shift_view(ztangent(old_distance - model_distance));
@@ -1713,7 +1713,7 @@ EX void show() {
         XLAT("New points are added when the current error in the model is smaller than this value.")
         );
       dialog::scaleLog();
-      dialog::reaction = [] () { err_zero_current = err_zero; };
+      dialog::get_di().reaction = [] () { err_zero_current = err_zero; };
       }
     else if(uni == 'f') 
       pushScreen(showStereo);

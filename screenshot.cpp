@@ -1065,8 +1065,8 @@ EX void menu() {
     dialog::add_action([] {
       dialog::editNumber(vid.fixed_facing_dir, 0, 360, 15, 90, XLAT("centering"), 
         XLAT("You can pick the angle. Note: the direction the PC is facing matters."));
-      dialog::reaction = fullcenter;
-      dialog::extra_options = [] () { 
+      dialog::get_di().reaction = fullcenter;
+      dialog::get_di().extra_options = [] () {
         dialog::addBoolItem(XLAT("rotate PC"), centering == eCentering::face, 'R');
         dialog::add_action([] { 
           flipplayer = false;
@@ -1565,8 +1565,8 @@ EX void show() {
       dialog::editNumber(animation_period, 0, 10000, 1000, 1000, XLAT("game animation period"), 
         XLAT("Least common multiple of the animation periods of all the game objects on screen, such as rotating items.")
         );
-      dialog::reaction = [] () { animation_factor = TAU * animation_lcm / animation_period; };
-      dialog::extra_options = [] () {
+      dialog::get_di().reaction = [] () { animation_factor = TAU * animation_lcm / animation_period; };
+      dialog::get_di().extra_options = [] () {
         dialog::addItem("default", 'D');
         dialog::add_action([] () {
           animation_factor = 1;
@@ -1601,7 +1601,7 @@ EX void show() {
       dialog::addSelItem(XLAT("circle radius"), fts(circle_radius), 'c');
       dialog::add_action([] () { 
         dialog::editNumber(circle_radius, 0, 10, 0.1, acosh(1.), XLAT("circle radius"), ""); 
-        dialog::extra_options = [] () {
+        dialog::get_di().extra_options = [] () {
           if(hyperbolic) {
             // area = 2pi (cosh(r)-1) 
             dialog::addSelItem(XLAT("double spin"), fts(acosh(2.)), 'A');
@@ -1633,7 +1633,7 @@ EX void show() {
         dialog::addSelItem(XLAT("cycle length"), fts(cycle_length), 'c');
         dialog::add_action([] () { 
           dialog::editNumber(cycle_length, 0, 10, 0.1, TAU, "shift", ""); 
-          dialog::extra_options = [] () {
+          dialog::get_di().extra_options = [] () {
             dialog::addSelItem(XLAT("full circle"), fts(TAU), 'A');
             dialog::add_action([] () { cycle_length = TAU; });
             dialog::addSelItem(XLAT("Zebra period"), fts(2.898149445355172), 'B');
@@ -1705,7 +1705,7 @@ EX void show() {
     animator(XLAT("automatic move speed"), rug_forward, 'M');
     dialog::add_action([] () { 
       dialog::editNumber(rug_forward, 0, 10, 1, 1, XLAT("automatic move speed"), XLAT("Move automatically without pressing any keys."));
-      dialog::extra_options = [] () {
+      dialog::get_di().extra_options = [] () {
         if(among(rug::gwhere, gSphere, gElliptic))  {
           dialog::addItem(XLAT("synchronize"), 'S');
           dialog::add_action([] () { rug_forward = TAU; popScreen(); });

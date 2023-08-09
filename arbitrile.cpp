@@ -1714,7 +1714,7 @@ EX void set_sliders() {
     dialog::addSelItem(sl.name, fts(sl.current), ch++);
     dialog::add_action([&] {
       dialog::editNumber(sl.current, sl.min, sl.max, 1, sl.zero, sl.name, sl.name);
-      dialog::reaction = [] { sliders_changed(false, false); };
+      dialog::get_di().reaction = [] { sliders_changed(false, false); };
       });
     }
   if(isize(current.intsliders))
@@ -1723,7 +1723,7 @@ EX void set_sliders() {
     dialog::addSelItem(sl.name, its(sl.current), ch++);
     dialog::add_action([&] {
       dialog::editNumber(sl.current, sl.min, sl.max, 1, sl.zero, sl.name, sl.name);
-      dialog::reaction = [] { sliders_changed(true, true); };
+      dialog::get_di().reaction = [] { sliders_changed(true, true); };
       });
     }
   dialog::addInfo(slider_error);

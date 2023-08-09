@@ -181,7 +181,7 @@ EX void showOverview() {
       gotoHelp(generateHelpForItem(eItem(umod)));
       if(cheater) {
         dialog::helpToEdit(items[umod], 0, 200, 10, 10);
-        dialog::reaction = [] () {
+        dialog::get_ne().reaction = [] () {
           if(hardcore) canmove = true;
           else checkmove();
           cheater++;

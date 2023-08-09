@@ -47,22 +47,50 @@ EX namespace dialog {
   const static scaler asinhic = {asinh, sinh, false};
   const static scaler asinhic100 = {[] (ld x) { return asinh(x*100); }, [] (ld x) { return sinh(x)/100; }, false};
  
-  struct numberEditor {
+  /** extendable dialog */
+  struct extdialog {
+    string title, help;
+    int dialogflags;
+    reaction_t reaction;
+    reaction_t reaction_final;
+    reaction_t extra_options;
+    virtual void draw() = 0;
+    void operator() () { draw(); }
+    virtual ~extdialog() {};
+    extdialog();
+    /** Pop screen, then call the final reaction. A bit more complex because it eeds to backup reaction_final due to popScreen */
+    void popfinal() { auto rf = std::move(reaction_final); popScreen(); if(rf) rf(); }
+    };
+
+  /** number dialog */
+  struct number_dialog : extdialog {
     ld *editwhat;
     string s;
     ld vmin, vmax, step, dft;
-    string title, help;
     scaler sc;
     int *intval; ld intbuf;
     bool animatable;
+    void draw() override;
+    void apply_edit();
+    void apply_slider();
     };
-
-  extern numberEditor ne;
-
-  inline void scaleLog() { ne.sc = logarithmic; }
-  inline void scaleSinh() { ne.sc = asinhic; }
-  inline void scaleSinh100() { ne.sc = asinhic100; }  
 #endif
+
+  EX number_dialog& get_ne() {
+    auto ptr = screens.back().target<number_dialog>();
+    if(!ptr) throw hr_exception("get_ne() called without number dialog");
+    return *ptr;
+    }
+
+  EX extdialog& get_di() {
+    auto ptr = screens.back().target<extdialog>();
+    if(!ptr) throw hr_exception("get_di() called without extdialog");
+    return *ptr;
+    }
+
+  EX void scaleLog() { get_ne().sc = logarithmic; }
+  EX void scaleSinh() { get_ne().sc = asinhic; }
+  EX void scaleSinh100() { get_ne().sc = asinhic100; }
 
   EX color_t dialogcolor = 0xC0C0C0;
   EX color_t dialogcolor_clicked = 0xFF8000;
@@ -353,8 +381,6 @@ EX namespace dialog {
     }
 
   EX int dcenter, dwidth;
-
-  EX int dialogflags;
 
   EX int displayLong(string str, int siz, int y, bool measure) {
 
@@ -970,8 +996,12 @@ EX namespace dialog {
   int colorp = 0;
   
   color_t *colorPointer;
+
+  struct color_dialog : extdialog {
+    void draw() override;
+    };
   
-  EX void handleKeyColor(int sym, int uni) {
+  EX void handleKeyColor(int sym, int uni, struct color_dialog& ne) {
     unsigned& color = *colorPointer;
     int shift = colorAlpha ? 0 : 8;
 
@@ -986,9 +1016,8 @@ EX namespace dialog {
       for(int i=0; i<10; i++) if(colorhistory[i] == (color << shift))
         inHistory = true;
       if(!inHistory) { colorhistory[lch] = (color << shift); lch++; lch %= 10; }
-      popScreen();
-      if(reaction) reaction();
-      if(reaction_final) reaction_final();
+      if(ne.reaction) ne.reaction();
+      ne.popfinal();
       }
     else if(uni >= '0' && uni <= '9') {
       color = colorhistory[uni - '0'] >> shift;
@@ -1010,15 +1039,12 @@ EX namespace dialog {
       unsigned char* pts = (unsigned char*) &color;
       pts[colorp] += abs(shiftmul) < .6 ? 1 : 17;
       }
-    else if(doexiton(sym, uni)) {
-      popScreen();
-      if(reaction_final) reaction_final();
-      }
+    else if(doexiton(sym, uni)) ne.popfinal();
     }
   
   EX bool colorAlpha;
   
-  EX void drawColorDialog() {
+  void color_dialog::draw() {
     cmode = sm::NUMBER | dialogflags;
     if(cmode & sm::SIDE) gamescreen();
     else emptyscreen();
@@ -1081,21 +1107,58 @@ EX namespace dialog {
 
     if(extra_options) extra_options();
     
-    keyhandler = handleKeyColor;
+    keyhandler = [this] (int sym, int uni) { return handleKeyColor(sym, uni, self); };
     }
   
   EX void openColorDialog(unsigned int& col, unsigned int *pal IS(palette)) {
+    color_dialog cd;
     colorPointer = &col; palette = pal;
     colorAlpha = true;
-    dialogflags = 0;
-    pushScreen(drawColorDialog);
-    reaction = reaction_t();
-    extra_options = reaction_t();
+    pushScreen(cd);
     }
-  
-  EX numberEditor ne;
-  
+
+  #if HDR
+  struct matrix_dialog : extdialog {
+    trans23 *edit_matrix;
+    void draw() override;
+    };
+  #endif
+
+  void matrix_dialog::draw() {
+    cmode = dialogflags;
+    gamescreen();
+    init(title);
+    addInfo(help);
+    addCustom(500, [this] {
+      int siz = dfsize * 5;
+      int mid = (top + tothei) / 2;
+      visualize_matrix(*edit_matrix, dcenter, mid, siz/2);
+      });
+    addBreak(100);
+    addItem("enter angle", 'a');
+    dialog::add_action([this] {
+      static ld angle = as_degrees(edit_matrix->get());
+      editNumber(angle, -180, 180, 90, 0, title, help);
+      auto& ne = get_ne();
+      auto re = reaction;
+      ne.reaction = [re, this] { *edit_matrix = spin(angle * degree); if(re) re(); };
+      ne.reaction_final = reaction;
+      ne.animatable = false;
+      });
+    addBack();
+    display();
+    }
+
+  EX void editMatrix(trans23& T, string t, string h) {
+    matrix_dialog m;
+    m.edit_matrix = &T;
+    m.title = t;
+    m.help = h;
+    pushScreen(m);
+    }
+
   EX bool editingDetail() {
+    auto& ne = get_ne();
     return ne.editwhat == &vid.highdetail || ne.editwhat == &vid.middetail;
     }
   
@@ -1105,18 +1168,16 @@ EX namespace dialog {
     }
   
   EX string disp(ld x) { 
-    if(dialogflags & sm::HEXEDIT) return "0x" + itsh((unsigned long long)(x));
-    else if(ne.intval) return its(ldtoint(x)); 
-    else return fts(x); }
+    auto& ne = get_ne();
+    if(ne.dialogflags & sm::HEXEDIT) return "0x" + itsh((unsigned long long)(x));
+    if(ne.intval) return its(ldtoint(x));
+    return fts(x);
+    }
 
-  EX reaction_t reaction;
-  EX reaction_t reaction_final;
-  
-  EX reaction_t extra_options;
-  
-  EX void apply_slider() {
+  void number_dialog::apply_slider() {
+    auto &ne = self;
     if(ne.intval) *ne.intval = ldtoint(*ne.editwhat);
-    if(reaction) reaction();
+    if(ne.reaction) ne.reaction();
     if(ne.intval) *ne.editwhat = *ne.intval;
     ne.s = disp(*ne.editwhat);
     #if CAP_ANIMATIONS
@@ -1125,11 +1186,13 @@ EX namespace dialog {
     }
   
   EX void use_hexeditor() {
-    dialogflags |= sm::HEXEDIT;
+    auto& ne = get_ne();
+    ne.dialogflags |= sm::HEXEDIT;
     ne.s = disp(*ne.editwhat);
     }
   
-  EX void apply_edit() {
+  void number_dialog::apply_edit() {
+    auto& ne = self;
     try {
       exp_parser ep;
       ep.s = ne.s;    
@@ -1150,8 +1213,9 @@ EX namespace dialog {
     }
 
   EX void bound_low(ld val) {
-    auto r = reaction;
-    reaction = [r, val] () {
+    auto& ne = get_ne();
+    auto r = ne.reaction;
+    ne.reaction = [r, val, &ne] () {
       if(*ne.editwhat < val) {
         *ne.editwhat = val;
         if(ne.intval) *ne.intval = ldtoint(*ne.editwhat);
@@ -1161,8 +1225,9 @@ EX namespace dialog {
     }
 
   EX void bound_up(ld val) {
-    auto r = reaction;
-    reaction = [r, val] () {
+    auto& ne = get_ne();
+    auto r = ne.reaction;
+    ne.reaction = [r, val, &ne] () {
       if(*ne.editwhat > val) {
         *ne.editwhat = val;
         if(ne.intval) *ne.intval = ldtoint(*ne.editwhat);
@@ -1182,7 +1247,13 @@ EX namespace dialog {
   
   EX bool onscreen_keyboard = ISMOBILE;
 
-  EX void number_dialog_help() {    
+  struct number_dialog_help {
+    number_dialog *ptr;
+    void operator() ();
+    };
+
+  void number_dialog_help :: operator() () {
+    auto ne = *ptr;
     init("number dialog help");
     dialog::addBreak(100);
     dialog::addHelp(XLAT("You can enter formulas in this dialog."));
@@ -1192,7 +1263,7 @@ EX namespace dialog {
     dialog::addBreak(100);
     dialog::addHelp(XLAT("Constants and variables available:"));
     addHelp(available_constants());
-    if(ne.animatable) {
+    if(ptr && ne.animatable) {
       dialog::addBreak(100);
       dialog::addHelp(XLAT("Animations:"));
       dialog::addHelp(XLAT("a..b -- animate linearly from a to b"));
@@ -1207,7 +1278,7 @@ EX namespace dialog {
     
     #if CAP_ANIMATIONS
     dialog::addBreak(50);
-    auto f = find_edit(ne.intval ? (void*) ne.intval : (void*) ne.editwhat);
+    auto f = find_edit(!ptr ? nullptr : ne.intval ? (void*) ne.intval : (void*) ne.editwhat);
     if(f)
       dialog::addHelp(XLAT("Parameter names, e.g. '%1'", f->parameter_name));
     else
@@ -1223,17 +1294,18 @@ EX namespace dialog {
     }
 
   EX void parser_help() {
-    ne.editwhat = nullptr;
-    ne.intval = nullptr;
+    number_dialog_help ndh;
+    ndh.ptr = nullptr;
     addItem("help", SDLK_F1);
-    add_action_push(number_dialog_help);
+    add_action_push(ndh);
     }
   
-  EX void drawNumberDialog() {
+  void number_dialog::draw() {
     cmode = sm::NUMBER | dialogflags;
     gamescreen();
-    init(ne.title);
-    addInfo(ne.s);
+    init(title);
+    addInfo(s);
+    auto& ne = self;
     if(ne.intval && ne.sc.direct == &identity_f)
       addIntSlider(int(ne.vmin), int(*ne.editwhat), int(ne.vmax), 500);
     else
@@ -1248,7 +1320,7 @@ EX namespace dialog {
     addSelItem(XLAT("default value"), disp(ne.dft), SDLK_HOME);
     add_edit(onscreen_keyboard);
     addItem("help", SDLK_F1);
-    add_action_push(number_dialog_help);
+    add_action([this] { number_dialog_help ndh; ndh.ptr = this; pushScreen(ndh); });
 
     addBreak(100);
     
@@ -1267,7 +1339,7 @@ EX namespace dialog {
     
     display();
     
-    keyhandler = [] (int sym, int uni) {
+    keyhandler = [this, &ne] (int sym, int uni) {
       handleNavigation(sym, uni);
       if((uni >= '0' && uni <= '9') || among(uni, '.', '+', '-', '*', '/', '^', '(', ')', ',', '|', 3) || (uni >= 'a' && uni <= 'z')) {
         if(uni == 3) ne.s += "pi";
@@ -1322,7 +1394,7 @@ EX namespace dialog {
           
         apply_slider();
         }
-      else if(doexiton(sym, uni)) { popScreen(); if(reaction_final) reaction_final(); }
+      else if(doexiton(sym, uni)) ne.popfinal();
       };
     }  
 
@@ -1377,7 +1449,16 @@ EX namespace dialog {
     return true;
     }
   
+  extdialog::extdialog() {
+    dialogflags = 0;
+    if(cmode & sm::SIDE) dialogflags |= sm::MAYDARK | sm::SIDE;
+    reaction = reaction_t();
+    reaction_final = reaction_t();
+    extra_options = reaction_t();
+    }
+
   EX void editNumber(ld& x, ld vmin, ld vmax, ld step, ld dft, string title, string help) {
+    number_dialog ne;
     ne.editwhat = &x;
     ne.s = disp(x);
     ne.vmin = vmin;
@@ -1388,45 +1469,19 @@ EX namespace dialog {
     ne.help = help;
     ne.sc = identity;
     ne.intval = NULL;
-    dialogflags = 0;
-    if(cmode & sm::SIDE) dialogflags |= sm::MAYDARK | sm::SIDE;
-    cmode |= sm::NUMBER;
-    pushScreen(drawNumberDialog);
-    reaction = reaction_t();
-    reaction_final = reaction_t();
-    extra_options = reaction_t();
     ne.animatable = true;
     #if CAP_ANIMATIONS
     anims::get_parameter_animation(anims::find_param(&x), ne.s);
     #endif
-    }
-
-  EX void editMatrix(trans23& x, string title, string help) {
-    static ld angle = as_degrees(x.get());
-    ne.editwhat = &angle;
-    ne.s = disp(angle);
-    ne.vmin = -180;
-    ne.vmax = 180;
-    ne.step = 90;
-    ne.dft = 0;
-    ne.title = title;
-    ne.help = help;
-    ne.sc = identity;
-    ne.intval = NULL;
-    dialogflags = 0;
-    if(cmode & sm::SIDE) dialogflags |= sm::MAYDARK | sm::SIDE;
-    cmode |= sm::NUMBER;
-    pushScreen(drawNumberDialog);
-    reaction = [&] { x = spin(angle * degree); };
-    reaction_final = reaction;
-    extra_options = reaction_t();
-    ne.animatable = false;
+    pushScreen(ne);
     }
 
   EX void editNumber(int& x, int vmin, int vmax, ld step, int dft, string title, string help) {
-    editNumber(ne.intbuf, vmin, vmax, step, dft, title, help);
-    ne.intbuf = x; ne.intval = &x; ne.s = its(x);
-    ne.animatable = true;
+    ld tmp;
+    editNumber(tmp, vmin, vmax, step, dft, title, help);
+    auto& ne = dialog::get_ne();
+    ne.editwhat = &ne.intbuf; ne.intbuf = x; ne.intval = &x; ne.s = its(x);
+    anims::get_parameter_animation(anims::find_param(&x), ne.s);
     }
   
   EX void helpToEdit(int& x, int vmin, int vmax, int step, int dft) {
@@ -1464,7 +1519,11 @@ EX namespace dialog {
 
   bool search_mode;
 
-  EX void drawFileDialog() {
+  struct file_dialog : extdialog {
+    void draw() override;
+    };
+
+  void file_dialog::draw() {
     cmode = sm::NUMBER | dialogflags | sm::DIALOG_WIDE;
     gamescreen();
     init(filecaption);
@@ -1541,8 +1600,8 @@ EX namespace dialog {
         else {
           str1 = where + vf;
           if(s == str1) {
-            popScreen();
-            if(!file_action()) pushScreen(drawFileDialog);
+            bool ac = file_action();
+            if(ac) popScreen();
             }
           s = str1;
           }
@@ -1570,9 +1629,8 @@ EX namespace dialog {
       popScreen();
       }
     else if(sym == SDLK_RETURN || sym == SDLK_KP_ENTER) {
-      // we pop and re-push, in case if action opens something
-      popScreen();
-      if(!file_action()) pushScreen(drawFileDialog);
+      bool ac = file_action();
+      if(ac) popScreen();
       }
     else if(sym == SDLK_BACKSPACE && i) {
       s.erase(i-1, 1);
@@ -1588,11 +1646,12 @@ EX namespace dialog {
     }
 
   EX void openFileDialog(string& filename, string fcap, string ext, bool_reaction_t action) {
+    file_dialog fd;
     cfileptr = &filename;
     filecaption = fcap;
     cfileext = ext;
     file_action = action;
-    pushScreen(dialog::drawFileDialog);
+    pushScreen(fd);
     }
   
   // infix/v/vpush
@@ -1695,11 +1754,15 @@ EX namespace dialog {
     else return false;
     return true;
     }
+
+  struct string_dialog : extdialog {
+    void draw();
+    };
   
-  EX void string_edit_dialog() {
+  void string_dialog::draw() {
     cmode = sm::NUMBER | dialogflags;
     gamescreen();
-    init(ne.title);
+    init(title);
     addInfo(view_edited_string());
     addBreak(100);
     formula_keyboard(true);
@@ -1707,34 +1770,27 @@ EX namespace dialog {
     dialog::addBack();
     addBreak(100);
     
-    if(ne.help != "") {
-      addHelp(ne.help);
+    if(help != "") {
+      addHelp(help);
       }
 
     if(extra_options) extra_options();
     
     display();
     
-    keyhandler = [] (int sym, int uni) {
+    keyhandler = [this] (int sym, int uni) {
       handleNavigation(sym, uni);
       if(handle_edit_string(sym, uni)) ;
-      else if(doexiton(sym, uni)) {
-        popScreen();
-        if(reaction_final) reaction_final();
-        }
+      else if(doexiton(sym, uni)) popfinal();
       };
-    }  
+    }
 
   EX void edit_string(string& s, string title, string help) {
     start_editing(s);
+    string_dialog ne;
     ne.title = title;
     ne.help = help;
-    dialogflags = 0;
-    if(cmode & sm::SIDE) dialogflags |= sm::MAYDARK | sm::SIDE;
-    cmode |= sm::NUMBER;
-    pushScreen(string_edit_dialog);
-    reaction = reaction_t();
-    extra_options = reaction_t();
+    pushScreen(ne);
     }
 
   EX void confirm_dialog(const string& text, const reaction_t& act) {

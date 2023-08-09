@@ -1441,7 +1441,7 @@ EX void showMenu() {
   dialog::add_action([] {
     dialog::editNumber(config.gsplits, 0, 4, 1, 1, XLAT("precision"),
       XLAT("precision"));
-    if(config.tstate == tsActive) dialog::reaction = [] () { config.finish_mapping();
+    if(config.tstate == tsActive) dialog::get_di().reaction = [] () { config.finish_mapping();
       };
     });
   dialog::addHelp();

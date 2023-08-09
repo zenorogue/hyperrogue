@@ -731,10 +731,10 @@ EX void configure() {
     "the number of cells around an edge.\n\n"
     );
   if(fake::in())
-    dialog::reaction = change_around;
+    dialog::get_di().reaction = change_around;
   else  
-    dialog::reaction_final = change_around;
-  dialog::extra_options = [] {
+    dialog::get_di().reaction_final = change_around;
+  dialog::get_di().extra_options = [] {
     ld e = compute_euclidean();
     dialog::addSelItem("Euclidean", fts(e), 'E');
     dialog::add_action([e] {

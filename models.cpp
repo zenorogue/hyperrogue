@@ -293,7 +293,7 @@ EX namespace models {
       });
     if(spiral_id > isize(torus_zeros)) spiral_id = 0;
     dialog::editNumber(spiral_id, 0, isize(torus_zeros)-1, 1, 10, XLAT("match the period of the torus"), "");
-    dialog::reaction = [] () {
+    dialog::get_di().reaction = [] () {
       auto& co = torus_zeros[spiral_id];
       vpconf.spiral_x = co.first;
       vpconf.spiral_y = co.second;
@@ -312,7 +312,7 @@ EX namespace models {
       )
       );
     #if CAP_QUEUE && CAP_CURVE
-    dialog::extra_options = [] () {
+    dialog::get_di().extra_options = [] () {
       dialog::parser_help();
       initquickqueue();
       queuereset(mdPixel, PPR::LINE);              
@@ -328,7 +328,7 @@ EX namespace models {
       quickqueue();
       };
     #endif
-    dialog::reaction_final = [] () {
+    dialog::get_di().reaction_final = [] () {
       vpconf.model = mdFormula;
       };
     }
@@ -339,8 +339,8 @@ EX namespace models {
       "It affects the line animation in the history mode, and "
       "lands which have a special direction. Note that if finding this special direction is a part of the puzzle, "
       "it works only in the cheat mode.");
-    dialog::dialogflags |= sm::CENTER;
-    dialog::extra_options = [] () {
+    dialog::get_di().dialogflags |= sm::CENTER;
+    dialog::get_di().extra_options = [] () {
       dialog::addBreak(100);
       dialog::addBoolItem_choice("line animation only", models::do_rotate, 0, 'N');
       dialog::addBoolItem_choice("gravity lands", models::do_rotate, 1, 'G');
@@ -398,7 +398,7 @@ EX namespace models {
     dialog::addBreak(100);
     if(sphere && pmodel == mdBandEquiarea) {
       dialog::addBoolItem("Gall-Peters", vpconf.stretch == 2, 'O');
-      dialog::add_action([] { vpconf.stretch = 2; dialog::ne.s = "2"; });
+      dialog::add_action([] { vpconf.stretch = 2; dialog::get_ne().s = "2"; });
       }
     if(pmodel == mdBandEquiarea) {
       // y = K * sin(phi)
@@ -558,17 +558,17 @@ EX namespace models {
       dialog::addSelItem(XLAT("polygon sides"), its(polygonal::SI), 'x');
       dialog::add_action([] () {
         dialog::editNumber(polygonal::SI, 3, 10, 1, 4, XLAT("polygon sides"), "");
-        dialog::reaction = polygonal::solve;
+        dialog::get_di().reaction = polygonal::solve;
         });
       dialog::addSelItem(XLAT("star factor"), fts(polygonal::STAR), 'y');
       dialog::add_action([]() {
         dialog::editNumber(polygonal::STAR, -1, 1, .1, 0, XLAT("star factor"), "");
-        dialog::reaction = polygonal::solve;
+        dialog::get_di().reaction = polygonal::solve;
         });
       dialog::addSelItem(XLAT("degree of the approximation"), its(polygonal::deg), 'n');
       dialog::add_action([](){
         dialog::editNumber(polygonal::deg, 2, polygonal::MSI-1, 1, 2, XLAT("degree of the approximation"), "");
-        dialog::reaction = polygonal::solve;
+        dialog::get_di().reaction = polygonal::solve;
         dialog::bound_low(0); dialog::bound_up(polygonal::MSI-1);
         });
       }
