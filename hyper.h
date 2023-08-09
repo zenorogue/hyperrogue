@@ -254,13 +254,15 @@ enum eStereo { sOFF, sAnaglyph, sLR, sODS };
 
 enum eModel : int;
 
+struct trans23* gen_trans23();
+
 /** configuration of the projection */
 struct projection_configuration {
   eModel model;            /**< which projection, see classes.cpp */
   ld xposition, yposition; /**< move the center to another position */
   ld scale, alpha, camera_angle, fisheye_param, twopoint_param, axial_angle, stretch, ballangle, ballproj, euclid_to_sphere;
   ld clip_min, clip_max;
-  ld model_orientation, halfplane_scale, model_orientation_yz;  
+  ld halfplane_scale;  
   ld collignon_parameter; 
   ld aitoff_parameter, miller_parameter, loximuthal_parameter, winkel_parameter;
   bool show_hyperboloid_flat;
@@ -287,8 +289,9 @@ struct projection_configuration {
   bool dualfocus_autoscale;
 
   int back_and_front; /* 0 = do not, 1 = do, 2 = only back */
+  struct trans23 *ptr_model_orientation;
 
-  projection_configuration() { 
+  projection_configuration() {
     formula = "z^2"; top_z = 5; model_transition = 1; spiral_angle = 70; spiral_x = 10; spiral_y = 7; 
     rotational_nil = 1;
     right_spiral_multiplier = 1;
@@ -310,7 +313,10 @@ struct projection_configuration {
     back_and_front = 0;
     dualfocus_autoscale = false;
     axial_angle = 90;
+    ptr_model_orientation = gen_trans23();
     }
+
+  trans23& mori() { return *ptr_model_orientation; }
   };
 
 enum eThreatLevel { tlNoThreat, tlSpam, tlNormal, tlHighThreat };
