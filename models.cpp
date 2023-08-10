@@ -468,16 +468,16 @@ EX namespace models {
       }
                                   
     if(has_orientation(vpmodel)) {
-      dialog::addMatrixItem(XLAT("model orientation"), vpconf.mori(), 'l');
+      dialog::addMatrixItem(XLAT("model orientation"), vpconf.mori().get(), 'l');
       dialog::add_action([] () {
-        dialog::editMatrix(vpconf.mori(), XLAT("model orientation"), "");
+        dialog::editMatrix(vpconf.mori().get(), XLAT("model orientation"), "", GDIM);
         });
       }
      
     if(among(vpmodel, mdPerspective, mdHorocyclic) && nil) {
-      dialog::addMatrixItem(XLAT("model orientation"), vpconf.mori(), 'l');
+      dialog::addMatrixItem(XLAT("model orientation"), vpconf.mori().get(), 'l');
       dialog::add_action([] () {
-        dialog::editMatrix(vpconf.mori(), XLAT("model orientation"), "");
+        dialog::editMatrix(vpconf.mori().get(), XLAT("model orientation"), "", GDIM);
         });
       dialog::addSelItem(XLAT("rotational or Heisenberg"), fts(vpconf.rotational_nil), 'L');
       dialog::add_action([] () {
@@ -965,7 +965,8 @@ EX namespace models {
       addsaverenum(p.model, pp+"used model", mdDisk);
       if(&p.model == &pmodel) param_custom(pmodel, "projection|Poincare|Klein|half-plane|perspective", menuitem_projection, '1');
 
-      param_matrix(p.mori(), pp+"mori");
+      param_matrix(p.mori().v2, pp+"mori", 2);
+      param_matrix(p.mori().v3, pp+"mori3", 3);
 
       param_f(p.top_z, sp+"topz", 5)
       -> editable(1, 20, .25, "maximum z coordinate to show", "maximum z coordinate to show", 'l');       

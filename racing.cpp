@@ -846,7 +846,8 @@ auto hook =
     })
 + addHook(hooks_configfile, 100, [] {
     param_f(racing::race_advance, "race_advance");
-    param_matrix(racing::race_angle, "race_angle");
+    param_matrix(racing::race_angle.v2, "race_angle", 2);
+    param_matrix(racing::race_angle.v3, "race_angle3", 3);
     param_i(racing::ghosts_to_show, "race_ghosts_to_show");
     param_i(racing::ghosts_to_save, "race_ghosts_to_save");
     param_b(racing::guiding, "race_guiding");
@@ -1035,9 +1036,9 @@ void race_projection() {
   else dialog::addBreak(100);
         
   if(GDIM == 2) {
-    dialog::addMatrixItem(XLAT("race angle"), race_angle, 'a');
+    dialog::addMatrixItem(XLAT("race angle"), race_angle.get(), 'a');
     dialog::add_action([] () {
-      dialog::editMatrix(race_angle, XLAT("model orientation"), "");
+      dialog::editMatrix(race_angle.get(), XLAT("model orientation"), "", GDIM);
       auto q = rot_inverse(race_angle) * pconf.mori();
       auto last = dialog::get_ne().reaction;
       dialog::get_ne().reaction = [q, last] () { last(); pconf.mori() = race_angle * q; };

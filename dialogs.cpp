@@ -305,12 +305,13 @@ EX namespace dialog {
      return alpha / degree;
      }
 
-  EX void addMatrixItem(string body, trans23& value, int key) {
+  EX void addMatrixItem(string body, transmatrix& value, int key, int dim IS(GDIM)) {
     addSelItem(body, COLORBAR, key);
     auto& it = items.back();
     it.type = diMatrixItem;
     it.ptr = &value;
-    it.value = fts(as_degrees(value.get())) + "°";
+    it.value = fts(as_degrees(value)) + "°";
+    it.p1 = dim;
     }
 
   EX void addHelp(string body) {
@@ -586,13 +587,12 @@ EX namespace dialog {
       }
     }
 
-  EX void visualize_matrix(const trans23& T, ld x, ld y, ld r) {
+  EX void visualize_matrix(const trans23& T, ld x, ld y, ld r, int dim) {
     vector<hyperpoint> pts;
-    for(int a=0; a<MDIM-1; a++) {
+    for(int a=0; a<dim; a++) {
       hyperpoint h = C0; h[a] = r;
       pts.push_back(rot_inverse(T.get()) * h);
       }
-    int dim = MDIM;
 
     flat_model_enabler fme;
     initquickqueue();
@@ -604,14 +604,14 @@ EX namespace dialog {
     queuecurve(V, 0xFFFFFFFF, 0x202020FF, PPR::LINE);
 
     color_t cols[3] = {0xFF0000FF, 0x00FF00FF, 0x0000FFFF};
-    for(int a=0; a<dim-1; a++) {
+    for(int a=0; a<dim; a++) {
       auto pt = pts[a]; pt[2] = 1; pt[3] = 1;
       curvepoint(hyperpoint(0,0,1,1));
       curvepoint(pt);
       // queueline(V * hyperpoint(0,0,1,1), V * pt, cols[a], 0);
       queuecurve(V, cols[a], 0, PPR::LINE);
       }
-    if(dim == 4) for(int a=0; a<dim-1; a++) {
+    if(dim == 4) for(int a=0; a<dim; a++) {
       auto pt = pts[a]; ld val = pt[2] * vid.fsize / r / 5; pt[2] = 1; pt[3] = 1;
       curvepoint(hyperpoint(0, val, 1, 1));
       curvepoint(hyperpoint(-val, -val*sqrt(3)/2, 1, 1));
@@ -832,7 +832,7 @@ EX namespace dialog {
             while(siz > 6 && textwidth(siz, I.value) + (I.type == diMatrixItem ? siz : 0) >= vid.xres - valuex) siz--;
             displayfr(valuex, mid, 2, siz, I.value, I.colorv, 0);
 
-            if(I.type == diMatrixItem) visualize_matrix(*((trans23*)I.ptr), valuex + textwidth(siz, "-359.999o") + siz/2, mid, siz/2);
+            if(I.type == diMatrixItem) visualize_matrix(*((transmatrix*)I.ptr), valuex + textwidth(siz, "-359.999o") + siz/2, mid, siz/2, I.p1);
             }
           }
         if(xthis) getcstat = I.key;
@@ -1121,7 +1121,8 @@ EX namespace dialog {
 
   #if HDR
   struct matrix_dialog : extdialog {
-    trans23 *edit_matrix;
+    transmatrix *edit_matrix;
+    int dim;
     void draw() override;
     };
   #endif
@@ -1134,12 +1135,12 @@ EX namespace dialog {
     addCustom(500, [this] {
       int siz = dfsize * 5;
       int mid = (top + tothei) / 2;
-      visualize_matrix(*edit_matrix, dcenter, mid, siz/2);
+      visualize_matrix(*edit_matrix, dcenter, mid, siz/2, dim);
       });
     addBreak(100);
     addItem("enter angle", 'a');
     dialog::add_action([this] {
-      static ld angle = as_degrees(edit_matrix->get());
+      static ld angle = as_degrees(*edit_matrix);
       editNumber(angle, -180, 180, 90, 0, title, help);
       auto& ne = get_ne();
       auto re = reaction;
@@ -1151,11 +1152,12 @@ EX namespace dialog {
     display();
     }
 
-  EX void editMatrix(trans23& T, string t, string h) {
+  EX void editMatrix(transmatrix& T, string t, string h, int dim) {
     matrix_dialog m;
     m.edit_matrix = &T;
     m.title = t;
     m.help = h;
+    m.dim = dim;
     pushScreen(m);
     }
 

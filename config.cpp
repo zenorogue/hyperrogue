@@ -131,6 +131,17 @@ namespace anims {
   extern void animate_setting(setting*, string);
   }
 
+/** transmatrix with equality, so we can construct val_setting<matrix_eq> */
+struct matrix_eq : transmatrix {
+  bool operator == (const transmatrix& t) const {
+    for(int i=0; i<MAXMDIM; i++) for(int j=0; j<MAXMDIM; j++)  if(self[i][j] != t[i][j]) return false;
+    return true;
+    }
+  bool operator != (const transmatrix& t) const {
+    return ! (self == t);
+    }
+  };
+
 template<class T> struct val_setting : public setting {
   T *value, last_value, anim_value, dft;
 
@@ -237,7 +248,8 @@ struct color_setting : public val_setting<color_t> {
   void load_from_raw(const string& s) override { sscanf(s.c_str(), "%x", value); }
   };
 
-struct matrix_setting : public val_setting<trans23> {
+struct matrix_setting : public val_setting<matrix_eq> {
+  int dim;
   supersaver *make_saver() override;
   void show_edit_option(int key) override;
   matrix_setting *editable(string menu_item_name, string help_text, char key) {
@@ -248,7 +260,7 @@ struct matrix_setting : public val_setting<trans23> {
     return this;
     }
 
-  void load_from_raw(const string& s) override { *value = parsematrix23(s); }
+  void load_from_raw(const string& s) override { (transmatrix&)*value = parsematrix(s); }
   };
 
 struct char_setting : public val_setting<char> {
@@ -405,32 +417,30 @@ template<> struct saver<string> : dsaver<string> {
   virtual void swap_with(supersaver *s) { swap(val, ((saver<string>*)s)->val); }
   };
 
-template<> struct saver<trans23> : supersaver {
+template<> struct saver<matrix_eq> : supersaver {
 
-  trans23& val;
-  trans23 dft;
+  matrix_eq& val;
+  matrix_eq dft;
 
-  explicit saver(trans23& _val) : val(_val) { }
+  explicit saver(matrix_eq& _val) : val(_val) { }
 
   void reset() override { val = dft; }
   bool affects(void* v) override { return v == &val; }
   void set_default() override { dft = val; }
-  bool dosave() override { return !eqmatrix(val.v2, dft.v2) || !eqmatrix(val.v3, dft.v3); }
+  bool dosave() override { return !eqmatrix(val, dft); }
 
   string save() override {
     shstream ss;
-    for(int a=0; a<4; a++) for(int b=0; b<4; b++) print(ss, val.v2[a][b], " ");
-    for(int a=0; a<4; a++) for(int b=0; b<4; b++) print(ss, val.v3[a][b], " ");
+    for(int a=0; a<4; a++) for(int b=0; b<4; b++) print(ss, val[a][b], " ");
     return ss.s;
     }
   void load(const string& s) override {
     shstream ss;
     ss.s = s;
-    for(int a=0; a<4; a++) for(int b=0; b<4; b++) scan(ss, val.v2[a][b]);
-    for(int a=0; a<4; a++) for(int b=0; b<4; b++) scan(ss, val.v3[a][b]);
+    for(int a=0; a<4; a++) for(int b=0; b<4; b++) scan(ss, val[a][b]);
     }
-  virtual void clone(struct local_parameter_set& lps, void *value) override { addsaver(*(trans23*) value, lps.label + name); }
-  virtual void swap_with(supersaver *s) override { swap(val, ((saver<trans23>*)s)->val); }
+  virtual void clone(struct local_parameter_set& lps, void *value) override { addsaver(*(matrix_eq*) value, lps.label + name); }
+  virtual void swap_with(supersaver *s) override { swap(val, ((saver<matrix_eq>*)s)->val); }
   };
 
 template<> struct saver<ld> : dsaver<ld> {
@@ -564,7 +574,7 @@ void color_setting::show_edit_option(int key) {
 void matrix_setting::show_edit_option(int key) {
   dialog::addMatrixItem(XLAT(menu_item_name), *value, key);
   dialog::add_action([this] () {
-    dialog::editMatrix(*value, XLAT(menu_item_name), help_text);
+    dialog::editMatrix(*value, XLAT(menu_item_name), help_text, dim);
     });
   }
 
@@ -682,7 +692,8 @@ EX color_setting *param_color(color_t& val, const string s, bool has_alpha, colo
   return f;
   }
 
-EX matrix_setting *param_matrix(trans23& val, const string s) {
+EX matrix_setting *param_matrix(transmatrix& val0, const string s, int dim) {
+  matrix_eq& val = (matrix_eq&) val0;
   unique_ptr<matrix_setting> u ( new matrix_setting );
   u->parameter_name = param_esc(s);
   u->config_name = s;
@@ -690,6 +701,7 @@ EX matrix_setting *param_matrix(trans23& val, const string s) {
   u->value = &val;
   u->last_value = val;
   u->dft = val;
+  u->dim = dim;
   u->register_saver();
   auto f = &*u;
   params[u->parameter_name] = std::move(u);
