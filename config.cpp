@@ -4056,6 +4056,20 @@ EX int read_config_args() {
   else if(argis("-d:find")) {
     PHASEFROM(2); launch_dialog(find_setting);
     }
+  else if(argis("-d:param")) {
+    PHASEFROM(2);
+    shift();
+    string s = args();
+    for(auto& fs: params) if(fs.first == s) {
+      dialog::items.clear();
+      dialog::key_actions.clear();
+      fs.second->show_edit_option();
+      for(auto p: dialog::key_actions) { p.second(); return 0; }
+      println(hlog, "no key action");
+      return 0;
+      }
+    println(hlog, "unknown param to edit: ", s);
+    }
   else if(argis("-char")) {
     auto& cs = vid.cs;
     shift();
