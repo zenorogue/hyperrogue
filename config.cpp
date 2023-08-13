@@ -2419,7 +2419,7 @@ EX ld max_fov_angle() {
   return acos(-p) * 2 / degree;
   }
 
-EX void add_edit_fov(char key IS('f'), bool pop IS(false)) {
+EX void add_edit_fov(char key IS('f')) {
 
   string sfov = fts(vid.fov) + "°";
   if(panini_alpha || stereo_alpha) {
@@ -2427,7 +2427,6 @@ EX void add_edit_fov(char key IS('f'), bool pop IS(false)) {
     }
   dialog::addSelItem(XLAT("field of view"), sfov, key);
   dialog::add_action([=] {
-    if(pop) popScreen();
     dialog::editNumber(vid.fov, 1, max_fov_angle(), 1, 90, "field of view", 
       XLAT(
         "Horizontal field of view, in angles. "
@@ -2449,7 +2448,6 @@ EX void add_edit_fov(char key IS('f'), bool pop IS(false)) {
     dialog::get_di().extra_options = [quick] {
       dialog::addSelItem(XLAT("Panini projection"), fts(panini_alpha), 'P');
       dialog::add_action([quick] {
-        popScreen();
         dialog::editNumber(panini_alpha, 0, 1, 0.1, 0, "Panini parameter", 
           XLAT(
             "The Panini projection is an alternative perspective projection "
@@ -2458,13 +2456,10 @@ EX void add_edit_fov(char key IS('f'), bool pop IS(false)) {
         #if CAP_GL
         dialog::get_di().reaction = reset_all_shaders;
         #endif
-        dialog::get_di().extra_options = [] {
-          add_edit_fov('F', true);
-          };
+        dialog::get_di().extra_options = [] { add_edit_fov('F'); };
         });
       dialog::addSelItem(XLAT("spherical perspective projection"), fts(stereo_alpha), 'S');
       dialog::add_action([quick] {
-        popScreen();
         dialog::editNumber(stereo_alpha, 0, 1, 0.1, 0, "spherical perspective parameter", 
           XLAT(
             "Set to 1 to get stereographic projection, "
@@ -2473,9 +2468,7 @@ EX void add_edit_fov(char key IS('f'), bool pop IS(false)) {
         #if CAP_GL
         dialog::get_di().reaction = reset_all_shaders;
         #endif
-        dialog::get_di().extra_options = [] {
-          add_edit_fov('F', true);
-          };
+        dialog::get_di().extra_options = [] { add_edit_fov('F'); };
         });
       };
     });

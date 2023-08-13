@@ -2740,25 +2740,21 @@ EX namespace mapeditor {
           }
         dialog::addSelItem(XLAT("mousewheel step"), fts(front_step), 'S');
         dialog::add_action([] {
-          popScreen();
           dialog::editNumber(front_step, -10, 10, 0.1, 0.1, XLAT("mousewheel step"), "hint: shift for finer steps");
           });
         if(front_config == eFront::sphere_center) {
           dialog::addSelItem(XLAT("parallels to draw"), its(parallels), 'P');
           dialog::add_action([] {
-            popScreen();
             dialog::editNumber(parallels, 0, 72, 1, 12, XLAT("parallels to draw"), "");
             });
           dialog::addSelItem(XLAT("meridians to draw"), its(meridians), 'M');
           dialog::add_action([] {
-            popScreen();
             dialog::editNumber(meridians, 0, 72, 1, 12, XLAT("meridians to draw"), "");
             });
           }
         else if(front_config != eFront::sphere_camera) {
           dialog::addSelItem(XLAT("range of grid to draw"), fts(equi_range), 'R');
           dialog::add_action([] {
-            popScreen();
             dialog::editNumber(equi_range, 0, 5, 0.1, 1, XLAT("range of grid to draw"), "");
             });
           }
