@@ -109,14 +109,22 @@ struct list_setting : setting {
   void show_edit_option(int key) override;
   };
 
+namespace anims {
+  extern void animate_setting(setting*, string);
+  }
+
 template<class T> struct enum_setting : list_setting {
-  T *value, last_value;
-  T dft;
+  T *value, last_value, dft, anim_value;
   int get_value() override { return (int) *value; }
   void set_value(int i) override { *value = (T) i; }
   bool affects(void* v) override { return v == value; }
   supersaver *make_saver() override;
-  void load_from(const string& s) override {
+  virtual void load_from_raw(const string& s) {
+    int N = isize(options);
+    for(int i=0; i<N; i++) if(appears(options[i].first, s)) {
+      *value = (T) i;
+      return;
+      }
     *value = (T) parseint(s);
     }
   virtual void check_change() {
@@ -125,11 +133,24 @@ template<class T> struct enum_setting : list_setting {
       add_to_changed(this);
       }
     }
-  };
 
-namespace anims {
-  extern void animate_setting(setting*, string);
-  }
+  void load_from(const string& s) override {
+    auto bak = *value;
+    load_from_raw(s);
+    if(*value != bak && reaction) reaction();
+    }
+  bool load_from_animation(const string& s) override {
+    if(anim_value != *value) return false;
+    load_from(s);
+    anim_value = *value;
+    return true;
+    }
+  void load_as_animation(const string& s) override {
+    load_from(s);
+    anim_value = *value;
+    anims::animate_setting(this, s);
+    }
+  };
 
 /** transmatrix with equality, so we can construct val_setting<matrix_eq> */
 struct matrix_eq : transmatrix {
