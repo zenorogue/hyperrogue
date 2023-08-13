@@ -1137,7 +1137,6 @@ EX ld period = 10000;
 EX int noframes = 30;
 EX ld cycle_length = TAU;
 EX ld parabolic_length = 1;
-EX ld skiprope_rotation;
 
 EX string time_formula = "-";
 
@@ -1231,8 +1230,6 @@ void apply_animated_parameters() {
   }
 
 bool needs_highqual;
-
-bool joukowsky_anim;
 
 EX void reflect_view() {
   if(centerover) {
@@ -1369,25 +1366,7 @@ EX void apply() {
       animate_rug_movement(rug_forward * t / period);
     }
   #endif
-  pconf.skiprope += skiprope_rotation * t * TAU / period;
 
-  if(ballangle_rotation) {
-    if(models::has_orientation(vpconf.model))
-      vpconf.mori() = trans23(spin(ballangle_rotation * 360 * t / period)) * vpconf.mori();
-    else
-      vpconf.ballangle += ballangle_rotation * 360 * t / period;
-    }
-  if(joukowsky_anim) {
-    ld t = ticks / period;
-    t = t - floor(t);
-    if(pmodel == mdBand) {
-      vpconf.model_transition = t * 4 - 1;
-      }
-    else {
-      vpconf.model_transition = t / 1.1;
-      vpconf.scale = (1 - vpconf.model_transition) / 2.;
-      }
-    }
   apply_animated_parameters();
   calcparam();
   }
@@ -1581,12 +1560,6 @@ EX void show() {
   if(hyperbolic) {
     dialog::addBoolItem_choice(XLAT("parabolic"), ma, maParabolic, '3');
     }
-  if(among(pmodel, mdJoukowsky, mdJoukowskyInverted)) {
-    dialog::addBoolItem_action(XLAT("joukowsky_anim"), joukowsky_anim, 'j');
-    }
-  if(among(pmodel, mdJoukowsky, mdJoukowskyInverted)) {
-    animator(XLAT("Möbius transformations"), skiprope_rotation, 'S');
-    }
   if(!mproduct) {
     dialog::addBoolItem(XLAT("circle"), ma == maCircle, '4');
     dialog::add_action([] () { ma = maCircle; 
@@ -1715,10 +1688,6 @@ EX void show() {
       });
     }
   #endif
-  if(models::has_orientation(vpconf.model))
-    animator(XLAT("model rotation"), ballangle_rotation, 'I');
-  else if(models::is_3d(vpconf))
-    animator(XLAT("3D rotation"), ballangle_rotation, '3');
   
   dialog::addSelItem(XLAT("animate parameters"), fts(a), 'a');
   dialog::add_action([] () {
@@ -1849,13 +1818,6 @@ int readArgs() {
     shift_arg_formula(env_ocean);
     shift_arg_formula(env_volcano);
     }
-  else if(argis("-animball")) {
-    shift_arg_formula(ballangle_rotation);
-    }
-  else if(argis("-animj")) {
-    shift(); joukowsky_anim = true;
-    }
-#endif
   else return 1;
   return 0;
   }
@@ -1886,7 +1848,7 @@ auto animhook = addHook(hooks_frame, 100, display_animation)
 EX bool any_animation() {
   if(history::on) return true;
   if(ma) return true;
-  if(ballangle_rotation || rug_rotation1 || rug_rotation2) return true;
+  if(rug_rotation1 || rug_rotation2) return true;
   if(ap_changes) return true;
   return false;
   }
