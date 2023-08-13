@@ -362,7 +362,86 @@ int read_legacy_args() {
   return 0;
   }
 
-auto ah_legacy = addHook(hooks_args, 0, read_legacy_args);
+int read_legacy_args_anim() {
+  using namespace anims;
+  using namespace arg;
+  ld movement_angle, shift_angle, rug_angle; /* TODO link to anims::angle's */
+  if(0);
+  else if(argis("-animperiod")) {
+    PHASEFROM(2); shift_arg_formula(period);
+    }
+  else if(argis("-animcircle")) {
+    PHASE(3); start_game();
+    ma = maCircle; ma_reaction();
+    shift_arg_formula(circle_spins);
+    shift_arg_formula(circle_radius);
+    shift(); circle_display_color = argcolor(24);
+    }
+  else if(argis("-animmove")) {
+    ma = maTranslation; 
+    shift_arg_formula(cycle_length);
+    shift_arg_formula(shift_angle);
+    shift_arg_formula(movement_angle);
+    }
+  else if(argis("-animmoverot")) {
+    ma = maTranslationRotation; 
+    shift_arg_formula(cycle_length);
+    shift_arg_formula(shift_angle);
+    shift_arg_formula(movement_angle);
+    }
+  else if(argis("-wallopt")) {
+    wallopt = true;
+    }
+  else if(argis("-animpar")) {
+    ma = maParabolic; 
+    shift_arg_formula(parabolic_length);
+    shift_arg_formula(shift_angle);
+    shift_arg_formula(movement_angle);
+    }
+  else if(argis("-animclear")) { clearup = true; }
+  else if(argis("-animrot")) {
+    ma = maRotation;
+    if(GDIM == 3) {
+      shift_arg_formula(movement_angle);
+      shift_arg_formula(normal_angle);
+      }
+    }
+  else if(argis("-animrotd")) {
+    start_game();
+    ma = maRotation;
+    shift_arg_formula(rotation_distance);
+    }
+  else if(argis("-animrug")) {
+    shift_arg_formula(rug_rotation1);
+    shift_arg_formula(rug_angle);
+    shift_arg_formula(rug_rotation2);
+    }
+  else if(argis("-animenv")) {
+    shift_arg_formula(env_ocean);
+    shift_arg_formula(env_volcano);
+    }
+  else if(argis("-animball")) {
+    shift(); println(hlog, "-animball removed");
+    }
+  else if(argis("-animj")) {
+    shift(); println(hlog, "-animj removed");
+/*  to recreate: if(joukowsky_anim) {
+    ld t = ticks / period;
+    t = t - floor(t);
+    if(pmodel == mdBand) {
+      vpconf.model_transition = t * 4 - 1;
+      }
+    else {
+      vpconf.model_transition = t / 1.1;
+      vpconf.scale = (1 - vpconf.model_transition) / 2.;
+      } */
+/* skiprope:legacy.cpp  pconf.skiprope += skiprope_rotation * t * TAU / period; */
+    }
+  else return 1;
+  return 0;
+  }
+
+auto ah_legacy = addHook(hooks_args, 0, read_legacy_args) + addHook(hooks_args, 0, read_legacy_args_anim);
 #endif
 
 

@@ -1131,7 +1131,7 @@ enum eMovementAnimation {
 
 EX eMovementAnimation ma;
 
-EX ld shift_angle, movement_angle, movement_angle_2;
+EX trans23 movement_angle;
 EX ld normal_angle = 90;
 EX ld period = 10000;
 EX int noframes = 30;
@@ -1142,15 +1142,22 @@ EX string time_formula = "-";
 
 int lastticks, bak_turncount;
 
-EX ld rug_rotation1, rug_rotation2, rug_forward, ballangle_rotation, env_ocean, env_volcano, rug_movement_angle, rug_shift_angle;
+EX ld rug_rotation1, rug_rotation2, rug_forward, env_ocean, env_volcano;
 EX bool env_shmup;
-EX ld rug_angle;
+EX transmatrix rug_angle = Id, rug_movement_angle = cspin(0, 1, 90._deg);
 
 EX ld rotation_distance;
 cell *rotation_center;
 transmatrix rotation_center_View;
 
-color_t circle_display_color = 0x00FF00FF;
+EX void ma_reaction() {
+  println(hlog, "ma_reaction called");
+  if(ma == maCircle) start_game();
+  rotation_center = centerover;
+  rotation_center_View = View;
+  }
+
+EX color_t circle_display_color = 0x00FF00FF;
 
 EX ld circle_radius = acosh(2.);
 EX ld circle_spins = 1;
@@ -1241,14 +1248,14 @@ EX void reflect_view() {
     }
   }
 
-bool clearup;
+EX bool clearup;
 
 EX purehookset hooks_anim;
 
 EX void animate_rug_movement(ld t) {
   rug::using_rugview urv;
   shift_view(
-    cspin(0, GDIM-1, rug_movement_angle * degree) * spin(rug_shift_angle * degree) * xtangent(t)
+    rug_movement_angle * xtangent(t)
     );
   }
 
@@ -1280,7 +1287,7 @@ EX void apply() {
             }
           }
         shift_view(
-          cspin(0, GDIM-1, movement_angle * degree) * spin(shift_angle * degree) * xtangent(cycle_length * t / period)
+          movement_angle.get() * xtangent(cycle_length * t / period)
           );
         moved();
         if(clearup) {
@@ -1291,25 +1298,17 @@ EX void apply() {
       break;
 
     case maRotation:
-      shift_view(ztangent(-rotation_distance));
-      if(GDIM == 3) {
-        rotate_view(spin(-movement_angle * degree));
-        rotate_view(cspin(1, 2, normal_angle * degree));
-        rotate_view(spin(-movement_angle_2 * degree));
-        }
+      if(GDIM == 3) shift_view(ztangent(-rotation_distance));
+      rotate_view(movement_angle.get());
       rotate_view(spin(TAU * t / period));
-      if(GDIM == 3) {
-        rotate_view(spin(movement_angle_2 * degree));
-        rotate_view(cspin(2, 1, normal_angle * degree));
-        rotate_view(spin(movement_angle * degree));
-        }
-      shift_view(ztangent(rotation_distance));
+      rotate_view(rot_inverse(movement_angle.get()));
+      if(GDIM == 3) shift_view(ztangent(rotation_distance));
       moved();
       break;
     
     case maTranslationRotation:
       shift_view(
-        cspin(0, GDIM-1, movement_angle * degree) * spin(shift_angle * degree) * xtangent(cycle_length * t / period)
+        rot_inverse(movement_angle.get()) * xtangent(cycle_length * t / period)
         );
       moved();
       rotate_view(cspin(0, GDIM-1, TAU * t / period));
@@ -1321,12 +1320,12 @@ EX void apply() {
     #if CAP_BT
     case maParabolic:
       reflect_view();
-      View = ypush(-shift_angle * degree) * spin(-movement_angle * degree) * View;
+      View = movement_angle.get() * View;
       if(GDIM == 2)
         View = bt::parabolic(parabolic_length * t / period) * View;
       else
         View = bt::parabolic3(parabolic_length * t / period, 0) * View;
-      View = spin(movement_angle * degree) * ypush(shift_angle * degree) * View;
+      View = rot_inverse(movement_angle.get()) * View;
       moved();
       break;
     #endif
@@ -1356,7 +1355,7 @@ EX void apply() {
   if(rug::rugged) {
     if(rug_rotation1) {
       rug::using_rugview rv;
-      rotate_view(cspin(1, 2, -rug_angle * degree) * cspin(0, 2, rug_rotation1 * TAU * t / period) * cspin(1, 2, rug_angle * degree));
+      rotate_view(inverse(rug_angle) * cspin(0, 2, rug_rotation1 * TAU * t / period) * rug_angle);
       }
     if(rug_rotation2) {
       rug::using_rugview rv;
@@ -1515,16 +1514,8 @@ EX ld a, b;
 ld animation_period;
 
 EX void rug_angle_options() {
-  dialog::addSelItem(XLAT("shift"), fts(rug_shift_angle) + "°", 'C');
-  dialog::add_action([] () { 
-    popScreen();
-    dialog::editNumber(rug_shift_angle, 0, 90, 15, 0, XLAT("shift"), ""); 
-    });
-  dialog::addSelItem(XLAT("movement angle"), fts(rug_movement_angle) + "°", 'M');
-  dialog::add_action([] () { 
-    popScreen();
-    dialog::editNumber(rug_movement_angle, 0, 360, 15, 0, XLAT("movement angle"), ""); 
-    });
+  add_edit(rug_angle);
+  add_edit(rug_movement_angle);
   }
 
 EX void show() {
@@ -1618,14 +1609,7 @@ EX void show() {
         }
       else 
         add_edit(parabolic_length);
-      dialog::addSelItem(XLAT("shift"), fts(shift_angle) + "°", 'C');
-      dialog::add_action([] () { 
-        dialog::editNumber(shift_angle, 0, 90, 15, 0, XLAT("shift"), ""); 
-        });
-      dialog::addSelItem(XLAT("movement angle"), fts(movement_angle) + "°", 'm');
-      dialog::add_action([] () { 
-        dialog::editNumber(movement_angle, 0, 360, 15, 0, XLAT("movement angle"), ""); 
-        });
+      add_edit(movement_angle.get());
       break;
       }
     case maRotation:
@@ -1634,10 +1618,7 @@ EX void show() {
         dialog::add_action([] () { 
           dialog::editNumber(normal_angle, 0, 360, 15, 0, XLAT("angle to screen normal"), ""); 
           });
-        dialog::addSelItem(XLAT("movement angle"), fts(movement_angle) + "°", 'm');
-        dialog::add_action([] () { 
-          dialog::editNumber(movement_angle, 0, 360, 15, 0, XLAT("movement angle"), ""); 
-          });
+        add_edit(movement_angle);
         dialog::addBreak(100);
         dialog::addSelItem(XLAT("distance from rotation center"), fts(rotation_distance), 'r');
         dialog::add_action([] () { 
@@ -1667,12 +1648,7 @@ EX void show() {
   #if CAP_RUG
   if(rug::rugged) {
     animator(XLAT("screen-relative rotation"), rug_rotation1, 'r');
-    if(rug_rotation1) { 
-      dialog::addSelItem(XLAT("angle"), fts(rug_angle) + "°", 'a');
-      dialog::add_action([] () { 
-        dialog::editNumber(rug_angle, 0, 360, 15, 0, "Rug angle", ""); 
-        });
-      }
+    if(rug_rotation1) add_edit(rug_angle);
     else dialog::addBreak(100);
     animator(XLAT("model-relative rotation"), rug_rotation2, 'r');
     animator(XLAT("automatic move speed"), rug_forward, 'M');
@@ -1766,58 +1742,7 @@ int readArgs() {
     shift(); videofile = args(); record_video();
     }
 #endif
-  else if(argis("-animcircle")) {
-    PHASE(3); start_game();
-    ma = maCircle; 
-    rotation_center = centerover;
-    rotation_center_View = View;
-    shift_arg_formula(circle_spins);
-    shift_arg_formula(circle_radius);
-    shift(); circle_display_color = argcolor(24);
-    }
-  else if(argis("-animmove")) {
-    ma = maTranslation; 
-    shift_arg_formula(cycle_length);
-    shift_arg_formula(shift_angle);
-    shift_arg_formula(movement_angle);
-    }
-  else if(argis("-animmoverot")) {
-    ma = maTranslationRotation; 
-    shift_arg_formula(cycle_length);
-    shift_arg_formula(shift_angle);
-    shift_arg_formula(movement_angle);
-    }
-  else if(argis("-wallopt")) {
-    wallopt = true;
-    }
-  else if(argis("-animpar")) {
-    ma = maParabolic; 
-    shift_arg_formula(parabolic_length);
-    shift_arg_formula(shift_angle);
-    shift_arg_formula(movement_angle);
-    }
-  else if(argis("-animclear")) { clearup = true; }
-  else if(argis("-animrot")) {
-    ma = maRotation;
-    if(GDIM == 3) {
-      shift_arg_formula(movement_angle);
-      shift_arg_formula(normal_angle);
-      }
-    }
-  else if(argis("-animrotd")) {
-    start_game();
-    ma = maRotation;
-    shift_arg_formula(rotation_distance);
-    }
-  else if(argis("-animrug")) {
-    shift_arg_formula(rug_rotation1);
-    shift_arg_formula(rug_angle);
-    shift_arg_formula(rug_rotation2);
-    }
-  else if(argis("-animenv")) {
-    shift_arg_formula(env_ocean);
-    shift_arg_formula(env_volcano);
-    }
+#endif
   else return 1;
   return 0;
   }
@@ -1834,14 +1759,29 @@ auto animhook = addHook(hooks_frame, 100, display_animation)
     param_f(anims::cycle_length, "acycle", "animation cycle length");
     param_f(anims::parabolic_length, "aparabolic", "animation parabolic length")
       ->editable(0, 10, 1, "cells to go", "", 'c');
-    param_f(anims::rug_angle, "arugangle", "animation rug angle");
+    param_matrix(anims::rug_angle, "arugangle", 3)
+      ->editable("animation rug angle", "", 'a');
     param_f(anims::circle_radius, "acradius", "animation circle radius");
     param_f(anims::circle_spins, "acspins", "animation circle spins");
-    addsaver(anims::rug_movement_angle, "rug forward movement angle", 90);
-    addsaver(anims::rug_shift_angle, "rug forward shift angle", 0);
+    param_matrix(anims::rug_movement_angle, "rug forward movement angle", 3)
+      ->editable("rug forward movement angle", "", 'b');
+    param_matrix(anims::movement_angle.v2, "movement_angle", 2)->editable("movement angle", "", 'm');
+    param_matrix(anims::movement_angle.v3, "movement_angle_3", 3)->editable("movement angle", "", 'm');
+    param_f(rug_rotation1, "rug_rotation1");
+    param_f(rug_rotation2, "rug_rotation2");
+    param_f(rotation_distance, "rotation_distance");
+    param_f(cycle_length, "cycle_length");
+    param_f(env_ocean, "env_ocean");
+    param_f(env_volcano, "env_volcano");
+    param_b(wallopt, "wallopt");
+    param_b(clearup, "anim_clearup");
+    param_color(circle_display_color, "circle_display_color", true);
+    param_enum(anims::ma, "ma", "movement_animation", maNone)
+    -> editable({{"none", ""}, {"translation", ""}, {"rotation", ""}, {"circle", ""}, {"parabolic", ""}, {"translation+rotation", ""}}, "movement animation", 'a')
+    -> set_reaction(ma_reaction);
+
     param_f(anims::a, "a", 0);
     param_f(anims::b, "b", 0);
-    param_f(anims::movement_angle_2, "movement angle 2", 0);
     #endif
     });
 
