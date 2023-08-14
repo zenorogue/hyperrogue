@@ -569,7 +569,7 @@ void accept_command(string s) {
     variation =eVariation::unrectified;
     gp::param = {x, y};
     start_game();
-    init_go();
+    init_go_board();
     go_message("Bring surface, size = " + its(isize(ac)));
     take_shot();
     }
@@ -586,7 +586,7 @@ void accept_command(string s) {
     variation =eVariation::unrectified;
     gp::param = {x, y};
     start_game();
-    init_go();
+    init_go_board();
     go_message("disk, size = " + its(isize(ac)));
     take_shot();
     }
