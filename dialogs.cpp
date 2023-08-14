@@ -611,13 +611,13 @@ EX namespace dialog {
       // queueline(V * hyperpoint(0,0,1,1), V * pt, cols[a], 0);
       queuecurve(V, cols[a], 0, PPR::LINE);
       }
-    if(dim == 4) for(int a=0; a<dim; a++) {
-      auto pt = pts[a]; ld val = pt[2] * vid.fsize / r / 5; pt[2] = 1; pt[3] = 1;
-      curvepoint(hyperpoint(0, val, 1, 1));
-      curvepoint(hyperpoint(-val, -val*sqrt(3)/2, 1, 1));
-      curvepoint(hyperpoint(+val, -val*sqrt(3)/2, 1, 1));
-      curvepoint(hyperpoint(0, val, 1, 1));
-      queuecurve(V * rgpushxto0(pt), cols[a], cols[a] & 0xFFFFFF80, PPR::LINE);
+    if(dim == 3) for(int a=0; a<dim; a++) {
+      auto pt = pts[a]; ld val = pt[2] * vid.fsize / r / 5;
+      curvepoint(hyperpoint(pt[0], pt[1]+val, 1, 1));
+      curvepoint(hyperpoint(pt[0]-val, pt[1]-val*sqrt(3)/2, 1, 1));
+      curvepoint(hyperpoint(pt[0]+val, pt[1]-val*sqrt(3)/2, 1, 1));
+      curvepoint(hyperpoint(pt[0], pt[1]+val, 1, 1));
+      queuecurve(V, cols[a], cols[a] & 0xFFFFFF80, PPR::LINE);
       }
     quickqueue();
     }
