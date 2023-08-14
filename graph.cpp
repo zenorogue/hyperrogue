@@ -5791,6 +5791,7 @@ namespace sm {
   static const int EDIT_BEFORE_WALLS = (1<<25); // mouseover targets before walls
   static const int EDIT_INSIDE_WALLS = (1<<26); // mouseover targets inside walls
   static const int DIALOG_WIDE = (1<<27); // make dialogs wide
+  static const int MOUSEAIM = (1<<28); // mouse aiming active here
   }
 #endif
 

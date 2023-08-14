@@ -1178,6 +1178,15 @@ EX namespace dialog {
       rot_but(0, 2, "rotate in XZ", 'y');
       rot_but(1, 2, "rotate in YZ", 'x');
       }
+
+    addBoolItem("mouse control", dialogflags & sm::MOUSEAIM, 'm');
+    dialog::add_action([this] { dialogflags ^= sm::MOUSEAIM; });
+    if(dialogflags & sm::MOUSEAIM) {
+      *edit_matrix = cspin(0, 2, mouseaim_x) * *edit_matrix;
+      *edit_matrix = cspin(1, 2, mouseaim_y) * *edit_matrix;
+      mouseaim_x = mouseaim_y = 0;
+      }
+
     static string formula;
     formula = "?";
     anims::get_parameter_animation(anims::find_param(edit_matrix), formula);

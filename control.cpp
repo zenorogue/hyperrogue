@@ -702,7 +702,7 @@ EX int sc_ticks, sc_ticks2;
 
 EX bool mouseaiming(bool shmupon) {
   return
-    (GDIM == 3 && !shmupon) || (rug::rugged && (lctrlclick ^ rug::mouse_control_rug));
+    (GDIM == 3 && !shmupon) || (rug::rugged && (lctrlclick ^ rug::mouse_control_rug)) || (cmode & sm::MOUSEAIM);
   }
 
 /* visualization only -- the HyperRogue movement keys should move the camera */
@@ -753,6 +753,7 @@ EX void mainloopiter() {
   
   mousepan = cmode & sm::NORMAL;
   if((cmode & sm::PANNING) && !hiliteclick) mousepan = true;
+  if(cmode & sm::MOUSEAIM) mousepan = true;
   if(cmode & sm::SHOWCURSOR) mousepan = false;
   mousepan = mousepan && mouseaiming(false) && mouseaim_sensitivity;
   if(mousepan != oldmousepan) {
@@ -775,7 +776,7 @@ EX void mainloopiter() {
       SDL_ShowCursor(SDL_ENABLE);
       SDL_WarpMouse(vid.xres/2, vid.yres/2);
       #endif
-      mouseaim_x = mouseaim_y = 0;      
+      mouseaim_x = mouseaim_y = 0;
       }
     #endif
     }
@@ -907,7 +908,7 @@ EX void mainloopiter() {
     }
   #endif
   
-  if(mouseaiming(shmup::on)) {
+  if(mouseaiming(shmup::on) && !(cmode & sm::MOUSEAIM)) {
     #if CAP_MOUSEGRAB
     rug::using_rugview urv;
     dynamicval<bool> ds(didsomething, didsomething);
