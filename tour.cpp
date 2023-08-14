@@ -829,8 +829,8 @@ EX slide default_slides[] = {
       if(mode == 1) 
         pmodel = mdHalfplane, smart = vid.use_smart_range, vid.use_smart_range = 2;
       if(mode == 2) 
-        models::rotation = cwt.at->land == laDungeon ? 0 : 2;
-      if(mode == 3) pmodel = mdDisk, models::rotation = 0, vid.use_smart_range = smart;
+        models::rotation = cwt.at->land == laDungeon ? Id : spin(M_PI);
+      if(mode == 3) pmodel = mdDisk, models::rotation = Id, vid.use_smart_range = smart;
       }
     },
   {"Curvature", 29, LEGAL::ANY,
@@ -978,7 +978,7 @@ EX slide default_slides[] = {
     "memory.",
     [] (presmode mode) {
       static int smart;
-      if(mode == 1) pmodel = mdBand, history::create_playerpath(), models::rotation = 0,
+      if(mode == 1) pmodel = mdBand, history::create_playerpath(), models::rotation = Id,
         smart = vid.use_smart_range, vid.use_smart_range = 2;
       if(mode == 3) {
         history::clear(), pmodel = mdDisk;

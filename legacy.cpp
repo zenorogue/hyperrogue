@@ -363,6 +363,13 @@ int read_legacy_args() {
     shift(); println(hlog, "-ballangle not implemented");
     // shift_arg_formula(vpconf.ballangle);
     }
+  else if(argis("-crot")) {
+    PHASEFROM(2);
+    shift(); shift(); shift(); println(hlog, "-crot not implemented");
+    /* shift_arg_formula(models::rotation);
+    if(GDIM == 3) shift_arg_formula(models::rotation_xz);
+    if(GDIM == 3) shift_arg_formula(models::rotation_xy2); */
+    }
   else return 1;
   return 0;
   }

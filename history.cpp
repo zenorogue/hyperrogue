@@ -453,7 +453,7 @@ EX namespace history {
     if(1) {
       // block for RAII
       dynamicval<videopar> dv(vid, vid);
-      dynamicval<ld> dr(models::rotation, 0);
+      dynamicval<trans23> dr(models::rotation, Id);
       dynamicval<bool> di(inHighQual, true);
       
       renderbuffer glbuf(bandfull, bandfull, vid.usingGL);

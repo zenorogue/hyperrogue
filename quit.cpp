@@ -236,9 +236,9 @@ EX hint hints[] = {
       popScreen();
       auto m = pmodel;
       pmodel = mdBand;
-      int r = models::rotation;
+      auto r = models::rotation;
       bool h = history::includeHistory;
-      models::rotation = 0;
+      models::rotation = Id;
       history::includeHistory = true;
       history::create_playerpath();
       cancel = [m,r,h] () { 

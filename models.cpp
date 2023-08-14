@@ -142,9 +142,7 @@ projection_configuration::projection_configuration() {
 
 EX namespace models {
 
-  EX ld rotation = 0;
-  EX ld rotation_xz = 90;
-  EX ld rotation_xy2 = 90;
+  EX trans23 rotation;
   EX int do_rotate = 1;
   EX bool model_straight, model_straight_yz;
 
@@ -157,8 +155,8 @@ EX namespace models {
   EX void scr_to_ori(transmatrix& h) { if(!model_straight) h = iso_inverse(pconf.mori().get()) * h; }
 
   EX transmatrix rotmatrix() {
-    if(GDIM == 2 || gproduct) return spin(rotation * degree);
-    return spin(rotation_xy2 * degree) * cspin(0, 2, -rotation_xz * degree) * spin(rotation * degree);
+    if(gproduct) return rotation.v2;
+    return rotation.get();
     }
   
   int spiral_id = 7;
@@ -356,30 +354,6 @@ EX namespace models {
       };
     }
   
-  EX void edit_rotation(ld& which) {
-    dialog::editNumber(which, 0, 360, 90, 0, XLAT("rotation"), 
-      "This controls the automatic rotation of the world. "
-      "It affects the line animation in the history mode, and "
-      "lands which have a special direction. Note that if finding this special direction is a part of the puzzle, "
-      "it works only in the cheat mode.");
-    dialog::get_di().dialogflags |= sm::CENTER;
-    dialog::get_di().extra_options = [] () {
-      dialog::addBreak(100);
-      dialog::addBoolItem_choice("line animation only", models::do_rotate, 0, 'N');
-      dialog::addBoolItem_choice("gravity lands", models::do_rotate, 1, 'G');
-      dialog::addBoolItem_choice("all directional lands", models::do_rotate, 2, 'D');
-      if(GDIM == 3) {
-        dialog::addBreak(100);
-        dialog::addSelItem(XLAT("XY plane"), fts(models::rotation) + "°", 'A');
-        dialog::add_action([] { popScreen(); edit_rotation(models::rotation); });
-        dialog::addSelItem(XLAT("XZ plane"), fts(models::rotation_xz) + "°", 'B');
-        dialog::add_action([] { popScreen(); edit_rotation(models::rotation_xz); });
-        dialog::addSelItem(XLAT("XY plane #2"), fts(models::rotation_xy2) + "°", 'C');
-        dialog::add_action([] { popScreen(); edit_rotation(models::rotation_xy2); });
-        }
-      };
-    }
-
   EX void model_list() {
     cmode = sm::SIDE | sm::MAYDARK | sm::CENTER;
     gamescreen();
@@ -456,14 +430,10 @@ EX namespace models {
     if(nonisotropic && !sl2)
       dialog::addBoolItem_action(XLAT("geodesic movement in Sol/Nil"), nisot::geodesic_movement, 'G');
 
-    dialog::addBoolItem(XLAT("rotation"), do_rotate == 2, 'r');
-    if(do_rotate == 0) dialog::lastItem().value = XLAT("NEVER");
-    if(GDIM == 2)
-      dialog::lastItem().value += " " + its(rotation) + "°";
-    else
-      dialog::lastItem().value += " " + its(rotation) + "°" + its(rotation_xz) + "°" + its(rotation_xy2) + "°";
-    dialog::add_action([] { edit_rotation(rotation); });
-    
+    add_edit((GDIM == 2 || gproduct) ? rotation.v2 : rotation.v3);
+    if(do_rotate == 0) { dialog::lastItem().value = XLAT("NEVER"); dialog::lastItem().type = dialog::diItem; }
+    else { dialog::lastItem().value = ONOFF(do_rotate == 2); }
+
     bool vr_settings = vrhr::active() && set_vr_settings;
 
     if(vrhr::active()) {
@@ -870,12 +840,6 @@ EX namespace models {
       PHASEFROM(2); 
       shift_arg_formula(vpconf.rotational_nil);
       }
-    else if(argis("-crot")) { 
-      PHASEFROM(2); 
-      shift_arg_formula(models::rotation);
-      if(GDIM == 3) shift_arg_formula(models::rotation_xz);
-      if(GDIM == 3) shift_arg_formula(models::rotation_xy2);
-      }
     else if(argis("-clip")) { 
       PHASEFROM(2); 
       shift_arg_formula(vpconf.clip_min);
@@ -968,9 +932,15 @@ EX namespace models {
       addsaver(polygonal::coefi[i], "polynomial "+its(i)+".imag");
       }
 
-    param_f(models::rotation, "rotation", "conformal rotation");
-    addsaver(models::rotation_xz, "conformal rotation_xz");
-    addsaver(models::rotation_xy2, "conformal rotation_2");
+    auto setrot = [] {
+      dialog::addBreak(100);
+      dialog::addBoolItem_choice("line animation only", models::do_rotate, 0, 'N');
+      dialog::addBoolItem_choice("gravity lands", models::do_rotate, 1, 'G');
+      dialog::addBoolItem_choice("all directional lands", models::do_rotate, 2, 'D');
+      };
+
+    param_matrix(models::rotation.v2, "rotation", 2)->editable("conformal rotation", "", 'r')->set_extra(setrot);
+    param_matrix(models::rotation.v3, "rotation3", 3)->editable("conformal rotation in 3D", "", 'r')->set_extra(setrot);
     addsaver(models::do_rotate, "conformal rotation mode", 1);
 
     param_f(pconf.halfplane_scale, "hp", "halfplane scale", 1);

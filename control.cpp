@@ -430,7 +430,7 @@ EX void full_rotate_camera(int dir, ld val) {
 
 EX void full_rotate_view(ld h, ld v) {
   if(history::on && !rug::rug_control())
-    models::rotation += h * camera_rot_speed;
+    models::rotation = spin(h * camera_rot_speed) * models::rotation;
   else {
     rotate_view(cspin(0, 1, v * camera_rot_speed));
     didsomething = true;

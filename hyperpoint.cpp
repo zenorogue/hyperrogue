@@ -221,6 +221,10 @@ struct trans23 {
     dim = 4; t.v3 = v3 * T.v3;
     return t;
     }
+  friend trans23 operator * (transmatrix M, trans23 T) {
+    trans23 t(M);
+    return M * T;
+    }
   };
 
 /** mirror image */

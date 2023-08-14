@@ -2073,10 +2073,10 @@ EX void spinEdge(ld aspd) {
     }
   else if(keep_vertical()) {
     hyperpoint h = vertical_vector();
-    downspin = -atan2(h[0], h[1]);
     if(ds.qty && GDIM == 2) {
-      downspin += models::rotation * degree;
+      h = rot_inverse(models::rotation.get()) * h;
       }
+    downspin = -atan2(h[0], h[1]);
     if(ds.qty) {
       cyclefix(downspin, 0);      
       downspin = downspin * min(ds.speed, (double)1);
