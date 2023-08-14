@@ -136,6 +136,8 @@ projection_configuration::projection_configuration() {
   dualfocus_autoscale = false;
   axial_angle = 90;
   ptr_model_orientation = new trans23;
+  ptr_ball = new transmatrix;
+  *ptr_ball = cspin(1, 2, 20._deg);
   }
 
 EX namespace models {
@@ -144,7 +146,6 @@ EX namespace models {
   EX ld rotation_xz = 90;
   EX ld rotation_xy2 = 90;
   EX int do_rotate = 1;
-  EX ld cos_ball, sin_ball;
   EX bool model_straight, model_straight_yz;
 
   /** screen coordinates to orientation logical coordinates */
@@ -154,11 +155,6 @@ EX namespace models {
   /** orientation logical coordinates to screen coordinates */
   EX void scr_to_ori(hyperpoint& h) { if(!model_straight) h = iso_inverse(pconf.mori().get()) * h; }
   EX void scr_to_ori(transmatrix& h) { if(!model_straight) h = iso_inverse(pconf.mori().get()) * h; }
-
-  #if HDR
-  template<class A>
-  void apply_ball(A& x, A& y) { tie(x,y) = make_pair(x*cos_ball + y*sin_ball, y*cos_ball - x*sin_ball); }
-  #endif
 
   EX transmatrix rotmatrix() {
     if(GDIM == 2 || gproduct) return spin(rotation * degree);
@@ -175,8 +171,6 @@ EX namespace models {
   EX transmatrix euclidean_spin;
   
   EX void configure() {
-    ld ball = -pconf.ballangle * degree;
-    cos_ball = cos(ball), sin_ball = sin(ball);
     model_straight = (pconf.mori().get()[0][0] > 1 - 1e-9);
     model_straight_yz = GDIM == 2 || (pconf.mori().get()[2][2] > 1-1e-9);
     if(history::on) history::apply();
@@ -603,7 +597,7 @@ EX namespace models {
       }
     
     if(is_3d(vpconf) && GDIM == 2 && !vr_settings) 
-      add_edit(vpconf.ballangle);     
+      add_edit(vpconf.ball());
     
     if(vr_settings) {
       dialog::addSelItem(XLAT("VR: rotate the 3D model"), fts(vpconf.vr_angle) + "°", 'B');
@@ -847,10 +841,6 @@ EX namespace models {
         shift(); vpconf.basic_model = eModel(argi());
         shift(); vpconf.formula = args();
         }
-      }
-    else if(argis("-ballangle")) { 
-      PHASEFROM(2); 
-      shift_arg_formula(vpconf.ballangle);
       }
     else if(argis("-topz")) { 
       PHASEFROM(2); 
@@ -1099,16 +1089,15 @@ EX namespace models {
       param_f(p.camera_angle, pp+"cameraangle", sp+"camera angle", 0);
       addsaver(p.ballproj, sp+"ballproj", 1);      
 
-      param_f(p.ballangle, pp+"ballangle", sp+"ball angle", 20)
-      -> editable(0, 90, 5, "camera rotation in 3D models", 
+      param_matrix(p.ball(), pp+"ballangle", 3)
+      -> editable("camera rotation in 3D models",
         "Rotate the camera in 3D models (ball model, hyperboloid, and hemisphere). "
         "Note that hyperboloid and hemisphere models are also available in the "
         "Hypersian Rug surfaces menu, but they are rendered differently there -- "
         "by making a flat picture first, then mapping it to a surface. "
         "This makes the output better in some ways, but 3D effects are lost. "
         "Hypersian Rug model also allows more camera freedom.",
-        'b')
-      -> unit = "°";
+        'b');
 
       string help =
         "This parameter has a bit different scale depending on the settings:\n"

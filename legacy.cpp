@@ -358,6 +358,11 @@ int read_legacy_args() {
     PHASE(3);  start_game();
     View = Id; playermoved = false;
     }
+  else if(argis("-ballangle")) {
+    PHASEFROM(2);
+    shift(); println(hlog, "-ballangle not implemented");
+    // shift_arg_formula(vpconf.ballangle);
+    }
   else return 1;
   return 0;
   }

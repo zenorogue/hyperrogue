@@ -162,7 +162,7 @@ void ballmodel(hyperpoint& ret, double alpha, double d, double zl) {
   ret[1] = ay;
   ret[2] = ax * sa;
   
-  models::apply_ball(ret[2], ret[1]);
+  ret = pconf.ball() * ret;
   }
 
 bool use_z_coordinate() {
@@ -970,7 +970,7 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
       
       swap(ret[1], ret[2]);
       
-      models::apply_ball(ret[2], ret[1]);
+      ret = pconf.ball() * ret;
       
       break;
       }
@@ -1032,7 +1032,7 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
       ret[0] = ret[0] / 3;
       tie(ret[1], ret[2]) = make_pair(((sphere?0:1) - ret[2]) / 3, ret[1] / 3);
       
-      models::apply_ball(ret[2], ret[1]);
+      ret = pconf.ball() * ret;
       break;
       }
     
@@ -1443,7 +1443,7 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
         if(euclid) ret = models::euclidean_spin * ret;
         ret[2] = (r-1) * sqrt( pow(360/pconf.spiral_cone, 2) - 1);
         
-        models::apply_ball(ret[2], ret[1]);
+        ret = pconf.ball() * ret;
         }
       else {      
         z = exp(z);
@@ -2614,8 +2614,8 @@ EX void draw_model_elements() {
         ld z = acosh(tz);
     
         hyperpoint a = xpush0(z);
-        ld cb = models::cos_ball;
-        ld sb = models::sin_ball;
+        ld cb = pconf.ball() [1][1];
+        ld sb = pconf.ball() [1][2];
         
         a[1] = sb * a[2] / -cb;
         a[0] = sqrt(-1 + a[2] * a[2] - a[1] * a[1]);
@@ -2807,11 +2807,13 @@ EX void draw_boundary(int w) {
       break;
     
     case mdHemisphere: {
+      ld cb = pconf.ball() [1][1];
+      ld sb = pconf.ball() [2][1];
       if(hyperbolic) {
         queuereset(mdPixel, p);
         for(int i=0; i<=360; i++) {
           ld s = sin(i * degree);
-          curvepoint(point3(current_display->radius * cos(i * degree), current_display->radius * s * (models::cos_ball * s >= 0 - 1e-6 ? 1 : abs(models::sin_ball)), 0));
+          curvepoint(point3(current_display->radius * cos(i * degree), current_display->radius * s * (cb * s >= 0 - 1e-6 ? 1 : abs(sb)), 0));
           }
         queuecurve(shiftless(Id), lc, fc, p);
         queuereset(pmodel, p);
@@ -2820,7 +2822,7 @@ EX void draw_boundary(int w) {
   
         for(int i=0; i<=360; i++) {
           ld s = sin(i * degree);
-          curvepoint(point3(current_display->radius * cos(i * degree), current_display->radius * s * models::sin_ball, 0));
+          curvepoint(point3(current_display->radius * cos(i * degree), current_display->radius * s * sb, 0));
           }
         queuecurve(shiftless(Id), lc, fc, p);
         queuereset(pmodel, p);
@@ -2842,8 +2844,8 @@ EX void draw_boundary(int w) {
         as_hyperboloid:
         ld& tz = pconf.top_z;
         ld mz = sphere ? atan(sqrt(tz*tz-1)) : acosh(tz);
-        ld cb = models::cos_ball;
-        ld sb = models::sin_ball;
+        ld cb = pconf.ball() [1][1];
+        ld sb = pconf.ball() [2][1];
         
         if(abs(sb) <= abs(cb) + 1e-5) {
           ld step = .01 / (1 << vid.linequality);        
@@ -3196,7 +3198,7 @@ EX int cone_side(const shiftpoint H) {
     ret[1] = cos(alpha) * r;
     ret[2] = (r-1) * sqrt( pow(360/pconf.spiral_cone, 2) - 1);
     
-    models::apply_ball(ret[2], ret[1]);
+    ret = pconf.ball() * ret;
     return ret;
     };
   

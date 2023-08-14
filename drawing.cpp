@@ -353,10 +353,9 @@ EX int get_side(const hyperpoint& H) {
     }
   if(pmodel == mdRotatedHyperboles)
     return H[1] > 0 ? -1 : 1;
-  if(pmodel == mdHyperboloid && hyperbolic)
-    return (models::sin_ball * H[2] > -models::cos_ball * H[1]) ? -1 : 1;
-  if(pmodel == mdHyperboloid && sphere)
-    return (models::sin_ball * H[2] > models::cos_ball * H[1]) ? -1 : 1;
+  if(pmodel == mdHyperboloid) {
+    return det2(pconf.ball() * cspin90(1, 2) * rgpushxto0(H)) > 0 ? 1 : -1;
+    }
   if(pmodel == mdHyperboloidFlat && sphere)
     return H[2] >= 0 ? 1 : -1;
   if(pmodel == mdHemisphere && hyperbolic) {
@@ -369,8 +368,9 @@ EX int get_side(const hyperpoint& H) {
     int s = H1[2] > 0 ? 1 : -1;
     if(hemi_side && s != hemi_side) return -spherespecial;
     H1[0] /= H1[2]; H1[1] /= H1[2];
-    H1[2] = s * sqrt(1 + H1[0]*H1[0] + H1[1] * H1[1]);
-    return (models::sin_ball * H1[2] > models::cos_ball * H1[1]) ? 1 : -1;
+    H1[2] = -s * sqrt(1 + H1[0]*H1[0] + H1[1] * H1[1]);
+    dynamicval<geometryinfo1> g(cginf.g, giHyperb2);
+    return det2(pconf.ball() * cspin90(1, 2) * rgpushxto0(H1)) > 0 ? 1 : -1;
     }
   if(pmodel == mdSpiral && pconf.spiral_cone < 360) {    
     return cone_side(shiftless(H));
@@ -2435,14 +2435,14 @@ EX void draw_main() {
     }
 
   if(pmodel == mdHemisphere && sphere && hemi_side == 0 && !vrhr::rendering()) {
-    hemi_side = models::sin_ball > 0 ? 1 : -1;
+    hemi_side = (pconf.ball() * hyperpoint(0,1,0,1)) [2] < 0 ? 1 : -1;
     draw_main();
 
     if(pconf.show_hyperboloid_flat) {
       dynamicval<eModel> dv (pmodel, mdHyperboloidFlat);
       dynamicval<int> ds (spherespecial, 1);
       for(auto& ptd: ptds)
-        if(!among(ptd->prio, PPR::MOBILE_ARROW, PPR::OUTCIRCLE, PPR::CIRCLE))
+        if(!among(ptd->prio, PPR::MOBILE_ARROW, PPR::OUTCIRCLE, PPR::CIRCLE)) 
           ptd->draw();
       }
 
