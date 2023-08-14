@@ -2680,14 +2680,14 @@ EX namespace linepatterns {
     }
 
   EX ld dual_length = 0;
-  EX ld dual_angle = 0;
+  EX trans23 dual_angle;
 
   hyperpoint dualpoint(cell *c) {
     if(!aperiodic) return tile_center();
     if(dual_length && c->master->c7 == c)
-      return MirrorX * xspinpush0(dual_angle * degree, dual_length);
+      return MirrorX * dual_angle.get() * xpush0(dual_length);
     if(dual_length)
-      return xspinpush0(dual_angle * degree, dual_length);
+      return dual_angle.get() * xpush0(dual_length);
     return tile_center();
     }
 

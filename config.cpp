@@ -3023,7 +3023,8 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
   param_f(linepatterns::meridian_prec2, "meridian_prec2");
 
   param_f(linepatterns::dual_length, "dual_length");
-  param_f(linepatterns::dual_angle, "dual_angle");
+  param_matrix(linepatterns::dual_angle.v2, "dual_angle", 2);
+  param_matrix(linepatterns::dual_angle.v3, "dual_angle3", 3);
 
   param_f(twopoint_xscale, "twopoint_xscale");
   param_i(twopoint_xshape, "twopoint_xshape");
