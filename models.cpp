@@ -969,8 +969,10 @@ EX namespace models {
       addsaverenum(p.model, pp+"used model", mdDisk);
       if(&p.model == &pmodel) param_custom(pmodel, "projection|Poincare|Klein|half-plane|perspective", menuitem_projection, '1');
 
-      param_matrix(p.mori().v2, pp+"mori", 2);
-      param_matrix(p.mori().v3, pp+"mori3", 3);
+      param_matrix(p.mori().v2, pp+"mori", 2)
+      -> editable("model orientation", "", 'o');
+      param_matrix(p.mori().v3, pp+"mori3", 3)
+      -> editable("model orientation 3D", "", 'o');
 
       param_f(p.top_z, sp+"topz", 5)
       -> editable(1, 20, .25, "maximum z coordinate to show", "maximum z coordinate to show", 'l');       
