@@ -3343,7 +3343,7 @@ EX void drawaura() {
       ld hx = (x * 1. - current_display->xcenter) / rad;
       ld hy = (y * 1. - current_display->ycenter) / rad / pconf.stretch;
   
-      if(pconf.camera_angle) camrotate(hx, hy);
+      if(!models::camera_straight) camrotate(hx, hy);
       
       ld fac = sqrt(hx*hx+hy*hy);
       if(fac < 1) continue;
@@ -3419,16 +3419,11 @@ EX void drawaura() {
     ld x = rad0 * c;
     ld y = rad0 * s;
     
-    if(pconf.camera_angle) {
-      ld z = rad0;
-
-      ld cam = pconf.camera_angle * degree;
-      GLfloat cc = cos(cam);
-      GLfloat ss = sin(cam);
-      
-      tie(y, z) = make_pair(y * cc - z * ss, z * cc + y * ss);
-      x *= rad0 / z;
-      y *= rad0 / z;
+    if(!models::camera_straight) {
+      hyperpoint p = hyperpoint(x, y, rad0, 1);
+      p = pconf.cam() * p;
+      x = p[0] * rad0 / p[2];
+      y = p[1] * rad0 / p[2];
       }
     cx[r][z][0] = x;
     cx[r][z][1] = y * pconf.stretch;

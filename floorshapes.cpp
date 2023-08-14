@@ -1381,7 +1381,7 @@ void geometry_information::make_floor_textures_here() {
   vid.xres = FLOORTEXTURESIZE;
   vid.yres = FLOORTEXTURESIZE;
   pconf.scale = 0.125;
-  pconf.camera_angle = 0;
+  dynamicval<transmatrix> vm(pconf.cam(), Id);
   pconf.alpha = 1;
   dynamicval<ld> lw(vid.linewidth, 2);
 

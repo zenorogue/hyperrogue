@@ -138,13 +138,14 @@ projection_configuration::projection_configuration() {
   ptr_model_orientation = new trans23;
   ptr_ball = new transmatrix;
   *ptr_ball = cspin(1, 2, 20._deg);
+  ptr_camera = new transmatrix; *ptr_camera = Id;
   }
 
 EX namespace models {
 
   EX trans23 rotation;
   EX int do_rotate = 1;
-  EX bool model_straight, model_straight_yz;
+  EX bool model_straight, model_straight_yz, camera_straight;
 
   /** screen coordinates to orientation logical coordinates */
   EX void ori_to_scr(hyperpoint& h) { if(!model_straight) h = pconf.mori().get() * h; }
@@ -171,6 +172,7 @@ EX namespace models {
   EX void configure() {
     model_straight = (pconf.mori().get()[0][0] > 1 - 1e-9);
     model_straight_yz = GDIM == 2 || (pconf.mori().get()[2][2] > 1-1e-9);
+    camera_straight = eqmatrix(pconf.cam(), Id);
     if(history::on) history::apply();
     
     if(!euclid) {
@@ -1057,8 +1059,13 @@ EX namespace models {
       param_custom(p.alpha, sp+"projection", menuitem_projection_distance, 'p')
       ->help_text = "projection distance|Gans Klein Poincare orthographic stereographic";
 
-      param_f(p.camera_angle, pp+"cameraangle", sp+"camera angle", 0);
-      addsaver(p.ballproj, sp+"ballproj", 1);      
+      param_matrix(p.cam(), pp+"cameraangle", 3)
+      -> editable(pp+"camera angle", "Rotate the camera. Can be used to obtain a first person perspective, "
+        "or third person perspective when combined with Y shift.", 'S')
+      -> set_extra([] {
+        dialog::addBoolItem(XLAT("render behind the camera"), vpconf.back_and_front, 'R');
+        dialog::add_action([] { vpconf.back_and_front = !vpconf.back_and_front; });
+        });
 
       param_matrix(p.ball(), pp+"ballangle", 3)
       -> editable("camera rotation in 3D models",

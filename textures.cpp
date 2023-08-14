@@ -998,7 +998,7 @@ void init_textureconfig() {
   addsaver(vid.yshift, "Y shift", 0);
   addsaver(pconf.yposition, "Y position", 0);
   addsaver(pconf.xposition, "X position", 0);
-  addsaver(pconf.camera_angle, "camera angle", 0);
+  addsaver((matrix_eq&)pconf.cam(), "camera angle");
   addsaverenum(targetvariation, "bitruncated", eVariation::bitruncated);
   // ... geometry parameters
 

@@ -956,7 +956,7 @@ EX void showStartMenu() {
       pconf.mori() = racing::race_angle;
       racing::race_advance = 1;
       vid.yshift = 0;
-      pconf.camera_angle = 0;
+      pconf.cam() = Id;
       pconf.xposition = 0;
       pconf.yposition = 0;
       pconf.scale = 1;

@@ -836,20 +836,8 @@ void display_data::set_projection(int ed, ld shift) {
     glhr::projection_multiply(glhr::translate(0, 0.5, 0));
     }      
   
-  if(pconf.camera_angle && pmodel != mdPixel) {
-    ld cam = pconf.camera_angle * degree;
-
-    GLfloat cc = cos(cam);
-    GLfloat ss = sin(cam);
-    
-    GLfloat yzspin[16] = {
-      1, 0, 0, 0,
-      0, cc, ss, 0,
-      0, -ss, cc, 0,
-      0, 0, 0, 1
-      };
-    
-    glhr::projection_multiply(glhr::as_glmatrix(yzspin));
+  if(!models::camera_straight && pmodel != mdPixel) {
+    glhr::projection_multiply(glhr::tmtogl_transpose(pconf.cam()));
     }
   
   if(u_alpha) {

@@ -1116,9 +1116,9 @@ EX namespace geom3 {
   EX void switch_tpp() {
     if(dual::split(switch_fpp)) return;
     if(rug::rugged) rug::close();
-    if(pmodel == mdDisk && pconf.camera_angle) {
+    if(pmodel == mdDisk && !models::camera_straight) {
       vid.yshift = 0;
-      pconf.camera_angle = 0;
+      pconf.cam() = Id;
       pconf.xposition = 0;
       pconf.yposition = 0;
       pconf.scale = 1;      
@@ -1126,7 +1126,7 @@ EX namespace geom3 {
       }
     else {
       vid.yshift = -0.3;
-      pconf.camera_angle = -45;
+      pconf.cam() = cspin(1, 2, -45._deg);
       pconf.scale = 18/16. * vid.xres / vid.yres / multi::players;
       pconf.xposition = 0;
       pconf.yposition = -0.9;

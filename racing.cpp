@@ -967,12 +967,12 @@ void race_projection() {
   
   dialog::init(XLAT("racing projections"));
 
-  dialog::addBoolItem(XLAT("Poincaré disk model"), pmodel == mdDisk && !pconf.camera_angle, '1');
+  dialog::addBoolItem(XLAT("Poincaré disk model"), pmodel == mdDisk && models::camera_straight, '1');
   dialog::add_action([] () {
     pmodel = mdDisk;
     race_advance = 0;
     vid.yshift = 0;
-    pconf.camera_angle = 0;
+    pconf.cam() = Id;
     pconf.xposition = 0;
     pconf.yposition = 0;
     pconf.scale = 1;
@@ -986,7 +986,7 @@ void race_projection() {
     pconf.mori() = race_angle;
     race_advance = 1;
     vid.yshift = 0;
-    pconf.camera_angle = 0;
+    pconf.cam() = Id;
     pconf.xposition = 0;
     pconf.yposition = 0;
     pconf.scale = 1;
@@ -1000,7 +1000,7 @@ void race_projection() {
     pconf.mori() = race_angle * spin90();
     race_advance = 0.5;
     vid.yshift = 0;
-    pconf.camera_angle = 0;
+    pconf.cam() = Id;
     pconf.xposition = 0;
     pconf.yposition = 0;
     pconf.scale = 1;
@@ -1008,12 +1008,12 @@ void race_projection() {
     vid.smart_range_detail = 3;
     });
 
-  dialog::addBoolItem(XLAT("third-person perspective"), pmodel == mdDisk && pconf.camera_angle, '4');
+  dialog::addBoolItem(XLAT("third-person perspective"), pmodel == mdDisk && !models::camera_straight, '4');
   dialog::add_action([] () {
     pmodel = mdDisk;
     race_advance = 0;
     vid.yshift = -0.3;
-    pconf.camera_angle = -45;
+    pconf.cam() = cspin(1, 2, -45._deg);
     pconf.scale = 18/16. * vid.xres / vid.yres / multi::players;
     pconf.xposition = 0;
     pconf.yposition = -0.9;

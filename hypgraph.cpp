@@ -24,11 +24,9 @@ void ghcheck(hyperpoint &ret, const shiftpoint &H) {
   }
 
 EX void camrotate(ld& hx, ld& hy) {
-  ld cam = pconf.camera_angle * degree;
-  GLfloat cc = cos(cam);
-  GLfloat ss = sin(cam);
-  ld ux = hx, uy = hy * cc + ss, uz = cc - ss * hy;
-  hx = ux / uz, hy = uy / uz;
+  hyperpoint p = hyperpoint(hx, hy, 1, 1);
+  p = pconf.cam() * p;
+  hx = p[0] / p[2], hy = p[1] / p[2];
   }
 
 EX bool non_spatial_model() {
@@ -145,7 +143,7 @@ EX shiftpoint gethyper(ld x, ld y) {
     return find_on_screen(hxy, rgpushxto0(ghpm));
     }
   
-  if(pconf.camera_angle) camrotate(hx, hy);
+  if(!models::camera_straight) camrotate(hx, hy);
   
   return shiftless(perspective_to_space(hpxyz(hx, hy, 0)));
   }
@@ -703,7 +701,7 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
         return;
         }
       ld tz = get_tz(H);
-      if(!pconf.camera_angle) {
+      if(models::camera_straight) {
         ret[0] = H[0] / tz;
         ret[1] = H[1] / tz;
         if(GDIM == 3) ret[2] = H[2] / tz;
@@ -713,13 +711,13 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
       else {
         ld tx = H[0];
         ld ty = H[1];
-        ld cam = pconf.camera_angle * degree;
-        GLfloat cc = cos(cam);
-        GLfloat ss = sin(cam);
-        ld ux = tx, uy = ty * cc - ss * tz, uz = tz * cc + ss * ty;
-        ret[0] = ux / uz;
-        ret[1] = uy / uz;
-        ret[2] = vid.xres * current_display->eyewidth() / 2 / current_display->radius - vid.ipd / uz / 2;
+
+        hyperpoint p = hyperpoint(tx, ty, tz, 1);
+        p = rot_inverse(pconf.cam()) * p;
+
+        ret[0] = p[0] / p[2];
+        ret[1] = p[1] / p[2];
+        ret[2] = vid.xres * current_display->eyewidth() / 2 / current_display->radius - vid.ipd / p[2] / 2;
         }
       return;
       }
@@ -2386,6 +2384,7 @@ eGeometry backup_geometry;
 eVariation backup_variation;
 videopar backup_vid;
 bool backup_lpu;
+transmatrix backup_cam;
 
 /** \brief enable the 'flat' model for drawing HUD. See hr::flat_model_enabler */
 EX void enable_flat_model(int val) {
@@ -2395,6 +2394,7 @@ EX void enable_flat_model(int val) {
     #endif
     backup_geometry = geometry;
     backup_variation = variation;
+    backup_cam = pconf.cam();
     backup_lpu = nisot::local_perspective_used;
     backup_vid = vid;
     geometry = gNormal;
@@ -2404,7 +2404,7 @@ EX void enable_flat_model(int val) {
     pmodel = mdDisk;
     pconf.alpha = 1;
     pconf.scale = 1;
-    pconf.camera_angle = 0;
+    pconf.cam() = Id;
     pconf.stretch = 1;
     
     vid.always3 = false;
@@ -2421,6 +2421,7 @@ EX void enable_flat_model(int val) {
     geometry = backup_geometry;
     variation = backup_variation;
     nisot::local_perspective_used = backup_lpu;
+    pconf.cam() = backup_cam;
     vid = backup_vid;
     geom3::apply_always3();
     calcparam();
@@ -2466,7 +2467,7 @@ EX transmatrix atscreenpos(ld x, ld y, ld size) {
 
 void circle_around_center(ld radius, color_t linecol, color_t fillcol, PPR prio) {
   #if CAP_QUEUE
-  if(among(pmodel, mdDisk, mdEquiarea, mdEquidistant, mdFisheye) && !(pmodel == mdDisk && hyperbolic && pconf.alpha <= -1) && pconf.camera_angle == 0) {
+  if(among(pmodel, mdDisk, mdEquiarea, mdEquidistant, mdFisheye) && !(pmodel == mdDisk && hyperbolic && pconf.alpha <= -1) && models::camera_straight) {
     hyperpoint ret;
     applymodel(shiftless(xpush0(radius)), ret);
     ld r = hypot_d(2, ret);

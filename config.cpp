@@ -2605,7 +2605,7 @@ EX geom3::eSpatialEmbedding shown_spatial_embedding() {
   return geom3::spatial_embedding;
   }
 
-EX bool in_tpp() { return pmodel == mdDisk && pconf.camera_angle; }
+EX bool in_tpp() { return pmodel == mdDisk && !models::camera_straight; }
 
 EX void display_embedded_errors() {
   using namespace geom3;
@@ -2854,19 +2854,7 @@ EX void show3D() {
       dialog::editNumber(mouseaim_sensitivity, -1, 1, 0.002, 0.01, XLAT("mouse aiming sensitivity"), "set to 0 to disable");
       });
     }
-  if(true) {
-    dialog::addSelItem(XLAT("camera rotation"), fts(vpconf.camera_angle), 'S');
-    dialog::add_action([] {
-      dialog::editNumber(vpconf.camera_angle, -180, 180, 5, 0, XLAT("camera rotation"), 
-        XLAT("Rotate the camera. Can be used to obtain a first person perspective, "
-        "or third person perspective when combined with Y shift.")
-        );
-      dialog::get_di().extra_options = [] {
-        dialog::addBoolItem(XLAT("render behind the camera"), vpconf.back_and_front, 'R');
-        dialog::add_action([] { vpconf.back_and_front = !vpconf.back_and_front; });
-        };
-      });
-    }
+  if(true) add_edit(vpconf.cam());
   if(GDIM == 2) {
     dialog::addSelItem(XLAT("fixed facing"), vid.fixed_facing ? fts(vid.fixed_facing_dir) : XLAT("OFF"), 'f');
     dialog::add_action([] () { vid.fixed_facing = !vid.fixed_facing; 
@@ -3959,11 +3947,6 @@ EX int read_config_args() {
     }
   else if(argis("-mrsv")) {
     PHASEFROM(2); shift(); reserve_limit = argi(); apply_memory_reserve();
-    }
-  else if(argis("-yca")) {
-    PHASEFROM(2); 
-    shift_arg_formula(vid.yshift);
-    shift_arg_formula(pconf.camera_angle);
     }
   else if(argis("-pside")) {
     PHASEFROM(2); 

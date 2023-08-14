@@ -370,6 +370,12 @@ int read_legacy_args() {
     if(GDIM == 3) shift_arg_formula(models::rotation_xz);
     if(GDIM == 3) shift_arg_formula(models::rotation_xy2); */
     }
+  else if(argis("-yca")) {
+    PHASEFROM(2);
+    shift_arg_formula(vid.yshift);
+    shift(); ld angle = argf();
+    pconf.cam() = cspin(0, 2, angle);
+    }
   else return 1;
   return 0;
   }

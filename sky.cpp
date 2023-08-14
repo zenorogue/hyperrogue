@@ -645,7 +645,7 @@ EX void make_air() {
 
     pconf.alpha = 1;
     pconf.scale = 1;
-    pconf.camera_angle = 0;
+    dynamicval<transmatrix> vm(pconf.cam(), Id);
     pconf.stretch = 1;
     pmodel = mdDisk;
 
