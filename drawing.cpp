@@ -925,16 +925,17 @@ ld period_at(ld y) {
     }     
   }
 
-void apply_ori_gl(glvertex& g) {
-  auto Ori = pconf.mori().v2;
+void ori_to_scr(glvertex& g) {
+  auto& Ori = pconf.mori().v2;
   tie(g[0], g[1]) = make_pair(
     Ori[0][0] * g[0] + Ori[0][1] * g[1],
     Ori[1][0] * g[0] + Ori[1][1] * g[1]
     );
   }
 
-void apply_iori_gl(glvertex& g) {
-  auto Ori = pconf.mori().v2;
+void scr_to_ori(glvertex& g) {
+  auto& Ori = pconf.mori().v2;
+  /* we invert it, so transposition is applied in the formula */
   tie(g[0], g[1]) = make_pair(
     Ori[0][0] * g[0] + Ori[1][0] * g[1],
     Ori[0][1] * g[0] + Ori[1][1] * g[1]
@@ -947,7 +948,7 @@ void adjust(bool tinf) {
   
   if(!models::model_straight)
     for(auto& g: glcoords)
-      apply_ori_gl(g);
+      scr_to_ori(g);
 
   for(int i = 0; i<isize(glcoords); i++) periods[i] = period_at(glcoords[i][1]);  
     
@@ -1005,7 +1006,7 @@ void adjust(bool tinf) {
   if(abs(first - last) < 1e-6) {
     if(!models::model_straight)
       for(auto& g: glcoords)
-        apply_iori_gl(g);
+        ori_to_scr(g);
     }
   else {
     if(tinf) { 
@@ -1036,7 +1037,7 @@ void adjust(bool tinf) {
       }
     if(!models::model_straight)
       for(auto& g: glcoords)
-        apply_iori_gl(g);
+        ori_to_scr(g);
     // we have already looped
     loop_min = loop_max = 0;  
     }
