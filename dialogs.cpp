@@ -1157,6 +1157,7 @@ EX namespace dialog {
         ne.reaction = [re, this] { *edit_matrix = spin(angle * degree); if(re) re(); };
         ne.reaction_final = reaction;
         ne.animatable = false;
+        ne.dialogflags |= dialogflags;
         });
       }
     if(dim == 3) {
@@ -1172,6 +1173,7 @@ EX namespace dialog {
           ne.reaction = [re, i, j, this, cur] { *edit_matrix = cspin(i, j, angle * degree) * cur; if(re) re(); };
           ne.reaction_final = reaction;
           ne.animatable = false;
+          ne.dialogflags |= dialogflags;
           });
         };
       rot_but(0, 1, "rotate in XY", 'z');
@@ -1204,6 +1206,7 @@ EX namespace dialog {
           }
         catch(hr_parse_exception&) { }
         };
+      dialog::get_di().dialogflags |= dialogflags;
       });
     if(extra_options) extra_options();
     addBack();

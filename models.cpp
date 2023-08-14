@@ -933,6 +933,7 @@ EX namespace models {
       }
 
     auto setrot = [] {
+      dialog::get_di().dialogflags |= sm::CENTER;
       dialog::addBreak(100);
       dialog::addBoolItem_choice("line animation only", models::do_rotate, 0, 'N');
       dialog::addBoolItem_choice("gravity lands", models::do_rotate, 1, 'G');
