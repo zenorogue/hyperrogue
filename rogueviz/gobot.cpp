@@ -336,10 +336,11 @@ bool set_owner_auto() {
       if(t0 && t1) o = Unowned;
       else if(t0) o = 0;
       else if(t1) o = 1;
-      else return true; /* all free */
+      else { go_message("all free!"); return true; } /* all free */
       }
     }
 
+  take_shot();
   return true;
   }
 
