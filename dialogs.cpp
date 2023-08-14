@@ -301,7 +301,8 @@ EX namespace dialog {
 
   ld as_degrees(transmatrix T) {
      hyperpoint h = T * point31(1, 0, 0);
-     ld alpha = atan2(h[1], h[0]);
+     ld alpha = atan2(-h[1], h[0]);
+     if(alpha == 0) alpha = 0;
      return alpha / degree;
      }
 
@@ -1148,7 +1149,7 @@ EX namespace dialog {
     if(dim == 2) {
       static ld angle;
       angle = as_degrees(*edit_matrix);
-      addSelItem("enter angle", fts(angle), 'a');
+      addSelItem("enter angle", fts(angle) + "°", 'a');
       dialog::add_action([this] {
         editNumber(angle, -180, 180, 90, 0, title, help);
         auto& ne = get_ne();
