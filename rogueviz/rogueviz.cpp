@@ -1012,7 +1012,7 @@ void configure_edge_display() {
           dialog::addColorItem(t->name, t->color, 'a' + i);
         dialog::add_action([t] {
           dialog::openColorDialog(t->color, NULL);
-          dialog::dialogflags |= sm::MAYDARK | sm::SIDE;
+          dialog::get_di().dialogflags |= sm::MAYDARK | sm::SIDE;
           });
         break;
       case 1: case 2: {
@@ -1030,8 +1030,8 @@ void configure_edge_display() {
             static ld i;
             i = 1 / val;
             dialog::editNumber(i, 1, 1000000, 1, 500, weight_label, "");
-            dialog::reaction = [&val] () { val = i ? 1. / i : 5; };
-            dialog::scaleLog(); dialog::ne.step = .2;
+            dialog::get_di().reaction = [&val] () { val = i ? 1. / i : 5; };
+            dialog::scaleLog(); dialog::get_ne().step = .2;
             });
           }
         break;

@@ -235,20 +235,17 @@ void show() {
 
   dialog::addSelItem("advance", fts(advance), 'a');
   dialog::add_action([]() {
-    dialog::editNumber(advance, 0, 100, 1, 1, "advance", "");
-    dialog::reaction = make_routes;
+    dialog::editNumber(advance, 0, 100, 1, 1, "advance", "").reaction = make_routes;
     });
 
   dialog::addSelItem("over", fts(over), 'o');
   dialog::add_action([]() {
-    dialog::editNumber(over, 0, 100, 1, 1, "over", "");
-    dialog::reaction = make_routes;
+    dialog::editNumber(over, 0, 100, 1, 1, "over", "").reaction = make_routes;
     });
 
   dialog::addSelItem("over2", fts(over2), 'p');
   dialog::add_action([]() {
-    dialog::editNumber(over2, 0, 100, 1, 1, "over2", "");
-    dialog::reaction = make_routes;
+    dialog::editNumber(over2, 0, 100, 1, 1, "over2", "").reaction = make_routes;
     });
 
   dialog::addBoolItem_action("animated", animated, 'a');

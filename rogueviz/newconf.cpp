@@ -946,7 +946,10 @@ void ncee() {
     if(uni == 's') show_mapping = !show_mapping;
     if(uni == 'g') show_mgrid = !show_mgrid;
     if(uni == 't') pushScreen(conf_shapes);
-    if(uni == 'y') dialog::editNumber(mapping_split, 0, 1, 0.05, 0.75, "", ""), dialog::dialogflags = sm::NOSCR;
+    if(uni == 'y') {
+      dialog::editNumber(mapping_split, 0, 1, 0.05, 0.75, "", "");
+      dialog::get_di().dialogflags = sm::NOSCR;
+      }
     if(uni == '-') {
       int x = (mousex - cd->xcenter - xc - x0) / siz;
       int y = (mousey - cd->ycenter - yc - y0) / siz;

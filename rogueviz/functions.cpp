@@ -85,17 +85,19 @@ void draw_to(ld t0, hyperpoint h0, ld t1, hyperpoint h1, int small = 0, int big 
 
 int editwhich = -1;
 
+dialog::string_dialog se;
+
 void show_graph() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen();
   dialog::init(XLAT("graph"));
   for(int i=0; i<isize(formula); i++) {
     if(editwhich == i) {
-      dialog::addItem(dialog::view_edited_string(), '1'+i);
+      dialog::addItem(se.view_edited_string(), '1'+i);
       }
     else {
       dialog::addItem(formula[i], editwhich == -1 ? '1'+i : 0);
-      dialog::add_action([i] () { editwhich = i; dialog::start_editing(formula[i]); });
+      dialog::add_action([i] () { editwhich = i; se.start_editing(formula[i]); });
       }
     }
 
@@ -104,7 +106,7 @@ void show_graph() {
 
   keyhandler = [] (int sym, int uni) {
     if(editwhich >= 0) {
-      if(dialog::handle_edit_string(sym, uni)) ;
+      if(se.handle_edit_string(sym, uni)) ;
       else if(doexiton(sym, uni))
         editwhich = -1;
       }

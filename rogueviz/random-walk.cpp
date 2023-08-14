@@ -140,7 +140,7 @@ void show() {
       }
     if(in_video) {
       history::create(currentmap->gamestart(), walkers[0].at, walkers[0].T);
-      models::rotation = rand() % 360;
+      models::rotation = spin((rand() % 360) * degree);
       }
     });
 

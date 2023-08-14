@@ -871,7 +871,7 @@ void switch_fpp_fixed() {
     playermoved = false;
     }
   else {
-    pconf.camera_angle = 0;
+    pconf.cam() = Id;
     vid.yshift = 0;
     ys = tView[2][3];
     println(hlog, "ys = ", ys, " from ", tView);

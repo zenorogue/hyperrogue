@@ -169,12 +169,12 @@ void collatz_video(const string &fname) {
   if(true) {
     sightrange_bonus = 3;
     genrange_bonus = 3;
-    dronemode = true; pconf.camera_angle = -45; rog3 = true; patterns::whichShape = '8';
+    dronemode = true; pconf.cam() = spin(-45._deg); rog3 = true; patterns::whichShape = '8';
     vid.aurastr = 512;
     
     collatz::lookup(763, 60);
 
-    history::create_playerpath(), models::rotation = 1;
+    history::create_playerpath(), models::rotation = spin90();
     // pmodel = mdBand;
 
 #define STORYCOUNT 24

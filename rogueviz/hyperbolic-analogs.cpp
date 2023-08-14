@@ -34,7 +34,7 @@ vector<reaction_t> models_to_use = {
     else {
       pmodel = mdHyperboloid;
       pconf.top_z = 4;
-      pconf.ballangle = -20;
+      pconf.ball() = spin(-20._deg);
       pconf.scale = .75;
       }
     spherename = "Euclidean sphere";

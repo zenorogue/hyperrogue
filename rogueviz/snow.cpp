@@ -216,8 +216,7 @@ void snow_slide(vector<tour::slide>& v, string title, string desc, reaction_t t)
     if(mode == pmKey) {
       using namespace anims;
       tour::slide_backup(ma, ma == maTranslation ? maNone : maTranslation);
-      tour::slide_backup<ld>(shift_angle, 0);
-      tour::slide_backup<ld>(movement_angle, 90);
+      tour::slide_backup<transmatrix>(movement_angle.v3, cspin90(0, 2));
       }
     
     if(mode == pmStart) {
@@ -241,8 +240,7 @@ void show() {
 
   dialog::addSelItem("lambda", fts(snow_lambda), 'l');
   dialog::add_action([]() {
-    dialog::editNumber(snow_lambda, 0, 100, 1, 10, "lambda", "snowball density");
-    dialog::reaction = [] { snowballs_at.clear(); };
+    dialog::editNumber(snow_lambda, 0, 100, 1, 10, "lambda", "snowball density").reaction = [] { snowballs_at.clear(); };
     });
 
   dialog::addSelItem("size", fts(snow_shape), 's');

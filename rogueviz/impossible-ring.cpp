@@ -246,8 +246,7 @@ bool cylanim = false;
 
 void o_key(o_funcs& v) {
   v.push_back(named_functionality("ring size", [] { 
-    dialog::editNumber(cscale, 0, 1, .01, .1, "", "");
-    dialog::reaction = reset;
+    dialog::editNumber(cscale, 0, 1, .01, .1, "", "").reaction = reset;
     }));
   }
 

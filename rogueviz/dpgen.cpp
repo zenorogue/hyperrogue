@@ -223,12 +223,12 @@ EX void show_menu() {
 
     dialog::addItem(XLAT("enter seed"), 's');
     dialog::add_action([] { 
-      dialog::editNumber(last_seed, 0, 1000000, 1, last_seed, XLAT("seed"), "");
-      dialog::reaction_final = [] {
+      auto& di = dialog::editNumber(last_seed, 0, 1000000, 1, last_seed, XLAT("seed"), "");
+      di.reaction_final = [] {
         launch(last_seed, last_elimit, last_hlimit); 
         popScreenAll();
         };
-      dialog::extra_options = [] {
+      di.extra_options = [] {
         dialog::addSelItem("Euclidean size", its(last_elimit), 'E');
         dialog::add_action([] { popScreen(); dialog::editNumber(last_elimit, 2, 10, 1, 3, XLAT("Euclidean size"), ""); });
         dialog::addSelItem("hyperbolic size", its(last_hlimit), 'H');

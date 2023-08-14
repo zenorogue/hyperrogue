@@ -453,10 +453,10 @@ void show() {
     last_segment = -1;
     test_t = 0;
     dialog::editNumber(test_t, 0, 100, 0.1, 0, "enter the percentage", "");
-    dialog::reaction = [] {
+    dialog::get_di().reaction = [] {
       handle_animation(test_t / 100);
       };
-    dialog::extra_options = [] {
+    dialog::get_di().extra_options = [] {
       dialog::addSelItem("current segment", its(last_segment), 'C');
       dialog::addSelItem("current front", fts(c_front_dist), 'F');
       dialog::addSelItem("current up", fts(c_up_dist), 'U');

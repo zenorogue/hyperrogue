@@ -195,8 +195,7 @@ void add_extra_projections() {
 
   add_extra("azimuthal cylindrical", mf::cylindrical | mf::azimuthal | mf::orientation, [] (shiftpoint& H_orig, hyperpoint& H, hyperpoint& ret) {
     find_zlev(H);
-    models::apply_orientation_yz(H[1], H[2]);
-    models::apply_orientation(H[0], H[1]);
+    models::scr_to_ori(H);
 
     ld x, y;
     y = asin_auto(H[1]);
@@ -212,6 +211,7 @@ void add_extra_projections() {
     ret[1] = H[1] / H[0] * x;
     if(GDIM == 2) ret[2] = H[2] / H[0] * x;
     ret[LDIM] = 1;
+    models::ori_to_scr(H);
     });
   }
 
