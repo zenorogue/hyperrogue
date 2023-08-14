@@ -762,8 +762,8 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
         break;
         }
       
+      /* it was inverted, so we apply scr_to_ori again */
       models::scr_to_ori(H);
-      
       H *= pconf.halfplane_scale;
       auto ocos = pconf.mori().get()[0][0];
       auto osin = pconf.mori().get()[1][0];
@@ -781,7 +781,7 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
       ret[1] = ocos + H[1];
       ret[2] = GDIM == 3 ? H[2] : 0;
       if(MAXMDIM == 4) ret[3] = 1;
-       if(zlev != 1 && use_z_coordinate())
+      if(zlev != 1 && use_z_coordinate())
         apply_depth(ret, height);
       else 
         ret[1] += height * pconf.depth_scaling;
@@ -2800,7 +2800,7 @@ EX void draw_boundary(int w) {
     
     case mdHalfplane: 
       if(hyperbolic && GDIM == 2) {
-        transmatrix Ori = rot_inverse(pconf.mori().get());
+        transmatrix Ori = pconf.mori().get();
         queuestraight(Ori * spin270() * xpush0(fakeinf), 1, lc, fc, p);
         return;
         }
