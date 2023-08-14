@@ -1299,16 +1299,16 @@ EX void apply() {
 
     case maRotation:
       if(GDIM == 3) shift_view(ztangent(-rotation_distance));
-      rotate_view(movement_angle.get());
-      rotate_view(spin(TAU * t / period));
       rotate_view(rot_inverse(movement_angle.get()));
+      rotate_view(spin(TAU * t / period));
+      rotate_view(movement_angle.get());
       if(GDIM == 3) shift_view(ztangent(rotation_distance));
       moved();
       break;
     
     case maTranslationRotation:
       shift_view(
-        rot_inverse(movement_angle.get()) * xtangent(cycle_length * t / period)
+        movement_angle.get() * xtangent(cycle_length * t / period)
         );
       moved();
       rotate_view(cspin(0, GDIM-1, TAU * t / period));
@@ -1320,19 +1320,21 @@ EX void apply() {
     #if CAP_BT
     case maParabolic:
       reflect_view();
-      View = movement_angle.get() * View;
+      rotate_view(rot_inverse(movement_angle.get()));
       if(GDIM == 2)
         View = bt::parabolic(parabolic_length * t / period) * View;
       else
         View = bt::parabolic3(parabolic_length * t / period, 0) * View;
-      View = rot_inverse(movement_angle.get()) * View;
+      rotate_view(movement_angle.get());
       moved();
       break;
     #endif
     case maCircle: {
+      rotate_view(rot_inverse(movement_angle.get()));
       centerover = rotation_center;
       ld alpha = circle_spins * TAU * ticks / period;
       View = spin(-cos_auto(circle_radius)*alpha) * xpush(circle_radius) * spin(alpha) * rotation_center_View;
+      rotate_view(movement_angle.get());
       moved();
       break;
       }

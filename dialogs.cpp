@@ -591,7 +591,7 @@ EX namespace dialog {
     vector<hyperpoint> pts;
     for(int a=0; a<dim; a++) {
       hyperpoint h = C0; h[a] = r;
-      pts.push_back(rot_inverse(T.get()) * h);
+      pts.push_back(T.get() * h);
       }
 
     flat_model_enabler fme;
@@ -612,7 +612,7 @@ EX namespace dialog {
       queuecurve(V, cols[a], 0, PPR::LINE);
       }
     if(dim == 3) for(int a=0; a<dim; a++) {
-      auto pt = pts[a]; ld val = pt[2] * vid.fsize / r / 5;
+      auto pt = pts[a]; ld val = -pt[2] * vid.fsize / r / 5;
       curvepoint(hyperpoint(pt[0], pt[1]+val, 1, 1));
       curvepoint(hyperpoint(pt[0]-val, pt[1]-val*sqrt(3)/2, 1, 1));
       curvepoint(hyperpoint(pt[0]+val, pt[1]-val*sqrt(3)/2, 1, 1));
