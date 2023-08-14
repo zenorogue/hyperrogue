@@ -1210,6 +1210,8 @@ EX namespace dialog {
     }
 
   EX bool editingDetail() {
+    auto ptr = dynamic_cast<number_dialog*> (screens.back().target_base());
+    if(!ptr) return false;
     auto& ne = get_ne();
     return ne.editwhat == &vid.highdetail || ne.editwhat == &vid.middetail;
     }
