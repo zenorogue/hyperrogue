@@ -1124,29 +1124,77 @@ EX namespace dialog {
     transmatrix *edit_matrix;
     int dim;
     void draw() override;
+    void large_viz();
     };
   #endif
+
+  void matrix_dialog::large_viz() {
+    addCustom(500, [this] {
+      int siz = dfsize * 5;
+      int mid = (top + tothei) / 2;
+      visualize_matrix(*edit_matrix, dcenter, mid, siz/2, dim);
+      });
+    }
 
   void matrix_dialog::draw() {
     cmode = dialogflags;
     gamescreen();
     init(title);
     addInfo(help);
-    addCustom(500, [this] {
-      int siz = dfsize * 5;
-      int mid = (top + tothei) / 2;
-      visualize_matrix(*edit_matrix, dcenter, mid, siz/2, dim);
-      });
+    large_viz();
     addBreak(100);
-    addItem("enter angle", 'a');
+    addItem("reset", 'r');
+    dialog::add_action([this] { *edit_matrix = Id; });
+    if(dim == 2) {
+      static ld angle;
+      angle = as_degrees(*edit_matrix);
+      addSelItem("enter angle", fts(angle), 'a');
+      dialog::add_action([this] {
+        editNumber(angle, -180, 180, 90, 0, title, help);
+        auto& ne = get_ne();
+        auto re = reaction;
+        ne.extra_options = [this] { large_viz(); };
+        ne.reaction = [re, this] { *edit_matrix = spin(angle * degree); if(re) re(); };
+        ne.reaction_final = reaction;
+        ne.animatable = false;
+        });
+      }
+    if(dim == 3) {
+      transmatrix cur = *edit_matrix;
+      auto rot_but = [this, cur] (int i, int j, string title, char key) {
+        addItem(title, key);
+        dialog::add_action([i, j, title, this, cur] {
+          static ld angle; angle = 0;
+          editNumber(angle, -180, 180, 90, 0, title, XLAT("Angle to rotate by."));
+          auto& ne = get_ne();
+          auto re = reaction;
+          ne.extra_options = [this] { large_viz(); };
+          ne.reaction = [re, i, j, this, cur] { *edit_matrix = cspin(i, j, angle * degree) * cur; if(re) re(); };
+          ne.reaction_final = reaction;
+          ne.animatable = false;
+          });
+        };
+      rot_but(0, 1, "rotate in XY", 'z');
+      rot_but(0, 2, "rotate in XZ", 'y');
+      rot_but(1, 2, "rotate in YZ", 'x');
+      }
+    static string formula;
+    formula = "?";
+    anims::get_parameter_animation(anims::find_param(edit_matrix), formula);
+    addSelItem("enter formula", formula, 'f');
     dialog::add_action([this] {
-      static ld angle = as_degrees(*edit_matrix);
-      editNumber(angle, -180, 180, 90, 0, title, help);
-      auto& ne = get_ne();
-      auto re = reaction;
-      ne.reaction = [re, this] { *edit_matrix = spin(angle * degree); if(re) re(); };
-      ne.reaction_final = reaction;
-      ne.animatable = false;
+      if(formula == "?") formula = "id";
+      anims::get_parameter_animation(anims::find_param(edit_matrix), formula);
+      dialog::edit_string(formula, "formula", XLAT("dxy(n) = rotate n degrees from x to y\n\nd-degree, r-radian, t-turn\n\nexample: dxy(30)*dyz(45)"));
+      dialog::get_di().extra_options = [this] { large_viz(); };
+      dialog::get_di().reaction = [this] {
+        try {
+          *edit_matrix = parsematrix(formula);
+          auto p = anims::find_param(edit_matrix);
+          if(p) p->load_as_animation(formula);
+          }
+        catch(hr_parse_exception&) { }
+        };
       });
     addBack();
     display();
