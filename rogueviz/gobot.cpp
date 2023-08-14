@@ -52,6 +52,8 @@ bool draw_go(cell *c, const shiftmatrix& V);
 
 void init_go_board() {
   ac = currentmap->allcells();
+  current.taken.clear();
+  current.owner.clear();
   current.taken.resize(isize(ac), 2);
   current.owner.resize(isize(ac), 2);
   current.captures[0] = 0;
