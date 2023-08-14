@@ -1205,6 +1205,7 @@ EX namespace dialog {
         catch(hr_parse_exception&) { }
         };
       });
+    if(extra_options) extra_options();
     addBack();
     display();
     }
