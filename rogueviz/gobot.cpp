@@ -533,7 +533,7 @@ void accept_command(string s) {
 
   if(tokens[0] == "score") {
     array<int, 4> owned_by, stones;
-    for(int i=0; i<2; i++)
+    for(int i=0; i<4; i++)
       owned_by[i] = stones[i] = 0;
 
     for(int i=0; i<isize(ac); i++)
