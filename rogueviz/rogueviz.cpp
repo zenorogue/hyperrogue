@@ -527,7 +527,7 @@ bool drawVertex(const shiftmatrix &V, cell *c, shmup::monster *m) {
   
   bool multidraw = quotient;
   
-  bool use_brm = closed_or_bounded && isize(currentmap->allcells()) <= brm_limit;
+  bool use_brm = closed_manifold && isize(currentmap->allcells()) <= brm_limit;
 
   ld hi_weight = 0;
         
