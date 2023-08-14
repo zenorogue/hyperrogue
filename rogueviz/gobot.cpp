@@ -40,6 +40,7 @@ struct boarddata {
   vector<int> taken, owner;
   array<int, 2> captures;
   string geom;
+  int last_index;
   };
 
 boarddata current;
@@ -58,6 +59,7 @@ void init_go_board() {
   current.owner.resize(isize(ac), 2);
   current.captures[0] = 0;
   current.captures[1] = 0;
+  current.last_index = -1;
   shstream f; mapstream::save_geometry(f); current.geom = f.s;
   indices.clear();
   for(int i=0; i<isize(ac); i++)
@@ -138,6 +140,12 @@ bool draw_go(cell *c, const shiftmatrix& V) {
     lv_needed = 2;
     }
   
+  if(id == current.last_index) {
+    vid.linewidth *= 3;
+    queuecircleat1(c, V, 1, 0x8080FFFF);
+    vid.linewidth /= 3;
+    }
+
   if(labels_value >= lv_needed) {
     string s = index_to_str(id);
     queuestr(V, isize(s) == 1 ? 0.8 : 0.5, s, 0xFFD500);
@@ -273,6 +281,7 @@ void dead_group(int pos) {
       for(int j: neigh_indices(at)) d.visit(j);
       }
     }
+  current.last_index = pos;
   }
 
 bool dead_group(string s) {
@@ -311,6 +320,7 @@ bool mark_owned(string s, int who) {
       }
     }
   
+  current.last_index = pos;
   return true;
   }
 
@@ -340,6 +350,7 @@ bool set_owner_auto() {
       }
     }
 
+  current.last_index = -1;
   take_shot();
   return true;
   }
@@ -387,6 +398,7 @@ void try_to_play(string s, int who) {
     }
   
   else {
+    current.last_index = pos;
     take_shot();
     }      
   }
@@ -410,12 +422,15 @@ void set_owner(vector<string> tokens, int who) {
     if(mark_owned(tokens[i], who)) ok = true;
     }
   if(!ok) undo();
-  else take_shot();
+  else {
+    take_shot();
+    }
   }
 
 void clear_owner_marks() {
   save_backup();
   for(int i=0; i<isize(ac); i++) current.owner[i] = Free;
+  current.last_index = -1;
   take_shot();
   }
 
@@ -472,6 +487,7 @@ void accept_command(string s) {
   if(tokens[0] == "labels" && t == 2) {
     try {
       labels_value = parseld(tokens[1]);
+      current.last_index = -1;
       take_shot();
       }
     catch(hr_parse_exception& exc) {
