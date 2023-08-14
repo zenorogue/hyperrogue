@@ -523,11 +523,14 @@ void accept_command(string s) {
       "undo - undo last move\n"
       "export - export board to string (no history, owners, captures)\n"
       "import [string] - import board from string\n"
-      );      
+      "csc [value] - stone size, current is " + fts(vid.creature_scale) + "\n"
+      );
 
   if(tokens[0] == "save") save_go();
 
   if(tokens[0] == "die") die_at(tokens);
+
+  if(tokens[0] == "csc" && t == 2) vid.creature_scale = parseld(tokens[1].c_str());
   
   if(tokens[0] == "clear" && t == 1) 
     clear_owner_marks();
