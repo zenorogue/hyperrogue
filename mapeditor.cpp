@@ -541,6 +541,8 @@ EX namespace mapstream {
       f.write(euc::eu_input.twisted);
       }
     f.write(mine_adjacency_rule);
+    f.write(req_disksize);
+    f.write(diskshape);
     }
   
   EX void load_geometry(hstream& f) {
@@ -681,6 +683,10 @@ EX namespace mapstream {
       }
     if(vernum >= 0xA810)
       f.read(mine_adjacency_rule);
+    if(vernum >= 0xA933) {
+      f.read(req_disksize);
+      f.read(diskshape);
+      }
     geometry_settings(was_default);
     }
   
