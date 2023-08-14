@@ -196,6 +196,82 @@ void clean_old_shots() {
 
 bool menubased;
 
+bool full_scores = true;
+
+struct score {
+  array<int, 4> owned_by, stones;
+  };
+
+score get_score() {
+  score sc;
+  for(int i=0; i<4; i++)
+    sc.owned_by[i] = sc.stones[i] = 0;
+
+  for(int i=0; i<isize(ac); i++)
+    if(current.taken[i] != Free)
+      sc.stones[current.taken[i]]++;
+    else sc.owned_by[current.owner[i]]++;
+  return sc;
+  }
+
+void go_screenshot_content() {
+  gamescreen();
+  if(!full_scores) return;
+
+  score sc = get_score();
+
+  flat_model_enabler fme;
+  initquickqueue();
+
+  ld rad = vid.fsize;
+
+  if(sc.stones[0] > 0) {
+    shiftmatrix V = shiftless(atscreenpos(rad, rad, rad));
+    queuepolyat(V, cgi.shHugeDisk, player_colors[0], PPR::SUPERLINE);
+    write_in_space(V, max_glfont_size, .8, its(sc.stones[0]), player_colors[1], 1);
+    }
+
+  if(current.captures[0] > 0) {
+    shiftmatrix V = shiftless(atscreenpos(rad * 3, rad, rad));
+    write_in_space(V, max_glfont_size, .8, its(current.captures[0]), player_colors[1], 1);
+    }
+
+  if(sc.owned_by[0] > 0) {
+    shiftmatrix V = shiftless(atscreenpos(rad, rad * 3, rad));
+    write_in_space(V, max_glfont_size, .8, its(sc.owned_by[0]), player_colors[1], 1);
+    }
+
+  if(sc.stones[1] > 0) {
+    shiftmatrix V = shiftless(atscreenpos(vid.xres-rad, rad, rad));
+    queuepolyat(V, cgi.shHugeDisk, player_colors[1], PPR::SUPERLINE);
+    write_in_space(V, max_glfont_size, .8, its(sc.stones[1]), player_colors[0], 1);
+    }
+
+  if(current.captures[1] > 0) {
+    shiftmatrix V = shiftless(atscreenpos(vid.xres - rad * 3, rad, rad));
+    write_in_space(V, max_glfont_size, .8, its(current.captures[1]), player_colors[0], 1);
+    }
+
+  if(sc.owned_by[1] > 0) {
+    shiftmatrix V = shiftless(atscreenpos(vid.xres - rad, rad * 3, rad));
+    write_in_space(V, max_glfont_size, .8, its(sc.owned_by[1]), player_colors[1], 1);
+    }
+
+  if(sc.owned_by[2] > 0) {
+    shiftmatrix V = shiftless(atscreenpos(rad, vid.yres - rad, rad));
+    write_in_space(V, max_glfont_size, .8, its(sc.owned_by[2]), player_colors[2], 1);
+    }
+
+  if(sc.owned_by[3] > 0) {
+    shiftmatrix V = shiftless(atscreenpos(rad, vid.yres - rad, rad));
+    write_in_space(V, max_glfont_size, .8, its(sc.owned_by[3]), player_colors[3], 1);
+    }
+
+
+  quickqueue();
+  println(hlog, "should be drawn");
+  }
+
 void take_shot() {
   #if AEGIS
   if(cur) {
@@ -217,7 +293,7 @@ void take_shot() {
   #endif
   else if(!menubased) {
     println(hlog, "taking test screenshot");
-    shot::take("go-test.png");
+    shot::take("go-test.png", go_screenshot_content);
     }
   }
 
@@ -515,7 +591,7 @@ void accept_command(string s) {
       "of [where] - the area is free\n"
       "oc [where] - the area is common\n"
       "oauto - own automatically\n"
-      "score - view the score\n"
+      "score - view the score (score on/off to include the score in screenshots)\n"
       "hires - take a 1000x1000 screenshot\n"
       "restart - restart\n"
       "bring-unrectified x y -- restart on unrectified GP(x,y) Bring surface\n"
@@ -553,23 +629,19 @@ void accept_command(string s) {
     }
 
   if(tokens[0] == "score") {
-    array<int, 4> owned_by, stones;
-    for(int i=0; i<4; i++)
-      owned_by[i] = stones[i] = 0;
-
-    for(int i=0; i<isize(ac); i++)
-      if(current.taken[i] != Free)
-        stones[current.taken[i]]++;
-      else owned_by[current.owner[i]]++;
+    score sc = get_score();
     
     shstream ss;
-    println(ss, "black: ", stones[0], " stones, ", owned_by[0], " area, ", current.captures[1], " prisoners");
-    println(ss, "white: ", stones[1], " stones, ", owned_by[1], " area, ", current.captures[0], " prisoners");
+    println(ss, "black: ", sc.stones[0], " stones, ", sc.owned_by[0], " area, ", current.captures[1], " prisoners");
+    println(ss, "white: ", sc.stones[1], " stones, ", sc.owned_by[1], " area, ", current.captures[0], " prisoners");
     print(ss, "board size: ", isize(ac));
-    if(owned_by[2]) print(ss, " free: ", owned_by[2]);
-    if(owned_by[3]) print(ss, " common: ", owned_by[3]);
+    if(sc.owned_by[2]) print(ss, " free: ", sc.owned_by[2]);
+    if(sc.owned_by[3]) print(ss, " common: ", sc.owned_by[3]);
     
     go_message(ss.s);
+
+    if(t == 2 && tokens[1] == "on") { full_scores = true; take_shot(); }
+    if(t == 2 && tokens[1] == "off") { full_scores = false; take_shot(); }
     }
 
   if(tokens[0] == "restart") {
@@ -780,11 +852,13 @@ int rugArgs() {
   return 0;
   }
 
+bool display_stats = false;
+
 auto gobot_hook = 
   addHook(hooks_args, 100, rugArgs) +
   addHook(shmup::hooks_turn, 100, [] (int t) {
     if(shot_state == 1) {
-      shot::take("go-temp.png");
+      shot::take("go-temp.png", go_screenshot_content);
       shot_state = 2;
       }
     return false;
