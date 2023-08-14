@@ -223,8 +223,6 @@ struct trans23 {
     }
   };
 
-inline trans23 *gen_trans23() { return new trans23; }
-
 /** mirror image */
 constexpr transmatrix Mirror = diag(1,-1,1,1);
 

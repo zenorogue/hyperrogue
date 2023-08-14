@@ -254,8 +254,6 @@ enum eStereo { sOFF, sAnaglyph, sLR, sODS };
 
 enum eModel : int;
 
-struct trans23* gen_trans23();
-
 /** configuration of the projection */
 struct projection_configuration {
   eModel model;            /**< which projection, see classes.cpp */
@@ -291,30 +289,7 @@ struct projection_configuration {
   int back_and_front; /* 0 = do not, 1 = do, 2 = only back */
   struct trans23 *ptr_model_orientation;
 
-  projection_configuration() {
-    formula = "z^2"; top_z = 5; model_transition = 1; spiral_angle = 70; spiral_x = 10; spiral_y = 7; 
-    rotational_nil = 1;
-    right_spiral_multiplier = 1;
-    any_spiral_multiplier = 1;
-    sphere_spiral_multiplier = 2;
-    spiral_cone = 360;
-    use_atan = false;
-    product_z_scale = 1;
-    aitoff_parameter = .5;
-    miller_parameter = .8;
-    loximuthal_parameter = 0;
-    winkel_parameter = .5;
-    show_hyperboloid_flat = true;
-    depth_scaling = 1;
-    vr_angle = 0;
-    hyperboloid_scaling = 1;
-    vr_zshift = 0;
-    vr_scale_factor = 1;
-    back_and_front = 0;
-    dualfocus_autoscale = false;
-    axial_angle = 90;
-    ptr_model_orientation = gen_trans23();
-    }
+  projection_configuration();
 
   trans23& mori() { return *ptr_model_orientation; }
   };
