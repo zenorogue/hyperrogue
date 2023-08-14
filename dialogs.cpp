@@ -1717,10 +1717,23 @@ EX namespace dialog {
     dialog::v.push_back(make_pair(s, color));
     }
   
-  int editpos = 0;
-  EX string *edited_string;
+  EX string editchecker(int sym, int uni) {
+      if(uni >= 32 && uni < 127) return string("") + char(uni);
+      return "";
+      }
 
-  EX string view_edited_string() {
+  #if HDR
+  struct string_dialog : extdialog {
+    int editpos = 0;
+    string *edited_string;
+    string view_edited_string();
+    void draw();
+    void start_editing(string& s);
+    bool handle_edit_string(int sym, int uni, function<string(int, int)> checker = editchecker);
+    };
+  #endif
+  
+  string string_dialog::view_edited_string() {
     string cs = *edited_string;
     if(editpos < 0) editpos = 0;
     if(editpos > isize(cs)) editpos = isize(cs);
@@ -1728,17 +1741,12 @@ EX namespace dialog {
     return cs;
     }    
   
-  EX void start_editing(string& s) {
+  void string_dialog::start_editing(string& s) {
     edited_string = &s;
     editpos = isize(s);
     }
   
-  EX string editchecker(int sym, int uni) {
-    if(uni >= 32 && uni < 127) return string("") + char(uni);
-    return "";
-    }
-
-  EX bool handle_edit_string(int sym, int uni, function<string(int, int)> checker IS(editchecker)) {
+  bool string_dialog::handle_edit_string(int sym, int uni, function<string(int, int)> checker) {
     auto& es = *edited_string;
     string u2;
     if(DKEY == SDLK_LEFT) editpos--;
@@ -1747,21 +1755,19 @@ EX namespace dialog {
       if(editpos == 0) return true;
       es.replace(editpos-1, 1, "");
       editpos--;
+      if(reaction) reaction();
       }
     else if((u2 = checker(sym, uni)) != "") {
       for(char c: u2) {
         es.insert(editpos, 1, c);
         editpos ++;
         }
+      if(reaction) reaction();
       }
     else return false;
     return true;
     }
 
-  struct string_dialog : extdialog {
-    void draw();
-    };
-  
   void string_dialog::draw() {
     cmode = sm::NUMBER | dialogflags;
     gamescreen();
@@ -1789,10 +1795,10 @@ EX namespace dialog {
     }
 
   EX void edit_string(string& s, string title, string help) {
-    start_editing(s);
     string_dialog ne;
     ne.title = title;
     ne.help = help;
+    ne.start_editing(s);
     pushScreen(ne);
     }
 

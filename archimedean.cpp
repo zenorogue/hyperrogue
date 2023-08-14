@@ -1349,6 +1349,8 @@ function<void()> setcanvas(char c) {
     };
   }
 
+dialog::string_dialog se;
+
 EX void show() {
   if(lastsample < isize(samples)) {
     string s = samples[lastsample].first;
@@ -1374,7 +1376,7 @@ EX void show() {
   dialog::init(XLAT("Archimedean tilings"));
   
   if(symbol_editing) {
-    dialog::addSelItem("edit", dialog::view_edited_string(), '/');
+    dialog::addSelItem("edit", se.view_edited_string(), '/');
     dialog::add_action([] () { 
       symbol_editing = false;
       if(!edited.errors) enable(edited);
@@ -1405,7 +1407,7 @@ EX void show() {
     dialog::add_action([] () { 
       symbol_editing = true;
       edited = current;
-      dialog::start_editing(edited.symbol);
+      se.start_editing(edited.symbol);
       edited.parse();
       });
     dialog::addBreak(100);
@@ -1508,7 +1510,7 @@ EX void show() {
   keyhandler = [] (int sym, int uni) {
     if(symbol_editing && sym == SDLK_RETURN) sym = uni = '/';
     dialog::handleNavigation(sym, uni);
-    if(symbol_editing && dialog::handle_edit_string(sym, uni)) {
+    if(symbol_editing && se.handle_edit_string(sym, uni)) {
       edited.parse(edited.symbol);
       return;
       }
