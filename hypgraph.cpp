@@ -2943,9 +2943,9 @@ EX void change_shift(shiftpoint& h, ld by) {
     tie(h[0], h[1]) = make_pair(h[0] * ca - h[1] * sa, h[1] * ca + h[0] * sa);
     }
   else if((mdinf[pmodel].flags & mf::uses_bandshift) || (sphere && pmodel == mdSpiral)) {
-    h.h = pconf.mori().get() * h.h;
+    models::ori_to_scr(h.h);
     h.h = xpush(-by) * h.h;
-    h.h = rot_inverse(pconf.mori().get()) * h.h;
+    models::scr_to_ori(h.h);
     }
   }
 
@@ -2960,10 +2960,10 @@ EX void change_shift(shiftmatrix& T, ld by) {
       }
     }
   else if((mdinf[pmodel].flags & mf::uses_bandshift) || (sphere && pmodel == mdSpiral)) {
-    T.T = pconf.mori().get() * T.T;
+    models::scr_to_ori(T.T);
     T.T = xpush(-by) * T.T;
     fixmatrix(T.T);
-    T.T = rot_inverse(pconf.mori().get()) * T.T;
+    models::ori_to_scr(T.T);
     }
   }
 
@@ -3006,7 +3006,7 @@ EX void optimize_shift(shiftmatrix& T) {
     }
 
   else if(((mdinf[pmodel].flags & mf::uses_bandshift) && T[LDIM][LDIM] > 30) || (sphere && pmodel == mdSpiral)) {
-    T.T = pconf.mori().get() * T.T;
+    models::ori_to_scr(T.T);
     hyperpoint H = tC0(T.T);
     find_zlev(H);
     
@@ -3019,7 +3019,7 @@ EX void optimize_shift(shiftmatrix& T) {
     T.shift += x;
     T.T = xpush(-x) * T.T;
     fixmatrix(T.T);
-    T.T = rot_inverse(pconf.mori().get()) * T.T;
+    models::scr_to_ori(T.T);
     }
   }
 

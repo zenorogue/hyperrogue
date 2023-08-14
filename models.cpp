@@ -124,9 +124,11 @@ EX namespace models {
 
   /** screen coordinates to orientation logical coordinates */
   EX void ori_to_scr(hyperpoint& h) { if(!model_straight) h = pconf.mori().get() * h; }
+  EX void ori_to_scr(transmatrix& h) { if(!model_straight) h = pconf.mori().get() * h; }
 
   /** orientation logical coordinates to screen coordinates */
   EX void scr_to_ori(hyperpoint& h) { if(!model_straight) h = iso_inverse(pconf.mori().get()) * h; }
+  EX void scr_to_ori(transmatrix& h) { if(!model_straight) h = iso_inverse(pconf.mori().get()) * h; }
 
   #if HDR
   template<class A>
