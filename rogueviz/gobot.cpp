@@ -59,6 +59,7 @@ void init_go_board() {
   current.captures[0] = 0;
   current.captures[1] = 0;
   shstream f; mapstream::save_geometry(f); current.geom = f.s;
+  indices.clear();
   for(int i=0; i<isize(ac); i++)
     indices[ac[i]] = i;
   }
