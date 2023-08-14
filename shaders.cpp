@@ -59,7 +59,7 @@ glhr::glmatrix model_orientation_gl() {
   for(int a=0; a<GDIM; a++) {
     hyperpoint row;
     for(int b=0; b<4; b++) row[b] = s[a][b];
-    models::apply_iori(row);
+    models::ori_to_scr(row);
     for(int b=0; b<4; b++) s[a][b] = row[b];
     }
   return s;
@@ -791,7 +791,7 @@ void display_data::set_projection(int ed, ld shift) {
       for(int a=0; a<4; a++)  {
         hyperpoint row;
         for(int b=0; b<4; b++) row[b] = pp[a][b];
-        models::apply_ori(row);
+        models::scr_to_ori(row);
         for(int b=0; b<4; b++) pp[a][b] = row[b];
         }
       }

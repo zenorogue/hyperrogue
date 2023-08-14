@@ -253,7 +253,7 @@ void move_y_to_z(hyperpoint& H, pair<ld, ld> coef) {
 
 template<class T> void makeband(shiftpoint H, hyperpoint& ret, const T& f) {
   ld zlev = find_zlev(H.h);
-  models::apply_ori(H.h);
+  models::scr_to_ori(H.h);
   auto r = move_z_to_y(H.h);
   
   ld x, y, yf, zf=0;
@@ -271,7 +271,7 @@ template<class T> void makeband(shiftpoint H, hyperpoint& ret, const T& f) {
   ld yzf = y * zf; y *= yf;
   ret = hpxyz(x / M_PI, y / M_PI, 0);
   move_y_to_z(ret, r);
-  models::apply_iori(ret);
+  models::ori_to_scr(ret);
   if(zlev != 1 && use_z_coordinate()) 
     apply_depth(ret, yzf / M_PI);
   return;
@@ -395,9 +395,9 @@ EX void apply_perspective(const hyperpoint& H, hyperpoint& ret) {
 EX void apply_nil_rotation(hyperpoint& H) {
   if(nil) {
     nilv::convert_ref(H, nilv::model_used, nilv::nmSym);
-    models::apply_ori(H);
+    models::scr_to_ori(H);
     nilv::convert_ref(H, nilv::nmSym, pconf.rotational_nil);
-    models::apply_iori(H);  
+    models::ori_to_scr(H);
     }
   }
 
@@ -452,7 +452,7 @@ EX void threepoint_projection(const hyperpoint& H, hyperpoint& ret) {
   hyperpoint H1 = H;
   find_zlev(H1);
   if(true) {
-    models::apply_ori(H1);
+    models::scr_to_ori(H1);
     }
 
   auto p = pconf.twopoint_param;
@@ -498,14 +498,14 @@ EX void threepoint_projection(const hyperpoint& H, hyperpoint& ret) {
   geometry = gCubeTiling;
   
   ret = sxy;
-  models::apply_iori(ret);
+  models::ori_to_scr(ret);
   }
 #endif
 
 EX vector<hr::function<void(shiftpoint& H_orig, hyperpoint& H, hyperpoint& ret)>> extra_projections;
 
 EX void make_axial(hyperpoint H, hyperpoint& ret, const hr::function<ld(hyperpoint)>& f) {
-  models::apply_ori(H);
+  models::scr_to_ori(H);
 
   ret[0] = f(H);
   ld axi = pconf.axial_angle;
@@ -526,7 +526,7 @@ EX void make_axial(hyperpoint H, hyperpoint& ret, const hr::function<ld(hyperpoi
 
   ret[3] = 1;
 
-  models::apply_iori(ret);
+  models::ori_to_scr(ret);
   }
 
 // according to https://github.com/cspersonal/peirce-quincuncial-projection/blob/master/peirceQuincuncialProjection.R
@@ -649,7 +649,7 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
       #endif
       if(!computing_semidirect) S = lp_apply(S);
       if(hyperbolic) {
-        models::apply_iori(ret);
+        models::ori_to_scr(ret);
         }
       apply_perspective(S, ret);
       return;
@@ -744,7 +744,7 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
       ld zlev = find_zlev(H);
       H = space_to_perspective(H);
       
-      models::apply_ori(H);
+      models::scr_to_ori(H);
   
       H[1] += 1;
       double rad = sqhypot_d(GDIM, H);
@@ -758,11 +758,11 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
         ret[1] = 1 + H[1];
         ret[2] = H[2];
         ret[3] = 1;
-        models::apply_iori(ret);
+        models::ori_to_scr(ret);
         break;
         }
       
-      models::apply_ori(H);
+      models::scr_to_ori(H);
       
       H *= pconf.halfplane_scale;
       auto ocos = pconf.mori().get()[0][0];
@@ -817,7 +817,7 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
     
     case mdQuadrant: {
       H = space_to_perspective(H);
-      models::apply_ori(H);
+      models::scr_to_ori(H);
       
       tie(H[0], H[1]) = make_pair((H[0] + H[1]) / sqrt(2), (H[1] - H[0]) / sqrt(2));
 
@@ -832,7 +832,7 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
       ret[0] = -H[1] * x - 1;
       ret[1] = H[1] / x + 1;
 
-      models::apply_iori(ret);
+      models::ori_to_scr(ret);
       break;
       }
     
@@ -849,13 +849,13 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
 
       apply_nil_rotation(H);
       
-      if(hyperbolic) models::apply_ori(H);
+      if(hyperbolic) models::scr_to_ori(H);
       
       ret = hyperbolic ? deparabolic13(H) : H;
       ret *= .5;
       ret[LDIM] = 1;
       
-      if(hyperbolic) models::apply_iori(ret);
+      if(hyperbolic) models::ori_to_scr(ret);
       
       if(!vrhr::rendering()) ret = lp_apply(ret);
 
@@ -864,24 +864,24 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
 
     case mdHorocyclicEqa: {
 
-      if(hyperbolic) models::apply_ori(H);
+      if(hyperbolic) models::scr_to_ori(H);
 
       ret = hyperbolic ? deparabolic13(H) : H;
       ret[0] = exp(-ret[0]) - 1;
       ret *= .5;
       ret[LDIM] = 1;
 
-      if(hyperbolic) models::apply_iori(ret);
+      if(hyperbolic) models::ori_to_scr(ret);
 
       break;
       }
 
     case mdConformalSquare: {
       find_zlev(H);
-      models::apply_ori(H);
+      models::scr_to_ori(H);
       if(euclid) H[0] /= pconf.fisheye_param, H[1] /= pconf.fisheye_param;
       ret = to_square(H);
-      models::apply_iori(ret);
+      models::ori_to_scr(ret);
       break;
       }
 
@@ -891,7 +891,7 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
       ret *= .5;
       ret[LDIM] = 1;
 
-      if(hyperbolic) models::apply_iori(ret);
+      if(hyperbolic) models::ori_to_scr(ret);
 
       if(!vrhr::rendering()) ret = lp_apply(ret);
 
@@ -1054,7 +1054,7 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
       }
     
     case mdSimulatedPerspective: {
-      models::apply_ori(H);
+      models::scr_to_ori(H);
       auto yz = move_z_to_y(H);
       hyperpoint Hl = xpush(-pconf.twopoint_param) * H;
       hyperpoint Hr = xpush(+pconf.twopoint_param) * H;
@@ -1073,25 +1073,25 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
       ret[0] = -ret[0]; ret[1] = -ret[1];
 
       move_y_to_z(ret, yz);      
-      models::apply_iori(ret);
+      models::ori_to_scr(ret);
       break;
       }
     
     case mdTwoHybrid: {
-      models::apply_ori(H);
+      models::scr_to_ori(H);
       auto yz = move_z_to_y(H);
       
       ret = compute_hybrid(H, whateveri[0]); 
       
       move_y_to_z(ret, yz);      
-      models::apply_iori(ret);
+      models::ori_to_scr(ret);
       break;
       }
     
     case mdJoukowsky: 
     case mdJoukowskyInverted: {
-      models::apply_ori(H);
-      // with equal speed skiprope: models::apply_orientation(H[1], H[0]);
+      models::scr_to_ori(H);
+      // with equal speed skiprope: models::scr_to_orientation(H[1], H[0]);
   
       if(pconf.skiprope) {
         static ld last_skiprope = 0;
@@ -1151,7 +1151,7 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
       else {
         move_y_to_z(ret, yz);
         }
-      models::apply_iori(ret);
+      models::ori_to_scr(ret);
   
       break;
       }
@@ -1160,14 +1160,14 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
     
       H = space_to_perspective(H);
 
-      models::apply_ori(H);
+      models::scr_to_ori(H);
   
       pair<long double, long double> p = polygonal::compute(H[0], H[1]);
   
       ret[0] = p.first;
       ret[1] = p.second;
       ret[2] = 0;
-      models::apply_iori(ret);
+      models::ori_to_scr(ret);
       break;
       }  
       
@@ -1178,7 +1178,7 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
         
         H = space_to_perspective(H);
         
-        models::apply_ori(H);
+        models::scr_to_ori(H);
     
         H[0] += 1;
         double rad = H[0]*H[0] + H[1]*H[1];
@@ -1199,7 +1199,7 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
         ret[0] /= -(1-mt) * 90._deg;
         ret[1] /= (1-mt) * 90._deg;
         
-        models::apply_iori(ret);
+        models::ori_to_scr(ret);
         }
       else 
         makeband(H_orig, ret, band_conformal);
@@ -1296,7 +1296,7 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
     
     case mdWerner: {
 
-      models::apply_ori(H);
+      models::scr_to_ori(H);
 
       find_zlev(H); // ignored for now
       
@@ -1310,7 +1310,7 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
       ret[2] = 0;
       ret[3] = 1;
 
-      models::apply_iori(ret);
+      models::ori_to_scr(ret);
       break;
       }
 
@@ -1382,7 +1382,7 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
     case mdRotatedHyperboles: {
       // ld zlev =  <- not implemented
       find_zlev(H); // + vid.depth;
-      models::apply_ori(H);
+      models::scr_to_ori(H);
       
       ld y = asin_auto(H[1]);
       ld x = asin_auto_clamp(H[0] / cos_auto(y));
@@ -1497,7 +1497,7 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
     
     case mdPanini: {
       find_zlev(H);
-      models::apply_ori(H);
+      models::scr_to_ori(H);
 
       ld proh = sqrt(H[2]*H[2] + curvature() * H[0] * H[0]);
       H /= proh;
@@ -1505,7 +1505,7 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
       ret = H;
       ret[2] = 0; ret[3] = 1;
 
-      models::apply_iori(ret);
+      models::ori_to_scr(ret);
       break;
       }
     
@@ -1513,7 +1513,7 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
       find_zlev(H);
       H = space_to_perspective(H);
       
-      models::apply_ori(H);
+      models::scr_to_ori(H);
       
       ld u = H[0], v = H[1];
       if(abs(u) > 1e-3 && abs(v) > 1e-3) {
@@ -1526,7 +1526,7 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
       ret[2] = 0;
       ret[3] = 1;
   
-      models::apply_iori(ret);
+      models::ori_to_scr(ret);
       break;
       }
     
@@ -2564,7 +2564,7 @@ EX void draw_model_elements() {
           hyperpoint H = xpush(p * pconf.twopoint_param) * ypush0(h);
           
           hyperpoint res = compute_hybrid(H, 2 | mode);
-          models::apply_iori(res);
+          models::ori_to_scr(res);
           curvepoint(res * current_display->radius);
           }
         queuecurve(shiftless(Id), ringcolor, 0, PPR::CIRCLE);
@@ -2586,7 +2586,7 @@ EX void draw_model_elements() {
       vid.linewidth *= 5;
       for(int i=0; i<=3; i++) {
         hyperpoint h = xspinpush0(120._deg*i, pconf.twopoint_param);
-        models::apply_iori(h);
+        models::ori_to_scr(h);
         curvepoint(h);
         }
       
@@ -2732,7 +2732,7 @@ EX void draw_boundary(int w) {
         h[broken_coord] = -sin_auto(a*degree) * rem;
         h[0] = sin_auto(a*degree) * eps * s;
         h[unbroken_coord] = cos_auto(a*degree);
-        models::apply_iori(h);
+        models::ori_to_scr(h);
         curvepoint(h);
         }
       queuecurve(shiftless(Id), periodcolor, 0, PPR::CIRCLE).flags |= POLY_FORCEWIDE;
@@ -2753,13 +2753,13 @@ EX void draw_boundary(int w) {
         ld y = 0;
         ld z = -sqrt(1 - x*x);
         hyperpoint h0 = hpxyz(x, y, z);
-        models::apply_iori(h0);
+        models::ori_to_scr(h0);
         hyperpoint h1;
         applymodel(shiftless(h0), h1);
         
-        models::apply_ori(h1);
+        models::scr_to_ori(h1);
         h1[1] = abs(h1[1]) * b;
-        models::apply_iori(h1);
+        models::ori_to_scr(h1);
         curvepoint(h1);
         }
   
@@ -3397,7 +3397,7 @@ EX hyperpoint lie_log(const shiftpoint h1) {
 EX hyperpoint lie_log_correct(const shiftpoint H_orig, hyperpoint& H) {
   find_zlev(H);
   if(hyperbolic) {
-    models::apply_ori(H);
+    models::scr_to_ori(H);
     return lie_log(shiftless(H));
     }
   return lie_log(H_orig);

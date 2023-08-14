@@ -1683,7 +1683,7 @@ bool broken_projection(dqi_poly& p0) {
     int fail = 0;
     int last_fail;
 
-    for(auto& h: all) models::apply_ori(h);
+    for(auto& h: all) models::scr_to_ori(h);
 
     auto break_in_xz = [&] (hyperpoint a, hyperpoint b, int xcoord, int zcoord) {
       return a[xcoord] * b[xcoord] <= 0 && (a[xcoord] * (b[zcoord]+zlow) - b[xcoord] * (a[zcoord]+zlow)) * (a[xcoord] - b[xcoord]) < 0;
@@ -1708,7 +1708,7 @@ bool broken_projection(dqi_poly& p0) {
 
     /* we don't rotate h's back, just change p.V */
     for(int i=0; i<3; i++)
-      models::apply_ori(p.V.T[i]);
+      models::scr_to_ori(p.V.T[i]);
 
     if(fail) {
       if(p0.tinf) return true;
@@ -1891,8 +1891,8 @@ void dqi_poly::draw() {
           shiftpoint h2 = V * glhr::gltopoint((*tab)[offset+(i+1)%cnt]);
           
           hyperpoint ah1 = h1.h, ah2 = h2.h;
-          models::apply_ori(ah1);
-          models::apply_ori(ah2);
+          models::scr_to_ori(ah1);
+          models::scr_to_ori(ah2);
           if(ah1[1] * ah2[1] > 0) continue;
           ld c1 = ah1[1], c2 = -ah2[1];
           if(c1 < 0) c1 = -c1, c2 = -c2;

@@ -122,11 +122,13 @@ EX namespace models {
   EX ld cos_ball, sin_ball;
   EX bool model_straight, model_straight_yz;
 
-  EX void apply_ori(hyperpoint& h) { if(!model_straight) h = pconf.mori().get() * h; }
-  EX void apply_iori(hyperpoint& h) { if(!model_straight) h = iso_inverse(pconf.mori().get()) * h; }
+  /** screen coordinates to orientation logical coordinates */
+  EX void ori_to_scr(hyperpoint& h) { if(!model_straight) h = pconf.mori().get() * h; }
+
+  /** orientation logical coordinates to screen coordinates */
+  EX void scr_to_ori(hyperpoint& h) { if(!model_straight) h = iso_inverse(pconf.mori().get()) * h; }
+
   #if HDR
-  // screen coordinates to logical coordinates: apply_orientation(x,y)
-  // logical coordinates back to screen coordinates: apply_orientation(y,x)
   template<class A>
   void apply_ball(A& x, A& y) { tie(x,y) = make_pair(x*cos_ball + y*sin_ball, y*cos_ball - x*sin_ball); }
   #endif

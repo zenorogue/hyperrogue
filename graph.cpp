@@ -3402,9 +3402,9 @@ EX void drawaura() {
     if(joukowsky) {
       hyperpoint v(c, s, 0, 1);
       if(inversion)
-        models::apply_iori(v);
+        models::ori_to_scr(v);
       else        
-        models::apply_ori(v);
+        models::scr_to_ori(v);
       ld c1 = v[0], s1 = v[1];
 
       ld& mt = pconf.model_transition;
