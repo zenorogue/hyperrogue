@@ -354,7 +354,7 @@ EX int get_side(const hyperpoint& H) {
   if(pmodel == mdRotatedHyperboles)
     return H[1] > 0 ? -1 : 1;
   if(pmodel == mdHyperboloid) {
-    return det2(pconf.ball() * cspin90(1, 2) * rgpushxto0(H)) > 0 ? 1 : -1;
+    return det2(pconf.ball() * cspin90(2, 1) * rgpushxto0(H)) > 0 ? 1 : -1;
     }
   if(pmodel == mdHyperboloidFlat && sphere)
     return H[2] >= 0 ? 1 : -1;
@@ -370,7 +370,7 @@ EX int get_side(const hyperpoint& H) {
     H1[0] /= H1[2]; H1[1] /= H1[2];
     H1[2] = -s * sqrt(1 + H1[0]*H1[0] + H1[1] * H1[1]);
     dynamicval<geometryinfo1> g(cginf.g, giHyperb2);
-    return det2(pconf.ball() * cspin90(1, 2) * rgpushxto0(H1)) > 0 ? 1 : -1;
+    return det2(pconf.ball() * cspin90(2, 1) * rgpushxto0(H1)) > 0 ? 1 : -1;
     }
   if(pmodel == mdSpiral && pconf.spiral_cone < 360) {    
     return cone_side(shiftless(H));
