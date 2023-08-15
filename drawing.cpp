@@ -2445,6 +2445,11 @@ EX void draw_main() {
           ptd->draw();
       }
 
+    for(auto& ptd: ptds) if(ptd->prio == PPR::OUTCIRCLE) {
+      auto c = dynamic_cast<dqi_poly*> (&*ptd);
+      if(c) { c->color = 0; c->outline = 0; }
+      }
+
     hemi_side *= -1;
     draw_main();
     hemi_side = 0;

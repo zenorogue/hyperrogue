@@ -602,6 +602,13 @@ hyperpoint to_square(hyperpoint H) {
   return res;
   }
 
+EX hyperpoint hyperboloid_form(hyperpoint ret) {
+  ret = cspin90(2, 1) * ret / 3;
+  if(hyperbolic) ret[1] += 1/3.;
+  ret = pconf.ball() * ret;
+  return ret;
+  }
+
 EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
 
   hyperpoint H = H_orig.h;
@@ -1027,9 +1034,7 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
         if(sphere) ret[2] = -ret[2];
         }
   
-      ret = cspin90(2, 1) * ret / 3;
-      if(hyperbolic) ret[1] += 1/3.;
-      ret = pconf.ball() * ret;
+      ret = hyperboloid_form(ret);
       break;
       }
     
@@ -2873,58 +2878,68 @@ EX void draw_boundary(int w) {
         as_hyperboloid:
         auto d = deconstruct_ball();
         ld& tz = pconf.top_z;
-        ld mz = sphere ? atan(sqrt(tz*tz-1)) : acosh(tz);
+        ld mz = acosh(tz);
+
+        for(int it=0; it < (sphere ? 2 : 1); it++) {
+          auto fc1 = fc;
+          auto p1 = p;
         
-        if(abs(d.sin_beta) <= abs(d.cos_beta) + 1e-5) {
-          ld step = .01 / (1 << vid.linequality);        
-    
-          hyperpoint a;
-  
-          for(ld t=-1; t<=1; t += step) {
-  
-            a = xpush0(t * mz);
-            
-            if(t != 0) {
-              a[1] = d.sin_beta * a[2] / -d.cos_beta;
-              ld v = -1 + a[2] * a[2] - a[1] * a[1];
-              if(v < 0) continue;
-              a[0] = sqrt(v);
-              if(t < 0) a[0] = -a[0];
+          if(abs(d.sin_beta) <= abs(d.cos_beta) + 1e-5) {
+            queuereset(mdPixel, p1);
+            int steps = 100 << vid.linequality;
+      
+            hyperpoint a;
+
+            auto hpolar = [] (ld phi, ld r) {
+              ld s = sinh(r);
+              return point3(cos(phi) * s, -sin(phi) * s, cosh(r));
+              };
+
+            auto hform = [&] (hyperpoint h) {
+              h = hyperboloid_form(d.igamma * h);
+              h[0] *= current_display->radius; h[1] *= current_display->radius; h[2] = 0;
+              if(it) h[0] *= -1, h[1] *= -1;
+              return h;
+              };
+
+            for(int ts=-steps; ts<=steps; ts++) {
+              ld t = ts * 1. / steps;
+              a = hpolar(0, t * mz);
+              if(t != 0) {
+                a[1] = d.sin_beta * a[2] / -d.cos_beta;
+                ld v = -1 + a[2] * a[2] - a[1] * a[1];
+                if(v < 0) continue;
+                a[0] = sqrt(v);
+                if(t < 0) a[0] = -a[0];
+                }
+              curvepoint(hform(a));
               }
             
-            curvepoint(a);
-            }
-          
-          if((d.sin_beta > 0) ^ (d.cos_beta < 0)) {
-            ld alpha = M_PI - atan2(a[0], -a[1]);
+            if((d.sin_beta > 0) ^ (d.cos_beta < 0)) {
+              ld alpha = (M_PI - atan2(a[0], -a[1])) / steps;
+              
+              for(int ts=-steps; ts<=steps; ts++)
+                curvepoint(hform(hpolar(-90._deg - ts * alpha, mz)));
+              }
+            else {
+              ld alpha = - atan2(a[0], -a[1]) / steps;
+              
+              for(int ts=-steps; ts<=steps; ts++)
+                curvepoint(hform(hpolar(+90._deg - ts * alpha, mz)));
+              }
             
-            for(ld t=-1; t<=1; t += step)
-              curvepoint(xspinpush0(-90._deg - t * alpha, mz));
+            queuecurve(shiftless(Id), lc, fc1, p1);
+            queuereset(pmodel, p1);
+            fc1 = 0; p1 = PPR::CIRCLE;
             }
-          else {
-            ld alpha = - atan2(a[0], -a[1]);
-            
-            for(ld t=-1; t<=1; t += step)
-              curvepoint(xspinpush0(+90._deg - t * alpha, mz));
-            }
-          
-          queuecurve(shiftless(d.igamma), lc, fc, p);
-          fc = 0; p = PPR::CIRCLE;
-          }
 
-        for(ld t=0; t<=360; t ++)
-          curvepoint(xspinpush0(t * degree, mz));
-
-        queuecurve(shiftless(Id), lc, fc, p);
-
-        if(sphere) {
           for(ld t=0; t<=360; t ++)
-            curvepoint(xspinpush0(t * degree, M_PI-mz));
+            curvepoint(xspinpush0(t * degree, it ? M_PI - mz : mz));
 
-          queuecurve(shiftless(Id), lc, fc, p);
+          queuecurve(shiftless(Id), lc, fc1, p1);
           }
         }
-      if(sphere) {
+      else if(sphere) {
         queuereset(mdPixel, p);
         for(int i=0; i<=360; i++) {
           curvepoint(point3(current_display->radius * cos(i * degree)/3, current_display->radius * sin(i * degree)/3, 0));
