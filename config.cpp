@@ -1268,8 +1268,10 @@ EX void initConfig() {
   
   // colors
 
-  param_f(crosshair_size, "size:crosshair");
-  addsaver(crosshair_color, "color:crosshair");
+  param_f(crosshair_size, "size:crosshair")
+  ->set_extra(draw_crosshair);
+  param_color(crosshair_color, "color:crosshair", true, crosshair_color)
+  ->set_extra(draw_crosshair);
   
   param_b(mapeditor::drawplayer, "drawplayer");
   param_color((color_t&) patterns::canvasback, "color:canvasback", false);
@@ -2313,8 +2315,12 @@ EX void configureInterface() {
       ));
     dialog::bound_low(0);
     dialog::get_di().extra_options = [] {
+      draw_crosshair();
       dialog::addColorItem(XLAT("crosshair color"), crosshair_color, 'X');
-      dialog::add_action([] { dialog::openColorDialog(crosshair_color); });
+      dialog::add_action([] {
+        dialog::openColorDialog(crosshair_color);
+        dialog::get_di().extra_options = draw_crosshair;
+        });
       };
     });
 
