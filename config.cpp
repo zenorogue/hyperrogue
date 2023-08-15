@@ -601,7 +601,7 @@ void color_setting::show_edit_option(int key) {
   }
 
 void matrix_setting::show_edit_option(int key) {
-  dialog::addMatrixItem(XLAT(menu_item_name), *value, key);
+  dialog::addMatrixItem(XLAT(menu_item_name), *value, key, dim);
   dialog::add_action([this] () {
     dialog::editMatrix(*value, XLAT(menu_item_name), help_text, dim);
     if(sets) sets();
