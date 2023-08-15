@@ -2726,7 +2726,7 @@ EX void draw_boundary(int w) {
     }
 
   if(w == 1) return;
-  if(nonisotropic || (euclid && !among(pmodel, mdFisheye, mdConformalSquare)) || gproduct) return;
+  if(nonisotropic || (euclid && !among(pmodel, mdFisheye, mdConformalSquare, mdHemisphere)) || gproduct) return;
   #if CAP_VR
   if(vrhr::active() && pmodel == mdHyperboloid) return;
   #endif
@@ -2867,8 +2867,12 @@ EX void draw_boundary(int w) {
         for(int i=0; i<=360; i++) {
           curvepoint(point3(current_display->radius * cos(i * degree), current_display->radius * sin(i * degree), 0));
           }
-        queuecurve(shiftless(Id), lc, fc, p);
+        queuecurve_reuse(shiftless(Id), lc, fc, p);
         queuereset(pmodel, p);
+
+        queuereset(mdPixel, PPR::CIRCLE);
+        queuecurve(shiftless(Id), lc, 0, PPR::CIRCLE);
+        queuereset(pmodel, PPR::CIRCLE);
         }
       if(sphere) goto as_hyperboloid;
       return;
