@@ -3710,7 +3710,9 @@ EX void edit_all_settings() {
   }
 
 void list_setting::show_edit_option(int key) {
-  string opt = options[get_value()].first;
+  string opt;
+  if(get_value() < 0 || get_value() >= isize(options)) opt = its(get_value());
+  else opt = options[get_value()].first;
   dialog::addSelItem(XLAT(menu_item_name), XLAT(opt), key);
   dialog::add_action_push([this] {
     add_to_changed(this);
