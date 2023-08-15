@@ -223,7 +223,7 @@ struct trans23 {
     }
   friend trans23 operator * (transmatrix M, trans23 T) {
     trans23 t(M);
-    return M * T;
+    return t * T;
     }
   };
 
