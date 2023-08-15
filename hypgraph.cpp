@@ -2847,11 +2847,12 @@ EX void draw_boundary(int w) {
           ld s1 = sin(i * degree - d.gamma);
           curvepoint(point3(current_display->radius * c1, current_display->radius * s1 * (d.cos_beta * s1 >= 0 - 1e-6 ? 1 : abs(d.sin_beta)), 0));
           }
-        queuecurve(shiftless(d.talpha), lc, fc, p);
+        queuecurve_reuse(shiftless(d.talpha), lc, fc, p);
         queuereset(pmodel, p);
 
         p = PPR::CIRCLE; fc = 0;
         queuereset(mdPixel, p);
+        queuecurve(shiftless(d.talpha), lc, fc, p);
   
         for(int i=0; i<=360; i++) {
           ld c = cos(i * degree);
@@ -2928,14 +2929,18 @@ EX void draw_boundary(int w) {
                 curvepoint(hform(hpolar(+90._deg - ts * alpha, mz)));
               }
             
-            queuecurve(shiftless(Id), lc, fc1, p1);
+            queuecurve_reuse(shiftless(Id), lc, fc1, p1);
             queuereset(pmodel, p1);
             fc1 = 0; p1 = PPR::CIRCLE;
+            queuereset(mdPixel, p1);
+            queuecurve(shiftless(Id), lc, fc1, p1);
+            queuereset(pmodel, p1);
             }
 
           for(ld t=0; t<=360; t ++)
             curvepoint(xspinpush0(t * degree, it ? M_PI - mz : mz));
 
+          if(p1 == PPR::OUTCIRCLE) { queuecurve_reuse(shiftless(Id), lc, fc1, p1); fc1 = 0; p1 = PPR::CIRCLE; }
           queuecurve(shiftless(Id), lc, fc1, p1);
           }
         }
@@ -2944,8 +2949,12 @@ EX void draw_boundary(int w) {
         for(int i=0; i<=360; i++) {
           curvepoint(point3(current_display->radius * cos(i * degree)/3, current_display->radius * sin(i * degree)/3, 0));
           }
-        queuecurve(shiftless(Id), lc, fc, p);
+        queuecurve_reuse(shiftless(Id), lc, fc, p);
         queuereset(pmodel, p);
+
+        queuereset(mdPixel, PPR::CIRCLE);
+        queuecurve(shiftless(Id), lc, 0, PPR::CIRCLE);
+        queuereset(pmodel, PPR::CIRCLE);
         }
       return;
       }
