@@ -2766,9 +2766,14 @@ EX void curvepoint_first() {
   curvedata.push_back(curvedata[curvestart]);
   }
 
-EX dqi_poly& queuecurve(const shiftmatrix& V, color_t linecol, color_t fillcol, PPR prio) {
+EX dqi_poly& queuecurve_reuse(const shiftmatrix& V, color_t linecol, color_t fillcol, PPR prio) {
   auto &res = queuetable(V, curvedata, isize(curvedata)-curvestart, linecol, fillcol, prio);
   res.offset = curvestart;
+  return res;
+  }
+
+EX dqi_poly& queuecurve(const shiftmatrix& V, color_t linecol, color_t fillcol, PPR prio) {
+  auto &res = queuecurve_reuse(V, linecol, fillcol, prio);
   curvestart = isize(curvedata);
   return res;
   }
