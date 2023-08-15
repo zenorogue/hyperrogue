@@ -1141,7 +1141,7 @@ EX namespace dialog {
     cmode = dialogflags;
     gamescreen();
     init(title);
-    addInfo(help);
+    addHelp(help);
     large_viz();
     addBreak(100);
     addItem("reset", 'r');
