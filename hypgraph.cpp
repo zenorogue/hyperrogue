@@ -2924,6 +2924,14 @@ EX void draw_boundary(int w) {
           queuecurve(shiftless(Id), lc, fc, p);
           }
         }
+      if(sphere) {
+        queuereset(mdPixel, p);
+        for(int i=0; i<=360; i++) {
+          curvepoint(point3(current_display->radius * cos(i * degree)/3, current_display->radius * sin(i * degree)/3, 0));
+          }
+        queuecurve(shiftless(Id), lc, fc, p);
+        queuereset(pmodel, p);
+        }
       return;
       }
 

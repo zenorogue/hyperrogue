@@ -313,12 +313,11 @@ EX bool two_sided_model() {
   #endif
   if(GDIM == 3) return false;
   if(in_vr_sphere) return true;
-  if(models::is_hyperboloid(pmodel)) return !euclid && !in_vr;
+  if(pmodel == mdHemisphere || pmodel == mdHyperboloid) return !euclid && !in_vr;
   // if(pmodel == mdHemisphere) return true;
   if(pmodel == mdDisk) return sphere || (hyperbolic && pconf.alpha < 0 && pconf.alpha > -1);
   if(pmodel == mdRetroLittrow) return sphere;
   if(pmodel == mdRetroHammer) return sphere;
-  if(pmodel == mdHemisphere) return !in_vr;
   if(pmodel == mdRotatedHyperboles) return true;
   if(pmodel == mdSpiral && pconf.spiral_cone < 360) return true;
   return false;
