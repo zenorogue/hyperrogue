@@ -4056,6 +4056,7 @@ EX int read_config_args() {
     PHASEFROM(2);
     shift();
     string s = args();
+    cmode |= sm::SIDE;
     for(auto& fs: params) if(fs.first == s) {
       dialog::items.clear();
       dialog::key_actions.clear();
