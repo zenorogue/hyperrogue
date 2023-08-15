@@ -942,9 +942,9 @@ EX namespace models {
       dialog::addBoolItem_choice("all directional lands", models::do_rotate, 2, 'D');
       };
 
-    param_matrix(models::rotation.v2, "rotation", 2)->editable("conformal rotation", "", 'r')->set_extra(setrot);
-    param_matrix(models::rotation.v3, "rotation3", 3)->editable("conformal rotation in 3D", "", 'r')->set_extra(setrot);
-    addsaver(models::do_rotate, "conformal rotation mode", 1);
+    param_matrix(models::rotation.v2, "rotation", 2)->editable("auto rotation", "", 'r')->set_extra(setrot);
+    param_matrix(models::rotation.v3, "rotation3", 3)->editable("auto rotation in 3D", "", 'r')->set_extra(setrot);
+    param_i(models::do_rotate, "auto_rotation_mode", 1);
 
     param_f(pconf.halfplane_scale, "hp", "halfplane scale", 1);
     
