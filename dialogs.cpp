@@ -1177,9 +1177,9 @@ EX namespace dialog {
           ne.dialogflags |= dialogflags;
           });
         };
+      rot_but(0, 2, "rotate in XZ", 'x');
+      rot_but(1, 2, "rotate in YZ", 'y');
       rot_but(0, 1, "rotate in XY", 'z');
-      rot_but(0, 2, "rotate in XZ", 'y');
-      rot_but(1, 2, "rotate in YZ", 'x');
       }
 
     addBoolItem("mouse control", dialogflags & sm::MOUSEAIM, 'm');
