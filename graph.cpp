@@ -3421,7 +3421,7 @@ EX void drawaura() {
     
     if(!models::camera_straight) {
       hyperpoint p = hyperpoint(x, y, rad0, 1);
-      p = pconf.cam() * p;
+      p = rot_inverse(pconf.cam()) * p;
       x = p[0] * rad0 / p[2];
       y = p[1] * rad0 / p[2];
       }

@@ -837,7 +837,7 @@ void display_data::set_projection(int ed, ld shift) {
     }      
   
   if(!models::camera_straight && pmodel != mdPixel) {
-    glhr::projection_multiply(glhr::tmtogl_transpose(pconf.cam()));
+    glhr::projection_multiply(glhr::tmtogl(pconf.cam()));
     }
   
   if(u_alpha) {
