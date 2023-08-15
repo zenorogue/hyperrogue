@@ -1837,7 +1837,7 @@ startanim null_animation { "", no_init, [] { gamescreen(); }};
 #if CAP_STARTANIM
 startanim joukowsky { "Joukowsky transform", no_init, [] {
   dynamicval<eModel> dm(pmodel, mdJoukowskyInverted);
-  dynamicval<trans23> dt(pconf.mori(), spin( ticks / 25. ));
+  dynamicval<trans23> dt(pconf.mori(), spin( ticks / 25. * degree));
   dynamicval<int> dv(vid.use_smart_range, 2);
   dynamicval<ld> ds(pconf.scale, 1/4.);
   models::configure();
@@ -1848,7 +1848,7 @@ startanim joukowsky { "Joukowsky transform", no_init, [] {
 
 startanim bandspin { "spinning in the band model", no_init, [] {
   dynamicval<eModel> dm(pmodel, mdBand);
-  dynamicval<trans23> dt(pconf.mori(), spin( ticks / 25. ));
+  dynamicval<trans23> dt(pconf.mori(), spin( ticks / 25. * degree));
   dynamicval<int> dv(vid.use_smart_range, 2);
   models::configure();
   gamescreen();
