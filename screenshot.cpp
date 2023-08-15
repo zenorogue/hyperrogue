@@ -1357,7 +1357,7 @@ EX void apply() {
   if(rug::rugged) {
     if(rug_rotation1) {
       rug::using_rugview rv;
-      rotate_view(inverse(rug_angle) * cspin(0, 2, rug_rotation1 * TAU * t / period) * rug_angle);
+      rotate_view(rot_inverse(rug_angle) * cspin(0, 2, rug_rotation1 * TAU * t / period) * rug_angle);
       }
     if(rug_rotation2) {
       rug::using_rugview rv;
@@ -1762,7 +1762,7 @@ auto animhook = addHook(hooks_frame, 100, display_animation)
     param_f(anims::parabolic_length, "aparabolic", "animation parabolic length")
       ->editable(0, 10, 1, "cells to go", "", 'c');
     param_matrix(anims::rug_angle, "arugangle", 3)
-      ->editable("animation rug angle", "", 'a');
+      ->editable("animation rug angle", "", 'C');
     param_f(anims::circle_radius, "acradius", "animation circle radius");
     param_f(anims::circle_spins, "acspins", "animation circle spins");
     param_matrix(anims::rug_movement_angle, "rug forward movement angle", 3)
