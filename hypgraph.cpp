@@ -2983,6 +2983,10 @@ EX void draw_boundary(int w) {
         }
       return;
       }
+    
+    case mdBall:
+      /* circle_around_center not wanted */
+      return;
 
     default:
       if(models::is_perspective(pmodel)) return;
