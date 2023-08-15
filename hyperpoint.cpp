@@ -1361,13 +1361,16 @@ EX shiftmatrix orthogonal_move(const shiftmatrix& t, double level) {
   return shiftless(orthogonal_move(t.T, level), t.shift);
   }
 
-/** fix a 3x3 matrix into a 4x4 matrix */
-EX transmatrix fix4(transmatrix t) {
+/** fix a 3x3 matrix into a 4x4 matrix, in place */
+EX void fix4(transmatrix& t) {
   #if MAXMDIM > 3
+  if(ldebug) println(hlog, "fix4 performed");
   for(int i=0; i<4; i++) t[3][i] = t[i][3] = i == 3;
   #endif
-  return t;
   }
+
+/** fix a 3x3 matrix into a 4x4 matrix, as a function */
+EX transmatrix fix4_f(transmatrix t) { fix4(t); return t; }
 
 EX transmatrix xyscale(const transmatrix& t, double fac) {
   transmatrix res;
