@@ -1027,9 +1027,8 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
         if(sphere) ret[2] = -ret[2];
         }
   
-      ret[0] = ret[0] / 3;
-      tie(ret[1], ret[2]) = make_pair(((sphere?0:1) - ret[2]) / 3, ret[1] / 3);
-      
+      ret = cspin90(2, 1) * ret / 3;
+      if(hyperbolic) ret[1] += 1/3.;
       ret = pconf.ball() * ret;
       break;
       }
@@ -2687,6 +2686,33 @@ void queuestraight(hyperpoint X, int style, color_t lc, color_t fc, PPR p) {
     } */
   }
 
+/** ball is written as cspin(0, 1, alpha) * cspin(2, 1, beta) * cspin(0, 2, gamma) */
+struct ball_deconstruct {
+  ld alpha, beta, gamma;
+  transmatrix talpha, tbeta, tgamma, igamma;
+  ld cos_beta, sin_beta;
+  };
+
+/** create a ball_deconstruct object */
+ball_deconstruct deconstruct_ball() {
+  // (0,1,0) -> (0, cos beta, sin beta) -> (sin alpha, cos beta * cos alpha, sin beta)
+  hyperpoint h = pconf.ball() * point3(0, 1, 0);
+  ball_deconstruct d;
+  if(h[0] == 0 && h[1] == 0) { println(hlog, "gimbal lock"); return d; }
+  d.alpha = atan2(h[0], h[1]);
+  d.beta = atan2(h[2], hypot(h[0], h[1]));
+  d.cos_beta = cos(d.beta);
+  d.sin_beta = sin(d.beta);
+  d.talpha = cspin(0, 1, d.alpha);
+  d.tbeta = cspin(2, 1, d.beta);
+  d.tgamma = rot_inverse(d.tbeta) * rot_inverse(d.talpha) * pconf.ball();
+  h = d.tgamma * point3(0, 0, 1);
+  d.gamma = atan2(h[0], h[2]);
+  if(!eqmatrix(d.tgamma, cspin(0, 2, d.gamma))) println(hlog, "deconstruction failed");
+  d.igamma = cspin(1, 0, d.gamma);
+  return d;
+  }
+
 EX void draw_boundary(int w) {
 
   if((nonisotropic || gproduct) && pmodel == mdDisk) {
@@ -2808,24 +2834,26 @@ EX void draw_boundary(int w) {
       break;
     
     case mdHemisphere: {
-      ld cb = pconf.ball() [1][1];
-      ld sb = pconf.ball() [2][1];
+      auto d = deconstruct_ball();
       if(hyperbolic) {
         queuereset(mdPixel, p);
         for(int i=0; i<=360; i++) {
-          ld s = sin(i * degree);
-          curvepoint(point3(current_display->radius * cos(i * degree), current_display->radius * s * (cb * s >= 0 - 1e-6 ? 1 : abs(sb)), 0));
+          ld c1 = cos(i * degree - d.gamma);
+          ld s1 = sin(i * degree - d.gamma);
+          curvepoint(point3(current_display->radius * c1, current_display->radius * s1 * (d.cos_beta * s1 >= 0 - 1e-6 ? 1 : abs(d.sin_beta)), 0));
           }
-        queuecurve(shiftless(Id), lc, fc, p);
+        queuecurve(shiftless(d.talpha), lc, fc, p);
         queuereset(pmodel, p);
+
         p = PPR::CIRCLE; fc = 0;
         queuereset(mdPixel, p);
   
         for(int i=0; i<=360; i++) {
+          ld c = cos(i * degree);
           ld s = sin(i * degree);
-          curvepoint(point3(current_display->radius * cos(i * degree), current_display->radius * s * sb, 0));
+          curvepoint(point3(current_display->radius * c, current_display->radius * s * d.sin_beta, 0));
           }
-        queuecurve(shiftless(Id), lc, fc, p);
+        queuecurve(shiftless(d.talpha), lc, fc, p);
         queuereset(pmodel, p);
         }
       if(euclid) {
@@ -2843,12 +2871,11 @@ EX void draw_boundary(int w) {
     case mdHyperboloid: {
       if(hyperbolic) {
         as_hyperboloid:
+        auto d = deconstruct_ball();
         ld& tz = pconf.top_z;
         ld mz = sphere ? atan(sqrt(tz*tz-1)) : acosh(tz);
-        ld cb = pconf.ball() [1][1];
-        ld sb = pconf.ball() [2][1];
         
-        if(abs(sb) <= abs(cb) + 1e-5) {
+        if(abs(d.sin_beta) <= abs(d.cos_beta) + 1e-5) {
           ld step = .01 / (1 << vid.linequality);        
     
           hyperpoint a;
@@ -2858,7 +2885,7 @@ EX void draw_boundary(int w) {
             a = xpush0(t * mz);
             
             if(t != 0) {
-              a[1] = sb * a[2] / -cb;
+              a[1] = d.sin_beta * a[2] / -d.cos_beta;
               ld v = -1 + a[2] * a[2] - a[1] * a[1];
               if(v < 0) continue;
               a[0] = sqrt(v);
@@ -2868,7 +2895,7 @@ EX void draw_boundary(int w) {
             curvepoint(a);
             }
           
-          if((sb > 0) ^ (cb < 0)) {
+          if((d.sin_beta > 0) ^ (d.cos_beta < 0)) {
             ld alpha = M_PI - atan2(a[0], -a[1]);
             
             for(ld t=-1; t<=1; t += step)
@@ -2881,7 +2908,7 @@ EX void draw_boundary(int w) {
               curvepoint(xspinpush0(+90._deg - t * alpha, mz));
             }
           
-          queuecurve(shiftless(Id), lc, fc, p);
+          queuecurve(shiftless(d.igamma), lc, fc, p);
           fc = 0; p = PPR::CIRCLE;
           }
 
