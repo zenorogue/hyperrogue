@@ -890,7 +890,7 @@ EX namespace dialog {
     }
 
   bool isitem(item& it) {
-    return among(it.type, diItem, diBigItem, diColorItem);
+    return among(it.type, diItem, diBigItem, diColorItem, diMatrixItem);
     }
 
   EX void handle_actions(int &sym, int &uni) {
