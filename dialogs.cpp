@@ -1524,7 +1524,7 @@ EX namespace dialog {
     extra_options = reaction_t();
     }
 
-  EX void editNumber(ld& x, ld vmin, ld vmax, ld step, ld dft, string title, string help) {
+  EX number_dialog& editNumber(ld& x, ld vmin, ld vmax, ld step, ld dft, string title, string help) {
     number_dialog ne;
     ne.editwhat = &x;
     ne.vmin = vmin;
@@ -1541,14 +1541,15 @@ EX namespace dialog {
     #endif
     ne.reset_str();
     pushScreen(ne);
+    return get_ne();
     }
 
-  EX void editNumber(int& x, int vmin, int vmax, ld step, int dft, string title, string help) {
+  EX number_dialog& editNumber(int& x, int vmin, int vmax, ld step, int dft, string title, string help) {
     ld tmp;
-    editNumber(tmp, vmin, vmax, step, dft, title, help);
-    auto& ne = dialog::get_ne();
+    auto& ne = editNumber(tmp, vmin, vmax, step, dft, title, help);
     ne.editwhat = &ne.intbuf; ne.intbuf = x; ne.intval = &x; ne.s = its(x);
     anims::get_parameter_animation(anims::find_param(&x), ne.s);
+    return ne;
     }
   
   EX void helpToEdit(int& x, int vmin, int vmax, int step, int dft) {
