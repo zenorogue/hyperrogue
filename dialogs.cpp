@@ -311,7 +311,24 @@ EX namespace dialog {
     auto& it = items.back();
     it.type = diMatrixItem;
     it.ptr = &value;
-    it.value = fts(as_degrees(value)) + "°";
+    it.value = "";
+    if(dim == 2) it.value = fts(as_degrees(value)) + "°";
+    if(dim == 3) {
+      for(int k=0; k<3; k++) {
+        if(value[k][k] != 1) continue;
+        int i=(k+1)%3;
+        int j=(i+1)%3;
+        if(i > j) swap(i, j);
+        hyperpoint h = Hypc; h[i] = 1;
+        h = value * h;
+        ld alpha = atan2(-h[j], h[i]);
+        if(alpha == 0) alpha = 0;
+        it.value = fts(alpha / degree) + "° ";
+        it.value += ('X' + i);
+        it.value += ('X' + j);
+        }
+      if(eqmatrix(value, Id)) it.value = "Id";
+      }
     it.p1 = dim;
     }
 
@@ -588,7 +605,7 @@ EX namespace dialog {
       }
     }
 
-  EX void visualize_matrix(const trans23& T, ld x, ld y, ld r, int dim) {
+  EX void visualize_matrix(const trans23& T, ld x, ld y, ld r, int dim, ld tsize) {
     vector<hyperpoint> pts;
     for(int a=0; a<dim; a++) {
       hyperpoint h = C0; h[a] = r;
@@ -604,7 +621,7 @@ EX namespace dialog {
       curvepoint(hyperpoint(r * sin(i*degree), r*cos(i*degree), 1, 1));
     queuecurve(V, 0xFFFFFFFF, 0x202020FF, PPR::LINE);
 
-    color_t cols[3] = {0xFF0000FF, 0x00FF00FF, 0x0000FFFF};
+    color_t cols[3] = {0xFF8080FF, 0x80FF80FF, 0x8080FFFF};
     for(int a=0; a<dim; a++) {
       auto pt = pts[a]; pt[2] = 1; pt[3] = 1;
       curvepoint(hyperpoint(0,0,1,1));
@@ -613,7 +630,7 @@ EX namespace dialog {
       queuecurve(V, cols[a], 0, PPR::LINE);
       }
     if(dim == 3) for(int a=0; a<dim; a++) {
-      auto pt = pts[a]; ld val = -pt[2] * vid.fsize / r / 5;
+      auto pt = pts[a]; ld val = -pt[2] * tsize / r / 5;
       curvepoint(hyperpoint(pt[0], pt[1]+val, 1, 1));
       curvepoint(hyperpoint(pt[0]-val, pt[1]-val*sqrt(3)/2, 1, 1));
       curvepoint(hyperpoint(pt[0]+val, pt[1]-val*sqrt(3)/2, 1, 1));
@@ -830,10 +847,10 @@ EX namespace dialog {
             }
           else {
             int siz = dfsize * I.scale/100;
-            while(siz > 6 && textwidth(siz, I.value) + (I.type == diMatrixItem ? siz : 0) >= vid.xres - valuex) siz--;
-            displayfr(valuex, mid, 2, siz, I.value, I.colorv, 0);
+            while(siz > 6 && textwidth(siz, I.value) + (I.type == diMatrixItem ? siz*3/2 : 0) >= vid.xres - valuex) siz--;
+            displayfr(valuex + (I.type == diMatrixItem ? siz*3/2 : 0), mid, 2, siz, I.value, I.colorv, 0);
 
-            if(I.type == diMatrixItem) visualize_matrix(*((transmatrix*)I.ptr), valuex + textwidth(siz, "-359.999o") + siz/2, mid, siz/2, I.p1);
+            if(I.type == diMatrixItem) visualize_matrix(*((transmatrix*)I.ptr), valuex + siz/2, mid, siz/2, I.p1, vid.fsize);
             }
           }
         if(xthis) getcstat = I.key;
@@ -1133,7 +1150,9 @@ EX namespace dialog {
     addCustom(500, [this] {
       int siz = dfsize * 5;
       int mid = (top + tothei) / 2;
-      visualize_matrix(*edit_matrix, dcenter, mid, siz/2, dim);
+      vid.linewidth *= 3;
+      visualize_matrix(*edit_matrix, dcenter, mid, siz/2, dim, vid.fsize * 2);
+      vid.linewidth /= 3;
       });
     }
 
