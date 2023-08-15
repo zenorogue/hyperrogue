@@ -1834,23 +1834,24 @@ EX void edit_sightrange_3d(char key, bool fog) {
   }
 
 EX void edit_sightrange() {
-  #if CAP_RUG
-  USING_NATIVE_GEOMETRY_IN_RUG;
-  #endif
   cmode = sm::SIDE;
   gamescreen();
   dialog::init("sight range settings");
   add_edit(vid.use_smart_range);
+  int wdim = WDIM;
+  #if CAP_RUG
+  USING_NATIVE_GEOMETRY_IN_RUG;
+  #endif
   if(vid.use_smart_range) {
-    add_edit(WDIM == 2 ? vid.smart_range_detail : vid.smart_range_detail_3);
+    add_edit(wdim == 2 ? vid.smart_range_detail : vid.smart_range_detail_3);
     if(GDIM == 3) edit_sightrange_3d('r', true);
     }
   else {
-    if(WDIM == 2) {
+    if(wdim == 2) {
       add_edit(sightrange_bonus);
-      edit_sightrange_3d('r', true);
+      if(GDIM == 3) edit_sightrange_3d('r', true);
       }
-    if(WDIM == 3) edit_sightrange_3d('r', false);
+    if(wdim == 3) edit_sightrange_3d('r', false);
     }
   #if CAP_SOLV
   if(models::is_perspective(pmodel) && sol) {
@@ -1880,16 +1881,16 @@ EX void edit_sightrange() {
       dialog::editNumber(slr::shader_iterations, 0, 50, 1, 10, "", "");
       });
     }
-  if(vid.use_smart_range && WDIM == 2) {
+  if(vid.use_smart_range && wdim == 2) {
     dialog::addBoolItem_action(XLAT("area-based range"), vid.smart_area_based, 'a');
     }
-  if(vid.use_smart_range == 0 && allowChangeRange() && WDIM == 2) {
+  if(vid.use_smart_range == 0 && allowChangeRange() && wdim == 2) {
     dialog::addSelItem(XLAT("generation range bonus"), its(genrange_bonus), 'o');
     dialog::add_action([] () { genrange_bonus = sightrange_bonus; doOvergenerate(); });
     dialog::addSelItem(XLAT("game range bonus"), its(gamerange_bonus), 's');
     dialog::add_action([] () { gamerange_bonus = sightrange_bonus; doOvergenerate(); });
     }
-  if(WDIM == 3 && !vid.use_smart_range) {
+  if(wdim == 3 && !vid.use_smart_range) {
     dialog::addBoolItem_action(XLAT("sloppy range checking"), vid.sloppy_3d, 's');
     }
   if(GDIM == 3 && !vid.use_smart_range) {
