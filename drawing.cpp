@@ -313,7 +313,7 @@ EX bool two_sided_model() {
   #endif
   if(GDIM == 3) return false;
   if(in_vr_sphere) return true;
-  if(pmodel == mdHemisphere || pmodel == mdHyperboloid) return !euclid && !in_vr;
+  if(pmodel == mdHemisphere || pmodel == mdHyperboloid) return !in_vr;
   // if(pmodel == mdHemisphere) return true;
   if(pmodel == mdDisk) return sphere || (hyperbolic && pconf.alpha < 0 && pconf.alpha > -1);
   if(pmodel == mdRetroLittrow) return sphere;
@@ -357,7 +357,7 @@ EX int get_side(const hyperpoint& H) {
     }
   if(pmodel == mdHyperboloidFlat && sphere)
     return H[2] >= 0 ? 1 : -1;
-  if(pmodel == mdHemisphere && hyperbolic) {
+  if(pmodel == mdHemisphere && !sphere) {
     hyperpoint res;
     applymodel(shiftless(H), res);
     return res[2] < 0 ? -1 : 1;
