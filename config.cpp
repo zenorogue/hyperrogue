@@ -79,6 +79,12 @@ struct setting {
   virtual bool anim_unchanged() { return true; }
   virtual void anim_restore() { }
   virtual cld get_cld() { throw hr_exception("parameter has no complex value"); }
+  virtual void set_cld_raw(cld x) { throw hr_exception("parameter has no complex value"); }
+  virtual void set_cld(cld value) {
+    auto bak = get_cld();
+    set_cld_raw(value);
+    if(value != bak && reaction) reaction();
+    }
   };
 #endif
 
@@ -216,6 +222,7 @@ struct float_setting : public val_setting<ld> {
   void show_edit_option(int key) override;
   void load_from_raw(const string& s) override { *value = parseld(s); }
   virtual cld get_cld() override { return *value; }
+  void set_cld_raw(cld x) override { *value = real(x); }
   };
 
 struct float_setting_dft : public float_setting {
@@ -245,6 +252,7 @@ struct int_setting : public val_setting<int> {
   virtual cld get_cld() override { return *value; }
 
   void load_from_raw(const string& s) override { *value = parseint(s); }
+  void set_cld_raw(cld x) override { *value = (int)(real(x) + .5); }
 
   virtual void check_change() {
     if(*value != last_value) {
