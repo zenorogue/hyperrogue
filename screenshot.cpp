@@ -1852,7 +1852,7 @@ startanim bandspin { "spinning in the band model", no_init, [] {
   dynamicval<int> dv(vid.use_smart_range, 2);
   models::configure();
   gamescreen();
-  explorable([] { pmodel = mdJoukowskyInverted; pushScreen(models::model_menu); });
+  explorable([] { pmodel = mdBand; pushScreen(models::model_menu); });
   }};
 
 startanim perspective { "projection distance", no_init, [] {
