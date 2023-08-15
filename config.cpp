@@ -1374,10 +1374,12 @@ EX void initConfig() {
 
   addsaver(vid.use_smart_range, "smart-range", 0);
   param_f(vid.smart_range_detail, "smart-range-detail", 8)
-  ->editable(1, 50, 1, "minimum visible cell in pixels", "", 'd');
+  ->editable(1, 50, 1, "minimum visible cell in pixels", "", 'd')
+  ->set_extra([] { add_cells_drawn('C'); });
 
   param_f(vid.smart_range_detail_3, "smart-range-detail-3", 30)
-  ->editable(1, 50, 1, "minimum visible cell in pixels", "", 'd');
+  ->editable(1, 50, 1, "minimum visible cell in pixels", "", 'd')
+  ->set_extra([] { add_cells_drawn('C'); });
 
   param_b(vid.smart_area_based, "smart-area-based", false);
   param_i(vid.cells_drawn_limit, "limit on cells drawn", 10000);
@@ -1812,6 +1814,23 @@ EX void menuitem_sightrange_bonus(char c) {
     });
   }
 
+EX void edit_sightrange_3d(char key, bool fog) {
+  dialog::addSelItem(XLAT(fog ? "3D sight range for the fog effect" : "3D sight range"), fts(sightranges[geometry]), key);
+  dialog::add_action([] {
+    dialog::editNumber(sightranges[geometry], 0, TAU, 0.5, M_PI, XLAT("3D sight range"),
+      XLAT(
+        "Sight range for 3D geometries is specified in the absolute units. This value also affects the fog effect.\n\n"
+        "In spherical geometries, the sight range of 2π will let you see things behind you as if they were in front of you, "
+        "and the sight range of π (or more) will let you see things on the antipodal point just as if they were close to you.\n\n"
+        "In hyperbolic geometries, the number of cells to render depends exponentially on the sight range. More cells to drawn "
+        "reduces the performance.\n\n"
+        "Sight range affects the gameplay, and monsters act iff they are visible. Monster generation takes this into account."
+        )
+      );
+    dialog::get_di().extra_options = [] { add_cells_drawn('C'); };
+    });
+  }
+
 EX void edit_sightrange() {
   #if CAP_RUG
   USING_NATIVE_GEOMETRY_IN_RUG;
@@ -1820,43 +1839,28 @@ EX void edit_sightrange() {
   gamescreen();
   dialog::init("sight range settings");
   add_edit(vid.use_smart_range);
-  if(vid.use_smart_range)
+  if(vid.use_smart_range) {
     add_edit(WDIM == 2 ? vid.smart_range_detail : vid.smart_range_detail_3);
+    if(GDIM == 3) edit_sightrange_3d('r', true);
+    }
   else {
     if(WDIM == 2) {
       add_edit(sightrange_bonus);
-      if(GDIM == 3) {
-        dialog::addSelItem(XLAT("3D sight range for the fog effect"), fts(sightranges[geometry]), 'r');
-        dialog::add_action([] {
-          dialog::editNumber(sightranges[geometry], 0, TAU, 0.5, M_PI, XLAT("fog effect"), "");
-          });
-        }
+      edit_sightrange_3d('r', true);
       }
-    if(WDIM == 3) {
-      dialog::addSelItem(XLAT("3D sight range"), fts(sightranges[geometry]), 'r');
-      dialog::add_action([] {
-      dialog::editNumber(sightranges[geometry], 0, TAU, 0.5, M_PI, XLAT("3D sight range"),
-        XLAT(
-          "Sight range for 3D geometries is specified in the absolute units. This value also affects the fog effect.\n\n"
-          "In spherical geometries, the sight range of 2π will let you see things behind you as if they were in front of you, "
-          "and the sight range of π (or more) will let you see things on the antipodal point just as if they were close to you.\n\n"
-          "In hyperbolic geometries, the number of cells to render depends exponentially on the sight range. More cells to drawn "
-          "reduces the performance.\n\n"
-          "Sight range affects the gameplay, and monsters act iff they are visible. Monster generation takes this into account."
-          )
-        );
-        });
-      }
+    if(WDIM == 3) edit_sightrange_3d('r', false);
     }
   #if CAP_SOLV
   if(models::is_perspective(pmodel) && sol) {
     dialog::addSelItem(XLAT("max difference in X/Y coordinates"), fts(sn::solrange_xy), 'x');
     dialog::add_action([] {
       dialog::editNumber(sn::solrange_xy, 0.01, 200, 0.1, 50, XLAT("max difference in X/Y coordinates"), solhelp()), dialog::scaleLog();
+      dialog::get_di().extra_options = [] { add_cells_drawn('C'); };
       });
     dialog::addSelItem(XLAT("max difference in Z coordinate"), fts(sn::solrange_z), 'z');
     dialog::add_action([] {
       dialog::editNumber(sn::solrange_z, 0, 20, 0.1, 6, XLAT("max difference in Z coordinates"), solhelp());
+      dialog::get_di().extra_options = [] { add_cells_drawn('C'); };
       });
     }
   #endif
