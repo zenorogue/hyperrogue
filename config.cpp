@@ -1072,11 +1072,11 @@ EX void initConfig() {
 
   param_b(less_in_landscape, "less_in_landscape", false)
   ->editable("less items/kills in landscape", 'L')
-  -> set_sets([] { dialog::get_di().reaction_final = [] { println(hlog, "Reset"); vid.killreduction = 0; }; });
+  -> set_reaction([] { vid.killreduction = 0; });
 
   param_b(less_in_portrait, "less_in_portrait", false)
   ->editable("less items/kills in portrait", 'P')
-  -> set_sets([] { dialog::get_di().reaction_final = [] { println(hlog, "Reset"); vid.killreduction = 0; }; });
+  -> set_reaction([] { vid.killreduction = 0; });
   
   // basic graphics
   
