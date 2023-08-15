@@ -2806,7 +2806,7 @@ EX void draw_boundary(int w) {
       if(GDIM == 3) return;
       if(pmodel == mdBand && pconf.model_transition != 1) return;
       bool bndband = (among(pmodel, mdBand, mdMiller, mdGallStereographic, mdCentralCyl) ? hyperbolic : sphere);
-      transmatrix T = rot_inverse(pconf.mori().get());
+      transmatrix T = pconf.mori().get();
       ld right = 90._deg - 1e-5;
       if(bndband) 
         queuestraight(T * ypush0(hyperbolic ? 10 : right), 2, lc, fc, p);
