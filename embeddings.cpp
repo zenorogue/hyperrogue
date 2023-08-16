@@ -398,9 +398,11 @@ struct emb_none : embedding_method {
     return rgpushxto0(i);
     }
   hyperpoint flatten(hyperpoint a) override {
-    if(gproduct) return a / exp(zlevel(a));
+    if(gproduct || GDIM == 2) return a / exp(zlevel(a));
     return embedding_method::flatten(a);
     }
+
+  hyperpoint normalize_flat(hyperpoint a) override { return normalize(a); }
 
   transmatrix base_to_actual(const transmatrix& T) override { return T; }
   hyperpoint base_to_actual(hyperpoint h) override { return h; }
