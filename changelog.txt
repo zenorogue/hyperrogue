@@ -4979,3 +4979,12 @@ Mostly embedding-related improvements:
 - fixed stereo_alpha in some geometries
 - fixed the combinations of Archimedean, fake, and embedding
 - "pipes" (fat grid lines) for anisotropic geometries
+
+2023-08-16 09:32 Update 12.1s
+- Most angles are now specified using a special dialog (rather than degrees, or a bunch of degree values in the 3D case). This is more powerful (more intuitive in 3D cases; 3D rotations like 'camera angle' and '3D model rotation' became 3D).
+- Fixes to how hyperboloid/hemisphere/ball models are rendered
+- Minor improvements to the number dialogs (immediately visible effects, etc.) and parameter (animation formulas allowed in more places)
+- Fixed centering in multiplayer
+- Fixed a bug which caused the screen to disappear on switch-to-fpp
+- Fixed the movement in Nil geometry
+- Fixed a crash when changing sight range while in rug
