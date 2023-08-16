@@ -258,7 +258,7 @@ enum eModel : int;
 struct projection_configuration {
   eModel model;            /**< which projection, see classes.cpp */
   ld xposition, yposition; /**< move the center to another position */
-  ld scale, alpha, camera_angle, fisheye_param, twopoint_param, axial_angle, stretch, ballangle, ballproj, euclid_to_sphere;
+  ld scale, alpha, fisheye_param, twopoint_param, axial_angle, stretch, ballproj, euclid_to_sphere;
   ld clip_min, clip_max;
   ld halfplane_scale;  
   ld collignon_parameter; 
@@ -288,10 +288,14 @@ struct projection_configuration {
 
   int back_and_front; /* 0 = do not, 1 = do, 2 = only back */
   struct trans23 *ptr_model_orientation;
+  struct transmatrix *ptr_ball;
+  struct transmatrix *ptr_camera;
 
   projection_configuration();
 
   trans23& mori() { return *ptr_model_orientation; }
+  transmatrix& ball() { return *ptr_ball; }
+  transmatrix& cam() { return *ptr_camera; }
   };
 
 enum eThreatLevel { tlNoThreat, tlSpam, tlNormal, tlHighThreat };
