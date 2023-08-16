@@ -29,7 +29,7 @@ struct function_state : function_state_base<R, Args...> {
     function_state_base<R, Args...> *clone() const override {
         return new function_state(*this);
     }
-    virtual funbase* as_funbase() {
+    virtual funbase* as_funbase() override {
       if(std::is_base_of<funbase, T>::value) return (funbase*) (&t_);
       return nullptr;
       }
