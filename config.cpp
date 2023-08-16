@@ -133,7 +133,7 @@ template<class T> struct enum_setting : list_setting {
       }
     *value = (T) parseint(s);
     }
-  virtual void check_change() {
+  virtual void check_change() override {
     if(*value != last_value) {
       last_value = *value;
       add_to_changed(this);
@@ -173,15 +173,15 @@ template<class T> struct val_setting : public setting {
   T *value, last_value, anim_value, dft;
 
   bool affects(void *v) override { return v == value; }
-  virtual void check_change() {
+  virtual void check_change() override {
     if(*value != last_value) {
       last_value = *value;
       add_to_changed(this);
       }
     }
 
-  virtual bool anim_unchanged() { return *value == anim_value; }
-  virtual void anim_restore() { *value = anim_value; if(reaction) reaction(); }
+  virtual bool anim_unchanged() override { return *value == anim_value; }
+  virtual void anim_restore() override { *value = anim_value; if(reaction) reaction(); }
 
   virtual void load_from_raw(const string& s) { throw hr_exception("load_from_raw not defined"); }
 
@@ -254,7 +254,7 @@ struct int_setting : public val_setting<int> {
   void load_from_raw(const string& s) override { *value = parseint(s); }
   void set_cld_raw(cld x) override { *value = (int)(real(x) + .5); }
 
-  virtual void check_change() {
+  virtual void check_change() override {
     if(*value != last_value) {
       last_value = *value;
       add_to_changed(this);
@@ -324,7 +324,7 @@ struct custom_setting : public setting {
   void show_edit_option(int key) override { custom_viewer(key); }
   supersaver *make_saver() { throw hr_exception("make_saver for custom_setting"); }
   bool affects(void *v) override { return custom_affect(v); }
-  virtual void check_change() {
+  virtual void check_change() override {
     if(custom_value() != last_value) {
       last_value = custom_value();
       add_to_changed(this);
@@ -391,7 +391,7 @@ template<class T> struct saverenum : supersaver {
   bool affects(void* v) override { return v == &val; }
   void set_default() override { dft = val; }
   void clone(struct local_parameter_set& lps, void *value) override { addsaverenum(*(T*) value, lps.label + name); }
-  void swap_with(supersaver *s) { swap(val, ((saverenum<T>*)s)->val); }
+  void swap_with(supersaver *s) override { swap(val, ((saverenum<T>*)s)->val); }
   };
 
 template<class T, class U> supersaver *addsaverenum(T& i, U name, T dft) {
@@ -411,7 +411,7 @@ template<> struct saver<int> : dsaver<int> {
   string save() override { return its(val); }
   void load(const string& s) override { val = atoi(s.c_str()); }
   virtual void clone(struct local_parameter_set& lps, void *value) override { addsaver(*(int*) value, lps.label + name); }
-  virtual void swap_with(supersaver *s) { swap(val, ((saver<int>*)s)->val); }
+  virtual void swap_with(supersaver *s) override { swap(val, ((saver<int>*)s)->val); }
   };
 
 template<> struct saver<char> : dsaver<char> {
@@ -419,7 +419,7 @@ template<> struct saver<char> : dsaver<char> {
   string save() override { return its(val); }
   void load(const string& s) override { val = atoi(s.c_str()); }
   virtual void clone(struct local_parameter_set& lps, void *value) override { addsaver(*(char*) value, lps.label + name); }
-  virtual void swap_with(supersaver *s) { swap(val, ((saver<char>*)s)->val); }
+  virtual void swap_with(supersaver *s) override { swap(val, ((saver<char>*)s)->val); }
   };
 
 template<> struct saver<bool> : dsaver<bool> {
@@ -427,7 +427,7 @@ template<> struct saver<bool> : dsaver<bool> {
   string save() override { return val ? "yes" : "no"; }
   void load(const string& s) override { val = isize(s) && s[0] == 'y'; }
   virtual void clone(struct local_parameter_set& lps, void *value) override { addsaver(*(bool*) value, lps.label + name); }
-  virtual void swap_with(supersaver *s) { swap(val, ((saver<bool>*)s)->val); }
+  virtual void swap_with(supersaver *s) override { swap(val, ((saver<bool>*)s)->val); }
   };
 
 template<> struct saver<unsigned> : dsaver<unsigned> {
@@ -435,7 +435,7 @@ template<> struct saver<unsigned> : dsaver<unsigned> {
   string save() override { return itsh(val); }
   void load(const string& s) override { val = (unsigned) strtoll(s.c_str(), NULL, 16); }
   virtual void clone(struct local_parameter_set& lps, void *value) override { addsaver(*(unsigned*) value, lps.label + name); }
-  virtual void swap_with(supersaver *s) { swap(val, ((saver<unsigned>*)s)->val); }
+  virtual void swap_with(supersaver *s) override { swap(val, ((saver<unsigned>*)s)->val); }
   };
 
 template<> struct saver<string> : dsaver<string> {
@@ -443,7 +443,7 @@ template<> struct saver<string> : dsaver<string> {
   string save() override { return val; }
   void load(const string& s) override { val = s; }
   virtual void clone(struct local_parameter_set& lps, void *value) override { addsaver(*(string*) value, lps.label + name); }
-  virtual void swap_with(supersaver *s) { swap(val, ((saver<string>*)s)->val); }
+  virtual void swap_with(supersaver *s) override { swap(val, ((saver<string>*)s)->val); }
   };
 
 template<> struct saver<matrix_eq> : supersaver {

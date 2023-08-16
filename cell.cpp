@@ -103,7 +103,7 @@ struct hrmap_standard : hrmap {
   virtual hyperpoint get_corner(cell *c, int cid, ld cf) override;
   virtual transmatrix master_relative(cell *c, bool get_inverse) override;
   virtual bool link_alt(heptagon *h, heptagon *alt, hstate firststate, int dir) override;
-  virtual void on_dim_change();
+  virtual void on_dim_change() override;
   };
 
 void clearfrom(heptagon*);
