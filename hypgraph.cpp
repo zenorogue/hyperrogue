@@ -2227,7 +2227,7 @@ EX void centerpc(ld aspd) {
     }
 
   if(set_multi && multi::two_focus) {
-    pconf.mori() = spin( atan2(multi_point) );
+    pconf.mori() = spin( -atan2(multi_point) );
     auto& d = pconf.twopoint_param;
     d = hdist0(multi_point);
     if(among(pmodel, mdJoukowsky, mdJoukowskyInverted)) {
