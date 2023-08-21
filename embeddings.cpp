@@ -520,7 +520,7 @@ struct emb_actual : embedding_method {
 /** embed in the 3D variant of the same geometry */
 
 struct emb_same_in_same : emb_actual {
-  virtual bool is_same_in_same() override { return true; }
+  bool is_same_in_same() override { return true; }
   transmatrix intermediate_to_actual_translation(hyperpoint i) override { return rgpushxto0(logical_to_actual(i)); }
   hyperpoint actual_to_intermediate(hyperpoint a) override { return actual_to_logical(a); }
   hyperpoint orthogonal_move(const hyperpoint& h, ld z) override {
@@ -601,7 +601,7 @@ struct emb_same_in_same : emb_actual {
 /** embed in the product geometry */
 
 struct emb_product_embedding : emb_actual {
-  virtual bool is_product_embedding() override { return true; }
+  bool is_product_embedding() override { return true; }
   transmatrix intermediate_to_actual_translation(hyperpoint i) override { return rgpushxto0(logical_to_actual(i)); }
   hyperpoint actual_to_intermediate(hyperpoint a) override { return actual_to_logical(a); }
   hyperpoint flatten(hyperpoint h) override { h /= exp(zlevel(h)); return h; }
@@ -913,7 +913,7 @@ struct emb_euc_cylinder_sl2 : emb_euc_cylinder_twisted {
 struct emb_euc_in_sph : emb_euclid_noniso {
   bool is_euc_in_sph() override { return true; }
   ld center_z() override { return 1; }
-  // virtual ld height_limit(ld sign) override { return sign < 0 ? 0 : 90._deg; }
+  // ld height_limit(ld sign) override { return sign < 0 ? 0 : 90._deg; }
   hyperpoint actual_to_intermediate(hyperpoint a) override { 
     ld tx = hypot(a[0], a[2]);
     ld ty = hypot(a[1], a[3]);

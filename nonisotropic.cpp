@@ -1391,8 +1391,8 @@ EX namespace hybrid {
       return PIU( currentmap->full_shvid(c1) );
       }
 
-    virtual transmatrix spin_to(cell *c, int d, ld bonus) override { if(d >= c->type-2) return Id; c = get_where(c).first; return fix4_f( in_underlying([&] { return currentmap->spin_to(c, d, bonus); }) ); }
-    virtual transmatrix spin_from(cell *c, int d, ld bonus) override { if(d >= c->type-2) return Id; c = get_where(c).first; return fix4_f( in_underlying([&] { return currentmap->spin_from(c, d, bonus); }) ); }
+    transmatrix spin_to(cell *c, int d, ld bonus) override { if(d >= c->type-2) return Id; c = get_where(c).first; return fix4_f( in_underlying([&] { return currentmap->spin_to(c, d, bonus); }) ); }
+    transmatrix spin_from(cell *c, int d, ld bonus) override { if(d >= c->type-2) return Id; c = get_where(c).first; return fix4_f( in_underlying([&] { return currentmap->spin_from(c, d, bonus); }) ); }
 
     subcellshape& get_cellshape(cell *c) override {      
       int id = full_shvid(c);
@@ -1705,7 +1705,7 @@ EX namespace product {
         }
       }
 
-    virtual transmatrix ray_iadj(cell *c, int i) override {
+    transmatrix ray_iadj(cell *c, int i) override {
       if(i == c->type-2) return (cpush(2, +cgi.plevel));
       if(i == c->type-1) return (cpush(2, -cgi.plevel));
       transmatrix T;

@@ -1811,7 +1811,7 @@ EX namespace dialog {
     int editpos = 0;
     string *edited_string;
     string view_edited_string();
-    void draw();
+    void draw() override;
     void start_editing(string& s);
     bool handle_edit_string(int sym, int uni, function<string(int, int)> checker = editchecker);
     };
