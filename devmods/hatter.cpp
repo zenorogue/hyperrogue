@@ -103,11 +103,11 @@ void init() {
   for(int a=0; a<100; a++) {
     ld nq7 = q7 + q8;
     ld nq8 = q7 * 5 + q8 * 6;
-    println(hlog, format("%.20f", val = (nq7 + nq8) / (q7 + q8)));
+    println(hlog, hr::format("%.20f", val = (nq7 + nq8) / (q7 + q8)));
     q7 = nq7; q8 = nq8;
     }
   val = sqrt(val);
-  println(hlog, "root: ", format("%.20f", val));
+  println(hlog, "root: ", hr::format("%.20f", val));
   for(int a=-50; a<50; a++)
   for(int b=1; b<50; b++)
   for(int c=-50; c<50; c++)
@@ -283,7 +283,7 @@ string matcode(transmatrix T) {
   swap(h[1], h[2]); swap(h[0], h[1]);
   // return lalign(0, h);
 
-  return format("R%dA%03dL%.3f", ialpha/60, hangle, hypot_d(2, h));
+  return hr::format("R%dA%03dL%.3f", ialpha/60, hangle, hypot_d(2, h));
   }
 
 int ghatid(string s) {
@@ -431,7 +431,7 @@ void hatframe() {
   }
 
 string writematrix(transmatrix T) {
-  return format("mt(%.10f,%.10f,%.10f, %.10f,%.10f,%.10f, %.10f,%.10f,%.10f)",
+  return hr::format("mt(%.10f,%.10f,%.10f, %.10f,%.10f,%.10f, %.10f,%.10f,%.10f)",
     T[0][0], 
     T[0][1], 
     T[0][2], 
@@ -456,7 +456,7 @@ void hatter() {
   dialog::add_key_action('a', [] {
     hatcorners_add.push_back(sh);
     println(hlog, "hatcorners = {");
-    for(auto h: hatcorners_add) println(hlog, format("  pt(%.10f,%.10f),", h[0], h[1]));
+    for(auto h: hatcorners_add) println(hlog, hr::format("  pt(%.10f,%.10f),", h[0], h[1]));
     println(hlog, "  }");
     });
 

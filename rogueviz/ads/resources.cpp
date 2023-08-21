@@ -94,7 +94,7 @@ void display(int id, int y, ld val, ld maxv, ld tank, ld unit) {
   
   if(maxv == 0) {
     string s;
-    if(main_rock) s = format(tformat, current.shift);
+    if(main_rock) s = hr::format(tformat, current.shift);
     else s = its(val + .5);
 
     queuestr(sta, ctr, 0, 20, s, col >> 8, 1, 0);

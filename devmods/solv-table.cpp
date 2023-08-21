@@ -235,11 +235,11 @@ void build_sols(int PRECX, int PRECY, int PRECZ) {
       auto xerr = solerror(v, nisot::numerical_exp(cand));
       
       if(cand == fail) {
-        println(hlog, format("[%2d %2d %2d] FAIL", iz, iy, ix));
+        println(hlog, hr::format("[%2d %2d %2d] FAIL", iz, iy, ix));
         }
       
       else if(xerr > 1e-3) {
-        println(hlog, format("[%2d %2d %2d] ", iz, iy, ix));
+        println(hlog, hr::format("[%2d %2d %2d] ", iz, iy, ix));
         println(hlog, "f(?) = ", v);
         println(hlog, "f(", cand, ") = ", nisot::numerical_exp(cand));
         println(hlog, "error = ", xerr);
@@ -265,7 +265,7 @@ void build_sols(int PRECX, int PRECY, int PRECZ) {
         }
       if(it < last_x && it < last_y) solve_at(it, it);
       std::lock_guard<std::mutex> fm(file_mutex);
-      if(0) println(hlog, format("%2d: %2d", iz, it));
+      if(0) println(hlog, hr::format("%2d: %2d", iz, it));
       }
     };
 
@@ -469,7 +469,7 @@ void visualize_table(sn::tabled_inverses& tab, const string& s) {
         for(int i=0; i<3; i++)
           part(p, i) = 0x80 + 0x70 * tab.get_int(ix, iy, iz)[i];
         }
-    SDL_SavePNG(rb.srf, format(s.c_str(), iz).c_str());
+    SDL_SavePNG(rb.srf, hr::format(s.c_str(), iz).c_str());
     }
   }
 

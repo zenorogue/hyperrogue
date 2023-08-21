@@ -142,7 +142,7 @@ int move_restart() {
   print(hlog, " stats:");
   for(int a=0; a<2; a++) for(int b=0; b<128; b++) {
     int d = distances_map[a][b];
-    if(d) print(hlog, format(" %d/%d:%d", a,b, d));
+    if(d) print(hlog, hr::format(" %d/%d:%d", a,b, d));
     }
   println(hlog, "\n");
   return lastmoves = moves;
@@ -157,7 +157,7 @@ void verifycs() {
     edgecs += edgetally[u] * u*u,
     totalcs += tally[u] * u*u;
   
-  print(hlog, "edgecs=", format("%lld", edgecs), " totalcs=", format("%lld", totalcs));
+  print(hlog, "edgecs=", hr::format("%lld", edgecs), " totalcs=", hr::format("%lld", totalcs));
   }
 
 void preparegraph() {

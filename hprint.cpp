@@ -507,8 +507,8 @@ EX string from_hexstring(string o) {
 EX string as_cstring(string o) {
   string s = "string(\"";
   for(char c: o)
-    s += format("\\x%02x", (unsigned char) c);
-  s += format("\", %d)", isize(o));
+    s += hr::format("\\x%02x", (unsigned char) c);
+  s += hr::format("\", %d)", isize(o));
   return s;
   }
 
@@ -520,7 +520,7 @@ EX string as_nice_cstring(string o) {
     else if(c == 10)
       s += "\\n";
     else
-      s += format("\\x%02x", (unsigned char) c);
+      s += hr::format("\\x%02x", (unsigned char) c);
   s += "\"";
   return s;
   }

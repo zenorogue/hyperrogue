@@ -921,7 +921,7 @@ void ncee() {
     displayButton(vid.xres - 8, 8 + vid.fsize, XLAT("(v) menu"), 'v', 16);
 
   if(algo_ticks)
-    displaystr(8, 8 + vid.fsize, 0, vid.fsize * 2, format("%d.%03d", algo_ticks/1000, algo_ticks%1000), 0xFFFFFF, 0);
+    displaystr(8, 8 + vid.fsize, 0, vid.fsize * 2, hr::format("%d.%03d", algo_ticks/1000, algo_ticks%1000), 0xFFFFFF, 0);
   
   keyhandler = [=] (int sym, int uni) {
     // dialog::handleNavigation(sym, uni);
@@ -977,7 +977,7 @@ void ncee() {
         fmap = genellipse(D, i * degree / slow);
         println(hlog, "i = ", i);
         for(int a=0; a<10; a++) iterate();
-        if(i >= 0) shot::take(format(rfname.c_str(), i), draw_ncee);
+        if(i >= 0) shot::take(hr::format(rfname.c_str(), i), draw_ncee);
         }
       }
     };

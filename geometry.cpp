@@ -695,7 +695,7 @@ void geometry_information::prepare_basics() {
     : hdist(xpush0(crossf), xspinpush0(TAU/S7, crossf));
   
   DEBB(DF_GEOM | DF_POLY,
-    (format("S7=%d S6=%d hexf = " LDF" hcross = " LDF" tessf = " LDF" hexshift = " LDF " hexhex = " LDF " hexv = " LDF "\n", S7, S6, hexf, hcrossf, tessf, hexshift, 
+    (hr::format("S7=%d S6=%d hexf = " LDF" hcross = " LDF" tessf = " LDF" hexshift = " LDF " hexhex = " LDF " hexv = " LDF "\n", S7, S6, hexf, hcrossf, tessf, hexshift, 
     hexhexdist, hexvdist)));  
   
   base_distlimit = ginf[geometry].distlimit[!BITRUNCATED];

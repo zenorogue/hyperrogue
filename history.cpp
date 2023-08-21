@@ -470,7 +470,7 @@ EX namespace history {
       auto save_band_segment = [&] {
         string fname = name_format;
         replace_str(fname, "$DATE", timebuf);
-        replace_str(fname, "$ID", format("%03d", segid++));
+        replace_str(fname, "$ID", hr::format("%03d", segid++));
         IMAGESAVE(band, fname.c_str());
 
         if(dospiral) 

@@ -607,17 +607,17 @@ EX void initcells() {
 
 EX void clearcell(cell *c) {
   if(!c) return;
-  DEBB(DF_MEMORY, (format("c%d %p\n", c->type, hr::voidp(c))));
+  DEBB(DF_MEMORY, (hr::format("c%d %p\n", c->type, hr::voidp(c))));
   for(int t=0; t<c->type; t++) if(c->move(t)) {
-    DEBB(DF_MEMORY, (format("mov %p [%p] S%d\n", hr::voidp(c->move(t)), hr::voidp(c->move(t)->move(c->c.spin(t))), c->c.spin(t))));
+    DEBB(DF_MEMORY, (hr::format("mov %p [%p] S%d\n", hr::voidp(c->move(t)), hr::voidp(c->move(t)->move(c->c.spin(t))), c->c.spin(t))));
     if(c->move(t)->move(c->c.spin(t)) != NULL &&
       c->move(t)->move(c->c.spin(t)) != c) {
-        DEBB(DF_MEMORY | DF_ERROR, (format("cell error: type = %d %d -> %d\n", c->type, t, c->c.spin(t))));
+        DEBB(DF_MEMORY | DF_ERROR, (hr::format("cell error: type = %d %d -> %d\n", c->type, t, c->c.spin(t))));
         if(worst_precision_error < 1e-3) exit(1);
         }
     c->move(t)->move(c->c.spin(t)) = NULL;
     }
-  DEBB(DF_MEMORY, (format("DEL %p\n", hr::voidp(c))));
+  DEBB(DF_MEMORY, (hr::format("DEL %p\n", hr::voidp(c))));
   gp::delete_mapped(c);
   destroy_cell(c);
   }

@@ -1562,7 +1562,7 @@ struct shift_data {
   
   bignum& compute(ld rad2) {
     if(result.count(rad2)) return result[rad2];
-    // println(hlog, "compute ", format("%p", this), " [shift=", shift, "], r2 = ", rad2);
+    // println(hlog, "compute ", hr::format("%p", this), " [shift=", shift, "], r2 = ", rad2);
     // indenter i(2);
     auto& b = result[rad2];
     if(!parent) {

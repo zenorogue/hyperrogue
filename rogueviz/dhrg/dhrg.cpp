@@ -45,7 +45,7 @@ void memoryInfo() {
   }
 
 void debugtally() {
-  print(hlog, "T"); for(int i=0; i<MAXDIST; i++) if(tally[i]) print(hlog, format(" %4d/%4lld", edgetally[i], tally[i]));
+  print(hlog, "T"); for(int i=0; i<MAXDIST; i++) if(tally[i]) print(hlog, hr::format(" %4d/%4lld", edgetally[i], tally[i]));
   println(hlog, " .. %", loglikopt()); 
   }
 

@@ -1448,7 +1448,7 @@ EX bool record_video(string fname IS(videofile), bool_reaction_t rec IS(record_a
   
   array<int, 2> tab;
   if(pipe(&tab[0])) {
-    addMessage(format("Error: %s", strerror(errno)));
+    addMessage(hr::format("Error: %s", strerror(errno)));
     return false;
     }
   println(hlog, "tab = ", tab);

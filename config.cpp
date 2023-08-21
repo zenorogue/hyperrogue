@@ -1943,7 +1943,7 @@ EX void menuitem_sightrange(char c IS('c')) {
   else if(WDIM == 3)
     dialog::addSelItem(XLAT("sight range settings"), fts(sightranges[geometry]) + "au", c);
   else
-    dialog::addSelItem(XLAT("sight range settings"), format("%+d", sightrange_bonus), c);
+    dialog::addSelItem(XLAT("sight range settings"), hr::format("%+d", sightrange_bonus), c);
   dialog::add_action_push(edit_sightrange);
   }
 

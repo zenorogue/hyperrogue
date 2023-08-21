@@ -97,7 +97,7 @@ int readArgs() {
       for(auto& loc: p.second.locs) {
         dynamicval<transmatrix> dv(View, loc.lView);
         dynamicval<cell*> dc(centerover, loc.lco);
-        shot::take(format(s.c_str(), p.first, i++));
+        shot::take(hr::format(s.c_str(), p.first, i++));
         }
       }
     }

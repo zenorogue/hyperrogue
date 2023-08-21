@@ -31,7 +31,7 @@ void build(crystal::coord co, int at) {
     if(WDIM == 3) c->wall = waWaxWall;
     }
 
-  println(hlog, co, " twos = ", twos, " index = ", index, " set = ", format("%06X", c->landparam));
+  println(hlog, co, " twos = ", twos, " index = ", index, " set = ", hr::format("%06X", c->landparam));
   
   }
 

@@ -100,7 +100,7 @@ void experiment() {
     println(hlog, "found: ", tie(ia, ib));
 
     for(auto& row: jms[ia]) {
-      for(auto& i: row) print(hlog, format("%2d, ", i));
+      for(auto& i: row) print(hlog, hr::format("%2d, ", i));
       println(hlog);
       }
     }

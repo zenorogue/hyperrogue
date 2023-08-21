@@ -397,7 +397,7 @@ void wfc() {
   
   if(isize(freq)) println(hlog, "last freq = ", freq[0].prob);
   println(hlog, "freq size = ", isize(freq));
-  println(hlog, "tfreq = ", format("%lld", tfreq));
+  println(hlog, "tfreq = ", hr::format("%lld", tfreq));
   println(hlog, "trans size = ", isize(trans));
   println(hlog, "next code = ", nextcode);
   clearMessages();

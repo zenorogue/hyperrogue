@@ -379,7 +379,7 @@ void do_recording() {
       ticks = i * 1000 / mrec_fps;
       
       if(i >= mrec_first && i < mrec_last) {
-        string s = format(mrec_file.c_str(), i);
+        string s = hr::format(mrec_file.c_str(), i);
         println(hlog, "recording frame ", i, "/", isize(saved), " to ", s);
         shot::take(s);
         }

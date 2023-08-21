@@ -431,7 +431,7 @@ namespace sag {
       
       if(t2 - tl > 980) {
         tl = t2;
-        println(hlog, format("it %12Ld temp %6.4f [1/e at %13.6f] cost = %f ",
+        println(hlog, hr::format("it %12Ld temp %6.4f [1/e at %13.6f] cost = %f ",
           numiter, double(sag::temperature), (double) exp(sag::temperature),
           double(sag::cost)));
         }
@@ -458,7 +458,7 @@ namespace sag {
         auto t2 = SDL_GetTicks();
         if(t2 - t1 > 1000) {
           t1 = t2;
-          println(hlog, format("it %12Ld temp %6.4f [1/e at %13.6f] cost = %f ",
+          println(hlog, hr::format("it %12Ld temp %6.4f [1/e at %13.6f] cost = %f ",
             numiter, double(sag::temperature), (double) exp(sag::temperature),
             double(sag::cost)));
           }
@@ -491,7 +491,7 @@ namespace sag {
     if(t < (sag_ittime+1) / 2) ipturn *= 2;
     else if(t > sag_ittime * 2) ipturn /= 2;
     else ipturn = ipturn * sag_ittime / t;
-    print(hlog, format("it %12Ld temp %6.4f [2:%8.6f,10:%8.6f,50:%8.6f] cost = %f\n",
+    print(hlog, hr::format("it %12Ld temp %6.4f [2:%8.6f,10:%8.6f,50:%8.6f] cost = %f\n",
       numiter, double(sag::temperature), 
       (double) exp(-2 * exp(-sag::temperature)),
       (double) exp(-10 * exp(-sag::temperature)),
@@ -701,7 +701,7 @@ namespace sag {
 
     dhrg::fast_loglik_cont(lgemb, lc, nullptr, 1, 1e-5);
     
-    println(hlog, "loglik = ", format("%.6f", lc(lgemb)), " R = ", lgemb.R, " T = ", lgemb.T, " iterations = ", embiter);
+    println(hlog, "loglik = ", hr::format("%.6f", lc(lgemb)), " R = ", lgemb.R, " T = ", lgemb.T, " iterations = ", embiter);
     }
 
   void reassign_embedding() {
@@ -769,7 +769,7 @@ namespace sag {
     for(int i=0; i<isize(sagid); i++) {
       println(f, vdata[i].name);
       for(int d=0; d<MDIM; d++)
-        println(f, format("%.20f", placement[i][d]));
+        println(f, hr::format("%.20f", placement[i][d]));
       }
     }
 
@@ -1153,8 +1153,8 @@ void geo_stats() {
     out("geometry", S3 >= OINF ? "tree" : hyperbolic ? "hyperbolic" : sphere ? "sphere" : euclid ? "euclid" : nil ? "nil" : sol ? "solv" : mproduct ? "product" : "other");
     out("closed", max_sag_dist == isize(sagcells) ? 0 : closed_manifold ? 1 : 0);
     out("angular", angular);
-    for(int p: {1, 10, 50}) { out(format("sagdist%02d", p), sorted_sagdist[(p * sorted_sagdist.size()) / 100]); }
-    for(int p: {1, 2, 3, 4}) { out(format("d%d", p), d[p]); }
+    for(int p: {1, 10, 50}) { out(hr::format("sagdist%02d", p), sorted_sagdist[(p * sorted_sagdist.size()) / 100]); }
+    for(int p: {1, 2, 3, 4}) { out(hr::format("d%d", p), d[p]); }
     println(hlog);
     #undef out
     }
@@ -1173,7 +1173,7 @@ void output_stats() {
   dhrg::prepare_pairs(DN, [] (int i) { return edges_yes[i]; });
   dhrg::greedy_routing(routing_result, [] (int i, int j) { return sagdist[sagid[i]][sagid[j]]; });
   print(hlog, "CSV;", logid++, ";", isize(sagnode), ";", DN, ";", isize(sagedges), ";", lgsag.R, ";", lgsag.T, ";", cost, ";", mAP, ";", routing_result.suc / routing_result.tot, ";", routing_result.routedist / routing_result.bestdist);
-  if(report_tempi) print(hlog, ";", hightemp,";",lowtemp,";",format("%lld", numiter));
+  if(report_tempi) print(hlog, ";", hightemp,";",lowtemp,";",hr::format("%lld", numiter));
   println(hlog);
   }
 
