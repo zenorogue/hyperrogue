@@ -27,9 +27,7 @@ EX int getgametime() {
   }
 
 EX string getgametime_s(int timespent IS(getgametime())) {
-  char buf[20];
-  sprintf(buf, "%d:%02d", timespent/60, timespent % 60);
-  return buf;
+  return hr::format("%d:%02d", timespent/60, timespent % 60);
   }
 
 EX bool display_yasc_codes;

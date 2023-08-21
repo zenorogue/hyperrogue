@@ -308,8 +308,6 @@ struct debugScreen {
       #if CAP_SHAPES
       queuepoly(gmatrix[what], cgi.shAsymmetric, 0x80808080);
       #endif
-      char buf[200];
-      sprintf(buf, "%p", hr::voidp(what));
       dialog::addSelItem("mpdist", its(what->mpdist), 'd');
       dialog::add_action([what] () { 
         bitfield_editor(what->mpdist, [what] (int i) { what->mpdist = 0; }, "generation level");        
@@ -390,7 +388,7 @@ struct debugScreen {
       dialog::addBreak(50);
       
       if(show_debug_data) {
-        dialog::addSelItem("pointer", s0+buf+"/"+index_pointer(what), 0);
+        dialog::addSelItem("pointer", s0+hr::format("%p", hr::voidp(what))+"/"+index_pointer(what), 0);
         dialog::addSelItem("cpdist", its(what->cpdist), 0);
         dialog::addSelItem("celldist", its(celldist(what)), 0);
         dialog::addSelItem("celldistance", its(celldistance(cwt.at, what)), 0);

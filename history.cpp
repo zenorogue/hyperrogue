@@ -498,10 +498,7 @@ EX namespace history {
           
           pushScreen(progress_screen);
   
-          char buf[128];
-          sprintf(buf, "#%03d", segid);
-  
-          progress(s0 + buf + " ("+its(j+bonus)+"/"+its(siz+bonus+bonus-1)+")"); */
+          progress(s0 + hr::format("#%03d (%d/%d)", segid, j+bonus, siz+bonus+bonus-1)); */
   
           // calcparam(); current_display->radius = bandhalf;
           phase = j; movetophase();
