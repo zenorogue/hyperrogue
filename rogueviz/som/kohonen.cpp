@@ -1059,8 +1059,8 @@ namespace levelline {
       if(uni >= 'a' && uni - 'a' + isize(levellines)) {
         auto& l = levellines[uni - 'a'];
         dialog::editNumber(l.qty, 0, 10, 1, 0, colnames[l.column], 
-          XLAT("Controls the number of level lines."));
-        dialog::reaction = [&l] () {
+          XLAT("Controls the number of level lines."))
+        .reaction = [&l] () {
           l.modified = true;
           build();
           };
@@ -1068,7 +1068,7 @@ namespace levelline {
       else if(uni >= 'A' && uni - 'A' + isize(levellines)) {
         auto& l = levellines[uni - 'A'];
         dialog::openColorDialog(l.color, NULL);
-        dialog::dialogflags |= sm::MAYDARK | sm::SIDE;
+        dialog::get_di().dialogflags |= sm::MAYDARK | sm::SIDE;
         }
       else if(doexiton(sym, uni)) popScreen();
       };
