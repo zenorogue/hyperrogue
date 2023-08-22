@@ -133,6 +133,11 @@ namespace rogueviz {
     on_cleanup_or_next([backup, &variable] { variable = backup; });
     }
 
+  template<class T> void rv_keep(T& variable) {
+    T backup = variable;
+    on_cleanup_or_next([backup, &variable] { variable = backup; });
+    }
+
   template<class T, class U> void rv_hook(hookset<T>& m, int prio, U&& hook) {
     int p = addHook(m, prio, hook);
     auto del = [&m, p] { 
