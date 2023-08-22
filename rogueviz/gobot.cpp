@@ -136,7 +136,9 @@ bool draw_go(cell *c, const shiftmatrix& V) {
     }
   
   else {
+    vid.linewidth /= 5;
     queuepoly(V, cgi.shGem[0], player_colors[current.owner[id]]);    
+    vid.linewidth *= 5;
     lv_needed = 2;
     }
   
