@@ -322,7 +322,9 @@ void pick_game() {
   dialog::add_action_push(pick_level);
   dialog::addBreak(100);
   add_edit(planning_mode);
-  dialog::addBack();
+  dialog::addItem(XLAT("play this track"), SDLK_ESCAPE);
+  dialog::addItem(XLAT("quit Nil Rider"), 'q');
+  dialog::add_action([] { quitmainloop = true; });
   dialog::display();
   }
 
