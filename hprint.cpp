@@ -150,7 +150,7 @@ struct fhstream : hstream {
   void write_chars(const char* c, size_t i) override { if(fwrite(c, i, 1, f) != 1) throw hstream_exception(); }
   void read_chars(char* c, size_t i) override { if(fread(c, i, 1, f) != 1) throw hstream_exception(); }
   char read_char() override { char c; read_chars(&c, 1); return c; }
-  virtual void flush() override { fflush(f); }
+  void flush() override { fflush(f); }
   };
 
 struct shstream : hstream { 

@@ -99,11 +99,11 @@ struct hrmap_standard : hrmap {
   ld spin_angle(cell *c, int d) override;
   double spacedist(cell *c, int i) override;
   void find_cell_connection(cell *c, int d) override;
-  virtual int shvid(cell *c) override;
-  virtual hyperpoint get_corner(cell *c, int cid, ld cf) override;
-  virtual transmatrix master_relative(cell *c, bool get_inverse) override;
-  virtual bool link_alt(heptagon *h, heptagon *alt, hstate firststate, int dir) override;
-  virtual void on_dim_change() override;
+  int shvid(cell *c) override;
+  hyperpoint get_corner(cell *c, int cid, ld cf) override;
+  transmatrix master_relative(cell *c, bool get_inverse) override;
+  bool link_alt(heptagon *h, heptagon *alt, hstate firststate, int dir) override;
+  void on_dim_change() override;
   };
 
 void clearfrom(heptagon*);

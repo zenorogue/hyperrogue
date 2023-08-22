@@ -2199,7 +2199,7 @@ EX namespace reg3 {
       return relative_matrix_recursive(h2, h1);
       }
     
-    virtual bool link_alt(heptagon *h, heptagon *alt, hstate firststate, int dir) override {
+    bool link_alt(heptagon *h, heptagon *alt, hstate firststate, int dir) override {
       return ruleset_link_alt(h, alt, firststate, dir);
       }
     };

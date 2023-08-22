@@ -2370,7 +2370,7 @@ struct hrmap_rulegen : hrmap {
   
   bool strict_tree_rules() override { return true; }
 
-  virtual bool link_alt(heptagon *h, heptagon *alt, hstate firststate, int dir) override {
+  bool link_alt(heptagon *h, heptagon *alt, hstate firststate, int dir) override {
     auto& hts = treestates[h->fieldval];
     int psid = hts.sid;
     
