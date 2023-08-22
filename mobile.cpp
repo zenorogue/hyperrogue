@@ -14,13 +14,11 @@ string buildScoreDescription() {
   time_t timer;
   timer = time(NULL);
   char buf[128]; strftime(buf, 128, "%c", localtime(&timer));
-  char buf2[128];
   
   s += XLAT("HyperRogue for Android");
   s += " ( " VER "), http://www.roguetemple.com/z/hyper/\n";
   s += XLAT("Date: %1 time: %2 s ", buf, getgametime_s());
   s += XLAT("distance: %1\n", its(celldist(cwt.at)));
-  // s += buf2;
   if(cheater) s += XLAT("Cheats: ") + its(cheater) + "\n";
   s += XLAT("Score: ") + its(gold());
 
