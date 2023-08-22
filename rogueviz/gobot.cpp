@@ -598,6 +598,8 @@ void accept_command(string s) {
       "restart - restart\n"
       "bring-unrectified x y -- restart on unrectified GP(x,y) Bring surface\n"
       "disk-unrectified x y size -- restart on unrectified GP(x,y) {4,5} disk of given size\n"
+      "bring-gp x y -- restart on GP(x,y) Bring surface\n"
+      "disk-gp x y size -- restart on GP(x,y) {4,5} disk of given size\n"
       "undo - undo last move\n"
       "export - export board to string (no history, owners, captures)\n"
       "import [string] - import board from string\n"
@@ -679,6 +681,38 @@ void accept_command(string s) {
     geometry = g45;
     req_disksize = size;
     variation =eVariation::unrectified;
+    gp::param = {x, y};
+    start_game();
+    init_go_board();
+    go_message("disk, size = " + its(isize(ac)));
+    take_shot();
+    }
+
+  if(tokens[0] == "bring-gp" && t == 3) {
+    int x = atoi(tokens[1].c_str());
+    int y = atoi(tokens[2].c_str());
+    if(x > 8 || y > 8 || x < 0 || y < 0 || x+y == 0) { go_message("illegal parameters"); return; }
+    save_backup();
+    stop_game();
+    geometry = gBring;
+    variation =eVariation::goldberg;
+    gp::param = {x, y};
+    start_game();
+    init_go_board();
+    go_message("Bring surface, size = " + its(isize(ac)));
+    take_shot();
+    }
+
+  if(tokens[0] == "disk-gp" && t == 4) {
+    int x = atoi(tokens[1].c_str());
+    int y = atoi(tokens[2].c_str());
+    int size = atoi(tokens[3].c_str());
+    if(x > 8 || y > 8 || x < 0 || y < 0 || x+y == 0 || size > 1000 || size < 10) { go_message("illegal parameters"); return; }
+    save_backup();
+    stop_game();
+    geometry = g45;
+    req_disksize = size;
+    variation =eVariation::goldberg;
     gp::param = {x, y};
     start_game();
     init_go_board();
