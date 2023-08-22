@@ -748,8 +748,10 @@ void go_discord() {
 #if AEGIS
   bot_thread = std::thread([] {
     println(hlog, "starting bot");
+    char *token = getenv("GOBOT_TOKEN");
+    if(!token) throw hr_exception("set the env variable GOBOT_TOKEN to the Discord bot token to run gobot");
     uint64_t intents = dpp::i_default_intents | dpp::i_message_content;
-    dpp::cluster bot(AEGIS_TOKEN, intents);
+    dpp::cluster bot(token, intents);
     pbot = &bot;
     std::mutex lock;
     println(hlog, "on_message_create");
