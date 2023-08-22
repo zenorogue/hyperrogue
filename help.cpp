@@ -586,8 +586,7 @@ EX string generateHelpForWall(eWall w) {
 void buteol(string& s, int current, int req) {
   int siz = isize(s);
   if(s[siz-1] == '\n') s.resize(siz-1);
-  char buf[100]; sprintf(buf, " (%d/%d)", current, req);
-  s += buf; s += "\n";
+  s += hr::format(" (%d/%d)\n", current, req);
   }
 
 EX string generateHelpForMonster(eMonster m) {
@@ -930,7 +929,7 @@ EX void describeMouseover() {
       }
 
     if(buggyGeneration) {
-      char buf[80]; sprintf(buf, " %p H=%d M=%d", hr::voidp(c), c->landparam, c->mpdist); out += buf;
+      out += hr::format(" %p H=%d M=%d", hr::voidp(c), c->landparam, c->mpdist);
       }
     
     if(randomPatternsMode)

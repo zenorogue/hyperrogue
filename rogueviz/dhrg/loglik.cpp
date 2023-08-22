@@ -78,7 +78,7 @@ ld bestll2(ld a, ld ab) { return bestll(a, ab-a); }
 template<class T> void fix_logistic_parameters(logistic& l, const T& f, const char *name, ld eps) {
   indenter_finish im("fix_logistic_parameters");
   ld cur = f(l);
-  println(hlog, format("%s = %20.10" PLDF " (R=%10.5" PLDF " T=%" PLDF ")", name, cur, l.R, l.T));
+  println(hlog, hr::format("%s = %20.10" PLDF " (R=%10.5" PLDF " T=%" PLDF ")", name, cur, l.R, l.T));
 
   for(ld step=1; step>eps; step /= 2) {
     
@@ -94,7 +94,7 @@ template<class T> void fix_logistic_parameters(logistic& l, const T& f, const ch
     while(true) { l.T -= step; ld t = f(l); if(t <= cur) break; cur = t; }
     l.T += step;
 
-    println(hlog, format("%s = %20.10" PLDF " (R=%10.5" PLDF " T=%10.5" PLDF ")", name, cur, l.R, l.T));
+    println(hlog, hr::format("%s = %20.10" PLDF " (R=%10.5" PLDF " T=%10.5" PLDF ")", name, cur, l.R, l.T));
     fflush(stdout);
     }
   }
@@ -269,7 +269,7 @@ void writestats() {
   ld placement_loglik = loglik_placement();
   
   for(int u=0; u<MAXDIST; u++) if(tally[u]) {
-    println(hlog, format("* %4d: %8d / %12Ld = %lf %.10" PLDF " %.10" PLDF, 
+    println(hlog, hr::format("* %4d: %8d / %12Ld = %lf %.10" PLDF " %.10" PLDF, 
       u, edgetally[u], tally[u], double(edgetally[u]) / tally[u], 
       saved_logistic.yes(u), current_logistic.yes(u)));
     }
@@ -393,7 +393,7 @@ void fast_loglik_cont(logistic& l, const logisticfun& f, const char *name, ld st
   if(name) println(hlog, "fix_logistic_parameters");
   indenter_finish im(name);
   ld cur = f(l);
-  if(name) println(hlog, format("%s = %20.10" PLDF " (R=%10.5" PLDF " T=%" PLDF ")", name, cur, l.R, l.T));
+  if(name) println(hlog, hr::format("%s = %20.10" PLDF " (R=%10.5" PLDF " T=%" PLDF ")", name, cur, l.R, l.T));
 
   map<pair<double, double>, double> memo;
   auto ff = [&] () {
@@ -424,7 +424,7 @@ void fast_loglik_cont(logistic& l, const logisticfun& f, const char *name, ld st
     
     if(changed) goto loop;
 
-    if(name) println(hlog, format("%s = %20.10" PLDF " (R=%10.5" PLDF " T=%10.5" PLDF ")", name, cur, l.R, l.T));
+    if(name) println(hlog, hr::format("%s = %20.10" PLDF " (R=%10.5" PLDF " T=%10.5" PLDF ")", name, cur, l.R, l.T));
     fflush(stdout);
     }
   }

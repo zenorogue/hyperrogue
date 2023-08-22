@@ -274,7 +274,7 @@ struct storydata { int s; int e; const char *text; } story[] = {
 #undef T
 #endif
 
-string its05(int i) { char buf[64]; sprintf(buf, "%05d", i); return buf; }
+string its05(int i) { return hr::format("%05d", i); }
 
 int dimid(char x) {
   if(x >= 'a' && x < 'a' + GDIM) return x - 'a';

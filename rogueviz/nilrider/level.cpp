@@ -388,7 +388,7 @@ void level::init() {
   start.timer = 0;
   current = start;
   println(hlog, "start.where = ", start.where);
-  println(hlog, "current.where = ", current.where, " : ", format("%p", &current));
+  println(hlog, "current.where = ", current.where, " : ", hr::format("%p", &current));
   
   int qgoals = isize(goals);
   records[0].resize(qgoals, 0);

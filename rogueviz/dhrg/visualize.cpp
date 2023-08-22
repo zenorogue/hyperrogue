@@ -29,13 +29,12 @@ void show_likelihood() {
     for(int i=0; i<MAXDIST; i++) bonus_tally[i] = 0;
 
   for(int u=0; u<MAXDIST; u++) if(tally[u] || bonus_tally[u]) {
-    char buf[20];
-    sprintf(buf, "%.6lf", lc_type == 'R' ? current_logistic.yes(u) : double(edgetally[u] * 1. / tally[u]));    
+    string value = hr::format("%.6lf", lc_type == 'R' ? current_logistic.yes(u) : double(edgetally[u] * 1. / tally[u]));
     string s = its(u);
     if(isize(s) == 1) s = "0" + s;
     s += ": " + its(edgetally[u]) + " / " + its(tally[u]);
     if(bonus_tally[u]) s += " [" + its(bonus_edgetally[u]) + "/" + its(bonus_tally[u]) + "]";
-    dialog::addSelItem(s, buf, 0);
+    dialog::addSelItem(s, value, 0);
     }
   
   char letters[3] = {'O', 'R', 'M'};

@@ -102,7 +102,7 @@ void geometry_information::prepare_usershapes() {
       if(sh->flags & POLY_VCONVEX) vcon++;
       if(sh->flags & POLY_CCONVEX) ccon++;
       }
-    println(hlog, format("inverse = %d isside = %d vcon = %d ccon = %d", inve, issi, vcon, ccon));
+    println(hlog, hr::format("inverse = %d isside = %d vcon = %d ccon = %d", inve, issi, vcon, ccon));
     }
   
   initPolyForGL();

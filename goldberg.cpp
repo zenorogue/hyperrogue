@@ -234,7 +234,7 @@ EX namespace gp {
     auto& wc = get_mapping(at);
     auto wcw = get_localwalk(wc, dir);
     auto& wc1 = get_mapping(at + eudir(dir));
-    DEBB0(DF_GP, (format("  md:%02d s:%d", wc.mindir, wc.cw.spin)); )
+    DEBB0(DF_GP, (hr::format("  md:%02d s:%d", wc.mindir, wc.cw.spin)); )
     DEBB0(DF_GP, ("  connection ", at, "/", dir, " ", wc.cw+dir, "=", wcw, " ~ ", at+eudir(dir), "/", dir1, " "); )
     if(!wc1.cw.at) {
       wc1.start = wc.start;

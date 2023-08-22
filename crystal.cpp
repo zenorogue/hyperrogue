@@ -1318,9 +1318,7 @@ EX void set_crystal(int sides) {
   set_variation(eVariation::pure);
   ginf[gCrystal].sides = sides;
   ginf[gCrystal].vertex = 4;
-  static char buf[20];
-  sprintf(buf, "{%d,4}", sides);
-  ginf[gCrystal].tiling_name = buf;
+  ginf[gCrystal].tiling_name = hr::format("{%d,4}", sides);
   ginf[gCrystal].distlimit = distlimit_table[min(sides, MAX_EDGE_CRYSTAL-1)];
   }
 
@@ -1562,7 +1560,7 @@ struct shift_data {
   
   bignum& compute(ld rad2) {
     if(result.count(rad2)) return result[rad2];
-    // println(hlog, "compute ", format("%p", this), " [shift=", shift, "], r2 = ", rad2);
+    // println(hlog, "compute ", hr::format("%p", this), " [shift=", shift, "], r2 = ", rad2);
     // indenter i(2);
     auto& b = result[rad2];
     if(!parent) {

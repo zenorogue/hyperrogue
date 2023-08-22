@@ -1000,7 +1000,7 @@ EX namespace gp {
     bool master = !(li.relative.first||li.relative.second);
     int cor = master ? S7 : SG6;
     if(master) li.last_dir = -1;
-    DEBB(DF_GP, (format("last=%d at=%d,%d tot=%d siid=%d sidir=%d cor=%d id=%d\n", li.last_dir, li.relative.first, li.relative.second, li.total_dir, siid, sidir, cor, id)));
+    DEBB(DF_GP, (hr::format("last=%d at=%d,%d tot=%d siid=%d sidir=%d cor=%d id=%d\n", li.last_dir, li.relative.first, li.relative.second, li.total_dir, siid, sidir, cor, id)));
       
     cgi.generate_floorshapes_for(id, c0, siid, sidir);
     

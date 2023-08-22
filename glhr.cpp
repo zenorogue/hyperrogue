@@ -57,7 +57,7 @@ EX }
 EX void glError(const char* GLcall, const char* file, const int line) {
   GLenum errCode = glGetError();
   if(errCode!=GL_NO_ERROR) {
-    println(hlog, format("OPENGL ERROR #%i: in file %s on line %i :: %s",errCode,file, line, GLcall));
+    println(hlog, hr::format("OPENGL ERROR #%i: in file %s on line %i :: %s",errCode,file, line, GLcall));
     }
   }
 
@@ -75,7 +75,7 @@ struct glwrap {
 void glwrap::act(const char *when) {
   GLenum errCode = glGetError();
   if(errCode!=GL_NO_ERROR) {
-    println(hlog, format("GL error %i %s: %s:%i", errCode, when, msg, line));
+    println(hlog, hr::format("GL error %i %s: %s:%i", errCode, when, msg, line));
     }
   }
 
@@ -332,7 +332,7 @@ EX int compileShader(int type, const string& s) {
     int lineno = 1;
     string cline = "";
     for(char c: s+"\n") {
-      if(c == '\n') println(hlog, format("%4d : ", lineno), cline), lineno++, cline = "";
+      if(c == '\n') println(hlog, hr::format("%4d : ", lineno), cline), lineno++, cline = "";
       else cline += c;
       }
     println(hlog, "===");

@@ -29,7 +29,7 @@ struct rock_generator {
     };
 
   void report(string s) {
-    println(hlog, lalign(10, format(tformat, cshift/ds_time_unit)), ": ", s);
+    println(hlog, lalign(10, hr::format(tformat, cshift/ds_time_unit)), ": ", s);
     };
 
   ld rand_range(ld a, ld b) { return lerp(a, b, randd()); };
@@ -585,7 +585,7 @@ void view_ds_game() {
       if(view_proper_times && rock.type != oParticle) {
         ld t = rock.pt_main.shift;
         if(rock.type == oMainRock) t += current.shift;
-        string str = format(tformat, t / ds_time_unit);
+        string str = hr::format(tformat, t / ds_time_unit);
         queuestr(shiftless(sphereflip * rgpushxto0(rock.pt_main.h)), .1, str, 0xFFFF00, 8);
         }
       
@@ -638,7 +638,7 @@ void view_ds_game() {
         }
 
       if(view_proper_times) {
-        string str = format(tformat, (cr.shift + ss.start) / ds_time_unit);
+        string str = hr::format(tformat, (cr.shift + ss.start) / ds_time_unit);
         queuestr(shiftless(sphereflip * rgpushxto0(cr.h)), .1, str, 0xC0C0C0, 8);
         }
       }
@@ -664,13 +664,13 @@ void view_ds_game() {
       poly_outline = 0xFF;
 
       if(view_proper_times) {
-        string str = format(tformat, ship_pt / ds_time_unit);
+        string str = hr::format(tformat, ship_pt / ds_time_unit);
         queuestr(shiftless(sphereflip), .1, str, 0xFFFFFF, 8);
         }
       }
     
     if(paused && view_proper_times) {
-      string str = format(tformat, view_pt / ds_time_unit);
+      string str = hr::format(tformat, view_pt / ds_time_unit);
       queuestr(shiftless(sphereflip), .1, str, 0xFFFF00, 8);
       }
 

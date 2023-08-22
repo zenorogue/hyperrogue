@@ -33,9 +33,9 @@ EX int debugflags = DF_INIT | DF_ERROR | DF_WARN | DF_MSG | DF_TIME | DF_LOG;
 
 EX string s0;
 
-EX string its(int i) { char buf[64]; sprintf(buf, "%d", i); return buf; }
+EX string its(int i) { return hr::format("%d", i); }
 
-EX string itsh8(int i) {static char buf[16]; sprintf(buf, "%08X", i); return buf; }
+EX string itsh8(int i) { return hr::format("%08X", i); }
 
 EX string fts(ld x, int prec IS(6)) {
   std::stringstream ss;
@@ -399,9 +399,9 @@ EX string llts(long long i) {
     if(i < 10) return its((int) i);
     return llts(i/10) + its(i%10);
 }
-EX string itsh(unsigned int i) {static char buf[16]; sprintf(buf, "%03X", i); return buf; }
-EX string itsh(int i) {static char buf[16]; sprintf(buf, "%03X", i); return buf; }
-EX string itsh2(int i) {static char buf[16]; sprintf(buf, "%02X", i); return buf; }
+EX string itsh(unsigned int i) { return hr::format("%03X", i); }
+EX string itsh(int i) { return hr::format("%03X", i); }
+EX string itsh2(int i) { return hr::format("%02X", i); }
 
 EX string itsh(unsigned long long i) {
   int i0 = int(i);
@@ -483,9 +483,7 @@ template<class T> T deserialize(const string& s) {
 EX string as_hexstring(string o) {
   string res;
   for(char x: o) {
-    char buf[4];
-    sprintf(buf, "%02X", (unsigned char)(x));
-    res += buf;
+    res += hr::format("%02X", (unsigned char)(x));
     }
   return res;
   }
@@ -507,8 +505,8 @@ EX string from_hexstring(string o) {
 EX string as_cstring(string o) {
   string s = "string(\"";
   for(char c: o)
-    s += format("\\x%02x", (unsigned char) c);
-  s += format("\", %d)", isize(o));
+    s += hr::format("\\x%02x", (unsigned char) c);
+  s += hr::format("\", %d)", isize(o));
   return s;
   }
 
@@ -520,7 +518,7 @@ EX string as_nice_cstring(string o) {
     else if(c == 10)
       s += "\\n";
     else
-      s += format("\\x%02x", (unsigned char) c);
+      s += hr::format("\\x%02x", (unsigned char) c);
   s += "\"";
   return s;
   }

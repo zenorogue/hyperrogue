@@ -1162,7 +1162,7 @@ EX void add_options() {
     cell *c = centerover->move(point_direction);
     if(c && c->wall == waWaxWall) {
       color_t col = c->landparam;
-      dialog::addBoolItem("we are facing floor (color " + format("%06X", col) + ")", colors_of_floors.count(col), 'n');
+      dialog::addBoolItem("we are facing floor (color " + hr::format("%06X", col) + ")", colors_of_floors.count(col), 'n');
       dialog::add_action([col] {
         if(colors_of_floors.count(col)) colors_of_floors.erase(col);
         else colors_of_floors.insert(col);

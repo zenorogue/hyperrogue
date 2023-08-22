@@ -499,7 +499,7 @@ void bantar_record() {
     vid.xres = vid.yres = TSIZE;
     banachtarski::bantar_frame();
     
-    IMAGESAVE(rbuf.render(), ("bantar/" + format("%05d", fr) + IMAGEEXT).c_str());
+    IMAGESAVE(rbuf.render(), ("bantar/" + hr::format("%05d", fr) + IMAGEEXT).c_str());
     printf("GL %5d/%5d\n", i, 10000);
     fr++;
     }

@@ -470,7 +470,7 @@ EX namespace history {
       auto save_band_segment = [&] {
         string fname = name_format;
         replace_str(fname, "$DATE", timebuf);
-        replace_str(fname, "$ID", format("%03d", segid++));
+        replace_str(fname, "$ID", hr::format("%03d", segid++));
         IMAGESAVE(band, fname.c_str());
 
         if(dospiral) 
@@ -498,10 +498,7 @@ EX namespace history {
           
           pushScreen(progress_screen);
   
-          char buf[128];
-          sprintf(buf, "#%03d", segid);
-  
-          progress(s0 + buf + " ("+its(j+bonus)+"/"+its(siz+bonus+bonus-1)+")"); */
+          progress(s0 + hr::format("#%03d (%d/%d)", segid, j+bonus, siz+bonus+bonus-1)); */
   
           // calcparam(); current_display->radius = bandhalf;
           phase = j; movetophase();

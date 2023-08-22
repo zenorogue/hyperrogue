@@ -439,9 +439,7 @@ EX namespace netgen {
     for(int ix=0; ix<PX; ix++) {
       for(int y=0; y<qy; y++) for(int x=0; x<qx; x++)
         qpixel(quarter,x,y) = qpixel(net, x+qx*ix, y+qy*iy);
-      char buf[64];
-      sprintf(buf, "papermodel-page%d%d" IMAGEEXT, iy, ix);
-      IMAGESAVE(quarter, buf);
+      IMAGESAVE(quarter, hr::format("papermodel-page%d%d" IMAGEEXT, iy, ix).c_str());
       }
     
     SDL_FreeSurface(net);

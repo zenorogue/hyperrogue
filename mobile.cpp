@@ -26,15 +26,13 @@ string buildScoreDescription() {
 
   for(int i=0; i<ittypes; i++) if(items[i]) {
     string t = XLATN(iinf[i].name);
-    sprintf(buf2, " %s (%d)", t.c_str(), items[i]);
-    s += buf2;
+    s += hr::format(" %s (%d)", t.c_str(), items[i]);
     }
   s += "\n";
   s += XLAT("Kills: ") + its(tkills());
   for(int i=1; i<motypes; i++) if(kills[i]) {
     string t = XLATN(minf[i].name);
-    sprintf(buf2, " %s (%d)", t.c_str(), kills[i]);
-    s += buf2;
+    s += hr::format(" %s (%d)", t.c_str(), kills[i]);
     }
   s += "\n";
 

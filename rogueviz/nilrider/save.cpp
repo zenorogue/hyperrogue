@@ -22,7 +22,7 @@ void save() {
         if(l->records[i][g]) {
           println(f, "*RECORD");
           println(f, l->name);
-          println(f, format("%d %d %f", i, g, l->records[i][g]));
+          println(f, hr::format("%d %d %f", i, g, l->records[i][g]));
           }
       }
     }
@@ -40,7 +40,7 @@ void save() {
       println(f, l->name);
       println(f, p.name);
       println(f, isize(p.plan));
-      for(auto t: p.plan) println(f, format("%.6f %.6f %.6f %.6f", t.at[0], t.at[1], t.vel[0], t.vel[1]));
+      for(auto t: p.plan) println(f, hr::format("%.6f %.6f %.6f %.6f", t.at[0], t.at[1], t.vel[0], t.vel[1]));
       println(f);
       }
     }

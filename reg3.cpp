@@ -1589,7 +1589,7 @@ EX namespace reg3 {
       ld err;
       
       for(auto& p2: altmap[alt]) if((err = intval(tC0(p2.second), hT)) < 1e-3) {
-        if(err > worst_error1) println(hlog, format("worst_error1 = %lg", double(worst_error1 = err)));
+        if(err > worst_error1) println(hlog, hr::format("worst_error1 = %lg", double(worst_error1 = err)));
         // println(hlog, "YES found in ", isize(altmap[alt]));
         if(DEB) println(hlog, "-> found ", p2.first);
         int fb = 0;
@@ -1604,7 +1604,7 @@ EX namespace reg3 {
         for(int d2=0; d2<S7; d2++) {
           hyperpoint back = p2.second * tC0(cgi.adjmoves[d2]);
           if((err = intval(back, old)) < 1e-3) {
-            if(err > worst_error2) println(hlog, format("worst_error2 = %lg", double(worst_error2 = err)));
+            if(err > worst_error2) println(hlog, hr::format("worst_error2 = %lg", double(worst_error2 = err)));
             if(p2.first->move(d2)) println(hlog, "error: repeated edge");
             p2.first->c.connect(d2, parent, d, false);
             fix_distances(p2.first, parent);
@@ -2416,7 +2416,7 @@ EX namespace reg3 {
           println(f, "face ", t, " ", id++, " ", isize(fa));
           for(auto& h: fa) {
             auto h1 = kleinize(h);
-            println(f, format("%.20f %.20f %.20f", h1[0], h1[1], h1[2]));
+            println(f, hr::format("%.20f %.20f %.20f", h1[0], h1[1], h1[2]));
             }
           }
         println(f);
@@ -2431,7 +2431,7 @@ EX namespace reg3 {
           transmatrix T = quotient_map->adj(c, i);
           for(int i=0; i<4; i++) {
             for(int j=0; j<4; j++) {
-              print(f, format("%.20f", T[i][j]), j == 3 ? "\n" : " ");
+              print(f, hr::format("%.20f", T[i][j]), j == 3 ? "\n" : " ");
               }
             }
           println(f);

@@ -105,7 +105,7 @@ void draw_game_cell(const cell_to_draw& cd) {
     }
 
   if(view_proper_times) {
-    string str = format(tformat, cd.center.shift / ads_time_unit);
+    string str = hr::format(tformat, cd.center.shift / ads_time_unit);
     queuestr(shiftless(rgpushxto0(cd.center.h)), .1, str, 0xFF4040, 8);
     }
 
@@ -167,7 +167,7 @@ void draw_game_cell(const cell_to_draw& cd) {
       }
 
     if(view_proper_times && rock.type != oParticle) {
-      string str = format(tformat, rock.pt_main.shift / ads_time_unit);
+      string str = hr::format(tformat, rock.pt_main.shift / ads_time_unit);
       queuestr(shiftless(rgpushxto0(rock.pt_main.h)), .1, str, 0xFFFFFF, 8);
       }
     }
@@ -213,7 +213,7 @@ void draw_game_cell(const cell_to_draw& cd) {
     queuecurve(shiftless(Id), 0xFF, shipcolor, PPR::MONSTER_FOOT);
 
     if(view_proper_times) {
-      string str = format(tformat, (cr.shift + rock.start) / ads_time_unit);
+      string str = hr::format(tformat, (cr.shift + rock.start) / ads_time_unit);
       queuestr(shiftless(rgpushxto0(cr.h)), .1, str, 0xC0C0C0, 8);
       }
     }
@@ -350,13 +350,13 @@ void view_ads_game() {
       poly_outline = 0xFF;
 
       if(view_proper_times) {
-        string str = format(tformat, ship_pt / ads_time_unit);
+        string str = hr::format(tformat, ship_pt / ads_time_unit);
         queuestr(shiftless(Id), .1, str, 0xFFFFFF, 8);
         }
       }
     
     if(paused && view_proper_times) {
-      string str = format(tformat, view_pt / ads_time_unit);
+      string str = hr::format(tformat, view_pt / ads_time_unit);
       queuestr(shiftless(Id), .1, str, 0xFFFF00, 8);
       }
     }

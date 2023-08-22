@@ -456,7 +456,7 @@ public class HyperRogue extends Activity implements SensorEventListener {
                  @Override
                  public boolean onError(MediaPlayer mp, int what, int extra)
                  {
-                     /* Toast.makeText(getApplicationContext(), String.format("Error(%s%s)", what, extra),
+                     /* Toast.makeText(getApplicationContext(), String.hr::format("Error(%s%s)", what, extra),
                              Toast.LENGTH_SHORT).show(); */
                      return true;
                  }

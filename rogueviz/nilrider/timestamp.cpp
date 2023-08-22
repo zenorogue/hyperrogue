@@ -217,7 +217,7 @@ void timestamp::centerview(level *lev) {
   }
 
 string format_timer(ld t) {
-  return format("%d:%02d.%02d", int(t / 60), int(t) % 60, int(frac(t) * 100));
+  return hr::format("%d:%02d.%02d", int(t / 60), int(t) % 60, int(frac(t) * 100));
   }
 
 void timestamp::draw_instruments(level* l) {
@@ -373,7 +373,7 @@ void timestamp::draw_instruments(level* l) {
 
   string s;
   if(loaded_or_planned) s = "R";
-  else if(reversals) s = format("+%d", reversals);
+  else if(reversals) s = hr::format("+%d", reversals);
   else return;
   displaystr(vid.xres - vid.fsize, vid.fsize*4, 0, vid.fsize, s, 0, 16);
   }

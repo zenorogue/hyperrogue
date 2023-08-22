@@ -196,7 +196,7 @@ string latex_packages =
 string latex_cachename(string s, flagtype flags) {
   unsigned hash = 0;
   for(char c: latex_packages + s) hash = (hash << 3) ^ hash ^ c ^ flags;
-  return format("latex-cache/%08X.png", hash);
+  return hr::format("latex-cache/%08X.png", hash);
   }
 
 /* note: you pdftopng from the xpdf package for this to work! */
@@ -330,7 +330,7 @@ void show_animation(presmode mode, string s, int sx, int sy, int frames, int fps
     /* actually load */
     array<int, 2> tab;
     if(pipe(&tab[0])) {
-      addMessage(format("Error: %s", strerror(errno)));
+      addMessage(hr::format("Error: %s", strerror(errno)));
       return;
       }
 

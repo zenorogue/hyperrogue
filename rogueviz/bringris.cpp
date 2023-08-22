@@ -1755,7 +1755,7 @@ void run() {
       perfect_linewidth = 0;
       shot::shot_aa = 2;
       vid.linewidth *= 2;
-      shot::take(format("bringris-%04d.png", id++), [] { draw_screen(vid.xres, false); });
+      shot::take(hr::format("bringris-%04d.png", id++), [] { draw_screen(vid.xres, false); });
       vid.linewidth /= 2;
       }
     #endif

@@ -32,7 +32,7 @@ int tallybox_total(qtybox& box) {
   }
 
 string segdesc(segment *s) {
-  return format("(%s-%s: len=%d, qty=%d/%d)", get_path(s->left).c_str(), get_path(s->right).c_str(), segmentlen(s), get0(s->qty), tallybox_total(s->qty));
+  return hr::format("(%s-%s: len=%d, qty=%d/%d)", get_path(s->left).c_str(), get_path(s->right).c_str(), segmentlen(s), get0(s->qty), tallybox_total(s->qty));
   }
 
 
@@ -342,7 +342,7 @@ void compute_betweenness(bool verify) {
     auto b = betweenness3(c1);
     // add_to_set(c1, 1, 0);
     auto b4 = betweenness4(c1);
-    print(hlog, format("B;%10Ld;%10Ld;%20.10Lf;%3d;%-40s", b.first, b.second, b4, vertices[i]->lev, rogueviz::vdata[i].name.c_str()));
+    print(hlog, hr::format("B;%10Ld;%10Ld;%20.10Lf;%3d;%-40s", b.first, b.second, b4, vertices[i]->lev, rogueviz::vdata[i].name.c_str()));
     if(verify) {
       /*
       betweenness_type a = b.first;
@@ -364,7 +364,7 @@ void compute_betweenness(bool verify) {
     else printf("\n");
     pb++;
     }
-  if(verify) println(hlog, format("errorcount = %d/%d\n", errorcount, errorcount2));
+  if(verify) println(hlog, hr::format("errorcount = %d/%d\n", errorcount, errorcount2));
   }
 
 void build(mycell *c, int lev, string s) {

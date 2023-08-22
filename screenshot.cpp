@@ -53,13 +53,13 @@ EX always_false in;
     static int id;
     id++; id %= 10;
     if(divby == 1) {
-      sprintf(buf[id], "%d", val); return buf[id];
+      snprintf(buf[id], 20, "%d", val); return buf[id];
       }
     else if(divby <= 10) {
-      sprintf(buf[id], "%.1f", val*1./divby); return buf[id];
+      snprintf(buf[id], 20, "%.1f", val*1./divby); return buf[id];
       }
     else {
-      sprintf(buf[id], "%.2f", val*1./divby); return buf[id];
+      snprintf(buf[id], 20, "%.2f", val*1./divby); return buf[id];
       }
     }
   
@@ -78,7 +78,7 @@ EX always_false in;
       else fill = 0xFFFFFFFF;
       }
     
-    sprintf(buf, "style=\"stroke:#%06x;stroke-opacity:%.3" PLDF ";stroke-width:%" PLDF "px;fill:#%06x;fill-opacity:%.3" PLDF "\"",
+    snprintf(buf, 600, "style=\"stroke:#%06x;stroke-opacity:%.3" PLDF ";stroke-width:%" PLDF "px;fill:#%06x;fill-opacity:%.3" PLDF "\"",
       (stroke>>8) & 0xFFFFFF, cta(stroke),
       width/divby,
       (fill>>8) & 0xFFFFFF, cta(fill)
@@ -1448,7 +1448,7 @@ EX bool record_video(string fname IS(videofile), bool_reaction_t rec IS(record_a
   
   array<int, 2> tab;
   if(pipe(&tab[0])) {
-    addMessage(format("Error: %s", strerror(errno)));
+    addMessage(hr::format("Error: %s", strerror(errno)));
     return false;
     }
   println(hlog, "tab = ", tab);

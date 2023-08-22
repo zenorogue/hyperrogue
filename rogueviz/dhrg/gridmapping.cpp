@@ -61,15 +61,15 @@ void do_analyze_grid(int maxv) {
     ld wE2 = wstats[d][2];
     ld wVr = wE2 - wE * wE;
 
-    print(hlog, format("d=%2d: q = %8d E = %12.8" PLDF " dif = %12.8" PLDF " Vr = %12.8" PLDF " Vr/(d-1)=%12.8" PLDF,
+    print(hlog, hr::format("d=%2d: q = %8d E = %12.8" PLDF " dif = %12.8" PLDF " Vr = %12.8" PLDF " Vr/(d-1)=%12.8" PLDF,
       d, q, E, dif, Vr, Vd));
 
-    if(0) print(hlog, format(" | <%" PLDF "> ex = %12.8" PLDF " d.ex = %12.8" PLDF " Vr = %12.8" PLDF, wstats[d][0], wE, wE - lwE, wVr));
+    if(0) print(hlog, hr::format(" | <%" PLDF "> ex = %12.8" PLDF " d.ex = %12.8" PLDF " Vr = %12.8" PLDF, wstats[d][0], wE, wE - lwE, wVr));
     
     ld Sigma = sqrt(Vr);
     sort(distances[d].begin(), distances[d].end());
     if(Sigma) for(int u=1; u<8; u++)
-      print(hlog, format(" %8.5" PLDF, (distances[d][u * isize(distances[d]) / 8] - E) / Sigma));
+      print(hlog, hr::format(" %8.5" PLDF, (distances[d][u * isize(distances[d]) / 8] - E) / Sigma));
     
     println(hlog);
     lwE = wE;

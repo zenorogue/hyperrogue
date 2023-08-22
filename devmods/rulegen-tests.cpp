@@ -1079,7 +1079,7 @@ void test_current(string tesname) {
     case 'O': Out("overts;oedges", lalign(0, count_vertex_orbits(), ";", count_edge_orbits()));
     case 'U': Out("vshapes;vverts;vedges;ushapes;uverts;uedges;xea;xeb;xec", count_uniform());
     case 'L': Out("mirror_rules", arb::current.mirror_rules);
-    case 'B': Out("listshape;listvalence", format("%lld;%lld", get_shapelist(), get_valence_list()));
+    case 'B': Out("listshape;listvalence", hr::format("%lld;%lld", get_shapelist(), get_valence_list()));
     case 'F': Out("maxdist", max_dist());
 
     case 'f': Out("file", tesname);
@@ -1091,7 +1091,7 @@ void test_current(string tesname) {
     case '1': Out("single", single_live_branches);
     case '2': Out("double", double_live_branches);
     case 'p': Out("premini", states_premini);
-    case 'K': Out("movecount", format("%ld", rulegen::movecount));
+    case 'K': Out("movecount", hr::format("%ld", rulegen::movecount));
     }
   println(*test_out);
   test_out->flush();
