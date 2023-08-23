@@ -59,39 +59,39 @@ EX int states_premini = 0;
 
 #if HDR
 /** change some flags -- they usually make it worse */
-static const flagtype w_numerical = Flag(1); /*< build trees numerically */
-static const flagtype w_near_solid = Flag(2); /*< solid's pre-parent is also solid */
-static const flagtype w_no_shortcut = Flag(3); /*< generate no shortcuts */
-static const flagtype w_no_restart = Flag(4); /*< do not restart at powers of two */
-static const flagtype w_no_sidecache = Flag(5); /*< do not cache get_side */
-static const flagtype w_no_relative_distance = Flag(6); /*< do not build relative distances into codes */
-static const flagtype w_examine_once = Flag(7); /*< restart after first conflict found in analysis */
-static const flagtype w_examine_all = Flag(8); /*< focus on all conflicts found in analysis even if we know them */
-static const flagtype w_conflict_all = Flag(9); /*< full extension in case of conflicts */
-static const flagtype w_parent_always = Flag(10); /*< always consider the full parent rule */
-static const flagtype w_parent_reverse = Flag(11); /*< reverse paths in parent_dir */
-static const flagtype w_parent_side = Flag(12); /*< allow side paths in parent_dir */
-static const flagtype w_parent_never = Flag(13); /*< never consider the full parent rule */
-static const flagtype w_always_clean = Flag(14); /*< restart following phases after any distance errors */
-static const flagtype w_single_origin = Flag(15); /*< consider only one origin */
-static const flagtype w_slow_side = Flag(16); /*< do not try get_side optimization */
-static const flagtype w_bfs = Flag(17); /*< compute distances using BFS */
-static const flagtype w_numerical_fix = Flag(18); /*< when doing numerical, find out filled vertices */
-static const flagtype w_known_structure = Flag(19); /*< do flagless first, then use the known distances from there (handled in ruletest) */
-static const flagtype w_known_distances = Flag(20); /*< with, use the actual distances */
-static const flagtype w_no_smart_shortcuts = Flag(21); /*< disable the 'smart shortcut' optimization */
-static const flagtype w_less_smart_retrace = Flag(22); /*< stop early when examining smart shortcut retraction */
-static const flagtype w_less_smart_advance = Flag(23); /*< stop early when examining smart shortcut advancement */
-static const flagtype w_no_queued_extensions = Flag(24); /*< consider extensions one by one */
-static const flagtype w_no_branch_skipping = Flag(24); /*< do not skip branches */
+static constexpr flagtype w_numerical = Flag(1); /*< build trees numerically */
+static constexpr flagtype w_near_solid = Flag(2); /*< solid's pre-parent is also solid */
+static constexpr flagtype w_no_shortcut = Flag(3); /*< generate no shortcuts */
+static constexpr flagtype w_no_restart = Flag(4); /*< do not restart at powers of two */
+static constexpr flagtype w_no_sidecache = Flag(5); /*< do not cache get_side */
+static constexpr flagtype w_no_relative_distance = Flag(6); /*< do not build relative distances into codes */
+static constexpr flagtype w_examine_once = Flag(7); /*< restart after first conflict found in analysis */
+static constexpr flagtype w_examine_all = Flag(8); /*< focus on all conflicts found in analysis even if we know them */
+static constexpr flagtype w_conflict_all = Flag(9); /*< full extension in case of conflicts */
+static constexpr flagtype w_parent_always = Flag(10); /*< always consider the full parent rule */
+static constexpr flagtype w_parent_reverse = Flag(11); /*< reverse paths in parent_dir */
+static constexpr flagtype w_parent_side = Flag(12); /*< allow side paths in parent_dir */
+static constexpr flagtype w_parent_never = Flag(13); /*< never consider the full parent rule */
+static constexpr flagtype w_always_clean = Flag(14); /*< restart following phases after any distance errors */
+static constexpr flagtype w_single_origin = Flag(15); /*< consider only one origin */
+static constexpr flagtype w_slow_side = Flag(16); /*< do not try get_side optimization */
+static constexpr flagtype w_bfs = Flag(17); /*< compute distances using BFS */
+static constexpr flagtype w_numerical_fix = Flag(18); /*< when doing numerical, find out filled vertices */
+static constexpr flagtype w_known_structure = Flag(19); /*< do flagless first, then use the known distances from there (handled in ruletest) */
+static constexpr flagtype w_known_distances = Flag(20); /*< with, use the actual distances */
+static constexpr flagtype w_no_smart_shortcuts = Flag(21); /*< disable the 'smart shortcut' optimization */
+static constexpr flagtype w_less_smart_retrace = Flag(22); /*< stop early when examining smart shortcut retraction */
+static constexpr flagtype w_less_smart_advance = Flag(23); /*< stop early when examining smart shortcut advancement */
+static constexpr flagtype w_no_queued_extensions = Flag(24); /*< consider extensions one by one */
+static constexpr flagtype w_no_branch_skipping = Flag(24); /*< do not skip branches */
 
 /* for 3D honeycombs */
-static const flagtype w_skip_transducers = Flag(32); /*< skip the transducer test */
-static const flagtype w_skip_transducer_loops = Flag(33); /*< skip loops during the transducer test */
-static const flagtype w_skip_transducer_terminate = Flag(34); /*< skip termination during the transducer test */
-static const flagtype w_r3_all_errors = Flag(35); /*< consider all errors for R3 */
-static const flagtype w_r3_no_road_shortcuts = Flag(36); /*< consider all errors for R3 */
-static const flagtype w_ignore_transducer_dist = Flag(37); /*< ignore distance errors while testing the transducers */
+static constexpr flagtype w_skip_transducers = Flag(32); /*< skip the transducer test */
+static constexpr flagtype w_skip_transducer_loops = Flag(33); /*< skip loops during the transducer test */
+static constexpr flagtype w_skip_transducer_terminate = Flag(34); /*< skip termination during the transducer test */
+static constexpr flagtype w_r3_all_errors = Flag(35); /*< consider all errors for R3 */
+static constexpr flagtype w_r3_no_road_shortcuts = Flag(36); /*< consider all errors for R3 */
+static constexpr flagtype w_ignore_transducer_dist = Flag(37); /*< ignore distance errors while testing the transducers */
 #endif
 
 /** these control the output */
@@ -1160,12 +1160,12 @@ struct treestate {
   vector<pair<int, int>> possible_parents;
   };
 
-static const int C_IGNORE = 0;
-static const int C_CHILD = 1;
-static const int C_UNCLE = 2;
-static const int C_EQUAL = 4;
-static const int C_NEPHEW = 6;  
-static const int C_PARENT = 8;
+static constexpr int C_IGNORE = 0;
+static constexpr int C_CHILD = 1;
+static constexpr int C_UNCLE = 2;
+static constexpr int C_EQUAL = 4;
+static constexpr int C_NEPHEW = 6;  
+static constexpr int C_PARENT = 8;
 #endif
 
 EX vector<treestate> treestates;
@@ -1445,10 +1445,10 @@ vector<twalker> cq;
 
 #if HDR
 /* special codes */
-static const int DIR_UNKNOWN = -1;
-static const int DIR_LEFT = -4;
-static const int DIR_RIGHT = -5;
-static const int DIR_PARENT = -6;
+static constexpr int DIR_UNKNOWN = -1;
+static constexpr int DIR_LEFT = -4;
+static constexpr int DIR_RIGHT = -5;
+static constexpr int DIR_PARENT = -6;
 #endif
 
 vector<int> gen_rule(twalker cwmain, int id) {

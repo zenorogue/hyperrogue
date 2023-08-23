@@ -22,7 +22,7 @@ struct usershapelayer {
 
 extern int usershape_changes;
 
-static const int USERLAYERS = 32;
+static constexpr int USERLAYERS = 32;
 
 struct usershape { usershapelayer d[USERLAYERS]; };
 
@@ -57,15 +57,15 @@ struct hpcshape {
 #define GOLDBERG_BITS 5
 #endif
 
-static const int GOLDBERG_LIMIT = (1<<GOLDBERG_BITS);
-static const int GOLDBERG_MASK = (GOLDBERG_LIMIT-1);
+static constexpr int GOLDBERG_LIMIT = (1<<GOLDBERG_BITS);
+static constexpr int GOLDBERG_MASK = (GOLDBERG_LIMIT-1);
 
 #ifndef BADMODEL
 #define BADMODEL 0
 #endif
 
 #ifndef WINGS
-static const int WINGS = (BADMODEL ? 1 : 4);
+static constexpr int WINGS = (BADMODEL ? 1 : 4);
 #endif
 
 typedef array<hpcshape, WINGS+1> hpcshape_animated;
@@ -571,7 +571,7 @@ EX void add_wall(int i, const vector<hyperpoint>& h) {
  */
 
 #if HDR
-static const ld hcrossf7 = 0.620672, hexf7 = 0.378077, tessf7 = 1.090550, hexhexdist7 = 0.566256;
+static constexpr ld hcrossf7 = 0.620672, hexf7 = 0.378077, tessf7 = 1.090550, hexhexdist7 = 0.566256;
 #endif
 
 EX bool scale_used() { return (shmup::on && geometry == gNormal && BITRUNCATED) ? (cheater || autocheat) : true; }

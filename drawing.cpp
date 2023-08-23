@@ -9,37 +9,37 @@
 namespace hr {
 
 #if HDR
-static const int POLY_DRAWLINES = 1;            // draw the lines
-static const int POLY_DRAWAREA = 2;             // draw the area
-static const int POLY_INVERSE = 4;              // draw the inverse -- useful in stereographic projection
-static const int POLY_ISSIDE = 8;               // never draw in inverse
-static const int POLY_BEHIND = 16;              // there are points behind the camera
-static const int POLY_TOOLARGE = 32;            // some coordinates are too large -- best not to draw to avoid glitches
-static const int POLY_INFRONT = 64;             // on the sphere (orthogonal projection), do not draw without any points in front
-static const int POLY_HASWALLS = 128;           // floor shapes which have their sidewalls
-static const int POLY_PLAIN = 256;              // plain floors
-static const int POLY_FULL = 512;               // full floors
-static const int POLY_HASSHADOW = 1024;         // floor shapes which have their shadows, or can use shFloorShadow
-static const int POLY_GP = 2048;                // Goldberg shapes
-static const int POLY_VCONVEX = 4096;           // Convex shape (vertex)
-static const int POLY_CCONVEX = 8192;           // Convex shape (central)
-static const int POLY_CENTERIN = 16384;         // new system of side checking 
-static const int POLY_FORCEWIDE = (1<<15);      // force wide lines
-static const int POLY_NOTINFRONT = (1<<16);     // points not in front
-static const int POLY_NIF_ERROR = (1<<17);      // points moved to the outline cross the image, disable
-static const int POLY_BADCENTERIN = (1<<18);    // new system of side checking 
-static const int POLY_PRECISE_WIDE = (1<<19);   // precise width calculation
-static const int POLY_FORCE_INVERTED = (1<<20); // force inverted
-static const int POLY_ALWAYS_IN = (1<<21);      // always draw this
-static const int POLY_TRIANGLES = (1<<22);      // made of TRIANGLES, not TRIANGLE_FAN
-static const int POLY_INTENSE = (1<<23);        // extra intense colors
-static const int POLY_DEBUG = (1<<24);          // debug this shape
-static const int POLY_PRINTABLE = (1<<25);      // these walls are printable
-static const int POLY_FAT = (1<<26);            // fatten this model in WRL export (used for Rug)
-static const int POLY_SHADE_TEXTURE = (1<<27);  // texture has 'z' coordinate for shading
-static const int POLY_ONE_LEVEL = (1<<28);      // only one level of the universal cover in SL(2,R)
-static const int POLY_APEIROGONAL = (1<<29);    // only vertices indexed up to she are drawn as the boundary
-static const int POLY_NO_FOG = (1<<30);         // disable fog for this
+static constexpr int POLY_DRAWLINES = 1;            // draw the lines
+static constexpr int POLY_DRAWAREA = 2;             // draw the area
+static constexpr int POLY_INVERSE = 4;              // draw the inverse -- useful in stereographic projection
+static constexpr int POLY_ISSIDE = 8;               // never draw in inverse
+static constexpr int POLY_BEHIND = 16;              // there are points behind the camera
+static constexpr int POLY_TOOLARGE = 32;            // some coordinates are too large -- best not to draw to avoid glitches
+static constexpr int POLY_INFRONT = 64;             // on the sphere (orthogonal projection), do not draw without any points in front
+static constexpr int POLY_HASWALLS = 128;           // floor shapes which have their sidewalls
+static constexpr int POLY_PLAIN = 256;              // plain floors
+static constexpr int POLY_FULL = 512;               // full floors
+static constexpr int POLY_HASSHADOW = 1024;         // floor shapes which have their shadows, or can use shFloorShadow
+static constexpr int POLY_GP = 2048;                // Goldberg shapes
+static constexpr int POLY_VCONVEX = 4096;           // Convex shape (vertex)
+static constexpr int POLY_CCONVEX = 8192;           // Convex shape (central)
+static constexpr int POLY_CENTERIN = 16384;         // new system of side checking 
+static constexpr int POLY_FORCEWIDE = (1<<15);      // force wide lines
+static constexpr int POLY_NOTINFRONT = (1<<16);     // points not in front
+static constexpr int POLY_NIF_ERROR = (1<<17);      // points moved to the outline cross the image, disable
+static constexpr int POLY_BADCENTERIN = (1<<18);    // new system of side checking 
+static constexpr int POLY_PRECISE_WIDE = (1<<19);   // precise width calculation
+static constexpr int POLY_FORCE_INVERTED = (1<<20); // force inverted
+static constexpr int POLY_ALWAYS_IN = (1<<21);      // always draw this
+static constexpr int POLY_TRIANGLES = (1<<22);      // made of TRIANGLES, not TRIANGLE_FAN
+static constexpr int POLY_INTENSE = (1<<23);        // extra intense colors
+static constexpr int POLY_DEBUG = (1<<24);          // debug this shape
+static constexpr int POLY_PRINTABLE = (1<<25);      // these walls are printable
+static constexpr int POLY_FAT = (1<<26);            // fatten this model in WRL export (used for Rug)
+static constexpr int POLY_SHADE_TEXTURE = (1<<27);  // texture has 'z' coordinate for shading
+static constexpr int POLY_ONE_LEVEL = (1<<28);      // only one level of the universal cover in SL(2,R)
+static constexpr int POLY_APEIROGONAL = (1<<29);    // only vertices indexed up to she are drawn as the boundary
+static constexpr int POLY_NO_FOG = (1<<30);         // disable fog for this
 
 /** \brief A graphical element that can be drawn. Objects are not drawn immediately but rather queued.
  *

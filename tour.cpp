@@ -60,19 +60,19 @@ namespace LEGAL {
   }
 
 /** \brief when Enter pressed while showing the text, skip to the next slide immediately */
-static const flagtype QUICKSKIP=8;
+static constexpr flagtype QUICKSKIP=8;
 /** \brief The final slide. Shows where the presentation ends */
-static const flagtype FINALSLIDE=16;
+static constexpr flagtype FINALSLIDE=16;
 /** \brief Pressing Enter while in another geometry should change slides immediately */
-static const flagtype QUICKGEO=32;
+static constexpr flagtype QUICKGEO=32;
 /** \brief This slide should be displayed in sidescreen mode */
-static const flagtype SIDESCREEN = 64;
+static constexpr flagtype SIDESCREEN = 64;
 /** \brief When changing geometries, show the name of the slide, instead of the current land */
-static const flagtype USE_SLIDE_NAME = 128;
+static constexpr flagtype USE_SLIDE_NAME = 128;
 /** \brief do not display any help line */
-static const flagtype NOTITLE = 256;
+static constexpr flagtype NOTITLE = 256;
 /** \brief always display the text, even if going back or texts are disabled */
-static const flagtype ALWAYS_TEXT = 256;
+static constexpr flagtype ALWAYS_TEXT = 256;
 #endif
 
 EX vector<reaction_t> restorers;

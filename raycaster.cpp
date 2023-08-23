@@ -46,7 +46,7 @@ EX ld minstep = .001;
 
 EX ld reflect_val = 0;
 
-static const int NO_LIMIT = 999999;
+static constexpr int NO_LIMIT = 999999;
 
 EX ld hard_limit = NO_LIMIT;
 
@@ -186,11 +186,11 @@ struct raycaster : glhr::GLprogram {
 #ifdef GLES_ONLY
 bool m_via_texture = false;
 bool wall_via_texture = false;
-static const bool can_via_texture = false; /* textures are not precise enough ): */
+static constexpr bool can_via_texture = false; /* textures are not precise enough ): */
 #else
 bool m_via_texture = true;
 bool wall_via_texture = true;
-static const bool can_via_texture = true;
+static constexpr bool can_via_texture = true;
 #endif
 
 

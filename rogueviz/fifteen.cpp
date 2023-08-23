@@ -11,7 +11,7 @@ namespace hr {
 
 EX namespace fifteen {
 
-static const int Empty = 0;
+static constexpr int Empty = 0;
 
 struct celldata {
   int target, targetdir;

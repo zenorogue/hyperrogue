@@ -77,7 +77,7 @@ EX int btspin(int id, int d) {
 
 #if HDR
 
-static const int ERR = -99;
+static constexpr int ERR = -99;
 
 struct triplet_info {
   int i, j, size;
@@ -272,7 +272,7 @@ struct fpattern {
   
   void build();
   
-  static const int MAXDIST = 120;
+  static constexpr int MAXDIST = 120;
   
   vector<char> disthep;
   vector<char> disthex;

@@ -44,7 +44,7 @@ EX namespace brownian {
     c->landparam += val;
     }
   
-  static const int FAT = (-100); // less than 0
+  static constexpr int FAT = (-100); // less than 0
 
   void recurse(cell *c, int fatten_from) {
     int dl = getDistLimit();

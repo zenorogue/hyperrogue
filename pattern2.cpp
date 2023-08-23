@@ -628,20 +628,20 @@ EX namespace patterns {
     PAT_SINGLETYPE = 't'
     };  
 
-  static const int SPF_ROT = 1;
-  static const int SPF_SYM01 = 2;
-  static const int SPF_SYM02 = 4;
-  static const int SPF_SYM03 = 8;
-  static const int SPF_CHANGEROT = 16;
-  static const int SPF_TWOCOL = 32;
-  static const int SPF_EXTRASYM = 64;
-  static const int SPF_ALTERNATE = 128;
-  static const int SPF_FOOTBALL = 256;
-  static const int SPF_FULLSYM = 512;
-  static const int SPF_DOCKS = 1024;
-  static const int SPF_NO_SUBCODES = 2048;
+  static constexpr int SPF_ROT = 1;
+  static constexpr int SPF_SYM01 = 2;
+  static constexpr int SPF_SYM02 = 4;
+  static constexpr int SPF_SYM03 = 8;
+  static constexpr int SPF_CHANGEROT = 16;
+  static constexpr int SPF_TWOCOL = 32;
+  static constexpr int SPF_EXTRASYM = 64;
+  static constexpr int SPF_ALTERNATE = 128;
+  static constexpr int SPF_FOOTBALL = 256;
+  static constexpr int SPF_FULLSYM = 512;
+  static constexpr int SPF_DOCKS = 1024;
+  static constexpr int SPF_NO_SUBCODES = 2048;
 
-  static const int SPF_SYM0123 = SPF_SYM01 | SPF_SYM02 | SPF_SYM03;
+  static constexpr int SPF_SYM0123 = SPF_SYM01 | SPF_SYM02 | SPF_SYM03;
 
   struct patterninfo {
     int id;

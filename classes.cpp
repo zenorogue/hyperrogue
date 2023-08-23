@@ -426,59 +426,59 @@ enum eSlimegroup { sgNone, sgCave, sgWater, sgFloorA, sgFloorB, sgVine, sgTree }
 
 #if HDR
 // we use CF not MF to avoid confusion with MF_ movement flags
-static const flagtype CF_NOGHOST = Flag(0);
-static const flagtype CF_RAIDER = Flag(1);
-static const flagtype CF_PRINCESS = Flag(2);
-static const flagtype CF_MIMIC = Flag(3);
-static const flagtype CF_GOK = Flag(4);
-static const flagtype CF_NONLIVING = Flag(5);
-static const flagtype CF_METAL = Flag(6);
-static const flagtype CF_STUNNABLE = Flag(7);
-static const flagtype CF_HP = Flag(8);
-static const flagtype CF_MOUNTABLE = Flag(9);
-static const flagtype CF_FRIENDLY = Flag(10);
-static const flagtype CF_PLAYER = Flag(11);
-static const flagtype CF_BUG = Flag(12);
-static const flagtype CF_IVY = Flag(13);
-static const flagtype CF_PART = Flag(14);
-static const flagtype CF_MUTANTIVY = Flag(15);
-static const flagtype CF_ANYIVY = Flag(16);
-static const flagtype CF_BULLET = Flag(17);
-static const flagtype CF_DEMON = Flag(18);
-static const flagtype CF_WORM = Flag(19);
-static const flagtype CF_WITCH = Flag(20);
-static const flagtype CF_BIRD = Flag(21);
-static const flagtype CF_SLOWMOVER = Flag(22);
-static const flagtype CF_MAGNETIC = Flag(23);
-static const flagtype CF_SWITCH = Flag(24);
-static const flagtype CF_GHOST = Flag(25);
-static const flagtype CF_SHARK = Flag(26);
-static const flagtype CF_SLIME = Flag(27);
-static const flagtype CF_DRAGON = Flag(28);
-static const flagtype CF_KRAKEN = Flag(29);
-static const flagtype CF_NOBLOW = Flag(30);
-static const flagtype CF_MULTITILE = Flag(31);
-static const flagtype CF_LEADER = Flag(32);
-static const flagtype CF_FLYING = Flag(33);
-static const flagtype CF_ATTACK_THRU_VINE = Flag(34);
-static const flagtype CF_ATTACK_NONADJACENT = Flag(35);
-static const flagtype CF_NOHIGHLIGHT = Flag(36);
-static const flagtype CF_INACTIVE = Flag(37);
-static const flagtype CF_UNARMED = Flag(38);
-static const flagtype CF_IGNORE_PLATE = Flag(39);
-static const flagtype CF_BULL = Flag(40);
-static const flagtype CF_TROLL = Flag(41);
-static const flagtype CF_IGNORE_SMELL = Flag(42);
-static const flagtype CF_RATLING = Flag(43);
-static const flagtype CF_POWER = Flag(44);
-static const flagtype CF_GHOSTMOVER = Flag(45);
-static const flagtype CF_TECHNICAL = Flag(46);
-static const flagtype CF_MOVED = Flag(47);
-static const flagtype CF_FACING = Flag(48);
-static const flagtype CF_FACE_UP = Flag(49);
-static const flagtype CF_FACE_SIDE = Flag(50);
-static const flagtype CF_HIGH_THREAT = Flag(51);
-static const flagtype CF_SPAM = Flag(52);
+static constexpr flagtype CF_NOGHOST = Flag(0);
+static constexpr flagtype CF_RAIDER = Flag(1);
+static constexpr flagtype CF_PRINCESS = Flag(2);
+static constexpr flagtype CF_MIMIC = Flag(3);
+static constexpr flagtype CF_GOK = Flag(4);
+static constexpr flagtype CF_NONLIVING = Flag(5);
+static constexpr flagtype CF_METAL = Flag(6);
+static constexpr flagtype CF_STUNNABLE = Flag(7);
+static constexpr flagtype CF_HP = Flag(8);
+static constexpr flagtype CF_MOUNTABLE = Flag(9);
+static constexpr flagtype CF_FRIENDLY = Flag(10);
+static constexpr flagtype CF_PLAYER = Flag(11);
+static constexpr flagtype CF_BUG = Flag(12);
+static constexpr flagtype CF_IVY = Flag(13);
+static constexpr flagtype CF_PART = Flag(14);
+static constexpr flagtype CF_MUTANTIVY = Flag(15);
+static constexpr flagtype CF_ANYIVY = Flag(16);
+static constexpr flagtype CF_BULLET = Flag(17);
+static constexpr flagtype CF_DEMON = Flag(18);
+static constexpr flagtype CF_WORM = Flag(19);
+static constexpr flagtype CF_WITCH = Flag(20);
+static constexpr flagtype CF_BIRD = Flag(21);
+static constexpr flagtype CF_SLOWMOVER = Flag(22);
+static constexpr flagtype CF_MAGNETIC = Flag(23);
+static constexpr flagtype CF_SWITCH = Flag(24);
+static constexpr flagtype CF_GHOST = Flag(25);
+static constexpr flagtype CF_SHARK = Flag(26);
+static constexpr flagtype CF_SLIME = Flag(27);
+static constexpr flagtype CF_DRAGON = Flag(28);
+static constexpr flagtype CF_KRAKEN = Flag(29);
+static constexpr flagtype CF_NOBLOW = Flag(30);
+static constexpr flagtype CF_MULTITILE = Flag(31);
+static constexpr flagtype CF_LEADER = Flag(32);
+static constexpr flagtype CF_FLYING = Flag(33);
+static constexpr flagtype CF_ATTACK_THRU_VINE = Flag(34);
+static constexpr flagtype CF_ATTACK_NONADJACENT = Flag(35);
+static constexpr flagtype CF_NOHIGHLIGHT = Flag(36);
+static constexpr flagtype CF_INACTIVE = Flag(37);
+static constexpr flagtype CF_UNARMED = Flag(38);
+static constexpr flagtype CF_IGNORE_PLATE = Flag(39);
+static constexpr flagtype CF_BULL = Flag(40);
+static constexpr flagtype CF_TROLL = Flag(41);
+static constexpr flagtype CF_IGNORE_SMELL = Flag(42);
+static constexpr flagtype CF_RATLING = Flag(43);
+static constexpr flagtype CF_POWER = Flag(44);
+static constexpr flagtype CF_GHOSTMOVER = Flag(45);
+static constexpr flagtype CF_TECHNICAL = Flag(46);
+static constexpr flagtype CF_MOVED = Flag(47);
+static constexpr flagtype CF_FACING = Flag(48);
+static constexpr flagtype CF_FACE_UP = Flag(49);
+static constexpr flagtype CF_FACE_SIDE = Flag(50);
+static constexpr flagtype CF_HIGH_THREAT = Flag(51);
+static constexpr flagtype CF_SPAM = Flag(52);
 
 enum eMonster {
   #define MONSTER(a,b,c,d,e,f,g,h) d,
@@ -536,16 +536,16 @@ EX genderswitch_t genderswitch[NUM_GS] = {
 #if HDR
 enum eOrbshape { osNone, osLove, osRanged, osOffensive, osFriend, osUtility, osDirectional, osWarping, osFrog, osPowerUtility, osProtective, osMovement, osTerraform };
 
-static const flagtype ZERO = 0;
+static constexpr flagtype ZERO = 0;
 
-static const flagtype IF_SHARD = Flag(0);
-static const flagtype IF_FIREPROOF = Flag(1);
-static const flagtype IF_PROTECTION = Flag(2);
-static const flagtype IF_EMPATHY = Flag(3);
-static const flagtype IF_RANGED = Flag(4);
-static const flagtype IF_SHMUPLIFE = Flag(5);
-static const flagtype IF_REVIVAL = Flag(6);
-static const flagtype IF_CURSE = Flag(7);
+static constexpr flagtype IF_SHARD = Flag(0);
+static constexpr flagtype IF_FIREPROOF = Flag(1);
+static constexpr flagtype IF_PROTECTION = Flag(2);
+static constexpr flagtype IF_EMPATHY = Flag(3);
+static constexpr flagtype IF_RANGED = Flag(4);
+static constexpr flagtype IF_SHMUPLIFE = Flag(5);
+static constexpr flagtype IF_REVIVAL = Flag(6);
+static constexpr flagtype IF_CURSE = Flag(7);
 
 // 0 = basic treasure, 1 = other item, 2 = power orb, 3 = not an item
 #define IC_TREASURE 0
@@ -578,28 +578,28 @@ EX itemtype iinf[ittypes] = {
 // --- wall types ---
 
 #if HDR
-static const flagtype WF_WATER = Flag(0);
-static const flagtype WF_BOAT = Flag(1);
-static const flagtype WF_CHASM = Flag(2);
-static const flagtype WF_NOFLIGHT = Flag(3);
-static const flagtype WF_FIRE = Flag(4);
-static const flagtype WF_THUMPER = Flag(5);
-static const flagtype WF_ACTIVABLE = Flag(6);
-static const flagtype WF_ALCHEMY = Flag(7);
-static const flagtype WF_RED = Flag(8);
-static const flagtype WF_WALL = Flag(9);
-static const flagtype WF_PUSHABLE = Flag(10);
-static const flagtype WF_CONE = Flag(11);
-static const flagtype WF_STDTREE = Flag(12);
-static const flagtype WF_GRAVE = Flag(13);
-static const flagtype WF_REPTILE = Flag(14);
-static const flagtype WF_HEATCOLOR = Flag(15);
-static const flagtype WF_HIGHWALL = Flag(16);
-static const flagtype WF_THORNY = Flag(17);
-static const flagtype WF_TIMEOUT = Flag(18);
-static const flagtype WF_CISLAND = Flag(19);
-static const flagtype WF_SULPHURIC = Flag(20);
-static const flagtype WF_HALFVINE = Flag(21);
+static constexpr flagtype WF_WATER = Flag(0);
+static constexpr flagtype WF_BOAT = Flag(1);
+static constexpr flagtype WF_CHASM = Flag(2);
+static constexpr flagtype WF_NOFLIGHT = Flag(3);
+static constexpr flagtype WF_FIRE = Flag(4);
+static constexpr flagtype WF_THUMPER = Flag(5);
+static constexpr flagtype WF_ACTIVABLE = Flag(6);
+static constexpr flagtype WF_ALCHEMY = Flag(7);
+static constexpr flagtype WF_RED = Flag(8);
+static constexpr flagtype WF_WALL = Flag(9);
+static constexpr flagtype WF_PUSHABLE = Flag(10);
+static constexpr flagtype WF_CONE = Flag(11);
+static constexpr flagtype WF_STDTREE = Flag(12);
+static constexpr flagtype WF_GRAVE = Flag(13);
+static constexpr flagtype WF_REPTILE = Flag(14);
+static constexpr flagtype WF_HEATCOLOR = Flag(15);
+static constexpr flagtype WF_HIGHWALL = Flag(16);
+static constexpr flagtype WF_THORNY = Flag(17);
+static constexpr flagtype WF_TIMEOUT = Flag(18);
+static constexpr flagtype WF_CISLAND = Flag(19);
+static constexpr flagtype WF_SULPHURIC = Flag(20);
+static constexpr flagtype WF_HALFVINE = Flag(21);
 
 struct walltype {
   char  glyph;
@@ -631,23 +631,23 @@ enum eCanvasFloor { caflNone, caflM, caflFull, caflWarp, caflStar, caflCloud, ca
   caflPalace, caflDemon, caflCave, caflDesert, caflPower, caflRose, caflTurtle, caflDragon, caflReptile,
   caflHive, caflSwitch, caflTower, caflEND };
 
-static const flagtype LF_GENERATE_ALL = Flag(0);
-static const flagtype LF_ICY = Flag(1);
-static const flagtype LF_GRAVITY = Flag(2);
-static const flagtype LF_EQUI = Flag(3);
-static const flagtype LF_WARPED = Flag(4);
-static const flagtype LF_CYCLIC = Flag(5);
-static const flagtype LF_TECHNICAL = Flag(6);
-static const flagtype LF_MIRROR = Flag(7);
-static const flagtype LF_SEA = Flag(8);
-static const flagtype LF_COASTAL = Flag(9);
-static const flagtype LF_PURESEA = Flag(10);
-static const flagtype LF_ELEMENTAL = Flag(11);
-static const flagtype LF_HAUNTED = Flag(12);
-static const flagtype LF_TROLL = Flag(13);
-static const flagtype LF_INMIRROR = Flag(14);
-static const flagtype LF_INMIRRORORWALL = Flag(15);
-static const flagtype LF_ELECTRIC = Flag(17);
+static constexpr flagtype LF_GENERATE_ALL = Flag(0);
+static constexpr flagtype LF_ICY = Flag(1);
+static constexpr flagtype LF_GRAVITY = Flag(2);
+static constexpr flagtype LF_EQUI = Flag(3);
+static constexpr flagtype LF_WARPED = Flag(4);
+static constexpr flagtype LF_CYCLIC = Flag(5);
+static constexpr flagtype LF_TECHNICAL = Flag(6);
+static constexpr flagtype LF_MIRROR = Flag(7);
+static constexpr flagtype LF_SEA = Flag(8);
+static constexpr flagtype LF_COASTAL = Flag(9);
+static constexpr flagtype LF_PURESEA = Flag(10);
+static constexpr flagtype LF_ELEMENTAL = Flag(11);
+static constexpr flagtype LF_HAUNTED = Flag(12);
+static constexpr flagtype LF_TROLL = Flag(13);
+static constexpr flagtype LF_INMIRROR = Flag(14);
+static constexpr flagtype LF_INMIRRORORWALL = Flag(15);
+static constexpr flagtype LF_ELECTRIC = Flag(17);
 
 struct landtype {
   color_t color;
@@ -788,76 +788,76 @@ struct geometryinfo {
   eVariation default_variation;
   };
 
-static const flagtype qCLOSED         = 1;
-static const flagtype qANYQ            = 2;
-static const flagtype qNONORIENTABLE   = 4;
-static const flagtype qSMALL           = 8;
+static constexpr flagtype qCLOSED         = 1;
+static constexpr flagtype qANYQ            = 2;
+static constexpr flagtype qNONORIENTABLE   = 4;
+static constexpr flagtype qSMALL           = 8;
 
-static const flagtype qFIELD           = 16;
-static const flagtype qDOCKS           = 32;
-static const flagtype qZEBRA           = 64;
+static constexpr flagtype qFIELD           = 16;
+static constexpr flagtype qDOCKS           = 32;
+static constexpr flagtype qZEBRA           = 64;
 
-static const flagtype qELLIPTIC        = 128;
+static constexpr flagtype qELLIPTIC        = 128;
 
-static const flagtype qBINARY          = 256;
-static const flagtype qKITE            = 512;
+static constexpr flagtype qBINARY          = 256;
+static constexpr flagtype qKITE            = 512;
 
-static const flagtype qREGULAR         = 1024; /* not set! */
-static const flagtype qARCHI           = 2048;
-static const flagtype qHYBRID          = 4096;
-static const flagtype qCRYSTAL         = 8192;
-static const flagtype qSOL             = 16384;
-static const flagtype qEXPERIMENTAL    = 32768;
-static const flagtype qNIH             = 65536;
+static constexpr flagtype qREGULAR         = 1024; /* not set! */
+static constexpr flagtype qARCHI           = 2048;
+static constexpr flagtype qHYBRID          = 4096;
+static constexpr flagtype qCRYSTAL         = 8192;
+static constexpr flagtype qSOL             = 16384;
+static constexpr flagtype qEXPERIMENTAL    = 32768;
+static constexpr flagtype qNIH             = 65536;
 
-static const flagtype qIDEAL           = 131072;
-static const flagtype qHUGE_BOUNDED    = 262144;
-static const flagtype qOPTQ            = Flag(19);
-static const flagtype qSINGLE          = Flag(20);
+static constexpr flagtype qIDEAL           = 131072;
+static constexpr flagtype qHUGE_BOUNDED    = 262144;
+static constexpr flagtype qOPTQ            = Flag(19);
+static constexpr flagtype qSINGLE          = Flag(20);
 
-static const flagtype qDEPRECATED      = Flag(21);
-static const flagtype qINFMIXED        = Flag(22);
+static constexpr flagtype qDEPRECATED      = Flag(21);
+static constexpr flagtype qINFMIXED        = Flag(22);
 
-static const flagtype qRAYONLY         = Flag(23);
-static const flagtype qAFFINE          = Flag(24);
+static constexpr flagtype qRAYONLY         = Flag(23);
+static constexpr flagtype qAFFINE          = Flag(24);
 
-static const flagtype qULTRA           = Flag(25);
+static constexpr flagtype qULTRA           = Flag(25);
 
-static const flagtype qPORTALSPACE     = Flag(26);
+static constexpr flagtype qPORTALSPACE     = Flag(26);
 
-static const flagtype qSTRETCHABLE     = Flag(27);
+static constexpr flagtype qSTRETCHABLE     = Flag(27);
 
-static const flagtype qCAT             = Flag(28);
+static constexpr flagtype qCAT             = Flag(28);
 
-static const flagtype qAPERIODIC       = Flag(29);
-static const flagtype qHAT             = Flag(30);
+static constexpr flagtype qAPERIODIC       = Flag(29);
+static constexpr flagtype qHAT             = Flag(30);
 
-static const flagtype qFRACTAL         = Flag(31);
+static constexpr flagtype qFRACTAL         = Flag(31);
 
 // note: dnext assumes that x&7 equals 7
-static const int SEE_ALL = 50;
+static constexpr int SEE_ALL = 50;
 // note: check_football_colorability in arbitrile.cpp assumes OINF is divisible by 3
-static const int OINF = 123;
+static constexpr int OINF = 123;
 
 extern eGeometry geometry;
 extern eVariation variation;
 #endif
 
 #if HDR
-static const flagtype qsNONOR           = qANYQ | qSMALL | qCLOSED | qNONORIENTABLE;
-static const flagtype qsNONORE          = qsNONOR | qELLIPTIC;
-static const flagtype qsBQ              = qANYQ | qSMALL | qCLOSED;
-static const flagtype qsSMALL           = qANYQ | qSMALL | qCLOSED;
-static const flagtype qsSMALLN          = qANYQ | qSMALL | qCLOSED | qNONORIENTABLE;
-static const flagtype qsZEBRA           = qANYQ | qSMALL | qCLOSED | qZEBRA;
-static const flagtype qsFIELD           = qANYQ | qFIELD | qCLOSED;
-static const flagtype qsDOCKS           = qANYQ | qSMALL | qCLOSED | qDOCKS;
-static const flagtype qsSMALLB          = qSMALL | qCLOSED;
-static const flagtype qsSMALLBF         = qsSMALLB | qsFIELD | qANYQ;
-static const flagtype qsSMALLBE         = qsSMALLB | qELLIPTIC | qANYQ;
-static const flagtype qsBP              = qBINARY | qKITE;
+static constexpr flagtype qsNONOR           = qANYQ | qSMALL | qCLOSED | qNONORIENTABLE;
+static constexpr flagtype qsNONORE          = qsNONOR | qELLIPTIC;
+static constexpr flagtype qsBQ              = qANYQ | qSMALL | qCLOSED;
+static constexpr flagtype qsSMALL           = qANYQ | qSMALL | qCLOSED;
+static constexpr flagtype qsSMALLN          = qANYQ | qSMALL | qCLOSED | qNONORIENTABLE;
+static constexpr flagtype qsZEBRA           = qANYQ | qSMALL | qCLOSED | qZEBRA;
+static constexpr flagtype qsFIELD           = qANYQ | qFIELD | qCLOSED;
+static constexpr flagtype qsDOCKS           = qANYQ | qSMALL | qCLOSED | qDOCKS;
+static constexpr flagtype qsSMALLB          = qSMALL | qCLOSED;
+static constexpr flagtype qsSMALLBF         = qsSMALLB | qsFIELD | qANYQ;
+static constexpr flagtype qsSMALLBE         = qsSMALLB | qELLIPTIC | qANYQ;
+static constexpr flagtype qsBP              = qBINARY | qKITE;
 
-static const flagtype qsSINGLE          = qANYQ | qSMALL | qCLOSED | qSINGLE;
+static constexpr flagtype qsSINGLE          = qANYQ | qSMALL | qCLOSED | qSINGLE;
 #endif
 
 EX geometryinfo1 giEuclid2 = { gcEuclid,     2, 2, 3, {1,1, 0,0 } };
@@ -974,31 +974,31 @@ EX vector<geometryinfo> ginf = {
 
 #if HDR
 namespace mf {
-  static const flagtype azimuthal = 1;
-  static const flagtype cylindrical = 2; /* usually you want 'band' */
-  static const flagtype equiarea = 4;
-  static const flagtype equidistant = 8;
-  static const flagtype conformal = 16;
-  static const flagtype euc_boring = 32;
-  static const flagtype space = 64;
-  static const flagtype hyper_only = 128;
-  static const flagtype hyper_or_torus = 256;
-  static const flagtype pseudocylindrical = 512; /* includes cylindrical; usually you want 'band' or 'pseudoband' */
-  static const flagtype equivolume = 1024;
-  static const flagtype twopoint = 2048;
-  static const flagtype uses_bandshift = 4096;
-  static const flagtype broken = 8192; /* in spherical case, these are broken along the meridian 180 deg */
-  static const flagtype technical = 16384; /* don't display in the list */
-  static const flagtype product_special = (1<<15);
-  static const flagtype axial = (1<<16);
-  static const flagtype perspective = (1<<17);
-  static const flagtype orientation = (1<<18);
-  static const flagtype transition = (1<<19);
-  static const flagtype werner = (1<<20);
-  static const flagtype horocyclic = (1<<21);
+  static constexpr flagtype azimuthal = 1;
+  static constexpr flagtype cylindrical = 2; /* usually you want 'band' */
+  static constexpr flagtype equiarea = 4;
+  static constexpr flagtype equidistant = 8;
+  static constexpr flagtype conformal = 16;
+  static constexpr flagtype euc_boring = 32;
+  static constexpr flagtype space = 64;
+  static constexpr flagtype hyper_only = 128;
+  static constexpr flagtype hyper_or_torus = 256;
+  static constexpr flagtype pseudocylindrical = 512; /* includes cylindrical; usually you want 'band' or 'pseudoband' */
+  static constexpr flagtype equivolume = 1024;
+  static constexpr flagtype twopoint = 2048;
+  static constexpr flagtype uses_bandshift = 4096;
+  static constexpr flagtype broken = 8192; /* in spherical case, these are broken along the meridian 180 deg */
+  static constexpr flagtype technical = 16384; /* don't display in the list */
+  static constexpr flagtype product_special = (1<<15);
+  static constexpr flagtype axial = (1<<16);
+  static constexpr flagtype perspective = (1<<17);
+  static constexpr flagtype orientation = (1<<18);
+  static constexpr flagtype transition = (1<<19);
+  static constexpr flagtype werner = (1<<20);
+  static constexpr flagtype horocyclic = (1<<21);
   
-  static const flagtype band = (cylindrical | pseudocylindrical | uses_bandshift | orientation);
-  static const flagtype pseudoband = (pseudocylindrical | uses_bandshift | orientation);
+  static constexpr flagtype band = (cylindrical | pseudocylindrical | uses_bandshift | orientation);
+  static constexpr flagtype pseudoband = (pseudocylindrical | uses_bandshift | orientation);
   }
   
 struct modelinfo {

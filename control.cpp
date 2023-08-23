@@ -34,7 +34,7 @@ EX function <bool(SDL_Event &ev)> joyhandler = [] (SDL_Event &ev) {return false;
 
 #if HDR
 // what part of the compass does 'skip turn'
-static const auto SKIPFAC = .4;
+static constexpr auto SKIPFAC = .4;
 #endif
 
 // is the player using mouse? (used for auto-cross)

@@ -20,7 +20,7 @@ EX namespace mapeditor {
 
   #if HDR
   enum eShapegroup { sgPlayer, sgMonster, sgItem, sgFloor, sgWall };
-  static const int USERSHAPEGROUPS = 5;
+  static constexpr int USERSHAPEGROUPS = 5;
   #endif
   
   EX color_t dtfill = 0;
@@ -1873,7 +1873,7 @@ EX namespace mapeditor {
   bool coloring;
   color_t colortouse = 0xC0C0C0FFu;
   // fake key sent to change the color
-  static const int COLORKEY = (-10000); 
+  static constexpr int COLORKEY = (-10000); 
 
   EX shiftmatrix drawtrans, drawtransnew;
 

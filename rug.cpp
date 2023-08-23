@@ -476,7 +476,7 @@ EX void buildTorusRug() {
         
     r->valid = true;
     
-    static const int X = 100003; // a prime
+    static constexpr int X = 100003; // a prime
     auto gluefun = [] (ld z) { return int(frac(z + .5/X) * X); };
     auto p = make_pair(gluefun(h[0]), gluefun(h[1]));
     auto& r2 = glues[p];
@@ -1374,7 +1374,7 @@ EX void actDraw() {
 
 int besti;
 
-static const ld RADAR_INF = 1e12;
+static constexpr ld RADAR_INF = 1e12;
 ld radar_distance = RADAR_INF;
 
 EX shiftpoint gethyper(ld x, ld y) {

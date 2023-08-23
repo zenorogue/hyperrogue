@@ -12,11 +12,11 @@ namespace kohonen {
 
 typedef vector<double> kohvec;
 
-static const flagtype KS_ROGUEVIZ = 1;
-static const flagtype KS_NEURONS = 2;
-static const flagtype KS_DISPERSION = 4;
-static const flagtype KS_SAMPLES = 8;
-static const flagtype KS_NEURONS_INI = 16;
+static constexpr flagtype KS_ROGUEVIZ = 1;
+static constexpr flagtype KS_NEURONS = 2;
+static constexpr flagtype KS_DISPERSION = 4;
+static constexpr flagtype KS_SAMPLES = 8;
+static constexpr flagtype KS_NEURONS_INI = 16;
 
 extern flagtype state;
 
@@ -139,7 +139,7 @@ struct manidata {
   vector<pair<int, int> > edges;
   };
 
-static const int MCOUNT = 12;
+static constexpr int MCOUNT = 12;
 
 extern vector<string> catnames;
 
@@ -149,7 +149,7 @@ ld evaluate_measure(manidata& emb, manidata& orig, vector<int>& mapp, vector<pai
 
 }
 
-static const string som_test_dir = "results/";
+static constexpr string som_test_dir = "results/";
 }
 
 

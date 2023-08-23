@@ -11,10 +11,10 @@ namespace hr {
 EX namespace multi {
 
   #if HDR
-  static const int MAXJOY = 8;
-  static const int MAXBUTTON = 64;
-  static const int MAXAXE = 16;
-  static const int MAXHAT = 4;
+  static constexpr int MAXJOY = 8;
+  static constexpr int MAXBUTTON = 64;
+  static constexpr int MAXAXE = 16;
+  static constexpr int MAXHAT = 4;
   
   struct config {
     char keyaction[512];
@@ -75,8 +75,8 @@ EX namespace multi {
 
   EX double mdx[MAXPLAYER], mdy[MAXPLAYER]; // movement vector for the next move
   
-  static const int CMDS = 15;
-  static const int CMDS_PAN = 11;
+  static constexpr int CMDS = 15;
+  static constexpr int CMDS_PAN = 11;
 
   vector<string> playercmds_shmup = {
     "forward", "backward", "turn left", "turn right",

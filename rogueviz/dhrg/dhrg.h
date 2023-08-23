@@ -12,10 +12,10 @@ using namespace hr;
 typedef long long ll;
 
 #ifndef BOXSIZE
-static const int BOXSIZE = 32;
+static constexpr int BOXSIZE = 32;
 #endif
-static const int MAXDIST = (2*BOXSIZE);
-static const int SETS = 4;
+static constexpr int MAXDIST = (2*BOXSIZE);
+static constexpr int SETS = 4;
 
 struct segment;
 

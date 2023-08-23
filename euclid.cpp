@@ -12,8 +12,8 @@ EX namespace euc {
 
   #if HDR
   struct coord : array<int, 3> {
-    coord() {}
-    coord(int x, int y, int z) { self[0] = x; self[1] = y; self[2] = z; }
+    explicit coord() = default;
+    constexpr explicit coord(int x, int y, int z) : array{x,y,z} {}
     coord& operator += (coord b) { for(int i: {0,1,2}) self[i] += b[i]; return self; }
     coord& operator -= (coord b) { for(int i: {0,1,2}) self[i] -= b[i]; return self; }
     coord operator + (coord b) const { coord a = self; return a += b; }
@@ -32,7 +32,7 @@ EX namespace euc {
   EX const coord eutester = coord(3,7,0);
   EX intmatrix euzeroall = make_array<coord>(euzero, euzero, euzero);
 
-  static const intmatrix main_axes = make_array<coord>(coord(1,0,0), coord(0,1,0), coord(0,0,1));
+  static constexpr intmatrix main_axes = make_array<coord>(coord(1,0,0), coord(0,1,0), coord(0,0,1));
   
   EX vector<coord> get_shifttable() {
     static const coord D0 = main_axes[0];

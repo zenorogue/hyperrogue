@@ -720,7 +720,7 @@ bool noncrashable(monster *m, monster *by) {
 int bulltime[MAXPLAYER];
 
 // set to P_MIRRORWALL to allow the PCs to go through mirrors
-static const int reflectflag = P_MIRRORWALL;
+static constexpr int reflectflag = P_MIRRORWALL;
 
 void movePlayer(monster *m, int delta) {
 

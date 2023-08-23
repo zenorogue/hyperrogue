@@ -607,7 +607,7 @@ int hdist(heptagon *h1, heptagon *h2) {
 // - compute celldists for all the cells in these three heptagons, by bfs, based on the 'parent' heptagons adjacent to h
 // - record the computed distances for h, but not for its siblings
 
-static const int NODISTANCE = 2000000000;
+static constexpr int NODISTANCE = 2000000000;
 
 map<heptagon*, heptagon*> last_on_horocycle;
 
@@ -683,7 +683,7 @@ void compute_horocycle(heptagon *alt) {
   heptagon *master = last_on_horocycle[alt];
   // printf("computing horocycle, master distance = %d [M=%p, A=%p]\n", master->alt->distance, hr::voidp(master), hr::voidp(alt));
   
-  static const int LOOKUP = 16;
+  static constexpr int LOOKUP = 16;
   set<heptagon*> hs[LOOKUP];
   hs[0].insert(master);
   set<heptagon*> region;

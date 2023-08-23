@@ -907,13 +907,8 @@ EX namespace nilv {
   #if HDR
   struct mvec : array<int, 3> {
     /** these are in nmHeis */
-    
-    mvec() { }
-  
-    mvec(int x, int y, int z) { 
-      auto& a = *this;
-      a[0] = x; a[1] = y; a[2] = z;
-      }
+    explicit mvec() = default;
+    constexpr explicit mvec(int x, int y, int z) : array{x, y, z} {}
     mvec inverse() {  
       auto& a = *this;
       return mvec(-a[0], -a[1], -a[2]+a[1] * a[0]); 
@@ -925,7 +920,7 @@ EX namespace nilv {
     };
   #endif
 
-  static const mvec mvec_zero = mvec(0, 0, 0);
+  static constexpr mvec mvec_zero = mvec(0, 0, 0);
 
   EX ld nilwidth = 1;
       

@@ -77,8 +77,8 @@ inline void drawcell(cell *c, const shiftmatrix& V) {
   }
 #endif
 
-static const int trapcol[4] = {0x904040, 0xA02020, 0xD00000, 0x303030};
-static const int terracol[8] = {0xD000, 0xE25050, 0xD0D0D0, 0x606060, 0x303030, 0x181818, 0x0080, 0x8080};
+static constexpr int trapcol[4] = {0x904040, 0xA02020, 0xD00000, 0x303030};
+static constexpr int terracol[8] = {0xD000, 0xE25050, 0xD0D0D0, 0x606060, 0x303030, 0x181818, 0x0080, 0x8080};
 
 void celldrawer::addaura() {
   hr::addaura(tC0(V), darkened(aura_color), fd);

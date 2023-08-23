@@ -54,7 +54,7 @@ namespace rogueviz {
 
   edgetype *add_edgetype(const string& name);
   
-  static const unsigned DEFAULT_COLOR = 0x471293B5;
+  static constexpr unsigned DEFAULT_COLOR = 0x471293B5;
 
   extern edgetype default_edgetype;
   
@@ -255,7 +255,7 @@ function<void(presmode)> roguevizslide_action(char c, const T& t, const U& act) 
   void use_angledir(presmode mode, bool reset);
   void slide_error(presmode mode, string s);
 
-  static const flagtype LATEX_COLOR = 1;
+  static constexpr flagtype LATEX_COLOR = 1;
   
   void show_latex(presmode mode, string s);
   void dialog_add_latex(string s, color_t color, int size = 100, flagtype flag = 0);
