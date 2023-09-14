@@ -1815,6 +1815,7 @@ EX void start_camelot(cell *c) {
     }
   }
 
+EX bool debug_voronoi;
 EX map<heptagon*, eLand> horodisk_land;
 EX map<heptagon*, eLand> horodisk_last_land;
 

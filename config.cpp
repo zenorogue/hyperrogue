@@ -3223,6 +3223,8 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
     "Setting 1 uses the internal shape IDs, while setting 2 in tes files uses "
     "the original IDs in case if extra tile types were added to "
     "separate mirror images or different football types.", 'd');
+  param_b(debug_voronoi, "debug_voronoi")->editable(
+    "display Voronoi tie debug values", 'd');
   param_f(global_boundary_ratio, "global_boundary_ratio")
   ->editable(0, 5, 0.1, "Width of cell boundaries",
     "How wide should the cell boundaries be.", '0');

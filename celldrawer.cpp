@@ -2105,6 +2105,11 @@ void celldrawer::draw_cellstat() {
       queuestr(V * rgpushxto0(mid(currentmap->get_corner(c, i, 4), currentmap->get_corner(c, i+1, 5))), .2, its(i), 0xFFFFFFFF, 1);
       }
     }
+
+  if(debug_voronoi && ls::voronoi_structure() && mod_allowed()) {
+    auto p = get_voronoi_winner(c);
+    queuestr(V, .2, its(p.second), index_pointer_int(p.first) * 0x7F3015, 1);
+    }
     
   if(cmode & sm::TORUSCONFIG) {
     auto p = euc::coord_display(V, c);
