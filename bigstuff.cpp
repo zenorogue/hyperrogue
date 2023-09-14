@@ -1657,8 +1657,11 @@ EX void start_camelot(cell *c) {
   if(alt) {
     altmap::radius(alt) = rtr;
     altmap::orig_land(alt) = c->land;
+    horodisk_land[alt] = laCamelot;
     }
   }
+
+EX map<heptagon*, eLand> horodisk_land;
 
 EX void build_horocycles(cell *c, cell *from) {
 
@@ -1708,10 +1711,18 @@ EX void build_horocycles(cell *c, cell *from) {
   if(c->land == laCaribbean && can_start_horo(c))
     create_altmap(c, horo_gen_distance(), hsA);
 
+  if(ls::horodisk_structure() && can_start_horo(c)) {
+    auto m = create_altmap(c, horo_gen_distance(), hsA);
+    if(m) {
+      horodisk_land[m] = getNewLand(laCrossroads);
+      clearing::bpdata[m].root = NULL;
+      }
+    }
+
   if(c->land == laCanvas && can_start_horo(c) && ls::any_order())
     create_altmap(c, horo_gen_distance(), hsA);
 
-  if(c->land == laPalace && can_start_horo(c) && !princess::generating && !shmup::on && multi::players == 1 && !weirdhyperbolic &&
+  if(c->land == laPalace && can_start_horo(c) && !princess::generating && !shmup::on && multi::players == 1 && !weirdhyperbolic && !ls::hv_structure() &&
     (princess::forceMouse ? canReachPlayer(from, moMouse) :
       (hrand(2000) < (peace::on ? 100 : 20))) && 
     (princess::challenge || kills[moVizier] || peace::on)) {
@@ -1966,12 +1977,31 @@ EX void moreBigStuff(cell *c) {
     else
       c->wall = waSea;
     }
+
+  if(ls::horodisk_structure()) {
+    if(have_alt(c) && masterAlt(c) <= 0) {
+      gen_alt(c);
+      preventbarriers(c);
+      }
+    if(have_alt(c) && celldistAlt(c) <= 0) {
+      eLand l = horodisk_land[c->master->alt->alt];
+      setland(c, l);
+      if(l == laWhirlpool && celldistAlt(c) >= -1) {
+        setland(c, laOcean);
+        c->landparam = 30;
+        }
+      if(l == laCaribbean) generateTreasureIsland(c);
+      if(isEquidLand(l)) c->landparam = 1-celldistAlt(c);
+      }
+    else
+      setland(c, laCrossroads);
+    }
   
   extend_alt(c, laPalace, laPalace, false, PRADIUS1);
 
   extend_alt(c, laCanvas, laCanvas);
 
-  if(extend_alt(c, laStorms, laStorms, false)) {
+  if(extend_alt(c, laStorms, laStorms, false) && !ls::hv_structure()) {
     int d = celldistAlt(c);
     if(d <= -2) {
       c->wall = eubinary ? waCharged : (altmap::which(c->master->alt->alt) & 1) ? waCharged : waGrounded;
@@ -1990,10 +2020,12 @@ EX void moreBigStuff(cell *c) {
         c->wall = waColumn;
     }
   
-  else if(extend_alt(c, laTemple, laRlyeh)) 
+  else if(extend_alt(c, laTemple, laRlyeh) && !ls::hv_structure())
     gen_temple(c);
 
-  if(extend_alt(c, laClearing, laOvergrown)) {
+   if(c->land == laTemple && ls::hv_structure()) gen_temple(c);
+
+  if(extend_alt(c, laClearing, laOvergrown) && !ls::hv_structure()) {
     if(in_single_horo(c, laClearing)) {
       c->land = laClearing, c->wall = waNone;
       }
@@ -2001,11 +2033,16 @@ EX void moreBigStuff(cell *c) {
       c->wall = waSmallTree, c->monst = moNone, c->item = itNone, c->landparam = 1;
     }
 
-  if(extend_alt(c, laMountain, laJungle) && in_single_horo(c, laMountain)) {
+  if(c->land == laClearing && ls::hv_structure()) {
+    if(celldistAlt(c) >= -1)
+      c->wall = waSmallTree, c->monst = moNone, c->item = itNone, c->landparam = 1;
+   }
+
+  if(extend_alt(c, laMountain, laJungle) && in_single_horo(c, laMountain) && !ls::hv_structure()) {
     c->land = laMountain, c->wall = waNone;
     }
 
-  if(extend_alt(c, laWhirlpool, laOcean) && in_single_horo(c, laWhirlpool))
+  if(!ls::horodisk_structure() && extend_alt(c, laWhirlpool, laOcean) && in_single_horo(c, laWhirlpool))
     c->land = laWhirlpool, c->wall = waSea, c->monst = moNone, c->item = itNone;
   }
 

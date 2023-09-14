@@ -907,6 +907,8 @@ EX namespace clearing {
         c->mondir = 0;
       return;
       }
+
+    if(c->land == laClearing && ls::hv_structure() && celldistAlt(c) >= -1) return;
     
     if(!eubinary && !horo_ok()) return;
     // cell *oc = c;
@@ -4080,10 +4082,18 @@ EX namespace dungeon {
           rdepths[i] = c2 && c3 && c4 && (c2->landflags == 3 || c3->landflags == 3 || c4->landflags == 3);
           if(c2) generate_around(c2);
           if(c3) generate_around(c3);
-          c2 = ts::left_parent(c2, coastvalEdge);
-          c3 = ts::right_parent(c3, coastvalEdge);
-          if(!c2) { towerError(c); return; }
-          if(!c3) { towerError(c); return; }
+          
+          if(ls::horodisk_structure()) {
+            c2 = ts::left_child(c2, celldistAlt);
+            c3 = ts::right_child(c3, celldistAlt);
+            if(!c2 || !c3) return;
+            }
+          else {
+            c2 = ts::left_parent(c2, coastvalEdge);
+            c3 = ts::right_parent(c3, coastvalEdge);
+            if(!c2) { towerError(c); return; }
+            if(!c3) { towerError(c); return; }
+            }
           }
         }
       
@@ -4106,10 +4116,17 @@ EX namespace dungeon {
           if(c3 && c5 && c5->landflags == 3 && c3->landflags != 3 && c5 == ts::right_of(c3, coastvalEdge))
             c->wall = waLadder;
           buildEquidistant(c4); buildEquidistant(c5);
-          if(c2) c2 = ts::left_parent(c2, coastvalEdge);
-          if(c3) c3 = ts::right_parent(c3, coastvalEdge);
-          if(c4) c4 = ts::left_parent(c4, coastvalEdge);
-          if(c5) c5 = ts::right_parent(c5, coastvalEdge);
+          if(ls::horodisk_structure()) {
+            c2 = ts::left_child(c2, celldistAlt);
+            c3 = ts::right_child(c3, celldistAlt);
+            if(!c2 || !c3) return;
+            }
+          else {
+            if(c2) c2 = ts::left_parent(c2, coastvalEdge);
+            if(c3) c3 = ts::right_parent(c3, coastvalEdge);
+            if(c4) c4 = ts::left_parent(c4, coastvalEdge);
+            if(c5) c5 = ts::right_parent(c5, coastvalEdge);
+            }
           }
         }
       }
@@ -4161,10 +4178,17 @@ EX namespace dungeon {
             switchcount++;
           generate_around(c2);
           generate_around(c3);
-          c2 = ts::left_parent(c2, coastvalEdge);
-          c3 = ts::right_parent(c3, coastvalEdge);
-          if(!c2) { towerError(c); return 0; }
-          if(!c3) { towerError(c); return 0; }
+          if(ls::horodisk_structure()) {
+            c2 = ts::left_child(c2, celldistAlt);
+            c3 = ts::right_child(c3, celldistAlt);
+            if(!c2 || !c3) return 0;
+            }
+          else {
+            c2 = ts::left_parent(c2, coastvalEdge);
+            c3 = ts::right_parent(c3, coastvalEdge);
+            if(!c2) { towerError(c); return 0; }
+            if(!c3) { towerError(c); return 0; }
+            }
           }
         }
       }

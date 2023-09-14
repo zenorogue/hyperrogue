@@ -276,7 +276,7 @@ EX void place_random_gate_continuous(cell *c) {
   }
 
 EX void giantLandSwitch(cell *c, int d, cell *from) {
-  bool fargen = d == min(BARLEV, 9);
+  bool fargen = d == min(BARLEV, ls::horodisk_structure() ? 8 : 9);
   switch(c->land) {
 
     case laPrairie: // -------------------------------------------------------------
@@ -405,7 +405,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
         }
       else {
 
-        if(d == 9) {
+        if(d == (ls::horodisk_structure() ? 8 : 9)) {
           cell *c2 = NONSTDVAR ? c->master->c7 : c;
           if(cdist50(c2) == 3 && polarb50(c2))
             c->wall = waPalace;
@@ -453,7 +453,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
             }          
         
           // note: Princess Challenge brings back the normal Palace generation
-          bool lookingForPrincess = !euclid && c->master->alt && !princess::challenge;
+          bool lookingForPrincess = !euclid && c->master->alt && !princess::challenge && !ls::horodisk_structure();
           
           bool pgate = false;
           if(PURE || GOLDBERG) {
@@ -551,7 +551,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
         }
       
       ONEMPTY {
-        bool lookingForPrincess0 = !euclid && c->master->alt;
+        bool lookingForPrincess0 = !euclid && c->master->alt && !ls::horodisk_structure();
         bool lookingForPrincess = lookingForPrincess0 && !princess::challenge;
         int hardness = lookingForPrincess ? 5 : items[itPalace] + yendor::hardness();
         
@@ -1982,7 +1982,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
         for(int i=0; i<c->type; i++) {
           cell *c2 = c->move(i);          
           if(c2 && c2->wall == waRose) nww++;
-          if(c2 && !ls::any_chaos()) for(int j=0; j<c2->type; j++) {
+          if(c2 && !ls::any_chaos() && !ls::hv_structure()) for(int j=0; j<c2->type; j++) {
             cell *c3 = c2->move(j);
             // note: c3->land is required for Android --
             // not strictly equivalent since another land there might be not yet generated
@@ -2089,6 +2089,12 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
     case laOcean:
       if(d >= 8) c->wall = waSea;
       if(d == 7 && !safety) {
+
+        if(ls::horodisk_structure() && c->master->alt && horodisk_land[c->master->alt->alt] == laWhirlpool) {
+          if(hrand(100) < 10) c->wall = waBoat;
+          return;
+          }
+
         bool placecolumn = false;
         if(c->landparam % temple_layer_size() == 0 && c->landparam <= 24) {
           int q = 0;
@@ -2261,6 +2267,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
     case laClearing:    
       if(d == 7) {
         clearing::generate(c);
+        if(ls::horodisk_structure() && celldistAlt(c) >= -1) c->monst = moNone;
         if(pseudohept(c)) {
           int d = -celldistAlt(c);
           if(hrand_monster(2500) < items[itMutant2] + yendor::hardness() - 10 && !reptilecheat)
@@ -2460,6 +2467,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           int freq = 4000;
           if(ls::single() && specialland == laCrossroads5 && !racing::on)
             freq = 250;
+          if(ls::hv_structure() && hrand(10000) < 10) { c->monst = moPirate; }
           if(hrand_monster(freq) < items[itHyperstone] && !c->monst) {
             // only interesting monsters here!
             eMonster cm = crossroadsMonster();
@@ -2533,7 +2541,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
             
     case laEclectic: {
 
-      if(d >= 9) c->wall = waChasm;
+      if(d >= (ls::hv_structure() ? 8 : 9)) c->wall = waChasm;
       
       if(d == 8) wfc::schedule(c);
 

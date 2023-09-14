@@ -532,7 +532,7 @@ EX eLand getNewLand(eLand old) {
   // the intermediate lands
   if(all_unlocked || gold() >= R30) {
     tab[cnt++] = laCrossroads;
-    tab[cnt++] = geometry ? laMirrorOld : laMirror;
+    tab[cnt++] = (geometry || ls::hv_structure()) ? laMirrorOld : laMirror;
     tab[cnt++] = laOcean;
     tab[cnt++] = laLivefjord;
     if(all_unlocked || kills[moVizier]) tab[cnt++] = laEmerald;
@@ -548,7 +548,7 @@ EX eLand getNewLand(eLand old) {
     if(all_unlocked || rlyehComplete()) tab[cnt++] = laRlyeh;
     else if(ls::std_chaos() && (old == laWarpCoast || old == laLivefjord || old == laOcean)) 
       tab[cnt++] = laRlyeh;
-    if((all_unlocked || items[itStatue] >= U5) && ls::std_chaos())
+    if((all_unlocked || items[itStatue] >= U5) && (ls::std_chaos() || ls::horodisk_structure()))
       tab[cnt++] = laTemple;
     if(old == laCrossroads || old == laCrossroads2) tab[cnt++] = laOcean;
     if(old == laOcean) tab[cnt++] = laCrossroads;
@@ -563,6 +563,9 @@ EX eLand getNewLand(eLand old) {
     tab[cnt++] = laDual;
     tab[cnt++] = laSnakeNest;
     }
+
+  if(landUnlocked(laMountain)) tab[cnt++] = laMountain;
+  if(landUnlocked(laClearing)) tab[cnt++] = laClearing;
   
   if(landUnlocked(laTrollheim)) {
     if(isTrollLand(old)) LIKELY tab[cnt++] = laTrollheim;
@@ -731,6 +734,7 @@ namespace lv {
   land_validity_t not_in_shmup = {0, q0, "This land is not available in the shmup mode."}; 
   land_validity_t not_in_multi = {0, q0, "This land is not available in multiplayer."}; 
   land_validity_t single_only = {2, q0 | switch_to_single, "Available in single land mode only." };
+  land_validity_t not_in_hv = { 0, q0, "Does not work in horodisk/Voronoi mode."};
   }
 
 // old Daily Challenges should keep their validity forever
@@ -853,6 +857,8 @@ EX land_validity_t& land_validity(eLand l) {
     if(l == laBurial && !shmup::on) return not_implemented;
     if(l == laMirrorOld && !shmup::on) return not_implemented;
     }
+
+  if(ls::hv_structure() && among(l, laPrairie, laIvoryTower, laDungeon, laEndorian, laBrownian, laTortoise, laElementalWall)) return not_in_hv;
   
   if(l == laBrownian) {
     if(quotient || !hyperbolic || cryst) return dont_work;
@@ -935,12 +941,14 @@ EX land_validity_t& land_validity(eLand l) {
   if(l == laWhirlwind && hyperbolic_not37)
     return pattern_incompatibility;
 
+  bool better_mirror = !geometry && STDVAR && !ls::hv_structure();
+
   // available only in non-standard geometries
-  if(l == laMirrorOld && !geometry && STDVAR)
+  if(l == laMirrorOld && better_mirror)
     return better_version_exists;
   
   // available only in standard geometry
-  if(l == laMirror && (geometry || NONSTDVAR))
+  if(l == laMirror && !better_mirror)
     return not_implemented; 
   
   // Halloween needs bounded world (can be big bounded)

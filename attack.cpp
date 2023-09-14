@@ -758,7 +758,7 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
   if(m == moWaterElemental && c->item == itNone)
     c->item = itOrbWater;
 
-  if(m == moPirate && isOnCIsland(c) && c->item == itNone && (
+  if(m == moPirate && (isOnCIsland(c) || ls::hv_structure()) && c->item == itNone && (
       eubinary ||
       (c->master->alt && celldistAlt(c) <= 2-getDistLimit()) ||
       isHaunted(c->land)) && !cryst) {
