@@ -226,7 +226,8 @@ void new_voronoi_root(heptagon *h, int dist, int dir, eLand next, eLand last) {
   alt->alt = alt;
   alt->cdata = (cdata*) h;
   alt->distance = dist;
-  h->alt = alt;
+  vector<pair<heptagon*, heptagon*>> altpairs;
+  altpairs.emplace_back(h, alt);
   altmap::relspin(alt) = dir;
 
   horodisk_land[alt] = next;
@@ -236,6 +237,8 @@ void new_voronoi_root(heptagon *h, int dist, int dir, eLand next, eLand last) {
     auto alt1 = createStep(alt, 0);
     alt1->alt = alt->alt;
     auto h1 = createStep(h, dir);
+    if(h1->alt) return;
+    altpairs.emplace_back(h1, alt1);
     h1->alt = alt1;
 
     auto dir_alt = alt->c.spin(0);
@@ -245,7 +248,10 @@ void new_voronoi_root(heptagon *h, int dist, int dir, eLand next, eLand last) {
 
     h = h1; alt = alt1;
     }
+
+  for(auto p: altpairs) p.first->alt = p.second;
   }
+
 
 struct cand_info {
   int best, bqty;
