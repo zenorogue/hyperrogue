@@ -554,6 +554,15 @@ EX namespace ts {
     return c->cmodmove(pid + (valence() == 3 ? 2 : 1) + id);
     }
 
+  EX cell *get_child(cell *c, const cellfunction& cf, int v) {
+    for(int i=0; i<c->type; i++) if(cf(c->cmodmove(i+v)) <= cf(c) && cf(c->cmodmove(i)) > cf(c))
+      return c->cmodmove(i);
+    return nullptr;
+    }
+
+  EX cell *right_child(cell *c, const cellfunction& cf) { return get_child(c, cf, -1); }
+  EX cell *left_child(cell *c, const cellfunction& cf) { return get_child(c, cf, 1); }
+
   #if HDR
   inline cell *left_parent(cell *c, const cellfunction& cf) { return verified_add(c, 1, 0, cf); }
   inline cell *right_parent(cell *c, const cellfunction& cf) { return verified_add(c, -1, 0, cf); }
