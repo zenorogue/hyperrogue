@@ -1054,10 +1054,12 @@ EX namespace models {
 
       param_i(p.back_and_front, sp+"backandfront", 0);
 
-      addsaver(p.alpha, sp+"projection", 1);
-      if(&p.model == &pmodel)
-      param_custom(p.alpha, sp+"projection", menuitem_projection_distance, 'p')
-      ->help_text = "projection distance|Gans Klein Poincare orthographic stereographic";
+      auto projsaver = addsaver(p.alpha, sp+"projection", 1);
+      if(&p.model == &pmodel) {
+        auto proj = param_custom(p.alpha, sp+"projection", menuitem_projection_distance, 'p');
+        proj->help_text = "projection distance|Gans Klein Poincare orthographic stereographic";
+        proj->saver = projsaver;
+        }
 
       param_matrix(p.cam(), pp+"cameraangle", 3)
       -> editable(pp+"camera angle", "Rotate the camera. Can be used to obtain a first person perspective, "
