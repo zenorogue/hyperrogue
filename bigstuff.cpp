@@ -219,7 +219,7 @@ void hrmap::extend_altmap(heptagon *h, int levs, bool link_cdata) {
     }
   }
 
-void new_voronoi_root(heptagon *h, int dist, int dir, eLand last, eLand last2) {
+void new_voronoi_root(heptagon *h, int dist, int dir, eLand next, eLand last) {
   heptagon *alt = init_heptagon(h->type);
   allmaps.push_back(newAltMap(alt));
   alt->s = hsA;
@@ -229,7 +229,7 @@ void new_voronoi_root(heptagon *h, int dist, int dir, eLand last, eLand last2) {
   h->alt = alt;
   altmap::relspin(alt) = dir;
 
-  horodisk_land[alt] = getNewLand(last, last2);
+  horodisk_land[alt] = next;
   horodisk_last_land[alt] = last;
 
   while(alt->distance > -100) {
@@ -291,7 +291,7 @@ void extend_altmap_voronoi(heptagon *h) {
   auto ci = voronoi_candidate(h);
 
   if(ci.bqty == 0) {
-    new_voronoi_root(h, -30, hrand(h->type), laBarrier, laBarrier);
+    new_voronoi_root(h, -30, hrand(h->type), firstland, laBarrier);
     return;
     }
   else if(ci.bqty > 0 && isize(ci.free_dirs)) {
@@ -299,7 +299,9 @@ void extend_altmap_voronoi(heptagon *h) {
     ld growth = expansion.get_growth();
     ld odds = pow(growth, ci.candidate->distance) * isize(ci.free_dirs);
     if(hrandf() < odds / (1 + odds)) {
-      new_voronoi_root(h, ci.candidate->distance - 1, hrand_elt(ci.free_dirs), horodisk_land[ci.candidate->alt], horodisk_last_land[ci.candidate->alt]);
+      eLand last = horodisk_land[ci.candidate->alt];
+      eLand last2 = horodisk_last_land[ci.candidate->alt];
+      new_voronoi_root(h, ci.candidate->distance - 1, hrand_elt(ci.free_dirs), getNewLand(last, last2), last);
       return;
       }
     }
