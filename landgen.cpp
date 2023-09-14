@@ -2746,7 +2746,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
       break;
     
     case laFrog:
-      if(d == 9) {
+      if(d == (ls::hv_structure() ? 8 : 9)) {
         if(randomPatternsMode ? RANDPAT : !is_zebra_trapdoor(c)) {
           if(hrand(2000) < PT(100 + 2 * kills[moFrog] + 2 * kills[moPhaser] + 2 * kills[moVaulter], 100) && notDippingFor(itFrog)) {
             bool ok = true;
