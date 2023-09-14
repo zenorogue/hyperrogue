@@ -276,7 +276,7 @@ EX void place_random_gate_continuous(cell *c) {
   }
 
 EX void giantLandSwitch(cell *c, int d, cell *from) {
-  bool fargen = d == min(BARLEV, ls::horodisk_structure() ? 8 : 9);
+  bool fargen = d == min(BARLEV, ls::hv_structure() ? 8 : 9);
   switch(c->land) {
 
     case laPrairie: // -------------------------------------------------------------
@@ -405,7 +405,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
         }
       else {
 
-        if(d == (ls::horodisk_structure() ? 8 : 9)) {
+        if(d == (ls::hv_structure() ? 8 : 9)) {
           cell *c2 = NONSTDVAR ? c->master->c7 : c;
           if(cdist50(c2) == 3 && polarb50(c2))
             c->wall = waPalace;
@@ -453,7 +453,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
             }          
         
           // note: Princess Challenge brings back the normal Palace generation
-          bool lookingForPrincess = !euclid && c->master->alt && !princess::challenge && !ls::horodisk_structure();
+          bool lookingForPrincess = !euclid && c->master->alt && !princess::challenge && !ls::hv_structure();
           
           bool pgate = false;
           if(PURE || GOLDBERG) {
@@ -551,7 +551,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
         }
       
       ONEMPTY {
-        bool lookingForPrincess0 = !euclid && c->master->alt && !ls::horodisk_structure();
+        bool lookingForPrincess0 = !euclid && c->master->alt && !ls::hv_structure();
         bool lookingForPrincess = lookingForPrincess0 && !princess::challenge;
         int hardness = lookingForPrincess ? 5 : items[itPalace] + yendor::hardness();
         
@@ -2090,7 +2090,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
       if(d >= 8) c->wall = waSea;
       if(d == 7 && !safety) {
 
-        if(ls::horodisk_structure() && c->master->alt && horodisk_land[c->master->alt->alt] == laWhirlpool) {
+        if(ls::hv_structure() && c->master->alt && horodisk_land[c->master->alt->alt] == laWhirlpool) {
           if(hrand(100) < 10) c->wall = waBoat;
           return;
           }
@@ -2267,7 +2267,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
     case laClearing:    
       if(d == 7) {
         clearing::generate(c);
-        if(ls::horodisk_structure() && celldistAlt(c) >= -1) c->monst = moNone;
+        if(ls::hv_structure() && celldistAlt(c) >= -1) c->monst = moNone;
         if(pseudohept(c)) {
           int d = -celldistAlt(c);
           if(hrand_monster(2500) < items[itMutant2] + yendor::hardness() - 10 && !reptilecheat)

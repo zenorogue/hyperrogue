@@ -219,6 +219,141 @@ void hrmap::extend_altmap(heptagon *h, int levs, bool link_cdata) {
     }
   }
 
+void new_voronoi_root(heptagon *h, int dist, int dir, eLand last, eLand last2) {
+  heptagon *alt = init_heptagon(h->type);
+  allmaps.push_back(newAltMap(alt));
+  alt->s = hsA;
+  alt->alt = alt;
+  alt->cdata = (cdata*) h;
+  alt->distance = dist;
+  h->alt = alt;
+  altmap::relspin(alt) = dir;
+
+  horodisk_land[alt] = getNewLand(last, last2);
+  horodisk_last_land[alt] = last;
+
+  while(alt->distance > -100) {
+    auto alt1 = createStep(alt, 0);
+    alt1->alt = alt->alt;
+    auto h1 = createStep(h, dir);
+    h1->alt = alt1;
+
+    auto dir_alt = alt->c.spin(0);
+    auto dir_h = h->c.spin(dir);
+
+    dir = altmap::relspin(alt1) = gmod(dir_h - dir_alt, alt->type);
+
+    h = h1; alt = alt1;
+    }
+  }
+
+struct cand_info {
+  int best, bqty;
+  heptagon *candidate;
+  vector<int> free_dirs;
+  };
+
+cand_info voronoi_candidate(heptagon *h) {
+  cand_info ci;
+  ci.best = 999999; ci.bqty = 0;
+
+  for(int i=0; i<h->type; i++) {
+    heptagon *ho = createStep(h, i);
+    int ri = h->c.spin(i);
+    auto hoa = ho->alt;
+    if(hoa && hoa->alt) {
+      auto relspin = altmap::relspin(hoa);
+      /* we want ho->move(ri) which is hoa->move(ri - relspin) */
+      int dir = gmod(ri - relspin, hoa->type);
+      heptagon *hoa1 = createStep(hoa, dir);
+      if(!hoa1->alt) hoa1->alt = hoa->alt;
+      auto dist = hoa1->distance;
+      if(dist < ci.best) {
+        ci.best = dist;
+        ci.bqty = 0;
+        }
+      if(dist == ci.best && ci.candidate != hoa1) {
+        ci.bqty++;
+        ci.candidate = hoa1;
+        int rb = hoa->c.spin(dir);
+        /* hoa1->alt->move(rb) is h->move(rb+relspin to compute) */
+        altmap::relspin(ci.candidate) = gmod(i - rb, ci.candidate->type);
+        }
+      }
+    else ci.free_dirs.push_back(i);
+    }
+  return ci;
+  }
+
+void extend_altmap_voronoi(heptagon *h) {
+  if(h->alt) return;
+
+  auto ci = voronoi_candidate(h);
+
+  if(ci.bqty == 0) {
+    new_voronoi_root(h, -30, hrand(h->type), laBarrier, laBarrier);
+    return;
+    }
+  else if(ci.bqty > 0 && isize(ci.free_dirs)) {
+    auto& expansion = get_expansion();
+    ld growth = expansion.get_growth();
+    ld odds = pow(growth, ci.candidate->distance) * isize(ci.free_dirs);
+    if(hrandf() < odds / (1 + odds)) {
+      new_voronoi_root(h, ci.candidate->distance - 1, hrand_elt(ci.free_dirs), horodisk_land[ci.candidate->alt], horodisk_last_land[ci.candidate->alt]);
+      return;
+      }
+    }
+
+  h->alt = ci.candidate;
+  }
+
+EX pair<heptagon*, int> get_voronoi_winner(cell *c) {
+  if(c == c->master->c7) {
+    extend_altmap_voronoi(c->master);
+    auto ci = voronoi_candidate(c->master);
+    if(ci.bqty == 1) return { ci.candidate->alt, ci.best };
+    else return { nullptr, ci.best };
+    }
+  else if(!BITRUNCATED) return get_voronoi_winner(c->master->c7);
+  else {
+    vector<heptagon*> nearh;
+    for(int i=0; i<c->type; i++) {
+      c->cmove(i);
+      if(c->move(i)->master->c7 == c->move(i)) nearh.push_back(c->move(i)->master);
+      }
+    for(auto h: nearh) extend_altmap_voronoi(h);
+    for(auto h: nearh) if(!h->alt) return { nullptr, 0 };
+    pair<heptagon*, int> best = {nullptr, 999999};
+    int bqty = 0;
+    for(auto h: nearh) {
+      vector<int> dists;
+      for(auto h1: nearh) {
+        if(h == h1) dists.push_back(h->alt->distance);
+        else {
+          for(int i=0; i<h->type; i++) if(h->cmove(i) == h1) {
+            auto ha1 = createStep(h->alt, gmod(i - altmap::relspin(h->alt), h->type));
+            dists.push_back(ha1->distance);
+            }
+          }
+        }
+      sort(dists.begin(), dists.end());
+      int gdist;
+      if(dists.back() == dists[0]) gdist = dists[0] - 1;
+      else if(dists.back() == dists[0] + 2) gdist = dists[0] + 1;
+      else gdist = dists[0];
+      if(gdist < best.second) {
+        best.second = gdist; bqty = 0;
+        }
+      if(gdist == best.second) {
+        bqty++;
+        if(bqty == 1 || best.first == h->alt->alt) best.first = h->alt->alt;
+        else best.first = nullptr;
+        }
+      }
+    return best;
+    }
+  }
+
 #if MAXMDIM >= 4
 EX int hrandom_adjacent(cellwalker cw) {
   auto& da = currentmap->dirdist(cw);
@@ -1662,6 +1797,7 @@ EX void start_camelot(cell *c) {
   }
 
 EX map<heptagon*, eLand> horodisk_land;
+EX map<heptagon*, eLand> horodisk_last_land;
 
 EX void build_horocycles(cell *c, cell *from) {
 
@@ -1674,7 +1810,7 @@ EX void build_horocycles(cell *c, cell *from) {
   
   // buildbigstuff
 
-  if(ls::any_order() && bearsCamelot(c->land) && can_start_horo(c) && !bt::in() && 
+  if(ls::any_order() && bearsCamelot(c->land) && can_start_horo(c) && !bt::in() && !ls::voronoi_structure() &&
     #if MAXMDIM >= 4
     !(hyperbolic && WDIM == 3 && !reg3::in_hrmap_rule_or_subrule()) &&
     #endif
@@ -1978,6 +2114,19 @@ EX void moreBigStuff(cell *c) {
       c->wall = waSea;
     }
 
+  if(ls::voronoi_structure()) {
+    auto p = get_voronoi_winner(c);
+    auto ph = p.first;
+    if(ph) {
+      eLand l = horodisk_land[ph];
+      setland(c, l);
+      if(isEquidLand(l)) c->landparam = 1-p.second;
+      }
+    else {
+      setland(c, laBarrier);
+      }
+    }
+
   if(ls::horodisk_structure()) {
     if(have_alt(c) && masterAlt(c) <= 0) {
       gen_alt(c);
@@ -1997,11 +2146,11 @@ EX void moreBigStuff(cell *c) {
       setland(c, laCrossroads);
     }
   
-  extend_alt(c, laPalace, laPalace, false, PRADIUS1);
+  if(!ls::hv_structure()) extend_alt(c, laPalace, laPalace, false, PRADIUS1);
 
   extend_alt(c, laCanvas, laCanvas);
 
-  if(extend_alt(c, laStorms, laStorms, false) && !ls::hv_structure()) {
+  if(!ls::hv_structure() && extend_alt(c, laStorms, laStorms, false)) {
     int d = celldistAlt(c);
     if(d <= -2) {
       c->wall = eubinary ? waCharged : (altmap::which(c->master->alt->alt) & 1) ? waCharged : waGrounded;
@@ -2020,12 +2169,12 @@ EX void moreBigStuff(cell *c) {
         c->wall = waColumn;
     }
   
-  else if(extend_alt(c, laTemple, laRlyeh) && !ls::hv_structure())
+  else if(!ls::hv_structure() && extend_alt(c, laTemple, laRlyeh))
     gen_temple(c);
 
-   if(c->land == laTemple && ls::hv_structure()) gen_temple(c);
+  if(ls::hv_structure() && c->land == laTemple) gen_temple(c);
 
-  if(extend_alt(c, laClearing, laOvergrown) && !ls::hv_structure()) {
+  if(!ls::hv_structure() && extend_alt(c, laClearing, laOvergrown)) {
     if(in_single_horo(c, laClearing)) {
       c->land = laClearing, c->wall = waNone;
       }
@@ -2033,16 +2182,21 @@ EX void moreBigStuff(cell *c) {
       c->wall = waSmallTree, c->monst = moNone, c->item = itNone, c->landparam = 1;
     }
 
-  if(c->land == laClearing && ls::hv_structure()) {
+  if(ls::horodisk_structure() && c->land == laClearing) {
     if(celldistAlt(c) >= -1)
       c->wall = waSmallTree, c->monst = moNone, c->item = itNone, c->landparam = 1;
-   }
+    }
 
-  if(extend_alt(c, laMountain, laJungle) && in_single_horo(c, laMountain) && !ls::hv_structure()) {
+  if(ls::voronoi_structure() && c->land == laClearing) {
+    if(celldistAlt(c) == -20)
+      c->wall = waSmallTree, c->monst = moNone, c->item = itNone, c->landparam = 1;
+    }
+
+  if(!ls::hv_structure() && extend_alt(c, laMountain, laJungle) && in_single_horo(c, laMountain)) {
     c->land = laMountain, c->wall = waNone;
     }
 
-  if(!ls::horodisk_structure() && extend_alt(c, laWhirlpool, laOcean) && in_single_horo(c, laWhirlpool))
+  if(!ls::hv_structure() && extend_alt(c, laWhirlpool, laOcean) && in_single_horo(c, laWhirlpool))
     c->land = laWhirlpool, c->wall = waSea, c->monst = moNone, c->item = itNone;
   }
 

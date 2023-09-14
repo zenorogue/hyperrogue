@@ -99,6 +99,7 @@ EX bool any_order() { return among(land_structure, lsNiceWalls, lsNoWalls, lsHor
 EX bool nice_walls() { return land_structure == lsNiceWalls; }
 EX bool no_walls() { return land_structure == lsNoWalls; }
 EX bool horodisk_structure() { return land_structure == lsHorodisks; }
+EX bool voronoi_structure() { return land_structure == lsVoronoi; }
 EX bool hv_structure() { return among(land_structure, lsHorodisks, lsVoronoi); }
 
 EX bool any_nowall() { return no_walls() || std_chaos(); }
@@ -137,7 +138,7 @@ EX string land_structure_name(bool which) {
     case lsHorodisks:
       return XLAT("horodisks");
     case lsVoronoi:
-      return XLAT("limit Voronoi");
+      return XLAT("ideal Voronoi");
     case lsNoWalls:
       return XLAT("wall-less");
     default:
@@ -158,7 +159,7 @@ EX void fix_land_structure_choice() {
     land_structure = lsNoWalls;
   if(!nice_walls_available() && land_structure == lsWallChaos)
     land_structure = lsChaos;
-  if(ls::hv_structure() && !hyperbolic)
+  if(ls::hv_structure() && (!hyperbolic || bt::in() || quotient))
     land_structure = lsSingle;
   if(walls_not_implemented() && among(land_structure, lsChaos, lsNoWalls))
     land_structure = lsSingle;
@@ -382,7 +383,7 @@ EX bool all_unlocked = false;
 
 EX vector<eLand> cheatdest_list;
 
-EX eLand getNewLand(eLand old) {
+EX eLand getNewLand(eLand old, eLand old2 IS(laBarrier)) {
 
   #if CAP_LEGACY
   if(legacy_racing()) {
@@ -394,7 +395,7 @@ EX eLand getNewLand(eLand old) {
   eLand l = callhandlers(laNone, hooks_nextland, old);
   if(l) return l;
   
-  if(cheatdest != old && cheatdest != laElementalWall) if(!isCyclic(cheatdest) && !isTechnicalLand(cheatdest)) return cheatdest;
+  if(cheatdest != old && cheatdest != old2 && cheatdest != laElementalWall) if(!isCyclic(cheatdest) && !isTechnicalLand(cheatdest)) return cheatdest;
   
   if(cheatdest_list.size()) {
     eLand l = cheatdest_list[0];
@@ -408,7 +409,9 @@ EX eLand getNewLand(eLand old) {
     while(true) {
       eLand n = eLand(hrand(landtypes));
       if(n == old) continue;
+      if(n == old2) continue;
       if(incompatible(n,old)) continue;
+      if(incompatible(n,old2)) continue;
       if(!isLandIngame(n)) continue;
       if(n == laElementalWall || isTechnicalLand(n)) continue;
       if(n == laWildWest) continue;
@@ -420,9 +423,9 @@ EX eLand getNewLand(eLand old) {
   if(markOrb(itOrbLuck)) {
     int i = items[itOrbLuck];
     items[itOrbLuck] = 0;
-    eLand l1 = getNewLand(old);
+    eLand l1 = getNewLand(old, old2);
     for(int i=1; i<3; i++)
-      l1 = pickluck(l1, getNewLand(old));
+      l1 = pickluck(l1, getNewLand(old, old2));
     items[itOrbLuck] = i;
     return l1;
     }
@@ -446,9 +449,9 @@ EX eLand getNewLand(eLand old) {
   #endif
 
   if(tactic::on) return specialland;
-  if(specialland != old && easy_to_find_specialland && specialland != laElementalWall) return specialland;
+  if(specialland != old && specialland != old2 && easy_to_find_specialland && specialland != laElementalWall) return specialland;
 
-  if(specialland != old && easy_specialland && specialland != laElementalWall) {
+  if(specialland != old && specialland != old2 && easy_specialland && specialland != laElementalWall) {
     easy_specialland--;
     return specialland;
     }
@@ -858,7 +861,8 @@ EX land_validity_t& land_validity(eLand l) {
     if(l == laMirrorOld && !shmup::on) return not_implemented;
     }
 
-  if(ls::hv_structure() && among(l, laPrairie, laIvoryTower, laDungeon, laEndorian, laBrownian, laTortoise, laElementalWall)) return not_in_hv;
+  if(ls::hv_structure() && among(l, laPrairie, laIvoryTower, laDungeon, laEndorian, laBrownian, laTortoise, laElementalWall, laWarpCoast, laWarpSea, laHive)) return not_in_hv;
+  if(ls::voronoi_structure() && among(l, laCamelot, laWhirlpool, laClearing)) return not_in_hv;
   
   if(l == laBrownian) {
     if(quotient || !hyperbolic || cryst) return dont_work;

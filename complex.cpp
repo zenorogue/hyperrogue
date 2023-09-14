@@ -908,7 +908,8 @@ EX namespace clearing {
       return;
       }
 
-    if(c->land == laClearing && ls::hv_structure() && celldistAlt(c) >= -1) return;
+    if(c->land == laClearing && ls::horodisk_structure() && celldistAlt(c) >= -1) return;
+    if(c->land == laClearing && ls::voronoi_structure() && celldistAlt(c) >= -20) return;
     
     if(!eubinary && !horo_ok()) return;
     // cell *oc = c;
