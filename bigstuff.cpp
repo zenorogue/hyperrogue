@@ -472,7 +472,12 @@ EX void beCIsland(cell *c) {
   }
 
 EX void generateTreasureIsland(cell *c) {
-  gen_alt(c);
+  if(ls::voronoi_structure()) {
+    if(c->land != laCaribbean) return;
+    }
+  else {
+    gen_alt(c);
+    }
   if(isOnCIsland(c)) return;
   
   bool src = hrand(100) < 10;
