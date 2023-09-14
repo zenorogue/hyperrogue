@@ -307,7 +307,13 @@ void extend_altmap_voronoi(heptagon *h) {
     if(hrandf() < odds / (1 + odds)) {
       eLand last = horodisk_land[ci.candidate->alt];
       eLand last2 = horodisk_last_land[ci.candidate->alt];
-      new_voronoi_root(h, ci.candidate->distance - 1, hrand_elt(ci.free_dirs), getNewLand(last, last2), last);
+      auto dist = ci.candidate->distance;
+      // in PURE, could be a tie, or the new root could win
+      if(PURE) dist -= hrand(2);
+      // in BITRUNCATED, it could change too.. need a better formula probably
+      if(BITRUNCATED) dist += hrand(3) - 1;
+      // do not care about others...
+      new_voronoi_root(h, dist, hrand_elt(ci.free_dirs), getNewLand(last, last2), last);
       return;
       }
     }
