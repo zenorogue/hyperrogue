@@ -46,13 +46,18 @@ EX string fts(ld x, int prec IS(6)) {
 
 EX map<void*, int> pointer_indices;
 
-EX string index_pointer(void *v) {
-  if(v == nullptr) return "0";
+EX int index_pointer_int(void *v) {
+  if(v == nullptr) return 0;
   if(!pointer_indices.count(v)) {
-    int s = isize(pointer_indices);
+    int s = isize(pointer_indices) + 1;
     pointer_indices[v] = s;
     }
-  int i = pointer_indices[v];
+  return pointer_indices[v];
+  }
+
+EX string index_pointer(void *v) {
+  int i = index_pointer_int(v);
+  if(!i) return "0";
   string res;
   while(true) { res += ('A' + (i % 26)); i /= 26; if(!i) break; i--; }
   return res;
