@@ -81,7 +81,7 @@ EX eLand firstland = laIce;
 EX eLand specialland = laIce;
 
 #if HDR
-enum eLandStructure { lsNiceWalls, lsChaos, lsPatchedChaos, lsTotalChaos, lsChaosRW, lsWallChaos, lsSingle, lsNoWalls, lsGUARD };
+enum eLandStructure { lsNiceWalls, lsChaos, lsPatchedChaos, lsTotalChaos, lsChaosRW, lsWallChaos, lsSingle, lsNoWalls, lsHorodisks, lsVoronoi, lsGUARD };
 #endif
 
 EX eLandStructure land_structure;
@@ -95,9 +95,11 @@ EX bool std_chaos() { return land_structure == lsChaos; }
 EX bool wall_chaos() { return land_structure == lsWallChaos; }
 EX bool patched_chaos() { return land_structure == lsPatchedChaos; }
 
-EX bool any_order() { return among(land_structure, lsNiceWalls, lsNoWalls); }
+EX bool any_order() { return among(land_structure, lsNiceWalls, lsNoWalls, lsHorodisks, lsVoronoi); }
 EX bool nice_walls() { return land_structure == lsNiceWalls; }
 EX bool no_walls() { return land_structure == lsNoWalls; }
+EX bool horodisk_structure() { return land_structure == lsHorodisks; }
+EX bool hv_structure() { return among(land_structure, lsHorodisks, lsVoronoi); }
 
 EX bool any_nowall() { return no_walls() || std_chaos(); }
 EX bool any_wall() { return nice_walls() || wall_chaos(); }
@@ -108,6 +110,7 @@ EX int chaoticity() {
   if(land_structure == lsPatchedChaos) return 60;
   if(land_structure == lsChaos) return 40;
   if(land_structure == lsWallChaos) return 30;
+  if(land_structure == lsVoronoi) return 20;
   if(land_structure == lsSingle) return 0;
   return 10;  
   }
@@ -131,6 +134,10 @@ EX string land_structure_name(bool which) {
       return XLAT("random-walk chaos");
     case lsSingle:
       return which ? XLAT("single land: ") + XLATN(linf[specialland].name) : XLAT("single land");
+    case lsHorodisks:
+      return XLAT("horodisks");
+    case lsVoronoi:
+      return XLAT("limit Voronoi");
     case lsNoWalls:
       return XLAT("wall-less");
     default:
@@ -151,6 +158,8 @@ EX void fix_land_structure_choice() {
     land_structure = lsNoWalls;
   if(!nice_walls_available() && land_structure == lsWallChaos)
     land_structure = lsChaos;
+  if(ls::hv_structure() && !hyperbolic)
+    land_structure = lsSingle;
   if(walls_not_implemented() && among(land_structure, lsChaos, lsNoWalls))
     land_structure = lsSingle;
   if(land_structure == lsPatchedChaos && !(stdeuc || nil || cryst || (euclid && WDIM == 3) || aperiodic))
