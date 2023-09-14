@@ -1810,7 +1810,7 @@ EX void start_camelot(cell *c) {
   heptagon *alt = create_altmap(c, ls::single() ? 2 : rtr+(hyperbolic && WDIM == 3 ? 11 : 14), ls::single() ? hsA : hsOrigin);
   if(alt) {
     altmap::radius(alt) = rtr;
-    altmap::orig_land(alt) = c->land;
+    altmap::orig_land(alt) = ls::horodisk_structure() ? laCrossroads : c->land;
     hv_land[alt] = laCamelot;
     }
   }
@@ -1830,7 +1830,7 @@ EX void build_horocycles(cell *c, cell *from) {
   
   // buildbigstuff
 
-  if(ls::any_order() && bearsCamelot(c->land) && can_start_horo(c) && !bt::in() && !ls::voronoi_structure() &&
+  if(ls::any_order() && (ls::horodisk_structure() || bearsCamelot(c->land)) && can_start_horo(c) && !bt::in() && !ls::voronoi_structure() &&
     #if MAXMDIM >= 4
     !(hyperbolic && WDIM == 3 && !reg3::in_hrmap_rule_or_subrule()) &&
     #endif
@@ -2024,6 +2024,9 @@ EX void buildCamelot(cell *c) {
       if(c->land == laNone) printf("Camelot\n"); // NONEDEBUG
       }
     }
+  else {
+    setland(c, eLand(altmap::orig_land(c->master->alt->alt)));
+    }
   #endif
   }
 
@@ -2120,6 +2123,7 @@ EX void gen_temple(cell *c) {
 EX void moreBigStuff(cell *c) {
   if(disable_bigstuff) return;
 
+  if(!ls::hv_structure())
   if((bearsCamelot(c->land) && !euclid && !quotient && !nil) || c->land == laCamelot) 
   if(have_alt(c)) if(!(bt::in() && specialland != laCamelot)) 
     buildCamelot(c);
@@ -2152,7 +2156,10 @@ EX void moreBigStuff(cell *c) {
       gen_alt(c);
       preventbarriers(c);
       }
-    if(have_alt(c) && celldistAlt(c) <= 0) {
+    if(have_alt(c) && hv_land[c->master->alt->alt] == laCamelot) {
+      buildCamelot(c);
+      }
+    else if(have_alt(c) && celldistAlt(c) <= 0) {
       eLand l = hv_land[c->master->alt->alt];
       setland(c, l);
       if(l == laWhirlpool && celldistAlt(c) >= -1) {
