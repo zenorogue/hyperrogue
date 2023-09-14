@@ -230,8 +230,8 @@ void new_voronoi_root(heptagon *h, int dist, int dir, eLand next, eLand last) {
   altpairs.emplace_back(h, alt);
   altmap::relspin(alt) = dir;
 
-  horodisk_land[alt] = next;
-  horodisk_last_land[alt] = last;
+  hv_land[alt] = next;
+  hv_last_land[alt] = last;
 
   while(alt->distance > -100) {
     auto alt1 = createStep(alt, 0);
@@ -305,8 +305,8 @@ void extend_altmap_voronoi(heptagon *h) {
     ld growth = expansion.get_growth();
     ld odds = pow(growth, ci.candidate->distance) * isize(ci.free_dirs);
     if(hrandf() < odds / (1 + odds)) {
-      eLand last = horodisk_land[ci.candidate->alt];
-      eLand last2 = horodisk_last_land[ci.candidate->alt];
+      eLand last = hv_land[ci.candidate->alt];
+      eLand last2 = hv_last_land[ci.candidate->alt];
       auto dist = ci.candidate->distance;
       // in PURE, could be a tie, or the new root could win
       if(PURE) dist -= hrand(2);
@@ -1811,13 +1811,13 @@ EX void start_camelot(cell *c) {
   if(alt) {
     altmap::radius(alt) = rtr;
     altmap::orig_land(alt) = c->land;
-    horodisk_land[alt] = laCamelot;
+    hv_land[alt] = laCamelot;
     }
   }
 
 EX bool debug_voronoi;
-EX map<heptagon*, eLand> horodisk_land;
-EX map<heptagon*, eLand> horodisk_last_land;
+EX map<heptagon*, eLand> hv_land;
+EX map<heptagon*, eLand> hv_last_land;
 
 EX void build_horocycles(cell *c, cell *from) {
 
@@ -1870,7 +1870,7 @@ EX void build_horocycles(cell *c, cell *from) {
   if(ls::horodisk_structure() && can_start_horo(c)) {
     auto m = create_altmap(c, horo_gen_distance(), hsA);
     if(m) {
-      horodisk_land[m] = getNewLand(laCrossroads);
+      hv_land[m] = getNewLand(laCrossroads);
       clearing::bpdata[m].root = NULL;
       }
     }
@@ -2138,7 +2138,7 @@ EX void moreBigStuff(cell *c) {
     auto p = get_voronoi_winner(c);
     auto ph = p.first;
     if(ph) {
-      eLand l = horodisk_land[ph];
+      eLand l = hv_land[ph];
       setland(c, l);
       if(isEquidLand(l)) c->landparam = 1-p.second;
       }
@@ -2153,7 +2153,7 @@ EX void moreBigStuff(cell *c) {
       preventbarriers(c);
       }
     if(have_alt(c) && celldistAlt(c) <= 0) {
-      eLand l = horodisk_land[c->master->alt->alt];
+      eLand l = hv_land[c->master->alt->alt];
       setland(c, l);
       if(l == laWhirlpool && celldistAlt(c) >= -1) {
         setland(c, laOcean);

@@ -2090,7 +2090,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
       if(d >= 8) c->wall = waSea;
       if(d == 7 && !safety) {
 
-        if(ls::hv_structure() && c->master->alt && horodisk_land[c->master->alt->alt] == laWhirlpool) {
+        if(ls::hv_structure() && c->master->alt && hv_land[c->master->alt->alt] == laWhirlpool) {
           if(hrand(100) < 10) c->wall = waBoat;
           return;
           }
