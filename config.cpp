@@ -67,8 +67,8 @@ struct setting {
   virtual ~setting() = default;
   virtual void load_from(const string& s) {
     if(saver) { saver->load(s); return; }
-    println(hlog, "cannot load this parameter");
-    exit(1);
+    println(hlog, "cannot load parameter: ", parameter_name, " from: ", s);
+    throw hr_exception("parameter cannot be loaded");
     }
   virtual bool load_from_animation(const string& s) {
     load_from(s); return false;
