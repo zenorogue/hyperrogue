@@ -341,32 +341,39 @@ int arg::readCommon() {
     exit(0);
     }
   else if(argis("-L")) {
-    printf("Treasures:\n");
+    printf("+ Treasures:\n");
+    int qty = 0;
     for(int i=1; i<ittypes; i++) 
       if(itemclass(eItem(i)) == IC_TREASURE)
-        printf("    %s\n", iinf[i].name);
+        printf("    %s\n", iinf[i].name), qty++;
+    printf("    total = %d\n", qty); qty = 0;
     printf("\n");
-    printf("Orbs:\n");
+    printf("+ Orbs:\n");
     for(int i=1; i<ittypes; i++) 
       if(itemclass(eItem(i)) == IC_ORB)
-        printf("    %s\n", iinf[i].name);
+        printf("    %s\n", iinf[i].name), qty++;
+    printf("    total = %d\n", qty); qty = 0;
     printf("\n");
-    printf("Other items:\n");
+    printf("+ Other items:\n");
     for(int i=1; i<ittypes; i++) 
       if(itemclass(eItem(i)) == IC_OTHER)
-        printf("    %s\n", iinf[i].name);
+        printf("    %s\n", iinf[i].name), qty++;
+    printf("    total = %d\n", qty); qty = 0;
     printf("\n");
-    printf("Monsters:\n");
+    printf("+ Monsters:\n");
     for(int i=1; i<motypes; i++) 
-      printf("    %s\n", minf[i].name);
+      printf("    %s\n", minf[i].name), qty++;
+    printf("    total = %d\n", qty); qty = 0;
     printf("\n");
-    printf("Lands:\n");
-    for(int i=1; i<landtypes; i++) 
-      printf("    %s\n", linf[i].name);
+    printf("+ Lands:\n");
+    for(int i=1; i<landtypes; i++)
+      printf("    %s\n", linf[i].name), qty++;
+    printf("    total = %d\n", qty); qty = 0;
     printf("\n");
-    printf("Walls:\n");
+    printf("+ Walls:\n");
     for(int i=0; i<walltypes; i++) 
-      printf("    %s\n", winf[i].name);
+      printf("    %s\n", winf[i].name), qty++;
+    printf("    total = %d\n", qty); qty = 0;
     printf("\n");
     exit(0);
     }
