@@ -1771,6 +1771,7 @@ auto cgm = addHook(hooks_clearmemory, 40, [] () {
   crush_now.clear();
   rosemap.clear();
   horodisk_land.clear();
+  horodisk_last_land.clear();
   for(auto &am: adj_memo) am.clear();
   }) + 
 addHook(hooks_gamedata, 0, [] (gamedata* gd) {
