@@ -4988,3 +4988,7 @@ Mostly embedding-related improvements:
 - Fixed a bug which caused the screen to disappear on switch-to-fpp
 - Fixed the movement in Nil geometry
 - Fixed a crash when changing sight range while in rug
+
+2023-09-15 07:48 Update 12.1t
+- fixed a crash on projection changing
+- two new land structure options: horodisk and ideal Voronoi
