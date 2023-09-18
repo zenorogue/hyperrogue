@@ -161,7 +161,7 @@ EX namespace brownian {
   
     if(!hyperbolic) c->wall = waNone, c->landparam = 256;
     
-    if(c->landparam == 0 && ls::single()) c->land = laOcean;
+    if(c->landparam == 0 && (ls::single() || ls::hv_structure())) c->land = laOcean;
 
     ONEMPTY {
       if(hrand(10000) < min(250, 100 + 2 * PT(kills[moAcidBird] + kills[moBrownBug], 50)) * (25 + min(items[itBrownian], 100)) / 25 && c->landparam >= 4 && c->landparam < 24)
