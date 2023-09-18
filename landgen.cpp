@@ -276,7 +276,7 @@ EX void place_random_gate_continuous(cell *c) {
   }
 
 EX void giantLandSwitch(cell *c, int d, cell *from) {
-  bool fargen = d == min(BARLEV, ls::hv_structure() ? 8 : 9);
+  bool fargen = d == 9;
   switch(c->land) {
 
     case laPrairie: // -------------------------------------------------------------
@@ -405,7 +405,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
         }
       else {
 
-        if(d == (ls::hv_structure() ? 8 : 9)) {
+        if(d == 9) {
           cell *c2 = NONSTDVAR ? c->master->c7 : c;
           if(cdist50(c2) == 3 && polarb50(c2))
             c->wall = waPalace;
@@ -1669,13 +1669,11 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
 
       if(d == 8 && c->land == laKraken && kraken_pseudohept(c) && hrand(1000) <= 2) {
         c->wall = waNone;
-        if(ls::hv_structure()) forCellCM(c2, c) setdist(c2, 8, c);
         forCellEx(c2, c) c2->wall = waNone;
         }
   
       if(d == 8 && !kraken_pseudohept(c) && hrand_monster(20000) < 10 + 3 * items[itKraken] + 2 * yendor::hardness() && c->wall == waSea && !c->item && !c->monst && !safety) {
         bool ok = true;
-        if(ls::hv_structure()) forCellCM(c2, c) setdist(c2, 8, c);
         forCellEx(c2, c)
           if(c2->wall != waSea || c2->item || c2->monst)
             ok = false;
@@ -1984,7 +1982,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
         for(int i=0; i<c->type; i++) {
           cell *c2 = c->move(i);          
           if(c2 && c2->wall == waRose) nww++;
-          if(c2 && !ls::any_chaos() && !ls::hv_structure()) for(int j=0; j<c2->type; j++) {
+          if(c2 && !ls::any_chaos()) for(int j=0; j<c2->type; j++) {
             cell *c3 = c2->move(j);
             // note: c3->land is required for Android --
             // not strictly equivalent since another land there might be not yet generated
@@ -2543,7 +2541,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
             
     case laEclectic: {
 
-      if(d >= (ls::hv_structure() ? 8 : 9)) c->wall = waChasm;
+      if(d >= 9) c->wall = waChasm;
       
       if(d == 8) wfc::schedule(c);
 
@@ -2748,7 +2746,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
       break;
     
     case laFrog:
-      if(d == (ls::hv_structure() ? 8 : 9)) {
+      if(d == 9) {
         if(randomPatternsMode ? RANDPAT : !is_zebra_trapdoor(c)) {
           if(hrand(2000) < PT(100 + 2 * kills[moFrog] + 2 * kills[moPhaser] + 2 * kills[moVaulter], 100) && notDippingFor(itFrog)) {
             bool ok = true;
@@ -3048,9 +3046,12 @@ EX void setdist(cell *c, int d, cell *from) {
 
   if(!c->monst) c->stuntime = 0;
 
-  giantLandSwitch(c, d, from);
+  bool big_first = ls::hv_structure();
+  if(!big_first) giantLandSwitch(c, d, from);
   
   if(d == min(reduced_barlev, 9)) moreBigStuff(c);
+
+  if(big_first) giantLandSwitch(c, d, from);
 
   if(d == 7) repairLandgen(c);
   
