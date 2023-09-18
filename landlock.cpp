@@ -861,8 +861,9 @@ EX land_validity_t& land_validity(eLand l) {
     if(l == laMirrorOld && !shmup::on) return not_implemented;
     }
 
-  if(ls::hv_structure() && among(l, laPrairie, laIvoryTower, laDungeon, laEndorian, laBrownian, laTortoise, laElementalWall, laWarpCoast, laWarpSea, laHive)) return not_in_hv;
+  if(ls::hv_structure() && among(l, laPrairie, laIvoryTower, laDungeon, laEndorian, laBrownian, laTortoise, laElementalWall, laWarpCoast, laWarpSea, laHive, laPrincessQuest)) return not_in_hv;
   if(ls::voronoi_structure() && among(l, laCamelot, laWhirlpool, laClearing)) return not_in_hv;
+  if(ls::horodisk_structure() && l != laCrossroads && isCrossroads(l)) return not_in_hv;
   
   if(l == laBrownian) {
     if(quotient || !hyperbolic || cryst) return dont_work;
