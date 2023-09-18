@@ -1993,11 +1993,12 @@ EX namespace hive {
     if(ls::any_chaos() && getDistLimit() <= 5) radius = 4;
     if(getDistLimit() <= 3) radius = 3;
 
-    for(int i=(ls::any_chaos()?0:2); i<radius; i++) 
+    for(int i=(ls::any_chaos()?0:2); i<radius; i++) {
       bf += revstep;
+      if(ls::horodisk_structure()) moreBigStuff(bf.at);
+      }
     cell *citycenter = bf.at;
     buginfo.clear();
-    
     
     // mark the area with BFS
     bugcitycell(citycenter, 0);
@@ -2005,9 +2006,10 @@ EX namespace hive {
       buginfo_t& b(buginfo[i]);
       cell *c = b.where;
       int d = b.dist[0];
+      if(ls::hv_structure()) moreBigStuff(c);
       // ERRORS!
       if(c->land != laHive && c->land != laNone) return;
-      if(c->bardir != NODIR) return;
+      if(ls::horodisk_structure() ? c->bardir != NOBARRIERS : c->bardir != NODIR) return;
       if(c->land == laHive && c->landparam >= 100) return;
       // bfs
       if(d < radius) for(int t=0; t<c->type; t++)
@@ -2021,7 +2023,8 @@ EX namespace hive {
       int d = b.dist[0];
       if(d <= 1 && c->wall == waNone)
         c->item = itRoyalJelly;
-      preventbarriers(c);
+      if(ls::horodisk_structure()) c->bardir = NOBARRIERS2;
+      else preventbarriers(c);
       if(d == 9 || d == 6 || d == 3)
         c->barleft = eLand(d/3),
         c->barright = eLand(k);

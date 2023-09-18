@@ -1643,8 +1643,9 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
     
     case laHive:
       if(fargen) {
-        if(hrand(2000) < (ls::tame_chaos() ? 1000 : (PURE && !ls::any_chaos()) ?200: ls::any_chaos() ? 10 : 2) && !safety) 
+        if(hrand(2000) < (ls::tame_chaos() ? 1000 : (PURE && !ls::any_chaos()) ?200: ls::any_chaos() ? 10 : ls::horodisk_structure() ? 50 : ls::hv_structure() ? 10 : 2) && !safety)
           hive::createBugArmy(c);
+        if(hrand_monster(20000) < 10 && ls::horodisk_structure()) c->monst = moPirate;
         if(hrand(2000) < 100 && !c->wall && !c->item && !c->monst) {
           int nww = 0;
           for(int i=0; i<c->type; i++) if(c->move(i) && c->move(i)->wall == waWaxWall)

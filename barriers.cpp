@@ -34,7 +34,7 @@ EX bool checkBarriersFront(cellwalker bb, int q IS(5), bool cross IS(false)) {
 
 /** return true if the cell c is not allowed to generate barriers because of other large things already existing nearby. */
 EX bool hasbardir(cell *c) {
-  return c->bardir != NODIR && c->bardir != NOBARRIERS;
+  return c->bardir != NODIR && c->bardir != NOBARRIERS && c->bardir != NOBARRIERS2;
   }
 
 EX void preventbarriers(cell *c) {

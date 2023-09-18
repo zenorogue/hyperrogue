@@ -274,7 +274,7 @@ void celldrawer::setcolors() {
       if(c->wall == waWaxWall) wcol = c->landparam;
       if(items[itOrbInvis] && c->wall == waNone && c->landparam)
         fcol = gradient(fcol, 0xFF0000, 0, c->landparam, 100);
-      if(c->bardir == NOBARRIERS && c->barleft) 
+      if(among(int(c->bardir), NOBARRIERS, NOBARRIERS2) && c->barleft)
         fcol = minf[moBug0+c->barright].color;
       break;
     case laSwitch:

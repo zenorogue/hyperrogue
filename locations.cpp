@@ -20,6 +20,7 @@ extern int cellcount, heptacount;
 
 #define NODIR 126
 #define NOBARRIERS 127
+#define NOBARRIERS2 125
 
 /** \brief Cell information for the game. struct cell builds on this */
 struct gcell {
