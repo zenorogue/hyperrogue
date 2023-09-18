@@ -3225,6 +3225,11 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
     "separate mirror images or different football types.", 'd');
   param_b(debug_voronoi, "debug_voronoi")->editable(
     "display Voronoi tie debug values", 'd');
+  param_i(horodisk_from, "horodisk_from", -2)->editable(-10, 10, 1,
+    "land size in horodisk mode",
+    "Set this to -2 to get perfect horodisks. Smaller values yield less dense horodisks, and "
+    "larger values might produce horodisks with errors or crashing into each other.", 'H');
+
   param_f(global_boundary_ratio, "global_boundary_ratio")
   ->editable(0, 5, 0.1, "Width of cell boundaries",
     "How wide should the cell boundaries be.", '0');

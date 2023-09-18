@@ -2120,6 +2120,9 @@ EX void gen_temple(cell *c) {
   else c->landparam = 2;
   }
 
+/* -2 should be perfect */
+EX int horodisk_from = -2;
+
 EX void moreBigStuff(cell *c) {
   if(disable_bigstuff) return;
 
@@ -2159,14 +2162,17 @@ EX void moreBigStuff(cell *c) {
     if(have_alt(c) && hv_land[c->master->alt->alt] == laCamelot) {
       buildCamelot(c);
       }
-    else if(have_alt(c) && celldistAlt(c) <= 0) {
+    else if(have_alt(c) && celldistAlt(c) <= horodisk_from) {
       eLand l = hv_land[c->master->alt->alt];
       setland(c, l);
+      if(l == laCaribbean) generateTreasureIsland(c);
       if(l == laWhirlpool && celldistAlt(c) >= -1) {
         setland(c, laOcean);
         c->landparam = 30;
         }
-      if(l == laCaribbean) generateTreasureIsland(c);
+      if(l == laWestWall && celldistAlt(c) >= -1) {
+        setland(c, laCrossroads);
+        }
       if(isEquidLand(l)) c->landparam = 1-celldistAlt(c);
       }
     else

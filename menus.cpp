@@ -435,6 +435,10 @@ EX void show_chaos() {
   if(casual) dialog::addInfo("(but the casual mode is on)");
 
   dialog::addBreak(100);
+  if(ls::horodisk_structure())
+    add_edit(horodisk_from);
+  else
+    dialog::addBreak(100);
   dialog::addBack();
   dialog::display();
   }
