@@ -590,6 +590,8 @@ EX eLand getNewLand(eLand old, eLand old2 IS(laBarrier)) {
     if(old == laCrossroads || old == laCrossroads2) tab[cnt++] = laOcean;
     if(old == laOcean) tab[cnt++] = laCrossroads2;
     }
+
+  if(ls::horodisk_structure() && tortoise::seek()) LIKELY tab[cnt++] = laTortoise;
   
   eLand n = old;
   while(incompatible(n, old) || incompatible(n, old2) || !isLandIngame(n)) {
@@ -861,7 +863,7 @@ EX land_validity_t& land_validity(eLand l) {
     if(l == laMirrorOld && !shmup::on) return not_implemented;
     }
 
-  if(ls::hv_structure() && among(l, laPrairie, laIvoryTower, laDungeon, laEndorian, laBrownian, laTortoise, laElementalWall, laWarpCoast, laWarpSea, laHive, laPrincessQuest)) return not_in_hv;
+  if(ls::hv_structure() && among(l, laPrairie, laIvoryTower, laDungeon, laEndorian, laBrownian, laElementalWall, laWarpCoast, laWarpSea, laHive, laPrincessQuest)) return not_in_hv;
   if(ls::voronoi_structure() && among(l, laCamelot, laWhirlpool, laClearing)) return not_in_hv;
   if(ls::horodisk_structure() && l != laCrossroads && isCrossroads(l)) return not_in_hv;
   

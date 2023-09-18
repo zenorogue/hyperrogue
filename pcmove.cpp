@@ -1045,7 +1045,7 @@ bool pcmove::attack() {
     changes.ccell(c2);
     c2->stuntime = 2;
     changes.at_commit([c2] {
-      items[itBabyTortoise] += 4;
+      items[itBabyTortoise] += (ls::hv_structure() ? 9 : 4);
       updateHi(itBabyTortoise, items[itBabyTortoise]);
       c2->item = itBabyTortoise;
       tortoise::babymap[c2] = tortoise::seekbits;

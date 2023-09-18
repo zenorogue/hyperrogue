@@ -275,6 +275,11 @@ EX void place_random_gate_continuous(cell *c) {
   else toggleGates(c, waOpenPlate, 1);
   }
 
+EX void gen_baby_tortoise(cell *c) {
+  c->item = itBabyTortoise;
+  tortoise::babymap[c] = tortoise::getb(c) ^ tortoise::getRandomBits();
+  }
+
 EX void giantLandSwitch(cell *c, int d, cell *from) {
   bool fargen = d == 9;
   switch(c->land) {
@@ -1060,10 +1065,8 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
             else c2->mondir = NODIR;
             }
           }
-        if(!c->monst && !ls::single() && !racing::on && !yendor::on && !randomPatternsMode && !peace::on && !euclid && hrand(4000) < 10 && !safety) {
-          c->item = itBabyTortoise;
-          tortoise::babymap[c] = tortoise::getb(c) ^ tortoise::getRandomBits();
-          }
+        if(!c->monst && !ls::single() && !racing::on && !yendor::on && !randomPatternsMode && !peace::on && !euclid && hrand(4000) < 10 && !safety) 
+          gen_baby_tortoise(c);
         }
       break;
     
@@ -1786,13 +1789,19 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           }
         }
       ONEMPTY {
-        if(hrand_monster(4000) < (peace::on ? 750 : 50 + items[itBabyTortoise]*2 + yendor::hardness() * 6) && !safety) {
+        if(hrand_monster(ls::hv_structure() ? 8000 : 4000) < (peace::on ? 750 : 50 + items[itBabyTortoise]*2 + yendor::hardness() * 6) && !safety) {
           c->monst = moTortoise;
           c->hitpoints = 3;
           auto val = tortoise::getb(c);
           tortoise::emap[c] = val;
           }
-        
+        else if(ls::hv_structure() && hrand(10000) <= 250) {
+          c->item = itCompass;
+          }
+        else if(ls::hv_structure() && hrand_monster(10000) <= 15) {
+          c->monst = moPirate;
+          }
+
         int chance = 50 + items[itBabyTortoise]*2;
         if(quickfind(laTortoise)) chance += 150;
         if((ls::single() || euclid || peace::on) && hrand(4000) < chance && !safety) {
@@ -2467,7 +2476,9 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           int freq = 4000;
           if(ls::single() && specialland == laCrossroads5 && !racing::on)
             freq = 250;
-          if(ls::hv_structure() && hrand(10000) < 10) { c->monst = moPirate; }
+          if(ls::hv_structure() && hrand(10000) < 10 && !c->monst) { c->monst = moPirate; }
+          if(ls::horodisk_structure() && !c->item && hrand(10000) < 10 && !safety)
+            gen_baby_tortoise(c);
           if(hrand_monster(freq) < items[itHyperstone] && !c->monst) {
             // only interesting monsters here!
             eMonster cm = crossroadsMonster();
