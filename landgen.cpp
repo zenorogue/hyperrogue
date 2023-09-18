@@ -2087,7 +2087,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
       break;
     
     case laOcean:
-      if(d >= 8) c->wall = waSea;
+      if(d >= 8 && d <= 9) c->wall = waSea;
       if(d == 7 && !safety) {
 
         if(ls::hv_structure() && c->master->alt && hv_land[c->master->alt->alt] == laWhirlpool) {
@@ -2541,7 +2541,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
             
     case laEclectic: {
 
-      if(d >= 9) c->wall = waChasm;
+      if(d == 9) c->wall = waChasm;
       
       if(d == 8) wfc::schedule(c);
 
@@ -2708,7 +2708,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
       break;
     
     case laMemory:
-      if(d >= 7) c->wall = waChasm;
+      if(d >= 7 && d <= 9) c->wall = waChasm;
       if(d == 7 && !c->monst && hrand(2000) < 4)
       #if CAP_RACING
       if(!racing::on)
@@ -2717,7 +2717,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
       break;
     
     case laAsteroids:
-      if(d >= 7) c->wall = waInvisibleFloor;
+      if(d >= 7 && d <= 9) c->wall = waInvisibleFloor;
       break;
     
     case laWet:
