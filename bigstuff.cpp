@@ -1588,7 +1588,9 @@ EX bool extend_alt(cell *c, eLand horoland, eLand overland, bool extend_in_singl
   return false;
   }
 
-EX bool can_start_horo(cell *c) {
+EX bool can_start_horo(cell *c, bool allowed_in_horo IS(false)) {
+  if(ls::voronoi_structure()) return false;
+  if(!allowed_in_horo && ls::horodisk_structure()) return false;
   if(yendor::on && !among(c->land, laCaribbean, laStorms))
     return false;
   return ctof(c) && !have_alt(c) && horo_ok() && !randomPatternsMode && !racing::on;
@@ -1830,7 +1832,7 @@ EX void build_horocycles(cell *c, cell *from) {
   
   // buildbigstuff
 
-  if(ls::any_order() && (ls::horodisk_structure() || bearsCamelot(c->land)) && can_start_horo(c) && !bt::in() && !ls::voronoi_structure() &&
+  if(ls::any_order() && (ls::horodisk_structure() || bearsCamelot(c->land)) && can_start_horo(c, true) && !bt::in() && !ls::voronoi_structure() &&
     #if MAXMDIM >= 4
     !(hyperbolic && WDIM == 3 && !reg3::in_hrmap_rule_or_subrule()) &&
     #endif
@@ -1860,14 +1862,14 @@ EX void build_horocycles(cell *c, cell *from) {
     create_altmap(c, horo_gen_distance(), hsA);
     
   #if CAP_COMPLEX2
-  if(c->land == laOcean && deepOcean && !generatingEquidistant && hrand(10000) < 20 && no_barriers_in_radius(c, 2) && hyperbolic && !quotient && !tactic::on && !safety) 
+  if(c->land == laOcean && deepOcean && !generatingEquidistant && hrand(10000) < 20 && no_barriers_in_radius(c, 2) && hyperbolic && !quotient && !tactic::on && !safety && !ls::hv_structure()) 
     brownian::init_further(c);
   #endif
 
   if(c->land == laCaribbean && can_start_horo(c))
     create_altmap(c, horo_gen_distance(), hsA);
 
-  if(ls::horodisk_structure() && can_start_horo(c)) {
+  if(ls::horodisk_structure() && can_start_horo(c, true)) {
     auto m = create_altmap(c, horo_gen_distance(), hsA);
     if(m) {
       hv_land[m] = getNewLand(laCrossroads);
@@ -1878,7 +1880,7 @@ EX void build_horocycles(cell *c, cell *from) {
   if(c->land == laCanvas && can_start_horo(c) && ls::any_order())
     create_altmap(c, horo_gen_distance(), hsA);
 
-  if(c->land == laPalace && can_start_horo(c) && !princess::generating && !shmup::on && multi::players == 1 && !weirdhyperbolic && !ls::hv_structure() &&
+  if(c->land == laPalace && can_start_horo(c) && !princess::generating && !shmup::on && multi::players == 1 && !weirdhyperbolic &&
     (princess::forceMouse ? canReachPlayer(from, moMouse) :
       (hrand(2000) < (peace::on ? 100 : 20))) && 
     (princess::challenge || kills[moVizier] || peace::on)) {
