@@ -194,9 +194,10 @@ EX void initgame() {
   if(firstland == laHauntedWall) firstland = laGraveyard; 
   if(firstland == laHaunted && !tactic::on) firstland = laGraveyard;
   if(firstland == laMercuryRiver) firstland = laTerracotta;
-  if(firstland == laMountain && !tactic::on) firstland = laJungle;
+  if(firstland == laMountain && !tactic::on && !ls::hv_structure()) firstland = laJungle;
   if(firstland == laPrincessQuest) firstland = laPalace;
   if(firstland == laMemory) firstland = laIce;
+  if(!ls::hv_structure())
   if((isGravityLand(firstland) && !isCyclic(firstland)) || (firstland == laOcean && !safety && !yendor::on)) {
     firstland = weirdhyperbolic ? laCrossroads4 : laCrossroads;
     easy_specialland = 3;

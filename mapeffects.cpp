@@ -577,6 +577,8 @@ EX bool destroyHalfvine(cell *c, eWall newwall IS(waNone), int tval IS(6)) {
 EX int coastvalEdge(cell *c) { return coastval(c, laIvoryTower); }
 
 EX int gravityLevel(cell *c) {
+  if(c->land == laIvoryTower && ls::hv_structure())
+    return celldistAlt(c);
   if(c->land == laIvoryTower || c->land == laEndorian)
     return coastval(c, laIvoryTower);
   if(c->land == laDungeon)
