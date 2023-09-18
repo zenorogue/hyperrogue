@@ -592,7 +592,7 @@ EX eLand getNewLand(eLand old, eLand old2 IS(laBarrier)) {
     }
   
   eLand n = old;
-  while(incompatible(n, old) || !isLandIngame(n)) {
+  while(incompatible(n, old) || incompatible(n, old2) || !isLandIngame(n)) {
     n = tab[hrand(cnt)];
     if(weirdhyperbolic && specialland == laCrossroads4 && isCrossroads(n))
       n = laCrossroads4;
