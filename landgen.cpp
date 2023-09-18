@@ -1669,13 +1669,15 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
 
       if(d == 8 && c->land == laKraken && kraken_pseudohept(c) && hrand(1000) <= 2) {
         c->wall = waNone;
+        if(ls::hv_structure()) forCellCM(c2, c) setdist(c2, 8, c);
         forCellEx(c2, c) c2->wall = waNone;
         }
   
       if(d == 8 && !kraken_pseudohept(c) && hrand_monster(20000) < 10 + 3 * items[itKraken] + 2 * yendor::hardness() && c->wall == waSea && !c->item && !c->monst && !safety) {
         bool ok = true;
+        if(ls::hv_structure()) forCellCM(c2, c) setdist(c2, 8, c);
         forCellEx(c2, c)
-          if(c2->wall != waSea || c2->item || c2->monst) 
+          if(c2->wall != waSea || c2->item || c2->monst)
             ok = false;
           
         if(ok) {
