@@ -1197,7 +1197,8 @@ EX namespace dice {
     
     int si = dw->facesides;
 
-    if(c == lmouseover_distant) {
+    if(inHighQual) ;
+    else if(c == lmouseover_distant) {
       set<cell*> visited;
       struct celldata_t {
         cell* c;
