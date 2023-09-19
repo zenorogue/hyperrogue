@@ -4003,8 +4003,8 @@ EX }
 EX namespace dungeon {
 
   /* use coastvalEdge normally, but celldistAlt in hv_structure */
-  bool cvfun(cell *c) {
-    if(ls::hv_structure()) return celldistAlt(c);
+  int cvfun(cell *c) {
+    if(ls::hv_structure()) return celldistAltPlus(c);
     return coastvalEdge(c);
     }
 
@@ -4014,6 +4014,13 @@ EX namespace dungeon {
       raiseBuggyGeneration(c, "ivory tower/dungeon generation error");
     }
 
+  /** for some reason standard generate_around does not work in hv_structure */
+  void gen_around(cell *c) {
+    if(ls::hv_structure()) {
+      forCellEx(c2, c) setdist(c2, 8, c);
+      }
+    else generate_around(c);
+    }
   void buildIvoryTower(cell *c) {
     /* if(int(c->landparam) % 5 == 0) 
       c->wall = waCamelot;
@@ -4060,22 +4067,20 @@ EX namespace dungeon {
       cl.add(c);
       for(int i=0; i<isize(cl.lst); i++) {
         cell *c1 = cl.lst[i];
-        generate_around(c1);
-        if(coastvalEdge(c1) == coastvalEdge(c) - 3) {
+        gen_around(c1);
+        if(cvfun(c1) == cvfun(c) - 3) {
           if(c1->landflags == 3) cnt++;
           continue;
           }
         if(c1->landflags == 3) below++;
-        forCellEx(c2, c1) if(coastvalEdge(c2) < coastvalEdge(c1))
+        forCellEx(c2, c1) if(cvfun(c2) < cvfun(c1))
           cl.add(c2);
         }
       if(cnt) c->wall = waPlatform;
-      else if(below && coastvalEdge(c) < 3) c->wall = waPlatform;
+      else if(below && cvfun(c) < 3) c->wall = waPlatform;
       }
 
     else if(true) {
-
-      auto cvfun = ls::hv_structure() ? celldistAlt : coastvalEdge;
 
       cell *c2 = c;
       cell *c3 = c;
@@ -4092,8 +4097,8 @@ EX namespace dungeon {
               c4 = c2->move(i);
             }
           rdepths[i] = c2 && c3 && c4 && (c2->landflags == 3 || c3->landflags == 3 || c4->landflags == 3);
-          if(c2) generate_around(c2);
-          if(c3) generate_around(c3);
+          if(c2) gen_around(c2);
+          if(c3) gen_around(c3);
           
           c2 = ts::left_parent(c2, cvfun);
           c3 = ts::right_parent(c3, cvfun);
@@ -4108,12 +4113,12 @@ EX namespace dungeon {
       if(!rdepths[2] && !rdepths[4] && !rdepths[1]) {
         c2 = c;
         c3 = c;
-        generate_around(c);
+        gen_around(c);
         cell *c4 = ts::left_of(c, cvfun);
         cell *c5 = ts::right_of(c, cvfun);
         for(int i=0; i<3; i++) {
-          if(coastvalEdge(c2) == 0) break;
-          for(cell *cx: {c2, c3, c4, c5}) if(cx) generate_around(cx);
+          if(cvfun(c2) == 0) break;
+          for(cell *cx: {c2, c3, c4, c5}) if(cx) gen_around(cx);
 
           if(c2 && c4 && c4->landflags == 3 && c2->landflags != 3 && c4 == ts::left_of(c2, cvfun))
             c->wall = waLadder;
@@ -4135,7 +4140,6 @@ EX namespace dungeon {
     buildEquidistant(c);
     bool rdepths[5];
     int switchcount = 0;
-    auto cvfun = ls::hv_structure() ? celldistAlt : coastvalEdge;
     
     if(WDIM == 3) {
       for(int i=0; i<5; i++) rdepths[i] = false;
@@ -4146,6 +4150,7 @@ EX namespace dungeon {
 
       for(int i=0; i<isize(cl.lst); i++) {
         cell *c1 = cl.lst[i];
+        if(ls::hv_structure()) forCellEx(c4, c1) moreBigStuff(c4);
         generate_around(c1);
         int d1 = d - cvfun(c);
         if(c1->landflags == 3) rdepths[d1] = true;
@@ -4174,6 +4179,10 @@ EX namespace dungeon {
           rdepths[i] = c2 && c3 && c4 && (c2->landflags == 3 || c3->landflags == 3 || c4->landflags == 3);
           if((c2&&c2->landflags == 1) || (c3&&c3->landflags == 1) || (c4&&c4->landflags == 1))
             switchcount++;
+          if(ls::hv_structure()) {
+            forCellEx(c4, c2) moreBigStuff(c4);
+            forCellEx(c4, c3) moreBigStuff(c3);
+            }
           generate_around(c2);
           generate_around(c3);
           c2 = ts::left_parent(c2, cvfun);
@@ -4213,6 +4222,7 @@ EX namespace dungeon {
     }
   
   cell *random_child(cell *c, const cellfunction& cf) {
+    if(ls::hv_structure()) forCellEx(c4, c) moreBigStuff(c4);
     generate_around(c);
     vector<cell*> children;
     forCellEx(c2, c) if(cf(c2) > cf(c)) children.push_back(c2);
@@ -4225,7 +4235,6 @@ EX namespace dungeon {
       c->wall = waCamelot;
       */
     
-    auto cvfun = ls::hv_structure() ? celldistAlt : coastvalEdge;
     if(true) {
       
       if(cvfun(c) == 1) forCellEx(c2, c)
@@ -4237,6 +4246,7 @@ EX namespace dungeon {
       int df = dungeonFlags(c);
       
       if(df&1) {
+        if(ls::hv_structure()) forCellEx(c4, c) moreBigStuff(c4);
         generate_around(c);
         int df1 = WDIM == 3 ? 0 : dungeonFlags(ts::left_of(c, cvfun));
         int df2 = WDIM == 3 ? 0 : dungeonFlags(ts::right_of(c, cvfun));

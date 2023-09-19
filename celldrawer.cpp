@@ -1961,6 +1961,7 @@ void celldrawer::check_rotations() {
     if(cwt.at->land == laDungeon) side = 2;
     if(cwt.at->land == laWestWall) side = 1;
     if(cwt.at->land == laIvoryTower && ls::hv_structure()) side = 2;
+    if(cwt.at->land == laDungeon && ls::hv_structure()) side = 0;
     if(models::do_rotate >= 1)
       use_if_less(edgeDepth(c), edgeDepth(old), cwt.at->landparam / 10., side);
     }
