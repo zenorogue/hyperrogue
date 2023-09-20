@@ -4992,3 +4992,11 @@ Mostly embedding-related improvements:
 2023-09-15 07:48 Update 12.1t
 - fixed a crash on projection changing
 - two new land structure options: horodisk and ideal Voronoi
+
+2023-09-19 08:01 Update 12.1u
+Fixes to the Horodisk/ideal Voronoi land structures:
+- horodisk mode now has a parameter controlling perfection vs density, and is set by default to generate less dense but perfect horocycles
+- Ivory Tower, Hive, and Galápagos join the H/V modes (also getting some interesting modifications from standard)
+- fixed some lands (Ocean/Lost Memory/Space Rocks/Eclectic) spilling when restarted in Safety in h/v mode
+- fixed a part of generation not being executed, or being executed for the starting land rather than the actual land, in some lands (e.g. Krakens not appearing)
+- more careful land incompatibility handling in voronoi
