@@ -1051,7 +1051,8 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
               createMov(c2, i);
               int j = c2->c.spin(i);
               cell *c3 = c2->move(i);
-              if(c3->monst || c3->bardir != NODIR || c3->wall || c3->mpdist <= 7) break;
+              setdist(c3, 9, c2);
+              if(c3->monst || (ls::hv_structure() ? c3->land != laDragon : c3->bardir != NODIR) || c3->wall || c3->mpdist <= 7) break;
               c2 = c3;
               c2->monst = moDragonTail;
               c2->hitpoints = 1;
