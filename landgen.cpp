@@ -1945,6 +1945,10 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           c->wall = waBoat;
           c->item = itCoral;
           }
+        else if(hrand(6000) < 1000 && ls::hv_structure()) {
+          /* somehow there were not enough boats in hv_structure... */
+          forCellEx(c1, c) if(c1->land == laWarpCoast) c->wall = waBoat;
+          }
         }
   
       ONEMPTY if(c->land == laWarpCoast) {

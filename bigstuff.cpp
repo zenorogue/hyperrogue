@@ -2143,6 +2143,10 @@ EX void pick_hv_subland(cell *c, eLand l, int depth) {
         c->wall = getElementalWall(hrand(2) ? c->barleft : c->barright);
       }
     }
+  else if(l == laWarpCoast) {
+    int i = (depth & 8);
+    setland(c, i ? laWarpCoast : laWarpSea);
+    }
   else setland(c, l);
   }
 
