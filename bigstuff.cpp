@@ -2125,6 +2125,27 @@ EX void gen_temple(cell *c) {
 /* -2 should be perfect */
 EX int horodisk_from = -2;
 
+EX void pick_hv_subland(cell *c, eLand l, int depth) {
+  if(l == laElementalWall) {
+    auto land_at = [] (int dp) {
+      int i = dp - 12;
+      if((i & 7) == 7) return laElementalWall;
+      i >>= 3;
+      eLand tab[4] = { laEAir, laEWater, laEEarth, laEFire };
+      return tab[i&3];
+      };
+
+    setland(c, land_at(depth));
+    if(c->land == laElementalWall) {
+      c->barleft = land_at(depth-1);
+      c->barright = land_at(depth+1);
+      if(hrand(100) < 75)
+        c->wall = getElementalWall(hrand(2) ? c->barleft : c->barright);
+      }
+    }
+  else setland(c, l);
+  }
+
 EX void moreBigStuff(cell *c) {
   if(disable_bigstuff) return;
 
@@ -2148,7 +2169,7 @@ EX void moreBigStuff(cell *c) {
     auto ph = p.first;
     if(ph) {
       eLand l = hv_land[ph];
-      setland(c, l);
+      pick_hv_subland(c, l, p.second);
       if(isEquidLand(l)) c->landparam = 1-p.second;
       }
     else {
@@ -2166,7 +2187,7 @@ EX void moreBigStuff(cell *c) {
       }
     else if(have_alt(c) && celldistAlt(c) <= horodisk_from) {
       eLand l = hv_land[c->master->alt->alt];
-      setland(c, l);
+      pick_hv_subland(c, l, celldistAlt(c));
       if(l == laCaribbean) generateTreasureIsland(c);
       if(l == laWhirlpool && celldistAlt(c) >= -1) {
         setland(c, laOcean);
