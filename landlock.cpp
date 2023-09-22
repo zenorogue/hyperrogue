@@ -567,6 +567,20 @@ EX eLand getNewLand(eLand old, eLand old2 IS(laBarrier)) {
     tab[cnt++] = laSnakeNest;
     }
 
+  if(ls::horodisk_structure()) {
+    if(gold() >= R30) {
+      tab[cnt++] = laCaribbean;
+      tab[cnt++] = laKraken;
+      tab[cnt++] = laWhirlpool;
+      }
+    if(gold() >= R60) {
+      tab[cnt++] = laRlyeh;
+      if(landUnlocked(laTemple)) tab[cnt++] = laTemple;
+      }
+    if(items[itBone] >= 10)
+      tab[cnt++] = laHaunted;
+    }
+
   if(ls::hv_structure() && landUnlocked(laMountain)) tab[cnt++] = laMountain;
   if(ls::hv_structure() && landUnlocked(laClearing)) tab[cnt++] = laClearing;
   
