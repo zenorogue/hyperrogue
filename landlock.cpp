@@ -567,8 +567,8 @@ EX eLand getNewLand(eLand old, eLand old2 IS(laBarrier)) {
     tab[cnt++] = laSnakeNest;
     }
 
-  if(landUnlocked(laMountain)) tab[cnt++] = laMountain;
-  if(landUnlocked(laClearing)) tab[cnt++] = laClearing;
+  if(ls::hv_structure() && landUnlocked(laMountain)) tab[cnt++] = laMountain;
+  if(ls::hv_structure() && landUnlocked(laClearing)) tab[cnt++] = laClearing;
   
   if(landUnlocked(laTrollheim)) {
     if(isTrollLand(old)) LIKELY tab[cnt++] = laTrollheim;

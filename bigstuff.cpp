@@ -2026,7 +2026,7 @@ EX void buildCamelot(cell *c) {
       if(c->land == laNone) printf("Camelot\n"); // NONEDEBUG
       }
     }
-  else {
+  else if(ls::hv_structure()) {
     setland(c, eLand(altmap::orig_land(c->master->alt->alt)));
     }
   #endif
