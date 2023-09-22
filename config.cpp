@@ -3229,6 +3229,9 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
     "land size in horodisk mode",
     "Set this to -2 to get perfect horodisks. Smaller values yield less dense horodisks, and "
     "larger values might produce horodisks with errors or crashing into each other.", 'H');
+  param_i(randomwalk_size, "randomwalk_size", 10)->editable(2, 100, 1,
+    "land size in randomwalk mode",
+    "The average size of a land in randomwalk mode.", 'R');
 
   param_f(global_boundary_ratio, "global_boundary_ratio")
   ->editable(0, 5, 0.1, "Width of cell boundaries",

@@ -437,6 +437,8 @@ EX void show_chaos() {
   dialog::addBreak(100);
   if(ls::horodisk_structure())
     add_edit(horodisk_from);
+  else if(land_structure == lsChaosRW)
+    add_edit(randomwalk_size);
   else
     dialog::addBreak(100);
   dialog::addBack();
