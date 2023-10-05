@@ -1995,7 +1995,7 @@ EX namespace hive {
 
     for(int i=(ls::any_chaos()?0:2); i<radius; i++) {
       bf += revstep;
-      if(ls::horodisk_structure()) moreBigStuff(bf.at);
+      if(ls::hv_structure()) moreBigStuff(bf.at);
       }
     cell *citycenter = bf.at;
     buginfo.clear();
