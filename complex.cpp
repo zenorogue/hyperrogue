@@ -4110,7 +4110,7 @@ EX namespace dungeon {
       if(rdepths[3]) {
         c->wall = waPlatform;
         }
-      if(!rdepths[2] && !rdepths[4] && !rdepths[1]) {
+      else if(!rdepths[2] && !rdepths[4] && !rdepths[1]) {
         c2 = c;
         c3 = c;
         gen_around(c);
