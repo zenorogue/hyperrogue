@@ -5000,3 +5000,18 @@ Fixes to the Horodisk/ideal Voronoi land structures:
 - fixed some lands (Ocean/Lost Memory/Space Rocks/Eclectic) spilling when restarted in Safety in h/v mode
 - fixed a part of generation not being executed, or being executed for the starting land rather than the actual land, in some lands (e.g. Krakens not appearing)
 - more careful land incompatibility handling in voronoi
+
+2023-09-22 13:00 Update 12.1v
+- fixed land generation becoming glitched in standard modes when Lost Mountain or Clearing becomes unlocked
+- fixed some lands not appearing in horodisk (Caribbean, Kraken, Whirlpool, Rlyeh, Temple, Haunted)
+- fixed roses and dragons not appearing in h/v
+- horocyclic variants of Warped Coast and Elemental Plains
+- the "random walk" land structure now has a parameter controlling the land size
+
+2023-10-05 14:12 Update 12.1w:
+- reverted the unintentional change which caused holes to appear in the platforms on Ivory Tower
+- fixed model color not taken into account in sphere stereographic projection
+- Prairie joins the horodisk land structure
+- fixed Hives missing in ideal Voronoi land structure
+- fixed some tiles pre-marked as mines in Minefield next to Ivory Tower in Voronoi land structure
+- fixed burial mounds not appearing in chaos/h/v land structures
