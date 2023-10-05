@@ -42,7 +42,7 @@ EX transmatrix relative_matrix_recursive(heptagon *h2, heptagon *h1) {
       }
     else {
       for(int i=0; i<h2->type; i++) if(h2->move(i) && h2->move(i)->distance < h2->distance) {
-        where = currentmap->iadj(h2, 0) * where;
+        where = currentmap->iadj(h2, i) * where;
         h2 = h2->move(i);
         goto again;
         }
