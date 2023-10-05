@@ -885,7 +885,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
         if(hrand(5000) < 25 && celldist(c) >= 5 && !safety) {
           bool goodland = true;
           cell *c2 = createMov(c, hrand(c->type));
-          for(auto cx: {c, c2})
+          if(!ls::any_chaos() && !ls::hv_structure()) for(auto cx: {c, c2})
             forCellCM(c3,cx) {
               if(c3->land != laNone && c3->land != laBurial)
                 goodland = false;
