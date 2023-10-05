@@ -3182,49 +3182,63 @@ EX namespace prairie {
   
   #define RLOW (sphere?(PURE?7:6):PURE?4:2)
   #define RHIGH (sphere?(PURE?8:9):PURE?11:13)
+
+  EX int get_val(cell *c) {
+    if(ls::hv_structure()) {
+      int a = celldistAlt(c);
+      if(a >= 2) a = 2;
+      a = gmod(18 - a, 20);
+      return a;
+      }
+    return c->LHU.fi.rval;
+    }
   
   EX bool no_worms(cell *c) {
     if(c->land != laPrairie) return false;
-    int rv = c->LHU.fi.rval;
+    int rv = get_val(c);
     return rv > RLOW+1 && rv < RHIGH-1;
     }
 
   EX bool isriver(cell *c) {
-    return c->land == laPrairie && c->LHU.fi.rval <= RHIGH && c->LHU.fi.rval >= RLOW;
+    int rv = get_val(c);
+    return c->land == laPrairie && rv <= RHIGH && rv >= RLOW;
     }
 
   bool mainriver(cell *c) {
-    return c->LHU.fi.rval <= 8 && c->LHU.fi.rval >= 7;
+    int rv = get_val(c);
+    return rv <= 8 && rv >= 7;
     }
 
   EX bool nearriver(cell *c) {
-    return c->LHU.fi.rval == RHIGH+1 || c->LHU.fi.rval == RLOW-1;
+    int rv = get_val(c);
+    return rv == RHIGH+1 || rv == RLOW-1;
     }
 
   cell *enter;
   
   bool opposite(cell *c) {
-    return (c->LHU.fi.rval ^ enter->LHU.fi.rval) & 8;
+    return (get_val(c) ^ get_val(enter)) & 8;
     }
 
   bool isleft(cell *c) {
-    return c->LHU.fi.rval & 8;
+    return get_val(c) & 8;
     }
 
   int towerleft(cell *c) { 
-    return c->LHU.fi.rval;
+    return get_val(c);
     }
   
   int towerright(cell *c) { 
-    return 15^c->LHU.fi.rval;
+    return 15^get_val(c);
     }
   
   EX cell *next(cell *c, int pv IS(1)) {
     for(int i=0; i<c->type; i++) {
       cell *c1 = createMov(c, i);
       cell *c2 = createMov(c, (i+pv+c->type)%c->type);
-      if(c1 && c1->LHU.fi.rval == c->LHU.fi.rval)
-      if(c2 && c2->LHU.fi.rval == c->LHU.fi.rval+1)
+      int rv = get_val(c);
+      if(c1 && get_val(c1) == rv)
+      if(c2 && get_val(c2) == rv+1)
       if(isNeighbor(c1,c2))
         return c1;
       }
@@ -3328,20 +3342,37 @@ EX namespace prairie {
     return true;
     }
   
+  EX void generateTreasure_here(cell *c) { 
+    int hr = hrand(100);
+    if(hr == 0 && items[itGreenGrass] >= 10 && !inv::on) {
+      c->item = itOrbBull;
+      // orbs.push_back(c); 
+      }
+    else if(hr < 1+PRIZEMUL) {
+      placePrizeOrb(c);
+      // if(c->item) orbs.push_back(c);
+      }
+    else if(!ls::hv_structure())
+      tchoices.push_back(c);
+    }
+
   EX void generateTreasure(cell *c) { 
 //    if(nearriver(c) && op
-    if(enter && nearriver(c) && opposite(c) && thisriver(c)) {
-      int hr = hrand(100);
-      if(hr == 0 && items[itGreenGrass] >= 10 && !inv::on) {
-        c->item = itOrbBull;
-        // orbs.push_back(c); 
+    if(ls::hv_structure()) {
+      if(get_val(c) == RHIGH + 1) {
+        int cd = celldist(c);
+        int min_cd = cd;
+        cell *c1;
+        c1 = c; for(int a=0; a<3; a++) { forCellEx(c2, c1) setdist(c2, 9, nullptr); c1 = next(c1); if(!c1) return; min_cd = min(min_cd, celldist(c1)); }
+        c1 = c; for(int a=0; a<3; a++) { forCellEx(c2, c1) setdist(c2, 9, nullptr); c1 = prev(c1); if(!c1) return; min_cd = min(min_cd, celldist(c1)); }
+        if(min_cd >= cd-1) forCellEx(c1, c) if(isriver(c1) && celldist(c1) < cd)
+          c->item = itGreenGrass;
         }
-      else if(hr < 1+PRIZEMUL) {
-        placePrizeOrb(c);
-        // if(c->item) orbs.push_back(c);
-        }
-      else tchoices.push_back(c);
-      } 
+      if(get_val(c) == 18 && hrand(100) < 50) c->item = itOrbSafety;
+      if(get_val(c) == 17) generateTreasure_here(c);
+      return;
+      }
+    if(enter && nearriver(c) && opposite(c) && thisriver(c)) generateTreasure_here(c);
     }
   
   EX void treasures() {

@@ -366,11 +366,12 @@ void celldrawer::setcolors() {
     #if CAP_FIELD
     case laPrairie:
       if(prairie::isriver(c)) {
-        fcol = flip_dark(c->LHU.fi.rval, 0x402000, 0x503000);
+        fcol = flip_dark(prairie::get_val(c), 0x402000, 0x503000);
         }
       else {
         fcol = 0x004000 + 0x001000 * c->LHU.fi.walldist;
         fcol += 0x10000 * (255 - 511 / (1 + max((int) c->LHU.fi.flowerdist, 1)));
+        if(ls::hv_structure()) fcol = prairie::nearriver(c) ? 0x40FF00 : 0x40D000;
         // fcol += 0x1 * (511 / (1 + max((int) c->LHU.fi.walldist2, 1)));
         }
       break;
