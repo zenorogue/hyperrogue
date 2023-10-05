@@ -4124,7 +4124,7 @@ EX namespace dungeon {
             c->wall = waLadder;
           if(c3 && c5 && c5->landflags == 3 && c3->landflags != 3 && c5 == ts::right_of(c3, cvfun))
             c->wall = waLadder;
-          buildEquidistant(c4); buildEquidistant(c5);
+          if(!ls::hv_structure()) { buildEquidistant(c4); buildEquidistant(c5); }
           if(c2) c2 = ts::left_parent(c2, cvfun);
           if(c3) c3 = ts::right_parent(c3, cvfun);
           if(c4) c4 = ts::left_parent(c4, cvfun);
