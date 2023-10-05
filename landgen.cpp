@@ -3008,11 +3008,11 @@ EX void setdist(cell *c, int d, cell *from) {
     }
 
   #if CAP_FIELD
-  if(d >= BARLEV-1 && c->land == laPrairie && !ls::any_chaos())
+  if(d >= BARLEV-1 && c->land == laPrairie && !ls::any_chaos() && !ls::hv_structure())
     prairie::spread(c, from);
   #endif
 
-  if(d < BARLEV && c->land == laPrairie && !c->landparam && !ls::any_chaos()) {
+  if(d < BARLEV && c->land == laPrairie && !c->landparam && !ls::any_chaos() && !ls::hv_structure()) {
     printf("d=%d/%d\n", d, BARLEV);
     raiseBuggyGeneration(c, "No landparam set");
     return;
