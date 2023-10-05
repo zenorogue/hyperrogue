@@ -2851,7 +2851,7 @@ EX int randomwalk_size = 10;
 
 EX void setland_randomwalk(cell *c) {
   if(c->land) return;
-  if(hrand(randomwalk_size) == 0) setland(c, currentlands[hrand(isize(currentlands))]);
+  if(hrand(randomwalk_size) == 0) setland(c, random_land());
   else {
     cell *c2 = nullptr;
     for(int i=0; i<10 && !(c2 && (!disksize || is_in_disk(c2)) && is_in_fractal(c2)); i++)
