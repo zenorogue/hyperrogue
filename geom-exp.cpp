@@ -554,7 +554,7 @@ EX string geometry_name() {
     return geometry_name(ginf[geometry].cclass) + dim_name();
   else
     return geometry_name(ginf[geometry].cclass);
-  };
+  }
 
 EX void select_quotient_screen() {
   cmode = sm::SIDE | sm::MAYDARK;

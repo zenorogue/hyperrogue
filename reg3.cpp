@@ -82,12 +82,12 @@ EX }
 transmatrix sfix_rgpushxto0(hyperpoint h) {
   if(stretch::applicable() && !fake::in()) return stretch::translate(h);
   return rgpushxto0(h);
-  };
+  }
 
 transmatrix sfix_gpushxto0(hyperpoint h) {
   if(stretch::applicable() && !fake::in()) return stretch::itranslate(h);
   return gpushxto0(h);
-  };
+  }
 
 #if MAXMDIM >= 4
 void subcellshape::compute_sub() {

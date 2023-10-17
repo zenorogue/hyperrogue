@@ -384,7 +384,7 @@ EX hookset<bool(celldrawer *cd)> hooks_ceiling;
 
 EX void g_add_to_sky(cell *c, shiftmatrix& V, color_t col, color_t col2) {
   if(sky) sky->sky.emplace_back(c, V, col, col2);
-  };
+  }
 
 void celldrawer::draw_ceiling() {
 
