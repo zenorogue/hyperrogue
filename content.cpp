@@ -295,7 +295,7 @@ MONSTER( 'F', 0xC35817, "Giant Fox", moRedFox, CF_FACE_SIDE | CF_HIGH_THREAT, RE
 MONSTER( 'C', 0x8080FF, "Wind Crow", moWindCrow, CF_FACE_SIDE | CF_BIRD | CF_FLYING | CF_IGNORE_PLATE | CF_HIGH_THREAT, RESERVED, moEagle,
     "A large bird who likes strong winds. Just as you, it can fly quickly in the wind."
     )
-MONSTER( 'G', 0xC0FFC0, "Friendly Ghost", moFriendlyGhost, CF_FACE_SIDE | CF_NOGHOST | CF_GOK | CF_FRIENDLY | CF_FACING | CF_GHOST | CF_FLYING | CF_ATTACK_THRU_VINE | CF_ATTACK_NONADJACENT | CF_IGNORE_PLATE, RESERVED, moFriendlyGhost, 
+MONSTER( 'G', 0xC0FFC0, "Friendly Ghost", moFriendlyGhost, CF_FACE_SIDE | CF_NOGHOST | CF_GOK | CF_FRIENDLY | CF_FACING | CF_GHOST | CF_FLYING | CF_ATTACK_THRU_VINE | CF_ATTACK_NONADJACENT | CF_IGNORE_PLATE | CF_NONLIVING, RESERVED, moFriendlyGhost, 
     "Friendly ghosts are friendly beings who can go through any obstacles. However, "
     "unlike most friends, they tend to fly away from you."
     )
