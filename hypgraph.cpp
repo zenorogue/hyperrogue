@@ -3412,7 +3412,7 @@ EX bool lie_movement_available() {
   if(nonisotropic && !embedded_plane) return true;
   if(mhyperbolic && bt::in()) return true;
   return false;
-  };
+  }
 
 EX hyperpoint lie_log(const shiftpoint h1) {
   hyperpoint h = unshift(h1);
