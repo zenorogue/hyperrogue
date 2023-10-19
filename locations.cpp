@@ -198,10 +198,10 @@ template<class T> void tailored_delete(T* x) {
   delete[] ((char*) (x));
   }
 
-static const struct wstep_t { wstep_t() {} } wstep;
-static const struct wmirror_t { wmirror_t() {}} wmirror;
-static const struct rev_t { rev_t() {} } rev;
-static const struct revstep_t { revstep_t() {}} revstep;
+static constexpr struct wstep_t {} wstep;
+static constexpr struct wmirror_t {} wmirror;
+static constexpr struct rev_t {} rev;
+static constexpr struct revstep_t {} revstep;
 
 extern int hrand(int);
 
@@ -287,7 +287,7 @@ enum hstate { hsOrigin, hsA, hsB, hsError, hsA0, hsA1, hsB0, hsB1, hsC };
 struct cell *createMov(struct cell *c, int d);
 struct heptagon *createStep(struct heptagon *c, int d);
 
-struct cdata_or_heptagon { virtual ~cdata_or_heptagon() {} };
+struct cdata_or_heptagon { virtual ~cdata_or_heptagon() = default; };
 
 struct cdata : cdata_or_heptagon {
   int val[4];
@@ -453,7 +453,7 @@ struct celllister : manual_celllister {
   };
 
 /** \brief translate heptspins to cellwalkers and vice versa */
-static const struct cth_t { cth_t() {}} cth;
+static constexpr struct cth_t {} cth;
 inline heptspin operator+ (cellwalker cw, cth_t) { return heptspin(cw.at->master, cw.spin * DUALMUL, cw.mirrored); }
 inline cellwalker operator+ (heptspin hs, cth_t) { return cellwalker(hs.at->c7, hs.spin / DUALMUL, hs.mirrored); }
 

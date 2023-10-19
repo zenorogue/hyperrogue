@@ -5,7 +5,7 @@ namespace dhrg {
 
 struct progressbar : indenter_finish {
   string name;
-  static const int PBSIZE = 64;
+  static constexpr int PBSIZE = 64;
   int step = -1, total, drawat = 0, count = -1;
   
   void operator ++ (int) { 

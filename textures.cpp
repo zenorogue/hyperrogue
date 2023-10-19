@@ -566,7 +566,7 @@ void texture_config::mark_triangles() {
       }
   }
 
-static const auto current_texture_parameters = tie(geometry, variation, patterns::whichPattern, patterns::subpattern_flags, pmodel, pconf.scale, pconf.alpha);
+static constexpr auto current_texture_parameters = tie(geometry, variation, patterns::whichPattern, patterns::subpattern_flags, pmodel, pconf.scale, pconf.alpha);
 
 void texture_config::clear_texture_map() {
   texture_map.clear();

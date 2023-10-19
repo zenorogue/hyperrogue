@@ -9,7 +9,7 @@
 namespace hr {
 
 #if HDR
-static const int PSEUDOKEY_MEMORY = 16397;
+static constexpr int PSEUDOKEY_MEMORY = 16397;
 #endif
 
 EX bool memory_saving_mode = true;
@@ -17,7 +17,7 @@ EX bool memory_saving_mode = true;
 EX bool show_memory_warning = true;
 EX bool ignored_memory_warning;
 
-static const int LIM = 150;
+static constexpr int LIM = 150;
 
 EX heptagon *last_cleared;
 

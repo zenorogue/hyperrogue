@@ -550,7 +550,7 @@ public:
 
 using purehookset = hookset<void()>;
 
-static const int NOHINT = -1;
+static constexpr int NOHINT = -1;
 
 typedef function<void()> reaction_t;
 typedef function<bool()> bool_reaction_t;
@@ -664,7 +664,7 @@ struct finalizer {
   ~finalizer() { f(); }
   };
   
-static const int MAXPLAYER = 7;
+static constexpr int MAXPLAYER = 7;
 
 #define DEFAULTCONTROL (multi::players == 1 && !shmup::on && !multi::alwaysuse)
 #define DEFAULTNOR(sym) (DEFAULTCONTROL || multi::notremapped(sym))
@@ -776,7 +776,7 @@ enum orbAction { roMouse, roKeyboard, roCheck, roMouseForce, roMultiCheck, roMul
 #endif
 #define pmodel (pconf.model)
 
-static const int DISTANCE_UNKNOWN = 127;
+static constexpr int DISTANCE_UNKNOWN = 127;
 
 template<class T, class U> int addHook(hookset<T>& m, int prio, U&& hook) {
   return m.add(prio, static_cast<U&&>(hook));
@@ -860,9 +860,9 @@ template<class T, class U> void eliminate_if(vector<T>& data, U pred) {
       data[i] = data.back(), data.pop_back(), i--;
   }
 
-template<class T> array<T, 4> make_array(T a, T b, T c, T d) { array<T,4> x; x[0] = a; x[1] = b; x[2] = c; x[3] = d; return x; }
-template<class T> array<T, 3> make_array(T a, T b, T c) { array<T,3> x; x[0] = a; x[1] = b; x[2] = c; return x; }
-template<class T> array<T, 2> make_array(T a, T b) { array<T,2> x; x[0] = a; x[1] = b; return x; }
+template<class T> constexpr array<T, 4> make_array(T a, T b, T c, T d) { return array<T,4>{a,b,c,d}; }
+template<class T> constexpr array<T, 3> make_array(T a, T b, T c) { return array<T,3>{a,b,c}; }
+template<class T> constexpr array<T, 2> make_array(T a, T b) { return array<T,2>{a,b}; }
 
 // Find in a std::map or std::unordered_map, or return null.
 template<class Map, class Key>
@@ -934,7 +934,7 @@ template<class T> ld binsearch(ld dmin, ld dmax, const T& f, int iterations = 20
   return dmin;
   } 
 
-  static const int max_vec = (1<<14);
+  static constexpr int max_vec = (1<<14);
   extern bool needConfirmationEvenIfSaved();
 
 typedef unsigned long long flagtype;

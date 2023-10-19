@@ -36,11 +36,11 @@ EX vector<bool> legalmoves;
 EX vector<int> move_issues;
 
 #if HDR
-static const int miVALID = 10000;
-static const int miENTITY = 11000;
-static const int miRESTRICTED = 10100;
-static const int miTHREAT = 10010;
-static const int miWALL = 10001;
+static constexpr int miVALID = 10000;
+static constexpr int miENTITY = 11000;
+static constexpr int miRESTRICTED = 10100;
+static constexpr int miTHREAT = 10010;
+static constexpr int miWALL = 10001;
 #endif
 
 EX int checked_move_issue;

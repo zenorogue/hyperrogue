@@ -5759,34 +5759,34 @@ EX cfunction current_screen_cfunction() {
 
 #if HDR
 namespace sm {
-  static const int NORMAL = 1;
-  static const int MISSION = 2;
-  static const int HELP = 4;
-  static const int MAP = 8;
-  static const int DRAW = 16;
-  static const int NUMBER = 32;
-  static const int SHMUPCONFIG = 64;
-  static const int OVERVIEW = 128;
-  static const int SIDE = 256;
-  static const int DOTOUR = 512;
-  static const int CENTER = 1024;
-  static const int ZOOMABLE = 4096;
-  static const int TORUSCONFIG = 8192;
-  static const int MAYDARK = 16384;
-  static const int DIALOG_STRICT_X = 32768; // do not interpret dialog clicks outside of the X region
-  static const int EXPANSION = (1<<16);
-  static const int HEXEDIT = (1<<17);
-  static const int VR_MENU = (1<<18); // always show the menu in VR
-  static const int SHOWCURSOR = (1<<19); // despite MAP/DRAW always show the cursor, no panning
-  static const int PANNING = (1<<20); // smooth scrolling works
-  static const int DARKEN = (1<<21); // darken the game background
-  static const int NOSCR = (1<<22); // do not show the game background
-  static const int AUTO_VALUES = (1<<23); // automatic place for values
-  static const int NARROW_LINES = (1<<24); // do make the lines narrower if we needed to reduce width
-  static const int EDIT_BEFORE_WALLS = (1<<25); // mouseover targets before walls
-  static const int EDIT_INSIDE_WALLS = (1<<26); // mouseover targets inside walls
-  static const int DIALOG_WIDE = (1<<27); // make dialogs wide
-  static const int MOUSEAIM = (1<<28); // mouse aiming active here
+  static constexpr int NORMAL = 1;
+  static constexpr int MISSION = 2;
+  static constexpr int HELP = 4;
+  static constexpr int MAP = 8;
+  static constexpr int DRAW = 16;
+  static constexpr int NUMBER = 32;
+  static constexpr int SHMUPCONFIG = 64;
+  static constexpr int OVERVIEW = 128;
+  static constexpr int SIDE = 256;
+  static constexpr int DOTOUR = 512;
+  static constexpr int CENTER = 1024;
+  static constexpr int ZOOMABLE = 4096;
+  static constexpr int TORUSCONFIG = 8192;
+  static constexpr int MAYDARK = 16384;
+  static constexpr int DIALOG_STRICT_X = 32768; // do not interpret dialog clicks outside of the X region
+  static constexpr int EXPANSION = (1<<16);
+  static constexpr int HEXEDIT = (1<<17);
+  static constexpr int VR_MENU = (1<<18); // always show the menu in VR
+  static constexpr int SHOWCURSOR = (1<<19); // despite MAP/DRAW always show the cursor, no panning
+  static constexpr int PANNING = (1<<20); // smooth scrolling works
+  static constexpr int DARKEN = (1<<21); // darken the game background
+  static constexpr int NOSCR = (1<<22); // do not show the game background
+  static constexpr int AUTO_VALUES = (1<<23); // automatic place for values
+  static constexpr int NARROW_LINES = (1<<24); // do make the lines narrower if we needed to reduce width
+  static constexpr int EDIT_BEFORE_WALLS = (1<<25); // mouseover targets before walls
+  static constexpr int EDIT_INSIDE_WALLS = (1<<26); // mouseover targets inside walls
+  static constexpr int DIALOG_WIDE = (1<<27); // make dialogs wide
+  static constexpr int MOUSEAIM = (1<<28); // mouse aiming active here
   }
 #endif
 

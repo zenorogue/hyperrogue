@@ -1175,10 +1175,10 @@ EX namespace whirlpool {
 EX namespace mirror {
 
   #if HDR
-  static const int SPINSINGLE = 1;
-  static const int SPINMULTI = 2;
-  static const int GO = 4;
-  static const int ATTACK = 8;
+  static constexpr int SPINSINGLE = 1;
+  static constexpr int SPINMULTI = 2;
+  static constexpr int GO = 4;
+  static constexpr int ATTACK = 8;
   #endif
   
   EX bool build(cell *c) {
@@ -1636,8 +1636,8 @@ EX namespace mirror {
     return cw;
     }
 
-  static const int CACHESIZE = 1<<12; // must be a power of 2
-  static const int CACHEMASK = CACHESIZE-1;
+  static constexpr int CACHESIZE = 1<<12; // must be a power of 2
+  static constexpr int CACHEMASK = CACHESIZE-1;
     
   pair<cell*, cellwalker> cache[CACHESIZE];
   int nextcache;
@@ -3406,7 +3406,7 @@ namespace prairie {
 
 EX namespace ca {
   EX ld prob = .2;
-  static const int MAX_NEIGHBOR = 60; /* may be larger than MAX_EDGE due to mineadj */
+  static constexpr int MAX_NEIGHBOR = 60; /* may be larger than MAX_EDGE due to mineadj */
   string carule[MAX_NEIGHBOR][2];
   
   EX eWall wlive = waFloorA;
@@ -3579,8 +3579,8 @@ int windcodes5676[] = {152,138,172,172,141,158,157,124,119,130,125,143,190,206,2
 EX namespace windmap {
 
   #if HDR
-  static const int NOWINDBELOW = 8;
-  static const int NOWINDFROM = 120;  
+  static constexpr int NOWINDBELOW = 8;
+  static constexpr int NOWINDFROM = 120;  
   #endif
 
   map<int, int> getid;

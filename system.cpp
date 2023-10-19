@@ -11,30 +11,30 @@ namespace hr {
 #if HDR
 /** \brief This namespace has constants used as parameters in functions such as restart_game and wrongmode. */
 namespace rg {
-  static const char nothing = 0;
-  static const char peace = 'P';
-  static const char inv = 'i';
-  static const char chaos = 'C';
-  static const char tactic = 't';
-  static const char tour = 'T';
-  static const char yendor = 'y';
-  static const char shmup = 's';
-  static const char randpattern = 'r';
-  static const char princess = 'p';
-  static const char daily = 'd';
-  static const char daily_off = 'D';
-  static const char racing = 'R';
-  static const char dualmode = 'U';
-  static const char heptagons = '7';
+  static constexpr char nothing = 0;
+  static constexpr char peace = 'P';
+  static constexpr char inv = 'i';
+  static constexpr char chaos = 'C';
+  static constexpr char tactic = 't';
+  static constexpr char tour = 'T';
+  static constexpr char yendor = 'y';
+  static constexpr char shmup = 's';
+  static constexpr char randpattern = 'r';
+  static constexpr char princess = 'p';
+  static constexpr char daily = 'd';
+  static constexpr char daily_off = 'D';
+  static constexpr char racing = 'R';
+  static constexpr char dualmode = 'U';
+  static constexpr char heptagons = '7';
   
   /** \brief wrongmode only -- marks 'global' achievements not related to the current mode */
-  static const char global = 'x'; 
+  static constexpr char global = 'x'; 
   /** \brief wrongmode only -- change vid.scfg.players then restart_game(rg::nothing) instead */
-  static const char multi = 'm';
+  static constexpr char multi = 'm';
   /** \brief wrongmode only -- mark achievements for special geometries/variations, this automatically marks the expected land_structure as lsSingle */
-  static const char special_geometry = 'g';
+  static constexpr char special_geometry = 'g';
   /** \brief wrongmode only -- mark achievements for special geometries/variations */
-  static const char special_geometry_nicewalls = 'G';
+  static constexpr char special_geometry_nicewalls = 'G';
   }
 #endif
 

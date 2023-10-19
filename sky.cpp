@@ -139,7 +139,7 @@ void compute_skyvertices(const vector<sky_item>& sky) {
         transmatrix T1 = unshift(si.T);
         hyperpoint ci = kleinize(get_corner_position(c, i, 3));
         hyperpoint cj = kleinize(get_corner_position(c, j, 3));
-        static const int prec = 8;
+        static constexpr int prec = 8;
         ci = (ci - C0)/prec;
         cj = (cj - C0)/prec;
         glhr::colored_vertex vs[prec+1][prec+1], vh[prec+1][prec+1];
@@ -194,7 +194,7 @@ void compute_skyvertices(const vector<sky_item>& sky) {
     
     for(int i=0; i<c->type; i++) {
       
-      static const int prec = 2; 
+      static constexpr int prec = 2; 
 
       if(1) {
         cellwalker cw0(c, i);

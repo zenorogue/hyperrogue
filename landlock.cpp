@@ -650,13 +650,13 @@ template<class T> void generateLandList(T t) {
 
 #if HDR
 namespace lv {
-  static const flagtype appears_in_geom_exp = 1;
-  static const flagtype display_error_message = 2;
-  static const flagtype appears_in_full = 4;
-  static const flagtype appears_in_ptm = 8;
-  static const flagtype display_in_help = 16;
-  static const flagtype one_and_half = 32;
-  static const flagtype switch_to_single = 64;
+  static constexpr flagtype appears_in_geom_exp = 1;
+  static constexpr flagtype display_error_message = 2;
+  static constexpr flagtype appears_in_full = 4;
+  static constexpr flagtype appears_in_ptm = 8;
+  static constexpr flagtype display_in_help = 16;
+  static constexpr flagtype one_and_half = 32;
+  static constexpr flagtype switch_to_single = 64;
   }
 
 struct land_validity_t {

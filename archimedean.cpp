@@ -96,11 +96,11 @@ struct archimedean_tiling {
 #endif
 
 #if HDR
-static const int sfPH = 1;
-static const int sfLINE = 2;
-static const int sfCHESS = 4;
-static const int sfTHREE = 8;
-static const int sfSEMILINE = 16;
+static constexpr int sfPH = 1;
+static constexpr int sfLINE = 2;
+static constexpr int sfCHESS = 4;
+static constexpr int sfTHREE = 8;
+static constexpr int sfSEMILINE = 16;
 #endif
 
 #if CAP_ARCM

@@ -772,9 +772,9 @@ EX int celldist(cell *c) {
   }
 
 #if HDR
-static const int ALTDIST_BOUNDARY = 99999;
-static const int ALTDIST_UNKNOWN = 99998;
-static const int ALTDIST_ERROR = 90000;
+static constexpr int ALTDIST_BOUNDARY = 99999;
+static constexpr int ALTDIST_UNKNOWN = 99998;
+static constexpr int ALTDIST_ERROR = 90000;
 #endif
 
 EX int celldistAlt(cell *c) {
@@ -863,12 +863,12 @@ EX int updir_alt(heptagon *h) {
 
 
 #if HDR
-static const int RPV_MODULO = 5;
-static const int RPV_RAND = 0;
-static const int RPV_ZEBRA = 1;
-static const int RPV_EMERALD = 2;
-static const int RPV_PALACE = 3;
-static const int RPV_CYCLE = 4;
+static constexpr int RPV_MODULO = 5;
+static constexpr int RPV_RAND = 0;
+static constexpr int RPV_ZEBRA = 1;
+static constexpr int RPV_EMERALD = 2;
+static constexpr int RPV_PALACE = 3;
+static constexpr int RPV_CYCLE = 4;
 #endif
 
 // x mod 5 = pattern type

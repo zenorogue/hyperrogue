@@ -11,8 +11,8 @@ namespace hr {
 EX namespace crystal {
 
 #if HDR
-static const int MAXDIM = 7;
-static const int MAX_EDGE_CRYSTAL = 2 * MAXDIM;
+static constexpr int MAXDIM = 7;
+static constexpr int MAX_EDGE_CRYSTAL = 2 * MAXDIM;
 
 struct coord : public array<int, MAXDIM> {
   coord operator + (coord b) { for(int i=0; i<MAXDIM; i++) b[i] += self[i]; return b; }  
@@ -20,7 +20,7 @@ struct coord : public array<int, MAXDIM> {
   coord operator * (int x) { coord res; for(int i=0; i<MAXDIM; i++) res[i] = x * self[i]; return res; } 
   };
 
-static const coord c0 = {};
+static constexpr coord c0 = {};
 
 struct ldcoord : public array<ld, MAXDIM> {
   friend ldcoord operator + (ldcoord a, ldcoord b) { ldcoord r; for(int i=0; i<MAXDIM; i++) r[i] = a[i] + b[i]; return r; }
@@ -30,7 +30,7 @@ struct ldcoord : public array<ld, MAXDIM> {
   friend ld operator | (ldcoord a, ldcoord b) { ld r=0; for(int i=0; i<MAXDIM; i++) r += a[i] * b[i]; return r; }
   };
 
-static const ldcoord ldc0 = {};
+static constexpr ldcoord ldc0 = {};
 #endif
 
 #if CAP_CRYSTAL
@@ -325,7 +325,7 @@ ld sqhypot2(crystal_structure& cs, ldcoord co1, ldcoord co2) {
   return result;
   }
 
-static const int Modval = 64;
+static constexpr int Modval = 64;
 
 struct east_structure {
   map<coord, int> data;
@@ -1595,7 +1595,7 @@ EX string get_table_volume() {
         if(co[i] < mincoord) mincoord = co[i];
         if(co[i] > maxcoord) maxcoord = co[i];
         }
-      static const ld eps = 1e-4;
+      static constexpr ld eps = 1e-4;
       if(mincoord >= 0-eps && maxcoord < PERIOD-eps) {
         ld my_rad2 = rad2;
         auto cshift = (co - m->camelot_coord) / PERIOD;

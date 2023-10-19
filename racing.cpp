@@ -26,8 +26,8 @@ int TWIDTH;
 
 EX ld race_advance = 0;
 
-static const int LENGTH = 250;
-static const int DROP = 1;
+static constexpr int LENGTH = 250;
+static constexpr int DROP = 1;
 
 EX int ghosts_to_show = 5;
 EX int ghosts_to_save = 10;
@@ -59,7 +59,7 @@ uchar angle_to_uchar(ld x) { return frac_to_uchar(x / TAU); }
 ld uchar_to_frac(uchar x) { return x / 256.; }
 transmatrix spin_uchar(uchar x) { return spin(uchar_to_frac(x) * TAU); }
 
-static const ld distance_multiplier = 4;
+static constexpr ld distance_multiplier = 4;
 
 struct ghostmoment {
   int step;

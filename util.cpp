@@ -573,8 +573,8 @@ EX string available_constants() {
 
 #if HDR
 struct bignum {
-  static const int BASE = 1000000000;
-  static const long long BASE2 = BASE * (long long)BASE;
+  static constexpr int BASE = 1000000000;
+  static constexpr long long BASE2 = BASE * (long long)BASE;
   vector<int> digits;
   bignum() {}
   bignum(int i) : digits() { digits.push_back(i); }

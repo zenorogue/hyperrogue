@@ -36,8 +36,8 @@ EX namespace inv {
     for(int i=0; i<ittypes; i++) usedup[i] = 0;
     }
   
-  static const int MIRRORED = 1000;
-  static const int TESTMIRRORED = 900;
+  static constexpr int MIRRORED = 1000;
+  static constexpr int TESTMIRRORED = 900;
 
   struct lateextraorb {
     eItem treasure;

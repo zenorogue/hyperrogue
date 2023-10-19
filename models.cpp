@@ -20,7 +20,7 @@ EX namespace polygonal {
   #endif
 
   #if HDR
-  static const int MSI = 120;
+  static constexpr int MSI = 120;
   #endif
 
   typedef long double xld;

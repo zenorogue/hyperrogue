@@ -35,36 +35,36 @@ enum eOrbLandRelation {
 #if HDR
 namespace orbgenflags {
   // generates in the given land from 10 treasures, in the classic mode
-  static const int LOCAL10 = 1;
+  static constexpr int LOCAL10 = 1;
   // generates in the Crossroads from 10 treasures, in the classic mode
-  static const int CROSS10 = 2;
+  static constexpr int CROSS10 = 2;
   // generates in other places from 25 treasures, in the classic mode
-  static const int GLOBAL25 = 4;
+  static constexpr int GLOBAL25 = 4;
   // in OSM you get it once at 10 treasures
-  static const int OSM_AT10 = 8;
+  static constexpr int OSM_AT10 = 8;
 
 
   // 'native' functions return this
-  static const int NATIVE = 64;
+  static constexpr int NATIVE = 64;
   // 'local' orb will be also placed in OSM (at 25 treasures); needs LOCAL10
-  static const int OSM_LOCAL25 = 128;
+  static constexpr int OSM_LOCAL25 = 128;
   // 'crossroads' orb will be also placed in OSM (at 50 treasures)
-  static const int OSM_CROSS50 = 256;
+  static constexpr int OSM_CROSS50 = 256;
   // 'crossroads' orb will be also placed in OSM (at 25 treasures)
-  static const int OSM_CROSS25 = 512;
+  static constexpr int OSM_CROSS25 = 512;
   // 'global' orb will be also placed in OSM (at 100 treasures)
-  static const int OSM_GLOBAL100 = 1024;
+  static constexpr int OSM_GLOBAL100 = 1024;
   // do not create in the Crossroads in the tactics mode
-  static const int NO_TACTIC = (1<<11);
+  static constexpr int NO_TACTIC = (1<<11);
   // guest Orb
-  static const int GUEST = (1<<12);
+  static constexpr int GUEST = (1<<12);
   
   // typical combinations
-  static const int S_NATIVE = LOCAL10 | CROSS10 | GLOBAL25 | NATIVE;
-  static const int S_GUEST  = LOCAL10 | OSM_AT10 | GUEST;
-  static const int S_YENDOR = S_NATIVE | OSM_LOCAL25 | OSM_CROSS50 | OSM_GLOBAL100 | NO_TACTIC;
-  static const int S_NAT_NT = S_NATIVE | NO_TACTIC;
-  static const int S_NA_O25 = S_NATIVE | OSM_CROSS25;
+  static constexpr int S_NATIVE = LOCAL10 | CROSS10 | GLOBAL25 | NATIVE;
+  static constexpr int S_GUEST  = LOCAL10 | OSM_AT10 | GUEST;
+  static constexpr int S_YENDOR = S_NATIVE | OSM_LOCAL25 | OSM_CROSS50 | OSM_GLOBAL100 | NO_TACTIC;
+  static constexpr int S_NAT_NT = S_NATIVE | NO_TACTIC;
+  static constexpr int S_NA_O25 = S_NATIVE | OSM_CROSS25;
   }
 
 struct orbinfo {

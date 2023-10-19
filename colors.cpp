@@ -25,7 +25,7 @@ EX unsigned char& part(color_t& col, int i) {
   }
 
 #if HDR
-static const color_t NOCOLOR = 0;
+static constexpr color_t NOCOLOR = 0;
 
 struct colortable: vector<color_t> {
   color_t& operator [] (int i) { i %= size(); if(i<0) i += size(); return ((vector<color_t>&)(*this)) [i]; }

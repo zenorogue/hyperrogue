@@ -61,7 +61,7 @@ template<size_t N> struct leastsquare_solution : public array<val, N> {
 template<size_t N> struct leastsquare_solver {
   array<array<val, N>, N> toinvert;
   array<val, N> Xty;
-  static const int iN = N;
+  static constexpr int iN = N;
 
   leastsquare_solver() {
     for(int y=0; y<iN; y++) Xty[y] = 0;

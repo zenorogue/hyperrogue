@@ -460,10 +460,10 @@ EX void countLocalTreasure() {
   }
 
 #if HDR
-static const int NO_TREASURE = 1;
-static const int NO_YENDOR = 2;
-static const int NO_GRAIL = 4;
-static const int NO_LOVE = 8;
+static constexpr int NO_TREASURE = 1;
+static constexpr int NO_YENDOR = 2;
+static constexpr int NO_GRAIL = 4;
+static constexpr int NO_LOVE = 8;
 #endif
 
 EX int gold(int no IS(0)) {
