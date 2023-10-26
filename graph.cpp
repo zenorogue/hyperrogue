@@ -933,6 +933,11 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
     queuepoly(Vit * spinptick(750, 0), cgi.shTriangle, darkena(icol, 0, 255));
     }
     
+  else if(it == itCrossbow) {
+    queuepoly(Vit, cgi.shCrossbowIcon, getcs().bowcolor);
+    queuepoly(Vit, cgi.shCrossbowstringIcon, getcs().bowcolor2);
+    }
+
   else if(it == itBabyTortoise) {
     int bits = c ? tortoise::babymap[c] : tortoise::last;
     int over = c && c->monst == moTortoise;

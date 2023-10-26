@@ -548,15 +548,17 @@ EX void handleKeyNormal(int sym, int uni) {
     if(sym == '.' || sym == 's') movepcto(-1, 1);
     if((sym == SDLK_DELETE || sym == SDLK_KP_PERIOD || sym == 'g') && uni != 'G' && uni != 'G'-64) 
       movepcto(MD_DROP, 1);
-    if(sym == 't' && uni != 'T' && uni != 'T'-64 && canmove) {
+    if(sym == 't' && uni != 'T' && uni != 'T'-64 && canmove) {     
       cell *target = GDIM == 3 ? mouseover : centerover;
       if(playermoved && items[itStrongWind]) { 
         cell *c = whirlwind::jumpDestination(cwt.at);
         if(c) target = c;
         }
-      targetRangedOrb(target, roKeyboard);
+      if(bow::fire_mode) bow::add_fire(target);
+      else targetRangedOrb(target, roKeyboard);
       sym = 0; uni = 0;
       }
+    if(sym == 'f') bow::switch_fire_mode();
     }
 
   if(sym == SDLK_KP5 && DEFAULTCONTROL && !game_keys_scroll) movepcto(-1, 1);
@@ -613,7 +615,10 @@ EX void handleKeyNormal(int sym, int uni) {
     actonrelease = false;
     
     multi::cpid = 0;
-    if(mouseover && 
+    if(bow::fire_mode) {
+      if(mouseover) bow::add_fire(mouseover);
+      }
+    else if(mouseover &&
       targetclick && (shmup::on ? numplayers() == 1 && !shmup::pc[0]->dead : true) && targetRangedOrb(mouseover, forcetarget ? roMouseForce : roMouse)) {
       }
     else if(forcetarget)
