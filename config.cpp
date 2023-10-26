@@ -122,13 +122,14 @@ namespace anims {
 template<class T> struct enum_setting : list_setting {
   T *value, last_value, dft, anim_value;
   int get_value() override { return (int) *value; }
-  void set_value(int i) override { *value = (T) i; }
+  hr::function<void(T)> set_value_to;
+  void set_value(int i) override { set_value_to((T)i); }
   bool affects(void* v) override { return v == value; }
   supersaver *make_saver() override;
   virtual void load_from_raw(const string& s) {
     int N = isize(options);
     for(int i=0; i<N; i++) if(appears(options[i].first, s)) {
-      *value = (T) i;
+      set_value_to((T)i);
       return;
       }
     *value = (T) parseint(s);
@@ -155,6 +156,11 @@ template<class T> struct enum_setting : list_setting {
     load_from(s);
     anim_value = *value;
     anims::animate_setting(this, s);
+    }
+
+  enum_setting<T>* editable(const vector<pair<string, string> >& o, string menu_item_name, char key) {
+    list_setting::editable(o, menu_item_name, key);
+    return this;
     }
   };
 
@@ -777,6 +783,7 @@ template<class T> enum_setting<T> *param_enum(T& val, const string p, const stri
   u->last_value = dft;
   u->register_saver();
   auto f = &*u;
+  u->set_value_to = [f] (T val) { *f->value = val; };
   params[p] = std::move(u);
   return f;
   }
