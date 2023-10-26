@@ -865,7 +865,7 @@ EX void hread(hstream& hs, charstyle& cs) {
     cs.skincolor = cso.skincolor;
     cs.haircolor = cso.haircolor;
     cs.dresscolor = cso.dresscolor;
-    cs.swordcolor = cs.eyecolor = cso.swordcolor;
+    cs.swordcolor = cs.eyecolor = cs.bowcolor = cs.bowcolor2 = cso.swordcolor;
     if(cs.charid < 4) cs.eyecolor = 0;
     cs.dresscolor2 = cso.dresscolor2;
     cs.uicolor = cso.uicolor;
@@ -935,6 +935,8 @@ EX void addsaver(charstyle& cs, string s) {
   addsaver(cs.charid, s + ".charid");
   addsaver(cs.skincolor, s + ".skincolor");
   addsaver(cs.eyecolor, s + ".eyecolor");
+  addsaver(cs.bowcolor, s + ".bowcolor");
+  addsaver(cs.bowcolor2, s + ".bowcolor2");
   addsaver(cs.haircolor, s + ".haircolor");
   addsaver(cs.dresscolor, s + ".dresscolor");
   addsaver(cs.swordcolor, s + ".swordcolor");
@@ -961,6 +963,8 @@ EX void initcs(charstyle &cs) {
   cs.dresscolor2= 0x8080FFC0;
   cs.uicolor    = 0xFF0000FF;
   cs.eyecolor   = 0x603000FF;
+  cs.bowcolor   = 0x603000FF;
+  cs.bowcolor2  = 0xFFD500FF;
   cs.lefthanded = false;
   }
 

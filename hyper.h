@@ -246,7 +246,7 @@ typedef unsigned color_t;
 
 struct charstyle {
   int charid;
-  color_t skincolor, haircolor, dresscolor, swordcolor, dresscolor2, uicolor, eyecolor;
+  color_t skincolor, haircolor, dresscolor, swordcolor, dresscolor2, uicolor, eyecolor, bowcolor, bowcolor2;
   bool lefthanded;
   };
 
