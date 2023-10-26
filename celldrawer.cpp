@@ -2625,6 +2625,55 @@ void celldrawer::add_map_effects() {
       }
     }
 
+  if(1) {
+    for(auto& m: bow::last_bowpath) if(m.next.s == c) {
+
+      hyperpoint h0 = C0, t0 = Hypc, h1 = C0, t1 = Hypc;
+      bool birth = false;
+
+      if(m.last.d != STAY) {
+        ld d = cellgfxdist(c, m.last.d) / 2;
+        h0 = ddspin(c, m.last.d) * xpush0(d);
+        t0 = ddspin(c, m.last.d) * xpush(d) * xtangent(-d*2);
+        }
+      else birth = true;
+
+      if(m.next.d != STAY) {
+        ld d = cellgfxdist(c, m.next.d) / 2;
+        h1 = ddspin(c, m.next.d) * xpush0(d);
+        t1 = ddspin(c, m.next.d) * xpush(d) * xtangent(-d*2);
+        }
+
+      ld t = frac(ptick(PURE?500:250));
+
+      color_t arrow_color = getcs().swordcolor;
+      color_t arrow_color_trans = arrow_color & 0xFFFFFF00;
+      if(bow::fire_mode) arrow_color = gradient(arrow_color_trans, arrow_color, 0, 0.25, 1);
+
+      if(birth) {
+        if(t > 0.8) {
+          hyperpoint h = h1 + t1 * (1-t);
+          hyperpoint tg = -t1;
+
+          poly_outline = OUTLINE_TRANS;
+          queuepoly(V * rgpushxto0(h) * rspintox(gpushxto0(h) * tg), cgi.shTrapArrow, gradient(arrow_color_trans, arrow_color, 0.8, t, 1));
+          poly_outline = OUTLINE_DEFAULT;
+          }
+        }
+
+      else {
+        hyperpoint h = h0 * (1-t) * (1-t) * (1 + 2 * t) + t0 * (1-t) * (1-t) * t + h1 * t * t * (3 - 2 * t) + t1 * t * t * (1-t);
+        h = normalize(h);
+
+        hyperpoint tg = (h1 - h0) * 6 * t * (1-t) + (3 * t*t - 4*t + 1) * t0 + (2*t-3*t*t) * t1;
+
+        poly_outline = OUTLINE_TRANS;
+        queuepoly(V * rgpushxto0(h) * rspintox(gpushxto0(h) * tg), cgi.shTrapArrow, arrow_color);
+        poly_outline = OUTLINE_DEFAULT;
+        }
+      }
+    }
+
   if(c->land == laBlizzard) {
     if(vid.backeffects) {
       if(c->cpdist <= getDistLimit())
