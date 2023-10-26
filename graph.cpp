@@ -1415,6 +1415,13 @@ EX void drawPlayer(eMonster m, cell *where, const shiftmatrix& V, color_t col, d
           queuepoly(VWPN, cgi.shTrophy, racing::trophy[multi::cpid]);
   #endif
         }
+      else if(bow::crossbow_mode() && cs.charid < 4) {
+        queuepoly(VWPN, cgi.shCrossbow, fc(314, cs.bowcolor, 3));
+        if(items[itCrossbow] <= 1) queuepoly(VWPN, cgi.shCrossbowstringLoaded, fc(314, cs.bowcolor2, 3));
+        else if(items[itCrossbow] <= 2) queuepoly(VWPN, cgi.shCrossbowstringSemiloaded, fc(314, cs.bowcolor2, 3));
+        else queuepoly(VWPN, cgi.shCrossbowstringUnloaded, fc(314, cs.bowcolor2, 3));
+        if(items[itCrossbow] == 0) queuepoly(VWPN, cgi.shCrossbowBolt, fc(314, cs.swordcolor, 3));
+        }
       else if(items[itOrbThorns])
         queuepoly(VWPN, cgi.shHedgehogBladePlayer, items[itOrbDiscord] ? watercolor(0) : 0x00FF00FF);
       else if(!shmup::on && items[itOrbDiscord])
