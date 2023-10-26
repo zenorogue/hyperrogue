@@ -1538,6 +1538,21 @@ EX void initConfig() {
         "neon mode", 'M'
         );
 
+  param_enum(bow::weapon, "pc_class", "pc_class", bow::weapon)
+    -> editable({{"blade", "Standard Rogue weapon. Bump into a monster to hit. Most monsters attack you the same way."},
+      {"crossbow", "Hits all monsters in a straight line, but slow to reload. Press 'f' or click the crossbow icon to target."}},
+      "weapon selection", 'w')
+    -> set_value_to = [] (bow::eWeapon wpn) { bool b = game_active; if(wpn != bow::weapon) stop_game(); bow::weapon = wpn; if(b) start_game(); };
+  param_enum(bow::style, "bow_style", "bow_style", bow::style)
+    -> editable({{"bull line", "Can go in either direction on odd shapes. 3 turns to reload."},
+      {"geodesic", "Graph geodesic: any sequence of tiles is OK as long as there are no shortcuts. 4 turns to reload."}},
+      "crossbow straight line style", 'l')
+    -> set_value_to = [] (bow::eCrossbowStyle s) { bool b = game_active; if(s != bow::style) stop_game(); bow::style = s; if(b) start_game(); };
+  param_b(bow::bump_to_shoot, "bump_to_shoot", true)->editable("bump to shoot", 'b');
+
+  param_enum(vid.msgleft, "message_style", "message style", 2)
+    -> editable({{"centered", ""}, {"left-aligned", ""}, {"line-broken", ""}}, "message style", 'a');
+
   addsaverenum(neon_nofill, "neon_nofill");
   param_b(noshadow, "noshadow");
   param_b(bright, "bright");
