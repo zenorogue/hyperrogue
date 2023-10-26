@@ -216,6 +216,7 @@ EX void reduceOrbPowers() {
   whirlwind::calcdirs(cwt.at); 
   items[itStrongWind] = !items[itOrbAether] && whirlwind::qdirs == 1;
   items[itWarning] = 0;
+  if(items[itCrossbow]) items[itCrossbow]--;
   }
 
 eWall orig_wall;

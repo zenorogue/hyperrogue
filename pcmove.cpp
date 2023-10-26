@@ -219,6 +219,7 @@ struct pcmove {
   void tell_why_cannot_attack();
   void tell_why_impassable();
   void handle_friendly_ivy();
+  bool try_shooting(bool auto_target);
 
   movei mi, mip;
   pcmove() : mi(nullptr, nullptr, 0), mip(nullptr, nullptr, 0) {}
@@ -239,6 +240,46 @@ EX bool movepcto(int d, int subdir IS(1), bool checkonly IS(false)) {
   auto b = pcm.movepcto();
   global_pushto = pcm.mip.t;
   return b;
+  }
+
+bool pcmove::try_shooting(bool auto_target) {
+  if(auto_target) {
+    auto b = bow::auto_path();
+    if(!b) {
+      if(!isWall(cwt.peek())) {
+        changes.rollback();
+        if(!checkonly) addMessage(XLAT("Cannot hit anything by shooting this direction!"));
+        }
+      return false;
+      }
+    }
+  items[itCrossbow] = bow::loading_time();
+  bow::shoot();
+
+  if(items[itOrbGravity]) {
+    gravity_state = get_static_gravity(cwt.at);
+    if(gravity_state) markOrb(itOrbGravity);
+    }
+  lastmovetype = lmAttack; lastmove = NULL;
+  if(checkNeedMove(checkonly, false))
+    return false;
+  swordAttackStatic();
+  nextmovetype = lmAttack;
+
+  mi = movei(cwt.at, STAY);
+  if(last_gravity_state && !gravity_state)
+    playerMoveEffects(mi);
+
+  if(monstersnear_add_pmi(mi)) {
+    if(vmsg(miTHREAT)) wouldkill("%The1 would catch you!");
+    return false;
+    }
+  if(checkonly) return true;
+  if(changes.on) changes.commit();
+  if(cellUnstable(cwt.at) && !markOrb(itOrbAether))
+    doesFallSound(cwt.at);
+
+  return after_move();
   }
 
 bool pcmove::movepcto() {  
@@ -281,10 +322,19 @@ bool pcmove::movepcto() {
   fmsActivate = forcedmovetype == fmSkip || forcedmovetype == fmActivate;
   
   changes.init(checkonly);
+  changes.value_keep(bow::last_bowpath);
+  bow::last_bowpath.clear();
   bool b = (d >= 0) ? actual_move() : stay();
   if(checkonly || !b) {
     changes.rollback();
     if(!checkonly) flipplayer = false;
+
+    if(!b && items[itCrossbow] == 0 && bow::crossbow_mode() && !bow::fire_mode) {
+      changes.init(checkonly);
+      changes.value_keep(bow::last_bowpath);
+      b = try_shooting(true);
+      if(checkonly || !b) changes.rollback();
+      }
     }
   else if(changes.on) {
     println(hlog, "error: not commited!");
@@ -803,6 +853,8 @@ void pcmove::tell_why_cannot_attack() {
     addMessage(XLAT("You cannot attack your own mount!"));
   else if(checkOrb(c2->monst, itOrbShield))
     addMessage(XLAT("A magical shield protects %the1!", c2->monst));
+  else if(bow::crossbow_mode() && items[itCrossbow])
+    addMessage(XLAT("Your crossbow is still reloading!"));
   else
     addMessage(XLAT("For some reason... cannot attack!"));
   }
@@ -999,7 +1051,7 @@ bool pcmove::attack() {
   if(items[itOrbSlaying]) attackflags |= AF_CRUSH;
   if(items[itCurseWeakness]) attackflags |= AF_WEAK;
   
-  bool ca =canAttack(cwt.at, moPlayer, c2, c2->monst, attackflags);
+  bool ca = bow::crossbow_mode() ? false : canAttack(cwt.at, moPlayer, c2, c2->monst, attackflags);
   
   if(!ca) {
     if(forcedmovetype == fmAttack) {

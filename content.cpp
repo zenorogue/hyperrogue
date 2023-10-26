@@ -1729,6 +1729,8 @@ MONSTER('d', 0x901020, "Angry Die", moAngryDie, ZERO, RESERVED, moAnimatedDie,
   "You have made a die unhappy. Taste the revenge! This one won't forgive you, no matter what you do."
   )
 
+ITEM('}', 0xFFFF80, "Crossbow", itCrossbow, IC_NAI, ZERO, RESERVED, osNone, "Your crossbow.")
+
 //shmupspecials
 MONSTER( '@', 0xC0C0C0, "Rogue", moPlayer, CF_FACE_UP | CF_PLAYER, RESERVED, moNone, "In the Shoot'em Up mode, you are armed with thrown Knives.")
 MONSTER( '*', 0xC0C0C0, "Knife", moBullet, ZERO | CF_BULLET, RESERVED, moNone, "A simple, but effective, missile, used by rogues.")

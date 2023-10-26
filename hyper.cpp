@@ -126,6 +126,7 @@
 #include "inforder.cpp"
 #include "vr.cpp"
 #include "intra.cpp"
+#include "crossbow.cpp"
 
 #if CAP_ROGUEVIZ
 #include "rogueviz/rogueviz-all.cpp"
