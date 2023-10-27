@@ -2626,22 +2626,22 @@ void celldrawer::add_map_effects() {
     }
 
   if(1) {
-    for(auto& m: bow::last_bowpath) if(m.next.s == c) {
+    for(auto& m: bow::last_bowpath) if(m.next.at == c) {
 
       hyperpoint h0 = C0, t0 = Hypc, h1 = C0, t1 = Hypc;
-      bool birth = false;
+      bool birth = m.first;
 
-      if(m.last.d != STAY) {
-        ld d = cellgfxdist(c, m.last.d) / 2;
-        h0 = ddspin(c, m.last.d) * xpush0(d);
-        t0 = ddspin(c, m.last.d) * xpush(d) * xtangent(-d*2);
+      if(!birth) {
+        ld d = cellgfxdist(c, m.prev.spin) / 2;
+        h0 = ddspin(c, m.prev.spin) * xpush0(d);
+        t0 = ddspin(c, m.prev.spin) * xpush(d) * xtangent(-d*2);
         }
       else birth = true;
 
-      if(m.next.d != STAY) {
-        ld d = cellgfxdist(c, m.next.d) / 2;
-        h1 = ddspin(c, m.next.d) * xpush0(d);
-        t1 = ddspin(c, m.next.d) * xpush(d) * xtangent(-d*2);
+      if(!m.last) {
+        ld d = cellgfxdist(c, m.next.spin) / 2;
+        h1 = ddspin(c, m.next.spin) * xpush0(d);
+        t1 = ddspin(c, m.next.spin) * xpush(d) * xtangent(-d*2);
         }
 
       ld t = frac(ptick(PURE?500:250));
