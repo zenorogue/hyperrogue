@@ -1378,7 +1378,7 @@ void movePlayer(monster *m, int delta) {
       }
     
     playerfire[cpid] = true;
-    m->nextshot = curtime + (250 + 250 * players);
+    m->nextshot = curtime + (250 + 250 * players) * (bow::crossbow_mode() ? 4 : 1);
     
     turncount++;    
     shootBullet(m);
@@ -1813,14 +1813,19 @@ void moveBullet(monster *m, int delta) {
         m2->stunoff = curtime + 600;
         continue;
         }
+
+      bool deadval = bow::crossbow_mode() ? false : true;
+
       // multi-HP monsters
       if((m2->type == moPalace || m2->type == moFatGuard || m2->type == moSkeleton ||
         m2->type == moVizier || isMetalBeast(m2->type) || m2->type == moTortoise || m2->type == moBrownBug || 
         m2->type == moReptile || m2->type == moSalamander || m2->type == moTerraWarrior) && m2->hitpoints > 1 && !slayer) {
         m2->rebasePat(spin_towards(m2->pat, m->ori, nat0 * C0, 0, 1), m2->base);
-        if(m2->type != moSkeleton && !isMetalBeast(m2->type) && m2->type != moReptile && m2->type != moSalamander && m2->type != moBrownBug) 
-          m2->hitpoints--;
-        m->dead = true;
+        if(m2->type != moSkeleton && !isMetalBeast(m2->type) && m2->type != moReptile && m2->type != moSalamander && m2->type != moBrownBug) {
+          if(!(bow::crossbow_mode() && m2->stunoff > curtime))
+            m2->hitpoints--;
+          }
+        m->dead = deadval;
         if(m2->type == moVizier) ;
         else if(m2->type == moFatGuard)
           m2->stunoff = curtime + 600;
@@ -1844,27 +1849,27 @@ void moveBullet(monster *m, int delta) {
       // Raiders are unaffected
       if((m2->type == moCrusher || m2->type == moPair || m2->type == moMonk ||
         m2->type == moAltDemon || m2->type == moHexDemon) && conv) {
-        m->dead = true;
+        m->dead = deadval;
         continue;
         }
       if(m2->type == moGreater && conv) {
-        m->dead = true;
+        m->dead = deadval;
         continue;
         }
       if(m2->type == moRoseBeauty && conv && !markOrb(itOrbBeauty)) {
-        m->dead = true;
+        m->dead = deadval;
         continue;
         }
       if(m2->type == moDraugr && conv) {
-        m->dead = true;
+        m->dead = deadval;
         continue;
         }
       if(m2->type == moButterfly && conv) {
-        m->dead = true;
+        m->dead = deadval;
         continue;
         }
       if(isBull(m2->type) && conv) {
-        m->dead = true;
+        m->dead = deadval;
         // enrage herd bulls, awaken sleeping bulls
         m2->type = moRagingBull;
         continue;
@@ -1878,7 +1883,7 @@ void moveBullet(monster *m, int delta) {
         m->set_parent(m2);
         continue;
         }
-      m->dead = true;
+      m->dead = deadval;
       if(m->type == moFireball) makeflame(m->base, 20, false);
       // Orb of Winter protects from fireballs
       if(m->type == moFireball && ((isPlayer(m2) && markOrb(itOrbWinter)) || m2->type == moWitchWinter)) 
@@ -3103,6 +3108,10 @@ bool celldrawer::draw_shmup_monster() {
         else if(peace::on) {
           queuepolyat(at_missile_level(view), cgi.shDisk, col, PPR::MISSILE);
           ShadowV(view, cgi.shPHead);
+          }
+        else if(bow::crossbow_mode()) {
+          queuepoly(at_missile_level(view), cgi.shTrapArrow, col);
+          ShadowV(view, cgi.shTrapArrow);
           }
         else {
           shiftmatrix t = view * spin(curtime / 50.0);
