@@ -560,6 +560,12 @@ void applyBoxM(eMonster m, bool f = false) {
 
 EX modecode_t saved_modecode;
 
+template<class T> void applyBoxEnum(T& i, string name IS("")) {
+  int ii = (int) i;
+  applyBoxNum(ii, name);
+  i = (T) ii;
+  }
+
 /** \brief Call applyBox for all the required values. This will save the values if hr::scores::saving==true, load if hr::scores::loading==true, load into highscores if hr::scores::loadingHi==true */
 EX void applyBoxes() {
   invorb.clear();
@@ -741,9 +747,7 @@ EX void applyBoxes() {
   if(loadingHi) applyBoxI(itLotus);
   else applyBoxNum(truelotus, "lotus/escape");
   
-  int v = int(variation);
-  applyBoxNum(v, "variation"); 
-  variation = eVariation(v);
+  applyBoxEnum(variation, "variation");
   applyBoxI(itRose);
   applyBoxOrb(itOrbBeauty);
   applyBoxI(itCoral);
@@ -753,9 +757,7 @@ EX void applyBoxes() {
   applyBoxM(moFalsePrincess);
   applyBoxM(moRoseLady);
   applyBoxM(moRoseBeauty);
-  int ls = (int) land_structure;
-  applyBoxNum(ls, "land structure");
-  land_structure = (eLandStructure) ls;
+  applyBoxEnum(land_structure, "land structure");
   applyBoxNum(multi::players, "shmup players");
   if(multi::players < 1 || multi::players > MAXPLAYER)
     multi::players = 1;
