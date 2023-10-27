@@ -197,15 +197,13 @@ EX void switch_fire_mode() {
 EX void add_fire(cell *c) {
   bool emp = target_at.empty();
   auto& t = target_at[c->cpdist];
-  if(t == c) {
-    println(hlog, "done");
+  if(t == c && !bow::bowpath.empty()) {
     bow::last_bowpath.clear();
     checked_move_issue = miVALID;
     pcmove pcm;
     pcm.checkonly = false;
     changes.init(false);
     bool b = pcm.try_shooting(false);
-    println(hlog, "b = ", b);
     if(!b) changes.rollback();
     fire_mode = false;
     }
@@ -217,7 +215,10 @@ EX void add_fire(cell *c) {
         target_at = {};
         add_fire(c);
         }
-      else addMessage(XLAT("No way to hit this place."));
+      else {
+        addMessage(XLAT("No way to hit this place."));
+        bow::bowpath = {};
+        }
       }
     bow::last_bowpath = bow::bowpath;
     }
