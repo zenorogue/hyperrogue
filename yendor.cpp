@@ -981,6 +981,11 @@ void save_mode_data(hstream& f) {
   if(casual) {
     f.write<char>(1);
     }
+  if(bow::weapon) {
+    f.write<char>(2);
+    f.write<char>(bow::weapon);
+    f.write<char>(bow::style);
+    }
   }
 
 EX modecode_t modecode(int mode) {

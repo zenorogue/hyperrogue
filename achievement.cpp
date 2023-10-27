@@ -108,6 +108,7 @@ EX bool wrongMode(char flags) {
   if(cheater) return true;
   if(casual) return true;
   if(flags == rg::global) return false;
+  if(bow::weapon) return true;
 
   if(flags != rg::special_geometry && flags != rg::special_geometry_nicewalls) {
     if(!BITRUNCATED) return true;
@@ -636,6 +637,7 @@ EX void achievement_score(int cat, int number) {
 #ifdef HAVE_ACHIEVEMENTS
   if(cheater) return;
   if(casual) return;
+  if(bow::weapon) return;
   LATE( achievement_score(cat, number); )
   if(disksize) return;
   if(cat == LB_HALLOWEEN) {
@@ -744,6 +746,7 @@ EX void achievement_final(bool really_final) {
     }
   if(cheater) return;
   if(casual) return;
+  if(bow::weapon) return;
 
 #if CAP_TOUR
   if(tour::on) return;
@@ -867,6 +870,7 @@ EX void achievement_victory(bool hyper) {
 #ifdef HAVE_ACHIEVEMENTS
   if(cheater) return;
   if(casual) return;
+  if(bow::weapon) return;
   if(geometry) return;
   if(CHANGED_VARIATION) return;
   if(randomPatternsMode) return;
@@ -958,6 +962,7 @@ EX string get_rich_presence_text() {
   if(inv::on) res += "OSM ";
   if(multi::players > 1) res += "multi ";
   if(casual) res += "casual ";
+  if(bow::weapon) res += bow::style == bow::cbBull ? "bow/bull " : "bow/geo ";
 
   if(cheater || among(cwt.at->land, laCanvas, laCA)) 
     return res + "(?)";
