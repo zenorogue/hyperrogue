@@ -3301,6 +3301,10 @@ EX void showCustomizeChar() {
   dialog::addColorItem(XLAT("eye color"), cs.eyecolor, 'e');
   dialog::addColorItem(XLAT("weapon color"), cs.swordcolor, 'w');
   dialog::addColorItem(XLAT("hair color"), cs.haircolor, 'h');
+  if(bow::crossbow_mode()) {
+    dialog::addColorItem(XLAT("bow color"), cs.bowcolor, 'b');
+    dialog::addColorItem(XLAT("boswtring color"), cs.bowcolor2, 'c');
+    }
   
   if(cs.charid >= 1) dialog::addColorItem(XLAT("dress color"), cs.dresscolor, 'd');
   else dialog::addBreak(100);
@@ -3353,6 +3357,8 @@ EX void showCustomizeChar() {
     else if(uni == 'u') switchcolor(cs.uicolor, eyecolors);
     else if(uni == 'e') switchcolor(cs.eyecolor, eyecolors);
     else if(uni == 'l') cs.lefthanded = !cs.lefthanded;
+    else if(uni == 'b') switchcolor(cs.bowcolor, swordcolors);
+    else if(uni == 'c') switchcolor(cs.bowcolor2, eyecolors);
     else if(doexiton(sym, uni)) popScreen();
     };
   }
