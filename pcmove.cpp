@@ -829,7 +829,10 @@ void pcmove::tell_why_cannot_attack() {
     addMessage(XLAT("You cannot attack Tentacles directly!"));
   else if(c2->monst == moHedge && !markOrb(itOrbThorns)) {
     addMessage(XLAT("You cannot attack %the1 directly!", c2->monst));
-    addMessage(XLAT("Stab them by walking around them."));
+    if(bow::crossbow_mode())
+      addMessage(XLAT("Stab them by shooting around them."));
+    else
+      addMessage(XLAT("Stab them by walking around them."));
     }
   else if(c2->monst == moRoseBeauty || isBull(c2->monst) || c2->monst == moButterfly) 
     addMessage(XLAT("You cannot attack %the1!", c2->monst));
