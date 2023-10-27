@@ -230,13 +230,61 @@ EX void shoot() {
   if(items[itOrbSlaying]) attackflags |= AF_CRUSH;
   if(items[itCurseWeakness]) attackflags |= AF_WEAK;
 
-  for(auto& m: bowpath) {
-    cell *c = m.next.s;
+  reverse(bowpath.begin(), bowpath.end());
+
+  for(auto& mov: bowpath) {
+    cell *c = mov.prev.at;
+    cell *cf = mov.prev.cpeek();
     if(!c) continue;
+
+    if(c != cf) for(int t=0; t<cf->type; t++) {
+      cell *c1 = cf->move(t);
+      if(!c) continue;
+      
+      bool stabthere = false;
+      if(logical_adjacent(c, moPlayer, c1)) stabthere = true;
+
+      if(stabthere && canAttack(cf,moPlayer,c1,c1->monst,AF_STAB)) {
+        changes.ccell(c1);
+        eMonster m = c->monst;
+        if(attackMonster(c1, AF_STAB | AF_MSG, moPlayer))  {
+          spread_plague(c1, cf, t, moPlayer);
+          produceGhost(c, m, moPlayer);
+          }
+        }
+      }
+
+    mirror::breakMirror(mov.next, -1);
+    eMonster m = c->monst;
+    if(!m || isMimic(m)) continue;
+    if(!canAttack(cf, moPlayer, c, m, attackflags)) {
+      pcmove pcm; pcm.mi = movei(mov.prev).rev();
+      pcm.tell_why_cannot_attack();
+      continue;
+      }
     changes.ccell(c);
-    if(c->monst) attackMonster(c, attackflags | AF_MSG, moPlayer);
+    if(m) attackMonster(c, attackflags | AF_MSG, moPlayer);
+
+    if(!c->monst || isAnyIvy(m)) {
+      spread_plague(cf, c, movei(mov.prev).rev().d, moPlayer);
+      produceGhost(c, m, moPlayer);
+      }
+
+    if(items[itCurseWeakness] || (isStunnable(c->monst) && c->hitpoints > 1)) {
+      if(!mov.last && monsterPushable(c)) {
+        cell *ct = mov.next.cpeek();
+        bool can_push = passable(ct, c, P_BLOW);
+        if(can_push) {
+          changes.ccell(c);
+          changes.ccell(ct);
+          pushMonster(mov.next);
+          }
+        }
+      }
     }
   last_bowpath = bowpath;
+
+  reverse(bowpath.begin(), bowpath.end());
   }
 
 EX void showMenu() {
