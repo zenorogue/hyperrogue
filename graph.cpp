@@ -1417,10 +1417,16 @@ EX void drawPlayer(eMonster m, cell *where, const shiftmatrix& V, color_t col, d
         }
       else if(bow::crossbow_mode() && cs.charid < 4) {
         queuepoly(VWPN, cgi.shCrossbow, fc(314, cs.bowcolor, 3));
-        if(items[itCrossbow] <= 1) queuepoly(VWPN, cgi.shCrossbowstringLoaded, fc(314, cs.bowcolor2, 3));
-        else if(items[itCrossbow] <= 2) queuepoly(VWPN, cgi.shCrossbowstringSemiloaded, fc(314, cs.bowcolor2, 3));
+        int ti = items[itCrossbow];
+        if(shmup::on) {
+          ti = shmup::getPlayer()->nextshot - shmup::curtime;
+          if(ti <= 0) ti = 0;
+          else ti = 1 + ti / 500;
+          }
+        if(ti <= 1) queuepoly(VWPN, cgi.shCrossbowstringLoaded, fc(314, cs.bowcolor2, 3));
+        else if(ti <= 2) queuepoly(VWPN, cgi.shCrossbowstringSemiloaded, fc(314, cs.bowcolor2, 3));
         else queuepoly(VWPN, cgi.shCrossbowstringUnloaded, fc(314, cs.bowcolor2, 3));
-        if(items[itCrossbow] == 0) queuepoly(VWPN, cgi.shCrossbowBolt, fc(314, cs.swordcolor, 3));
+        if(ti == 0) queuepoly(VWPN, cgi.shCrossbowBolt, fc(314, cs.swordcolor, 3));
         }
       else if(items[itOrbThorns])
         queuepoly(VWPN, cgi.shHedgehogBladePlayer, items[itOrbDiscord] ? watercolor(0) : 0x00FF00FF);
@@ -1533,7 +1539,22 @@ void drawMimic(eMonster m, cell *where, const shiftmatrix& V, color_t col, doubl
     const transmatrix VBS = otherbodyparts(V, darkena(col, 0, 0x40), m, footphase);
     queuepoly(VBODY * VBS, (cs.charid&1) ? cgi.shFemaleBody : cgi.shPBody,  darkena(col, 0, 0X80));
 
-    if(!shmup::on) {
+    if(bow::crossbow_mode() && cs.charid < 4) {
+      shiftmatrix VWPN = cs.lefthanded ? VBODY * VBS * lmirror() : VBODY * VBS;
+      color_t col1 = darkena(col, 0, 0x40);
+      queuepoly(VWPN, cgi.shCrossbow, col1);
+      int ti = items[itCrossbow];
+      if(shmup::on) {
+        ti = shmup::getPlayer()->nextshot - shmup::curtime;
+        if(ti <= 0) ti = 0;
+        else ti = 1 + ti / 500;
+        }
+      if(ti <= 1) queuepoly(VWPN, cgi.shCrossbowstringLoaded, col1);
+      else if(ti <= 2) queuepoly(VWPN, cgi.shCrossbowstringSemiloaded, col1);
+      else queuepoly(VWPN, cgi.shCrossbowstringUnloaded, col1);
+      if(ti == 0) queuepoly(VWPN, cgi.shCrossbowBolt, col1);
+      }
+    else if(!shmup::on) {
       bool emp = items[itOrbEmpathy] && m != moShadow;
       if(items[itOrbThorns] && emp)
         queuepoly(VBODY * VBS, cgi.shHedgehogBladePlayer, darkena(col, 0, 0x40));
