@@ -343,6 +343,7 @@ bool pcmove::movepcto() {
     println(hlog, "error: not commited!");
     changes.commit();
     }
+  if(!checkonly) bow::fire_mode = false;
 
   if(!b) {
     // bool try_instant = (forcedmovetype == fmInstant) || (forcedmovetype == fmSkip && !passable(c2, cwt.at, P_ISPLAYER | P_MIRROR | P_USEBOAT | P_FRIENDSWAP));  
