@@ -1213,6 +1213,7 @@ EX namespace mirror {
     return false;
     }
 
+  /* int is the owner's cpid */
   EX vector<pair<int, cellwalker>> mirrors;
   #if HDR
   constexpr int LIGHTNING = -1; // passed instead of cpid
