@@ -1279,6 +1279,7 @@ EX void stabbingAttack(movei mi, eMonster who, int bonuskill IS(0)) {
   for(int bb=0; bb<2; bb++) achievement_count("SLASH", numbb[bb], 0);
 
   if(peace::on) return;
+  bool out = who == moPlayer && bow::crossbow_mode();
   
   for(int t=0; t<mf->type; t++) {
     cell *c = mf->move(t);
@@ -1291,9 +1292,9 @@ EX void stabbingAttack(movei mi, eMonster who, int bonuskill IS(0)) {
     if(stabthere && c->wall == waExplosiveBarrel && markOrb(itOrbThorns))
       explodeBarrel(c);
     
-    if(stabthere && canAttack(mt,who,c,c->monst,AF_STAB)) {
+    if(stabthere && (items[itOrbThorns] || !out) && canAttack(mt,who,c,c->monst,AF_STAB)) {
       changes.ccell(c);
-      if(c->monst != moHedge) { 
+      if(c->monst != moHedge || out) {
         markOrb(itOrbThorns); if(who != moPlayer) markOrb(itOrbEmpathy);
         }
       eMonster m = c->monst;
@@ -1337,7 +1338,7 @@ EX void stabbingAttack(movei mi, eMonster who, int bonuskill IS(0)) {
       }
     }
 
-  if(!isUnarmed(who)) forCellIdEx(c, t, mt) {
+  if(!isUnarmed(who) && !out) forCellIdEx(c, t, mt) {
     if(!logical_adjacent(mt, who, c)) continue;
     eMonster mm = c->monst;
     int flag = AF_APPROACH;
