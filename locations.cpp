@@ -198,10 +198,10 @@ template<class T> void tailored_delete(T* x) {
   delete[] ((char*) (x));
   }
 
-static constexpr struct wstep_t {} wstep;
-static constexpr struct wmirror_t {} wmirror;
-static constexpr struct rev_t {} rev;
-static constexpr struct revstep_t {} revstep;
+static constexpr struct wstep_t {} wstep = {};
+static constexpr struct wmirror_t {} wmirror = {};
+static constexpr struct rev_t {} rev = {};
+static constexpr struct revstep_t {} revstep = {};
 
 extern int hrand(int);
 
@@ -453,7 +453,7 @@ struct celllister : manual_celllister {
   };
 
 /** \brief translate heptspins to cellwalkers and vice versa */
-static constexpr struct cth_t {} cth;
+static constexpr struct cth_t {} cth = {};
 inline heptspin operator+ (cellwalker cw, cth_t) { return heptspin(cw.at->master, cw.spin * DUALMUL, cw.mirrored); }
 inline cellwalker operator+ (heptspin hs, cth_t) { return cellwalker(hs.at->c7, hs.spin / DUALMUL, hs.mirrored); }
 
