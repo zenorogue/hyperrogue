@@ -256,7 +256,7 @@ bool pcmove::try_shooting(bool auto_target) {
   items[itCrossbow] = bow::loading_time();
   bow::shoot();
 
-  int v = -1; for(auto p: bow::bowpath) if(p.next.at == cwt.at && p.first) v = p.next.spin;
+  int v = -1; for(auto p: bow::bowpath) if(p.next.at == cwt.at && (p.flags & bow::bpFIRST)) v = p.next.spin;
 
   if(v >= 0) sideAttack(cwt.at, v, moPlayer, 0);
   if(items[itOrbGravity]) {

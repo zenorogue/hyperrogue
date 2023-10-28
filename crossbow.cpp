@@ -39,9 +39,7 @@ EX bool crossbow_mode() { return weapon == wCrossbow; }
 #if HDR
 struct bowpoint {
   cellwalker prev, next;
-  bool first, last;
-  bool copied;
-  bool mirrored;
+  flagtype flags;
   bowpoint() {}
   };
 
@@ -51,6 +49,10 @@ struct bowscore {
   int turns;
   };
 #endif
+
+EX flagtype bpFIRST = 1;
+EX flagtype bpLAST = 2;
+EX flagtype bpCOPIED = 4;
 
 EX vector<bowpoint> bowpath;
 
@@ -148,37 +150,43 @@ EX int create_path() {
     }
   reverse(dirseq.begin(), dirseq.end());
 
-  println(hlog, "dirseq = ", dirseq);
+  struct bolt {
+    cellwalker at;
+    flagtype flags;
+    bolt(cellwalker cw, flagtype f) { at = cw; flags = f; }
+    };
 
   bowpath.clear();
-  vector<cellwalker> bolts = { cwt };
-  for(auto m: mirror::mirrors) bolts.push_back(m.second);
+  vector<bolt> bolts = { bolt(cwt, 0) };
+  for(auto m: mirror::mirrors) bolts.emplace_back(m.second, bpCOPIED);
 
   set<cell*> broken_mirrors;
 
   for(auto d: dirseq) {
     bool first = bowpath.empty();
-    vector<cellwalker> nbolts;
+    vector<bolt> nbolts;
     set<cell*> next_broken_mirrors = broken_mirrors;
     for(auto bolt: bolts) {
       bowpath.emplace_back();
       auto& p = bowpath.back();
-      p.prev = bolt;
-      p.first = first;
-      if(d == NODIR || blocks(bolt.at)) { p.next = bolt; p.last = true; }
+      p.prev = bolt.at;
+      p.flags = bolt.flags;
+      if(first) p.flags |= bpFIRST;
+      if(d == NODIR || blocks(bolt.at.at)) { p.next = bolt.at; p.flags |= bpLAST; }
       else {
-        if(inmirror(bolt.at) || bolt.at->wall == waMirrorWall) bolt = mirror::reflect(bolt);
-        bolt += d;
-        p.next = bolt; p.last = false;
-        bolt += wstep;
-        if(among(bolt.at->wall, waCloud, waMirror) && !broken_mirrors.count(bolt.at)) {
+        if(inmirror(bolt.at.at) || (bolt.at.at->wall == waMirrorWall && inmirror((bolt.at+d).cpeek())))
+          bolt.at = mirror::reflect(bolt.at);
+        bolt.at += d;
+        p.next = bolt.at;
+        bolt.at += wstep;
+        if(among(bolt.at.at->wall, waCloud, waMirror) && !broken_mirrors.count(bolt.at.at)) {
           auto &mir = mirror::mirrors;
           vector<pair<int, cellwalker>> bmir;
           swap(mir, bmir);
-          mirror::createHere(bolt, 0);
+          mirror::createHere(bolt.at, 0);
           swap(mir, bmir);
-          for(auto b: bmir) nbolts.push_back(b.second);
-          next_broken_mirrors.insert(bolt.at);
+          for(auto b: bmir) nbolts.emplace_back(b.second, bolt.flags);
+          next_broken_mirrors.insert(bolt.at.at);
           }
         nbolts.push_back(bolt);
         }
@@ -265,18 +273,19 @@ EX void shoot() {
     cell *c = mov.prev.at;
     cell *cf = mov.prev.cpeek();
     if(!c) continue;
+    eMonster who = (mov.flags & bpCOPIED) ? moMimic : moPlayer;
 
     if(c != cf) for(int t=0; t<cf->type; t++) {
       cell *c1 = cf->move(t);
       if(!c) continue;
-      
+
       bool stabthere = false;
       if(logical_adjacent(c, moPlayer, c1)) stabthere = true;
 
-      if(stabthere && canAttack(cf,moPlayer,c1,c1->monst,AF_STAB)) {
+      if(stabthere && canAttack(cf,who,c1,c1->monst,AF_STAB)) {
         changes.ccell(c1);
         eMonster m = c->monst;
-        if(attackMonster(c1, AF_STAB | AF_MSG, moPlayer))  {
+        if(attackMonster(c1, AF_STAB | AF_MSG, who))  {
           spread_plague(c1, cf, t, moPlayer);
           produceGhost(c, m, moPlayer);
           }
@@ -286,13 +295,13 @@ EX void shoot() {
     mirror::breakMirror(mov.next, -1);
     eMonster m = c->monst;
     if(!m || isMimic(m)) continue;
-    if(!canAttack(cf, moPlayer, c, m, attackflags)) {
+    if(!canAttack(cf, who, c, m, attackflags)) {
       pcmove pcm; pcm.mi = movei(mov.prev).rev();
       pcm.tell_why_cannot_attack();
       continue;
       }
     changes.ccell(c);
-    if(m) attackMonster(c, attackflags | AF_MSG, moPlayer);
+    if(m) attackMonster(c, attackflags | AF_MSG, who);
 
     if(!c->monst || isAnyIvy(m)) {
       spread_plague(cf, c, movei(mov.prev).rev().d, moPlayer);
@@ -300,7 +309,7 @@ EX void shoot() {
       }
 
     if(items[itCurseWeakness] || (isStunnable(c->monst) && c->hitpoints > 1)) {
-      if(!mov.last && monsterPushable(c)) {
+      if(!(mov.flags & bpLAST) && monsterPushable(c)) {
         cell *ct = mov.next.cpeek();
         bool can_push = passable(ct, c, P_BLOW);
         if(can_push) {

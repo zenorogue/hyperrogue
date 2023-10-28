@@ -2700,7 +2700,7 @@ void celldrawer::draw_bowpath() {
   for(auto& m: *v) {
 
     hyperpoint h0 = C0, t0 = Hypc, h1 = C0, t1 = Hypc;
-    bool birth = m.first;
+    bool birth = m.flags & bow::bpFIRST;
 
     if(!birth) {
       ld d = cellgfxdist(c, m.prev.spin) / 2;
@@ -2709,7 +2709,7 @@ void celldrawer::draw_bowpath() {
       }
     else birth = true;
 
-    if(!m.last) {
+    if(!(m.flags & bow::bpLAST)) {
       ld d = cellgfxdist(c, m.next.spin) / 2;
       h1 = ddspin(c, m.next.spin) * xpush0(d);
       t1 = ddspin(c, m.next.spin) * xpush(d) * xtangent(-d*2);
@@ -2718,6 +2718,12 @@ void celldrawer::draw_bowpath() {
     ld t = frac(ptick(PURE?500:250));
 
     color_t arrow_color = getcs().swordcolor;
+
+    if(m.flags & bow::bpCOPIED) {
+      arrow_color &= 0xFF;
+      arrow_color |= mirrorcolor(m.next.mirrored != cwt.mirrored ? 1 : 0) << 8;
+      }
+
     color_t arrow_color_trans = arrow_color & 0xFFFFFF00;
     if(bow::fire_mode) arrow_color = gradient(arrow_color_trans, arrow_color, 0, 0.25, 1);
 
