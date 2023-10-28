@@ -5015,3 +5015,7 @@ Fixes to the Horodisk/ideal Voronoi land structures:
 - fixed Hives missing in ideal Voronoi land structure
 - fixed some tiles pre-marked as mines in Minefield next to Ivory Tower in Voronoi land structure
 - fixed burial mounds not appearing in chaos/h/v land structures
+
+2023-10-29 09:13 Update 12.1x:
+- a new alternative mode where the Rogue fights with a crossbow. Currently testing, so no achievements yet.
+- friendly ghosts are now flagged as non-living (thanks to @jlm)
