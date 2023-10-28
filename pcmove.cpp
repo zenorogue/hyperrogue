@@ -1058,7 +1058,7 @@ bool pcmove::attack() {
   if(items[itOrbSlaying]) attackflags |= AF_CRUSH;
   if(items[itCurseWeakness]) attackflags |= AF_WEAK;
   
-  bool ca = bow::crossbow_mode() ? false : canAttack(cwt.at, moPlayer, c2, c2->monst, attackflags);
+  bool ca = bow::crossbow_mode() ? good_tortoise : canAttack(cwt.at, moPlayer, c2, c2->monst, attackflags);
   
   if(!ca) {
     if(forcedmovetype == fmAttack) {
