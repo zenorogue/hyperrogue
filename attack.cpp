@@ -506,6 +506,8 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
     }
 #endif
   
+  if(m == moHunterGuard) ambush::guard_attack();
+
   if(m == moGolemMoved) m = moGolem;
   if(m == moKnightMoved) m = moKnight;
   if(m == moSlimeNextTurn) m = moSlime;

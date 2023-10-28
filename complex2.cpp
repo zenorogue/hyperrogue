@@ -905,6 +905,12 @@ EX void ambush(cell *c, int dogs) {
     addMessage(XLAT("You are ambushed!"));
   }
 
+EX void guard_attack() {
+  addMessage(XLAT("%The1 alarms other dogs as it dies!", moHunterGuard));
+  for(cell *c: dcal) if(c->monst == moHunterGuard) c->monst = moHunterDog;
+  ambush(cwt.at, 7);
+  }
+
 EX }
 
 EX namespace dice {
