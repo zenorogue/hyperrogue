@@ -67,7 +67,8 @@ EX int loading_time() {
   }
 
 EX bool blocks(cell *c) {
-  if(isWall(c) && !among(c->wall, waMirrorWall, waMirror, waCloud)) return true;
+  if(items[itOrbAether]) return false;
+  if(isWall(c) && !among(c->wall, waMirrorWall, waMirror, waCloud) && !isNonblock(c->wall)) return true;
   // if(c->monst && isMultitile(c->monst)) return true;
   return false;
   }
@@ -97,7 +98,7 @@ EX int create_path() {
       auto cw2 = ocw2;
       if(inmirror(c)) cw2 = mirror::reflect(cw2);
       if(blocks(cw2.peek())) continue;
-
+      if(thruVine(cw2.at, cw2.peek())) continue;
 
       if(cw2.at->monst) {
         flagtype attackflags = AF_NORMAL;

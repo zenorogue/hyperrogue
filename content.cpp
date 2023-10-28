@@ -891,10 +891,10 @@ WALL( '^', 0x8D694F, "Thumper", waThumperOff, WF_WALL | WF_ACTIVABLE | WF_THUMPE
 WALL( '^', 0x804000, "Fire", waFire, WF_FIRE | WF_TIMEOUT, RESERVED, 0, sgNone,
     "This cell is on fire. Most beings and items cannot survive."
     )
-WALL( '+', 0xC0C0C0, "ancient grave", waAncientGrave, WF_WALL | WF_HIGHWALL | WF_GRAVE, RESERVED, 0, sgNone, 
+WALL( '+', 0xC0C0C0, "ancient grave", waAncientGrave, WF_WALL | WF_HIGHWALL | WF_GRAVE | WF_NONBLOCK, RESERVED, 0, sgNone, 
   "An ancient grave." 
     )
-WALL( '+', 0xD0D080, "fresh grave", waFreshGrave, WF_WALL | WF_HIGHWALL | WF_GRAVE, RESERVED, 0, sgNone,
+WALL( '+', 0xD0D080, "fresh grave", waFreshGrave, WF_WALL | WF_HIGHWALL | WF_GRAVE | WF_NONBLOCK, RESERVED, 0, sgNone,
   "A fresh grave. Necromancers like those." 
     )
 WALL( '#', 0x00FFFF, "column", waColumn, WF_WALL | WF_HIGHWALL, RESERVED, 0, sgNone,
@@ -932,7 +932,7 @@ WALL( '#', 0x8080C0, "crystal cabinet", waGlass, WF_WALL, RESERVED, 0, sgNone,
     "using an Orb of Aether, your Aether power will be completely drained."
     )
 WALL( '#', 0xC0C0C0, "wall of Camelot", waCamelot, WF_WALL | WF_HIGHWALL, RESERVED, 0, sgNone, camelothelp )
-WALL( '+', 0xA06000, "Round Table", waRoundTable, WF_WALL, RESERVED, 1, sgNone, camelothelp )
+WALL( '+', 0xA06000, "Round Table", waRoundTable, WF_WALL | WF_NONBLOCK, RESERVED, 1, sgNone, camelothelp )
 WALL( '=', 0x0000A0, "moat of Camelot", waCamelotMoat, WF_WATER, RESERVED, 0, sgWater, camelothelp)
 WALL( '+', 0x606060, "big statue of Cthulhu", waBigStatue, WF_WALL, RESERVED, 0, sgNone, 
     "These statues of Cthulhu are too large to carry, and they don't look too "

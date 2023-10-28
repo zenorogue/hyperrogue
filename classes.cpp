@@ -600,6 +600,7 @@ static constexpr flagtype WF_TIMEOUT = Flag(18);
 static constexpr flagtype WF_CISLAND = Flag(19);
 static constexpr flagtype WF_SULPHURIC = Flag(20);
 static constexpr flagtype WF_HALFVINE = Flag(21);
+static constexpr flagtype WF_NONBLOCK = Flag(22);
 
 struct walltype {
   char  glyph;

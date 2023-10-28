@@ -204,8 +204,7 @@ EX bool passable(cell *w, cell *from, flagtype flags) {
   
   if(F(P_BULLET)) {
     if(isFire(w) || w->wall == waBonfireOff || cellHalfvine(w) ||  
-      w->wall == waMagma ||
-      w->wall == waAncientGrave || w->wall == waFreshGrave || w->wall == waRoundTable)
+      w->wall == waMagma || isNonblock(w->wall))
       return true;
     }
 
