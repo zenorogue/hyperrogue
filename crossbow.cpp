@@ -50,9 +50,9 @@ struct bowscore {
   };
 #endif
 
-EX flagtype bpFIRST = 1;
-EX flagtype bpLAST = 2;
-EX flagtype bpCOPIED = 4;
+EX constexpr flagtype bpFIRST = 1;
+EX constexpr flagtype bpLAST = 2;
+EX constexpr flagtype bpCOPIED = 4;
 
 EX vector<bowpoint> bowpath;
 
