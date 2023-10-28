@@ -1481,12 +1481,14 @@ EX void switch_game_mode(char switchWhat) {
       tactic::on = yendor::on = princess::challenge = 
       randomPatternsMode = inv::on = false;
       racing::on = false;
+      bow::weapon = bow::wBlade;
       break;
     
     case rg::dualmode:
       stop_tour(); tour::on = false;
       racing::on = false;
       yendor::on = tactic::on = princess::challenge = false;
+      bow::weapon = bow::wBlade;
       if(!dual::state) dual::enable();
       else dual::disable();
       break;
@@ -1569,6 +1571,7 @@ EX void switch_game_mode(char switchWhat) {
       shmup::on = !shmup::on;
       princess::challenge = false;
       if(!shmup::on) racing::on = false;
+      if(!shmup::on && multi::players > 1) bow::weapon = bow::wBlade;
       break;
     
     case rg::randpattern:

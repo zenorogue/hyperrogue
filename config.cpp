@@ -1542,7 +1542,10 @@ EX void initConfig() {
     -> editable({{"blade", "Standard Rogue weapon. Bump into a monster to hit. Most monsters attack you the same way."},
       {"crossbow", "Hits all monsters in a straight line, but slow to reload. Press 'f' or click the crossbow icon to target."}},
       "weapon selection", 'w')
-    -> set_value_to = [] (bow::eWeapon wpn) { bool b = game_active; if(wpn != bow::weapon) stop_game(); bow::weapon = wpn; if(b) start_game(); };
+    -> set_value_to = [] (bow::eWeapon wpn) { bool b = game_active; if(wpn != bow::weapon) stop_game(); bow::weapon = wpn;
+      peace::on = false; if(dual::state) dual::disable(); if(multi::players > 1 && !shmup::on) multi::players = 1;
+      if(b) start_game();
+      };
   param_enum(bow::style, "bow_style", "bow_style", bow::style)
     -> editable({{"bull line", "Can go in either direction on odd shapes. 3 turns to reload."},
       {"geodesic", "Graph geodesic: any sequence of tiles is OK as long as there are no shortcuts. 4 turns to reload."}},

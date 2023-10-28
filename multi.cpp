@@ -522,6 +522,7 @@ EX void showConfigureMultiplayer() {
       dialog::do_if_confirmed([i] {
         stop_game();
         players = i;
+        if(multi::players > 1 && !shmup::on) bow::weapon = bow::wBlade;
         start_game();
         });
       });
