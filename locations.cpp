@@ -492,7 +492,6 @@ struct movei {
     }
   movei(cell *_s, cell *_t, int _d) : s(_s), t(_t), d(_d) {}
   movei(cellwalker cw) : s(cw.at), t(cw.cpeek()), d(cw.spin) {}
-  movei(nullptr_t) : s(nullptr), t(nullptr), d(NOMOVEI) {}
   movei rev() const { return movei(t, s, rev_dir_or(d)); }
   int dir_or(int x) const { return proper() ? d : x; }
   int rev_dir_or(int x) const { return proper() ? s->c.spin(d) : x; }
