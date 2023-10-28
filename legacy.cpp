@@ -204,6 +204,8 @@ int modecodetable[42][6] = {
 
 EX modecode_t legacy_modecode() {
   if(int(geometry) > 3 || int(variation) > 1) return UNKNOWN;
+  if(casual) return UNKNOWN;
+  if(bow::weapon) return UNKNOWN;
 
   bool is_default_land_structure =
     (princess::challenge || tactic::on) ? ls::single() :
