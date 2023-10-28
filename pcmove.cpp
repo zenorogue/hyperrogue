@@ -325,8 +325,8 @@ bool pcmove::movepcto() {
   fmsActivate = forcedmovetype == fmSkip || forcedmovetype == fmActivate;
   
   changes.init(checkonly);
-  changes.value_keep(bow::last_bowpath);
-  bow::last_bowpath.clear();
+  changes.value_keep(bow::bowpath_map);
+  bow::bowpath_map.clear();
   bool b = (d >= 0) ? actual_move() : stay();
   if(checkonly || !b) {
     changes.rollback();
@@ -334,7 +334,7 @@ bool pcmove::movepcto() {
 
     if(!b && items[itCrossbow] == 0 && bow::crossbow_mode() && !bow::fire_mode && d >= 0) {
       changes.init(checkonly);
-      changes.value_keep(bow::last_bowpath);
+      changes.value_keep(bow::bowpath_map);
       b = try_shooting(true);
       if(checkonly || !b) changes.rollback();
       }

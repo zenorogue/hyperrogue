@@ -54,7 +54,7 @@ struct bowscore {
 
 EX vector<bowpoint> bowpath;
 
-EX vector<bowpoint> last_bowpath;
+EX map<cell*, vector<bowpoint>> bowpath_map;
 
 EX map<int, cell*> target_at;
 
@@ -170,6 +170,15 @@ EX int create_path() {
   return best_score;
   }
 
+EX void clear_bowpath() {
+  bowpath_map.clear();
+  }
+
+EX void gen_bowpath_map() {
+  bowpath_map = {};
+  for(auto& b: bowpath) bowpath_map[b.next.at].push_back(b);
+  }
+
 EX bool auto_path() {
   target_at = {};
   target_at[1] = cwt.cpeek();
@@ -184,13 +193,13 @@ EX void switch_fire_mode() {
   if(!fire_mode) {
     addMessage(XLAT("Double-click tile to fire."));
     fire_mode = true;
-    last_bowpath = {};
+    clear_bowpath();
     targets = {};
     }
   else if(fire_mode) {
     addMessage(XLAT("Firing cancelled."));
     fire_mode = false;
-    last_bowpath = {};
+    clear_bowpath();
     }
   }
 
@@ -198,7 +207,7 @@ EX void add_fire(cell *c) {
   bool emp = target_at.empty();
   auto& t = target_at[c->cpdist];
   if(t == c && !bow::bowpath.empty()) {
-    bow::last_bowpath.clear();
+    clear_bowpath();
     checked_move_issue = miVALID;
     pcmove pcm;
     pcm.checkonly = false;
@@ -220,7 +229,7 @@ EX void add_fire(cell *c) {
         bow::bowpath = {};
         }
       }
-    bow::last_bowpath = bow::bowpath;
+    gen_bowpath_map();
     }
   }
 
@@ -282,9 +291,10 @@ EX void shoot() {
         }
       }
     }
-  last_bowpath = bowpath;
 
   reverse(bowpath.begin(), bowpath.end());
+
+  gen_bowpath_map();
   }
 
 EX void showMenu() {
