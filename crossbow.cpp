@@ -93,7 +93,27 @@ EX int create_path() {
       auto cw2 = ocw2;
       if(inmirror(c)) cw2 = mirror::reflect(cw2);
       if(blocks(cw2.peek())) continue;
-      if(cw2.at->monst) { ntotal += 10000; ntotal += 1280 >> c->cpdist; }
+
+
+      if(cw2.at->monst) {
+        flagtype attackflags = AF_NORMAL;
+        if(items[itOrbSpeed]&1) attackflags |= AF_FAST;
+        if(items[itOrbSlaying]) attackflags |= AF_CRUSH;
+        if(items[itCurseWeakness]) attackflags |= AF_WEAK;
+        if(canAttack(cw2.peek(), moPlayer, cw2.at, cw2.at->monst, attackflags)) {
+          ntotal += 10000; ntotal += 1280 >> c->cpdist;
+          }
+        }
+
+      for(int t=0; t<cw2.at->type; t++) {
+        cell *c1 = cw2.at->move(t);
+        if(!c) continue;
+        if(!logical_adjacent(cw2.peek(), moPlayer, c1)) continue;
+        if(canAttack(cw2.peek(),moPlayer,c1,c1->monst,AF_STAB)) {
+          ntotal += 10000; ntotal += 1280 >> c->cpdist;
+          }
+        }
+
       ntotal += 2;
       int dir = 0;
       if(c->cpdist > 1) {
