@@ -13,7 +13,7 @@ EX namespace euc {
   #if HDR
   struct coord : array<int, 3> {
     explicit coord() = default;
-    constexpr explicit coord(int x, int y, int z) : array{x,y,z} {}
+    constexpr explicit coord(int x, int y, int z) : array<int,3> {{x,y,z}} {}
     coord& operator += (coord b) { for(int i: {0,1,2}) self[i] += b[i]; return self; }
     coord& operator -= (coord b) { for(int i: {0,1,2}) self[i] -= b[i]; return self; }
     coord operator + (coord b) const { coord a = self; return a += b; }

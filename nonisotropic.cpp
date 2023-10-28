@@ -908,7 +908,7 @@ EX namespace nilv {
   struct mvec : array<int, 3> {
     /** these are in nmHeis */
     explicit mvec() = default;
-    constexpr explicit mvec(int x, int y, int z) : array{x, y, z} {}
+    constexpr explicit mvec(int x, int y, int z) : array<int, 3>{{x, y, z}} {}
     mvec inverse() {  
       auto& a = *this;
       return mvec(-a[0], -a[1], -a[2]+a[1] * a[0]); 
