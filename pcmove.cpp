@@ -332,7 +332,7 @@ bool pcmove::movepcto() {
     changes.rollback();
     if(!checkonly) flipplayer = false;
 
-    if(!b && items[itCrossbow] == 0 && bow::crossbow_mode() && !bow::fire_mode && d >= 0) {
+    if(!b && items[itCrossbow] == 0 && bow::crossbow_mode() && !bow::fire_mode && d >= 0 && !checkonly) {
       changes.init(checkonly);
       changes.value_keep(bow::bowpath_map);
       b = try_shooting(true);

@@ -297,6 +297,30 @@ EX void shoot() {
   gen_bowpath_map();
   }
 
+EX bool have_bow_target() {
+  dynamicval<decltype(bowpath)> bp(bowpath);
+  dynamicval<decltype(bowpath_map)> bpm(bowpath_map);
+
+  for(int i=0; i<isize(dcal); i++) {
+    cell *c = dcal[i];
+    target_at = {};
+    target_at[c->cpdist] = {c};
+
+    int res = create_path();
+    if(res == -1) continue;
+
+    checked_move_issue = miVALID;
+    pcmove pcm;
+    pcm.checkonly = true;
+    changes.init(true);
+    bool b = pcm.try_shooting(false);
+    changes.rollback();
+
+    if(b) return true;
+    }
+  return false;
+  }
+
 EX void showMenu() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen();
