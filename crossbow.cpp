@@ -97,15 +97,15 @@ EX int create_path() {
       auto ocw2 = cellwalker(c, i);
       auto cw2 = ocw2;
       if(inmirror(c)) cw2 = mirror::reflect(cw2);
-      if(blocks(cw2.peek())) continue;
-      if(thruVine(cw2.at, cw2.peek())) continue;
+      if(blocks(cw2.cpeek())) continue;
+      if(thruVine(cw2.at, cw2.cpeek())) continue;
 
       if(cw2.at->monst) {
         flagtype attackflags = AF_BOW;
         if(items[itOrbSpeed]&1) attackflags |= AF_FAST;
         if(items[itOrbSlaying]) attackflags |= AF_CRUSH;
         if(items[itCurseWeakness]) attackflags |= AF_WEAK;
-        if(canAttack(cw2.peek(), moPlayer, cw2.at, cw2.at->monst, attackflags)) {
+        if(canAttack(cw2.cpeek(), moPlayer, cw2.at, cw2.at->monst, attackflags)) {
           ntotal += 10000; ntotal += 1280 >> c->cpdist;
           }
         }
@@ -113,8 +113,8 @@ EX int create_path() {
       for(int t=0; t<cw2.at->type; t++) {
         cell *c1 = cw2.at->move(t);
         if(!c) continue;
-        if(!logical_adjacent(cw2.peek(), moPlayer, c1)) continue;
-        if(canAttack(cw2.peek(),moPlayer,c1,c1->monst,AF_STAB)) {
+        if(!logical_adjacent(cw2.cpeek(), moPlayer, c1)) continue;
+        if(canAttack(cw2.cpeek(),moPlayer,c1,c1->monst,AF_STAB)) {
           ntotal += 10000; ntotal += 1280 >> c->cpdist;
           }
         }
@@ -149,7 +149,7 @@ EX int create_path() {
   while(best_score_at != cwt.at) { 
     auto& at = scores[best_score_at];
     dirseq.push_back(at.turns);
-    best_score_at = at.last.peek();
+    best_score_at = at.last.cpeek();
     }
   reverse(dirseq.begin(), dirseq.end());
 
