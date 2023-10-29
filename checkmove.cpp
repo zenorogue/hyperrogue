@@ -338,7 +338,7 @@ EX void checkmove() {
     }
 #endif
 
-  if(!canmove && bow::crossbow_mode()) canmove = bow::have_bow_target();
+  if(!canmove && bow::crossbow_mode() && !items[itCrossbow]) canmove = bow::have_bow_target();
 
   if(!canmove) {
     achievement_final(true);
