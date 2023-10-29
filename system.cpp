@@ -134,6 +134,8 @@ EX void welcomeMessage() {
     addMessage(XLAT("Welcome to HyperRogue! (cheat mode on)"));
   else if(hat::in())
     addMessage(XLAT("Welcome to HatRogue!"));
+  else if(bow::crossbow_mode())
+    addMessage(XLAT("Welcome to HyperRanger!"));
   else
     addMessage(XLAT("Welcome to HyperRogue!"));
 
