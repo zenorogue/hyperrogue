@@ -5019,3 +5019,23 @@ Fixes to the Horodisk/ideal Voronoi land structures:
 2023-10-29 09:13 Update 12.1x:
 - a new alternative mode where the Rogue fights with a crossbow. Currently testing, so no achievements yet.
 - friendly ghosts are now flagged as non-living (thanks to @jlm)
+
+2023-10-30 10:16 Update 12.1y:
+Updates to the crossbow mode:
+- no time passes when shooting while unstable
+- graves, shrubs, and Round Table no longer block the line of fire (but shooting through half-vines do)
+- fixed the 3D graphics
+- fixed some bugs with fire mode not disabling correctly
+- crossbows mimics no longer attack in melee, and it is also no longer possible to swing at mirrors with crossbow
+- crossbow moves are no longer considered valid moves for the checkmate rule when the crossbow is not loaded
+- improved messages
+- in fire mode, no longer display ranged orb icons on mousing
+- crossbow now shoots the targets in the logical order
+- fire mode now can be enabled even while reloading, for more consistency and examination
+- clarify that the Water Elemental special case only affects melee
+- fixed the bug which made the crossbow not pierce dragons
+- fixed the bug which made saving tortoises not possible
+- attacking guarding dogs now wakes up all other existing guarding dogs, and causes a small ambush (this fix also affects other ranged attacks)
+- fixed crossbow mode not changing the PTM/etc. scoreboards
+- mode change confirmation is now only required when actually changing a relevant option
+- new aim style 'geometric'
