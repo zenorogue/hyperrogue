@@ -1783,6 +1783,9 @@ auto cgm = addHook(hooks_clearmemory, 40, [] () {
   rosemap.clear();
   hv_land.clear();
   hv_last_land.clear();
+  bow::bowpath.clear();
+  bow::clear_bowpath();
+  bow::fire_mode = false;
   for(auto &am: adj_memo) am.clear();
   }) + 
 addHook(hooks_gamedata, 0, [] (gamedata* gd) {
