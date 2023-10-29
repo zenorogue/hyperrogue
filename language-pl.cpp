@@ -2097,10 +2097,10 @@ S("Mighty warriors from the Fjord, who can use boats.",
 N("Water Elemental", GEN_M, "Wodny Żywiołak", "Wodne Żywiołaki", "Wodnego Żywiołaka", "Wodnym Żywiołakiem")
 S("Wherever this powerful being goes, the living fjord "
   "sinks below water, non-magical boats are destroyed, and fires are extinguished.\n\n"
-  "As a special case, you can attack the Water Elemental from the water, without drowning immediately.",
+  "As a special case, you can attack the Water Elemental with your blade from the water, without drowning immediately.",
   "Gdziekolwiek przejdzie ta potężna istota, żywy fiord tonie, niemagiczne łódki są niszczone, a "
   "ogień gaśnie.\n\n"
-  "Jako szczególny przypadek, możesz atakować Wodnego Żywiołaka z wody, nie topiąc się.")
+  "Jako szczególny przypadek, możesz atakować Wodnego Żywiołaka mieczem z wody, nie topiąc się.")
 
 
 N("Garnet", GEN_O, "Granat", "Granaty", "Granat", "Granatem")

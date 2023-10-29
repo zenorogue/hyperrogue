@@ -2010,7 +2010,7 @@ S("Mighty warriors from the Fjord, who can use boats.",
 N("Water Elemental", GEN_M | GENF_ELISION, "Élémental d'Eau", "Élémentaux d'Eau", "Élémental d'Eau")
 S("Wherever this powerful being goes, the living fjord "
   "sinks below water, non-magical boats are destroyed, and fires are extinguished.\n\n"
-  "As a special case, you can attack the Water Elemental from the water, without drowning immediately.",
+  "As a special case, you can attack the Water Elemental from the water with your blade, without drowning immediately.",
   "Là où cet être puissant va, le fjord vivant est submergé d'eau, les bateaux non-magiques détruits, "
   "et les feux éteints.\n\n"
   "Cas particulier : vous pouvez attaquer l'Élemental depuis l'eau sans vous noyer immédiatement.")

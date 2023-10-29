@@ -1994,7 +1994,7 @@ S("Mighty warriors from the Fjord, who can use boats.",
 N("Water Elemental", GEN_M, "Su Özütü", "Su Özütleri", "Su Özütünü", "Su Özütüyle")
 S("Wherever this powerful being goes, the living fjord "
   "sinks below water, non-magical boats are destroyed, and fires are extinguished.\n\n"
-  "As a special case, you can attack the Water Elemental from the water, without drowning immediately.",
+  "As a special case, you can attack the Water Elemental from the water with your blade, without drowning immediately.",
   "Bu güçlü yaratığın geçtiği her yerde Yaşayan Fiyort su altına gömülür, sihirli olmayan kayıklar yok olur ve ateşler söner. \n\n "
   "İstisna bir durum olarak Su Özütüne suyun içerisinden hemen boğulmadan vurursan onu öldürebilirsin. ")
 

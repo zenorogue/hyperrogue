@@ -2083,7 +2083,7 @@ S("Mighty warriors from the Fjord, who can use boats.",
 N("Water Elemental", GEN_M, "Водный элементаль", "Водные элементали", "Водного элементаля", "Водным элементалем")
 S("Wherever this powerful being goes, the living fjord "
   "sinks below water, non-magical boats are destroyed, and fires are extinguished.\n\n"
-  "As a special case, you can attack the Water Elemental from the water, without drowning immediately.",
+  "As a special case, you can attack the Water Elemental from the water with your blade, without drowning immediately.",
   "Где бы ни шло это могущественное существо, фьорды расступаются перед ним, "
   "обычные лодки уничтожаются, огонь гаснет.\n\n"
   "Однако, если Вы атакуете его, находясь в воде, Вас не затянет сразу в воду.")

@@ -260,7 +260,7 @@ MONSTER( 'T', 0x00FFFF, "Fjord Troll", moFjordTroll, CF_FACE_UP | CF_TROLL, RESE
 MONSTER( 'E', 0x0000FF, "Water Elemental", moWaterElemental, CF_FACE_UP | CF_NOBLOW | CF_NONLIVING | CF_HIGH_THREAT, RESERVED, moWaterElemental, 
     "Wherever this powerful being goes, the living fjord "
     "sinks below water, non-magical boats are destroyed, and fires are extinguished.\n\n"
-    "As a special case, you can attack the Water Elemental from the water, without drowning immediately."
+    "As a special case, you can attack the Water Elemental from the water with your blade, without drowning immediately."
     )
 MONSTER( 'M', 0xD0D0D0, "Mouse", moMouse, CF_FACE_SIDE | CF_NOGHOST | CF_GOK | CF_FRIENDLY | CF_FACING | CF_UNARMED | CF_IGNORE_PLATE, RESERVED, moNone, princessdesc)
 MONSTER( 'M', 0xD0D0D0, "Mouse", moMouseMoved, CF_FACE_SIDE | CF_NOGHOST | CF_GOK | CF_FRIENDLY | CF_FACING | CF_UNARMED | CF_MOVED, RESERVED, moNone, princessdesc)

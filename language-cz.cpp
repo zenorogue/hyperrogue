@@ -2145,7 +2145,7 @@ S("Mighty warriors from the Fjord, who can use boats.",
 N("Water Elemental", GEN_M, "Elementál Vody", "Elementálové Vody", "Elementála Vody", "Elementálem Vody")
 S("Wherever this powerful being goes, the living fjord "
   "sinks below water, non-magical boats are destroyed, and fires are extinguished.\n\n"
-  "As a special case, you can attack the Water Elemental from the water, without drowning immediately.",
+  "As a special case, you can attack the Water Elemental from the water with your blade, without drowning immediately.",
   "Kamkoli se vydá tato mocná bytost, tam se Živoucí fjord potápí pod vodu, všechny čluny kromě magických "
   "jsou zničeny a veškerý oheň je uhašen.\n\n"
   "Na Elementála Vody můžeš zaútočit z vody, aniž by ses okamžitě utopil; to je speciální případ.")
