@@ -906,7 +906,7 @@ EX void ambush(cell *c, int dogs) {
   }
 
 EX void guard_attack() {
-  addMessage(XLAT("%The1 alarms other dogs as it dies!", moHunterGuard));
+  addMessage(XLAT("%The1 alarms other dogs as it dies!", moHunterDog));
   for(cell *c: dcal) if(c->monst == moHunterGuard) c->monst = moHunterDog;
   ambush(cwt.at, 7);
   }
