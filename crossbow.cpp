@@ -101,7 +101,7 @@ EX int create_path() {
       if(thruVine(cw2.at, cw2.peek())) continue;
 
       if(cw2.at->monst) {
-        flagtype attackflags = AF_NORMAL;
+        flagtype attackflags = AF_BOW;
         if(items[itOrbSpeed]&1) attackflags |= AF_FAST;
         if(items[itOrbSlaying]) attackflags |= AF_CRUSH;
         if(items[itCurseWeakness]) attackflags |= AF_WEAK;
@@ -265,7 +265,7 @@ EX void add_fire(cell *c) {
   }
 
 EX void shoot() {
-  flagtype attackflags = AF_NORMAL;
+  flagtype attackflags = AF_BOW;
   if(items[itOrbSpeed]&1) attackflags |= AF_FAST;
   if(items[itOrbSlaying]) attackflags |= AF_CRUSH;
   if(items[itCurseWeakness]) attackflags |= AF_WEAK;

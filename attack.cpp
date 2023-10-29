@@ -157,7 +157,8 @@ EX bool canAttack(cell *c1, eMonster m1, cell *c2, eMonster m2, flagtype flags) 
   if(isWorm(m2) && m2 != moTentacleGhost && !isDragon(m2)) return false;
   
   // dragon can't attack itself, or player who mounted it
-  if(c1 && c2 && isWorm(c1->monst) && isWorm(c2->monst) && wormhead(c1) == wormhead(c2)
+  cell *cp = (flags & AF_BOW) ? cwt.at : c1;
+  if(cp && c2 && isWorm(cp->monst) && isWorm(c2->monst) && wormhead(cp) == wormhead(c2)
     && m1 != moTentacleGhost && m2 != moTentacleGhost)
     return false;
     
