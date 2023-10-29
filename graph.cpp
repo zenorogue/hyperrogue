@@ -1423,10 +1423,12 @@ EX void drawPlayer(eMonster m, cell *where, const shiftmatrix& V, color_t col, d
           if(ti <= 0) ti = 0;
           else ti = 1 + ti / 500;
           }
-        if(ti <= 1) queuepoly(VWPN, cgi.shCrossbowstringLoaded, fc(314, cs.bowcolor2, 3));
-        else if(ti <= 2) queuepoly(VWPN, cgi.shCrossbowstringSemiloaded, fc(314, cs.bowcolor2, 3));
-        else queuepoly(VWPN, cgi.shCrossbowstringUnloaded, fc(314, cs.bowcolor2, 3));
-        if(ti == 0) queuepoly(VWPN, cgi.shCrossbowBolt, fc(314, cs.swordcolor, 3));
+        shiftmatrix VWPN1 = VWPN, VWPN2 = VWPN;
+        if(GDIM == 3) { ld h = cgi.human_height; VWPN1 = VWPN * lzpush(-h/60); VWPN2 = VWPN * lzpush(-h/30); }
+        if(ti <= 1) queuepoly(VWPN1, cgi.shCrossbowstringLoaded, fc(314, cs.bowcolor2, 3));
+        else if(ti <= 2) queuepoly(VWPN1, cgi.shCrossbowstringSemiloaded, fc(314, cs.bowcolor2, 3));
+        else queuepoly(VWPN1, cgi.shCrossbowstringUnloaded, fc(314, cs.bowcolor2, 3));
+        if(ti == 0) queuepoly(VWPN2, cgi.shCrossbowBolt, fc(314, cs.swordcolor, 3));
         }
       else if(items[itOrbThorns])
         queuepoly(VWPN, cgi.shHedgehogBladePlayer, items[itOrbDiscord] ? watercolor(0) : 0x00FF00FF);
@@ -1549,10 +1551,12 @@ void drawMimic(eMonster m, cell *where, const shiftmatrix& V, color_t col, doubl
         if(ti <= 0) ti = 0;
         else ti = 1 + ti / 500;
         }
-      if(ti <= 1) queuepoly(VWPN, cgi.shCrossbowstringLoaded, col1);
-      else if(ti <= 2) queuepoly(VWPN, cgi.shCrossbowstringSemiloaded, col1);
-      else queuepoly(VWPN, cgi.shCrossbowstringUnloaded, col1);
-      if(ti == 0) queuepoly(VWPN, cgi.shCrossbowBolt, col1);
+      shiftmatrix VWPN1 = VWPN, VWPN2 = VWPN;
+      if(GDIM == 3) { ld h = cgi.human_height; VWPN1 = VWPN * lzpush(-h/60); VWPN2 = VWPN * lzpush(-h/30); }
+      if(ti <= 1) queuepoly(VWPN1, cgi.shCrossbowstringLoaded, col1);
+      else if(ti <= 2) queuepoly(VWPN1, cgi.shCrossbowstringSemiloaded, col1);
+      else queuepoly(VWPN1, cgi.shCrossbowstringUnloaded, col1);
+      if(ti == 0) queuepoly(VWPN2, cgi.shCrossbowBolt, col1);
       }
     else if(!shmup::on) {
       bool emp = items[itOrbEmpathy] && m != moShadow;

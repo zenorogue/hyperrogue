@@ -2977,13 +2977,13 @@ auto hooksw = addHook(hooks_swapdim, 100, [] {
   });
 #endif
     
-}
-
-shiftmatrix at_missile_level(const shiftmatrix& T) {
+EX shiftmatrix at_missile_level(const shiftmatrix& T) {
   if(WDIM == 3) return T;
   if(GDIM == 3) return orthogonal_move(T, cgi.BODY);
   return at_smart_lof(T, 1.15);
   }
+
+EX }
 
 bool celldrawer::draw_shmup_monster() {
   using namespace shmup;

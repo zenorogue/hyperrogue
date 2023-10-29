@@ -2727,13 +2727,15 @@ void celldrawer::draw_bowpath() {
     color_t arrow_color_trans = arrow_color & 0xFFFFFF00;
     if(bow::fire_mode) arrow_color = gradient(arrow_color_trans, arrow_color, 0, 0.25, 1);
 
+    auto V1 = shmup::at_missile_level(V);
+
     if(birth) {
       if(t > 0.8) {
         hyperpoint h = h1 + t1 * (1-t);
         hyperpoint tg = -t1;
 
         poly_outline = OUTLINE_TRANS;
-        queuepoly(V * rgpushxto0(h) * rspintox(gpushxto0(h) * tg), cgi.shTrapArrow, gradient(arrow_color_trans, arrow_color, 0.8, t, 1));
+        queuepoly(V1 * rgpushxto0(h) * rspintox(gpushxto0(h) * tg), cgi.shTrapArrow, gradient(arrow_color_trans, arrow_color, 0.8, t, 1));
         poly_outline = OUTLINE_DEFAULT;
         }
       }
@@ -2745,7 +2747,7 @@ void celldrawer::draw_bowpath() {
       hyperpoint tg = (h1 - h0) * 6 * t * (1-t) + (3 * t*t - 4*t + 1) * t0 + (2*t-3*t*t) * t1;
 
       poly_outline = OUTLINE_TRANS;
-      queuepoly(V * rgpushxto0(h) * rspintox(gpushxto0(h) * tg), cgi.shTrapArrow, arrow_color);
+      queuepoly(V1 * rgpushxto0(h) * rspintox(gpushxto0(h) * tg), cgi.shTrapArrow, arrow_color);
       poly_outline = OUTLINE_DEFAULT;
       }
     }
