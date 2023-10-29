@@ -275,7 +275,7 @@ EX void shoot() {
   if(items[itOrbSlaying]) attackflags |= AF_CRUSH;
   if(items[itCurseWeakness]) attackflags |= AF_WEAK;
 
-  reverse(bowpath.begin(), bowpath.end());
+  vector<bowpoint> pushes;
 
   for(auto& mov: bowpath) {
     cell *c = mov.prev.at;
@@ -309,6 +309,10 @@ EX void shoot() {
       continue;
       }
     changes.ccell(c);
+
+    bool push = (items[itCurseWeakness] || (isStunnable(c->monst) && c->hitpoints > 1));
+    push = push && (!(mov.flags & bpLAST) && monsterPushable(c));
+
     if(m) attackMonster(c, attackflags | AF_MSG, who);
 
     if(!c->monst || isAnyIvy(m)) {
@@ -316,17 +320,20 @@ EX void shoot() {
       produceGhost(c, m, moPlayer);
       }
 
-    if(items[itCurseWeakness] || (isStunnable(c->monst) && c->hitpoints > 1)) {
-      if(!(mov.flags & bpLAST) && monsterPushable(c)) {
-        cell *ct = mov.next.cpeek();
-        bool can_push = passable(ct, c, P_BLOW);
-        if(can_push) {
-          changes.ccell(c);
-          changes.ccell(ct);
-          pushMonster(mov.next);
-          }
-        }
+    if(push) pushes.push_back(mov);
+    }
+
+  while(!pushes.empty()) {
+    auto& mov = pushes.back();
+    cell *c = mov.prev.at;
+    cell *ct = mov.next.cpeek();
+    bool can_push = passable(ct, c, P_BLOW);
+    if(can_push) {
+      changes.ccell(c);
+      changes.ccell(ct);
+      pushMonster(mov.next);
       }
+    pushes.pop_back();
     }
 
   reverse(bowpath.begin(), bowpath.end());
