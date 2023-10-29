@@ -220,15 +220,14 @@ EX bool fire_mode;
 
 EX void switch_fire_mode() {
   if(!crossbow_mode()) { addMessage(XLAT("You fire an angry glance at your enemies.")); return; }
-  if(items[itCrossbow]) { addMessage(XLAT("You need more time to reload your crossbow!")); return; }
   if(!fire_mode) {
-    addMessage(XLAT("Double-click tile to fire."));
+    addMessage(items[itCrossbow] ? XLAT("Note: cannot fire again yet. Turns to reload: %1.", its(items[itCrossbow])) : XLAT("Fire crossbow! Click to aim, click again to confirm."));
     fire_mode = true;
     clear_bowpath();
     targets = {};
     }
   else if(fire_mode) {
-    addMessage(XLAT("Firing cancelled."));
+    addMessage(items[itCrossbow] ? XLAT("Fire mode disabled.") : XLAT("Firing cancelled."));
     fire_mode = false;
     clear_bowpath();
     }
@@ -238,6 +237,12 @@ EX void add_fire(cell *c) {
   bool emp = target_at.empty();
   auto& t = target_at[c->cpdist];
   if(t == c && !bow::bowpath.empty()) {
+    if(items[itCrossbow]) {
+      clear_bowpath();
+      addMessage(XLAT("Cannot fire again yet. Turns to reload: %1.", its(items[itCrossbow])));
+      fire_mode = false;
+      return;
+      }
     clear_bowpath();
     checked_move_issue = miVALID;
     pcmove pcm;

@@ -145,9 +145,9 @@ int glyphflags(int gid) {
   if(gid < ittypes) {
     eItem i = eItem(gid);
     if(itemclass(i) == IC_NAI && i != itFatigue && i != itCrossbow) f |= GLYPH_NONUMBER;
-    if(i == itCrossbow && items[i] == 0) {
+    if(i == itCrossbow) {
+      if(items[i] == 0) f |= GLYPH_NONUMBER;
       if(bow::fire_mode) f |= GLYPH_ACTIVE;
-      f |= GLYPH_NONUMBER;
       }
     if(isElementalShard(i)) {
       f |= GLYPH_LOCAL | GLYPH_INSQUARE;
@@ -335,7 +335,14 @@ void displayglyph2(int cx, int cy, int buttonsize, int i) {
         getcstat = 'i';
         }
       if(it == itCrossbow) {
-        mouseovers += XLAT(" (click to use)");
+        if(items[it])
+          mouseovers += XLAT(" (turns to reload: %1)", its(items[it]));
+        else if(items[it] && bow::fire_mode)
+          mouseovers += XLAT(" (fire mode on / turns to reload: %1)", its(items[it]));
+        else if(bow::fire_mode)
+          mouseovers += XLAT(" (fire mode on)");
+        else
+          mouseovers += XLAT(" (click to fire)");
         getcstat = 'f';
         }
       if(imp & GLYPH_LOCAL) mouseovers += XLAT(" (local treasure)");
