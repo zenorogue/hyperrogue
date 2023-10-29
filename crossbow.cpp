@@ -224,7 +224,7 @@ EX void switch_fire_mode() {
     addMessage(items[itCrossbow] ? XLAT("Note: cannot fire again yet. Turns to reload: %1.", its(items[itCrossbow])) : XLAT("Fire crossbow! Click to aim, click again to confirm."));
     fire_mode = true;
     clear_bowpath();
-    targets = {};
+    target_at = {};
     }
   else if(fire_mode) {
     addMessage(items[itCrossbow] ? XLAT("Fire mode disabled.") : XLAT("Firing cancelled."));
