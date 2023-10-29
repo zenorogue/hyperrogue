@@ -1457,7 +1457,7 @@ EX namespace mirror {
         if(c2->monst) {
           c->monst = moMimic;
           eMonster m2 = c2->monst;
-          if(!peace::on && canAttack(c,moMimic,c2,m2, 0)) {
+          if(!peace::on && !bow::crossbow_mode() && canAttack(c,moMimic,c2,m2, 0)) {
             attackMonster(c2, AF_NORMAL | AF_MSG, moMimic);
             if(!fwd) produceGhost(c2, m2, moMimic);
             sideAttack(c, m.second.spin, m2, 0);

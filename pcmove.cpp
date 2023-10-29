@@ -913,7 +913,7 @@ bool pcmove::after_escape() {
     c2->wall == waBigTree ||
     c2->wall == waSmallTree ||
     (c2->wall == waShrub && items[itOrbSlaying]) ||
-    c2->wall == waMirrorWall;
+    (c2->wall == waMirrorWall && !bow::crossbow_mode());
   if(attackable && markOrb(itOrbAether) && c2->wall != waMirrorWall)
     attackable = false;
   bool nm; nm = attackable;
@@ -952,7 +952,7 @@ bool pcmove::after_escape() {
       c2->wall = waSmallTree;
       return swing();
       }
-    if(!peace::on) {
+    if(!peace::on && !bow::crossbow_mode()) {
       if(c2->wall == waMirrorWall)
         addMessage(XLAT("You swing your sword at the mirror."));
       else if(c2->wall)
