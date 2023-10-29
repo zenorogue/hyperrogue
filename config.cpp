@@ -47,6 +47,7 @@ struct setting {
   reaction_t reaction;
   char default_key;
   bool is_editable;
+  bool needs_confirm;
   supersaver *saver;
   virtual bool available() { if(restrict) return restrict(); return true; }
   virtual bool affects(void *v) { return false; }
@@ -58,7 +59,7 @@ struct setting {
   virtual string search_key() { 
     return parameter_name + "|" + config_name + "|" + menu_item_name + "|" + help_text;
     }
-  explicit setting() { restrict = auto_restrict; is_editable = false; }
+  explicit setting() { restrict = auto_restrict; is_editable = false; needs_confirm = false; }
   virtual void check_change() { }
   reaction_t sets;
   setting *set_sets(const reaction_t& s) { sets = s; return this; }
@@ -160,6 +161,10 @@ template<class T> struct enum_setting : list_setting {
 
   enum_setting<T>* editable(const vector<pair<string, string> >& o, string menu_item_name, char key) {
     list_setting::editable(o, menu_item_name, key);
+    return this;
+    }
+  enum_setting<T>* set_need_confirm() {
+    needs_confirm = true;
     return this;
     }
   };
@@ -1542,6 +1547,7 @@ EX void initConfig() {
     -> editable({{"blade", "Standard Rogue weapon. Bump into a monster to hit. Most monsters attack you the same way."},
       {"crossbow", "Hits all monsters in a straight line, but slow to reload. Press 'f' or click the crossbow icon to target."}},
       "weapon selection", 'w')
+    -> set_need_confirm()
     -> set_value_to = [] (bow::eWeapon wpn) { bool b = game_active; if(wpn != bow::weapon) stop_game(); bow::weapon = wpn;
       peace::on = false; if(dual::state) dual::disable(); if(multi::players > 1 && !shmup::on) multi::players = 1;
       if(b) start_game();
@@ -1550,6 +1556,7 @@ EX void initConfig() {
     -> editable({{"bull line", "Can go in either direction on odd shapes. 3 turns to reload."},
       {"geodesic", "Graph geodesic: any sequence of tiles is OK as long as there are no shortcuts. 4 turns to reload."}},
       "crossbow straight line style", 'l')
+    -> set_need_confirm()
     -> set_value_to = [] (bow::eCrossbowStyle s) { bool b = game_active; if(s != bow::style) stop_game(); bow::style = s; if(b) start_game(); };
   param_b(bow::bump_to_shoot, "bump_to_shoot", true)->editable("bump to shoot", 'b');
 
@@ -3770,7 +3777,7 @@ void list_setting::show_edit_option(int key) {
   if(get_value() < 0 || get_value() >= isize(options)) opt = its(get_value());
   else opt = options[get_value()].first;
   dialog::addSelItem(XLAT(menu_item_name), XLAT(opt), key);
-  dialog::add_action_push([this] {
+  reaction_t screen = [this] {
     add_to_changed(this);
     cmode = sm::SIDE | sm::MAYDARK;
     gamescreen();
@@ -3783,7 +3790,11 @@ void list_setting::show_edit_option(int key) {
     if(need_list >= 2) dialog::start_list(1500, 1500, 'a');
     for(int i=0; i<q; i++) {
       dialog::addBoolItem(XLAT(options[i].first), get_value() == i, need_list >= 2 ? dialog::list_fake_key++ : 'a' + i);
-      dialog::add_action([this, i, need_list] { set_value(i); if(reaction) reaction(); if(need_list == 0) popScreen(); });
+      auto action = [this, i, need_list] { set_value(i); if(reaction) reaction(); if(need_list == 0) popScreen(); };
+      if(needs_confirm)
+        dialog::add_action_confirmed(action);
+      else
+        dialog::add_action(action);
       if(need_list == 0 && options[i].second != "") {
         dialog::addBreak(100);
         dialog::addHelp(XLAT(options[i].second));
@@ -3799,7 +3810,8 @@ void list_setting::show_edit_option(int key) {
       }
     dialog::addBack();
     dialog::display();
-    });
+    };
+  dialog::add_action_push(screen);
   }
 
 EX void showSettings() {

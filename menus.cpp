@@ -661,7 +661,7 @@ EX void showChangeMode() {
   menuitem_land_structure('l');
 
   dialog::addBoolItem(XLAT("weapon selection"), bow::weapon, 'b');
-  dialog::add_action_confirmed([] { pushScreen(bow::showMenu); });
+  dialog::add_action_push(bow::showMenu);
 
   dialog::addBoolItem(XLAT("puzzle/exploration mode"), peace::on, 'p');
   dialog::add_action_push(peace::showMenu);
