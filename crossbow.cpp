@@ -284,7 +284,7 @@ EX void shoot() {
     eMonster who = (mov.flags & bpCOPIED) ? moMimic : moPlayer;
 
     if(c != cf) for(int t=0; t<cf->type; t++) {
-      cell *c1 = cf->move(t);
+      cell *c1 = cf->cmove(t);
       if(!c) continue;
 
       bool stabthere = false;
