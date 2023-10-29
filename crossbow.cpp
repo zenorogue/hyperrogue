@@ -27,7 +27,7 @@ EX namespace bow {
 
 #if HDR
 enum eWeapon { wBlade, wCrossbow };
-enum eCrossbowStyle { cbBull, cbGeodesic };
+enum eCrossbowStyle { cbBull, cbGeodesic, cbGeometric };
 #endif
 
 EX eWeapon weapon;
@@ -79,7 +79,37 @@ EX int qadd(cellwalker a, cellwalker b) {
   return NODIR;
   }
 
-EX int create_path() {
+int best_score_res;
+
+EX int bolt_score(cellwalker cw2) {
+  int d = cw2.at->cpdist;
+  int ntotal = 2;
+  if(inmirror(cw2.at)) cw2 = mirror::reflect(cw2);
+  if(blocks(cw2.cpeek())) return -1;
+  if(thruVine(cw2.at, cw2.cpeek())) return -1;
+
+  if(cw2.at->monst) {
+    flagtype attackflags = AF_BOW;
+    if(items[itOrbSpeed]&1) attackflags |= AF_FAST;
+    if(items[itOrbSlaying]) attackflags |= AF_CRUSH;
+    if(items[itCurseWeakness]) attackflags |= AF_WEAK;
+    if(canAttack(cw2.cpeek(), moPlayer, cw2.at, cw2.at->monst, attackflags)) {
+      ntotal += 10000; ntotal += 1280 >> d;
+      }
+    }
+
+  for(int t=0; t<cw2.at->type; t++) {
+    cell *c1 = cw2.at->cmove(t);
+    if(!logical_adjacent(cw2.cpeek(), moPlayer, c1)) continue;
+    if(canAttack(cw2.cpeek(),moPlayer,c1,c1->monst,AF_STAB)) {
+      ntotal += 10000; ntotal += 1280 >> d;
+      }
+    }
+
+  return ntotal;
+  }
+
+EX vector<int> create_dirseq() {
   map<cell*, bowscore> scores;
   scores[cwt.at].total = 0;
 
@@ -93,33 +123,11 @@ EX int create_path() {
     best.total = -1;
     forCellIdEx(c1, i, c) if(c1->cpdist < c->cpdist && scores.count(c1)) {
       auto& last = scores[c1];
-      int ntotal = last.total;
       auto ocw2 = cellwalker(c, i);
-      auto cw2 = ocw2;
-      if(inmirror(c)) cw2 = mirror::reflect(cw2);
-      if(blocks(cw2.cpeek())) continue;
-      if(thruVine(cw2.at, cw2.cpeek())) continue;
+      int bonus = bolt_score(ocw2);
+      if(bonus < 0) continue;
+      int ntotal = last.total + bonus;
 
-      if(cw2.at->monst) {
-        flagtype attackflags = AF_BOW;
-        if(items[itOrbSpeed]&1) attackflags |= AF_FAST;
-        if(items[itOrbSlaying]) attackflags |= AF_CRUSH;
-        if(items[itCurseWeakness]) attackflags |= AF_WEAK;
-        if(canAttack(cw2.cpeek(), moPlayer, cw2.at, cw2.at->monst, attackflags)) {
-          ntotal += 10000; ntotal += 1280 >> c->cpdist;
-          }
-        }
-
-      for(int t=0; t<cw2.at->type; t++) {
-        cell *c1 = cw2.at->move(t);
-        if(!c) continue;
-        if(!logical_adjacent(cw2.cpeek(), moPlayer, c1)) continue;
-        if(canAttack(cw2.cpeek(),moPlayer,c1,c1->monst,AF_STAB)) {
-          ntotal += 10000; ntotal += 1280 >> c->cpdist;
-          }
-        }
-
-      ntotal += 2;
       int dir = 0;
       if(c->cpdist > 1) {
         dir = qadd(last.last, ocw2+wstep);
@@ -143,7 +151,7 @@ EX int create_path() {
     if(best.total > -1) scores[c] = best;
     }
 
-  if(best_score == -1) return best_score;
+  if(best_score == -1) return {};
 
   vector<int> dirseq = { NODIR };
   while(best_score_at != cwt.at) { 
@@ -152,6 +160,51 @@ EX int create_path() {
     best_score_at = at.last.cpeek();
     }
   reverse(dirseq.begin(), dirseq.end());
+
+  best_score_res = best_score;
+  return dirseq;
+  }
+
+EX vector<int> create_dirseq_geometric() {
+  cell *tgt = nullptr;
+  for(auto t: target_at) tgt = t.second;
+  if(!tgt) return {};
+  hyperpoint h = tC0(currentmap->relative_matrix(tgt, cwt.at, C0));
+  transmatrix T = spintox(h);
+
+  best_score_res = 0;
+  cellwalker at = cwt;
+  vector<int> dirseq;
+  while(true) {
+    int best_i = -1;
+    ld best_y = HUGE_VAL;
+    for(int i=0; i<at.at->type; i++) {
+      cellwalker at1 = at + i;
+      if(at1.cpeek()->cpdist != at.at->cpdist + 1) continue;
+      transmatrix U = T * currentmap->adj(at.at, at1.spin);
+      hyperpoint U0 = tC0(U);
+      hyperpoint T0 = tC0(T);
+      if(U0[0] < T0[0] + 1e-6) continue;
+      ld y;
+      if(GDIM == 3) y = hypot(U0[1], U0[2]); else y = abs(U0[1]) + (U0[1] > 0 ? 1e-6 : 0);
+      if(y < best_y) { best_y = y; best_i = i; }
+      }
+    if(best_i < 0) break;
+    at = at + best_i;
+    int bonus = bolt_score(at + wstep);
+    if(bonus < 0) break;
+    best_score_res += bonus;
+    dirseq.push_back(best_i);
+    T = T * currentmap->adj(at.at, at.spin);
+    at = at + wstep;
+    }
+
+  return dirseq;
+  }
+
+EX int create_path() {
+  auto dirseq = style == cbGeometric ? create_dirseq_geometric() : create_dirseq();
+  if(dirseq.empty()) return -1;
 
   struct bolt {
     cellwalker at;
@@ -198,7 +251,7 @@ EX int create_path() {
     broken_mirrors = next_broken_mirrors;
     }
 
-  return best_score;
+  return best_score_res;
   }
 
 EX void clear_bowpath() {
@@ -255,6 +308,7 @@ EX void add_fire(cell *c) {
     }
   else {
     t = c;
+    if(style == cbGeometric) { target_at = {}; target_at[c->cpdist] = c; }
     int res = create_path();
     if(res == -1) {
       if(!emp) {

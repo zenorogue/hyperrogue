@@ -1554,7 +1554,8 @@ EX void initConfig() {
       };
   param_enum(bow::style, "bow_style", "bow_style", bow::style)
     -> editable({{"bull line", "Can go in either direction on odd shapes. 3 turns to reload."},
-      {"geodesic", "Graph geodesic: any sequence of tiles is OK as long as there are no shortcuts. 4 turns to reload."}},
+      {"geodesic", "Graph geodesic: any sequence of tiles is OK as long as there are no shortcuts. 4 turns to reload."},
+      {"geometric", "Approximations of geometric straight lines."}},
       "crossbow straight line style", 'l')
     -> set_need_confirm()
     -> set_value_to = [] (bow::eCrossbowStyle s) { bool b = game_active; if(s != bow::style) stop_game(); bow::style = s; if(b) start_game(); };
