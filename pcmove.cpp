@@ -252,6 +252,7 @@ bool pcmove::try_shooting(bool auto_target) {
         }
       return false;
       }
+    addMessage(XLAT("Fire!"));
     }
   items[itCrossbow] = bow::loading_time();
   bow::shoot();
@@ -860,8 +861,12 @@ void pcmove::tell_why_cannot_attack() {
     addMessage(XLAT("You cannot attack your own mount!"));
   else if(checkOrb(c2->monst, itOrbShield))
     addMessage(XLAT("A magical shield protects %the1!", c2->monst));
+  else if(bow::crossbow_mode() && !bow::bump_to_shoot)
+    addMessage(XLAT("You have no melee weapon!"));
   else if(bow::crossbow_mode() && items[itCrossbow])
     addMessage(XLAT("Your crossbow is still reloading!"));
+  else if(bow::crossbow_mode())
+    addMessage(XLAT("Trying to fire."));
   else
     addMessage(XLAT("For some reason... cannot attack!"));
   }
