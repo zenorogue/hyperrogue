@@ -4897,7 +4897,11 @@ EX void drawMarkers() {
     multi::cpid = 0;
     orbToTarget = targetRangedOrb(mouseover, roCheck);
     #if CAP_QUEUE
-    if(orbToTarget == itOrbSummon) {
+    if(bow::fire_mode) {
+      queuestr(mousex, mousey, 0, vid.fsize, "+", getcs().bowcolor >> 8);
+      orbToTarget = itNone;
+      }
+    else if(orbToTarget == itOrbSummon) {
       monsterToSummon = summonedAt(mouseover);
       queuestr(mousex, mousey, 0, vid.fsize, s0+minf[monsterToSummon].glyph, minf[monsterToSummon].color);
       queuecircleat(mouseover, 0.6, darkena(minf[monsterToSummon].color, 0, 0xFF));
