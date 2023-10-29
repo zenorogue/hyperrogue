@@ -248,6 +248,7 @@ EX void add_fire(cell *c) {
     pcmove pcm;
     pcm.checkonly = false;
     changes.init(false);
+    addMessage(XLAT("Fire!"));
     bool b = pcm.try_shooting(false);
     if(!b) changes.rollback();
     fire_mode = false;

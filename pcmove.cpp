@@ -265,6 +265,15 @@ bool pcmove::try_shooting(bool auto_target) {
     if(gravity_state) markOrb(itOrbGravity);
     }
   lastmovetype = lmAttack; lastmove = NULL;
+
+  if(cellEdgeUnstable(cwt.at) || cwt.at->land == laWhirlpool) {
+    if(checkonly) return true;
+    if(changes.on) changes.commit();
+    addMessage(XLAT("(shooting while unstable -- no turn passes)"));
+    checkmove();
+    return true;
+    }
+
   if(checkNeedMove(checkonly, false))
     return false;
   swordAttackStatic();
