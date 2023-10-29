@@ -1591,7 +1591,7 @@ ITEM( 'o', 0x808080, "Orb of Impact", itOrbImpact, IC_ORB, ZERO, RESERVED, osUti
   "Whenever you use a ranged Orb to achieve an effect, all the single-tile monsters adjacent to the target "
   "location are stunned."
   )
-WALL( '#', 0x00C000, "shrub",  waShrub, WF_WALL | WF_HIGHWALL | WF_STDTREE | WF_CONE, RESERVED, 0, sgNone, 
+WALL( '#', 0x00C000, "shrub",  waShrub, WF_WALL | WF_HIGHWALL | WF_STDTREE | WF_CONE | WF_NONBLOCK, RESERVED, 0, sgNone,
   "A strange small tree that cannot be attacked with mundane weapons nor phased though. "
   "It can be vaulted over, though."
   )
