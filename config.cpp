@@ -1581,6 +1581,7 @@ EX void initConfig() {
   ->set_reaction(reset_all_shaders);
   param_f(stereo_alpha, "stereo_alpha", 0)
   ->set_reaction(reset_all_shaders);
+  param_b(equirectangular, "equirectangular");
 
   callhooks(hooks_configfile);
   

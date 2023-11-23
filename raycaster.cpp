@@ -1952,6 +1952,10 @@ void raygen::create() {
 
    if(use_reflect) fmain += "  bool depthtoset = true;\n";
 
+   fmain +=
+    "  mediump float left = 1.;\n"
+    "  gl_FragColor = vec4(0,0,0,1);\n";
+
     if(IN_ODS) fmain +=
     "  mediump float lambda = at[0];\n" // -PI to PI
     "  mediump float phi;\n"
@@ -1960,13 +1964,18 @@ void raygen::create() {
     "  else { phi = at.y - PI/2.; eye = -uIPD / 2.; }\n"
     "  mediump mat4 vw = uStart * xzspin(-lambda) * "+f_xpush()+"(eye) * yzspin(phi);\n"
     "  mediump vec4 at0 = vec4(0., 0., 1., 0.);\n";
+    // todo: will not work in product!
     
+    else if(equirectangular) fmain +=
+    "  mediump float lambda = at.x * PI;\n" // -PI to PI
+    "  mediump float phi = at.y * PI / 2.0;\n"
+    "  mediump mat4 vw = uStart;\n"
+    "  mediump vec4 at0 = xzspin(-lambda) * yzspin(phi) * vec4(0., 0., 1., 0.);\n";
+
     else {
       fmain += 
         "  mediump mat4 vw = uStart;\n"
         "  mediump vec4 at0 = at;\n"
-        "  gl_FragColor = vec4(0,0,0,1);\n"
-        "  mediump float left = 1.;\n"
         "  at0.y = -at.y;\n"
         "  at0.w = 0.;\n";
       
@@ -2570,6 +2579,9 @@ EX void cast() {
   #else
   if(0) ;
   #endif
+  else if(equirectangular) {
+    glUniformMatrix4fv(o->uProjection, 1, 0, glhr::tmtogl_transpose(Id).as_array());
+    }
   else {
     dynamicval<eGeometry> g(geometry, gCubeTiling);
     transmatrix proj = Id;

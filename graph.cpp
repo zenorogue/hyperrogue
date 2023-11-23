@@ -24,6 +24,7 @@ EX bool mmspatial, mmhigh, mmmon, mmitem;
 
 EX ld panini_alpha = 0;
 EX ld stereo_alpha = 0;
+EX bool equirectangular;
 
 EX int detaillevel = 0;
 
