@@ -15,7 +15,7 @@ EX namespace ray {
 #if CAP_RAY
 
 /** texture IDs */
-GLuint txConnections = 0, txWallcolor = 0, txTextureMap = 0, txVolumetric = 0, txM = 0, txWall = 0, txPortalConnections = 0;
+GLuint txConnections = 0, txWallcolor = 0, txTextureMap = 0, txVolumetric = 0, txM = 0, txWall = 0, txPortalConnections = 0, txStart = 0;
 
 EX bool in_use;
 EX bool comparison_mode;
@@ -97,8 +97,6 @@ ld& maxstep_current() {
   return maxstep_nil;
   }
 
-#define IN_ODS 0
-
 eGeometry last_geometry;
 
 vector<pair<int, cell*>> used_sample_list() {
@@ -162,9 +160,9 @@ EX bool requested() {
 
 #if HDR
 struct raycaster : glhr::GLprogram {
-  GLint uStart, uStartid, uM, uLength, uIPD;
+  GLint uStart, uStartid, uM, uLength;
   GLint uWallstart, uWallX, uWallY;
-  GLint tConnections, tWallcolor, tTextureMap, tVolumetric;
+  GLint tConnections, tWallcolor, tTextureMap, tVolumetric, tStart;
   GLint uBinaryWidth, uPLevel, uLP, uStraighten, uReflectX, uReflectY;
   GLint uLinearSightRange, uExpStart, uExpDecay;
   GLint uBLevel;
@@ -204,7 +202,6 @@ raycaster::raycaster(string vsh, string fsh) : GLprogram(vsh, fsh) {
     uM = glGetUniformLocation(_program, "uM");
     uLength = glGetUniformLocation(_program, "uLength");
     uProjection = glGetUniformLocation(_program, "uProjection");
-    uIPD = glGetUniformLocation(_program, "uIPD");
 
     uWallstart = glGetUniformLocation(_program, "uWallstart");
     uWallX = glGetUniformLocation(_program, "uWallX");
@@ -228,6 +225,7 @@ raycaster::raycaster(string vsh, string fsh) : GLprogram(vsh, fsh) {
     tWallcolor = glGetUniformLocation(_program, "tWallcolor");
     tTextureMap = glGetUniformLocation(_program, "tTextureMap");
     tVolumetric = glGetUniformLocation(_program, "tVolumetric");
+    tStart = glGetUniformLocation(_program, "tStart");
 
     tPortalConnections = glGetUniformLocation(_program, "tPortalConnections");
 
@@ -1255,15 +1253,6 @@ void raygen::emit_iterate(int gid1) {
 
   if(in_e2xe() && !eyes) fmain += "tangent.w = position.w = 0.;\n";
 
-  if(IN_ODS) fmain +=
-    "  if(go == 0.) {\n"
-    "    mediump float best = "+f_len()+"(position);\n"
-    "    for(int i=0; i<sides; i++) {\n"
-    "      mediump float cand = "+f_len()+"(" + getM("i") + " * position);\n"
-    "      if(cand < best - .001) { dist = 0.; best = cand; which = i; }\n"
-    "      }\n"
-    "    }\n";
-
   compute_which_and_dist(flat1, flat2);
 
   vid.fixed_yz = false;
@@ -1855,9 +1844,6 @@ void raygen::create() {
     fsh =
     "varying mediump vec4 at;\n"
     "uniform mediump int uLength;\n"
-    "uniform mediump float uIPD;\n"
-    "uniform mediump mat4 uStart;\n"
-    "uniform mediump vec2 uStartid;\n"
     "uniform mediump sampler2D tConnections;\n"
     "uniform mediump sampler2D tWallcolor;\n"
     "uniform mediump sampler2D tVolumetric;\n"
@@ -1865,6 +1851,16 @@ void raygen::create() {
     "uniform mediump sampler2D tTextureMap;\n"
     "uniform mediump vec4 uFogColor;\n"
     "uniform mediump float uLinearSightRange, uExpStart, uExpDecay;\n";
+
+    if(vid.stereo_mode == sODS) {
+      fsh +=
+      "uniform mediump sampler2D tStart;\n";
+      }
+    else {
+      fsh +=
+      "uniform mediump mat4 uStart;\n"
+      "uniform mediump vec2 uStartid;\n";
+      }
 
     if(intra::in) fsh +=
       "uniform mediump sampler2D tPortalConnections;\n";
@@ -1915,7 +1911,7 @@ void raygen::create() {
       fsh += build_getter("mediump mat4", "uM", gms_limit);
     #endif
 
-    if(gproduct || intra::in) fsh +=
+    if((gproduct || intra::in) && vid.stereo_mode != sODS) fsh +=
       "uniform mediump mat4 uLP;\n";
 
     if(gproduct || intra::in) fsh +=
@@ -1952,21 +1948,32 @@ void raygen::create() {
 
    if(use_reflect) fmain += "  bool depthtoset = true;\n";
 
+   if(many_cell_types && vid.stereo_mode != sODS) fmain += "  walloffset = uWallOffset; sides = uSides;\n";
+
    fmain +=
     "  mediump float left = 1.;\n"
     "  gl_FragColor = vec4(0,0,0,1);\n";
 
-    if(IN_ODS) fmain +=
-    "  mediump float lambda = at[0];\n" // -PI to PI
+    if(vid.stereo_mode == sODS) fmain +=
     "  mediump float phi;\n"
-    "  mediump float eye;\n"
-    "  if(at.y < 0.) { phi = at.y + PI/2.; eye = uIPD / 2.; }\n" // right
-    "  else { phi = at.y - PI/2.; eye = -uIPD / 2.; }\n"
-    "  mediump mat4 vw = uStart * xzspin(-lambda) * "+f_xpush()+"(eye) * yzspin(phi);\n"
-    "  mediump vec4 at0 = vec4(0., 0., 1., 0.);\n";
-    // todo: will not work in product!
-*/
-    
+    "  mediump float yb;\n"
+    "  float xb = (at.x + 1.) / 2.;\n"
+    "  if(at.y < 0.) { phi = at.y * PI + PI/2.; yb = 0.516525; }\n" // right
+    "  else { phi = at.y * PI - PI/2.; yb = 0.016525; }\n" // left
+    "  mediump mat4 vw;\n"
+    "  mediump mat4 uLP;\n"
+    "  mediump vec4 at0 = yzspin(phi) * vec4(0., 0., 1., 0.);\n"
+    "  mediump vec4 pt = texture2D(tStart, vec2(xb, yb + 0.25));\n"
+    "  mediump vec2 uStartid = pt.xy;\n"
+    "  for(int i=0; i<4; i++) {\n"
+    "    mediump vec4 v = texture2D(tStart, vec2(xb, yb + float(i) / 32.));\n"
+    "    for(int j=0; j<4; j++) vw[j][i] = (v[j] - .5) * " + to_glsl(ray_scale) + ";\n"
+    "    v = texture2D(tStart, vec2(xb, yb + 0.125 + float(i) / 32.));\n"
+    "    for(int j=0; j<4; j++) uLP[j][i] = (v[j] - .5) * " + to_glsl(ray_scale) + ";\n"
+    "    }\n"
+    "  walloffset = int(pt.w * " + to_glsl(max_wall_offset) + ");\n"
+    "  sides = int(pt.w * " + to_glsl(max_wall_offset * max_celltype) + ") - " + its(max_celltype) + " * walloffset;\n";
+
     else if(vid.stereo_mode == sEquirectangular) fmain +=
     "  mediump float lambda = at.x * PI;\n" // -PI to PI
     "  mediump float phi = at.y * PI / 2.0;\n"
@@ -2038,8 +2045,6 @@ void raygen::create() {
       fmain += "  mediump float xspeed = 1.;\n";
       fmain += "  mediump float zpos = 0.;\n";
       }
-
-    if(many_cell_types) fmain += "  walloffset = uWallOffset; sides = uSides;\n";
 
     if(intra::in) {
 
@@ -2527,6 +2532,35 @@ EX void load_walls(vector<glvertex>& wallx, vector<glvertex>& wally, vector<GLin
     }
   }
 
+int ray_fixes_warn_from = 10;
+
+EX void rayfix(cell*& cs, transmatrix& T, transmatrix& msm) {
+  int ray_fixes = 0;
+  auto ocs = cs;
+
+  hyperpoint TC0 = tile_center();
+  back:
+  for(int a=0; a<cs->type; a++)
+    if(hdist(currentmap->ray_iadj(cs, a) * T * C0, TC0) < hdist(T * C0, TC0)) {
+      T = currentmap->iadj(cs, a) * T;
+      if(our_raycaster->uToOrig != -1) {
+        transmatrix HT = currentmap->adj(cs, a);
+        HT = stretch::itranslate(tC0(HT)) * HT;
+        msm = HT * msm;
+        }
+      cs = cs->move(a);
+      ray_fixes++;
+      if(ray_fixes > 100) {
+        println(hlog, "major ray error");
+        return;
+        }
+      goto back;
+      }
+  if(ray_fixes >= ray_fixes_warn_from) println(hlog, "ray error x", ray_fixes, " centerover = ", ocs, " -> ", cs);
+  }
+
+EX int ods_prec = 8192;
+
 EX void cast() {
   // may call itself recursively in case of bugs -- just in case...
   dynamicval<int> dn(nesting, nesting+1);
@@ -2538,7 +2572,7 @@ EX void cast() {
 
   auto& o = our_raycaster;
   
-  if(need_many_cell_types() && o->uWallOffset == -1) {
+  if(need_many_cell_types() && o->uWallOffset == -1 && vid.stereo_mode != sODS) {
     reset_raycaster();
     cast();
     return;
@@ -2599,43 +2633,20 @@ EX void cast() {
   transmatrix T = cview().T;
   
   if(global_projection)
-    T = xpush(vid.ipd * global_projection/2) * T;
+    T = xpush(vid.ipd * global_projection/2) * T; // todo fix for intra
 
   if(nonisotropic) T = NLP * T;
   T = inverse(T);
 
   virtualRebase(cs, T);
   
-  int ray_fixes = 0;
-  
   transmatrix msm = stretch::mstretch_matrix;
 
-  hyperpoint TC0 = tile_center();
-
-  back:
-  for(int a=0; a<cs->type; a++)
-    if(hdist(currentmap->ray_iadj(cs, a) * T * C0, TC0) < hdist(T * C0, TC0)) {
-      T = currentmap->iadj(cs, a) * T;
-      if(o->uToOrig != -1) {
-        transmatrix HT = currentmap->adj(cs, a);
-        HT = stretch::itranslate(tC0(HT)) * HT;
-        msm = HT * msm;
-        }
-      cs = cs->move(a);
-      ray_fixes++;
-      if(ray_fixes > 100) {
-        println(hlog, "major ray error");
-        return;
-        }
-      goto back;
-      }
-  if(ray_fixes) println(hlog, "ray error x", ray_fixes, " centerover = ", centerover, " -> ", cs);
+  rayfix(cs, T, msm);
   
-  glUniformMatrix4fv(o->uStart, 1, 0, glhr::tmtogl_transpose3(T).as_array());
+  if(vid.stereo_mode != sODS) glUniformMatrix4fv(o->uStart, 1, 0, glhr::tmtogl_transpose3(T).as_array());
   if(o->uLP != -1) glUniformMatrix4fv(o->uLP, 1, 0, glhr::tmtogl_transpose3(inverse(NLP)).as_array());
   GLERR("uniform mediump startid");
-  glUniform1f(o->uIPD, vid.ipd);
-  GLERR("uniform mediump IPD");
   
   if(o->uITOA != -1) {
     glUniformMatrix4fv(o->uITOA, 1, 0, glhr::tmtogl_transpose3(stretch::m_itoa).as_array());   
@@ -2757,7 +2768,7 @@ EX void cast() {
     }
 
   // we may learn about this now...
-  if(need_many_cell_types() && o->uWallOffset == -1) {
+  if(need_many_cell_types() && o->uWallOffset == -1 && vid.stereo_mode != sODS) {
     reset_raycaster();
     cast();
     return;
@@ -2766,7 +2777,88 @@ EX void cast() {
   GLERR("uniform mediump start");
   
   if(!o) { cast(); return; }
-  uniform2(o->uStartid, rmap->enc(rmap->ids[cs], 0));
+
+  if(vid.stereo_mode == sODS) {
+
+    vector<array<float, 4>> tstart(ods_prec * 32);
+
+    for(int y=0; y<2; y++)
+    for(int x=0; x<ods_prec; x++) {
+      // ...
+
+      ld lambda = ((x + 0.5) / ods_prec * 2 - 1) * M_PI;
+      // 0: -M_PI, ods_prec: M_PI -> ok
+
+      int xb = x + y * ods_prec * 16;
+
+      dynamicval<cell*> tco(centerover);
+      dynamicval<int> tfd(walking::floor_dir);
+      dynamicval<cell*> tof(walking::on_floor_of);
+      dynamicval<ld> tis(intra::scale);
+      dynamicval<transmatrix> tN(NLP, NLP);
+      dynamicval<transmatrix> tV(View, View);
+      dynamicval<transmatrix> tC(current_display->which_copy, current_display->which_copy);
+      dynamicval<transmatrix> trt(current_display->radar_transform);
+
+      int id = intra::current;
+      cell *cov = centerover;
+      finalizer fin([&] {
+        if(intra::current != id) {
+          intra::switch_to(id);
+          }
+        centerover = cov;
+        });
+
+      auto T1 = T;
+
+      View = inverse(T1);
+      // if(nonisotropic) View = inverse(NLP) * View;
+
+      centerover = cs;
+      ld eye = y == 0 ? vid.ipd / 2. : -vid.ipd / 2.;
+      rotate_view(cspin(0, 2, -lambda));
+      shift_view(xtangent(eye));
+
+      if(nonisotropic) {
+        auto T = View;
+        transmatrix T2 = eupush( tC0(view_inverse(T)) );
+        NLP = T * T2;
+        }
+
+      T1 = inverse(View);
+      virtualRebase(centerover, T1);
+      rayfix(centerover, T1, msm);
+
+      T1 = protect_prod(T1);
+
+      for(int a=0; a<4; a++)
+      for(int b=0; b<4; b++) {
+        tstart[xb + a * ods_prec][b] = T1[a][b]/ray_scale + .5;
+        }
+
+      auto mLP = protect_prod(inverse(NLP));
+
+      for(int a=0; a<4; a++)
+      for(int b=0; b<4; b++) {
+        tstart[xb + (a+4) * ods_prec][b] = mLP[a][b]/ray_scale + .5;
+        }
+
+      auto enc = rmap->enc(rmap->ids[centerover], 0);
+
+      tstart[xb + 8 * ods_prec][0] = enc[0];
+      tstart[xb + 8 * ods_prec][1] = enc[1];
+
+      int wo1 = intra::full_wall_offset(centerover);
+      int sides = centerover->type + (WDIM == 2 ? 2 : 0);
+
+      tstart[xb + 8 * ods_prec][3] = (wo1 * 1. / max_wall_offset) + (sides + .5) * 1. / max_wall_offset / max_celltype;
+      }
+
+    if(vid.stereo_mode != sODS) glUniformMatrix4fv(o->uStart, 1, 0, glhr::tmtogl_transpose3(T).as_array());
+    bind_array(tstart, o->tStart, txStart, 10, ods_prec);
+    }
+  else
+    uniform2(o->uStartid, rmap->enc(rmap->ids[cs], 0));
   }
 
   #if CAP_VERTEXBUFFER
