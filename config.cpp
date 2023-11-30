@@ -3714,9 +3714,23 @@ EX void add_edit_ptr(void *val) {
   if(found != 1) println(hlog, "found = ", found);
   }
 
+EX void add_edit_ptr(void *val, char key) {
+  int found = 0;
+  for(auto& fs: params) {
+    fs.second->check_change();
+    if(fs.second->affects(val))
+      fs.second->show_edit_option(key), found++;
+    }
+  if(found != 1) println(hlog, "found = ", found);
+  }
+
 #if HDR
 template<class T> void add_edit(T& val) {
   add_edit_ptr(&val);
+  }
+
+template<class T> void add_edit(T& val, char key) {
+  add_edit_ptr(&val, key);
   }
 #endif
 
