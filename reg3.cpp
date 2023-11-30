@@ -79,13 +79,16 @@ EX void make_vertices_only(vector<hyperpoint>& vo, const vector<vector<hyperpoin
   }
 EX }
 
+// you may need to disable this to revert to old behavior (e.g., to make old recordings work)
+EX bool fix_stretch = true;
+
 transmatrix sfix_rgpushxto0(hyperpoint h) {
-  if(stretch::applicable() && !fake::in()) return stretch::translate(h);
+  if(fix_stretch && stretch::applicable() && !fake::in()) return stretch::translate(h);
   return rgpushxto0(h);
   }
 
 transmatrix sfix_gpushxto0(hyperpoint h) {
-  if(stretch::applicable() && !fake::in()) return stretch::itranslate(h);
+  if(fix_stretch && stretch::applicable() && !fake::in()) return stretch::itranslate(h);
   return gpushxto0(h);
   }
 
