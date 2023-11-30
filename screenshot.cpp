@@ -798,12 +798,10 @@ EX void take(string fname, const function<void()>& what IS(default_screenshot_co
       if(chg[i]) anims::aps[i].par->anim_restore();
     });
   
-  if(intra::in) what();
-
-  dynamicval<videopar> v(vid, vid);
+  dynamicval<bool> vn(nohud, nohud || hide_hud);
   dynamicval<bool> v2(inHighQual, true);
   dynamicval<bool> v6(auraNOGL, true);
-  dynamicval<bool> vn(nohud, nohud || hide_hud);
+  dynamicval<videopar> v(vid, vid);
 
   vid.smart_range_detail *= multiplier;
   darken = 0;
