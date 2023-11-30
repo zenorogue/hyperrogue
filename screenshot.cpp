@@ -1390,11 +1390,14 @@ int numturns = 0;
 
 EX hookset<void(int, int)> hooks_record_anim;
 
+EX int record_frame_id = -1;
+
 EX bool record_animation_of(reaction_t content) {
   lastticks = 0;
   ticks = 0;
   int oldturn = -1;
   for(int i=0; i<noframes; i++) {
+    record_frame_id = i;
     if(i < min_frame || i > max_frame) continue;
     println(hlog, "record frame ",i, "/", noframes, " of ", videofile);
     callhooks(hooks_record_anim, i, noframes);
@@ -1433,6 +1436,7 @@ EX bool record_animation_of(reaction_t content) {
     shot::take(buf, content);
     }
   lastticks = ticks = SDL_GetTicks();
+  record_frame_id = -1;
   return true;
   }
 
