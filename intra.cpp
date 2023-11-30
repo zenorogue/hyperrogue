@@ -527,21 +527,21 @@ EX void analyze_orthonormal(array<hyperpoint, 4> ds, ld sca) {
   }
 
 EX void shift_view_portal(hyperpoint H) {
-  shift_view(H);
+  shift_view(H * scale);
   if(!through_portal()) return;
-  shift_view(-H);
+  shift_view(-H * scale);
   ld minv = 0, maxv = 1;
   for(int i=0; i<30; i++) {
     ld t = (minv + maxv) / 2;
-    shift_view(H * t);
+    shift_view(H * t * scale);
     bool b = through_portal();
     if(b) maxv = t; else minv = t;
-    shift_view(H * -t);
+    shift_view(H * -t * scale);
     }
   println(hlog, "maxv = ", maxv);
-  shift_view(H * maxv);
+  shift_view(H * maxv * scale);
   check_portal_movement();
-  shift_view_portal(H * (1 - maxv));
+  shift_view_portal(H * (1 - maxv) * scale);
   }
 
 EX const connection_data* through_portal() {
@@ -551,6 +551,8 @@ EX const connection_data* through_portal() {
   auto cw1 = cellwalker(centerover, nei);
   return at_or_null(connections, cw1);
   }
+
+EX ld scale = 1;
 
 EX void check_portal_movement() {
   auto p = through_portal();
@@ -620,19 +622,26 @@ EX void check_portal_movement() {
       #endif
       }
 
-    ld scale = p->id2.scale / p->id1.scale;
-
-    camera_speed *= scale;
-    anims::cycle_length *= scale;
-    #if CAP_VR
-    vrhr::absolute_unit_in_meters *= scale;
-    #endif
-    if(walking::eye_level != -1) walking::eye_level *= scale;
+    scale *= p->id2.scale / p->id1.scale;
 
     walking::floor_dir = -1;
     walking::on_floor_of = nullptr;
     }
   }
+
+EX void apply_scale() {
+  if(scale != 1) {
+    camera_speed *= scale;
+    anims::cycle_length *= scale;
+    vid.ipd *= scale;
+    #if CAP_VR
+    vrhr::absolute_unit_in_meters *= scale;
+    #endif
+    if(walking::eye_level != -1) walking::eye_level *= scale;
+    scale = 1;
+    }
+  }
+
 
 vector<cellwalker> unconnected;
 

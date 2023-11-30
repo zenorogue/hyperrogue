@@ -2262,6 +2262,10 @@ EX void optimizeview() {
   View = iview_inverse(iView);
   fixmatrix(View);
   callhooks(hooks_postoptimize);
+
+  #if CAP_PORTALS
+  intra::apply_scale();
+  #endif
   
   walking::handle();
 

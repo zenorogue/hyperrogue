@@ -1095,12 +1095,9 @@ EX void render() {
       dynamicval<transmatrix> tV(View, View);
       dynamicval<transmatrix> tC(current_display->which_copy, current_display->which_copy);
       dynamicval<transmatrix> trt(current_display->radar_transform);
-      
-      /* changed in intra */
-      dynamicval<ld> tcs(camera_speed);
-      dynamicval<ld> tcl(anims::cycle_length);
-      dynamicval<ld> tau(vrhr::absolute_unit_in_meters);
-      dynamicval<ld> tel(walking::eye_level);
+      dynamicval<ld> tcs(intra::scale);
+
+      // just in case
       dynamicval<int> tfd(walking::floor_dir);
       dynamicval<cell*> tof(walking::on_floor_of);
 
