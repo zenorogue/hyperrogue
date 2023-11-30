@@ -1434,10 +1434,10 @@ void raygen::emit_iterate(int gid1) {
       fsh += "uniform mediump float uLevelLines;\n";
     }
 
-  if(panini_alpha)
+  if(vid.stereo_mode == sPanini)
     fmain += panini_shader();
 
-  else if(stereo_alpha)
+  else if(vid.stereo_mode == sStereographic)
     fmain += stereo_shader();
 
   #ifndef GLES_ONLY
@@ -1965,8 +1965,9 @@ void raygen::create() {
     "  mediump mat4 vw = uStart * xzspin(-lambda) * "+f_xpush()+"(eye) * yzspin(phi);\n"
     "  mediump vec4 at0 = vec4(0., 0., 1., 0.);\n";
     // todo: will not work in product!
+*/
     
-    else if(equirectangular) fmain +=
+    else if(vid.stereo_mode == sEquirectangular) fmain +=
     "  mediump float lambda = at.x * PI;\n" // -PI to PI
     "  mediump float phi = at.y * PI / 2.0;\n"
     "  mediump mat4 vw = uStart;\n"
@@ -1978,10 +1979,10 @@ void raygen::create() {
         "  mediump vec4 at0 = at;\n"
         "  at0.y = -at.y;\n"
         "  at0.w = 0.;\n";
-      
-      if(panini_alpha) fmain += 
+
+      if(vid.stereo_mode == sPanini) fmain +=
           "mediump float hr = at0.x*at0.x;\n"
-          "mediump float alpha = " + to_glsl(panini_alpha) + ";\n"
+          "mediump float alpha = " + to_glsl(get_stereo_param()) + ";\n"
           "mediump float A = 1. + hr;\n"
           "mediump float B = -2.*hr*alpha;\n"
           "mediump float C = 1. - hr*alpha*alpha;\n"
@@ -1995,9 +1996,9 @@ void raygen::create() {
           "\n"
           ;
 
-      else if(stereo_alpha) fmain += 
+      else if(vid.stereo_mode == sStereographic) fmain +=
           "mediump float hr = at0.x*at0.x+at0.y*at0.y;\n"
-          "mediump float alpha = " + to_glsl(stereo_alpha) + ";\n"
+          "mediump float alpha = " + to_glsl(get_stereo_param()) + ";\n"
           "mediump float A = 1. + hr;\n"
           "mediump float B = -2.*hr*alpha;\n"
           "mediump float C = 1. - hr*alpha*alpha;\n"
@@ -2579,7 +2580,7 @@ EX void cast() {
   #else
   if(0) ;
   #endif
-  else if(equirectangular) {
+  else if(among(vid.stereo_mode, sODS, sEquirectangular)) {
     glUniformMatrix4fv(o->uProjection, 1, 0, glhr::tmtogl_transpose(Id).as_array());
     }
   else {

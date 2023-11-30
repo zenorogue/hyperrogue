@@ -457,6 +457,24 @@ int read_legacy_args_anim() {
       } */
 /* skiprope:legacy.cpp  pconf.skiprope += skiprope_rotation * t * TAU / period; */
     }
+  else if(argis("-palpha")) {
+    PHASEFROM(2);
+    #if CAP_GL
+    shift_arg_formula(vid.stereo_param, reset_all_shaders);
+    #else
+    shift_arg_formula(vid.stereo_param);
+    #endif
+    vid.stereo_mode = sPanini;
+    }
+  else if(argis("-salpha")) {
+    PHASEFROM(2);
+    #if CAP_GL
+    shift_arg_formula(vid.stereo_param, reset_all_shaders);
+    #else
+    shift_arg_formula(vid.stereo_param);
+    #endif
+    vid.stereo_mode = sStereographic;
+    }
   else return 1;
   return 0;
   }

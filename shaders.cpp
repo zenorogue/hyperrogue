@@ -77,7 +77,7 @@ EX string panini_shader() {
     "float s = t.z;\n"
     "float l = length(t.xyz);\n"
     "t /= max(length(t.xz), 1e-2);\n"
-    "t.z += " + glhr::to_glsl(panini_alpha) + ";\n"
+    "t.z += " + glhr::to_glsl(get_stereo_param()) + ";\n"
     "t *= l;\n"
     "t.w = 1.;\n";
   }
@@ -88,7 +88,7 @@ EX string stereo_shader() {
     "float s = t.z;\n"
     "float l = length(t.xyz);\n"
     "t /= max(l, 1e-2);\n"
-    "t.z += " + glhr::to_glsl(stereo_alpha) + ";\n"
+    "t.z += " + glhr::to_glsl(get_stereo_param()) + ";\n"
     "t *= l;\n"
     "t.w = 1.;\n";
   }
@@ -515,13 +515,13 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
     if(shader_flags & GF_LEVELS) vmain += "vPos = t;\n";  
     if(treset) vmain += "t[3] = 1.0;\n";
     
-    if((shader_flags & SF_PERS3) && panini_alpha && !vrhr::rendering_eye()) {
+    if((shader_flags & SF_PERS3) && vid.stereo_mode == sPanini && !vrhr::rendering_eye()) {
       vmain += "t = uPP * t;", vsh += "uniform mediump mat4 uPP;";
       /* panini */
       vmain += panini_shader();
       shader_flags |= SF_ORIENT;
       }
-    else if((shader_flags & SF_PERS3) && stereo_alpha && !vrhr::rendering_eye()) {
+    else if((shader_flags & SF_PERS3) && vid.stereo_mode == sStereographic && !vrhr::rendering_eye()) {
       vmain += "t = uPP * t;", vsh += "uniform mediump mat4 uPP;";
       vmain += stereo_shader();
       shader_flags |= SF_ORIENT;

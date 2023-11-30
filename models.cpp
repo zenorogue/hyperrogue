@@ -234,7 +234,7 @@ EX namespace models {
     }    
   
   EX bool has_orientation(eModel m) {
-    if(is_perspective(m) && panini_alpha) return true;
+    if(is_perspective(m) && vid.stereo_mode == sPanini) return true;
     if(nonisotropic) return false;    
     return (mdinf[m].flags & mf::orientation);
     }
@@ -883,22 +883,6 @@ EX namespace models {
     else if(argis("-mob")) { 
       PHASEFROM(2); 
       shift_arg_formula(vpconf.skiprope);
-      }
-    else if(argis("-palpha")) { 
-      PHASEFROM(2); 
-      #if CAP_GL
-      shift_arg_formula(panini_alpha, reset_all_shaders);
-      #else
-      shift_arg_formula(panini_alpha);
-      #endif
-      }
-    else if(argis("-salpha")) { 
-      PHASEFROM(2); 
-      #if CAP_GL
-      shift_arg_formula(stereo_alpha, reset_all_shaders);
-      #else
-      shift_arg_formula(stereo_alpha);
-      #endif
       }
     else if(argis("-zoom")) { 
       PHASEFROM(2); shift_arg_formula(vpconf.scale);

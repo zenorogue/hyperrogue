@@ -250,7 +250,7 @@ struct charstyle {
   bool lefthanded;
   };
 
-enum eStereo { sOFF, sAnaglyph, sLR, sODS };
+enum eStereo { sOFF, sAnaglyph, sLR, sODS, sPanini, sStereographic, sEquirectangular };
 
 enum eModel : int;
 
@@ -395,6 +395,7 @@ struct videopar {
   int cells_generated_limit; // limit on cells generated per frame
   
   eStereo stereo_mode;
+  ld stereo_param;
   ld ipd;
   ld lr_eyewidth, anaglyph_eyewidth;
   ld fov;

@@ -190,7 +190,7 @@
 #endif
 
 #ifndef CAP_ODS
-#define CAP_ODS 0
+#define CAP_ODS 1
 #endif
 
 #ifndef CAP_VIDEO

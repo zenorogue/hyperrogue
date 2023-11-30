@@ -1345,11 +1345,13 @@ EX void initConfig() {
   addsaver(vid.desaturate, "desaturate", 0);
   
   param_enum(vid.stereo_mode, "stereo_mode", "stereo-mode", vid.stereo_mode)
-    ->editable({{"OFF", ""}, {"anaglyph", ""}, {"side-by-side", ""}
-    #if CAP_ODS
-    , {"ODS", ""}
-    #endif
-    }, "stereo mode", 'm');
+    ->editable({
+    {"OFF", "linear perspective"}, {"anaglyph", "for red-cyan glasses"}, {"side-by-side", "for mobile VR"},
+    {"ODS", "for rendering 360° VR videos (implemented only in raycaster and some other parts)"},
+    {"Panini", "Projection believed to be used by Italian painters. Allows very high FOV angles while rendering more straight lines as straight than the stereographic projection."},
+    {"stereographic", "Stereographic projection allows very high FOV angles."},
+    {"equirectangular", "for rendering 360° videos (implemented only in raycaster)"}
+    }, "stereo/high-FOV mode", 'm');
 
   param_f(vid.plevel_factor, "plevel_factor", 0.7);
 
@@ -1577,11 +1579,12 @@ EX void initConfig() {
   param_f(camera_rot_speed, "camrot", "camera-rot-speed", 1);
   param_f(third_person_rotation, "third_person_rotation", 0);
 
-  param_f(panini_alpha, "panini_alpha", 0)
+  param_f(vid.stereo_param, "stereo_param", 0.9)
+  ->editable(-1, 1, 0.9, "stereographic/Panini parameter", "1 for full stereographic/Panini projection. Lower values reduce the effect.\n\n"
+        "HyperRogue uses "
+        "a quick implementation, so parameter values too close to 1 may "
+        "be buggy (outside of raycasting); try e.g. 0.9 instead.", 'd')
   ->set_reaction(reset_all_shaders);
-  param_f(stereo_alpha, "stereo_alpha", 0)
-  ->set_reaction(reset_all_shaders);
-  param_b(equirectangular, "equirectangular");
 
   callhooks(hooks_configfile);
   
@@ -2473,7 +2476,7 @@ EX void explain_detail() {
   }
 
 EX ld max_fov_angle() {
-  auto& p = panini_alpha ? panini_alpha : stereo_alpha;
+  auto p = get_stereo_param();
   if(p >= 1 || p <= -1) return 360;
   return acos(-p) * 2 / degree;
   }
@@ -2481,7 +2484,7 @@ EX ld max_fov_angle() {
 EX void add_edit_fov(char key IS('f')) {
 
   string sfov = fts(vid.fov) + "°";
-  if(panini_alpha || stereo_alpha) {
+  if(get_stereo_param()) {
     sfov += " / " + fts(max_fov_angle()) + "°";
     }
   dialog::addSelItem(XLAT("field of view"), sfov, key);
@@ -2498,37 +2501,11 @@ EX void add_edit_fov(char key IS('f')) {
         );
     dialog::bound_low(1e-8);
     dialog::bound_up(max_fov_angle() - 0.01);
-    string quick = 
-      XLAT(
-        "HyperRogue uses "
-        "a quick implementation, so parameter values too close to 1 may "
-        "be buggy (outside of raycasting); try e.g. 0.9 instead."
-        );
-    dialog::get_di().extra_options = [quick] {
-      dialog::addSelItem(XLAT("Panini projection"), fts(panini_alpha), 'P');
-      dialog::add_action([quick] {
-        dialog::editNumber(panini_alpha, 0, 1, 0.1, 0, "Panini parameter", 
-          XLAT(
-            "The Panini projection is an alternative perspective projection "
-            "which allows very wide field-of-view values.\n\n") + quick
-            );
-        #if CAP_GL
-        dialog::get_di().reaction = reset_all_shaders;
-        #endif
-        dialog::get_di().extra_options = [] { add_edit_fov('F'); };
-        });
-      dialog::addSelItem(XLAT("spherical perspective projection"), fts(stereo_alpha), 'S');
-      dialog::add_action([quick] {
-        dialog::editNumber(stereo_alpha, 0, 1, 0.1, 0, "spherical perspective parameter", 
-          XLAT(
-            "Set to 1 to get stereographic projection, "
-            "which allows very wide field-of-view values.\n\n") + quick
-            );
-        #if CAP_GL
-        dialog::get_di().reaction = reset_all_shaders;
-        #endif
-        dialog::get_di().extra_options = [] { add_edit_fov('F'); };
-        });
+    dialog::get_di().extra_options = [] {
+      add_edit(vid.stereo_mode, 'M');
+      if(among(vid.stereo_mode, sPanini, sStereographic)) {
+        add_edit(vid.stereo_param, 'P');
+        }
       };
     });
   }
@@ -2553,6 +2530,9 @@ EX void showStereo() {
       break;
     case sLR:
       dialog::addSelItem(XLAT("distance between images"), fts(vid.lr_eyewidth), 'd');
+      break;
+    case sPanini: case sStereographic:
+      add_edit(vid.stereo_param);
       break;
     default:
       dialog::addBreak(100);

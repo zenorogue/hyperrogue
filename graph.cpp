@@ -22,10 +22,6 @@ EX bool spatial_graphics;
 EX bool wmspatial, wmescher, wmplain, wmblack, wmascii, wmascii3;
 EX bool mmspatial, mmhigh, mmmon, mmitem;
 
-EX ld panini_alpha = 0;
-EX ld stereo_alpha = 0;
-EX bool equirectangular;
-
 EX int detaillevel = 0;
 
 EX bool first_cell_to_draw = true;
@@ -4122,10 +4118,14 @@ EX ld threshold, xyz_threshold;
 
 EX bool clip_checked = false;
 
+EX bool other_stereo_mode() {
+  return among(vid.stereo_mode, sODS, sPanini, sStereographic, sEquirectangular);
+  }
+
 void make_clipping_planes() {
 #if MAXMDIM >= 4
   clip_checked = false;
-  if(!frustum_culling || PIU(sphere) || experimental || vid.stereo_mode == sODS || panini_alpha || stereo_alpha || gproduct || embedded_plane) return;
+  if(!frustum_culling || PIU(sphere) || experimental || other_stereo_mode() || gproduct || embedded_plane) return;
 
   if(WDIM == 3 && pmodel == mdPerspective && !nonisotropic && !in_s2xe())
     threshold = sin_auto(cgi.corner_bonus), xyz_threshold = 0, clip_checked = true;
@@ -5496,6 +5496,11 @@ EX ld min_scale = 1e-6;
 
 EX int forced_center_down = ISANDROID ? 2 : ISIOS ? 40 : 40;
 
+EX ld get_stereo_param() {
+  if(among(vid.stereo_mode, sPanini, sStereographic)) return vid.stereo_param;
+  return 0;
+  }
+
 EX void calcparam() {
 
   DEBBI(DF_GRAPH, ("calc param"));
@@ -5557,7 +5562,7 @@ EX void calcparam() {
   cd->ycenter += cd->scrsize * pconf.yposition;
   
   ld fov = vid.fov * degree / 2;
-  cd->tanfov = sin(fov) / (cos(fov) + (panini_alpha ? panini_alpha : stereo_alpha));
+  cd->tanfov = sin(fov) / (cos(fov) + get_stereo_param());
   
   callhooks(hooks_calcparam);
   reset_projection();
