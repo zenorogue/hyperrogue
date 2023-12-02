@@ -1210,9 +1210,10 @@ EX void show_vr_demos() {
     hmd_ref_at = hmd_at;
     stop_game();
     set_geometry(gNormal);
-    if(GDIM == 3) geom3::switch_fpp();
     specialland = laIce;
     set_variation(eVariation::bitruncated);
+    start_game();
+    if(GDIM == 3) invoke_embed(geom3::seNone);
     pmodel = mdDisk;
     pconf.alpha = 1;
     pconf.vr_scale_factor = 1;
@@ -1220,7 +1221,6 @@ EX void show_vr_demos() {
     pconf.vr_zshift = 0;
     hsm = eHeadset::model_viewing;
     eyes = eEyes::equidistant;
-    start_game();
     popScreenAll();
     });
 
@@ -1231,16 +1231,16 @@ EX void show_vr_demos() {
     stop_game();
     pmodel = mdDisk;
     set_geometry(gNormal);
-    if(GDIM == 2) geom3::switch_fpp();
     specialland = laIce;
     set_variation(eVariation::bitruncated);
+    start_game();
+    invoke_embed(geom3::seDefault);
     pconf.alpha = 1;
     pconf.vr_scale_factor = 1;
     pconf.vr_angle = 0;
     pconf.vr_zshift = 0;
     hsm = eHeadset::reference;
     eyes = eEyes::equidistant;
-    start_game();
     popScreenAll();
     });
 
@@ -1251,9 +1251,10 @@ EX void show_vr_demos() {
     hmd_ref_at = hmd_at;
     stop_game();
     set_geometry(gNormal);
-    if(GDIM == 3) geom3::switch_fpp();
     specialland = laIce;
     set_variation(eVariation::bitruncated);
+    start_game();
+    if(GDIM == 3) invoke_embed(geom3::seNone);
     pmodel = mdDisk;
     pconf.alpha = 1;
     pconf.vr_scale_factor = 1;
@@ -1262,7 +1263,6 @@ EX void show_vr_demos() {
     hsm = eHeadset::model_viewing;
     rug::modelscale = 0.5;
     eyes = eEyes::equidistant;
-    start_game();
     rug::init();
     popScreenAll();
     });
@@ -1274,9 +1274,10 @@ EX void show_vr_demos() {
     hmd_ref_at = hmd_at;
     stop_game();
     set_geometry(gSphere);
-    if(GDIM == 3) geom3::switch_fpp();
     specialland = laHalloween;
     set_variation(eVariation::bitruncated);
+    start_game();
+    if(GDIM == 3) invoke_embed(geom3::seNone);
     pmodel = mdDisk;
     pconf.alpha = 0;
     pconf.vr_scale_factor = 2;
@@ -1284,7 +1285,6 @@ EX void show_vr_demos() {
     pconf.vr_zshift = 0;
     hsm = eHeadset::model_viewing;
     eyes = eEyes::equidistant;
-    start_game();
     popScreenAll();
     });
 
@@ -1294,9 +1294,10 @@ EX void show_vr_demos() {
     hmd_ref_at = hmd_at;
     stop_game();
     set_geometry(gSphere);
-    if(GDIM == 3) geom3::switch_fpp();
     specialland = laHalloween;
     set_variation(eVariation::bitruncated);
+    start_game();
+    if(GDIM == 3) invoke_embed(geom3::seNone);
     pmodel = mdDisk;
     pconf.alpha = 2;
     pconf.vr_scale_factor = 0.5;
@@ -1304,7 +1305,6 @@ EX void show_vr_demos() {
     pconf.vr_zshift = 0;
     hsm = eHeadset::model_viewing;
     eyes = eEyes::equidistant;
-    start_game();
     popScreenAll();
     });
 
