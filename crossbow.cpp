@@ -332,6 +332,7 @@ enum eMouseFireMode { mfmNone, mfmPriority, mfmAlways };
 EX eMouseFireMode mouse_fire_mode = mfmPriority;
 
 EX bool fire_on_mouse(cell *c) {
+  if(!crossbow_mode()) return false;
   if(mouse_fire_mode == mfmNone) return false;
   if(!mouseover) return false;
   if(!mouseover->monst) return false;
