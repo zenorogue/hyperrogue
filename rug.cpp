@@ -1468,10 +1468,14 @@ EX shiftpoint gethyper(ld x, ld y) {
     double tx = dxm * dy2 - dym * dx2;
     double ty = -(dxm * dy1 - dym * dx1);
     tx /= det; ty /= det;
+
+    if(in_perspective() && (p0[2] < 0 || p1[2] < 0 || p2[2] < 0) && (p0[2] > 0 || p1[2] > 0 || p2[2] > 0)) continue;
+
     if(tx >= 0 && ty >= 0 && tx+ty <= 1) {
       double rz1 = p0[2] * (1-tx-ty) + p1[2] * tx + p2[2] * ty;
-      rz1 = -rz1;
-      if(vr && rz1 < 0) { /* behind the controller, ignore */ }
+      if(vr) rz1 = -rz1;
+      if(in_perspective() && !vr && rz1 < 0) { /* behind the eye, ignore */ }
+      else if(vr && rz1 < 0) { /* behind the controller, ignore */ }
       else if(rz1 < radar_distance) {
         radar_distance = rz1;
         rx1 = r0->x1 + (r1->x1 - r0->x1) * tx + (r2->x1 - r0->x1) * ty;
