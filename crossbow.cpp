@@ -360,10 +360,19 @@ EX void shoot() {
     mirror::breakMirror(mov.next, -1);
     eMonster m = c->monst;
     if(!m || isMimic(m)) continue;
+
     if(!canAttack(cf, who, c, m, attackflags)) {
-      pcmove pcm; pcm.mi = movei(mov.prev).rev();
-      pcm.tell_why_cannot_attack();
-      continue;
+      if(among(m, moSleepBull, moHerdBull)) {
+        addMessage(XLAT("%The1 is enraged!", m));
+        c->monst = moRagingBull;
+        hit_anything = true;
+        continue;
+        }
+      else {
+        pcmove pcm; pcm.mi = movei(mov.prev).rev();
+        pcm.tell_why_cannot_attack();
+        continue;
+        }
       }
     changes.ccell(c);
 
