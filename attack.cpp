@@ -126,8 +126,10 @@ EX bool canAttack(cell *c1, eMonster m1, cell *c2, eMonster m2, flagtype flags) 
   
   if(!(flags & AF_NOSHIELD) && ((flags & AF_NEXTTURN) ? checkOrb2 : checkOrb)(m2, itOrbShield)) return false;
   
-  if((flags & AF_STAB) && m2 != moHedge)
+  if((flags & AF_STAB) && m2 != moHedge) {
     if(!checkOrb(m1, itOrbThorns)) return false;
+    else flags |= AF_IGNORE_UNARMED;
+    }
 
   if(flags & AF_BACK) {
     if(m2 == moFlailer && !c2->stuntime) flags |= AF_IGNORE_UNARMED;
@@ -137,7 +139,7 @@ EX bool canAttack(cell *c1, eMonster m1, cell *c2, eMonster m2, flagtype flags) 
 
   if(flags & AF_APPROACH) {
     if(m2 == moLancer) ;
-    else if((flags & AF_HORNS) && checkOrb(m1, itOrbHorns)) ;
+    else if((flags & AF_HORNS) && checkOrb(m1, itOrbHorns)) { flags |= AF_IGNORE_UNARMED; }
     else return false;
     }
   
@@ -1341,11 +1343,12 @@ EX void stabbingAttack(movei mi, eMonster who, int bonuskill IS(0)) {
       }
     }
 
-  if(!isUnarmed(who) && !out) forCellIdEx(c, t, mt) {
+  forCellIdEx(c, t, mt) {
     if(!logical_adjacent(mt, who, c)) continue;
     eMonster mm = c->monst;
     int flag = AF_APPROACH;
     if(proper(mt, backdir) && anglestraight(mt, backdir, t)) flag |= AF_HORNS;
+    if((isUnarmed(who) || out) && !(flag & AF_HORNS)) continue;
     if(canAttack(mt,who,c,c->monst, flag)) {
       changes.ccell(c);
       if(attackMonster(c, flag | AF_MSG, who)) numlance++;
