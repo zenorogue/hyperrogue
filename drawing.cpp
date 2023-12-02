@@ -1566,21 +1566,21 @@ EX namespace ods {
     dqi_poly npoly = *p;
     npoly.offset = 0;
     npoly.tab = &glcoords;
-    npoly.V = Id;
+    npoly.V = shiftless(Id);
     npoly.tinf = p->tinf ? &stinf : NULL;
     if(npoly.tinf) {
       npoly.offset_texture = 0;
       stinf.texture_id = p->tinf->texture_id;
       stinf.tvertices.clear();
       }
-    npoly.V = Id;
+    npoly.V = shiftless(Id);
     glcoords.clear();
 
     array<hyperpoint, 6> h;
 
     if(0) for(int i=0; i<p->cnt; i+=3) {
       for(int j=0; j<3; j++)
-        h[j] = p->V * glhr::gltopoint((*p->tab)[p->offset+i+j]);
+        h[j] = unshift(p->V) * glhr::gltopoint((*p->tab)[p->offset+i+j]);
 
       for(int j=0; j<3; j++) {
         glcoords.push_back(glhr::makevertex(h[j][0], h[j][1], h[j][2]));
@@ -1591,15 +1591,15 @@ EX namespace ods {
     if(1) for(int i=0; i<p->cnt; i+=3) {
 
       for(int j=0; j<3; j++) {
-        hyperpoint o = p->V * glhr::gltopoint((*p->tab)[p->offset+i+j]);
+        shiftpoint o = p->V * glhr::gltopoint((*p->tab)[p->offset+i+j]);
         if(nonisotropic || gproduct) {
-          o = lp_apply(inverse_exp(o, iTable, false));
-          o[3] = 1;
+          auto o1 = lp_apply(inverse_exp(o, pNORMAL));
+          o1[3] = 1;
           dynamicval<eGeometry> g(geometry, gEuclid);
-          if(!project(o, h[j], h[j+3], global_projection == -1))
+          if(!project(o1, h[j], h[j+3], global_projection == -1))
             goto next_i;
           }
-        else if(!project(o, h[j], h[j+3], global_projection == -1))
+        else if(!project(unshift(o), h[j], h[j+3], global_projection == -1))
           goto next_i;
         }
       
