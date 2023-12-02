@@ -410,7 +410,7 @@ EX string generateHelpForItem(eItem it) {
      help += XLAT("You can press 'g' or click them in the list to drop a Dead Orb.");
 #endif
    if(it == itOrbLightning || it == itOrbFlash)
-     help += XLAT("\n\nThis Orb is triggered on your first attack or illegal move.");
+     help += XLAT("\n\nThis Orb is triggered on your first direct melee attack or illegal move.");
    if(it == itOrbShield)
      help += XLAT("\n\nThis Orb protects you from attacks, scents, and insulates you "
        "from electricity. It does not let you go through deadly terrain, but "
