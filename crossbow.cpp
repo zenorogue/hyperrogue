@@ -325,6 +325,45 @@ EX void add_fire(cell *c) {
     }
   }
 
+#if HDR
+enum eMouseFireMode { mfmNone, mfmPriority, mfmAlways };
+#endif
+
+EX eMouseFireMode mouse_fire_mode = mfmPriority;
+
+EX bool fire_on_mouse(cell *c) {
+  if(mouse_fire_mode == mfmNone) return false;
+  if(!mouseover) return false;
+  if(!mouseover->monst) return false;
+  if(items[itCrossbow]) {
+    if(mouse_fire_mode == mfmAlways) {
+      addMessage(XLAT("Cannot fire again yet. Turns to reload: %1.", its(items[itCrossbow])));
+      return true;
+      }
+    return false;
+    }
+  target_at = {};
+  target_at[mouseover->cpdist] = mouseover;
+  int res = create_path();
+  if(res <= 0) {
+    if(mouse_fire_mode == mfmAlways) {
+      addMessage(XLAT("Shooting impossible."));
+      return true;
+      }
+    return false;
+    }
+  gen_bowpath_map();
+  checked_move_issue = miVALID;
+  pcmove pcm;
+  pcm.checkonly = false;
+  changes.init(false);
+  addMessage(XLAT("Fire!"));
+  bool b = pcm.try_shooting(false);
+  if(!b) changes.rollback();
+  if(mouse_fire_mode == mfmAlways) return true;
+  return b;
+  }
+
 EX void shoot() {
   flagtype attackflags = AF_BOW;
   if(items[itOrbSpeed]&1) attackflags |= AF_FAST;
@@ -440,6 +479,7 @@ EX void showMenu() {
   if(crossbow_mode()) {
     add_edit(style);
     add_edit(bump_to_shoot);
+    add_edit(bow::mouse_fire_mode);
     }
   else dialog::addBreak(200);
   dialog::addBack();

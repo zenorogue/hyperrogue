@@ -1562,6 +1562,11 @@ EX void initConfig() {
     -> set_need_confirm()
     -> set_value_to = [] (bow::eCrossbowStyle s) { bool b = game_active; if(s != bow::style) stop_game(); bow::style = s; if(b) start_game(); };
   param_b(bow::bump_to_shoot, "bump_to_shoot", true)->editable("bump to shoot", 'b');
+  param_enum(bow::mouse_fire_mode, "mouse_fire_mode", "mouse_fire_mode", bow::mfmPriority)
+     ->editable({{"explicit", "You need to click crossbow or be close to fire."},
+      {"priority", "Click on a faraway monster to fire if possible, or move if not."},
+      {"always", "Clicking on a faraway monster always means an attempt to fire."}},
+      "mouse auto-fire mode", 'm');
 
   param_enum(vid.msgleft, "message_style", "message style", 2)
     -> editable({{"centered", ""}, {"left-aligned", ""}, {"line-broken", ""}}, "message style", 'a');

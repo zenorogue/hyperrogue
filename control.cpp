@@ -621,6 +621,7 @@ EX void handleKeyNormal(int sym, int uni) {
     else if(mouseover &&
       targetclick && (shmup::on ? numplayers() == 1 && !shmup::pc[0]->dead : true) && targetRangedOrb(mouseover, forcetarget ? roMouseForce : roMouse)) {
       }
+    else if(bow::fire_on_mouse(mouseover)) ;
     else if(forcetarget)
       ;
     else if(rug::rugged && rug::renderonce)
