@@ -216,7 +216,12 @@ EX void reduceOrbPowers() {
   whirlwind::calcdirs(cwt.at); 
   items[itStrongWind] = !items[itOrbAether] && whirlwind::qdirs == 1;
   items[itWarning] = 0;
-  if(items[itCrossbow]) items[itCrossbow]--;
+  if(items[itCrossbow]) {
+    if(lastmovetype == lmSkip && isWarped(cwt.at))
+      addMessage(XLAT("The warped space distracts you from reloading while staying in place!"));
+    else
+      items[itCrossbow]--;
+    }
   }
 
 eWall orig_wall;
