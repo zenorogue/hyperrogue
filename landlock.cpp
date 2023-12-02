@@ -184,6 +184,10 @@ EX int lands_for_hell() {
   return casual ? 40 : 9;
   }
 
+EX int lands_for_cr3() {
+  return casual ? 20 : 9;
+  }
+
 EX int variant_unlock_value() {
   return inv::on ? 75 : 30;
   }
