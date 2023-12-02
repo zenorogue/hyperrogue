@@ -87,6 +87,7 @@ EX int bolt_score(cellwalker cw2) {
   if(inmirror(cw2.at)) cw2 = mirror::reflect(cw2);
   if(blocks(cw2.cpeek())) return -1;
   if(thruVine(cw2.at, cw2.cpeek())) return -1;
+  if(nonAdjacent(cw2.at, cw2.cpeek())) return -1;
 
   if(cw2.at->monst) {
     flagtype attackflags = AF_BOW;
