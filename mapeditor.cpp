@@ -216,12 +216,14 @@ EX namespace mapeditor {
       }
     cell *b = centerover;
     
-    auto xh1 = inverse_shift(ggmatrix(b), h1);
-    virtualRebase(b, xh1);
+    shiftmatrix T = rgpushxto0(h1);
+    auto T1 = inverse_shift(ggmatrix(b), T);
+    virtualRebase(b, T1);
+    hyperpoint xh1 = tC0(T1);
     
     auto l = new dtline;
     l->s = xh1;
-    l->e = inverse_shift(ggmatrix(b), h2);
+    l->e = inverse_shift(T*inverse(T1), h2);
     dt_add(b, l);
     }
 
@@ -271,6 +273,7 @@ EX namespace mapeditor {
   
   dtfree *cfree;
   cell *cfree_at;
+  shiftmatrix cfree_old;
   
   EX void dt_finish() {
     cfree = nullptr;
@@ -284,14 +287,16 @@ EX namespace mapeditor {
     auto T1 = inverse_shift(ggmatrix(b), T);
     virtualRebase(b, T1);
     
-    if(cfree)
-      cfree->lh.push_back(inverse_shift(ggmatrix(cfree_at), tC0(T)));
+    if(cfree) {
+      cfree->lh.push_back(inverse_shift(cfree_old, tC0(T)));
+      }
     
     if(b != cfree_at && !(dtfill && cfree_at)) {
       cfree = new dtfree;
       dt_add(b, cfree);
       cfree->lh.push_back(tC0(T1));
       cfree_at = b;
+      cfree_old = T * inverse(T1);
       }
     }
   
