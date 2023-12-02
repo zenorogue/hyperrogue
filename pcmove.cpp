@@ -62,6 +62,8 @@ enum eForcemovetype { fmSkip, fmMove, fmAttack, fmInstant, fmActivate };
 extern eForcemovetype forcedmovetype;
 #endif
 
+EX bool hit_anything;
+
 EX namespace orbbull {
   cell *prev[MAXPLAYER];
   eLastmovetype prevtype[MAXPLAYER];
@@ -243,6 +245,7 @@ EX bool movepcto(int d, int subdir IS(1), bool checkonly IS(false)) {
   }
 
 bool pcmove::try_shooting(bool auto_target) {
+  hit_anything = false;
   if(auto_target) {
     auto b = bow::auto_path();
     if(!b) {
@@ -264,7 +267,6 @@ bool pcmove::try_shooting(bool auto_target) {
     gravity_state = get_static_gravity(cwt.at);
     if(gravity_state) markOrb(itOrbGravity);
     }
-  lastmovetype = lmAttack; lastmove = NULL;
 
   if(cellEdgeUnstable(cwt.at) || cwt.at->land == laWhirlpool) {
     if(checkonly) return true;
@@ -277,7 +279,8 @@ bool pcmove::try_shooting(bool auto_target) {
   if(checkNeedMove(checkonly, false))
     return false;
   swordAttackStatic();
-  nextmovetype = lmAttack;
+  nextmovetype = hit_anything ? lmAttack : lmSkip;
+  lastmovetype = hit_anything ? lmAttack : lmSkip; lastmove = NULL;
 
   mi = movei(cwt.at, STAY);
   if(last_gravity_state && !gravity_state)
@@ -1628,6 +1631,7 @@ EX void sideAttackAt(cell *mf, int dir, cell *mt, eMonster who, eItem orb, cell 
     int kk = 0;
     if(orb == itOrbPlague) kk = tkills();
     if(attackMonster(mt, AF_NORMAL | f | AF_MSG, who) || isAnyIvy(m)) {
+      hit_anything = true;
       if(orb == itOrbPlague && kk < tkills())
         plague_kills++;
       if(mt->monst != m) spread_plague(mf, mt, dir, who);
@@ -1640,6 +1644,7 @@ EX void sideAttackAt(cell *mf, int dir, cell *mt, eMonster who, eItem orb, cell 
     markOrb(orb);
     mt->wall = waNone;
     spread_plague(mf, mt, dir, who);
+    hit_anything = true;
     }
   else if(mt->wall == waShrub && markEmpathy(itOrbSlaying)) {
     changes.ccell(mt);
@@ -1647,16 +1652,19 @@ EX void sideAttackAt(cell *mf, int dir, cell *mt, eMonster who, eItem orb, cell 
     markOrb(orb);
     mt->wall = waNone;
     spread_plague(mf, mt, dir, who);
+    hit_anything = true;
     }
   else if(mt->wall == waBigTree) {
     changes.ccell(mt);
     plague_particles();
     markOrb(orb);
     mt->wall = waSmallTree;
+    hit_anything = true;
     }
   else if(mt->wall == waExplosiveBarrel && orb != itOrbPlague) {
     changes.ccell(mt);
     explodeBarrel(mt);
+    hit_anything = true;
     }
   }
 

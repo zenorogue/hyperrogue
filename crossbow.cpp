@@ -347,6 +347,7 @@ EX void shoot() {
       if(logical_adjacent(c, moPlayer, c1)) stabthere = true;
 
       if(stabthere && canAttack(cf,who,c1,c1->monst,AF_STAB)) {
+        hit_anything = true;
         changes.ccell(c1);
         eMonster m = c->monst;
         if(attackMonster(c1, AF_STAB | AF_MSG, who))  {
@@ -369,7 +370,7 @@ EX void shoot() {
     bool push = (items[itCurseWeakness] || (isStunnable(c->monst) && c->hitpoints > 1));
     push = push && (!(mov.flags & bpLAST) && monsterPushable(c));
 
-    if(m) attackMonster(c, attackflags | AF_MSG, who);
+    if(m && attackMonster(c, attackflags | AF_MSG, who)) hit_anything = true;
 
     if(!c->monst || isAnyIvy(m)) {
       spread_plague(cf, c, movei(mov.prev).rev().d, moPlayer);
@@ -385,6 +386,7 @@ EX void shoot() {
     cell *ct = mov.next.cpeek();
     bool can_push = passable(ct, c, P_BLOW);
     if(can_push) {
+      hit_anything = true;
       changes.ccell(c);
       changes.ccell(ct);
       pushMonster(mov.next);
