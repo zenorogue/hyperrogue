@@ -2855,7 +2855,7 @@ EX void show3D() {
 
 #if MAXMDIM >=4
   if(WDIM == 2) {
-    dialog::addSelItem("3D style", geom3::spatial_embedding_options[shown_spatial_embedding()].first, 'E');
+    dialog::addSelItem(XLAT("3D style"), XLAT(geom3::spatial_embedding_options[shown_spatial_embedding()].first), 'E');
     dialog::add_action_push(show_spatial_embedding);
 
     display_embedded_errors();
@@ -2891,7 +2891,7 @@ EX void show3D() {
     
     dialog::addBreak(50);
     add_edit(vid.wall_height);
-    dialog::addSelItem("height details", "", 'D');
+    dialog::addSelItem(XLAT("3D detailed settings"), "", 'D');
     dialog::add_action_push(show3D_height_details);
     
     if(scale_used())

@@ -388,10 +388,10 @@ EX void show_chaos() {
   chaosUnlocked = chaosUnlocked || autocheat;
 
   dialog::addHelp(
-    "In the Chaos mode, lands change very often, and "
+    XLAT("In the Chaos mode, lands change very often, and "
     "there are no walls between them. "
     "Some lands are incompatible with this."
-    "\n\nYou need to reach Crossroads IV to unlock the Chaos mode."
+    "\n\nYou need to reach Crossroads IV to unlock the Chaos mode.")
     );
   
   dialog::addBreak(100);
@@ -422,17 +422,17 @@ EX void show_chaos() {
 
   dialog::addBreak(100);
   if(ineligible_starting_land)
-    dialog::addInfo("this starting land is not eligible for achievements");
+    dialog::addInfo(XLAT("this starting land is not eligible for achievements"));
   else if(land_structure == lsNiceWalls)
-    dialog::addInfo("eligible for most achievements");
+    dialog::addInfo(XLAT("eligible for most achievements"));
   else if(land_structure == lsChaos)
-    dialog::addInfo("eligible for Chaos mode achievements");
+    dialog::addInfo(XLAT("eligible for Chaos mode achievements"));
   else if(land_structure == lsSingle)
-    dialog::addInfo("eligible for special achievements");
+    dialog::addInfo(XLAT("eligible for special achievements"));
   else
-    dialog::addInfo("not eligible for achievements");
-  if(cheater) dialog::addInfo("(but the cheat mode is on)");
-  if(casual) dialog::addInfo("(but the casual mode is on)");
+    dialog::addInfo(XLAT("not eligible for achievements"));
+  if(cheater) dialog::addInfo(XLAT("(but the cheat mode is on)"));
+  if(casual) dialog::addInfo(XLAT("(but the casual mode is on)"));
 
   dialog::addBreak(100);
   if(ls::horodisk_structure())

@@ -724,11 +724,12 @@ EX void configure() {
     underlying_cgip = cgip;
     around = around_orig();
     }
-  dialog::editNumber(around, 2.01, 10, 1, around, "fake curvature", 
+  dialog::editNumber(around, 2.01, 10, 1, around, XLAT("fake curvature"), 
+    XLAT(
     "This feature lets you construct the same tiling, but "
     "from shapes of different curvature.\n\n"
     "The number you give here is (2D) vertex degree or (3D) "
-    "the number of cells around an edge.\n\n"
+    "the number of cells around an edge.\n\n")
     );
   if(fake::in())
     dialog::get_di().reaction = change_around;
@@ -736,33 +737,33 @@ EX void configure() {
     dialog::get_di().reaction_final = change_around;
   dialog::get_di().extra_options = [] {
     ld e = compute_euclidean();
-    dialog::addSelItem("Euclidean", fts(e), 'E');
+    dialog::addSelItem(XLAT("Euclidean"), fts(e), 'E');
     dialog::add_action([e] {
       around = e;
       popScreen();
       change_around();
       });
 
-    dialog::addSelItem("original", fts(around_orig()), 'O');
+    dialog::addSelItem(XLAT("original"), fts(around_orig()), 'O');
     dialog::add_action([] {
       around = around_orig();
       popScreen();
       change_around();
       });
 
-    dialog::addSelItem("double original", fts(2 * around_orig()), 'D');
+    dialog::addSelItem(XLAT("double original"), fts(2 * around_orig()), 'D');
     dialog::add_action([] {
       around = 2 * around_orig();
       popScreen();
       change_around();
       });
     
-    dialog::addBoolItem_action("draw all if multiple of original", multiple_special_draw, 'M');
-    dialog::addBoolItem_action("draw copies (2D only)", recursive_draw, 'C');
+    dialog::addBoolItem_action(XLAT("draw all if multiple of original"), multiple_special_draw, 'M');
+    dialog::addBoolItem_action(XLAT("draw copies (2D only)"), recursive_draw, 'C');
 
-    dialog::addBoolItem_choice("unordered", ordered_mode, 0, 'U');
-    dialog::addBoolItem_choice("pre-ordered", ordered_mode, 1, 'P');
-    dialog::addBoolItem_choice("post-ordered", ordered_mode, 2, 'Q');
+    dialog::addBoolItem_choice(XLAT("unordered"), ordered_mode, 0, 'U');
+    dialog::addBoolItem_choice(XLAT("pre-ordered"), ordered_mode, 1, 'P');
+    dialog::addBoolItem_choice(XLAT("post-ordered"), ordered_mode, 2, 'Q');
 
     };
   }
