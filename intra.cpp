@@ -668,7 +668,7 @@ EX string portal_help =
 EX void become_menu() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen();
-  dialog::init(XLAT("Become a portal map"));
+  dialog::init(XLAT("become a portal map"));
   dialog::addHelp(XLAT(portal_help));
   dialog::addItem(XLAT("yes, that's what I want"), 'y');
   dialog::add_action([] {
