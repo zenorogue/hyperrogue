@@ -7935,6 +7935,7 @@ Cell("{3,3,3} 5") Cell("{4,3,3} 8") Cell("{3,3,4} 16") Cell("{3,4,3} 24") Cell("
   S(x " field quotient space", x " prostor s tělesovým kvocientem")
 
 Honeycomb("{5,3,4}") Honeycomb("{4,3,5}") Honeycomb("{3,3,6}") Honeycomb("{3,4,4}") Honeycomb("{5,3,5}") Honeycomb("{5,3,6}") Honeycomb("{4,3,6}") Honeycomb("{5,3,6}")
+Honeycomb("{3,4,5}") Honeycomb("{3,5,3}") Honeycomb("{3,5,4}") Honeycomb("{3,5,5}")
 #undef Honeycomb
 
 // new or previously untranslated options
