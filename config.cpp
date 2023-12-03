@@ -3315,7 +3315,7 @@ EX void showCustomizeChar() {
   dialog::addColorItem(XLAT("hair color"), cs.haircolor, 'h');
   if(bow::crossbow_mode()) {
     dialog::addColorItem(XLAT("bow color"), cs.bowcolor, 'b');
-    dialog::addColorItem(XLAT("boswtring color"), cs.bowcolor2, 'c');
+    dialog::addColorItem(XLAT("bowstring color"), cs.bowcolor2, 'c');
     }
   
   if(cs.charid >= 1) dialog::addColorItem(XLAT("dress color"), cs.dresscolor, 'd');
