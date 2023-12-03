@@ -151,9 +151,9 @@ void showDemo() {
   dialog::addBreak(100);
 
   dialog::addTitle("highlights", 0xC00000, 120);
-  dialog::addItem(XLAT("Temple of Cthulhu"), 't');
-  dialog::addItem(XLAT("Land of Storms"), 'l');
-  dialog::addItem(XLAT("Burial Grounds"), 'b');
+  dialog::addItem(XLAT1("Temple of Cthulhu"), 't');
+  dialog::addItem(XLAT1("Land of Storms"), 'l');
+  dialog::addItem(XLAT1("Burial Grounds"), 'b');
 
   dialog::display();
   
