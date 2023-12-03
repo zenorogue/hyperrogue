@@ -43,6 +43,7 @@ struct setting {
   string parameter_name;
   string config_name;
   string menu_item_name;
+  bool menu_item_name_modified;
   string help_text;
   reaction_t reaction;
   char default_key;
@@ -110,6 +111,7 @@ struct list_setting : setting {
     is_editable = true;
     options = o;
     this->menu_item_name = menu_item_name;
+    menu_item_name_modified = true;
     default_key = key;
     return this;
     }
@@ -222,6 +224,7 @@ struct float_setting : public val_setting<ld> {
     this->min_value = min_value;
     this->max_value = max_value;
     this->menu_item_name = menu_item_name;
+    menu_item_name_modified = true;
     this->help_text = help_text;
     this->step = step;
     default_key = key;
@@ -254,6 +257,7 @@ struct int_setting : public val_setting<int> {
     this->min_value = min_value;
     this->max_value = max_value;
     this->menu_item_name = menu_item_name;
+    menu_item_name_modified = true;
     this->help_text = help_text;
     this->step = step;
     default_key = key;
@@ -280,6 +284,7 @@ struct color_setting : public val_setting<color_t> {
   color_setting *editable(string menu_item_name, string help_text, char key) {
     this->is_editable = true;
     this->menu_item_name = menu_item_name;
+    menu_item_name_modified = true;
     this->help_text = help_text;
     default_key = key;
     return this;
@@ -295,6 +300,7 @@ struct matrix_setting : public val_setting<matrix_eq> {
   matrix_setting *editable(string menu_item_name, string help_text, char key) {
     this->is_editable = true;
     this->menu_item_name = menu_item_name;
+    menu_item_name_modified = true;
     this->help_text = help_text;
     default_key = key;
     return this;
@@ -318,7 +324,9 @@ struct bool_setting : public val_setting<bool> {
   reaction_t switcher;
   bool_setting* editable(string cap, char key ) {
     is_editable = true;
-    menu_item_name = cap; default_key = key; return this; 
+    menu_item_name = cap; default_key = key;
+    menu_item_name_modified = true;
+    return this;
     } 
   void show_edit_option(int key) override;
 
@@ -682,6 +690,7 @@ EX int_setting *param_i(int& val, const string s, int dft) {
   u->parameter_name = param_esc(s);
   u->config_name = s;
   u->menu_item_name = s;
+  u->menu_item_name_modified = false;
   u->value = &val;
   u->last_value = dft;
   u->dft = dft;
@@ -707,6 +716,7 @@ EX bool_setting *param_b(bool& val, const string s, bool dft) {
   u->parameter_name = param_esc(s);
   u->config_name = s;
   u->menu_item_name = s;
+  u->menu_item_name_modified = false;
   u->value = &val;
   u->last_value = dft;
   u->dft = dft;
@@ -723,6 +733,7 @@ EX color_setting *param_color(color_t& val, const string s, bool has_alpha, colo
   u->parameter_name = param_esc(s);
   u->config_name = s;
   u->menu_item_name = s;
+  u->menu_item_name_modified = false;
   u->value = &val;
   u->last_value = dft;
   u->dft = dft;
@@ -740,6 +751,7 @@ EX matrix_setting *param_matrix(transmatrix& val0, const string s, int dim) {
   u->parameter_name = param_esc(s);
   u->config_name = s;
   u->menu_item_name = s;
+  u->menu_item_name_modified = false;
   u->value = &val;
   u->last_value = val;
   u->dft = val;
@@ -755,6 +767,7 @@ EX char_setting *param_char(char& val, const string s, char dft) {
   u->parameter_name = param_esc(s);
   u->config_name = s;
   u->menu_item_name = s;
+  u->menu_item_name_modified = false;
   u->value = &val;
   u->last_value = dft;
   u->dft = dft;
@@ -782,6 +795,7 @@ template<class T> enum_setting<T> *param_enum(T& val, const string p, const stri
   u->parameter_name = p;
   u->config_name = s;
   u->menu_item_name = s;
+  u->menu_item_name_modified = false;
   u->value = &val;
   u->dft = dft;
   val = dft;
@@ -813,6 +827,7 @@ custom_setting* param_custom(T& val, const string& s, function<void(char)> menui
   u->parameter_name = param_esc(s);
   u->config_name = s;
   u->menu_item_name = s;
+  u->menu_item_name_modified = false;
   u->last_value = (int) val;
   u->custom_viewer = menuitem;
   u->custom_value = [&val] () { return (int) val; };
