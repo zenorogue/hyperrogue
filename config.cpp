@@ -1878,7 +1878,7 @@ EX void menuitem_sightrange_bonus(char c) {
   }
 
 EX void edit_sightrange_3d(char key, bool fog) {
-  dialog::addSelItem(XLAT(fog ? "3D sight range for the fog effect" : "3D sight range"), fts(sightranges[geometry]), key);
+  dialog::addSelItem(fog ? XLAT("3D sight range for the fog effect") : ("3D sight range"), fts(sightranges[geometry]), key);
   dialog::add_action([] {
     dialog::editNumber(sightranges[geometry], 0, TAU, 0.5, M_PI, XLAT("3D sight range"),
       XLAT(
@@ -3821,7 +3821,8 @@ void list_setting::show_edit_option(int key) {
     dialog::addBreak(100);
 
     if(need_list >= 1 && options[get_value()].second != "") {
-      dialog::addHelp(XLAT(options[get_value()].second));
+      string text = options[get_value()].second;
+      dialog::addHelp(XLAT(text));
       dialog::addBreak(100);
       }
     dialog::addBack();

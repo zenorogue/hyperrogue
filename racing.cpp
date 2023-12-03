@@ -924,7 +924,7 @@ EX void load_official_track() {
 void track_chooser(bool official) {
   cmode = sm::NOSCR;
   gamescreen();
-  dialog::init(XLAT(official ? "Official tracks" : "Generate a racing track"));
+  dialog::init(official ? XLAT("play on an official track") : XLAT("generate a random track"));
   
   map<char, eLand> landmap;
   

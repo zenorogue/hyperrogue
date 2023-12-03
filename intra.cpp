@@ -788,7 +788,7 @@ EX void show_portals() {
     dialog::add_action([cw] { unconnected.push_back(cw); });
     dialog::start_list(500, 500, '1');
     for(auto p: unconnected) {
-      dialog::addItem(XLAT("connect " + lalign(0, p)), dialog::list_fake_key++);
+      dialog::addItem(XLAT("connect ") + lalign(0, p), dialog::list_fake_key++);
       dialog::add_action([p, cw] {
         connect_portal(cw, p, edit_spin);
         mapeditor::map_version++;
