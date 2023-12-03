@@ -9408,6 +9408,646 @@ S(
   "* na Prerii po jej odblokowaniu (%3 skarbów)\n\n"
   )
 
-N("Palace Quest", GEN_O, "Misja w Pałacu", "Misje w Pałacu", "Misję w Pałacu", "na Misji w Pałacu")
+// 13.0
 
+// gameplay
+//==========
+
+// these were missing somehow
+
+N("Palace Quest", GEN_O, "Misja w Pałacu", "Misje w Pałacu", "Misję w Pałacu", "na Misji w Pałacu")
 N("Pike", GEN_F, "Szczupak", "Szczupaki", "Szczupaka", "Szczupakiem")
+
+// crossbow
+
+S("The warped space distracts you from reloading while staying in place!",
+  "Zakrzywiona przestrzeń nie pozwala Ci ładować broni bez ruszania się!")
+S("Fire!", "Ognia!")
+S("(shooting while unstable -- no turn passes)", "(Strzał z niestabilnej pozycji -- tura nie mija)")
+S("Stab them by shooting around them.", "(Dźgnij ich poprzez strzelanie wokół nich.)")
+S("You are too weakened to attack %the1!", "Jesteś za słab%y0, by zaatakować %a2!")
+S("You cannot attack your own mount!", "Nie można atakować swojego własnego wierzchowca!")
+S("A magical shield protects %the1!", "Magiczna tarcza chroni %a1!")
+S("You have no melee weapon!", "Nie masz broni do walki wręcz!")
+S("Your crossbow is still reloading!", "Twoja kusza wciąż się ładuje!")
+S("Trying to fire.", "Próbujesz strzelać.")
+S(" (turns to reload: %1)", " (kolejki do naładowania: %1)")
+S(" (fire mode on / turns to reload: %1)", " (tryb strzału / kolejki do naładowania: %1)")
+S(" (fire mode on)", " (tryb strzału)")
+S(" (click to fire)", " (kliknij by strzelać)")
+S("You fire an angry glance at your enemies.", "Strzelasz focha.")
+S("Note: cannot fire again yet. Turns to reload: %1.", "Uwaga: jeszcze za wcześnie, by strzelać. Liczba kolejek do naładowania: %1")
+S("Fire crossbow! Click to aim, click again to confirm.", "Strzał! Kliknij cel, a następnie jeszcze raz, by potwierdzić.")
+S("Fire mode disabled.", "Tryb strzału wyłączony.")
+S("Firing cancelled.", "Strzał anulowany.")
+S("Cannot fire again yet. Turns to reload: %1.", "Wciąż nie możesz strzelać. Liczba kolejek do naładowania: %1")
+S("No way to hit this place.", "Nie da się tam trafić.")
+S("Shooting impossible.", "Strzał niemożliwy.")
+S("%The1 is enraged!", "%1 jest wściekł%y1!")
+S("weapon selection", "wybór broni")
+S("Cannot hit anything by shooting this direction!", "Nic nie trafisz strzelając w tym kierunku!")
+S("Welcome to HyperRanger!", "Witaj w HyperRanger!")
+S("bow color", "kolor kuszy")
+S("bowstring color", "kolor cięciwy")
+S("%The1 alarms other dogs as it dies!", "Umierając%y1 %1 podnosi alarm!")
+S("crossbow straight line style", "styl linii strzału")
+S("bull line", "linie byka")
+S("Can go in either direction on odd shapes. 3 turns to reload.", "Na polach nieparzystych może lekko skręcić w lewo lub prawo. 3 kolejki do przeładowania.")
+S("Graph geodesic: any sequence of tiles is OK as long as there are no shortcuts. 4 turns to reload.", "Geodezyjna grafowa: każdy ciąg pól dobry o ile nie ma skrótów. 4 kolejki do przeładowania.")
+S("geometric", "linie geometryczne")
+S("Approximations of geometric straight lines.", "Przybliżenia geometrycznych linii prostych")
+S("bump to shoot", "uderz by strzelać")
+S("mouse auto-fire mode", "tryb auto-strzału dla myszy")
+S("explicit", "kategoryczny")
+S("You need to click crossbow or be close to fire.", "By strzelać, musisz nacisnąć kuszę, albo być blisko")
+S("priority", "priorytetowy")
+S("Click on a faraway monster to fire if possible, or move if not.", "Klikając odległego przeciwnika strzelasz jeśli to możliwe, ruszasz się jeśli nie.")
+S("Clicking on a faraway monster always means an attempt to fire.", "Kliknięcie przeciwnika zawsze jest rozumiane jako próba strzału.")
+S("blade", "broń biała")
+S("Standard Rogue weapon. Bump into a monster to hit. Most monsters attack you the same way.",
+  "Standardowa broń. Uderz potwora, by go zaatakować. Większość potworów atakuję Cię w ten sposób.")
+S("crossbow", "kusza")
+S("Hits all monsters in a straight line, but slow to reload. Press 'f' or click the crossbow icon to target.",
+  "Rani wszystkich przeciwników w linii prostej, ale przeładowanie zajmuje dużo czasu. Naciśnij 'f' lub kliknij ikonę kuszy, by celować.")
+
+// 'click to use orb' errors
+
+S("You have no ranged Orbs!", "Nie masz Sfer działających na odległość!")
+S("Strong wind can only take you to a specific place!", "Silny wiatr może przenieść Cię tylko w konkretne miejsce!")
+S("%The1 can only be used on items!", "%1 może być używan%y1 tylko na przedmiotach!")
+S("Nothing to blow here!", "Tu nic nie można zdmuchnąć!")
+S("Cannot be used in multiplayer", "Nie można używać w grze na wielu graczy")
+S("You cannot grow on yourself!", "Nie możesz rosnąć na sobie!")
+S("Cannot attack there!", "Nie można tam zaatakować!")
+S("Cannot grow there!", "Nie można tam rosnąć!")
+S("Cannot grow against gravity!", "Nie można rosnąć wbrew grawitacji!")
+S("You cannot grow there from any adjacent cell!", "Nie można tam wyrosnąć z żadnego sąsiedniego pola!")
+S("Cannot vault that far!", "Nie można przeskoczyć tak daleko!")
+S("ERROR: No common neighbor to vault through!", "BŁĄD: brak wspólnego sąsiada do przeskoku!")
+S("Can only vault in a roughly straight line!", "Przeskok można wykonać tylko w (mniej więcej) prostej linii!")
+S("Nothing to vault over!", "Nie ma przez co przeskoczyć!")
+S("Cannot pass through %the1 while vaulting!", "Nie można przejść przez %a1 podczas przeskoku!")
+S("Cannot vault onto %the1!", "Nie można przeskoczyć na %a1!")
+S("Cannot vault to %the1!", "Nie można przeskoczyć do %a1!")
+S("Cannot attack %the1 while vaulting!", "Nie można zaatakować %a1 podczas przeskoku!")
+S("Cannot jump that far!", "Nie można skoczyć tak daleko!")
+S("Cannot jump onto %the1!", "Nie można wskoczyć na %a1!")
+S("Cannot phase that far!", "Nie można fazować tak daleko!")
+S("Cannot phase onto %the1!", "Nie można fazować na %a1!")
+S("Cannot phase to %the1!", "Nie można fazować do %a1!")
+S("Nothing to phase through!", "Nie ma nic przez co można fazować!")
+S("Can only use %the1 on a monster!", "Można użyć %a1 tylko na potworze!")
+S("%The1 is immune to %the2!", "%1 jest odporn%y1 na %a2!")
+S("%The1 can only be used on monsters.", "%1 może być użyt%y1 tylko na potworach.")
+S("%The1 cannot be used on big monsters.", "%1 nie może być użyt%y1 na dużych potworach.")
+S("%The1 cannot be used on %the2.", "%1 nie może być użyt%y1 na %abl2.")
+S("%The1 is already stunned!", "%1 już jest ogłuszon%y1!")
+
+// multiplayer settings
+
+S("friendly fire", "bratobójczy ogień")
+S("friendly fire off -- achievements disabled", "bratobójczy ogień wyłączony -- osiągnięcia wyłączone")
+
+S("player vs player", "gracz vs gracz")
+S("PvP available only in shmup", "tryb gracz vs gracz dostępny tylko w trybie strzelanki")
+S("PvP grants infinite lives -- achievements disabled", "gracz vs gracz daje nieskończenie wiele żyć -- osiągnięcia wyłączone")
+
+S("split screen mode", "tryb podzielonego ekranu")
+S("achievements disabled in split screen", "podzielony ekran -- osiągnięcia wyłączone")
+
+S("auto-adjust dual-focus projections", "automatycznie dostosuj projekcje podwójnie zogniskowane")
+S("autoscale dual focus", "automatyczne skalowanie przy podwójnym ogniskowaniu")
+
+S("self hits", "atakowanie siebie")
+
+S(" (%1 $$$, %2 kills, %3 deaths)", "(%1 $$$, pokonanych: %2, śmierci: %3)")
+S(" (%1 pkills)", " (%1 pokonanych graczy)")
+S(" (%1 self)", " (%1 siebie)")
+
+// racing mode
+
+S("play on an official track", "graj na torze oficjalnym")
+S("generate a random track", "generuj tor losowy")
+S("Too many pauses!", "za dużo pauz!")
+S("Pauses: %1 of %2 allowed", "Pauzy: %1 dozwolone: %2")
+
+// new land structures
+
+S("horodisks", "horodyski")
+S("land size in horodisk mode", "wielkość krainy w trybie horodysków")
+S("Set this to -2 to get perfect horodisks. Smaller values yield less dense horodisks, and larger values might produce horodisks with errors or crashing into each other.",
+  "Ustaw -2 by horodyski były dokładne. Mniejsze wartości to rzadsze horodyski; większe wartości mogą powodować, że horodyski się zderzają, i inne błędy.")
+
+S("ideal Voronoi", "idealne Voronoi")
+S("display Voronoi tie debug values", "wartości do debugowania Voronoi")
+
+S("land size in randomwalk mode", "wielkość krainy w trybie błądzenia losowego")
+S("The average size of a land in randomwalk mode.", "Średnia wielkość krainy w trybie błądzenia losowego.")
+
+S("this starting land is not eligible for achievements", "ta kraina startu wyłącza osiągnięcia")
+S("eligible for most achievements", "większość osiągnięć legalna")
+S("eligible for Chaos mode achievements", "osiągnięcia trybu Chaosu legalne")
+S("eligible for special achievements", "osiągnięcia spejalne legalne")
+S("not eligible for achievements", "osiągnięcia nielegalne")
+S("(but the cheat mode is on)", "(ale włączono tryb oszusta)")
+S("(but the casual mode is on)", "(ale włączono tryb niezobowiązujący)")
+
+// other gameplay
+
+S("There should be a Palace somewhere nearby...", "Gdzieś tu powinien być Pałac...")
+S("The following Orbs act an extra lives in the shmup mode:", "Następujące sfery w trybie strzelanki dają dodatkowe życie:")
+S("\n\nThis Orb is triggered on your first direct melee attack or illegal move.",  /* 'direct melee' added to an earlier version of this message */
+  "\n\nTa Sfera się aktywuje automatycznie, gdy wykonasz bezpośredni atak wręcz lub nielegalny ruch.")
+S("\n\nOrb unlocked: %1", "\n\nSfera odblokowana: %1")
+S("toggle numerical display", "przestaw tryb numeryczny") // in help
+S("display mine counts numerically", "pokazuj liczby min cyframi")
+S("Accessible only from %the1, %2, or %3.\n", "Kraina dostępna jedynie z: %1, %2, %3.\n")
+S("Cannot switch places with %the1!", "Nie można się zamienić miejscami z %abl1!")
+S("d%1 rolled %2", "d%1 wyrzuciła %2")
+
+S("orb display mode", "tryb pokazywania sfer")
+S("icons", "ikony")
+
+// menu & configuration
+//======================
+
+S("default: ", "domyślne: ")
+S("use the default value", "użyj wartości domyślnych")
+
+S("pick scores", "wybór wyników")
+
+S("Angle to rotate by.", "O jaki kąt obrócić")
+S("dxy(n) = rotate n degrees from x to y\n\nd-degree, r-radian, t-turn\n\nexample: dxy(30)*dyz(45)",
+   "dxy(n) = obróć n stopni od x do y\n\nd-stopeń (degree), r-radian, t-obrót (turn)\n\nprzykład: dxy(30)*dyz(45)")
+
+S("no filters", "bez filtrów")
+
+S("yet another classic game", "kolejna klasyczna gra") // hyperbolic Minesweeper
+
+S("context help", "pomoc kontekstowa")
+S("all context help/welcome messages", "pełna pomoc kontekstowa")
+S("no context help/welcome messages", "bez pomocy kontekstowej")
+S("I know I can press F1 for help", "wiem, że mogę nacisnąć F1 by dostać pomoc")
+
+S("menu map darkening", "przyciemnianie mapy w menu")
+S("A larger number means darker game map in the background. Set to 8 to disable the background.",
+  "Większa liczba to ciemniejsze tło z mapą gry. Ustaw 8, by całkowicie wyłączyć tło.")
+S("centered menus in widescreen", "wycentrowane menu przy szerokim ekranie")
+
+S("less items/kills in landscape", "mniej przedmiotów/zabić w trybie pejzażu")
+S("less items/kills in portrait", "mniej przedmiotów/zabić w trybie portretu")
+
+S("forced center down", "centrum niżej")
+S("make the center not the actual screen center", "umieść centrum mapy poniżej centrum ekranu")
+
+// animations
+
+S("idle animation speed", "prędkość animacji własnej")
+S("flashing effects", "efekty rozbłysku")
+S("Disable if you are photosensitive. Replaces flashing effects such as Orb of Storms lightning with slow, adjustable animations.",
+  "Wyłącz jeśli jesteś czuł%y0 na światło. Zamienia rozbłyski takie, jak efekt błyskawicy, na powolne, konfigurowalne animacje.")
+
+S("start animations", "animacje podczas startu gry")
+
+S("movement animation", "animacja ruchu")
+
+S("animation rug angle", "kąt animacji dywanu")
+S("rug forward movement angle", "kąt ruchu wprost dywanu")
+S("rug_camera angle", "kąt kamery dywanu")
+S("translation+rotation", "translacja+rotacja")
+
+// save file selection
+
+S("select the score/save file on startup", "wybierz plik postępów podczas uruchamiania")
+S("choose your score/save file", "Wybierz plik z zapisanymi stanami gry i wynikami")
+S("Save the config and restart to select another score/save file.", "Zapisz konfigurację i zrestartuj, by użyć innego pliku postępów.")
+S("Save the config to always play without recording your progress.", "Zapisz konfigurację, by zawsze grać bez zapisu postępów.")
+S("Save the config to always use %1.", "Zapisz konfigurację by zawsze używać pliku postępów %1.")
+S("Your progress will not be saved.", "Twoje postępy nie będą zapisywane.")
+
+// online demo (not translated but just in case)
+
+S("HyperRogue %1: online demo", "HyperRogue %1: demo online")
+S("play the game", "gramy")
+S("learn about hyperbolic geometry", "nauka o geometrii hiperbolicznej")
+S("toggle high detail", "przestaw wysoki poziom szczegółów")
+
+// other
+
+S("wiki", "wiki")
+S("highlight faraway monsters", "podświetlaj odległe potwory")
+
+// map editor, line patterns, etc.
+//=================================
+
+S("hint: shift+A to enter the map editor", "wskazówka: shift+A uruchamia edytor map")
+
+S("z = set Shift+click", "z = ustaw Shift+klik")
+S("B = build on walls ", "B = budowa na ścianie")
+S("S = snap (%1)", "S = przyciąganie (%1)")
+S("Z =", "Z = ")
+S("X =", "X = ")
+S("Y =", "Y = ")
+S("w: %1", "w: %1")
+S("λ: %1°", "λ: %1°")
+
+S("edit cell values", "edytuj zmienne w polach")
+S("canvas floor shape", "kształt podłogi płotna")
+S("canvas darkness", "przyciemnianie płótna")
+
+S("die shape", "kształt kostki")
+S("die face", "ścianka kostki")
+S("die direction", "kierunek kostki")
+S("die mirror status", "stan lustrzanego odbicia kostki")
+S("mirrored", "lustrzane")
+
+// line patterns
+
+S("parallel/meridian orientation", "orientacja równoleżników i południków")
+S("number of parallels drawn", "liczba rysowanych równoleżników")
+S("last parallel drawn", "ostatni równoleżnik rysowany")
+S("tree-drawing parameter", "parametr rysowania drzew")
+S("How much of edges to draw for tree patterns (to show how the tree edges are oriented).",
+  "Jaką część krawędzi rysować (by pokazać, w którą stronę zorientowane są krawędzie drzewa).")
+
+// debug tools
+
+S("error", "błąd")
+
+S("display tile debug values", "pokaż wartości do debugowania kafelków")
+S("Display cell type IDs, as well as vertex and edge identifiers.\n\n"
+  "Setting 1 uses the internal shape IDs, while setting 2 in tes files uses the original IDs"
+  " in case if extra tile types were added to separate mirror images or different football types.",
+
+  "Typy komórek, numery krawędzi i wierzchołków. Ustaw 1 = wewnętrzne IDy kształtów, 2 = oryginalne IDy, "
+  "o ile dodatkowe typy zostały dodane, by odseparować odbicia lustrzane lub dodatkowe typy wprowadzone w celu uzyskania kolorowalności piłki nożnej.")
+
+// tessellations / honeycombs / projections / embeddings
+//========================================================
+
+// new geometry settings
+
+S("projective Bring's Surface", "rzutowa powierzchnia Bringa")
+S("aperiodic hat", "aperiodyczny kapelusz (hat)")
+S("Sierpiński triangle", "trójkąt Sierpińskiego")
+S("Sierpiński carpet", "dywan Sierpińskiego")
+S("6-flake fractal", "fraktal 6-płatek")
+S("Menger sponge", "gąbka Mengera")
+S("Sierpiński tetrahedron", "czworościan Sierpińskiego")
+S("aperiodic spectre", "aperiodyczny spektr (spectre)")
+
+// inter-geometric portals
+
+S("Welcome to a portal map! Press 'o' to configure.", "Witaj w mapie portalowej! Naciśnij 'o', by skonfigurować.")
+S("become a portal map", "Przekształć na mapę portalową")
+S("yes, that's what I want", "Tak, tego chcę")
+S("world list", "lista światów")
+S("manage portals", "zarządzanie portalami")
+S("view another world", "pokaż inny świat")
+S("connect ", "połącz ")
+S("disconnect this portal", "rozłącz ten portal")
+S("remove %1 from the list", "usuń %1 z listy")
+S("add to list", "dodaj do listy")
+S("portal orientation", "orientacja portalu")
+S("mirror connection", "połączenie lustrzane")
+S("test portal here", "testuj portal tutaj")
+S("set recommended settings", "ustaw zalecane ustawienia")
+S("height-to-width ratio", "stosunek wysokości do szerokości")
+
+S("keep eye level when walking enabled", "trzymaj poziom oka podczas chodzenia")
+S("walking eye angle", "chodzenie: kąt widzenia")
+S("0 = looking forward, 90 = looking upward. In VR this is adjusted automatically.",
+  "0 = wprost, 90 = do góry. W VR to jest dostosowywane automatycznie.")
+S("eye angle scale", "skalowanie kąta widzenia")
+S("1 = the angle can be changed with keyboard or mouse movements, 0 = the angle is fixed",
+  "1 = kąt widzenia można zmieniać klawiaturą lub myszą, 0 = kąt jest sztywno ustalony")
+S("walking eye level", "chodzenie: poziom oka")
+S("Distance from the floor to the eye in the walking mode, in absolute units. In VR this is adjusted automatically.", 
+  "Odległość od podłogi do oka w trybie chodzenia, w jednostkach bezwzględnych. W trybie VR jest to dobierane automatycznie.")
+
+S("move the camera with arrow keys and Home/End", "strzałki i Home/End by ruszać kamerą")
+S("the map is fixed (improves performance)", "stała mapa (lepsza wydajność)")
+
+S("You are currently in a visualization. Press wasd to scroll, qe to rotate. You can also use the arrow keys. ESC for menu.\n\n",
+  "Jesteś w wizualizacji. Klawisze: wasd by przesuwać, qe by obracać. Można też używać strzałek. ESC by wyjść do menu.\n\n")
+
+S("You are currently in a visualization. Press wasdqe to rotate the camera, ijklyh to move. You can also use the arrow keys and Home/End and PgUp/PgDn. ESC for menu.\n\n",
+  "Jesteś w wizualizacji. Klawisze: wasdqe by obracać kamerę, ijklyh by poruszać. Można też używać strzałek, Home/End, i PgUp/PgDn. ESC by wyjść do menu.\n\n")
+
+S("pure exploration (game keys scroll)", "czysta eksploracja (klawisze gry przewijają)")
+
+// subdivisions of 3D honeycombs
+
+S("sub-cubes", "pod-kostki")
+S("dual sub-cubes", "dualne pod-kostki")
+S("bitruncated sub-cubes", "przycięte pod-kostki")
+S("note: more choices in cubic honeycombs", "uwaga: w teselacjach 3D kubicznych jest więcej możliwości")
+S("subdivision", "podział")
+S("split by original faces", "podziel według ścian oryginalnych komórek")
+S("split by vertex axes", "podziel według osi wierzchołków")
+S("split by midedges", "podziel według środków krawędzi")
+S("Outside of the supported limits", "przekraczasz dozwolone limity")
+// let's just not translate this
+S("subcubed", "subcubed")
+S("dual-subcubed", "dual-subcubed")
+S("bitruncated-subcubed", "bitruncated-subcubed")
+S("subdivided", "subdivided")
+
+// restrict map to disk
+
+S("disk size", "rozmiar dysku")
+S("Play on a disk. Enables the special game rules for small bounded spaces (especially relevant for e.g. Minefield and Halloween). "
+  "The number given is the number of tiles to use; it is not used exactly, actually the smallest disk above this size is used. Set to 0 to disable.",
+  "Graj na dysku. Uruchamia specjalne reguły gry dla małych, ograniczonych przestrzeni, które są szczególnie ważne dla Pola Minowego i Halloween. "
+  "Podaj, ile ma być pól; zwykle nie będzie dokładnie tyle, najmniejszy dysk ponad ten rozmiar będzie użyty. Ustaw 0 by wyłączyć.")
+
+S("disk shape", "kształt dysku")
+S("distance in tiles", "odległość w polach")
+S("distance in vertices", "odległość w wierzchołkach")
+S("geometric distance", "odległość geometryczna")
+S("fraction of mine in bounded minefield", "frakcja min w ograniczonym polu minowym")
+
+// tessellation tree generation
+
+S("strict tree maps", "ściśle drzewiaste mapy")
+S("display distances up to", "pokazuj odległości aż do")
+S("extend automatically", "automatycznie rozszerzaj tablicę") // the table of tile count by distances
+S("rules generated successfully: %1 states using %2-%3 cells", "reguły wygenerowane, liczba stanów: %1, liczba pól: %2-%3")
+S("too difficult: %1", "za trudne: %1")
+S("bug: %1", "bug: %1")
+S(
+    "Strict tree maps are generated using a more powerful algorithm.\n\nThis algorithms supports horocycles and knows the expansion rates of various "
+    "tessellations (contrary to the basic implementation of Archimedean, tes, and unrectified/warped/untruncated tessellations).\n\nYou can convert mostly any "
+    "non-spherical periodic 2D tessellation to strict tree based.\n\nSwitching the map format erases your map.",
+
+    "Ściśle drzewiaste mapy używają mocniejsego algorytmu.\n\n"
+    "W tym algorytmie działają horocykle i obliczanie stopnia ekspansji dla różnych teselacji (w przeciwieństwie do podstawowej implementacji map archimedesowych, "
+    ".tes, i teselacji unrectified/warped/untruncated).\n\n"
+    "Można skonwertować prawie dowolną niesferyczną okresową teselację 2D do ściśle drzewiastej mapy.\n\n"
+    "Ta konwersja powoduje wykasowanie Twojej obecnej mapy gry."
+  )
+
+S("in tes internal format", "w formacie wewnętrznym .tes")
+S("converted successfully -- %1 cell types", "konwersja udana -- liczba typów pól: %1")
+S("cannot be disabled for this tiling", "nie da się wyłączyć dla tej teselacji")
+S("extended football colorability", "rozszerzona kolorowalność w stylu piłki nożnej")
+S("consider all symmetries when converting", "przy konwersji uwzględniaj wszystkie symetrie")
+S("tes reverse order on convert", "odwrócona kolejność tes przy konwersji")
+S("maximum cellcount", "max liczba pól")
+S("controls the max memory usage of conversion algorithm -- the algorithm fails if exceeded",
+  "steruje maksymalnym zużyciem pamięci algorytmu konwersji -- jeśli przekroczymy podaną wartość, algorytm jest przerywany")
+
+// hat tiling
+
+S("hat/spectre/turtle parameter", "parametr hat/spectre/turtle")
+S("Apeirodic hat tiling based on: https://arxiv.org/pdf/2303.10798.pdf\n\n"
+  "This controls the parameter discussed in Section 6. Parameter p is Tile(p, (2-p)√3), "
+  "scaled so that the area is the same for every p.\n\n"
+  "Aperiodic spectre tiling based on: https://arxiv.org/abs/2305.17743\n\n"
+  "In the spectre tiling, set the parameter to 'spectre' value to make all tiles have the same shape.",
+
+  "Hat: aperiodyczny parkietaż oparty na: https://arxiv.org/pdf/2303.10798.pdf\n\n"
+  "Tu możemy sterować parametrem opisanym w Sekcji 6. Parametr p to Tile(p, (2-p)√3), "
+  "przeskalowany tak, by pole było takie samo dla każdego p.\n\n"
+  "Spectre: aperiodyczny parkietaż oparty na: https://arxiv.org/abs/2305.17743\n\n"
+  "W tym parkietażu ustaw parametr na 'spectre' by wszystkie kafelki miały ten sam kształt.")
+
+S("Welcome to HatRogue!", "Witaj w HatRogue!")
+S("hat in cluster", "kapelusz w klastrze")
+S("hat clusters", "klastry kapeluszy")
+S("hat superclusters", "superklastry")
+S("types (mark reverse)", "typy (zaznacz odwrócone)")
+S("display small floors", "małe podłogi")
+S("chevron (periodic)", "szewron")
+S("hat", "kapelusz ('hat')")
+S("spectre", "spektr ('spectre')")
+S("turtle", "żółw ('turtle')")
+S("comma (periodic)", "przecinek")
+
+S("hat parameter (imaginary)", "parametr hat (część urojona)")
+S("Imaginary part of the hat parameter. This corresponds to the usual interpretation of complex numbers in Euclidean planar geometry: "
+  "rather than shortened or lengthened, the edges are moved in the other dimension.",
+  "Część urojona parametru hat. Odpowiada ona standardowej interpretacji liczb zespolonych w geometrii płaskiej: "
+  "zamiast skracać czy wydłużać, krawędzie są przemieszczane w drugim wymiarze."
+  )
+
+// fake curvature setting in experiments in geometry (some texts were not translated)
+
+S(
+  "This feature lets you construct the same tiling, but "
+  "from shapes of different curvature.\n\n"
+  "The number you give here is (2D) vertex degree or (3D) "
+  "the number of cells around an edge.\n\n",
+
+ "Ta funkcja pozwala skonstruować ten sam parkietaż, ale z kształów pochodzących z geometrii o innej krzywiźnie.\n\n"
+ "Podana liczba to (w 2D) stopień wierczhołka lub (w 3D) liczba komórek wokół krawędzi.\n\n")
+
+S("original", "oryginalna")
+S("double original", "podwójna oryginalna")
+S("draw all if multiple of original", "rysuj wszystkie jeśli wielokrotność oryginalnej")
+S("draw copies (2D only)", "rysuj kopie (tylko 2D)")
+S("unordered", "nieuporządkowane")
+S("pre-ordered", "uporządkowane przed")
+S("post-ordered", "uporządkowane po")
+
+// other tessellation-related
+
+S("color by symmetries (reversed tiles marked)", "koloruj po symetriach (zaznacz odwrócone kafelki)")
+S("unreversed colors", "kolory nie odwrócone")
+S("symmetric subdivision", "symetryczny podział")
+S("simplified display of apeirogons", "uproszczone pokazywanie apeirogonów")
+
+S("Width of cell boundaries", "szerokość brzegów pól")
+S("How wide should the cell boundaries be.", "Jak szerokie powinny być brzegi pól.")
+
+S("the following sliders will restart the game", "te suwaki restartują grę")
+
+// new projections and parameters
+
+S("horocyclic equal-area", "horocykliczny, równe pola")
+S("conformal square", "kwadrat konforemny")
+S("Lie perspective", "perspektywa w grupie Liego")
+S("Lie orthogonal", "rzut ortogonalny w grupie Liego")
+S("relativistic perspective", "perspektywa relatywistyczna")
+S("relativistic orthogonal", "rzut ortogonalny relatywistyczny")
+S("angle between the axes", "kąt między osiami")
+S("In two-axe-based models, this parameter gives the angle between the two axes.", "W modelach opartych na dwóch osiach ten parametr określa kąt między osiami.")
+S("model orientation 3D", "orientacja modelu w 3D")
+S("semidirect_rendering (perspective on GPU)", "półbezpośrednie (perspektywa na GPU)")
+S("this is not a Lie group", "to nie grupa Liego")
+S("not implemented", "nie zaimplementowane")
+
+S("auto rotation", "automatyczne obracanie")
+S("auto rotation in 3D", "automatyczne obracanie w 3D")
+
+// alternative screen projections
+
+S("stereo/high-FOV mode", "tryb stereo / duże pole widzenia")
+S("linear perspective", "perspektywa liniowa")
+S("for red-cyan glasses", "do użycia z czerowno-turkusowymi okularami 3D")
+S("for mobile VR", "do mobilnego VR")
+S("ODS", "rzut ODS")
+S("for rendering 360° VR videos (implemented only in raycaster and some other parts)",
+  "do renderowania filmów VR w 360° stopniach (zaimplementowane jedynie w raycasterze i innych szczególnych przypadkach)")
+S("Panini", "Panini")
+S("Projection believed to be used by Italian painters. Allows very high FOV angles while rendering more straight lines as straight than the stereographic projection.",
+  "Rekonstrukcja rzutu używanego przez włoskich malarzy. Bardzo duże pole widzenia, ale więcej linii prostych niż w rzucie stereograficznym.")
+S("stereographic", "rzut stereograficzny")
+S("Stereographic projection allows very high FOV angles.", "Rzut stereograficzny pozwala na bardzo duże pole widzenia.")
+S("equirectangular", "rzut równoprostokątny")
+S("for rendering 360° videos (implemented only in raycaster)", "do filmów w 360° (zaimplementowany tylko w raycasterze)")
+S("stereographic/Panini parameter", "parametr rzutu stereograficznego/Paniniego")
+S("1 for full stereographic/Panini projection. Lower values reduce the effect.\n\n"
+  "HyperRogue uses a quick implementation, so parameter values too close to 1 may be buggy (outside of raycasting); try e.g. 0.9 instead.",
+  "1 to pełny rzut stereograficzny/Paniniego; mniejsze wartości to efekt pośredni.\n\n"
+  "Obecna implementacja jest uproszczona, także wartości parametru zbytnio bliskie 1 mogą powodować błędy graficzne (poza trybem raycastingu), "
+  "także zaleca się używać mniejszych wartości, przykładowo 0.9."
+  )
+
+// embeddings
+//============
+
+S("3D embedding method", "metoda zanurzenia w 3D")
+S("3D style", "styl 3D")
+S("2D engine", "silnik 2D")
+S("Use HyperRogue's 2D engine to simulate same curvature. Works well in top-down and third-person perspective. The Hypersian Rug mode can be used to project this to a surface.",
+  "Używamy silnika 2D by symulować tą samą krzywiznę w trzecim wymiarze. Działa dobrze przy widoku z góry i z perspektywy trzeciej osoby. Tryb Hiperskiego Dywanu "
+  "może być użyty, by zrobić rzut na powierzchnię w trzech wymiarach.")
+S("same curvature", "ta sama krzywizna")
+S("Embed as an equidistant surface in the 3D version of the same geometry.",
+  "Zanurz jako powierzchnia ekwidystantna w trójwymiarowej wersji tej samej geometrii.")
+S("lower curvature", "niższa krzywizna")
+S("Embed as a surface in a space of lower curvature.", "Zanurz jako powierzchnia w przestrzeni o niższej krzywiźnie.")
+S("much lower curvature", "o wiele niższa krzywizna")
+S("Embed sphere as a sphere in hyperbolic space.", "Zanurz sferę w przestrzeni hiperbolicznej.")
+S("product", "produkt")
+S("Add one extra dimension in the Euclidean way.", "Dodaje dodatkowy wymiar w sposób Euklidesowy.")
+S("Embed Euclidean plane into Nil.", "Zanurz płaszczyznę euklidesową w geometrię Nil.")
+S("Embed Euclidean or hyperbolic plane into Sol.", "Zanurz płaszczyznę euklidesową w geometrię Sol.")
+S("Embed Euclidean or hyperbolic plane into stretched hyperbolic geometry.", "Zanurz płaszczyznę euklidesową w rozciągniętą geometrię hiperboliczną.")
+S("stretched Sol", "rozciągnięte Sol.")
+S("Embed Euclidean or hyperbolic plane into stretched Sol geometry.", "Zanurz płaszczyznę euklidesową lub hiperboliczną w rozciągniętą geometrię Sol.")
+S("Clifford Torus", "trous Clifforda")
+S("Embed Euclidean rectangular torus into S3.", "Zanurz prostokątny torus w geometrię sferyczną.")
+S("hyperbolic product", "produkt hiperboliczny")
+S("Embed Euclidean or hyperbolic plane in the H2xR product space.", "Zanurz płaszczyznę euklidesową lub hiperboliczną w przestrzeń produktową H2xR")
+S("spherical product", "produkt sferyczny")
+S("Embed Euclidean cylinder or spherical plane in the H2xR product space.", "Zanurz płaszczyznę euklidesową lub sferę w przestrzeń produktową S2xR")
+S("Embed Euclidean plane in twisted product geometry.", "Zanurz płaszczyznę euklidesową w skręconą geometrię produktową.")
+S("Embed Euclidean cylinder in Euclidean space.", "Zanurz walec euklidesowy w przestrzeń euklidesową.")
+S("hyperbolic cylinder", "walec hiperboliczny")
+S("Embed Euclidean cylinder in hyperbolic space.", "Zanurz walec euklidesowy w przestrzeń hiperboliczną.")
+S("product cylinder", "walec produktowy")
+S("Embed Euclidean cylinder in H2xR space.", "Zanurz walec euklidesowy w przestrzeń produktową H2xR.")
+S("Nil cylinder", "walec Nil")
+S("Embed Euclidean cylinder in Nil.", "Zanurz walec euklidesowy w Nil.")
+S("horocylinder", "horowalec")
+S("Embed Euclidean as a horocylinder in H2xR space.", "Zanurz płaszczyznę euklidesową jako horowalec w H2xR.")
+S("SL2 cylinder", "walec SL2")
+S("Embed Euclidean as a cylinder in twisted product geometry.", "Zanurz walec euklidesowy w poskręcaną przestrzeń produktową.")
+
+// embedding settings
+
+S("flat, not equidistant", "płaskie, a nie ekwidystantny")
+S("invert convex/concave", "odwróć wypukły/wklęsły")
+
+// embedding errors
+
+S("set square tiling", "ustaw parkietaż kwadratowy")
+S("set hex tiling", "ustaw parkietaż sześciokątny")
+S("error: currently works only in PURE Euclidean regular square or hex tiling", "błąd: obecnie działa tylko w CZYSTYM parkietażu euklidesowym kwadratowym lub sześciokątnym")
+S("error: currently works only in pure Euclidean, or binary tiling and similar", "błąd: obecnie działa tylko w czystym parkietażu euklidesowym, lub podobnym do parkietażu binarnego")
+S("set binary tiling variant", "ustaw wariant parkietażu binarnego")
+S("set ternary tiling", "ustaw parkietaż ternarny")
+S("set binary tiling", "ustaw parkietaż binarny")
+S("error: this embedding does not work in shmup", "błąd: to zanurzenie nie działa w trybie strzelanki")
+S("error: this method works only in rectangular torus", "błąd: ta metoda działa tylko dla torusu prostokątnego")
+S("set 20x20 torus", "ustaw torus 20x20")
+S("error: this method works only in cylinder", "błąd: ta metoda działa tylko dla walcowej mapy")
+S("set cylinder", "ustaw walec")
+S("error: not supported", "błąd: nie działa")
+S("error: this method does not work in spherical geometry", "błąd: ta metoda nie działa w geometrii sferycznej")
+S("error: this method does not work in hyperbolic geometry", "błąd: ta metoda nie działa w geometrii hiperbolicznej")
+S("3D styles", "style 3D")
+S("3D detailed settings", "szczegółowe ustawienia 3D")
+S("more options in 3D engine", "więcej opcji przy użyciu silnika 3D")
+S("configure Hypersian Rug", "konfiguruj Hiperski Dywan")
+S("view shift for embedded planes", "zmiana kamery dla zanurzonych płaszczyzn")
+S("always move on geodesics", "ruch zawsze po geodezyjnych")
+S("keep levels", "trzymaj poziom")
+S("keep the vertical angle of the camera", "trzymaj pionowy kąt kamery")
+S("mixed", "tryb mieszany")
+S("on geodesics when moving camera manually, keep level when auto-centering", "geodezyjne przy ręcznym ruchu kamerą, trzymaj poziom przy auto-centrowaniu")
+S("Euclidean embedding rotation", "obrót zanurzenia euklidesowego")
+S("How to rotate the Euclidean embedding, in degrees.", "O ile obrócić zanurzoną płaszczyznę euklidesową, w stopniach.")
+S("Euclidean embedding scale", "skala zanurzenia euklidesowego")
+S("How to scale the Euclidean map, relatively to the 3D absolute unit.", "Jak przeskalować mapę euklidesową, w stosunku do jednostki absolutnej 3D.")
+S("Euclidean embedding scale Y/X", "skala Y/X zanurzenia euklidesowego")
+S("This scaling factor affects only the Y coordinate.", "Ten współczynnik skali wpływa jedynie na współrzędną Y.")
+S("(fix errors)", "(popraw błędy)")
+S("reset view", "zresetuj obraz")
+S("needs", "potrzeba: ")
+
+// embeddings: detailed 3D parameters
+
+S("set 3D settings automatically", "ustaw 3D automatycznie")
+
+S("draw plain floors in 3D", "w trybie 3D rysuj zwykłe podłogi")
+S("floor alpha", "przezroczystość podłóg")
+S("255 = opaque", "255 = nieprzejrzyste")
+
+S("altitude of the stars", "wysokość gwiazd")
+S("star probability", "prawdopodobieństwo gwiazdy")
+S("probability of star per tile", "prawdopodobieństwo gwiazdy na kafelek")
+S("night star size (relative to item sizes)", "rozmiar gwiazd nocnych (w stosunku do wielkości przedmiotów)")
+S("sun size (relative to item sizes)", "rozmiar słońca (w stosunku do wielkości przedmiotów)")
+S("infinite sky", "nieskończone niebo")
+S("ratio of high walls to normal walls", "stosunek wysokich ścian do normalnych")
+S("ratio of very high walls to normal walls", "stosunek bardzo wysokich ścian do normalnych")
+S("altitude of the sky", "wysokość nieba")
+S("sky fake height", "fałszywa wysokość nieba")
+S("Sky is rendered at the distance computed based on the sky height, "
+  "which might be beyond the range visible in fog. To prevent this, "
+  "the intensity of the fog effect depends on the value here rather than the actual distance. Stars are affected similarly.",
+
+  "Niebo jest renderowane w odległości obliczanej na podstawie parametru, "
+  "co może być dalej, niż zasięg widoczny we mgle. By tego uniknąć, "
+  "intensywność mgły zależy od tej wartości zamiast faktycznej odległości. Ten sam efekt wpływa na gwiazdy."
+  )
+S("sky rendering", "renderowanie powietrza")
+S("do not draw sky", "nie rysuj powietrza")
+S("skybox", "skybox")
+S("infinite depth", "nieskończona głębokość")
+S("The unit this is value is given in is wall height. "
+  "Note that, in exponentially expanding spaces, too high values could cause rendering issues. "
+  "So if you want infinity, values of 5 or similar should be used -- there is no visible difference from infinity and glitches are avoided.",
+  "Ta wartość jest podawana w jednostkach wysokości ściany. "
+  "W przestrzeniach rosnących wykładniczo, zbyt wysokie wartości mogą powodować błędy. "
+  "Także sugerujemy użycie wartości około 5 dla nieskończoności -- nie ma widocznych różnic i te błędy nie wystąpią.")
+S("Level of shallow water", "poziom płytkiej wody")
+S("do not render higher levels if camera too high", "nie renderuj wyższych poziomów jeśli kamera jest ponad nimi")
+S("works only in Euclidean", "działa tylko w przestrzeni euklidesowej")
+S("always", "zawsze")
+S("might be glitched in some settings", "w niektórych ustawieniach źle działa")
+S("prevent exceeding recommended altitudes", "nie przekraczaj rekomendowanych wysokości")
+
+S("camera angle", "kąt kamery")
+S("render behind the camera", "renderuj za kamerą")
+
+// embeddings: pseudohedral setting
+
+S("make the tiles flat", "płaskie kafelki")
+S("the tiles are curved", "kafelki są zakrzywione")
+S("inscribed", "wpisane")
+S("the tiles are inscribed", "kafelki są wpisane")
+S("circumscribed", "opisane")
+S("the tiles are circumscribed", "kafelki są opisane")
+S("depth bonus in pseudohedral", "bonus do głębokości")
+
+// embeddings: geodesic movement in Solv etc
+
+S("straight lines", "linie proste")
+S("Lie group", "grupy Liego")
+S("light, camera, and objects move in lines of constant direction, in the Lie group sense", "światło, kamera, i obiekty ruszają się w liniach o stałym kierunku w sensie group Liego")
+S("geodesics", "geodezyjne")
+S("light, camera, and objects always take the shortest path", "światło, kamera, i obiekty ruszają się po najkrótszej ścieżce")
