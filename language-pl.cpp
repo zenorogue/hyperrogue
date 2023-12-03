@@ -8144,7 +8144,7 @@ S("stretched hyperbolic", "rozciągnięta hiperboliczna")
 S("stretched Solv", "rozciągnięta geometria Solv")
 
 S("{3,∞} (infinite triangles)", "{3,∞} (nieskończone trójkąty)")
-S("{4,∞} (infinite triangles)", "{4,∞} (nieskończone kwadraty)")
+S("{4,∞} (infinite squares)", "{4,∞} (nieskończone kwadraty)")
 S("{3/4,∞} (infinite triangles and squares)", "nieskończone trójkąty i kwadraty")
 
 S("4D crystal in H3", "4D kryształ w H3")

@@ -8425,7 +8425,7 @@ S("stretched hyperbolic", "natažené hyperbolické")
 S("stretched Solv", "natažený Solv")
 
 S("{3,∞} (infinite triangles)", "{3,∞} (nekonečné trojúhelníky)")
-S("{4,∞} (infinite triangles)", "{4,∞} (nekonečné čtverce)")
+S("{4,∞} (infinite squares)", "{4,∞} (nekonečné čtverce)")
 S("{3/4,∞} (infinite triangles and squares)", "nekonečné trojúhelníky a čtverce")
 
 S("4D crystal in H3", "4D krystal v H3")
