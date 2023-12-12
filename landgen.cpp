@@ -1791,11 +1791,13 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           }
         }
       ONEMPTY {
-        if(hrand_monster(ls::hv_structure() ? 8000 : 4000) < (peace::on ? 750 : 50 + items[itBabyTortoise]*2 + yendor::hardness() * 6) && !safety) {
+        bool mk21tor = (tortoise::seek() && !((tortoise::getb(c) ^ tortoise::seekbits) & tortoise::mask) && (turncount > tortoise::last21tort + 100));
+        if((mk21tor || hrand_monster(ls::hv_structure() ? 8000 : 4000) < (peace::on ? 750 : 50 + items[itBabyTortoise]*2 + yendor::hardness() * 6)) && !safety) {
           c->monst = moTortoise;
           c->hitpoints = 3;
           auto val = tortoise::getb(c);
           tortoise::emap[c] = val;
+          if (mk21tor) tortoise::last21tort = turncount;
           }
         else if(ls::hv_structure() && hrand(10000) <= 250) {
           c->item = itCompass;

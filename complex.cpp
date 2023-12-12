@@ -2513,6 +2513,7 @@ EX namespace tortoise {
   EX map<cell*, int> emap;
   EX map<cell*, int> babymap;
   EX int last;
+  EX int last21tort;
   
   #if HDR
   enum tflag {
