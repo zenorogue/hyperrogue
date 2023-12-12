@@ -876,6 +876,12 @@ struct charstyle_old {
   bool lefthanded;
   };
 
+struct charstyle_prebow {
+  int charid;
+  color_t skincolor, haircolor, dresscolor, swordcolor, dresscolor2, uicolor, eyecolor;
+  bool lefthanded;
+  };
+
 EX void hread(hstream& hs, charstyle& cs) {
   // before 0xA61A there was no eyecolor
   if(hs.get_vernum() < 0xA61A) {
@@ -889,7 +895,21 @@ EX void hread(hstream& hs, charstyle& cs) {
     if(cs.charid < 4) cs.eyecolor = 0;
     cs.dresscolor2 = cso.dresscolor2;
     cs.uicolor = cso.uicolor;
-    cs.lefthanded = cso.lefthanded;    
+    cs.lefthanded = cso.lefthanded;
+    }
+  else if(hs.get_vernum() < 0xA938) {
+    charstyle_prebow cso;
+    hread_raw(hs, cso);
+    cs.charid = cso.charid;
+    cs.skincolor = cso.skincolor;
+    cs.haircolor = cso.haircolor;
+    cs.dresscolor = cso.dresscolor;
+    cs.eyecolor = cso.eyecolor;
+    cs.swordcolor = cs.bowcolor = cs.bowcolor2 = cso.swordcolor;
+    if(cs.charid < 4) cs.eyecolor = 0;
+    cs.dresscolor2 = cso.dresscolor2;
+    cs.uicolor = cso.uicolor;
+    cs.lefthanded = cso.lefthanded;
     }
   else hread_raw(hs, cs);
   }
