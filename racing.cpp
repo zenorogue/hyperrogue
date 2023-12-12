@@ -88,6 +88,7 @@ string ghost_prefix = "default";
 void hread(hstream& hs, ghostmoment& m) {
   int id;
   hread(hs, m.step, id, m.alpha, m.distance, m.beta, m.footphase);
+  if(id < 0 || id >= isize(mapstream::cellbyid)) throw hr_exception("error reading a ghost moment");
   m.where_cell = mapstream::cellbyid[id];
   }
 
