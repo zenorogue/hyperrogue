@@ -597,6 +597,7 @@ EX bool haveRangedTarget() {
   }
 
 void checkmoveO() {
+  bow::bowpath_map.clear();
   if(multi::players > 1 && multi::activePlayers() == 1)
     multi::checklastmove();
   if(multi::players == 1) checkmove();
@@ -738,6 +739,7 @@ EX bool jumpTo(orbAction a, cell *dest, eItem byWhat, int bonuskill IS(0), eMons
   if(from) movecost(from, dest, 2);
 
   createNoise(1);
+  bow::bowpath_map.clear();
 
   if(shmup::on)
     shmup::teleported();
