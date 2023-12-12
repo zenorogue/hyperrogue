@@ -791,7 +791,7 @@ EX namespace dialog {
           continue;
           }
         else list_left -= size;
-        if(list_next_key) { key_actions[list_next_key] = key_actions[I.key]; I.key = list_next_key++;  }
+        if(list_next_key) { if(key_actions.count(I.key)) key_actions[list_next_key] = key_actions[I.key]; I.key = list_next_key++;  }
         }
 
       top = tothei;
