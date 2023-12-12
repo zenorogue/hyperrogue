@@ -1732,7 +1732,7 @@ void moveBullet(monster *m, int delta) {
     (markOrb(itCurseWeakness) && (markOrb(itOrbEmpathy) ? isPlayerOrImage(ptype) : ptype == moPlayer));
       
   if(m->type != moTongue && !(godragon || (c2==m->base && m->type == moArrowTrap) || passable(c2, m->base, P_BULLET | P_MIRRORWALL))) {
-    m->dead = true;
+    if(!bow::crossbow_mode()) m->dead = true;
     if(!weak && (!isDie(c2->monst) || slayer))
       killMonster(c2, m->get_parenttype());
     // cell *c = m->base;
@@ -1740,12 +1740,14 @@ void moveBullet(monster *m, int delta) {
       if(c2->wall == waBigTree) {
         addMessage(XLAT("You start chopping down the tree."));
         c2->wall = waSmallTree;
+        m->dead = true;
         }
       else if(c2->wall == waSmallTree) {
         addMessage(XLAT("You chop down the tree."));
         c2->wall = waNone;
+        m->dead = true;
         }
-      else if(isActivable(c2)) 
+      else if(isActivable(c2))
         activateActiv(c2, true);
       else if(c2->wall == waExplosiveBarrel)
         explodeBarrel(c2);
@@ -1814,7 +1816,7 @@ void moveBullet(monster *m, int delta) {
         continue;
         }
 
-      bool deadval = bow::crossbow_mode() ? false : true;
+      bool deadval = (bow::crossbow_mode() && m->type == moBullet) ? false : true;
 
       // multi-HP monsters
       if((m2->type == moPalace || m2->type == moFatGuard || m2->type == moSkeleton ||
