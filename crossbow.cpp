@@ -336,6 +336,7 @@ EX bool fire_on_mouse(cell *c) {
   if(mouse_fire_mode == mfmNone) return false;
   if(!mouseover) return false;
   if(!mouseover->monst) return false;
+  if(shmup::on) return false;
   if(items[itCrossbow]) {
     if(mouse_fire_mode == mfmAlways) {
       addMessage(XLAT("Cannot fire again yet. Turns to reload: %1.", its(items[itCrossbow])));
