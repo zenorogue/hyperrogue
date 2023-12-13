@@ -1440,12 +1440,22 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
             c->wall = waSandstone;
           }
         
-        for(int i=0; i<c->type; i++)
-          if(c->move(i) && c->move(i)->land != laStorms && c->move(i)->land != laNone)
-            c->wall = waNone;
+        if(ls::horodisk_structure()) {
+          if(celldistAlt(c) >= horodisk_from) c->wall = waNone;
+          }
+        else if(!ls::voronoi_structure()) {
+          for(int i=0; i<c->type; i++)
+            if(c->move(i) && c->move(i)->land != laStorms && c->move(i)->land != laNone)
+              c->wall = waNone;
+          }
         }
       if(d == BARLEV && randstorm) {
         c->landparam = hrand(1000000);
+        }
+      if(d == 7 && ls::voronoi_structure()) {
+        for(int i=0; i<c->type; i++)
+          if(c->move(i) && c->move(i)->land != laStorms)
+            c->wall = waNone;
         }
       if(d == BARLEV-1 && randstorm) {
         /* static int stormlevel, stormgroup;
