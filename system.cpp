@@ -1714,6 +1714,15 @@ EX void progress_warning() {
     addMessage(XLAT("Your progress will not be saved."));
   }
 
+EX void restore_all_golems() {
+  if(!shmup::on) {
+    restoreGolems(items[itOrbLife], moGolem); items[itOrbLife] = 0;
+    restoreGolems(items[itOrbFriend], moTameBomberbird); items[itOrbFriend] = 0;
+    restoreGolems(kills[moPrincessMoved], moPrincess, princess::saveHP); kills[moPrincessMoved] = 0;
+    restoreGolems(kills[moPrincessArmedMoved], moPrincessArmed, princess::saveArmedHP); kills[moPrincessArmedMoved] = 0;
+    }
+  }
+
 EX void initAll() {
   callhooks(hooks_initialize);
   init_floorcolors();
@@ -1738,13 +1747,7 @@ EX void initAll() {
   if(IRREGULAR) irr::auto_creator();
 #endif
   start_game();
-  
-  if(!shmup::on) {
-    restoreGolems(items[itOrbLife], moGolem); items[itOrbLife] = 0;
-    restoreGolems(items[itOrbFriend], moTameBomberbird); items[itOrbFriend] = 0;
-    restoreGolems(kills[moPrincessMoved], moPrincess, princess::saveHP); kills[moPrincessMoved] = 0;
-    restoreGolems(kills[moPrincessArmedMoved], moPrincessArmed, princess::saveArmedHP); kills[moPrincessArmedMoved] = 0;
-    }
+  restore_all_golems();
   
   firstland = firstland0;
   polygonal::solve();

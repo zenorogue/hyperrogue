@@ -615,6 +615,7 @@ EX void handleKeyQuit(int sym, int uni) {
       stop_game();
       load_last_save();
       start_game();
+      restore_all_golems();
       }
     else
       gotoHelp(safety_help());
