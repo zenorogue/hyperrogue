@@ -5039,3 +5039,20 @@ Updates to the crossbow mode:
 - fixed crossbow mode not changing the PTM/etc. scoreboards
 - mode change confirmation is now only required when actually changing a relevant option
 - new aim style 'geometric'
+
+2023-12-02 12:54 Update 12.1z:
+Gameplay (mostly crossbow modes)
+- an option to automatically shoot when clicking a tile with mouse
+- press 'f' + direction for auto fire at distant enemies in the given direction
+- bulls are now enraged by crossbow shots
+- ratlings no longer move when shooting pointlessly
+- the warped space distracts you from reloading while staying in place
+- Warped Coast/Sea now prevents crossbow bolts from moving between triangles
+- clarified that only direct melee attacks trigger Storms/Flash
+- fixed Horns in the crossbow mode; the unarmed Princess is now also able to use Empathy+Thorns and Empathy+Horns
+- reduced CR3 land requirement to 20 in casual
+
+Other
+- fixed the drawing mode on quotient spaces (including torus display)
+- fixed point recognition in rug mode
+- cleaned up high-FOV and stereo modes into one setting
