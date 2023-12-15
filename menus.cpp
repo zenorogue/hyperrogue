@@ -381,6 +381,39 @@ EX void showCreative() {
   dialog::display();
   }
 
+EX void show_achievement_eligibility() {
+  // #if CAP_ACHIEVE
+  dialog::addBreak(100);
+  dialog::addInfo(XLAT("achievement/leaderboard eligiblity:"), 0xFF8000);
+  if(!wrongMode(0))
+    dialog::addInfo(XLAT("eligible for most"), 0x00FF00);
+  else if(!wrongMode(rg::racing))
+    dialog::addInfo(XLAT("eligible for racing"), 0xFFFF00);
+  else if(!wrongMode(rg::shmup))
+    dialog::addInfo(XLAT("eligible for shmup"), 0xFFFF00);
+  else if(!wrongMode(rg::multi))
+    dialog::addInfo(XLAT("eligible for multiplayer"), 0xFFFF00);
+  else if(!wrongMode(rg::chaos))
+    dialog::addInfo(XLAT("eligible for Chaos mode"), 0xFFFF00);
+  else if(!wrongMode(rg::princess))
+    dialog::addInfo(XLAT("eligible for Princess Challenge"), 0xFFFF00);
+  else if(!wrongMode(specgeom_heptagonal()))
+    dialog::addInfo(XLAT("eligible for heptagonal"), 0xFFFF00);
+  else if(!wrongMode(any_specgeom())) /* the player probably knows what they are aiming at */
+    dialog::addInfo(XLAT("eligible for special geometry"), 0xFFFF00);
+  #if CAP_DAILY
+  else if(daily::on && !daily::historical)
+    dialog::addInfo(XLAT("eligible for Strange Challenge"), 0xFFFF00);
+  #endif
+  else if(cheater) dialog::addInfo(XLAT("disabled in cheat mode"), 0xC00000);
+  else if(casual) dialog::addInfo(XLAT("disabled in casual mode"), 0xC00000);
+  else if(ineligible_starting_land)
+    dialog::addInfo(XLAT("this starting land is not eligible for achievements"), 0xC00000);
+  else
+    dialog::addInfo(XLAT("not eligible due to current mode settings"), 0XC00000);
+  // #endif
+  }
+
 EX void show_chaos() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen();
@@ -420,19 +453,7 @@ EX void show_chaos() {
   dialog::addSelItem(XLAT("land"), XLAT1(linf[specialland].name), 'l');
   dialog::add_action(activate_ge_land_selection);
 
-  dialog::addBreak(100);
-  if(ineligible_starting_land)
-    dialog::addInfo(XLAT("this starting land is not eligible for achievements"));
-  else if(land_structure == lsNiceWalls)
-    dialog::addInfo(XLAT("eligible for most achievements"));
-  else if(land_structure == lsChaos)
-    dialog::addInfo(XLAT("eligible for Chaos mode achievements"));
-  else if(land_structure == lsSingle)
-    dialog::addInfo(XLAT("eligible for special achievements"));
-  else
-    dialog::addInfo(XLAT("not eligible for achievements"));
-  if(cheater) dialog::addInfo(XLAT("(but the cheat mode is on)"));
-  if(casual) dialog::addInfo(XLAT("(but the casual mode is on)"));
+  show_achievement_eligibility();
 
   dialog::addBreak(100);
   if(ls::horodisk_structure())
@@ -716,8 +737,9 @@ EX void showChangeMode() {
   dialog::add_action(racing::configure_race);
 #endif  
 
-  dialog::addBreak(50);
+  show_achievement_eligibility();
 
+  dialog::addBreak(50);
   dialog::addItem(XLAT("highlights & achievements"), 'h');
   dialog::add_action_push(mode_higlights);
   

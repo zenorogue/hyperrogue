@@ -887,8 +887,7 @@ EX void moveWorm(cell *c) {
       else
         addMessage(XLAT("The sandworm explodes!"));
       playSound(NULL, "explosion");
-      if(geometry == gZebraQuotient)
-        achievement_gain_once("ZEBRAWORM", rg::special_geometry);
+      achievement_gain_once("ZEBRAWORM", specgeom_zebra());
       }
     return;
     }

@@ -35,6 +35,8 @@ namespace rg {
   static constexpr char special_geometry = 'g';
   /** \brief wrongmode only -- mark achievements for special geometries/variations */
   static constexpr char special_geometry_nicewalls = 'G';
+  /** \brief wrongmode only -- specgeom returns 'fail' if the special geometry is not correct */
+  static constexpr char fail = 'X';
   }
 #endif
 

@@ -108,6 +108,7 @@ EX bool wrongMode(char flags) {
   if(cheater) return true;
   if(casual) return true;
   if(flags == rg::global) return false;
+  if(flags == rg::fail) return true;
   if(bow::weapon) return true;
 
   if(flags != rg::special_geometry && flags != rg::special_geometry_nicewalls) {
@@ -131,6 +132,7 @@ EX bool wrongMode(char flags) {
   if(tour::on) return true;
 #endif
   eLandStructure dls = lsNiceWalls;
+  if(flags == rg::princess && !princess::challenge) return true;
   if(flags == rg::special_geometry || flags == rg::princess)
     dls = lsSingle;
   if(flags == rg::chaos)
@@ -158,6 +160,25 @@ EX void achievement_gain_once(const string& s, char flags IS(0)) {
     }
   got_achievements.insert(s);
   achievement_gain(s.c_str(), flags);
+  }
+
+namespace rg {
+  char check(bool b, char val = special_geometry) { return b ? val : fail; }
+  };
+
+EX char specgeom_zebra() { return rg::check(geometry == gZebraQuotient && !disksize && BITRUNCATED && firstland == laDesert); }
+EX char specgeom_lovasz() { return rg::check(geometry == gKleinQuartic && variation == eVariation::untruncated && gp::param == gp::loc(1,1) && !disksize && in_lovasz()); }
+EX char specgeom_halloween() { return rg::check((geometry == gSphere || geometry == gElliptic) && BITRUNCATED && !disksize && firstland == laHalloween); }
+EX char specgeom_heptagonal() { return rg::check(PURE && geometry == gNormal && !disksize, rg::special_geometry_nicewalls); }
+EX char specgeom_euclid_gen() { return rg::check(geometry == gEuclid && !disksize && firstland == laMirrorOld); }
+EX char specgeom_crystal1() { return rg::check(PURE && cryst && ginf[gCrystal].sides == 8 && ginf[gCrystal].vertex == 4 && !crystal::used_compass_inside && !disksize && firstland == laCamelot); }
+EX char specgeom_crystal2() { return rg::check(BITRUNCATED && cryst && ginf[gCrystal].sides == 8 && ginf[gCrystal].vertex == 3 && !crystal::used_compass_inside && !disksize && firstland == laCamelot); }
+
+EX vector<std::function<char()>> all_specgeom_checks = { specgeom_zebra, specgeom_lovasz, specgeom_halloween, specgeom_heptagonal, specgeom_crystal1, specgeom_crystal2, specgeom_euclid_gen };
+
+EX char any_specgeom() {
+  for(auto chk: all_specgeom_checks) if(chk() != rg::fail) return chk();
+  return rg::fail;
   }
 
 EX void achievement_log(const char* s, char flags) {
@@ -230,11 +251,11 @@ EX void achievement_collection2(eItem it, int q) {
   if(randomPatternsMode) return;
   LATE( achievement_collection2(it, q); )
 
-  if(it == itTreat && q == 50 && (geometry == gSphere || geometry == gElliptic) && BITRUNCATED && !disksize)
-    achievement_gain("HALLOWEEN1", rg::special_geometry);
+  if(it == itTreat && q == 50)
+    achievement_gain("HALLOWEEN1", specgeom_halloween());
 
-  if(it == itTreat && q == 100 && (geometry == gSphere || geometry == gElliptic) && BITRUNCATED && !disksize)
-    achievement_gain("HALLOWEEN2", rg::special_geometry);
+  if(it == itTreat && q == 100)
+    achievement_gain("HALLOWEEN2", specgeom_halloween());
 
   if(q == 1) {
     if(it == itDiamond) achievement_gain("DIAMOND1");
@@ -314,13 +335,10 @@ EX void achievement_collection2(eItem it, int q) {
   // 32
   if(it == itHolyGrail) {
     if(q == 1) achievement_gain("GRAIL2");
-    if(PURE && geometry == gNormal && !disksize)
-      achievement_gain("GRAILH", rg::special_geometry_nicewalls);
+    achievement_gain("GRAILH", specgeom_heptagonal());
     #if CAP_CRYSTAL
-    if(PURE && cryst && ginf[gCrystal].sides == 8 && ginf[gCrystal].vertex == 4 && !crystal::used_compass_inside && !disksize)
-      achievement_gain("GRAIL4D", rg::special_geometry);
-    if(BITRUNCATED && cryst && ginf[gCrystal].sides == 8 && ginf[gCrystal].vertex == 3 && !crystal::used_compass_inside && !disksize)
-      achievement_gain("GRAIL4D2", rg::special_geometry);
+    achievement_gain("GRAIL4D", specgeom_crystal1());
+    achievement_gain("GRAIL4D2", specgeom_crystal2());
     #endif
     if(q == 3) achievement_gain("GRAIL3");
     if(q == 8) achievement_gain("GRAIL4");
@@ -604,8 +622,8 @@ EX void achievement_count(const string& s, int current, int prev) {
     achievement_gain("LIGHTNING2");
   if(s == "LIGHTNING" && current-prev >= 10)
     achievement_gain("LIGHTNING3");
-  if(s == "MIRAGE" && current >= 35 && geometry == gEuclid && !disksize)
-    achievement_gain("MIRAGE", rg::special_geometry);
+  if(s == "MIRAGE" && current >= 35)
+    achievement_gain("MIRAGE", specgeom_euclid_gen());
   if(s == "ORB" && current >= 10)
     achievement_gain("ORB3");
   if(s == "BUG" && current >= 1000)
