@@ -874,6 +874,7 @@ EX void buildCrossroads2(cell *c) {
   if(buggyGeneration) return;
 
   if(!c) return;
+  if(ls::hv_structure()) return;
   
   for(int i=0; i<c->type; i++)
     if(c->move(i) && !c->move(i)->landparam && c->move(i)->mpdist < c->mpdist)

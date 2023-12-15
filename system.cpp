@@ -284,7 +284,7 @@ EX void initgame() {
     princess::generating = false;
     }
 
-  if(cwt.at->land == laCrossroads2) {
+  if(cwt.at->land == laCrossroads2 && !ls::hv_structure()) {
     cell *c = cwt.at;
     if(mhybrid) { c = hybrid::get_where(c).first; PIU( c->cmove(0) ); }
     c->landparam = 12;
