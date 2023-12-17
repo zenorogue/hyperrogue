@@ -599,7 +599,9 @@ EX eLand getNewLand(eLand old) {
 
   if(ls::hv_structure() && landUnlocked(laMountain)) tab[cnt++] = laMountain;
   if(ls::hv_structure() && landUnlocked(laClearing)) tab[cnt++] = laClearing;
-  
+  if(ls::voronoi_structure() && landUnlocked(laRlyeh) && !rlyehComplete()) LIKELY tab[cnt++] = laRlyeh;
+  if(ls::hv_structure() && landUnlocked(laTemple)) tab[cnt++] = laTemple;
+
   if(landUnlocked(laTrollheim)) {
     if(isTrollLand(old)) LIKELY tab[cnt++] = laTrollheim;
     if(old == laTrollheim) for(int i=0; i<landtypes; i++) {
@@ -908,7 +910,7 @@ EX land_validity_t& land_validity(eLand l) {
     }
 
   if(ls::hv_structure() && among(l, laDungeon, laEndorian, laBrownian, laPrincessQuest)) return not_in_hv;
-  if(ls::voronoi_structure() && among(l, laPrairie, laCamelot, laWhirlpool, laClearing)) return not_in_hv;
+  if(ls::voronoi_structure() && among(l, laPrairie, laCamelot, laWhirlpool, laClearing, laHaunted, laWestWall)) return not_in_hv;
   if(ls::horodisk_structure() && l != laCrossroads && isCrossroads(l)) return not_in_hv;
   
   if(l == laBrownian) {
