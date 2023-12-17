@@ -385,8 +385,10 @@ EX void show_achievement_eligibility() {
   #if CAP_ACHIEVE
   dialog::addBreak(100);
   dialog::addInfo(XLAT("achievement/leaderboard eligiblity:"), 0xFF8000);
-  if(!wrongMode(0))
-    dialog::addInfo(XLAT("eligible for most"), 0x00FF00);
+  if(!wrongMode(0)) {
+    if(inv::on || bow::crossbow_mode()) dialog::addInfo(XLAT("eligible for most -- leaderboards separate"), 0x80FF00);
+    else dialog::addInfo(XLAT("eligible for most"), 0x00FF00);
+    }
   else if(!wrongMode(rg::racing))
     dialog::addInfo(XLAT("eligible for racing"), 0xFFFF00);
   else if(!wrongMode(rg::shmup))

@@ -10055,6 +10055,7 @@ S("light, camera, and objects always take the shortest path", "światło, kamera
 // achievement eligiblity
 S("achievement/leaderboard eligiblity:", "legalność osiągnięć i rankingów:")
 S("eligible for most", "większość legalna")
+S("eligible for most -- leaderboards separate", "większość legalna -- osobne rankingi")
 S("eligible for racing", "legalne dla wyścigu")
 S("eligible for shmup", "legalne dla strzelanki")
 S("eligible for multiplayer", "legalne dla wielu graczy")
