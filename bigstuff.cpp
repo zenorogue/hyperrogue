@@ -219,7 +219,7 @@ void hrmap::extend_altmap(heptagon *h, int levs, bool link_cdata) {
     }
   }
 
-void new_voronoi_root(heptagon *h, int dist, int dir, eLand next, eLand last) {
+void new_voronoi_root(heptagon *h, int dist, int dir, eLand next) {
   heptagon *alt = init_heptagon(h->type);
   allmaps.push_back(newAltMap(alt));
   alt->s = hsA;
@@ -231,7 +231,6 @@ void new_voronoi_root(heptagon *h, int dist, int dir, eLand next, eLand last) {
   altmap::relspin(alt) = dir;
 
   hv_land[alt] = next;
-  hv_last_land[alt] = last;
 
   while(alt->distance > -100) {
     auto alt1 = createStep(alt, 0);
@@ -291,13 +290,41 @@ cand_info voronoi_candidate(heptagon *h) {
   return ci;
   }
 
+vector<eLand> list_adjacent_lands(heptagon *h) {
+  vector<eLand> res;
+  for(int i=0; i<h->type; i++) {
+    heptspin hs = heptspin(h, i);
+    hs += wstep;
+    auto alt = hs.at->alt;
+    if(!alt) continue;
+    alt = alt->alt;
+    res.push_back(hv_land.at(alt));
+    // go arround the region of alt using the 'butterfly' method, to find the other two lands which seem adjacent
+    for(int d: {-1, 1}) {
+      auto hs1 = hs;
+      for(int i=0; i<100; i++) {
+        hs1 += d;
+        hs1 += wstep;
+        if(!hs1.at->alt) { hs1 += wstep; continue; }
+        auto alt1 = hs1.at->alt->alt;
+        if(alt1 != alt) {
+          res.push_back(hv_land.at(alt1)); break;
+          }
+        hs1 += d;
+        }
+      }
+    }
+  if(res.empty()) return { laBarrier };
+  return res;
+  }
+
 void extend_altmap_voronoi(heptagon *h) {
   if(h->alt) return;
 
   auto ci = voronoi_candidate(h);
 
   if(ci.bqty == 0) {
-    new_voronoi_root(h, -30, hrand(h->type), firstland, laBarrier);
+    new_voronoi_root(h, -30, hrand(h->type), firstland);
     return;
     }
   else if(ci.bqty > 0 && isize(ci.free_dirs)) {
@@ -305,15 +332,15 @@ void extend_altmap_voronoi(heptagon *h) {
     ld growth = expansion.get_growth();
     ld odds = pow(growth, ci.candidate->distance) * isize(ci.free_dirs);
     if(hrandf() < odds / (1 + odds)) {
-      eLand last = hv_land[ci.candidate->alt];
-      eLand last2 = hv_last_land[ci.candidate->alt];
+      vector<eLand> lands_list = list_adjacent_lands(h);
+
       auto dist = ci.candidate->distance;
       // in PURE, could be a tie, or the new root could win
       if(PURE) dist -= hrand(2);
       // in BITRUNCATED, it could change too.. need a better formula probably
       if(BITRUNCATED) dist += hrand(3) - 1;
       // do not care about others...
-      new_voronoi_root(h, dist, hrand_elt(ci.free_dirs), getNewLand(last, last2), last);
+      new_voronoi_root(h, dist, hrand_elt(ci.free_dirs), getNewLand2(lands_list));
       return;
       }
     }
@@ -1819,7 +1846,6 @@ EX void start_camelot(cell *c) {
 
 EX bool debug_voronoi;
 EX map<heptagon*, eLand> hv_land;
-EX map<heptagon*, eLand> hv_last_land;
 
 EX void build_horocycles(cell *c, cell *from) {
 

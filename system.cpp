@@ -1787,7 +1787,6 @@ auto cgm = addHook(hooks_clearmemory, 40, [] () {
   crush_now.clear();
   rosemap.clear();
   hv_land.clear();
-  hv_last_land.clear();
   bow::bowpath.clear();
   bow::clear_bowpath();
   bow::fire_mode = false;

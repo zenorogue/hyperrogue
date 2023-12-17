@@ -266,6 +266,20 @@ EX int isRandland(eLand l) {
   return 0;
   }
 
+EX int voronoi_sea_category(eLand l) {
+  if(l == laRlyeh) return rlyehComplete() ? 0 : 2;
+  if(among(l, laOcean, laWarpCoast, laLivefjord, laDocks)) return 1;
+  if(among(l, laWhirlpool, laKraken, laWarpSea, laCaribbean)) return 2;
+  return 0;
+  }
+
+EX bool voronoi_sea_incompatible(eLand l1, eLand l2) {
+  int c1 = voronoi_sea_category(l1);
+  int c2 = voronoi_sea_category(l2);
+  if(c1+c2 == 2 && c1 != c2) return true;
+  return false;
+  }
+
 EX bool incompatible1(eLand l1, eLand l2) {
   if(isCrossroads(l1) && isCrossroads(l2)) return true;
   if(l1 == laJungle && l2 == laMotion) return true;
@@ -387,7 +401,7 @@ EX bool all_unlocked = false;
 
 EX vector<eLand> cheatdest_list;
 
-EX eLand getNewLand(eLand old, eLand old2 IS(laBarrier)) {
+EX eLand getNewLand(eLand old) {
 
   #if CAP_LEGACY
   if(legacy_racing()) {
@@ -399,7 +413,7 @@ EX eLand getNewLand(eLand old, eLand old2 IS(laBarrier)) {
   eLand l = callhandlers(laNone, hooks_nextland, old);
   if(l) return l;
   
-  if(cheatdest != old && cheatdest != old2 && cheatdest != laElementalWall) if(!isCyclic(cheatdest) && !isTechnicalLand(cheatdest)) return cheatdest;
+  if(cheatdest != old && cheatdest != laElementalWall) if(!isCyclic(cheatdest) && !isTechnicalLand(cheatdest)) return cheatdest;
   
   if(cheatdest_list.size()) {
     eLand l = cheatdest_list[0];
@@ -413,9 +427,7 @@ EX eLand getNewLand(eLand old, eLand old2 IS(laBarrier)) {
     while(true) {
       eLand n = eLand(hrand(landtypes));
       if(n == old) continue;
-      if(n == old2) continue;
       if(incompatible(n,old)) continue;
-      if(incompatible(n,old2)) continue;
       if(!isLandIngame(n)) continue;
       if(n == laElementalWall || isTechnicalLand(n)) continue;
       if(n == laWildWest) continue;
@@ -427,9 +439,9 @@ EX eLand getNewLand(eLand old, eLand old2 IS(laBarrier)) {
   if(markOrb(itOrbLuck)) {
     int i = items[itOrbLuck];
     items[itOrbLuck] = 0;
-    eLand l1 = getNewLand(old, old2);
+    eLand l1 = getNewLand(old);
     for(int i=1; i<3; i++)
-      l1 = pickluck(l1, getNewLand(old, old2));
+      l1 = pickluck(l1, getNewLand(old));
     items[itOrbLuck] = i;
     return l1;
     }
@@ -453,9 +465,9 @@ EX eLand getNewLand(eLand old, eLand old2 IS(laBarrier)) {
   #endif
 
   if(tactic::on) return specialland;
-  if(specialland != old && specialland != old2 && easy_to_find_specialland && specialland != laElementalWall) return specialland;
+  if(specialland != old && easy_to_find_specialland && specialland != laElementalWall) return specialland;
 
-  if(specialland != old && specialland != old2 && easy_specialland && specialland != laElementalWall) {
+  if(specialland != old && easy_specialland && specialland != laElementalWall) {
     easy_specialland--;
     return specialland;
     }
@@ -612,13 +624,27 @@ EX eLand getNewLand(eLand old, eLand old2 IS(laBarrier)) {
   if(ls::horodisk_structure() && tortoise::seek()) LIKELY tab[cnt++] = laTortoise;
   
   eLand n = old;
-  while(incompatible(n, old) || incompatible(n, old2) || !isLandIngame(n)) {
+  while(incompatible(n, old) || !isLandIngame(n)) {
     n = tab[hrand(cnt)];
     if(weirdhyperbolic && specialland == laCrossroads4 && isCrossroads(n))
       n = laCrossroads4;
     }
   
   return n;  
+  }
+
+EX eLand getNewLand2(vector<eLand> olds) {
+  for(int i=0;; i++) {
+    auto old = hrand_elt(olds);
+    eLand l = getNewLand(old);
+    // how bad it is
+    int err = 0;
+    for(auto o: olds) if(l == o) err += 2000;
+    for(auto o: olds) if(incompatible(l, o)) err += 1000;
+    for(auto o: olds) if(voronoi_sea_incompatible(l, o)) err += 100;
+    // we still allow bad choices if we cannot obtain a good one
+    if(err <= i) return l;
+    }
   }
 
 EX vector<eLand> land_over = {
