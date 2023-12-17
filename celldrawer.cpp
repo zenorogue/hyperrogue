@@ -971,7 +971,7 @@ void celldrawer::draw_halfvine() {
     }
   
   else if(wmspatial || GDIM == 3) {
-    floorshape& shar = *((wmplain || GDIM == 3) ? (floorshape*)&cgi.shFloor : (floorshape*)&cgi.shFeatherFloor);
+    floorshape& shar = *(GDIM == 3 ? (floorshape*)&cgi.shFullFloor : wmplain ? (floorshape*)&cgi.shFloor : (floorshape*)&cgi.shFeatherFloor);
     
     set_floor(shar);
 
@@ -2232,9 +2232,6 @@ void celldrawer::draw_wall_full() {
     else if(patterns::whichShape == '2')
       set_floor(cgi.shMFloor3);
 
-    else if(embedded_plane && qfi.fshape == &cgi.shFloor)
-      set_floor(cgi.shFullFloor);
-
 #if CAP_TEXTURE
     else if(GDIM == 2 && texture::config.apply(c, Vf, darkena(fcol, fd, 0xFF))) ;
 #endif
@@ -2270,6 +2267,8 @@ void celldrawer::draw_wall_full() {
     else if(set_randompattern_floor()) ;
     
     else set_land_floor(Vf);
+
+    if(embedded_plane && qfi.fshape == &cgi.shFloor) set_floor(cgi.shFullFloor);
 
     // actually draw the floor
 
