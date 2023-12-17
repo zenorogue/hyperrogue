@@ -458,7 +458,7 @@ ITEM( '*', 0x8080FF, "Ice Sapphire", itSapphire, IC_TREASURE, ZERO, RESERVED, os
 ITEM( '*', 0xEEFF20, "Hyperstone", itHyperstone, IC_TREASURE, ZERO, RESERVED, osNone, 
     "These bright yellow gems can be found only by those who have mastered the Crossroads."
     )
-ITEM( '[', 0x8080FF, "Key", itKey, IC_OTHER, ZERO, RESERVED, osNone, 
+ITEM( '[', 0x8080FF, "Key", itKey, IC_OTHER, ZERO | IF_FIREPROOF, RESERVED, osNone, 
     "That's all you need to unlock the Orb of Yendor! Well... as long as you are able to return to the Orb that this key unlocks...\n\n"
     "Each key unlocks only the Orb of Yendor which led you to it."
     )
