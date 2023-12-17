@@ -555,4 +555,12 @@ template<class... T> string lalign(int len, T... t) {
   return hs.s;
   }
 #endif
+
+map<string, string> last;
+
+EX void debug_view(string context, string s) {
+  string& old = last[context];
+  if(s != old) { old = s; println(hlog, s); }
+  }
+
 }
