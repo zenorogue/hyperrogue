@@ -812,7 +812,6 @@ int read_cheat_args() {
     }
   else if(argis("-lands")) {
     PHASEFROM(2);
-    cheat();
     stop_game();
     shift(); land_structure = (eLandStructure) (argi());
     }
