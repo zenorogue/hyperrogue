@@ -377,6 +377,7 @@ EX void initgame() {
     sagephase = 0; hardcoreAt = 0;
     timerstopped = false;
     savecount = 0; savetime = 0;
+    tortoise::last21tort = 0;
     cheater = 0;
     if(autocheat) cheater = 1;
     if(!wfc::use_eclectic) cheater = 1;
