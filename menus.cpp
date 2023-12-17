@@ -382,7 +382,7 @@ EX void showCreative() {
   }
 
 EX void show_achievement_eligibility() {
-  // #if CAP_ACHIEVE
+  #if CAP_ACHIEVE
   dialog::addBreak(100);
   dialog::addInfo(XLAT("achievement/leaderboard eligiblity:"), 0xFF8000);
   if(!wrongMode(0))
@@ -411,7 +411,9 @@ EX void show_achievement_eligibility() {
     dialog::addInfo(XLAT("this starting land is not eligible for achievements"), 0xC00000);
   else
     dialog::addInfo(XLAT("not eligible due to current mode settings"), 0XC00000);
-  // #endif
+  #else
+  dialog::addInfo(XLAT("no achievements/leaderboards in this version"), 0XFF8000);
+  #endif
   }
 
 EX void show_chaos() {
