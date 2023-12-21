@@ -1357,7 +1357,7 @@ EX void stabbingAttack(movei mi, eMonster who, int bonuskill IS(0)) {
       }
     }
 
-  if(who == moPlayer) {
+  if(who == moPlayer && !bow::crossbow_mode()) {
     if(numsh) achievement_count("STAB", numsh, 0);
     
     if(numlance && numflail && numsh) achievement_gain_once("MELEE3");

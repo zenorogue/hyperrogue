@@ -419,6 +419,7 @@ EX void shoot() {
         changes.ccell(c1);
         eMonster m = c->monst;
         if(attackMonster(c1, AF_STAB | AF_MSG, who))  {
+          achievement_count("STAB", 1, 0);
           spread_plague(c1, cf, t, moPlayer);
           produceGhost(c, m, moPlayer);
           }
