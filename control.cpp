@@ -574,7 +574,9 @@ EX void handleKeyNormal(int sym, int uni) {
     }
 
   if(sym == SDLK_ESCAPE) {
-    if(viewdists)
+    if(bow::fire_mode)
+      bow::switch_fire_mode();
+    else if(viewdists)
       viewdists = false;
     else
       showMissionScreen();
