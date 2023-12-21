@@ -2944,6 +2944,8 @@ EX }
 
 EX namespace kraken {
 
+  EX map<cell*, bool> half_killed;
+
   EX cell *head(cell *c) {
     if(c->monst == moKrakenH) return c;
     if(c->monst == moKrakenT) return c->move(c->mondir);
@@ -3045,6 +3047,7 @@ EX namespace kraken {
       c3->monst = moNone;
       }
     c->monst = moKrakenH;
+    if(half_killed.count(c2)) { half_killed[c] = half_killed[c2]; half_killed.erase(c2); }
     vector<pair<cell*, cell*> > acells;
     acells.push_back(make_pair(c2, c));
     forCellIdEx(c3, i, c) {
@@ -3516,6 +3519,7 @@ auto ccm = addHook(hooks_clearmemory, 0, [] () {
   clearing::stats.clear();
   clearing::score.clear();
   tortoise::emap.clear();
+  kraken::half_killed.clear();
   tortoise::babymap.clear();
   dragon::target = NULL;
   #if CAP_FIELD
@@ -3548,6 +3552,7 @@ auto ccm = addHook(hooks_clearmemory, 0, [] () {
   addHook(hooks_removecells, 0, [] () {
     for(cell *c: removed_cells) clearing::score.erase(c);
     for(auto& am: adj_memo) am.clear();
+    for(cell *c: removed_cells) kraken::half_killed.erase(c);
     eliminate_if(heat::offscreen_heat, is_cell_removed);
     eliminate_if(heat::offscreen_fire, is_cell_removed);
     eliminate_if(princess::infos, [] (princess::info*& i) { 

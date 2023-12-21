@@ -374,6 +374,33 @@ EX void shoot() {
 
   vector<bowpoint> pushes;
 
+  // for achievements
+  set<eMonster> kills;
+  vector<pair<cell*, int>> healthy_dragons;
+  map<cell*, pair<int, int>> kraken_hits;
+  int dragon_hits = 0;
+
+  // for achievements
+  for(auto& mov: bowpath) {
+    cell *c = mov.prev.at;
+    if(c->monst == moDragonHead) {
+      bool healthy = true;
+      cell *c1 = c;
+      int qty = 0;
+      for(int i=0; i<iteration_limit; i++) {
+        if(!isDragon(c1)) break;
+        if(!c1->hitpoints) { healthy = false; break; }
+        if(c1->mondir == NODIR) break;
+        c1 = c1->move(c1->mondir);
+        qty++;
+        }
+      if(healthy) healthy_dragons.emplace_back(c, qty);
+      }
+    if(c->monst == moKrakenT && c->hitpoints) {
+      kraken_hits[kraken::head(c)].first++;
+      }
+    }
+
   for(auto& mov: bowpath) {
     cell *c = mov.prev.at;
     cell *cf = mov.prev.cpeek();
@@ -401,6 +428,7 @@ EX void shoot() {
     mirror::breakMirror(mov.next, -1);
     eMonster m = c->monst;
     if(!m || isMimic(m)) continue;
+    if(m == moKrakenH) continue;
 
     if(!canAttack(cf, who, c, m, attackflags)) {
       if(among(m, moSleepBull, moHerdBull)) {
@@ -420,11 +448,16 @@ EX void shoot() {
     bool push = (items[itCurseWeakness] || (isStunnable(c->monst) && c->hitpoints > 1));
     push = push && (!(mov.flags & bpLAST) && monsterPushable(c));
 
+    // for achievements
+    if(isDragon(m)) dragon_hits++;
+    if(m == moKrakenT && c->hitpoints) kraken_hits[kraken::head(c)].second++;
+
     if(m && attackMonster(c, attackflags | AF_MSG, who)) hit_anything = true;
 
     if(!c->monst || isAnyIvy(m)) {
       spread_plague(cf, c, movei(mov.prev).rev().d, moPlayer);
       produceGhost(c, m, moPlayer);
+      kills.insert(m);
       }
 
     if(push) pushes.push_back(mov);
@@ -445,6 +478,22 @@ EX void shoot() {
     }
 
   reverse(bowpath.begin(), bowpath.end());
+
+  // three achievements:
+  achievement_count("BOWVARIETY", kills.size(), 0);
+
+  for(auto p: healthy_dragons) {
+    cell *c = p.first;
+    if(c->monst != moDragonHead && dragon_hits >= p.second)
+      achievement_gain_once("BOWDRAGON");
+    }
+
+  for(auto kh: kraken_hits) {
+    if(kh.second.first == 3 && kh.second.second == 3) {
+      if(kraken::half_killed[kh.first]) achievement_gain_once("BOWKRAKEN");
+      else kraken::half_killed[kh.first] = true;
+      }
+    }
 
   gen_bowpath_map();
   }

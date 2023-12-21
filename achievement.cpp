@@ -10,7 +10,7 @@
 #include "hyper.h"
 namespace hr {
 
-#define NUMLEADER 87
+#define NUMLEADER 90
 
 EX bool test_achievements = false;
 
@@ -80,7 +80,10 @@ EX const char* leadernames[NUMLEADER] = {
   "Lazurite Figurines", // 83
   "Water Lilies", // 84
   "Capon Stones", // 85
-  "Crystal Dice" // 86
+  "Crystal Dice", // 86
+  "Crossbow (bull)", // 87
+  "Crossbow (geodesic)", // 88
+  "Crossbow (geometric)", // 89
   };
 
 #define LB_STATISTICS 62
@@ -109,7 +112,6 @@ EX bool wrongMode(char flags) {
   if(casual) return true;
   if(flags == rg::global) return false;
   if(flags == rg::fail) return true;
-  if(bow::weapon) return true;
 
   if(flags != rg::special_geometry && flags != rg::special_geometry_nicewalls) {
     if(!BITRUNCATED) return true;
@@ -630,6 +632,10 @@ EX void achievement_count(const string& s, int current, int prev) {
     achievement_gain("BUG3");
   if(s == "ELEC" && current >= 10)
     achievement_gain("ELEC3");
+  if(s == "BOWVARIETY" && current >= 2)
+    achievement_gain("BOWVARIETY1");
+  if(s == "BOWVARIETY" && current >= 6)
+    achievement_gain("BOWVARIETY2");
   }
 
 int specific_improved = 0;
@@ -655,7 +661,6 @@ EX void achievement_score(int cat, int number) {
 #ifdef HAVE_ACHIEVEMENTS
   if(cheater) return;
   if(casual) return;
-  if(bow::weapon) return;
   LATE( achievement_score(cat, number); )
   if(disksize) return;
   if(cat == LB_HALLOWEEN) {
@@ -796,6 +801,9 @@ EX void achievement_final(bool really_final) {
   if(PURE) specialcode+=4;
   if(numplayers() > 1) specialcode+=8;
   if(inv::on) specialcode+=16;
+  if(bow::crossbow_mode && bow::style == bow::cbBull) specialcode += 32;
+  if(bow::crossbow_mode && bow::style == bow::cbGeodesic) specialcode += 64;
+  if(bow::crossbow_mode && bow::style == bow::cbGeometric) specialcode += 96;
   
   if(sphere && specialland == laHalloween) {
     if(specialcode) return;
@@ -822,6 +830,9 @@ EX void achievement_final(bool really_final) {
     case 8:  sid = 61; break;
     case 9:  sid = 44; break;
     case 16: sid = 69; break;
+    case 32: sid = 87; break;
+    case 64: sid = 88; break;
+    case 96: sid = 89; break;
     default: return;
     }
       
