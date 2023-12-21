@@ -9459,7 +9459,7 @@ S("Approximations of geometric straight lines.", "Przybliżenia geometrycznych l
 S("bump to shoot", "uderz by strzelać")
 S("mouse auto-fire mode", "tryb auto-strzału dla myszy")
 S("explicit", "kategoryczny")
-S("You need to click crossbow or be close to fire.", "By strzelać, musisz nacisnąć kuszę, albo być blisko")
+S("You need to click crossbow or be close to fire.", "By strzelać, musisz nacisnąć kuszę, albo być blisko.")
 S("priority", "priorytetowy")
 S("Click on a faraway monster to fire if possible, or move if not.", "Klikając odległego przeciwnika strzelasz jeśli to możliwe, ruszasz się jeśli nie.")
 S("Clicking on a faraway monster always means an attempt to fire.", "Kliknięcie przeciwnika zawsze jest rozumiane jako próba strzału.")
