@@ -304,8 +304,6 @@ EX vector<int> bfs_reachedfrom;
 /** calculate cpdist, 'have' flags, and do general fixings */
 EX void bfs() {
 
-  calcTidalPhase(); 
-    
   yendor::onpath();
   
   int dcs = isize(dcal);
@@ -330,12 +328,9 @@ EX void bfs() {
   
   dcal.clear(); bfs_reachedfrom.clear();
 
-  recalcTide = false;
-  
   for(cell *c: player_positions()) {
     if(c->cpdist == 0) continue;
     c->cpdist = 0;
-    checkTide(c);
     dcal.push_back(c);
     bfs_reachedfrom.push_back(hrand(c->type));
     if(!invismove) targets.push_back(c);
@@ -436,8 +431,6 @@ EX void bfs() {
         dcal.push_back(c2);
         bfs_reachedfrom.push_back(c->c.spin(i));
         
-        checkTide(c2);
-                
         if(c2->wall == waBigStatue && c2->land != laTemple) 
           statuecount++;
         
@@ -548,11 +541,6 @@ EX void bfs() {
       if(c2->wall == waThumperOn) {
         targets.push_back(c2);
         }
-
-  while(recalcTide) {
-    recalcTide = false;
-    for(int i=0; i<isize(dcal); i++) checkTide(dcal[i]);
-    }    
   
   for(auto& t: tempmonsters) t.first->monst = t.second;
   
@@ -831,7 +819,16 @@ EX void findWormIvy(cell *c) {
     else break;
     }
   }
-  
+
+EX void advance_tides() {
+  calcTidalPhase();
+  recalcTide = true;
+  while(recalcTide) {
+    recalcTide = false;
+    for(int i=0; i<isize(dcal); i++) checkTide(dcal[i]);
+    }
+  }
+
 EX void monstersTurn() {
   reset_spill();
   checkSwitch();
@@ -869,6 +866,8 @@ EX void monstersTurn() {
   if(!phase1) livecaves();
   if(!phase1) ca::simulate();
   if(!phase1) heat::processfires();
+  // this depends on turncount, so we do it always
+  advance_tides();
   
   for(cell *c: crush_now) {
     changes.ccell(c);

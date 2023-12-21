@@ -629,6 +629,7 @@ EX void teleportTo(cell *dest) {
       playerMoveEffects(movei(cwt.at, dest, TELEPORT));
       afterplayermoved();
       bfs();
+      advance_tides();
       }
     return;
     }
@@ -647,6 +648,7 @@ EX void teleportTo(cell *dest) {
 
   afterplayermoved();
   bfs();
+  advance_tides();
   
   sword::reset();
   items[itOrbSword2] = 0;

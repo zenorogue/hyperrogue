@@ -640,7 +640,7 @@ EX bool cellEdgeUnstable(cell *c, flagtype flags IS(0)) {
   return true;
   }
 
-int tidalphase;
+EX int tidalphase;
 
 EX int tidalsize, tide[200];
 
