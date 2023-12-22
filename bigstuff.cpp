@@ -529,13 +529,18 @@ EX void generateTreasureIsland(cell *c) {
   for(int i=0; i<c->type; i++) {
     cell *c2 = createMov(c, i);
     if(!eubinary) currentmap->extend_altmap(c2->master);
-    if(greater_alt(c, c2)) {
+    auto ok = [&] (cell *c2) {
+      if(ls::hv_structure() && get_voronoi_winner(c2).first != get_voronoi_winner(c).first) return false;
+      return true;
+      };
+    if(ok(c2) && greater_alt(c, c2)) {
       ctab.push_back(c2);
       qlo = i; qhi = i;
       while(true && isize(ctab) < c->type) {
         qlo--;
         c2 = c->cmodmove(qlo);
         if(!have_alt(c2)) break;
+        if(!ok(c2)) break;
         if(celldistAlt(c2) >= celldistAlt(c)) break;
         ctab.push_back(c2);
         }
@@ -543,6 +548,7 @@ EX void generateTreasureIsland(cell *c) {
         qhi++;
         c2 = c->cmodmove(qhi);
         if(!have_alt(c2)) break;
+        if(!ok(c2)) break;
         if(celldistAlt(c2) >= celldistAlt(c)) break;
         ctab.push_back(c2);
         }
@@ -556,6 +562,7 @@ EX void generateTreasureIsland(cell *c) {
     return; 
     }
   cell* c2 = c->cmodmove((qlo+qhi)/2);
+  if(ls::voronoi_structure() && c2->land != laCaribbean) c2->land = laCaribbean;
   generateTreasureIsland(c2);
   if(!src) {
     c->wall = c2->wall;
