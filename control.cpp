@@ -67,6 +67,7 @@ EX ld shiftmul = 1;
 
 EX cell *mouseover, *mouseover2, *lmouseover, *lmouseover_distant;
 EX ld modist, modist2;
+EX shiftmatrix mouseoverV;
 
 EX int lastt;
 

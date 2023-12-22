@@ -2029,6 +2029,7 @@ void celldrawer::bookkeeping() {
     modist2 = modist; mouseover2 = mouseover;
     modist = dist;
     mouseover = c;
+    mouseoverV = V;
     }
   else if(dist < modist2) {
     modist2 = dist;

@@ -964,7 +964,12 @@ EX void describeMouseover() {
     if(c->wall && !(c->wall == waChasm && c->land == laDual && ctof(c)) &&
       !(c->land == laMemory) &&
       !((c->wall == waFloorA || c->wall == waFloorB) && c->item)) { 
-      out += ", "; out += XLAT1(winf[c->wall].name); 
+
+      eWall w = c->wall;
+      if(isAlch(w))
+        w = conditional_flip_slime(mousing ? det(mouseoverV.T) < 0 : det(View) < 0, w);
+
+      out += ", "; out += XLAT1(winf[w].name);
       
       if(c->wall == waRose) out += " (" + its(7-rosephase) + ")";
       if(c->wall == waTerraWarrior) out += " (" + its(c->wparam) + ")";
