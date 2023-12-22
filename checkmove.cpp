@@ -304,6 +304,7 @@ EX void checkmove() {
   
   if(true) {
     for(int i=0; i<cwt.at->type; i++) {
+      dynamicval<bool> fm(bow::fire_mode, false);
       if(movepcto(1, -1, true)) {
         canmove = legalmoves[cwt.spin] = true;
         }
