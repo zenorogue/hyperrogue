@@ -5056,3 +5056,37 @@ Other
 - fixed the drawing mode on quotient spaces (including torus display)
 - fixed point recognition in rug mode
 - cleaned up high-FOV and stereo modes into one setting
+
+2023-12-02 12:54 Update 13.0:
+
+Summary post: https://zenorogue.blogspot.com/2023/12/hyperrogue-130.html
+
+Voronoi mode fixes:
+- fixed Caribbean
+- made Rlyeh and Temple appear, and Haunted and Free Fall are now unavailable
+- better land compatibility
+- fixed CR2
+- fixed Land of Storms (in Horodisk and Voronoi)
+
+Crossbow fixes:
+- in shmup, crossbow bolts now pierce multi-tile monsters, and fire-on-mouse is disabled
+- remove crossbow paths on orb use
+- pressing ESC key while in fire mode now disables the fire mode
+- geometric crossbow can now hit monsters on the edge of vision and inside walls
+- crossbow achievements and leaderboards
+- fixed false game over messages after shooting a bow
+
+other updates:
+- updated the Czech and Polish translations
+- display achievement eligiblity
+- make the Key fireproof; make tortoise if first 21/21 tile created in > 100 turns (thanks to jlm)
+
+Other fixes:
+- fixed restoring golems in casual mode
+- fixed a crash while loading races
+- fixed a bug with embedded maps (i.e., 2D maps in 3D) being destroyed when the game is restarted
+- fixed the drawing of half-vines and mirror walls in spatial
+- fixed the bug where tides may move on orb use
+- fixed Sol, NIH and SolN embeddings being always displayed as legal
+- fixed the name displayed on mouseover for slime
+
