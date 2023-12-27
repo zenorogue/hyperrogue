@@ -9693,3 +9693,662 @@ S(
   "* na Prérii poté, co ji odemkneš (%3 pokladů)\n\n"
   )
 
+// 13.0
+
+// gameplay
+//==========
+
+// these were missing somehow
+
+N("Palace Quest", GEN_F, "Palácová mise", "Palácové mise", "Palácovou misi", "na Palácové misi")
+N("Pike", GEN_F, "Štika", "Štiky", "Štiku", "Štikou")
+
+// crossbow
+
+S("The warped space distracts you from reloading while staying in place!",
+  "Pokřivený prostor ti brání nabíjet na místě!")
+S("Fire!", "Hoří!")
+S("(shooting while unstable -- no turn passes)", "(střelba z nestabilní polohy -- bez spotřeby kola)")
+S("Stab them by shooting around them.", "(Bodni je tím, že střelíš kolem nich.)")
+S("You are too weakened to attack %the1!", "Jsi příliš slab%ý0 na útok proti %a2!")
+S("You cannot attack your own mount!", "Nemůžeš útočit na vlastní jízdní zvíře!")
+S("A magical shield protects %the1!", "%a1 chrání magický štít!")
+S("You have no melee weapon!", "Nemáš žádnou zbraň pro boj na blízko!")
+S("Your crossbow is still reloading!", "Tvá kuše se stále ještě nabíjí!")
+S("Trying to fire.", "Pokoušíš se vystřelit.")
+S(" (turns to reload: %1)", " (počet kol do nabití: %1)")
+S(" (fire mode on / turns to reload: %1)", " (palebný mód / počet kol do nabití: %1)")
+S(" (fire mode on)", " (palebný mód)")
+S(" (click to fire)", " (střílej kliknutím)")
+S("You fire an angry glance at your enemies.", "Věnuješ nepřátelům ošklivý pohled.")
+S("Note: cannot fire again yet. Turns to reload: %1.", "Poznámka: ještě nemůžeš střílet. Počet kol do nabití: %1")
+S("Fire crossbow! Click to aim, click again to confirm.", "Vystřel! Klikni pro zamíření, a znovu pro potvrzení.")
+S("Fire mode disabled.", "Palebný mód vypnut.")
+S("Firing cancelled.", "Střelba zrušena.")
+S("Cannot fire again yet. Turns to reload: %1.", "Ještě nemůžeš znovu střílet. Počet kol do nabití: %1")
+S("No way to hit this place.", "To se nedá zasáhnout.")
+S("Shooting impossible.", "Nemůžeš střílet.")
+S("%The1 is enraged!", "%1 se rozzuři%l1!")
+S("weapon selection", "výběr zbraně")
+S("Cannot hit anything by shooting this direction!", "Tímhle směrem nemůžeš nic trefit!")
+S("Welcome to HyperRanger!", "Vítej v HyperRanger!")
+S("bow color", "barva kuše")
+S("bowstring color", "barva tětivy")
+S("%The1 alarms other dogs as it dies!", "Umírající %1 burcuje ostatní!")
+S("crossbow straight line style", "styl střelných čar")
+S("bull line", "býčí čára")
+S("Can go in either direction on odd shapes. 3 turns to reload.", "Na lichých tvarech můžeš jít kterýmkoli směrem. Nabíjení trvá 3 kola.")
+S("Graph geodesic: any sequence of tiles is OK as long as there are no shortcuts. 4 turns to reload.", "Grafová geodetika: jakákoli sekvence políček je v pořáídku, pokud neexistují zkratky. Nabíjení trvá 4 kola.")
+S("geometric", "geometrické čáry")
+S("Approximations of geometric straight lines.", "Aproximace geometrických přímek")
+S("bump to shoot", "střílej naběhnutím")
+S("mouse auto-fire mode", "mód automatické střelby myší")
+S("explicit", "explicitní")
+S("You need to click crossbow or be close to fire.", "Na výstřel musíš kliknout na kuši nebo být blízko.")
+S("priority", "prioritní")
+S("Click on a faraway monster to fire if possible, or move if not.", "Klikni na vzdáleného netvora, abys vystřelil, je-li to možné, nebo se pohnul, pokud není.")
+S("Clicking on a faraway monster always means an attempt to fire.", "Kliknutí na vzdáleného netvora vždy znamená pokus o výstřel.")
+S("blade", "čepel")
+S("Standard Rogue weapon. Bump into a monster to hit. Most monsters attack you the same way.",
+  "Standardní zbraň. Naběhni do netvora, abys na něj zaútočil. Většina netvorů na tebe útočí stejným způsobem.")
+S("crossbow", "kuše")
+S("Hits all monsters in a straight line, but slow to reload. Press 'f' or click the crossbow icon to target.",
+  "Zasáhne všechny netvory v přímé linii, chvíli však trvá, než se znovu nabije. Cíluj klávesou 'f' nebo kliknutím na ikonu kuše.")
+
+// 'click to use orb' errors
+
+S("You have no ranged Orbs!", "Nemáš žádné dálkové Sféry!")
+S("Strong wind can only take you to a specific place!", "Silný vítr tě může odnést pouze na určité místo!")
+S("%The1 can only be used on items!", "%1 se dá použít pouze na předměty!")
+S("Nothing to blow here!", "Tady není co odfouknout!")
+S("Cannot be used in multiplayer", "Toto nelze použít v módu pro více hráčů")
+S("You cannot grow on yourself!", "Nemůžeš růst na sobě!")
+S("Cannot attack there!", "Tam nemůžeš útočit!")
+S("Cannot grow there!", "Tam nemůžeš růst!")
+S("Cannot grow against gravity!", "Nemůžeš růst proti gravitaci!")
+S("You cannot grow there from any adjacent cell!", "Tam nemůžeš vyrůst z žádného sousedního políčka!")
+S("Cannot vault that far!", "Tak daleko nedoskočíš!")
+S("ERROR: No common neighbor to vault through!", "CHYBA: Není žádný společné sousední políčko, přes které bys mohl přeskočit!")
+S("Can only vault in a roughly straight line!", "Skoky lze provádět pouze (zhruba) přímo!")
+S("Nothing to vault over!", "Není přes co přeskočit!")
+S("Cannot pass through %the1 while vaulting!", "Při přeskoku nemůžeš projít skrz %a1!")
+S("Cannot vault onto %the1!", "Nemůžeš skočit na %a1!")
+S("Cannot vault to %the1!", "Nemůžeš skočit do %a1!")
+S("Cannot attack %the1 while vaulting!", "Nemůžeš útočit během skoku!")
+S("Cannot jump that far!", "Tak daleko nedoskočíš!")
+S("Cannot jump onto %the1!", "Nemůžeš vyskočit na %a1!")
+S("Cannot phase that far!", "Nemůžeš fázovat tak daleko!")
+S("Cannot phase onto %the1!", "Nemůžeš fázovat na %a1!")
+S("Cannot phase to %the1!", "Nemůžeš fázovat do %a1!")
+S("Nothing to phase through!", "Není tu nic, skrz co by se dalo fázovat!")
+S("Can only use %the1 on a monster!", "%a1 můžeš použít pouze na netvory!")
+S("%The1 is immune to %the2!", "%1 je proti %a2 imunní!")
+S("%The1 can only be used on monsters.", "%1 se dá používat pouze na netvory.")
+S("%The1 cannot be used on big monsters.", "%1 se nedá používat na velké netvory.")
+S("%The1 cannot be used on %the2.", "%1 se nedá použít na %abl2.")
+S("%The1 is already stunned!", "%1 už je omráčen%ý1!")
+
+// multiplayer settings
+
+S("friendly fire", "přátelská palba")
+S("friendly fire off -- achievements disabled", "přátelská palba vypnutá -- achievementy také")
+
+S("player vs player", "hráč proti hráči")
+S("PvP available only in shmup", "mód 'hráč proti hráči' je dostupný pouze ve střílečkovém módu")
+S("PvP grants infinite lives -- achievements disabled", "v módu 'hráč proti hráči' máš nekonečné životy -- achievementy jsou vypnuté")
+
+S("split screen mode", "mód rozdělené obrazovky")
+S("achievements disabled in split screen", "mód rozdělené obrazovky -- achievementy jsou vypnuté")
+
+S("auto-adjust dual-focus projections", "automatické přizpůsobení projekcí s dvojím zaostřením")
+S("autoscale dual focus", "automatické škálování dvojího zaostření")
+
+S("self hits", "útoky do sebe")
+
+S(" (%1 $$$, %2 kills, %3 deaths)", "(%1 $$$, zabitých nepřátel: %2, smrtí: %3)")
+S(" (%1 pkills)", " (%1 zabitých hráčů)")
+S(" (%1 self)", " (%1 sebe)")
+
+// racing mode
+
+S("play on an official track", "hraj na oficiální dráze")
+S("generate a random track", "vygeneruj náhodnou dráhu")
+S("Too many pauses!", "Příliš mnoho pauz!")
+S("Pauses: %1 of %2 allowed", "Pauzy: %1 z %2 povolených")
+
+// new land structures
+
+S("horodisks", "horodisky")
+S("land size in horodisk mode", "velikost krajů v horodiskovém módu")
+S("Set this to -2 to get perfect horodisks. Smaller values yield less dense horodisks, and larger values might produce horodisks with errors or crashing into each other.",
+  "Dokonalé horodisky získáš na hodnotě -2. Nižší hodnoty vedou k menší hustotě horodisků; vyšší hodnoty mohou vést k horodiskům, které obsahují chyby nebo do sebe narážejí.")
+
+S("ideal Voronoi", "ideální Voronoi")
+S("display Voronoi tie debug values", "zobrazit debugové hodnoty pro Voronoiova políčka")
+
+S("land size in randomwalk mode", "velikost krajů v módu náhodné procházky")
+S("The average size of a land in randomwalk mode.", "Průměrná velikost kraje v módu náhodné procházky.")
+
+S("this starting land is not eligible for achievements", "s tímto počátečním krajem není možné získat achievementy")
+S("eligible for most achievements", "lze získat většinu achievementů")
+S("eligible for Chaos mode achievements", "lze získat achievementy v chaotickém módu")
+S("eligible for special achievements", "lze získat speciální achievementy")
+S("not eligible for achievements", "nelze získat achievementy")
+S("(but the cheat mode is on)", "(ale je zapnutý cheat mód)")
+S("(but the casual mode is on)", "(ale je zapnutý neformální mód)")
+
+// other gameplay
+
+S("There should be a Palace somewhere nearby...", "Někde tady by měl být Palác...")
+S("The following Orbs act an extra lives in the shmup mode:", "Následující Sféry fungují ve střílečkovém módu jako životy navíc:")
+S("\n\nThis Orb is triggered on your first direct melee attack or illegal move.",  /* 'direct melee' added to an earlier version of this message */
+  "\n\nTato Sféra se spustí při tvém prvním přímém útoku nablízko nebo ilegálním tahu.")
+S("\n\nOrb unlocked: %1", "\n\nSféra odemčena: %1")
+S("toggle numerical display", "přepnutí číselného displeje") // in help
+S("display mine counts numerically", "zobrazuj počet min číslem")
+S("Accessible only from %the1, %2, or %3.\n", "Kraj je přístupný pouze z: %1, %2, %3.\n")
+S("Cannot switch places with %the1!", "Nemůžeš si vyměnit místo s %abl1!")
+S("d%1 rolled %2", "d%1 hodila %2")
+
+S("orb display mode", "mód zobrazení Sfér")
+S("icons", "ikony")
+
+// menu & configuration
+//======================
+
+S("default: ", "standardní: ")
+S("use the default value", "použij standardní hodnotu")
+
+S("pick scores", "vyber skóre")
+
+S("Angle to rotate by.", "Úhel rotace")
+S("dxy(n) = rotate n degrees from x to y\n\nd-degree, r-radian, t-turn\n\nexample: dxy(30)*dyz(45)",
+   "dxy(n) = otočení o n stupňů od x do y\n\nd-stupeň (degree), r-radián, t-otočka (turn)\n\například: dxy(30)*dyz(45)")
+
+S("no filters", "bez filtrů")
+
+S("yet another classic game", "další klasická hra") // hyperbolic Minesweeper
+
+S("context help", "kontextová nápověda")
+S("all context help/welcome messages", "plná kontextová nápověda")
+S("no context help/welcome messages", "bez kontextové nápovědy")
+S("I know I can press F1 for help", "vím, že mohu získat nápovědu stisknutím klávesy F1")
+
+S("menu map darkening", "ztmavování mapy v menu")
+S("A larger number means darker game map in the background. Set to 8 to disable the background.",
+  "Vyšší číslo znamená tmavší herní mapu na pozadí. Hodnota 8 pozadí úplně vypne.")
+S("centered menus in widescreen", "vycentrované menu na širokých obrazovkách")
+
+S("less items/kills in landscape", "méně předmětů/zabití v orientaci na šířku")
+S("less items/kills in portrait", "méně předmětů/zabití v orientaci na výšku")
+
+S("forced center down", "vynucený střed níže")
+S("make the center not the actual screen center", "způsobí, že střed herní plochy není skutečným středem obrazovky")
+
+// animations
+
+S("idle animation speed", "rychlost nečinné animace")
+S("flashing effects", "bleskové efekty")
+S("Disable if you are photosensitive. Replaces flashing effects such as Orb of Storms lightning with slow, adjustable animations.",
+  "Vypni, pokud máš citlivost na světlo. Nahrazuje blikající efekty, jako je Sféra Bouří, pomalými, konfigurovatelnými animacemi.")
+
+S("start animations", "startovní animace")
+
+S("movement animation", "animace pohybu")
+
+S("animation rug angle", "úhel animace koberce")
+S("rug forward movement angle", "úhel pohybu koberce dopředu")
+S("rug_camera angle", "úhel kamery koberce")
+S("translation+rotation", "posunutí+otočení")
+
+// save file selection
+
+S("select the score/save file on startup", "vyber soubor se skóre/uloženou hrou při spuštění")
+S("choose your score/save file", "vyber soubor se skóre/uloženou hrou")
+S("Save the config and restart to select another score/save file.", "Ulož konfiguraci a restartuj hru pro vybrání jiného souboru se skóre/uloženou hrou.")
+S("Save the config to always play without recording your progress.", "Ulož konfiguraci, aby se vždy hrálo bez zaznamenávání postupu.")
+S("Save the config to always use %1.", "Ulož konfiguraci, aby se vždy používalo %1.")
+S("Your progress will not be saved.", "Tvůj postup nebude uložen.")
+
+// online demo (not translated but just in case)
+
+S("HyperRogue %1: online demo", "HyperRogue %1: online demo")
+S("play the game", "hraj")
+S("learn about hyperbolic geometry", "nauč se něco o hyperbolické geometrii")
+S("toggle high detail", "přepni vysokou úroveň detailů")
+
+// other
+
+S("wiki", "wiki")
+S("highlight faraway monsters", "zvýrazni vzdálené netvory")
+
+// map editor, line patterns, etc.
+//=================================
+
+S("hint: shift+A to enter the map editor", "nápověda: stiskem shift+A se dostaneš do mapového editoru")
+
+S("z = set Shift+click", "z = nastav Shift+klik")
+S("B = build on walls ", "B = stavění na zdech")
+S("S = snap (%1)", "S = přicvaknutí (%1)")
+S("Z =", "Z = ")
+S("X =", "X = ")
+S("Y =", "Y = ")
+S("w: %1", "w: %1")
+S("λ: %1°", "λ: %1°")
+
+S("edit cell values", "editace hodnot políček")
+S("canvas floor shape", "tvar podlahy Plátna")
+S("canvas darkness", "tmavost Plátna")
+
+S("die shape", "tvar kostky")
+S("die face", "stěna kostky")
+S("die direction", "směr kostky")
+S("die mirror status", "zrcadlový status kostky")
+S("mirrored", "zrcadlená")
+
+// line patterns
+
+S("parallel/meridian orientation", "orientace rovnoběžek/poledníků")
+S("number of parallels drawn", "počet nakreslených rovnoběžek")
+S("last parallel drawn", "poslední nakreslená rovnoběžka")
+S("tree-drawing parameter", "parametr kreslení stromu")
+S("How much of edges to draw for tree patterns (to show how the tree edges are oriented).",
+  "Jak velká část hran se má kreslit ve stromových vzorech (pro vyznačení jejich orientace).")
+
+// debug tools
+
+S("error", "chyba")
+
+S("display tile debug values", "zobrazení debugových hodnot políček")
+S("Display cell type IDs, as well as vertex and edge identifiers.\n\n"
+  "Setting 1 uses the internal shape IDs, while setting 2 in tes files uses the original IDs"
+  " in case if extra tile types were added to separate mirror images or different football types.",
+
+  "Zobrazuje ID typu políčka a identifikátory vrcholů a hran.\n\n"
+  "Hodnota 1 používá interní ID tvarů, zatímco hodnota 2 používá původní ID ze souborů *.tes "
+  "pro případ, že se přidaly další typy políček, aby se oddělily zrcadlové obrazy nebo různé fotbalové typy.")
+
+// tessellations / honeycombs / projections / embeddings
+//========================================================
+
+// new geometry settings
+
+S("projective Bring's Surface", "projektivní Bringův povrch")
+S("aperiodic hat", "aperiodický klobouk")
+S("Sierpiński triangle", "Sierpińského trojúhelník")
+S("Sierpiński carpet", "Sierpińského koberec")
+S("6-flake fractal", "6-vločkový fraktál")
+S("Menger sponge", "Mengerova houba")
+S("Sierpiński tetrahedron", "Sierpińského čtyřstěn")
+S("aperiodic spectre", "aperiodický přízrak")
+
+// inter-geometric portals
+
+S("Welcome to a portal map! Press 'o' to configure.", "Vítej v portálové mapě! Stiskni 'o' pro konfiguraci.")
+S("become a portal map", "změnit na portálovou mapu")
+S("yes, that's what I want", "ano, to je to, co chci")
+S("world list", "seznam světů")
+S("manage portals", "správa portálů")
+S("view another world", "podívat se na jiný svět")
+S("connect ", "spojit ")
+S("disconnect this portal", "odpojit tento portál")
+S("remove %1 from the list", "odstranit %1 ze seznamu")
+S("add to list", "přidat na seznam")
+S("portal orientation", "orientace portálu")
+S("mirror connection", "zrcadlové spojení")
+S("test portal here", "otestovat portál zde")
+S("set recommended settings", "zadat doporučené nastavení")
+S("height-to-width ratio", "poměr výšky a šířky")
+
+S("keep eye level when walking enabled", "udržovat výši oka při zapnuté chůzi")
+S("walking eye angle", "úhel oka při chůzi")
+S("0 = looking forward, 90 = looking upward. In VR this is adjusted automatically.",
+  "0 = dopředu, 90 = nahoru. Ve VR módu se upravuje automaticky.")
+S("eye angle scale", "škálování úhlu oka")
+S("1 = the angle can be changed with keyboard or mouse movements, 0 = the angle is fixed",
+  "1 = úhel je možné měnit klávesnicí nebo pohybem myši, 0 = úhel je pevně daný")
+S("walking eye level", "výše oka při chůzi")
+S("Distance from the floor to the eye in the walking mode, in absolute units. In VR this is adjusted automatically.", 
+  "Vzdálenost oka od podlahy v módu chůze, vyjádřená v absolutních jednotkách. Ve VR módu se upravuje automaticky.")
+
+S("move the camera with arrow keys and Home/End", "přesouvat kameru šipkami a klávesami home/End")
+S("the map is fixed (improves performance)", "fixní mapa (zlepšuje výkon)")
+
+S("You are currently in a visualization. Press wasd to scroll, qe to rotate. You can also use the arrow keys. ESC for menu.\n\n",
+  "Momentálně se nacházíš ve vizualizaci. Stiskni klávesy WASD pro pohyb, QE pro rotaci. Také můžeš používat šipky. ESC otvírá menu.\n\n")
+
+S("You are currently in a visualization. Press wasdqe to rotate the camera, ijklyh to move. You can also use the arrow keys and Home/End and PgUp/PgDn. ESC for menu.\n\n",
+  "Momentálně se nacházíš ve vizualizaci. Stiskni klávesy WASDQE pro rotaci kamery, IJKLYH pro pohyb. Také můžeš používat šipky a klávesy Home/End a PgUp/PgDn. ESC otvírá menu.\n\n")
+
+S("pure exploration (game keys scroll)", "čisté zkoumání světa (herní klávesy scrollují)")
+
+// subdivisions of 3D honeycombs
+
+S("sub-cubes", "podkrychle")
+S("dual sub-cubes", "duální podkrychle")
+S("bitruncated sub-cubes", "dvojseříznuté podkrychle")
+S("note: more choices in cubic honeycombs", "poznámka: v krychlových dlážděních je více voleb")
+S("subdivision", "poddělení")
+S("split by original faces", "rozdělit podle původních stran")
+S("split by vertex axes", "rozdělit podle vrcholových os")
+S("split by midedges", "rozdělit podle středů hran")
+S("Outside of the supported limits", "Mimo podporované hranice")
+// let's just not translate this
+S("subcubed", "subcubed")
+S("dual-subcubed", "dual-subcubed")
+S("bitruncated-subcubed", "bitruncated-subcubed")
+S("subdivided", "subdivided")
+
+// restrict map to disk
+
+S("disk size", "rozměr disku")
+S("Play on a disk. Enables the special game rules for small bounded spaces (especially relevant for e.g. Minefield and Halloween). "
+  "The number given is the number of tiles to use; it is not used exactly, actually the smallest disk above this size is used. Set to 0 to disable.",
+  "Hraj na disku. Aktivuje zvláštní herní pravidla pro malé, ohraničené prostory (zvláště relevantní pro např. Minové pole a Halloween).  "
+  "Udané číslo je počet políček; nepoužívá se však přesně tato hodnota, ale nejmenší disk, který ji převyšuje. Nastavením na 0 se tato možnost vypne.")
+
+S("disk shape", "tvar disku")
+S("distance in tiles", "vzdálenost v políčkách")
+S("distance in vertices", "vzdálenost ve vrcholech")
+S("geometric distance", "geometrická vzdálenost")
+S("fraction of mine in bounded minefield", "podíl min v ohraničeném minovém poli")
+
+// tessellation tree generation
+
+S("strict tree maps", "striktní stromové mapy")
+S("display distances up to", "zobraz vzdálenosti až do")
+S("extend automatically", "automatické rozšíření tabulky") // the table of tile count by distances
+S("rules generated successfully: %1 states using %2-%3 cells", "pravidla úspěšně vygenerovaná: %1 stavů s využitím %2-%3 políček")
+S("too difficult: %1", "příliš obtížné: %1")
+S("bug: %1", "bug: %1")
+S(
+    "Strict tree maps are generated using a more powerful algorithm.\n\nThis algorithm supports horocycles and knows the expansion rates of various "
+    "tessellations (contrary to the basic implementation of Archimedean, tes, and unrectified/warped/untruncated tessellations).\n\nYou can convert mostly any "
+    "non-spherical periodic 2D tessellation to strict tree based.\n\nSwitching the map format erases your map.",
+
+    "Striktní stromové mapy se vytvářejí pomocí silnějšího algoritmu.\n\nTento algoritmus podporuje horocykly a zná rychlost růstu různých "
+    "dláždění (oproti základní implementaci archimédovských dláždění, *.tes a nerektifikovaných/pokřivených/neseříznutých dláždění).\n\nTéměř jakékoli "
+    "nesférické periodické 2D dláždění je možné zkonvertovat na striktní stromovou mapu.\n\nZměna formátu mapy tvoji mapu vymaže."
+  )
+
+S("in tes internal format", "v interním formátu *.tes")
+S("converted successfully -- %1 cell types", "konverze úspěšná -- %1 typů políček")
+S("cannot be disabled for this tiling", "v tomto dláždění nelze vypnout")
+S("extended football colorability", "rozšířená obarvitelnost fotbalového míče")
+S("consider all symmetries when converting", "ber při konverzi v úvahu všechny symetrie")
+S("tes reverse order on convert", "obrácené pořadí *.tes při konverzi")
+S("maximum cellcount", "maximální počet políček")
+S("controls the max memory usage of conversion algorithm -- the algorithm fails if exceeded",
+  "ovládá maximální využití paměti konverzním algoritmem -- pokud se toto množství překročí, algoritmus skončí neúspěšně")
+
+// hat tiling
+
+S("hat/spectre/turtle parameter", "parametr hat/spectre/turtle")
+S("Apeirodic hat tiling based on: https://arxiv.org/pdf/2303.10798.pdf\n\n"
+  "This controls the parameter discussed in Section 6. Parameter p is Tile(p, (2-p)√3), "
+  "scaled so that the area is the same for every p.\n\n"
+  "Aperiodic spectre tiling based on: https://arxiv.org/abs/2305.17743\n\n"
+  "In the spectre tiling, set the parameter to 'spectre' value to make all tiles have the same shape.",
+
+  "Aperiodické kloboukové (hat) dláždění založené na: https://arxiv.org/pdf/2303.10798.pdf\n\n"
+  "Toto ovládá parametr diskutovaná v Sekci 6. Parametr p znamená Tile(p, (2-p)√3), "
+  "škálovaný tak, aby měla pole pro všechna p stejný obsah.\n\n"
+  "Aperiodické přízrakové (spectre) dláždění založené na: https://arxiv.org/abs/2305.17743\n\n"
+  "Pokud v přízrakovém dláždění nastavíš parametr na hodnotu 'spectre', budou mít všechna políčka stejný tvar.")
+
+S("Welcome to HatRogue!", "Vítej v HatRogue!")
+S("hat in cluster", "klobouk ve shluku")
+S("hat clusters", "shluky klobouků")
+S("hat superclusters", "supershluky klobouků")
+S("types (mark reverse)", "typy (označit převrácené)")
+S("display small floors", "zobrazit malé podlahy")
+S("chevron (periodic)", "chevron (periodický)")
+S("hat", "klobouk ('hat')")
+S("spectre", "přízrak ('spectre')")
+S("turtle", "želva ('turtle')")
+S("comma (periodic)", "čárka (periodická)")
+
+S("hat parameter (imaginary)", "parametr 'hat' (imaginární)")
+S("Imaginary part of the hat parameter. This corresponds to the usual interpretation of complex numbers in Euclidean planar geometry: "
+  "rather than shortened or lengthened, the edges are moved in the other dimension.",
+  "Imaginární část parametru 'hat'. Odpovídá obvyklé interpretaci komplexních čísel v eukleidovské rovinné geometrii: "
+  "místo aby se hrany zkracovaly nebo prodlužovaly, posouvají se ve druhém rozměru."
+  )
+
+// fake curvature setting in experiments in geometry (some texts were not translated)
+
+S(
+  "This feature lets you construct the same tiling, but "
+  "from shapes of different curvature.\n\n"
+  "The number you give here is (2D) vertex degree or (3D) "
+  "the number of cells around an edge.\n\n",
+
+  "Zde můžeš sestavit stejné dláždění, ale "
+  "z tvarů odlišné křivosti.\n\n"
+  "Číslo, které se zde zadává, udává (2D) stupeň vrcholu nebo (3D) "
+  "počet buněk kolem hrany.\n\n")
+
+S("original", "originální")
+S("double original", "dvojitá originální")
+S("draw all if multiple of original", "vykresluj vše, je-li to násobkem originálu")
+S("draw copies (2D only)", "vykresluj kopie (pouze 2D)")
+S("unordered", "neuspořádané")
+S("pre-ordered", "uspořádané 'před'")
+S("post-ordered", "uspořádané 'po'")
+
+// other tessellation-related
+
+S("color by symmetries (reversed tiles marked)", "obarvi podle symetrií (s vyznačením převrácených dlaždic)")
+S("unreversed colors", "nepřevrácené barvy")
+S("symmetric subdivision", "symetrické poddělení")
+S("simplified display of apeirogons", "zjednodušené zobrazení apeirogonů")
+
+S("Width of cell boundaries", "šířka hranic políček")
+S("How wide should the cell boundaries be.", "Jak široké by měly být hranice políček.")
+
+S("the following sliders will restart the game", "následující slidery restartují hru")
+
+// new projections and parameters
+
+S("horocyclic equal-area", "horocyklická rovnoplochá")
+S("conformal square", "konformální čtverec")
+S("Lie perspective", "perspektiva v Lieově grupě")
+S("Lie orthogonal", "ortogonální projekce v Lieově grupě")
+S("relativistic perspective", "relativistická perspektiva")
+S("relativistic orthogonal", "relativistická ortogonální projekce")
+S("angle between the axes", "úhel mezi osami")
+S("In two-axe-based models, this parameter gives the angle between the two axes.", "V modelech založených na dvou osách tento parametr udává úhel mezi nimi.")
+S("model orientation 3D", "orientace modelu ve 3D")
+S("semidirect_rendering (perspective on GPU)", "polopřímé renderování (perspektiva v GPU)")
+S("this is not a Lie group", "toto není Lieova grupa")
+S("not implemented", "není implementováno")
+
+S("auto rotation", "automatická rotace")
+S("auto rotation in 3D", "automatická rotace ve 3D")
+
+// alternative screen projections
+
+S("stereo/high-FOV mode", "mód stereo / velký zorný úhel")
+S("linear perspective", "lineární perspektiva")
+S("for red-cyan glasses", "pro červeno-tyrkysové 3D brýle")
+S("for mobile VR", "pro mobilní VR")
+S("ODS", "projekce ODS")
+S("for rendering 360° VR videos (implemented only in raycaster and some other parts)",
+  "pro renderování 360° VR videí (implementováno pouze v raycasteru a některých jiných částech)")
+S("Panini", "Panini")
+S("Projection believed to be used by Italian painters. Allows very high FOV angles while rendering more straight lines as straight than the stereographic projection.",
+  "Domníváme se, že tuto projekci používali italští malíři. Umožňuje opravdu velké zorné úhly, a přitom vykresluje více přímek jako přímky než stereografická projekce.")
+S("stereographic", "stereografická projekce")
+S("Stereographic projection allows very high FOV angles.", "Stereografická projekce umožňuje opravdu velké zorné úhly.")
+S("equirectangular", "rovnoobdélníková projekce")
+S("for rendering 360° videos (implemented only in raycaster)", "pro renderování 360° videí (implementováno pouze v raycasteru)")
+S("stereographic/Panini parameter", "parametr stereografické/Paniniho projekce")
+S("1 for full stereographic/Panini projection. Lower values reduce the effect.\n\n"
+  "HyperRogue uses a quick implementation, so parameter values too close to 1 may be buggy (outside of raycasting); try e.g. 0.9 instead.",
+  "1 pro plnou stereografickou/Paniniho projekci. Nižší hodnoty účinek oslabují.\n\n"
+  "HyperRogue používá rychlou implementaci, takže hodnoty parametrů, které se příliš blíží jedné, mohou vést k chybám (s výjimkou raycastingu); zkus raději např. hodnotu 0.9."
+  )
+
+// embeddings
+//============
+
+S("3D embedding method", "metoda vnoření do 3D")
+S("3D style", "3D styl")
+S("2D engine", "2D engine")
+S("Use HyperRogue's 2D engine to simulate same curvature. Works well in top-down and third-person perspective. The Hypersian Rug mode can be used to project this to a surface.",
+  "Použij 2D engine HyperRogue k simulování stejné křivosti. Dobře to funguje v pohledu seshora nebo třetí osoby. Můžeš použít mód Hyperského koberce, abys výsledek promítl na nějaký povrch.")
+S("same curvature", "stejná křivost")
+S("Embed as an equidistant surface in the 3D version of the same geometry.",
+  "Vnoř jako ekvidistantní povrch ve 3D verzi stejné geometrie.")
+S("lower curvature", "menší křivost")
+S("Embed as a surface in a space of lower curvature.", "Vnoř jako povrch v prostoru s menší křivostí.")
+S("much lower curvature", "mnohem menší křivost")
+S("Embed sphere as a sphere in hyperbolic space.", "Vnoř kouli jako kouli v hyperbolickém prostoru.")
+S("product", "součin")
+S("Add one extra dimension in the Euclidean way.", "Přidej jeden rozměr navíc eukleidovským způsobem.")
+S("Embed Euclidean plane into Nil.", "Vnoř eukleidovskou rovinu do Nil.")
+S("Embed Euclidean or hyperbolic plane into Sol.", "Vnoř eukleidovskou rovinu do Sol.")
+S("Embed Euclidean or hyperbolic plane into stretched hyperbolic geometry.", "Vnoř eukleidovskou nebo hyperbolickou rovinu do natažené hyperbolické geometrie.")
+S("stretched Sol", "natažený Sol.")
+S("Embed Euclidean or hyperbolic plane into stretched Sol geometry.", "Vnoř eukleidovskou nebo hyperbolickou rovinu do natažené geometrie Sol.")
+S("Clifford Torus", "Cliffordův torus")
+S("Embed Euclidean rectangular torus into S3.", "Vnoř eukleidovský obdélníkový torus do S3.")
+S("hyperbolic product", "hyperbolický součin")
+S("Embed Euclidean or hyperbolic plane in the H2xR product space.", "Vnoř eukleidovskou nebo hyperbolickou rovinu do součinového prostoru H2xR")
+S("spherical product", "sférický součin")
+S("Embed Euclidean cylinder or spherical plane in the H2xR product space.", "Vnoř eukleidovský válec nebo sférickou rovinu do součinového prostoru S2xR")
+S("Embed Euclidean plane in twisted product geometry.", "Vnoř eukleidovskou rovinu do zkroucené součinové geometrie.")
+S("Embed Euclidean cylinder in Euclidean space.", "Vnoř eukleidovský válec do eukleidovského prostoru.")
+S("hyperbolic cylinder", "hyperbolický válec")
+S("Embed Euclidean cylinder in hyperbolic space.", "Vnoř eukleidovský válec do hyperbolického prostoru.")
+S("product cylinder", "součinový válec")
+S("Embed Euclidean cylinder in H2xR space.", "Vnoř eukleidovský válec do prostoru H2xR.")
+S("Nil cylinder", "Nil válec")
+S("Embed Euclidean cylinder in Nil.", "Vnoř eukleidovský válec do Nil.")
+S("horocylinder", "horoválec")
+S("Embed Euclidean as a horocylinder in H2xR space.", "Vnoř eukleidovskou rovinu do prostoru H2xR jako horoválec.")
+S("SL2 cylinder", "SL2 válec")
+S("Embed Euclidean as a cylinder in twisted product geometry.", "Vnoř eukleidovský válec do zkroucené součinové geometrie.")
+
+// embedding settings
+
+S("flat, not equidistant", "ploché, nikoli ekvidistantní")
+S("invert convex/concave", "převrať konvexní/konkávní")
+
+// embedding errors
+
+S("set square tiling", "nastav čtvercové dláždění")
+S("set hex tiling", "nastav šestiúhelníkové dláždění")
+S("error: currently works only in PURE Euclidean regular square or hex tiling", "chyba: momentálně funguje pouze v ČISTÉM eukleidovském pravidelném čtvercovém nebo šestiúhelníkovém dláždění")
+S("error: currently works only in pure Euclidean, or binary tiling and similar", "chyba: momentálně funguje pouze v čistých eukleidovských dlážděních nebo v binárním dláždění a jemu podobným")
+S("set binary tiling variant", "nastav variantu binárního dláždění")
+S("set ternary tiling", "nastav ternární dláždění")
+S("set binary tiling", "nastav binární dláždění")
+S("error: this embedding does not work in shmup", "chyba: toto vnoření nefunguje ve střílečkovém módu")
+S("error: this method works only in rectangular torus", "chyba: tato metoda funguje pouze v obdélníkovém torusu")
+S("set 20x20 torus", "nastav torus 20x20")
+S("error: this method works only in cylinder", "chyba: tato metoda funguje pouze ve válci")
+S("set cylinder", "nastav válec")
+S("error: not supported", "chyba: není podporováno")
+S("error: this method does not work in spherical geometry", "chyba: tato metoda nefunguje ve sférické geometrii")
+S("error: this method does not work in hyperbolic geometry", "chyba: tato metoda nefunguje v hyperbolické geometrii")
+S("3D styles", "styly 3D")
+S("3D detailed settings", "detailní nastavení 3D")
+S("more options in 3D engine", "více možností v 3D enginu")
+S("configure Hypersian Rug", "konfiguruj Hyperský koberec")
+S("view shift for embedded planes", "změna pohledu pro vnořené roviny")
+S("always move on geodesics", "vždy se pohybuj po geodetikách")
+S("keep levels", "udržuj úrovně")
+S("keep the vertical angle of the camera", "udržuj vertikální úhel kamery")
+S("mixed", "smíšený mód")
+S("on geodesics when moving camera manually, keep level when auto-centering", "udržuj úroveň při automatickém centrování během ručního pohybu kamery po geodetikách")
+S("Euclidean embedding rotation", "rotace eukleidovského vnoření")
+S("How to rotate the Euclidean embedding, in degrees.", "O kolik stupňů otočit eukleidovské vnoření.")
+S("Euclidean embedding scale", "škála eukleidovského vnoření")
+S("How to scale the Euclidean map, relatively to the 3D absolute unit.", "Jak škálovat eukleidovskou mapu v poměru ke 3D absolutní jednotce.")
+S("Euclidean embedding scale Y/X", "škála eukleidovského vnoření Y/X")
+S("This scaling factor affects only the Y coordinate.", "Tento škálovací faktor ovlivňuje pouze souřadnici Y.")
+S("(fix errors)", "(oprav chyby)")
+S("reset view", "vyresetuj pohled")
+S("needs", "potřebuje: ")
+
+// embeddings: detailed 3D parameters
+
+S("set 3D settings automatically", "nastav 3D možnosti automaticky")
+
+S("draw plain floors in 3D", "vykresluj v 3D módu prostou podlahu")
+S("floor alpha", "průhlednost podlahy")
+S("255 = opaque", "255 = neprůhledné")
+
+S("altitude of the stars", "výška hvězd")
+S("star probability", "pravděpodobnost hvězdy")
+S("probability of star per tile", "pravděpodobnost hvězdy na jednu dlaždici")
+S("night star size (relative to item sizes)", "velikost nočních hvězd (v poměru k velikosti předmětů)")
+S("sun size (relative to item sizes)", "velikost slunce (v poměru k velikosti předmětů)")
+S("infinite sky", "nekonečná obloha")
+S("ratio of high walls to normal walls", "poměr vysokých a normálních stěn")
+S("ratio of very high walls to normal walls", "poměr velmi vysokých a normálních stěn")
+S("altitude of the sky", "výška oblohy")
+S("sky fake height", "falešná výška oblohy")
+S("Sky is rendered at the distance computed based on the sky height, "
+  "which might be beyond the range visible in fog. To prevent this, "
+  "the intensity of the fog effect depends on the value here rather than the actual distance. Stars are affected similarly.",
+
+  "Nebe se renderuje ve vzdálenosti vypočtené na základě výšky oblohy, "
+  "což může být dál, než činí viditelnost v mlze. Aby se tomu zabránilo, "
+  "závisí intenzita efektu mlhy na této hodnotě a ne na skutečné vzdálenosti. Hvězdy jsou ovlivněny podobným způsobem."
+  )
+S("sky rendering", "renderování oblohy")
+S("do not draw sky", "nevykresluj oblohu")
+S("skybox", "skybox")
+S("infinite depth", "nekonečná hloubka")
+S("The unit this value is given in is wall height. "
+  "Note that, in exponentially expanding spaces, too high values could cause rendering issues. "
+  "So if you want infinity, values of 5 or similar should be used -- there is no visible difference from infinity and glitches are avoided.",
+  "Tato hodnota je udávaná v jednotkách výšky stěny. "
+  "Pozor -- v exponenciálně se zvětšujících prostorech by příliš vysoká hodnota mohla způsobit problémy při renderování. "
+  "Chceš-li tedy nekonečno, použij hodnotu 5 nebo něco podobného -- vizuálně tam žádný rozdíl oproti nekonečnu není a vyhneš se chybám.")
+S("Level of shallow water", "Úroveň mělké vody")
+S("do not render higher levels if camera too high", "nerenderuj vyšší úrovně, je-li kamera příliš vysoko")
+S("works only in Euclidean", "toto funguje pouze v eukleidovském prostoru")
+S("always", "vždy")
+S("might be glitched in some settings", "s některými nastaveními může dělat chyby")
+S("prevent exceeding recommended altitudes", "nepřekračuj doporučenou výšku")
+
+S("camera angle", "úhel kamery")
+S("render behind the camera", "renderuj za kamerou")
+
+// embeddings: pseudohedral setting
+
+S("make the tiles flat", "ploché dlaždice")
+S("the tiles are curved", "dlaždice jsou zakřivené")
+S("inscribed", "vepsané")
+S("the tiles are inscribed", "dlaždice jsou vepsané")
+S("circumscribed", "opsané")
+S("the tiles are circumscribed", "dlaždice jsou opsané")
+S("depth bonus in pseudohedral", "bonus na hloubku v pseudohedrálním módu")
+
+// embeddings: geodesic movement in Solv etc
+
+S("straight lines", "přímky")
+S("Lie group", "Lieova grupa")
+S("light, camera, and objects move in lines of constant direction, in the Lie group sense", "světlo, kamera a předměty se pohybují po čarách konstantního směru ve smyslu Lieovy grupy")
+S("geodesics", "geodetiky")
+S("light, camera, and objects always take the shortest path", "světlo, kamera a objekty se vždy pohybují po nejkratší dráze")
+
+// achievement eligiblity
+S("achievement/leaderboard eligiblity:", "dostupnost achievementů/leaderboardů:")
+S("eligible for most", "většina achievementů/leaderboardů dostupná")
+S("eligible for most -- leaderboards separate", "většina achievementů dostupná -- leaderboardy oddělené")
+S("eligible for racing", "závodní achievementy/leaderboardy dostupné")
+S("eligible for shmup", "střílečkové achievementy/leaderboardy dostupné")
+S("eligible for multiplayer", "multiplayerové achievementy/leaderboardy dostupné")
+S("eligible for Chaos mode", "achievementy/leaderboardy chaotického módu dostupné")
+S("eligible for Princess Challenge", "achievementy/leaderboardy Mise: Princezna dostupné")
+S("eligible for heptagonal", "achievementy/leaderboardy sedmiúhelníkového módu dostupné")
+S("eligible for special geometry", "achievementy/leaderboardy speciální geometrie dostupné")
+S("eligible for Strange Challenge", "achievementy/leaderboardy Podivné mise dostupné")
+S("disabled in cheat mode", "v cheat módu jsou achievementy/leaderboardy nedostupné")
+S("disabled in casual mode", "v neformálním módu jsou achievementy/leaderboardy nedostupné")
+S("not eligible due to current mode settings", "achievementy/leaderboardy nejsou dostupné díky současnému nastavení módu")
+S("no achievements/leaderboards in this version", "v této verzi žádné achievementy/leaderboardy nejsou")

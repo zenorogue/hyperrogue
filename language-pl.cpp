@@ -9776,7 +9776,7 @@ S("rules generated successfully: %1 states using %2-%3 cells", "reguły wygenero
 S("too difficult: %1", "za trudne: %1")
 S("bug: %1", "bug: %1")
 S(
-    "Strict tree maps are generated using a more powerful algorithm.\n\nThis algorithms supports horocycles and knows the expansion rates of various "
+    "Strict tree maps are generated using a more powerful algorithm.\n\nThis algorithm supports horocycles and knows the expansion rates of various "
     "tessellations (contrary to the basic implementation of Archimedean, tes, and unrectified/warped/untruncated tessellations).\n\nYou can convert mostly any "
     "non-spherical periodic 2D tessellation to strict tree based.\n\nSwitching the map format erases your map.",
 
@@ -9924,15 +9924,15 @@ S("product", "produkt")
 S("Add one extra dimension in the Euclidean way.", "Dodaje dodatkowy wymiar w sposób Euklidesowy.")
 S("Embed Euclidean plane into Nil.", "Zanurz płaszczyznę euklidesową w geometrię Nil.")
 S("Embed Euclidean or hyperbolic plane into Sol.", "Zanurz płaszczyznę euklidesową w geometrię Sol.")
-S("Embed Euclidean or hyperbolic plane into stretched hyperbolic geometry.", "Zanurz płaszczyznę euklidesową w rozciągniętą geometrię hiperboliczną.")
+S("Embed Euclidean or hyperbolic plane into stretched hyperbolic geometry.", "Zanurz płaszczyznę euklidesową lub hiperboliczną w rozciągniętą geometrię hiperboliczną.")
 S("stretched Sol", "rozciągnięte Sol.")
 S("Embed Euclidean or hyperbolic plane into stretched Sol geometry.", "Zanurz płaszczyznę euklidesową lub hiperboliczną w rozciągniętą geometrię Sol.")
-S("Clifford Torus", "trous Clifforda")
+S("Clifford Torus", "torus Clifforda")
 S("Embed Euclidean rectangular torus into S3.", "Zanurz prostokątny torus w geometrię sferyczną.")
 S("hyperbolic product", "produkt hiperboliczny")
 S("Embed Euclidean or hyperbolic plane in the H2xR product space.", "Zanurz płaszczyznę euklidesową lub hiperboliczną w przestrzeń produktową H2xR")
 S("spherical product", "produkt sferyczny")
-S("Embed Euclidean cylinder or spherical plane in the H2xR product space.", "Zanurz płaszczyznę euklidesową lub sferę w przestrzeń produktową S2xR")
+S("Embed Euclidean cylinder or spherical plane in the H2xR product space.", "Zanurz płaszczyznę euklidesową lub sferę w przestrzeń produktową H2xR")
 S("Embed Euclidean plane in twisted product geometry.", "Zanurz płaszczyznę euklidesową w skręconą geometrię produktową.")
 S("Embed Euclidean cylinder in Euclidean space.", "Zanurz walec euklidesowy w przestrzeń euklidesową.")
 S("hyperbolic cylinder", "walec hiperboliczny")
@@ -10018,7 +10018,7 @@ S("sky rendering", "renderowanie powietrza")
 S("do not draw sky", "nie rysuj powietrza")
 S("skybox", "skybox")
 S("infinite depth", "nieskończona głębokość")
-S("The unit this is value is given in is wall height. "
+S("The unit this value is given in is wall height. "
   "Note that, in exponentially expanding spaces, too high values could cause rendering issues. "
   "So if you want infinity, values of 5 or similar should be used -- there is no visible difference from infinity and glitches are avoided.",
   "Ta wartość jest podawana w jednostkach wysokości ściany. "

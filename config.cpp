@@ -3217,7 +3217,7 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
         );
         });
   string unitwarn =
-    "The unit this is value is given in is wall height. "
+    "The unit this value is given in is wall height. "
     "Note that, in exponentially expanding spaces, too high values could cause rendering issues. So "
     "if you want infinity, values of 5 or similar should be used -- there is no visible difference "
     "from infinity and glitches are avoided.";
