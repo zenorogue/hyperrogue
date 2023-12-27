@@ -90,7 +90,7 @@ EX namespace geom3 {
         ans += " torus";
       }
     if(among(sp, seSol, seNIH, seSolN)) {
-      if((meuclid && !PURE) && !bt::in()) ans += " pure or bin";
+      if((meuclid && !PURE) || !bt::in()) ans += " pure or bin";
       }
     return ans;
     }
