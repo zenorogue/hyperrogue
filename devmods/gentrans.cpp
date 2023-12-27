@@ -191,7 +191,7 @@ void gentrans() {
   DIR           *d;
   struct dirent *dir;
   
-  println(hlog, "// checking all the files");
+  println(hlog, "\n\n// checking all the files");
 
   d = opendir(".");
 
@@ -204,11 +204,11 @@ void gentrans() {
     closedir(d);
     }
 
-  println(hlog, "// checking configurables");
+  println(hlog, "\n\n// checking configurables");
   
   for(auto& fs: params) {
     auto& sett = fs.second;
-    if(sett->menu_item_name != sett->config_name)
+    if(sett->menu_item_name_modified)
       check_ex(sett->menu_item_name, "menu_item_name for " + sett->parameter_name);
     check_ex(sett->help_text, "help_text for " + sett->parameter_name);
     auto ls = dynamic_cast<list_setting*> ( (setting*) &*sett);
@@ -222,6 +222,6 @@ void gentrans() {
   exit(0);
   }
 
-auto ar = arg::add3("-gentrans", gentrans);
+auto gtar = arg::add3("-gentrans", gentrans);
 
 }

@@ -135,7 +135,7 @@
 #if CAP_DAILY
 #include "private/daily.cpp"
 #else
-namespace hr { namespace daily { bool on; } }
+namespace hr { namespace daily { bool on; int historical; } }
 #endif
 
 #include "mobile.cpp"
