@@ -190,7 +190,10 @@ EX vector<int> create_dirseq_geometric() {
       if(GDIM == 3) y = hypot(U0[1], U0[2]); else y = abs(U0[1]) + (U0[1] > 0 ? 1e-6 : 0);
       if(y < best_y) { best_y = y; best_i = i; }
       }
-    if(best_i < 0) break;
+    if(best_i < 0) {
+      dirseq.push_back(NODIR);
+      break;
+      }
     at = at + best_i;
     int bonus = bolt_score(at + wstep);
     best_score_res += bonus;
