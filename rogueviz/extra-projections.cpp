@@ -211,7 +211,26 @@ void add_extra_projections() {
     ret[1] = H[1] / H[0] * x;
     if(GDIM == 2) ret[2] = H[2] / H[0] * x;
     ret[LDIM] = 1;
-    models::ori_to_scr(H);
+    models::ori_to_scr(ret);
+    });
+
+  add_extra("point-ideal-point equidistant", mf::horocyclic | mf::orientation, [] (shiftpoint& H_orig, hyperpoint& H, hyperpoint& ret) {
+    find_zlev(H);
+    models::scr_to_ori(H);
+
+    ld d0 = hdist0(H);
+    ld x = deparabolic13(H)[0];
+    ld y2 = d0*d0 - x*x;
+    ld y = y2 > 0 ? sqrt(y2) : 0;
+
+    ret[0] = x;
+    if(GDIM == 2) ret[1] = H[1] > 0 ? y : -y;
+    else if(GDIM == 3) {
+      ld r = hypot(H[1], H[2]);
+      if(r == 0) ret[1] = ret[2] = 0;
+      else ret[1] = y * H[1] / r, ret[2] = y * H[2] / r;
+      }
+    models::ori_to_scr(ret);
     });
   }
 
