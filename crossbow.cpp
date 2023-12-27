@@ -193,9 +193,9 @@ EX vector<int> create_dirseq_geometric() {
     if(best_i < 0) break;
     at = at + best_i;
     int bonus = bolt_score(at + wstep);
-    if(bonus < 0) break;
     best_score_res += bonus;
     dirseq.push_back(best_i);
+    if(bonus < 0) break;
     T = T * currentmap->adj(at.at, at.spin);
     at = at + wstep;
     }
