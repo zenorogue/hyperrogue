@@ -887,6 +887,7 @@ template<class T> T& atmod(vector<T>& container, int index) {
 
 namespace daily {
   extern bool on;
+  extern int historical;
   extern int daily_id;
   void setup();
   void split();
