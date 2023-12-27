@@ -801,9 +801,9 @@ EX void achievement_final(bool really_final) {
   if(PURE) specialcode+=4;
   if(numplayers() > 1) specialcode+=8;
   if(inv::on) specialcode+=16;
-  if(bow::crossbow_mode && bow::style == bow::cbBull) specialcode += 32;
-  if(bow::crossbow_mode && bow::style == bow::cbGeodesic) specialcode += 64;
-  if(bow::crossbow_mode && bow::style == bow::cbGeometric) specialcode += 96;
+  if(bow::crossbow_mode() && bow::style == bow::cbBull) specialcode += 32;
+  if(bow::crossbow_mode() && bow::style == bow::cbGeodesic) specialcode += 64;
+  if(bow::crossbow_mode() && bow::style == bow::cbGeometric) specialcode += 96;
   
   if(sphere && specialland == laHalloween) {
     if(specialcode) return;

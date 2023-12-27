@@ -180,7 +180,7 @@ string get_slidename(const string& s) {
   return s.substr(i);
   }
 
-string get_foldername(const string& s) {
+EX string get_foldername(const string& s) {
   int i = 0;
   for(int k=0; k<isize(s); k++) if(s[k] == '/') i = k+1;
   return s.substr(0, i);
