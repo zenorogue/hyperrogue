@@ -234,7 +234,7 @@ struct hrmap_notknot : hrmap {
   heptagon* at(int x, int y, int z) { 
     dynamicval<eGeometry> g(geometry, base);
     dynamicval<hrmap*> m(currentmap, euc);
-    euc::coord co = euc::basic_canonicalize({x, y, z});
+    euc::coord co = euc::basic_canonicalize(euc::coord{x, y, z});
     
     return euc::get_at(co);
     }

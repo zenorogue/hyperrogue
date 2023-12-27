@@ -901,6 +901,7 @@ int rugArgs() {
 
   else if(argis("-go-save")) save_go();
 
+  #if CAP_VIDEO
   else if(argis("-go-video")) {
     save_backup();
     shift(); string s = args();
@@ -918,6 +919,7 @@ int rugArgs() {
     delHook(anims::hooks_anim, a);
     undo();
     }
+  #endif
 
   else return 1;
   return 0;
