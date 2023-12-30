@@ -50,7 +50,7 @@ void gdpush(int t);
 
 void shareScore(MOBPAR_FORMAL);
 
-const char *scorefile;
+std::string scorefile;
 
 bool settingsChanged = false;
 
@@ -203,14 +203,13 @@ extern "C" void
 Java_com_roguetemple_hyperroid_HyperRogue_setFilesDir(MOBPAR_FORMAL, jstring dir)
 {
   const char *nativeString = env->GetStringUTFChars(dir, 0);
-  sscorefile = nativeString; sscorefile += "/hyperrogue.log";
+  scorefile = nativeString; scorefile += "/hyperrogue.log";
   sconffile = nativeString; sconffile += "/hyperrogue.ini";
   scachefile = nativeString; scachefile += "/scorecache.txt";
   levelfile = nativeString; levelfile += "/hyperrogue.lev"; 
   picfile = nativeString; picfile += "/hyperrogue.pic"; 
-  scorefile = sscorefile.c_str();
   conffile = sconffile.c_str();
-  chmod(scorefile, 0777);
+  chmod(scorefile.c_str(), 0777);
   chmod(conffile, 0777);
   chmod(nativeString, 0777);
   chmod((string(nativeString)+"/..").c_str(), 0777);
