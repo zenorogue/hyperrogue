@@ -683,6 +683,9 @@ EX void resize_screen_to(int x, int y);
 EX void mainloopiter() { printf("(compiled without SDL -- no action)\n"); quitmainloop = true; }
 #endif
 
+/* visualization only -- the HyperRogue movement keys should move the camera */
+EX bool game_keys_scroll;
+
 #if CAP_SDL
 
 // Warning: a very long function! todo: refactor
@@ -713,9 +716,6 @@ EX bool mouseaiming(bool shmupon) {
   return
     (GDIM == 3 && !shmupon) || (rug::rugged && (lctrlclick ^ rug::mouse_control_rug)) || (cmode & sm::MOUSEAIM);
   }
-
-/* visualization only -- the HyperRogue movement keys should move the camera */
-EX bool game_keys_scroll;
 
 EX purehookset hooks_control;
 
