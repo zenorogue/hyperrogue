@@ -92,6 +92,11 @@ void handleclick(MOBPAR_FORMAL) {
         getcstat = 0;
         }
 
+      else if(statkeys && getcstat == 'f') {
+        bow::switch_fire_mode();
+        getcstat = 0;
+        }
+
       else if(getcstat != SDLK_F1 && getcstat != 'i' && getcstat != 't') {
         int px = mousex < current_display->xcenter ? 0 : 1;
         int py = mousey < current_display->ycenter ? 0 : 1;
@@ -289,6 +294,8 @@ EX void mobile_draw(MOBPAR_FORMAL) {
   if(lclicked && !clicked && !inmenu) handleclick(MOBPAR_ACTUAL);
 
   if(inmenu && !clicked && !lclicked) inmenu = false;
+
+  if(!clicked && !lclicked) invslider = false;
   
   bool keyreact = lclicked && !clicked;
 
@@ -302,6 +309,7 @@ EX void mobile_draw(MOBPAR_FORMAL) {
 #endif
   
   if(inslider) keyreact = true;
+  if(invslider || getcstat == PSEUDOKEY_LIST_SLIDER) keyreact = true;
 
 #if CAP_ANDROIDSHARE
   if(getcstat == 's'-96 && keyreact) {
