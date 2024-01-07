@@ -2724,6 +2724,7 @@ EX void turn(int delta) {
         terracotta::check();
         #endif
         heat::processfires();
+        advance_tides();
         if(havewhat&HF_WHIRLPOOL) whirlpool::move();
         if(havewhat&HF_WHIRLWIND) whirlwind::move();
         #if CAP_COMPLEX2

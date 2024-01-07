@@ -2855,7 +2855,7 @@ void celldrawer::draw() {
   
   if(callhandlers(false, hooks_drawcell, c, V)) return;
   
-  if(history::on || inHighQual || WDIM == 3 || sightrange_bonus > gamerange_bonus) checkTide(c);
+  if(history::on || inHighQual || WDIM == 3 || shmup::on || sightrange_bonus > gamerange_bonus || !playermoved) checkTide(c);
   
   if(1) {
   
