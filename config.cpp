@@ -1385,7 +1385,8 @@ EX void initConfig() {
     {"ODS", "for rendering 360° VR videos (implemented only in raycaster and some other parts)"},
     {"Panini", "Projection believed to be used by Italian painters. Allows very high FOV angles while rendering more straight lines as straight than the stereographic projection."},
     {"stereographic", "Stereographic projection allows very high FOV angles."},
-    {"equirectangular", "for rendering 360° videos (implemented only in raycaster)"}
+    {"equirectangular", "for rendering 360° videos (implemented only in raycaster)"},
+    {"cylindrical", "full vertical (not implemented in raycaster)"}
     }, "stereo/high-FOV mode", 'm')
   ->set_reaction(reset_all_shaders);
 

@@ -250,7 +250,7 @@ struct charstyle {
   bool lefthanded;
   };
 
-enum eStereo { sOFF, sAnaglyph, sLR, sODS, sPanini, sStereographic, sEquirectangular };
+enum eStereo { sOFF, sAnaglyph, sLR, sODS, sPanini, sStereographic, sEquirectangular, sCylindrical };
 
 enum eModel : int;
 

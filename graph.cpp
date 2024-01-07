@@ -4119,7 +4119,7 @@ EX ld threshold, xyz_threshold;
 EX bool clip_checked = false;
 
 EX bool other_stereo_mode() {
-  return among(vid.stereo_mode, sODS, sPanini, sStereographic, sEquirectangular);
+  return vid.stereo_mode != sOFF;
   }
 
 void make_clipping_planes() {

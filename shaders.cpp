@@ -82,6 +82,12 @@ EX string panini_shader() {
     "t.w = 1.;\n";
   }
 
+EX string cylindrical_shader() {
+  return
+    "t /= t.w;\n"
+    "t.y = atan2(t.y, length(t.xz)) * length(t.xz) * 2. / PI;\n";
+  }
+
 EX string stereo_shader() {
   return
     "t.w += 1.; t *= 2. / t.w; t.w -= 1.;\n"
@@ -519,6 +525,11 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
       vmain += "t = uPP * t;", vsh += "uniform mediump mat4 uPP;";
       /* panini */
       vmain += panini_shader();
+      shader_flags |= SF_ORIENT;
+      }
+    else if((shader_flags & SF_PERS3) && vid.stereo_mode == sCylindrical && !vrhr::rendering_eye()) {
+      vmain += "t = uPP * t;", vsh += "uniform mediump mat4 uPP;";
+      vmain += cylindrical_shader();
       shader_flags |= SF_ORIENT;
       }
     else if((shader_flags & SF_PERS3) && vid.stereo_mode == sStereographic && !vrhr::rendering_eye()) {
