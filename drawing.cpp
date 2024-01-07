@@ -229,7 +229,7 @@ EX void glflush() {
     
     else
     #endif
-    for(int ed = (current_display->stereo_active() && text_shift)?-1:0; ed<2; ed+=2) {
+    for(int ed = (current_display->separate_eyes() && text_shift)?-1:0; ed<2; ed+=2) {
       glhr::set_modelview(glhr::translate(-ed*text_shift-current_display->xcenter,-current_display->ycenter, 0));
       current_display->set_mask(ed);
       drawer();
@@ -237,7 +237,7 @@ EX void glflush() {
       GLERR("print");
       }
 
-    if(current_display->stereo_active() && text_shift && !svg::in) current_display->set_mask(0);
+    if(current_display->separate_eyes() && text_shift && !svg::in) current_display->set_mask(0);
  
     texts_merged = 0;
     text_vertices.clear();
@@ -474,7 +474,7 @@ void addpoint(const shiftpoint& H) {
 void coords_to_poly() {
   polyi = isize(glcoords);
   for(int i=0; i<polyi; i++) {
-    if(!current_display->stereo_active()) glcoords[i][2] = 0;
+    if(!current_display->separate_eyes()) glcoords[i][2] = 0;
 
     polyx[i]  = current_display->xcenter + glcoords[i][0] - glcoords[i][2]; 
     polyxr[i] = current_display->xcenter + glcoords[i][0] + glcoords[i][2]; 
@@ -663,7 +663,7 @@ void dqi_poly::gldraw() {
   int ioffset = offset;
   
 #if MINIMIZE_GL_CALLS  
-  if(current_display->stereo_active() == 0 && !tinf && (color == 0 || ((flags & (POLY_VCONVEX | POLY_CCONVEX)) && !(flags & (POLY_INVERSE | POLY_FORCE_INVERTED))))) {
+  if(current_display->separate_eyes() == 0 && !tinf && (color == 0 || ((flags & (POLY_VCONVEX | POLY_CCONVEX)) && !(flags & (POLY_INVERSE | POLY_FORCE_INVERTED))))) {
     if(lprio != prio || texts_merged || m_shift != V.shift) {
       glflush();
       lprio = prio;
@@ -717,7 +717,7 @@ void dqi_poly::gldraw() {
   
   next_slr:
 
-  for(int ed = current_display->stereo_active() ? -1 : 0; ed<2; ed+=2) {
+  for(int ed = current_display->separate_eyes() ? -1 : 0; ed<2; ed+=2) {
     if(global_projection && global_projection != ed) continue;
 
     if(min_slr < max_slr) {
@@ -2136,10 +2136,10 @@ void dqi_poly::draw() {
     else
       filledPolygonColorI(srend, polyx, polyy, polyi, color);
   
-    if(current_display->stereo_active()) filledPolygonColorI(auxrend, polyxr, polyy, polyi, color);
+    if(current_display->separate_eyes()) filledPolygonColorI(auxrend, polyxr, polyy, polyi, color);
     
     ((vid.antialias & AA_NOGL) ?aapolylineColor:polylineColor)(srend, polyx, polyy, polyi, outline);
-    if(current_display->stereo_active()) aapolylineColor(auxrend, polyxr, polyy, polyi, outline);
+    if(current_display->separate_eyes()) aapolylineColor(auxrend, polyxr, polyy, polyi, outline);
     
     if(vid.xres >= 2000 || fatborder) {
       int xmi = 3000, xma = -3000;
@@ -2623,7 +2623,7 @@ EX void drawqueue() {
     }
 
 #if CAP_SDL
-  if(current_display->stereo_active() && !vid.usingGL) {
+  if(current_display->separate_eyes() && !vid.usingGL) {
 
     if(aux && (aux->w != s->w || aux->h != s->h)) {
       SDL_FreeSurface(aux);
@@ -2651,7 +2651,7 @@ EX void drawqueue() {
   reset_projection();
   
   #if CAP_GL
-  if(model_needs_depth() && current_display->stereo_active()) {
+  if(model_needs_depth() && current_display->separate_eyes()) {
     global_projection = -1;
     draw_main();
     #if CAP_GL

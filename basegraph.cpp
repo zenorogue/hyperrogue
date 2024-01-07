@@ -58,7 +58,7 @@ struct display_data {
   transmatrix radar_transform_post;
 
   ld eyewidth();
-  bool stereo_active();
+  bool separate_eyes();
   bool in_anaglyph();
 
   void set_viewport(int ed);
@@ -108,7 +108,7 @@ EX int get_sightrange_ambush() {
   }
 
 bool display_data::in_anaglyph() { return vid.stereo_mode == sAnaglyph; }
-bool display_data::stereo_active() { return vid.stereo_mode != sOFF; }
+bool display_data::separate_eyes() { return among(vid.stereo_mode, sAnaglyph, sLR); }
 
 ld display_data::eyewidth() { 
   switch(vid.stereo_mode) {

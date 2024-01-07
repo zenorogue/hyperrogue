@@ -167,7 +167,7 @@ bool use_z_coordinate() {
   #if CAP_VR
   if(vrhr::rendering()) return true;
   #endif
-  return current_display->stereo_active();
+  return current_display->separate_eyes();
   }
 
 void apply_depth(hyperpoint &f, ld z) {
@@ -2783,7 +2783,7 @@ EX void draw_boundary(int w) {
   switch(pmodel) {
   
     case mdTwoPoint: {
-      if(twopoint_do_flips || current_display->stereo_active() || !sphere) return;
+      if(twopoint_do_flips || current_display->separate_eyes() || !sphere) return;
       queuereset(mdPixel, p);
   
       for(int b=-1; b<=1; b+=2)

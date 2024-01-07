@@ -315,7 +315,7 @@ void dqi_sky::draw() {
     
   be_euclidean_infinity(s);
 
-  for(int ed = current_display->stereo_active() ? -1 : 0; ed<2; ed+=2) {
+  for(int ed = current_display->separate_eyes() ? -1 : 0; ed<2; ed+=2) {
     if(global_projection && global_projection != ed) continue;
     current_display->next_shader_flags = GF_VARCOLOR;
     current_display->set_all(ed, 0);
