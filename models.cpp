@@ -619,6 +619,11 @@ EX namespace models {
     if(vpmodel == mdFisheye) 
       add_edit(vpconf.fisheye_param);
 
+    if(vpmodel == mdFisheye2) {
+      add_edit(vpconf.fisheye_param);
+      add_edit(vpconf.fisheye_alpha);
+      }
+
     if(is_hyperboloid(vpmodel))
       add_edit(pconf.show_hyperboloid_flat);
     
@@ -973,6 +978,13 @@ EX namespace models {
       param_f(p.fisheye_param, pp+"fisheye", sp+"fisheye parameter", 1)
       -> editable(1e-3, 10, .1, "fisheye parameter", "Size of the fish eye.", 'b')
       -> set_sets(dialog::scaleLog);
+
+      param_f(p.fisheye_alpha, pp+"fishalpha", sp+"off-center parameter", 0)
+      -> editable(1e-1, 10, .1, "off-center parameter",
+        "This projection is obtained by composing gnomonic projection and inverse stereographic projection. "
+        "This parameter changes the center of the first projection (0 = gnomonic, 1 = stereographic). Use a value closer to 1 "
+        "to make the projection more conformal.",
+        'o');
 
       param_f(p.stretch, pp+"stretch", 1)
       -> editable(0, 10, .1, "vertical stretch", "Vertical stretch factor.", 's')

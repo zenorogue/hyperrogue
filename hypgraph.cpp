@@ -1055,6 +1055,27 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
       break;
       }
     
+    case mdFisheye2: {
+      ld zlev;
+      if(nonisotropic) {
+        H = lp_apply(inverse_exp(H_orig));
+        zlev = 1;
+        }
+      else {
+        zlev = find_zlev(H);
+        H = space_to_perspective(H);
+        }
+      H /= pconf.fisheye_param;
+      auto H1 = perspective_to_space(H, pconf.fisheye_alpha, gcSphere);
+      auto H2 = perspective_to_space(hyperpoint(1e6, 0, 0, 0), pconf.fisheye_alpha, gcSphere);
+      H1[2] += 1;
+      H1 /= H1[2];
+      H1 /= H2[0] / (H2[2]+1);
+      ret = H1;
+      if(GDIM == 3) ret[LDIM] = zlev;
+      break;
+      }
+
     case mdSimulatedPerspective: {
       models::scr_to_ori(H);
       auto yz = move_z_to_y(H);
@@ -2475,7 +2496,7 @@ EX transmatrix atscreenpos(ld x, ld y, ld size) {
 
 void circle_around_center(ld radius, color_t linecol, color_t fillcol, PPR prio) {
   #if CAP_QUEUE
-  if(among(pmodel, mdDisk, mdEquiarea, mdEquidistant, mdFisheye) && !(pmodel == mdDisk && hyperbolic && pconf.alpha <= -1) && models::camera_straight) {
+  if(among(pmodel, mdDisk, mdEquiarea, mdEquidistant, mdFisheye, mdFisheye2) && !(pmodel == mdDisk && hyperbolic && pconf.alpha <= -1) && models::camera_straight) {
     hyperpoint ret;
     applymodel(shiftless(xpush0(radius)), ret);
     ld r = hypot_d(2, ret);
@@ -2733,7 +2754,7 @@ EX void draw_boundary(int w) {
     }
 
   if(w == 1) return;
-  if(nonisotropic || (euclid && !among(pmodel, mdFisheye, mdConformalSquare, mdHemisphere)) || gproduct) return;
+  if(nonisotropic || (euclid && !among(pmodel, mdFisheye, mdFisheye2, mdConformalSquare, mdHemisphere)) || gproduct) return;
   #if CAP_VR
   if(vrhr::active() && pmodel == mdHyperboloid) return;
   #endif

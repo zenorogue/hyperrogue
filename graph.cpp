@@ -3273,7 +3273,7 @@ EX int haveaura() {
   if(sphere && mdAzimuthalEqui()) return 0;
   if(among(pmodel, mdJoukowsky, mdJoukowskyInverted) && hyperbolic && pconf.model_transition < 1) 
     return 2;
-  if(pmodel == mdFisheye) return 1;
+  if(among(pmodel, mdFisheye, mdFisheye2)) return 1;
   return pmodel == mdDisk && (!sphere || pconf.alpha > 10) && !euclid;
   }
   
