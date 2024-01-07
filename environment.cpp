@@ -376,7 +376,7 @@ EX void bfs() {
         
         // remove treasures
         if(!peace::on && c2->item && c2->cpdist == distlimit && itemclass(c2->item) == IC_TREASURE &&
-          c2->item != itBabyTortoise && WDIM != 3 &&
+          !among(c2->item, itBrownian, itBabyTortoise) && WDIM != 3 &&
           (items[c2->item] >= (ls::any_chaos()?10:20) + currentLocalTreasure || getGhostcount() >= 2)) {
             c2->item = itNone;
             if(c2->land == laMinefield) { c2->landparam &= ~3; }
