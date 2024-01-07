@@ -1386,7 +1386,8 @@ EX void initConfig() {
     {"Panini", "Projection believed to be used by Italian painters. Allows very high FOV angles while rendering more straight lines as straight than the stereographic projection."},
     {"stereographic", "Stereographic projection allows very high FOV angles."},
     {"equirectangular", "for rendering 360° videos (implemented only in raycaster)"}
-    }, "stereo/high-FOV mode", 'm');
+    }, "stereo/high-FOV mode", 'm')
+  ->set_reaction(reset_all_shaders);
 
   param_f(vid.plevel_factor, "plevel_factor", 0.7);
 
