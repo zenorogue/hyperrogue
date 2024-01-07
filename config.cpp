@@ -2521,6 +2521,29 @@ EX ld max_fov_angle() {
   return acos(-p) * 2 / degree;
   }
 
+EX void edit_fov_screen() {
+  dialog::editNumber(vid.fov, 1, max_fov_angle(), 1, 90, "field of view",
+    XLAT(
+      "Horizontal field of view, in angles. "
+      "This affects the Hypersian Rug mode (even when stereo is OFF) "
+      "and non-disk models.") + "\n\n" +
+    XLAT(
+      "Must be less than %1°. Panini projection can be used to get higher values.",
+      fts(max_fov_angle())
+      )
+      );
+  dialog::bound_low(1e-8);
+  dialog::bound_up(max_fov_angle() - 0.01);
+  dialog::get_di().extra_options = [] {
+    auto ptr = dynamic_cast<dialog::number_dialog*> (screens.back().target_base());
+    if(ptr && ptr->vmax != max_fov_angle()) { popScreen(); edit_fov_screen(); return; }
+    add_edit(vid.stereo_mode, 'M');
+    if(among(vid.stereo_mode, sPanini, sStereographic)) {
+      add_edit(vid.stereo_param, 'P');
+      }
+    };
+  }
+
 EX void add_edit_fov(char key IS('f')) {
 
   string sfov = fts(vid.fov) + "°";
@@ -2528,26 +2551,7 @@ EX void add_edit_fov(char key IS('f')) {
     sfov += " / " + fts(max_fov_angle()) + "°";
     }
   dialog::addSelItem(XLAT("field of view"), sfov, key);
-  dialog::add_action([=] {
-    dialog::editNumber(vid.fov, 1, max_fov_angle(), 1, 90, "field of view", 
-      XLAT(
-        "Horizontal field of view, in angles. "
-        "This affects the Hypersian Rug mode (even when stereo is OFF) "
-        "and non-disk models.") + "\n\n" +
-      XLAT(
-        "Must be less than %1°. Panini projection can be used to get higher values.",
-        fts(max_fov_angle())
-        )
-        );
-    dialog::bound_low(1e-8);
-    dialog::bound_up(max_fov_angle() - 0.01);
-    dialog::get_di().extra_options = [] {
-      add_edit(vid.stereo_mode, 'M');
-      if(among(vid.stereo_mode, sPanini, sStereographic)) {
-        add_edit(vid.stereo_param, 'P');
-        }
-      };
-    });
+  dialog::add_action(edit_fov_screen);
   }
 
 bool supported_ods() {
