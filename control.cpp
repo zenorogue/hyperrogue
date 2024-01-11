@@ -1304,9 +1304,10 @@ EX void displayabutton(int px, int py, string s, int col) {
   int rad = (int) realradius();
   if(vid.stereo_mode == sLR) rad = 99999;
   int vrx = min(rad, vid.xres/2 - 40);
-  int vry = min(rad, min(current_display->ycenter, vid.yres - current_display->ycenter) - 20);
+  int maxy = min(current_display->ycenter, vid.yres - current_display->ycenter);
+  int vry = min(rad, maxy - 20);
   vrx = max(vrx, vid.xres/3);
-  vry = max(vry, vid.yres/3);
+  vry = max(vry, maxy * 2/3);
   int x = current_display->xcenter + px * vrx;
   int y = current_display->ycenter + py * (vry - siz/2);
   int vrr = int(hypot(vrx, vry) * sqrt(2.));
