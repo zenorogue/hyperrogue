@@ -679,6 +679,7 @@ EX void achievement_score(int cat, int number) {
   if(tactic::on && cat != LB_PURE_TACTICS && cat != LB_PURE_TACTICS_SHMUP && cat != LB_PURE_TACTICS_COOP) 
     return;
   if(racing::on && cat != LB_RACING) return;
+  if(bow::weapon) return;
   upload_score(cat, number);
 #endif
   }
@@ -769,7 +770,6 @@ EX void achievement_final(bool really_final) {
     }
   if(cheater) return;
   if(casual) return;
-  if(bow::weapon) return;
 
 #if CAP_TOUR
   if(tour::on) return;
