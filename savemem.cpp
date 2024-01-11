@@ -125,7 +125,7 @@ EX void save_memory() {
   // go back to such a point X that all the heptagons adjacent to the current 'at'
   // are the children of X. This X becomes the new 'at'
   if(true) {
-    heptagon *allh[9];
+    heptagon *allh[MAX_EDGE+1];
     int hcount = 0;
     allh[hcount++] = at;
     for(int j=0; j<S7; j++) 
