@@ -116,8 +116,12 @@ EX void save_memory() {
       }
     }
   
-  while(celldist(at->c7) > d-LIM) at = at->move(0);
-  
+  while(celldist(at->c7) > d-LIM && at != orig) at = at->move(0);
+
+  // make sure it is not the same altmap
+  auto atalt = at->alt; if(atalt) atalt = atalt->alt;
+  while(atalt && at != orig && at->alt && at->alt->alt == atalt) at = at->move(0);
+
   // go back to such a point X that all the heptagons adjacent to the current 'at'
   // are the children of X. This X becomes the new 'at'
   if(true) {
