@@ -258,7 +258,7 @@ enum eModel : int;
 struct projection_configuration {
   eModel model;            /**< which projection, see classes.cpp */
   ld xposition, yposition; /**< move the center to another position */
-  ld scale, alpha, fisheye_param, twopoint_param, axial_angle, stretch, ballproj, euclid_to_sphere;
+  ld scale, alpha, fisheye_param, fisheye_alpha, twopoint_param, axial_angle, stretch, ballproj, euclid_to_sphere;
   ld clip_min, clip_max;
   ld halfplane_scale;  
   ld collignon_parameter; 
