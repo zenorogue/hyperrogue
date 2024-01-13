@@ -5057,7 +5057,7 @@ Other
 - fixed point recognition in rug mode
 - cleaned up high-FOV and stereo modes into one setting
 
-2023-12-02 12:54 Update 13.0:
+2023-12-27 12:54 Update 13.0:
 
 Summary post: https://zenorogue.blogspot.com/2023/12/hyperrogue-130.html
 
@@ -5090,3 +5090,17 @@ Other fixes:
 - fixed Sol, NIH and SolN embeddings being always displayed as legal
 - fixed the name displayed on mouseover for slime
 
+2024-01-12 08:59 Update 13.0a:
+
+- fixed some bugs with high-FOV modes (reset shaders, show upper FOV ranges correctly, buggy two-eye rendering)
+- as a new positive, the Curse of Fatigue makes you not care about roses when very fatigued
+- changed one Prince(ss) message
+- crossbow leaderboards should be fixed
+- fixed button placement on Android once more
+- fixed mirrors in crossbow fire mode
+- the bump-to-shoot flag now actually works
+- fixed a bug in "memory saving" mode to not remove the current altmap
+- variant fisheye projection
+- fixed tides in shmup and when scrolling
+- the dipping rule no longer affects Tiger's Eyes
+- screenshots were sometimes not correctly centered
