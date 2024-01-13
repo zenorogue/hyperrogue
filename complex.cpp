@@ -738,7 +738,7 @@ struct info {
       if(m == moPrincess)
         addMessage(XLAT("\"I want my revenge. Stun a guard and leave him for me!\"", m));
       else
-        addMessage(XLAT("\"That felt great. Thanks!\"", m));
+        addMessage(XLAT("\"I wouldn't say killing that guard was not pleasant...\"", m));
       }
     else if(msgid  == 2 && d >= 70 && inpalace) {
       addMessage(XLAT("\"Bring me out of here please!\"", m));
