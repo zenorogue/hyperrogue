@@ -443,7 +443,7 @@ EX namespace scores {
 /** \brief the amount of boxes reserved for each hr::score item */
 #define MAXBOX 500
 /** \brief currently used boxes in hr::score */
-#define POSSCORE 408
+#define POSSCORE 410
 /** \brief a struct to keep local score from an earlier game */
 struct score {
   /** \brief version used */
@@ -940,6 +940,9 @@ EX void applyBoxes() {
 
   applyBoxEnum(bow::weapon, "weapon choice");
   applyBoxEnum(bow::style, "crossbow style");
+
+  applyBoxOrb(itOrbFish);
+  list_invorb();
 
   if(POSSCORE != boxid) printf("ERROR: %d boxes\n", boxid);
   if(isize(invorb)) { println(hlog, "ERROR: Orbs not taken into account"); exit(1); }
