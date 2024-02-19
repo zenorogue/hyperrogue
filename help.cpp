@@ -881,6 +881,7 @@ EX void describeMouseover() {
       if(shmup::on)
         out += " (" + its(c->landparam)+")";
       else {
+        calcTidalPhase();
         bool b = c->landparam >= tide[(turncount-1) % tidalsize];
         int t = 1;
         for(; t < 1000 && b == (c->landparam >= tide[(turncount+t-1) % tidalsize]); t++) ;
