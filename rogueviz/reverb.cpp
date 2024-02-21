@@ -187,7 +187,7 @@ void reverb_queue() {
 int maxvol = 1;
 
 /** draw bird, and also record the distance data about cell c */
-bool draw_bird(cell *c, const transmatrix& V) {
+bool draw_bird(cell *c, const shiftmatrix& V) {
 
   if(!in) return false;
 
@@ -211,8 +211,8 @@ bool draw_bird(cell *c, const transmatrix& V) {
   
   auto& ci = infos[c];
   ci.curframe = frameid;
-  ci.curdist[0] = hdist0(xpush(-iad) * tC0(V));
-  ci.curdist[1] = hdist0(xpush(+iad) * tC0(V));  
+  ci.curdist[0] = hdist0(xpush(-iad) * tC0(V.T));
+  ci.curdist[1] = hdist0(xpush(+iad) * tC0(V.T));
 
   return false;
   }
@@ -221,7 +221,7 @@ static int isor;
 
 void show() {
   cmode = sm::SIDE | sm::MAYDARK;
-  gamescreen(0);
+  gamescreen();
   dialog::init(XLAT("reverb"), 0xFFFFFFFF, 150, 0);
 
   dialog::addSelItem("speed of sound", "1/" + fts(speed_of_sound), 's');
@@ -254,7 +254,8 @@ void show() {
   
   dialog::add_action([]() {
     dialog::editNumber(isor, orig_size, orig_size*2, orig_size / 10, orig_size, "sample length", "warning: sample is cut off if you shorten it and then lengthen it again");
-    dialog::reaction = [] {
+    auto& ne = dialog::get_ne();
+    ne.reaction = [] {
       orig.resize(isor);
       };
     });
@@ -293,11 +294,13 @@ auto hchook = addHook(hooks_drawcell, 100, draw_bird)
 
 + addHook(anims::hooks_anim, 100, [] {
   if(!auto_anim) return;
-  if(cgi.cellshape.empty()) return;
-  hyperpoint h1 = cgi.cellshape[0];
-  hyperpoint h2 = normalize(cgi.cellshape[0] + cgi.cellshape[1]);
+  auto& cs = currentmap->get_cellshape(cwt.at);
+  auto vo = cs.vertices_only;
+  if(vo.empty()) return;
+  hyperpoint h1 = vo[0];
+  hyperpoint h2 = normalize(vo[0] + vo[1]);
   hyperpoint wc = Hypc;
-  for(int i=0; i<cgi.face; i++) wc += cgi.cellshape[i];
+  for(int i=0; i<cgi.face; i++) wc += vo[i];
   hyperpoint h3 = normalize(wc);
   if(cgflags & qIDEAL) {  
     println(hlog, "h1 was: ", h1);
@@ -383,8 +386,10 @@ auto hchook = addHook(hooks_drawcell, 100, draw_bird)
     patterns::rwalls = 100;
     mapeditor::drawplayer = false;
     start_game();
-    if(!cgi.cellshape.empty())
-      println(hlog, "edge = ", hdist(cgi.cellshape[0], cgi.cellshape[1]));
+    auto& cs = currentmap->get_cellshape(cwt.at);
+    auto& vo = cs.vertices_only;
+    if(!vo.empty())
+      println(hlog, "edge = ", hdist(vo[0], vo[1]));
     /* Doppler effect is weird if scrolling if not smooth */
     smooth_scrolling = true;
     /* disable the frustum culling (we need sound from every direction) */
