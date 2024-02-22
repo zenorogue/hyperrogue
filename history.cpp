@@ -457,6 +457,11 @@ EX namespace history {
       dynamicval<bool> di(inHighQual, true);
       
       renderbuffer glbuf(bandfull, bandfull, vid.usingGL);
+      glbuf.make_surface(); if(!glbuf.srf) {
+        addMessage(XLAT("Could not create an image of that size."));
+        return;
+        }
+
       vid.xres = vid.yres = bandfull;
       glbuf.enable(); current_display->radius = bandhalf;  
       calcparam();
@@ -480,7 +485,8 @@ EX namespace history {
         };
       
       if(!band) {
-        addMessage("Could not create an image of that size.");
+        addMessage(XLAT("Could not create an image of that size."));
+        return;
         }
       else {
   
@@ -528,6 +534,10 @@ EX namespace history {
               len -= bandsegment; xpos -= bandsegment;
               seglen = min(int(len), bandsegment);
               band = SDL_CreateRGBSurface(SDL_SWSURFACE, seglen, bandfull,32,0,0,0,0);
+              if(!band) {
+                addMessage(XLAT("Could not create an image of that size."));
+                return;
+                }
               goto drawsegment;
               }  
             xpos += bwidth;      
