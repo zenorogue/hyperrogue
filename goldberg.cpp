@@ -896,10 +896,11 @@ EX namespace gp {
       }
 
     dialog::addBreak(100);
+    int max_goldberg = (1<<GOLDBERG_BITS)/2 - 1;
     dialog::addSelItem("x", its(config.first), 'x');
-    dialog::add_action([] { dialog::editNumber(config.first, 0, 8, 1, 1, "x", helptext()); });
+    dialog::add_action([max_goldberg] { dialog::editNumber(config.first, 0, max_goldberg, 1, 1, "x", helptext()); });
     dialog::addSelItem("y", its(config.second), 'y');
-    dialog::add_action([] { dialog::editNumber(config.second, 0, 8, 1, 1, "y", helptext()); });
+    dialog::add_action([max_goldberg] { dialog::editNumber(config.second, 0, max_goldberg, 1, 1, "y", helptext()); });
     
     if(!check_limits(config))
       dialog::addInfo(XLAT("Outside of the supported limits"));
