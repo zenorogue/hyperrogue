@@ -699,6 +699,11 @@ void apply_chaos() {
     markOrb(itOrbChaos);
   copy_metadata(ca, &cob);
   copy_metadata(cb, &coa);
+
+  ca->item = coa.item;
+  cb->item = cob.item;
+  moveItem(ca, cb, false);
+
   if(!switch_lhu_in(ca->land)) ca->LHU = coa.LHU;
   if(!switch_lhu_in(cb->land)) cb->LHU = cob.LHU;
   if(ca->monst && !(isFriendly(ca) && markOrb(itOrbEmpathy))) {
