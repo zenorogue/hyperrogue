@@ -1148,7 +1148,7 @@ void movePlayer(monster *m, int delta) {
         }
       else if(
         (blown ? !passable(c2, m->base, P_ISPLAYER | P_BLOW) : !passable(c2, m->base, P_ISPLAYER | P_MIRROR | reflectflag)) && 
-        !(isWatery(c2) && m->inBoat && !nonAdjacent(m->base,c2)))
+        !(isWatery(c2) && m->inBoat && (!nonAdjacent(m->base,c2) || markOrb(itOrb37))))
         go = false;
       
       }
