@@ -1227,11 +1227,13 @@ EX void killThePlayer(eMonster m, int id, flagtype flags) {
     }
   else if(hardcore) {
     addMessage(XLAT("You are killed by %the1!", m));
+    yasc_message = XLAT("killed by %the1", m);
     killHardcorePlayer(id, flags);
     }
   else if(m == moLightningBolt && lastmovetype == lmAttack && isAlchAny(playerpos(id))) {
     addMessage(XLAT("You are killed by %the1!", m));
     addMessage(XLAT("Don't play with slime and electricity next time, okay?"));
+    yasc_message = XLAT("killed by %the1", m);
     kills[moPlayer]++;
     items[itOrbSafety] = 0;
     }

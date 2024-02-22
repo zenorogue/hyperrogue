@@ -118,6 +118,7 @@ bool pcmove::checkNeedMove(bool checkonly, bool attacking) {
   if(items[itOrbDomination] > ORBBASE && cwt.at->monst) 
     return false;
   int flags = 0;
+  bool drown = false;
   if(cwt.at->monst) {
     if(vmsg(miRESTRICTED, siMONSTER, cwt.at, cwt.at->monst)) {
       if(isMountable(cwt.at->monst))
@@ -132,6 +133,7 @@ bool pcmove::checkNeedMove(bool checkonly, bool attacking) {
       addMessage(XLAT("It would be impolite to land on the table!"));
     }
   else if(cwt.at->wall == waLake) {
+    drown = true;
     if(markOrb2(itOrbAether)) return false;
     if(markOrb2(itOrbFish)) return false;
     if(in_gravity_zone(cwt.at) && passable(cwt.at, NULL, P_ISPLAYER)) return false;
@@ -145,6 +147,7 @@ bool pcmove::checkNeedMove(bool checkonly, bool attacking) {
     return true;
     }
   else if(among(cwt.at->wall, waSea, waCamelotMoat, waLake, waDeepWater)) {
+    drown = true;
     if(markOrb(itOrbFish)) return false;
     if(markOrb2(itOrbAether)) return false;
     if(in_gravity_zone(cwt.at) && passable(cwt.at, NULL, P_ISPLAYER)) return false;
@@ -180,8 +183,21 @@ bool pcmove::checkNeedMove(bool checkonly, bool attacking) {
     if(vmsg(miWALL, siWALL, cwt.at, moNone)) addMessage(XLAT("Your Aether power has expired! RUN!"));
     }
   else return false;
-  if(hardcore && !checkonly) 
+  if(hardcore && !checkonly) {
+    if(cwt.at->monst)
+      yasc_message = XLAT("did not leave %the1", cwt.at->monst);
+    else if(cwt.at->wall == waChasm)
+      yasc_message = XLAT("fell into a chasm");
+    else if(cwt.at->wall == waRoundTable)
+      yasc_message = XLAT("died by politeness");
+    else if(cwt.at->wall == waClosedGate)
+      yasc_message = XLAT("crushed by a gate");
+    else if(drown)
+      yasc_message = XLAT("drowned in %the1", cwt.at->wall);
+    else
+      yasc_message = XLAT("did not leave %the1", cwt.at->wall);
     killHardcorePlayer(multi::cpid, flags);
+    }
   return true;
   }
 
