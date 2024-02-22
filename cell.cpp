@@ -1469,14 +1469,15 @@ EX int celldistance(cell *c1, cell *c2) {
   if(hyperbolic && WDIM == 3) return reg3::celldistance(c1, c2);
   #endif
 
-  if(INVERSE) {
+  /* if(INVERSE) {
     c1 = gp::get_mapped(c1);
     c2 = gp::get_mapped(c2);
     return UIU(celldistance(c1, c2)) / 2;
-    /* TODO */
-    }
+    // that does not seem to work
+    } */
 
   if(euclid) return clueless_celldistance(c1, c2);
+  if(INVERSE) return clueless_celldistance(c1, c2);
 
   return hyperbolic_celldistance(c1, c2);
   }
