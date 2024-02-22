@@ -22,12 +22,16 @@ string csub(const string& str, int q) {
   return str.substr(0, i);
   }
 
+vector<int> column_width(POSSCORE+1, 4);
+
 int colwidth(int scoredisplay) {
-  if(scoredisplay == 0) return 5;
+  return column_width[scoredisplay];
+  /* if(scoredisplay == 0) return 5;
   if(scoredisplay == 1) return 16;
   if(scoredisplay == 5) return 8;
   if(scoredisplay == POSSCORE) return 8;
-  return 4;
+  if(scoredisplay == 68) return yasc_width;
+  return 4; */
   }
 
 bool isHardcore(score *S) {
@@ -91,6 +95,7 @@ string displayfor(int scoredisplay, score* S, bool shorten = false) {
     if(scoredisplay == 67) return XLAT("cheats");
     if(scoredisplay == 66) return XLAT("saves");
     if(scoredisplay == 197) return XLAT("players");
+    if(scoredisplay == 68) return XLAT("where");
     return csub(str, 5);
     }
   if(scoredisplay == 0 || scoredisplay == 65) {
@@ -103,6 +108,7 @@ string displayfor(int scoredisplay, score* S, bool shorten = false) {
     return buf;
     }
   if(scoredisplay == POSSCORE) return modedesc(S);
+  if(scoredisplay == 68) return S->yasc_message + XLAT(" in %the1", eLand(S->box[68]));
   if(scoredisplay == 1) {
     time_t tim = S->box[1];
     char buf[128]; strftime(buf, 128, "%c", localtime(&tim));
@@ -162,27 +168,39 @@ void showPickScores() {
     };
   }
 
+int scale = 2;
+
 void show() {
 
   if(columns.size() == 0) {
     columns.push_back(POSSCORE);
-    for(int i=0; i<POSSCORE; i++) columns.push_back(i);
+    for(int i=0; i<POSSCORE; i++) {
+      if(i == 5) columns.push_back(68);
+      else if(i == 68) columns.push_back(5);
+      else columns.push_back(i);
+      }
     }
-  int y = vid.fsize * 5/2;
-  int bx = vid.fsize;
+  int score_size = vid.fsize / scale;
+  int y = score_size * 5/2;
+  int bx = score_size;
   getcstat = 0;
   
-  displaystr(bx*4, vid.fsize, 0, vid.fsize, "#", forecolor, 16);
-  displaystr(bx*8, vid.fsize, 0, vid.fsize, XLAT("ver"), forecolor, 16);
+  displaystr(bx*4, score_size, 0, vid.fsize, "#", forecolor, 16);
+  displaystr(bx*8, score_size, 0, vid.fsize, XLAT("ver"), forecolor, 16);
   
   int at = 9;
   for(int i=0; i<=POSSCORE; i++) {
     int c = columns[i];
     if(bx*at > vid.xres) break;
-    if(displaystr(bx*at, vid.fsize, 0, vid.fsize, displayfor(c, NULL, true), i == curcol ? 0xFFD500 : forecolor, 0))
+    string s = displayfor(c, NULL, true);
+    auto& cw = column_width[c];
+    cw = max(cw, textwidth(score_size, s) / bx + 1);
+    if(displaystr(bx*at, score_size, 0, score_size, s, i == curcol ? 0xFFD500 : forecolor, 0))
       getcstat = 1000+i;
     at += colwidth(c);
     }
+
+  vector<int> next_column_width(POSSCORE+1, 0);
   
   if(scorefrom < 0) scorefrom = 0;
   int id = 0;
@@ -205,28 +223,40 @@ void show() {
     
 
     rank++;
-    displaystr(bx*4,  y, 0, vid.fsize, its(rank), col, 16);
+    displaystr(bx*4,  y, 0, score_size, its(rank), col, 16);
     
-    displaystr(bx*8,  y, 0, vid.fsize, S.ver, col, 16);
+    displaystr(bx*8,  y, 0, score_size, S.ver, col, 16);
 
     int at = 9;
     for(int i=0; i<=POSSCORE; i++) {
       int c = columns[i];
       if(bx*at > vid.xres) break;
-      at += colwidth(c);
-      if(displaystr(bx*(at-1), y, 0, vid.fsize, displayfor(c, &S), col, 16))
-        getcstat = 1000+i;
+      string s = displayfor(c, &S);
+      auto& ncw = next_column_width[c];
+      ncw = max(ncw, textwidth(score_size, s) / bx + 1);
+      if(c == 68) {
+        if(displaystr(bx*at, y, 0, score_size, s, col, 0))
+          getcstat = 1000+i;
+        at += colwidth(c);
+        }
+      else {
+        at += colwidth(c);
+        if(displaystr(bx*(at-1), y, 0, score_size, s, col, 16))
+          getcstat = 1000+i;
+        }
       }
 
-    y += vid.fsize*5/4; id++;
+    y += score_size*5/4; id++;
     }
 
+  column_width = next_column_width;
   int i0 = vid.yres - vid.fsize;
   int xr = vid.xres / 80;
 
   displayButton(xr*10, i0, IFM("s - ") + XLAT("sort"), 's', 8);
   displayButton(xr*30, i0, IFM("t - ") + XLAT("choose"), 't', 8);
-  displayButton(xr*50, i0, IFM(dialog::keyname(SDLK_ESCAPE) + " - ") + XLAT("go back"), '0', 8);
+  displayButton(xr*50, i0, IFM("z - ") + XLAT("zoom"), 'z', 8);
+  displayButton(xr*70, i0, IFM(dialog::keyname(SDLK_ESCAPE) + " - ") + XLAT("go back"), '0', 8);
 
   keyhandler = [] (int sym, int uni) {
     if(DKEY == SDLK_LEFT || uni == 'h' || uni == 'a') {
@@ -246,6 +276,7 @@ void show() {
       scorefrom -= 5;
     else if(DKEY == SDLK_DOWN || uni == 'j' || uni == 'x')
       scorefrom += 5;
+    else if(uni == 'z') scale = 3 - scale;
     else if(sym == PSEUDOKEY_WHEELUP)
       scorefrom--;
     else if(sym == PSEUDOKEY_WHEELDOWN)
@@ -289,9 +320,11 @@ void load() {
     addMessage(s0 + "Could not open the score file: " + scorefile);
     return;
     }
+  string *yasc = nullptr;
   while(!feof(f)) {
-    char buf[120];
-    if(fgets(buf, 120, f) == NULL) break;
+    const int buflen = 1200;
+    char buf[buflen];
+    if(fgets(buf, buflen, f) == NULL) break;
     if(buf[0] == 'H' && buf[1] == 'y') {
       score sc; bool ok = true;
       sc.box[MAXBOX-1] = 0;
@@ -320,7 +353,14 @@ void load() {
       if(sc.box[2] == 0) continue; // do not list zero scores
       sc.box[POSSCORE] = modediff(&sc);
       
-      if(ok && boxid > 20) scores.push_back(sc);
+      if(ok && boxid > 20) {
+        scores.push_back(sc);
+        yasc = &scores.back().yasc_message;
+        }
+      }
+    if(buf[0] == 'Y' && buf[1] == 'A' && buf[2] == 'S' && buf[3] == 'C' && buf[4] == ' ') {
+      for(int i=5; i<buflen; i++) if(buf[i] == '\n' || buf[i] == '\r') buf[i] = 0;
+      *yasc = buf+5;
       }
     }
 
@@ -329,6 +369,7 @@ void load() {
   for(int i=0; i<POSSCORE; i++) sc.box[i] = save.box[i];
   sc.box[POSSCORE] = 0;
   sc.box[MAXBOX-1] = 1; sc.ver = "NOW";
+  sc.yasc_message = canmove ? "on the run" : yasc_message;
   scores.push_back(sc);
   
   fclose(f);

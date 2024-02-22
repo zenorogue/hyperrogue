@@ -439,6 +439,7 @@ EX void checkmove() {
     achievement_final(true);
     if(cmode & sm::NORMAL) showMissionScreen();
     }
+  else yasc_message = "";
 
   if(canmove && timerstopped) {
     timerstart = time(NULL);

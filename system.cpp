@@ -451,6 +451,8 @@ struct score {
   string ver;
   /** \brief all the data of the saved score, see applyBoxes() */
   int box[MAXBOX];
+  /** \brief yasc message */
+  string yasc_message;
   };
 #endif
 
@@ -620,7 +622,7 @@ EX void applyBoxes() {
   if(saving) savecount--;
   applyBoxNum(cheater, "number of cheats");
   
-  fakebox[boxid] = true;
+  fakebox[boxid] = false;
   if(saving) applyBoxSave(items[itOrbSafety] ? safetyland : cwt.at->land, "@safetyland");
   else if(loading) firstland = safetyland = eLand(applyBoxLoad("@safetyland"));
   else lostin = eLand(save.box[boxid++]);
@@ -1139,6 +1141,7 @@ EX void saveStats(bool emergency IS(false)) {
     anticheat::save(f);
 
     fprintf(f, "\n");
+    if(yasc_message != "") fprintf(f, "YASC %s\n", yasc_message.c_str());
     }
   fprintf(f, "Played on: %s - %s (%d %s)\n", sbuf, buf, turncount, 
     shmup::on ? "knives" : "turns");
