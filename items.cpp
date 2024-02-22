@@ -39,9 +39,8 @@ EX bool doPickupItemsWithMagnetism(cell *c) {
         if(!isNeighbor(c, c4) && c3->item && !c4->item && passable(c4, c3, ZERO)) {
           changes.ccell(c3);
           changes.ccell(c4);
-          c4->item = c3->item;
-          moveEffect(movei(c3, c4, (cw+j).spin), moDeadBird);
-          c3->item = itNone;
+          moveItem(c3, c4, false);
+          moveEffect(movei(c4, c4, NODIR), moDeadBird);
           markOrb(itCurseRepulsion);
           }
         }
