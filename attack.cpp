@@ -137,8 +137,8 @@ EX bool canAttack(cell *c1, eMonster m1, cell *c2, eMonster m2, flagtype flags) 
     else return false;
     }
 
-  if(flags & AF_APPROACH) {
-    if(m2 == moLancer) ;
+  if(flags & (AF_APPROACH | AF_HORNS)) {
+    if(m2 == moLancer && (flags & AF_APPROACH)) ;
     else if((flags & AF_HORNS) && checkOrb(m1, itOrbHorns)) { flags |= AF_IGNORE_UNARMED; }
     else return false;
     }
@@ -1346,9 +1346,10 @@ EX void stabbingAttack(movei mi, eMonster who, int bonuskill IS(0)) {
   forCellIdEx(c, t, mt) {
     if(!logical_adjacent(mt, who, c)) continue;
     eMonster mm = c->monst;
-    int flag = AF_APPROACH;
+    int flag = 0;
+    if(!isUnarmed(who) && !out) flag |= AF_APPROACH;
     if(proper(mt, backdir) && anglestraight(mt, backdir, t)) flag |= AF_HORNS;
-    if((isUnarmed(who) || out) && !(flag & AF_HORNS)) continue;
+    if(!flag) continue;
     if(canAttack(mt,who,c,c->monst, flag)) {
       changes.ccell(c);
       if(attackMonster(c, flag | AF_MSG, who)) numlance++;
