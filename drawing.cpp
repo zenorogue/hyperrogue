@@ -1975,7 +1975,7 @@ void dqi_poly::draw() {
   if(isize(glcoords) <= 1) return;
   
   cyl::loop_min = cyl::loop_max = 0;
-  if(sphere && mdBandAny())
+  if((sphere && mdBandAny()) || pmodel == mdPolar)
     cyl::adjust(tinf);
     
   int poly_limit = max(vid.xres, vid.yres) * 2;

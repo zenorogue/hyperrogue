@@ -139,6 +139,7 @@ projection_configuration::projection_configuration() {
   ptr_ball = new transmatrix;
   *ptr_ball = cspin(1, 2, 20._deg);
   ptr_camera = new transmatrix; *ptr_camera = Id;
+  offside = 0; offside2 = M_PI;
   }
 
 EX namespace models {
@@ -643,6 +644,11 @@ EX namespace models {
     if(among(vpmodel, mdLoximuthal, mdRetroHammer, mdRetroCraig)) 
       add_edit(vpconf.loximuthal_parameter);
 
+    if(among(vpmodel, mdPolar)) {
+      add_edit(vpconf.offside);
+      add_edit(vpconf.offside2);
+      }
+
     if(among(vpmodel, mdAitoff, mdHammer, mdWinkelTripel)) 
       add_edit(vpconf.aitoff_parameter);
     
@@ -1009,6 +1015,12 @@ EX namespace models {
           "The Aitoff projection is obtained by multiplying the longitude by 1/2, using azimuthal equidistant projection, and then dividing X by 1/2. "
           "Hammer projection is similar but equi-area projection is used instead. "
           "Here you can change this parameter.", 'b');
+      param_f(p.offside, sp+"offside")
+      -> editable(0, TAU, TAU/10, "offside parameter",
+          "Do not center the projection on the player -- move the center offside. Useful in polar, where the value equal to offside2 can be used to center the projection on the player.", 'o');
+      param_f(p.offside2, sp+"offside2")
+      -> editable(0, TAU, TAU/10, "offside parameter II",
+          "In polar projection, what distance to display in the center. Use asinh(1) (in hyperbolic) to make it conformal in the center, and pi to have the projection extend the same distance to the left, right, and upwards.", 'O');
       param_f(p.miller_parameter, sp+"miller");
       param_f(p.loximuthal_parameter, sp+"loximuthal")
       -> editable(-90._deg, 90._deg, .1, "loximuthal parameter",

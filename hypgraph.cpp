@@ -1362,6 +1362,21 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
       makeband(H_orig, ret, [] (ld& x, ld& y) { x *= cos_auto(y); });
       break;
     
+    case mdPolar: {
+      models::scr_to_ori(H);
+      H = xpush(pconf.offside) * H;
+      ld zlev = find_zlev(H);
+      ld d = hdist0(H);
+      ld df, zf;
+      hypot_zlev(zlev, d, df, zf);
+      ret[0] = -atan2(H) / M_PI;
+      ret[1] = (d - pconf.offside2) / M_PI;
+      ret[2] = zf;
+      ret[3] = 1;
+      models::ori_to_scr(ret);
+      break;
+      }
+
     case mdEquidistant: case mdEquiarea: case mdEquivolume: {
       if(vrhr::rendering() && GDIM == 3 && pmodel == mdEquidistant) {
         ret = inverse_exp(H_orig);
