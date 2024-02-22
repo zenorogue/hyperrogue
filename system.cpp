@@ -602,6 +602,7 @@ EX void applyBoxes() {
     else if(i == moGreater) applyBoxOrb(itOrbDragon);
     else if(i == moGreaterM) applyBoxOrb(itOrbIllusion);
     else if(i == moWolfMoved) applyBoxM(moWorldTurtle);
+    else if(i == moNone) applyBoxNum(kills[i], "icewalls melted");
     else applyBoxM(eMonster(i), fake);
     }
     
