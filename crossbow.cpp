@@ -369,6 +369,8 @@ EX bool fire_on_mouse(cell *c) {
   return b;
   }
 
+EX int rusalka_curses = 0;
+
 EX void shoot() {
   flagtype attackflags = AF_BOW;
   if(items[itOrbSpeed]&1) attackflags |= AF_FAST;
@@ -382,6 +384,7 @@ EX void shoot() {
   vector<pair<cell*, int>> healthy_dragons;
   map<cell*, pair<int, int>> kraken_hits;
   int dragon_hits = 0;
+  rusalka_curses++;
 
   // for achievements
   for(auto& mov: bowpath) {
@@ -457,6 +460,8 @@ EX void shoot() {
     if(m == moKrakenT && c->hitpoints) kraken_hits[kraken::head(c)].second++;
 
     if(m && attackMonster(c, attackflags | AF_MSG, who)) hit_anything = true;
+
+    if(m == moRusalka) rusalka_curses++;
 
     if(!c->monst || isAnyIvy(m)) {
       spread_plague(cf, c, movei(mov.prev).rev().d, moPlayer);

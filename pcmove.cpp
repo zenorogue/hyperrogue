@@ -309,6 +309,8 @@ bool pcmove::try_shooting(bool auto_target) {
   nextmovetype = hit_anything ? lmAttack : lmSkip;
   lastmovetype = hit_anything ? lmAttack : lmSkip; lastmove = NULL;
 
+  while(bow::rusalka_curses--) rusalka_curse();
+
   mi = movei(cwt.at, STAY);
   if(last_gravity_state && !gravity_state)
     playerMoveEffects(mi);
@@ -1101,6 +1103,12 @@ void pcmove::tell_why_impassable() {
     }
   }
 
+EX void rusalka_curse() {
+  changes.ccell(cwt.at);
+  if(cwt.at->wall == waNone) cwt.at->wall = waShallow;
+  else if(cwt.at->wall == waShallow || isAlch(cwt.at->wall)) cwt.at->wall = waDeepWater;
+  }
+
 bool pcmove::attack() {
   auto& c2 = mi.t;
   if(!fmsAttack) return false;
@@ -1177,11 +1185,7 @@ bool pcmove::attack() {
           changes.value_add(wandering_jiangshi, 1);
         }
       attackMonster(c2, attackflags | AF_MSG, moPlayer);
-      if(m == moRusalka) {
-        changes.ccell(cwt.at);
-        if(cwt.at->wall == waNone) cwt.at->wall = waShallow;
-        else if(cwt.at->wall == waShallow || isAlch(cwt.at->wall)) cwt.at->wall = waDeepWater;
-        }
+      if(m == moRusalka) rusalka_curse();
       changes.ccell(c2);
       // salamanders are stunned for longer time when pushed into a wall
       if(c2->monst == moSalamander && (mip.t == c2 || !mip.t)) c2->stuntime = 10;
