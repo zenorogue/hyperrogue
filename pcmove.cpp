@@ -275,6 +275,9 @@ bool pcmove::try_shooting(bool auto_target) {
     addMessage(XLAT("Fire!"));
     }
   items[itCrossbow] = bow::loading_time();
+  cell *fst = cwt.peek();
+  if(bow::bowpath.size() >= 1) fst = bow::bowpath[1].prev.at;
+  eMonster blocked = fst->monst;
   bow::shoot();
 
   int v = -1; for(auto p: bow::bowpath) if(p.next.at == cwt.at && (p.flags & bow::bpFIRST)) v = p.next.spin;
@@ -283,6 +286,13 @@ bool pcmove::try_shooting(bool auto_target) {
   if(items[itOrbGravity]) {
     gravity_state = get_static_gravity(cwt.at);
     if(gravity_state) markOrb(itOrbGravity);
+    }
+
+  if(againstRose(cwt.at, nullptr) && !scentResistant() && (againstRose(cwt.at, fst) || blocked == fst->monst)) {
+    if(vmsg(miRESTRICTED, siROSE, nullptr, moNone)) {
+      addMessage(XLAT("You cannot stay in place and shoot, those roses smell too nicely.") + its(celldistance(cwt.at, fst)));
+      }
+    return false;
     }
 
   if(cellEdgeUnstable(cwt.at) || cwt.at->land == laWhirlpool) {
