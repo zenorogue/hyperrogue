@@ -1666,6 +1666,7 @@ EX void restart_game(char switchWhat IS(rg::nothing)) {
   if(switchWhat == rg::nothing && racing::on) {
     racing::restore_goals();
     racing::reset_race();
+    shmup::count_pauses = 0;
     return;
     }
   #endif
