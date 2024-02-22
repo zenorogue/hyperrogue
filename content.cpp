@@ -1285,7 +1285,12 @@ LAND( 0x4040C0, "Sea Border", laOceanWall, ZERO | LF_TECHNICAL | LF_SEA, itNone,
 
 LAND( 0x4040C0, "Elemental Planes", laElementalWall, ZERO | LF_ELEMENTAL, itElemental, RESERVED, elemdesc)
   NATIVE((m == moAirElemental || m == moEarthElemental || m == moWaterElemental || m == moFireElemental) ? 1 : 0)
-  REQ(KILL(moAirElemental, laWhirlwind) KILL(moWaterElemental, laLivefjord) KILL(moEarthElemental, laDeadCaves) KILL(moFireElemental, laDragon))
+  REQ(
+    IFINGAME(laWhirlwind, KILL(moAirElemental, laWhirlwind), ITEMS(itDiamond, U10))
+    IFINGAME(laLivefjord, KILL(moWaterElemental, laLivefjord), ITEMS(itElixir, U10))
+    IFINGAME(laDeadCaves, KILL(moEarthElemental, laDeadCaves), ITEMS(itGold, U10))
+    IFINGAME(laDragon,    KILL(moFireElemental, laDragon), ITEMS(itSpice, U10))
+    )
 
 LAND( 0xE08020, "Canvas", laCanvas, ZERO | LF_TECHNICAL, itNone, RESERVED, "A fake Land with colored floors.")
   NATIVE(0)
@@ -1388,7 +1393,14 @@ LAND( 0x90A548, "Trollheim", laTrollheim, ZERO, itTrollEgg, RESERVED,
     "these Trolls yourself?"
     )
   NATIVE(isTroll(m) ? 1 : 0)
-  REQ( KILL(moTroll, laCaves) KILL(moDarkTroll, laDeadCaves) KILL(moRedTroll, laRedRock) KILL(moStormTroll, laStorms) KILL(moForestTroll, laOvergrown) KILL(moFjordTroll, laLivefjord) )
+  REQ(
+    IFINGAME(laCaves, KILL(moTroll, laCaves), ITEMS(itSpice, 10))
+    IFINGAME(laDeadCaves, KILL(moDarkTroll, laDeadCaves), ITEMS(itGold, 10))
+    IFINGAME(laRedRock, KILL(moRedTroll, laRedRock), ITEMS(itSpice, 10))
+    IFINGAME(laStorms, KILL(moStormTroll, laStorms), ITEMS(itElixir, 10))
+    IFINGAME(laOvergrown, KILL(moForestTroll, laOvergrown), ITEMS(itRuby, 10))
+    IFINGAME(laLivefjord, KILL(moFjordTroll, laLivefjord), ITEMS(itGold, 10))
+    )
 
 LAND( 0xFF7518, "Halloween", laHalloween, ZERO, itTreat, RESERVED, halloweendesc)
   NATIVE((m == moGhost || m == moZombie || m == moWitch ||
@@ -1406,7 +1418,10 @@ LAND( 0x605040, "Dungeon", laDungeon, ZERO | LF_GRAVITY | LF_EQUI, itSlime, RESE
     "The result of a collaboration of the Great Vizier and the Wizard of the Ivory Tower."
     )
   NATIVE(m == moBat ? 2 : m == moSkeleton || m == moGhost ? 1 : 0)
-  REQ(ITEMS(itPalace, U5) ITEMS(itIvory, U5))
+  REQ(
+    IFINGAME(laPalace, ITEMS(itPalace, U5), ITEMS(itDiamond, U10))
+    IFINGAME(laIvoryTower, ITEMS(itIvory, U5), ITEMS(itElixir, U10))
+    )
 
 LAND( 0x603000, "Lost Mountain", laMountain, ZERO | LF_GRAVITY | LF_CYCLIC, itAmethyst, RESERVED, 
     "Gravitational anomalies in the Jungle create mountains "
@@ -1415,7 +1430,11 @@ LAND( 0x603000, "Lost Mountain", laMountain, ZERO | LF_GRAVITY | LF_CYCLIC, itAm
     "Cells adjacent to Ivies count as stable (but Ivies "
     "cannot climb themselves or other Ivies).")
   NATIVE(m == moEagle || m == moMonkey || isIvy(m) || m == moFriendlyIvy ? 1 : 0)
-  REQ(ITEMS(itRuby, U5) ITEMS(itIvory, U5) ACCONLY(laJungle))
+  REQ(
+    ITEMS(itRuby, U5)
+    IFINGAME(laIvoryTower, ITEMS(itIvory, U5), ITEMS(itElixir, U10))
+    ACCONLY(laJungle)
+    )
 
 LAND( 0xFFFF00, "Reptiles", laReptile, ZERO, itDodeca, RESERVED, reptiledesc)
   NATIVE(m == moReptile ? 1 : 0)
@@ -1463,7 +1482,7 @@ LAND( 0xA06000, "Volcanic Wasteland", laVolcano, ZERO, itLavaLily, RESERVED, lav
 
 LAND( 0x8080FF, "Blizzard", laBlizzard, ZERO | LF_ICY, itBlizzard, RESERVED, blizzarddesc)
   NATIVE((m == moVoidBeast || m == moIceGolem) ? 2 : 0)
-  REQ(ITEMS(itDiamond, U5) ITEMS(itWindstone, U5))
+  REQ(IFINGAME(laWhirlwind, ITEMS(itDiamond, U5) ITEMS(itWindstone, U5), ITEMS(itDiamond, 10) GOLD(R60)))
 
 LAND( 0x207068, "Hunting Ground", laHunting, ZERO, itHunting, RESERVED, huntingdesc)
   NATIVE(m == moHunterDog ? 1 : 0)
@@ -1491,7 +1510,9 @@ LAND( 0x80FF00, "Docks", laDocks, ZERO | LF_SEA, itDock, RESERVED, NODESCYET)
 
 LAND( 0x306030, "Ruined City", laRuins, ZERO, itRuins, RESERVED, ruindesc)
   NATIVE(among(m, moPair, moHexDemon, moAltDemon, moMonk, moCrusher) ? 2 : m == moSkeleton ? 1 : 0)
-  REQ(KILL(moSkeleton, laPalace))
+  REQ(
+    IFINGAME(laPalace, KILL(moSkeleton, laPalace), ITEMS(itRuby, U10))
+    )
 
 LAND( 0x306030, "Magnetosphere", laMagnetic, ZERO, itMagnet, RESERVED, NODESCYET)
   NATIVE(isMagneticPole(m) ? 2 : 0)
