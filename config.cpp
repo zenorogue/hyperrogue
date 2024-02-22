@@ -169,6 +169,7 @@ template<class T> struct enum_setting : list_setting {
     needs_confirm = true;
     return this;
     }
+  virtual cld get_cld() override { return get_value(); }
   };
 
 /** transmatrix with equality, so we can construct val_setting<matrix_eq> */
@@ -359,6 +360,7 @@ struct custom_setting : public setting {
       }
     custom_load(s);
     }
+  virtual cld get_cld() override { return custom_value(); }
   };
   
 struct local_parameter_set {
