@@ -813,6 +813,15 @@ EX namespace gp {
     screens = g;
     }
 
+  EX bool check_whirl_set(loc xy) {
+    if(!check_limits(xy)) {
+      addMessage(XLAT("Outside of the supported limits"));
+      return false;
+      }
+    whirl_set(xy);
+    return true;
+    }
+
   string helptext() {
     return XLAT(
       "Goldberg polyhedra are obtained by adding extra hexagons to a dodecahedron. "
@@ -973,24 +982,24 @@ EX namespace gp {
         auto p = univ_param();
         if(S3 == 3 && !UNTRUNCATED) {
           println(hlog, "set param to ", p * loc(1,1));
-          whirl_set(p * loc(1, 1));
+          if(!check_whirl_set(p * loc(1, 1))) return;
           set_variation(eVariation::untruncated);
           start_game();
           config = human_representation(univ_param());
           }
         else if(S3 == 4 && !UNRECTIFIED) {
-          whirl_set(p * loc(1, 1));
+          if(!check_whirl_set(p * loc(1, 1))) return;
           set_variation(eVariation::unrectified);
           start_game();
           config = human_representation(univ_param());
           }
         else if(S3 == 3 && UNTRUNCATED) {
           println(hlog, "whirl_set to ", (p * loc(1,1)) / 3);
-          whirl_set((p * loc(1,1)) / 3);
+          if(!check_whirl_set((p * loc(1,1)) / 3)) return;
           config = human_representation(univ_param());
           }
         else if(S3 == 4 && UNRECTIFIED) {
-          whirl_set((p * loc(1,1)) / 2);
+          if(!check_whirl_set((p * loc(1,1)) / 2)) return;
           config = human_representation(univ_param());
           }
         });
