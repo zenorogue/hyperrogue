@@ -418,6 +418,8 @@ EX void checkmove() {
   for(int i=0; i<cwt.at->type; i++)
     yasc_code += move_issues[i].type;
 
+  if(!canmove && bow::crossbow_mode() && !items[itCrossbow]) canmove = bow::have_bow_target();
+
 #if CAP_INV  
   if(inv::on && !canmove && !inv::incheck) {
     if(inv::remaining[itOrbSafety] || inv::remaining[itOrbFreedom])
@@ -431,8 +433,6 @@ EX void checkmove() {
       pushScreen(inv::show);
     }
 #endif
-
-  if(!canmove && bow::crossbow_mode() && !items[itCrossbow]) canmove = bow::have_bow_target();
 
   if(!canmove) {
     create_yasc_message();
