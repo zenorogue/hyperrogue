@@ -728,9 +728,6 @@ void apply_chaos() {
   if(dice::on(ca) || dice::on(cb)) {
     dice::chaos_swap(wa, wb);
     }
-  if(ca->item == itBabyTortoise || cb->item == itBabyTortoise) {
-    tortoise::move_baby(ca, cb);
-    }
   }
   
 bool pcmove::actual_move() {
