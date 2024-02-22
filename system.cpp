@@ -196,6 +196,7 @@ EX void initgame() {
 
   if(firstland == laOceanWall) firstland = laOcean; 
   if(firstland == laHauntedWall) firstland = laGraveyard; 
+  if(firstland == laHauntedBorder) firstland = laGraveyard;
   if(firstland == laHaunted && !tactic::on) firstland = laGraveyard;
   if(firstland == laMercuryRiver) firstland = laTerracotta;
   if(firstland == laMountain && !tactic::on && !ls::hv_structure()) firstland = laJungle;
