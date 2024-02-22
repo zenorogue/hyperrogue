@@ -1111,11 +1111,11 @@ EX bool should_switchplace(cell *c1, cell *c2) {
 EX bool switchplace_prevent(cell *c1, cell *c2, struct pcmove& m) {
   if(!should_switchplace(c1, c2)) return false;
   if(peace::on && (isMultitile(c2->monst) || saved_tortoise_on(c2) || isDie(c2->monst))) {
-    if(m.vmsg(miRESTRICTED)) addMessage(XLAT("Cannot switch places with %the1!", c2->monst));
+    if(m.vmsg(miRESTRICTED, siMONSTER, c2, c2->monst)) addMessage(XLAT("Cannot switch places with %the1!", c2->monst));
     return true;
     }
   if(c1->monst && c1->monst != moFriendlyIvy) {
-    if(m.vmsg(miRESTRICTED)) addMessage(XLAT("There is no room for %the1!", c2->monst));
+    if(m.vmsg(miRESTRICTED, siMONSTER, c1, c1->monst)) addMessage(XLAT("There is no room for %the1!", c2->monst));
     return true;
     }
   if(passable(c1, c2, P_ISFRIEND | (c2->monst == moTameBomberbird ? P_FLYING : 0))) return false;

@@ -328,6 +328,7 @@ EX void showGameMenu() {
     XLAT("GAME OVER"), 
     0xC00000, 200, 100
     );
+  if(!canmove && yasc_message != "") dialog::addInfo(yasc_message);
 
   #if CAP_COMPLEX2
   bool sweeper = mine::in_minesweeper();

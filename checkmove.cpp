@@ -27,29 +27,49 @@ EX bool canmove = true;
 
 // how many monsters are near
 EX eMonster who_kills_me;
+EX cell *who_kills_me_cell;
 
 EX int lastkills;
 
 EX vector<bool> legalmoves;
 
-/* why is a move illegal */
-EX vector<int> move_issues;
-
 #if HDR
+struct moveissue {
+  int type;
+  int subtype;
+  eMonster monster;
+  cell *where;
+  };
+
 static constexpr int miVALID = 10000;
 static constexpr int miENTITY = 11000;
 static constexpr int miRESTRICTED = 10100;
 static constexpr int miTHREAT = 10010;
 static constexpr int miWALL = 10001;
+
+static constexpr int siWALL = 1;
+static constexpr int siMONSTER = 2;
+static constexpr int siGRAVITY = 3;
+static constexpr int siROSE = 4;
+static constexpr int siITEM = 5;
+static constexpr int siWIND = 6;
+static constexpr int siCURRENT = 7;
+static constexpr int siFATIGUE = 8;
+static constexpr int siWARP = 9;
+static constexpr int siUNKNOWN = 10;
 #endif
 
-EX int checked_move_issue;
+/* why is a move illegal */
+EX vector<moveissue> move_issues;
+
+EX moveissue checked_move_issue;
+EX moveissue stay_issue;
 EX int yasc_code;
 
 EX void check_if_monster() {
   eMonster m = cwt.peek()->monst;
   if(m && m != passive_switch && !isFriendly(m))
-    checked_move_issue = miENTITY;
+    checked_move_issue = moveissue { miENTITY, siMONSTER, m, cwt.peek() };
   }
   
 EX bool hasSafeOrb(cell *c) {
@@ -108,14 +128,14 @@ EX bool monstersnear(cell *c, eMonster who) {
   bool kraken_will_destroy_boat = false;
 
   elec::builder b;
-  if(elec::affected(c)) { who_kills_me = moLightningBolt; res++; }
+  if(elec::affected(c)) { who_kills_me = moLightningBolt; who_kills_me_cell = nullptr; res++; }
   
   if(c->wall == waArrowTrap && c->wparam == 2) {
-    who_kills_me = moArrowTrap; res++;
+    who_kills_me = moArrowTrap; who_kills_me_cell = nullptr; res++;
     }
   
   for(auto c1: crush_now) if(c == c1) {
-    who_kills_me = moCrusher; res++;
+    who_kills_me = moCrusher; who_kills_me_cell = nullptr; res++;
     }
 
   if(who == moPlayer || items[itOrbEmpathy]) {
@@ -126,7 +146,7 @@ EX bool monstersnear(cell *c, eMonster who) {
   if(havewhat&HF_OUTLAW) {
     for(cell *c1: gun_targets(c)) 
       if(c1->monst == moOutlaw && !c1->stuntime) {
-        res++; who_kills_me = moOutlaw;
+        res++; who_kills_me = moOutlaw; who_kills_me_cell = c1;
         }
     }
 
@@ -157,7 +177,7 @@ EX bool monstersnear(cell *c, eMonster who) {
         }
       // flashwitches cannot attack if it would kill another enemy
       if(c3->monst == moWitchFlash && flashWouldKill(c3, 0)) continue;
-      res++, who_kills_me = c3->monst;
+      res++, who_kills_me = c3->monst; who_kills_me_cell = c3;
       } 
 
     // consider normal monsters
@@ -179,12 +199,12 @@ EX bool monstersnear(cell *c, eMonster who) {
           eaten = true;
         else if(c2->monst != moHexSnake) continue;
         }
-      res++, who_kills_me = m;
+      res++, who_kills_me = m; who_kills_me_cell = c2;
       }
     }
 
   if(kraken_will_destroy_boat && !krakensafe(c) && warningprotection(XLAT("This move appears dangerous -- are you sure?"))) {
-    if (res == 0) who_kills_me = moWarning;
+    if (res == 0) who_kills_me = moWarning; who_kills_me_cell = nullptr;
     res++;
   } else {
     if(who == moPlayer && res && (markOrb2(itOrbShield) || markOrb2(itOrbShell)) && !eaten)
@@ -239,7 +259,7 @@ EX bool monstersnear_aux() {
 /** like monstersnear but add the potential moves of other players into account */
 EX bool monstersnear_add_pmi(player_move_info pmi0) {
   if(suicidal) {
-    who_kills_me = moPlayer;
+    who_kills_me = moPlayer; who_kills_me_cell = nullptr;
     return true;
     }
   pmi.push_back(pmi0);
@@ -280,6 +300,78 @@ EX bool swordConflict(const player_move_info& sm1, const player_move_info& sm2) 
   return false;
   }
 
+EX string yasc_message;
+
+EX void create_yasc_message() {
+  set<pair<cell*, eMonster>> captures;
+  auto all = move_issues;
+  all.push_back(stay_issue);
+  for(auto c: all) if(c.type == miTHREAT) captures.emplace(c.where, c.monster);
+
+  vector<string> context;
+  if(!captures.empty()) {
+    string msg = "captured by ";
+    map<eMonster, int> qties;
+    for(auto ca: captures) qties[ca.second]++;
+    int iqties = 0;
+    for(auto q: qties) {
+      if(iqties && iqties == isize(qties) - 1) msg += " and ";
+      else if(iqties) msg += ", ";
+      msg += dnameof(q.first);
+      if(q.second > 1) msg += " (x" + its(q.second) + ")";
+      iqties++;
+      }
+    context.push_back(msg);
+    }
+
+  int idx = 0;
+  for(auto c: all) if(idx == 0 && c.subtype == siROSE) context.push_back("rosed"), idx = 1;
+  for(auto c: all) if(idx < 2 && c.subtype == siWIND) context.push_back("blown away"), idx = 2;
+  for(auto c: all) if(idx < 3 && c.subtype == siGRAVITY) context.push_back("falling"), idx = 3;
+  for(auto c: all) if(idx < 4 && c.subtype == siFATIGUE) context.push_back("fatigued"), idx = 4;
+  for(auto c: all) if(idx < 5 && c.subtype == siCURRENT) context.push_back("whirled"), idx = 5;
+
+  bool in_ctx = true;
+
+  set<string> blocks;
+  int index = 0;
+  for(auto c: all) {
+    if(c.type == miENTITY && !captures.count({c.where, c.monster})) blocks.insert(dnameof(c.monster));
+    if(c.subtype == siITEM) blocks.insert("item");
+    if(c.subtype == siWALL) {
+      if(c.where == cwt.at) { if(in_ctx) context.push_back("in " + dnameof(c.where->wall)); in_ctx = false; }
+      else if(c.where && c.where->wall != cwt.at->wall) blocks.insert(dnameof(c.where->wall));
+      }
+    if(c.type == siWARP) blocks.insert("warp");
+    index++;
+    }
+
+  if(!blocks.empty()) {
+    string block = "blocked by ";
+    int iqties = 0;
+    for(auto& q: blocks) {
+      if(iqties && iqties == isize(blocks) - 1) block += " and ";
+      else if(iqties) block += ", ";
+      block += q;
+      iqties++;
+      }
+    context.push_back(block);
+    }
+
+  yasc_message = "";
+  int iqties = 0;
+  for(auto& ctx: context) {
+    if(iqties == 0) ;
+    else if(iqties == 1) yasc_message += " while ";
+    else if(iqties == isize(context) - 1) yasc_message += " and ";
+    else yasc_message += ", ";
+    yasc_message += ctx;
+    iqties++;
+    }
+
+  println(hlog, "YASC_MESSAGE: ", yasc_message);
+  }
+
 EX void checkmove() {
 
   if(dual::state == 2) return;
@@ -295,12 +387,13 @@ EX void checkmove() {
   if(hardcore) return;
   
   legalmoves.clear(); legalmoves.resize(cwt.at->type+1, false);
-  move_issues.clear(); move_issues.resize(cwt.at->type, 0);
+  move_issues.clear(); move_issues.resize(cwt.at->type);
 
   canmove = haveRangedTarget();
   items[itWarning]+=2;
   if(movepcto(-1, 0, true))
     canmove = legalmoves[cwt.at->type] = true;
+  stay_issue = checked_move_issue;
   
   if(true) {
     for(int i=0; i<cwt.at->type; i++) {
@@ -323,7 +416,7 @@ EX void checkmove() {
   
   yasc_code = 0;
   for(int i=0; i<cwt.at->type; i++)
-    yasc_code += move_issues[i];
+    yasc_code += move_issues[i].type;
 
 #if CAP_INV  
   if(inv::on && !canmove && !inv::incheck) {
@@ -342,6 +435,7 @@ EX void checkmove() {
   if(!canmove && bow::crossbow_mode() && !items[itCrossbow]) canmove = bow::have_bow_target();
 
   if(!canmove) {
+    create_yasc_message();
     achievement_final(true);
     if(cmode & sm::NORMAL) showMissionScreen();
     }

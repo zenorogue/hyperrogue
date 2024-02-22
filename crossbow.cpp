@@ -301,7 +301,7 @@ EX void add_fire(cell *c) {
       return;
       }
     clear_bowpath();
-    checked_move_issue = miVALID;
+    checked_move_issue.type = miVALID;
     pcmove pcm;
     pcm.checkonly = false;
     changes.init(false);
@@ -358,7 +358,7 @@ EX bool fire_on_mouse(cell *c) {
     return false;
     }
   gen_bowpath_map();
-  checked_move_issue = miVALID;
+  checked_move_issue.type = miVALID;
   pcmove pcm;
   pcm.checkonly = false;
   changes.init(false);
@@ -514,7 +514,7 @@ EX bool have_bow_target() {
     int res = create_path();
     if(res == -1) continue;
 
-    checked_move_issue = miVALID;
+    checked_move_issue.type = miVALID;
     pcmove pcm;
     pcm.checkonly = true;
     changes.init(true);
