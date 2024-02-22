@@ -409,7 +409,8 @@ EX bool sizes_known() {
   if(aperiodic) return false;
   if(currentmap->strict_tree_rules()) return true;
   if(arb::in()) return false;
-  return true;  
+  if(INVERSE) return false;
+  return true;
   }
 
 EX bool trees_known() {
