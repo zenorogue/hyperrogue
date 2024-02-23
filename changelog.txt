@@ -5104,3 +5104,32 @@ Other fixes:
 - fixed tides in shmup and when scrolling
 - the dipping rule no longer affects Tiger's Eyes
 - screenshots were sometimes not correctly centered
+
+2024-02-23 01:34 Update 13.0b:
+
+When you are checkmated or die, a message explaining the cause is now displayed in the quit screen and saved in the local score file.
+
+Crossbow fixes:
+- opening inventory mode when you can just shoot should be fixed
+- rusałka curses now work
+- fixed tricking Pikemen with a bow
+- while rosed, you can now only shoot when this kills a monster at point blank in the rose direction
+
+Crash fixes:
+- fixed crash when e.g. entering 'ma' as a value, or when editing some settings such as sight range bonus
+- fixed a crash when viewing help on tide tiles (thanks to jlm)
+- fixed a crash with too large band
+- fixed some cases where untruncated/unrectified/warped maps would freeze when computing distances or crash due to trees are not known
+
+Gameplay fixes:
+- restarting a race now resets pause counter
+- World Turtle kills are recorded (thanks to jlm)
+- boat can go thru non-adjacent using Orb of Warp in shmup
+- fixed the items (key, OoY, baby tortoise) moved by the Orb of Chaos and Curse of Repulsion
+- fixed the Yard bug (graveless graveyard when you somehow used Orb of Safety in the Haunted Woods strip)
+- Trollheim no longer generates adjacent non-unlocked troll lands
+- alternative land unlock rules when monster/item requested is not available due to geometry etc
+
+Other:
+- in Goldberg variation, x/y limit is now based on what the engine allows, and 'dual of current' no longer can circumvent the limits
+- New projection: polar coordinates
