@@ -263,6 +263,7 @@ void killMonster(monster* m, eMonster who_kills, flagtype flags = 0) {
   if(m->dead) return;
   m->dead = true;
   if(isPlayer(m) && m->fragoff < curtime) {
+    yasc_message = XLAT("killed by %the1", who_kills);
     if(multi::cpid == m->pid)
       multi::suicides[multi::cpid]++;
     else if(multi::cpid >= 0)
@@ -439,8 +440,10 @@ void shootBullet(monster *m) {
   }
 
 EX void killThePlayer(eMonster m) {
-  if(cpid >= 0 && cpid < MAXPLAYER && pc[cpid])
+  if(cpid >= 0 && cpid < MAXPLAYER && pc[cpid]) {
+    yasc_message = XLAT("killed by %the1", m);
     pc[cpid]->dead = true;
+    }
   }
 
 monster *playerCrash(monster *who, shiftpoint where) {
@@ -1238,6 +1241,7 @@ void movePlayer(monster *m, int delta) {
 
       if(c2->wall == waMineMine && !markOrb(itOrbAether) && !markOrb(itOrbWinter)) {
         items[itOrbLife] = 0;
+        if(!m->dead) yasc_message = XLAT("stepped on a mine");
         m->dead = true;
         }
       #if CAP_COMPLEX2
@@ -1283,14 +1287,25 @@ void movePlayer(monster *m, int delta) {
     }
 
   if(!markOrb(itOrbAether)) {
-    if(m->base->wall == waChasm || m->base->wall == waClosedGate)
+    if(m->base->wall == waChasm) {
+      if(!m->dead) yasc_message = XLAT("fell into %the1", m->base->wall);
       m->dead = true;
+      }
 
-    if(isWatery(m->base) && !m->inBoat && !markOrb(itOrbFish))
+    if(m->base->wall == waClosedGate) {
+      if(!m->dead) yasc_message = XLAT("killed by %the1", m->base->wall);
       m->dead = true;
+      }
 
-    if(isFireOrMagma(m->base) && !markOrb(itOrbWinter))
+    if(isWatery(m->base) && !m->inBoat && !markOrb(itOrbFish)) {
+      if(!m->dead) yasc_message = XLAT("drowned in %the1", m->base->wall);
       m->dead = true;
+      }
+
+    if(isFireOrMagma(m->base) && !markOrb(itOrbWinter)) {
+      if(!m->dead) yasc_message = XLAT("burnt in %the1", m->base->wall);
+      m->dead = true;
+      }
     }
 
   landvisited[m->base->land] = true;
@@ -2250,8 +2265,10 @@ void moveMonster(monster *m, int delta) {
   
   if(!peace::on) 
   for(int i=0; i<players; i++) 
-    if(crashintomon == pc[i]) 
+    if(crashintomon == pc[i]) {
+      yasc_message = XLAT("killed by %the1", m->type);
       pc[i]->dead = true;
+      }
 
   if(peace::on) ; 
 
