@@ -1797,3 +1797,4 @@ MONSTER( '*', 0,        "vertex", moRogueviz, ZERO | CF_TECHNICAL, RESERVED, moN
 #undef ACCONLY2
 #undef ACCONLY3
 #undef ACCONLYF
+#undef IFINGAME
