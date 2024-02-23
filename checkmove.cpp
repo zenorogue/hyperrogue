@@ -339,7 +339,15 @@ EX void create_yasc_message() {
     if(c.type == miENTITY && !captures.count({c.where, c.monster})) blocks.insert(dnameof(c.monster));
     if(c.subtype == siITEM) blocks.insert("item");
     if(c.subtype == siWALL) {
-      if(c.where == cwt.at) { if(in_ctx) context.push_back("in " + dnameof(c.where->wall)); in_ctx = false; }
+      if(c.where == cwt.at) {
+        if(in_ctx) {
+          if(c.where->wall == waNone && c.where->land == laBrownian)
+            context.push_back("on level 3");
+          else
+            context.push_back(winf[c.where->wall].flags & WF_ON ? XLAT("on %the1", c.where->wall) : XLAT("in %the1", c.where->wall));
+          }
+        in_ctx = false;
+        }
       else if(c.where && c.where->wall != cwt.at->wall) blocks.insert(dnameof(c.where->wall));
       }
     if(c.type == siWARP) blocks.insert("warp");

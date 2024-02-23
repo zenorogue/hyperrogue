@@ -873,8 +873,8 @@ WALL( '#', 0x8080FF, "ice wall", waIcewall, WF_WALL | WF_HIGHWALL | WF_HEATCOLOR
     "Ice Walls melt after some time has passed."
     )
 WALL( '#', 0xC06000, "great wall", waBarrier, WF_WALL | WF_HIGHWALL, RESERVED, 0, sgNone,  barrierhelp)
-WALL( '+', 0x900030, "red slime", waFloorA, ZERO | WF_ALCHEMY, RESERVED, 0, sgFloorA,  slimehelp )
-WALL( '+', 0x300090, "blue slime", waFloorB, ZERO | WF_ALCHEMY, RESERVED, 0, sgFloorB,   slimehelp )
+WALL( '+', 0x900030, "red slime", waFloorA, ZERO | WF_ALCHEMY | WF_ON, RESERVED, 0, sgFloorA,  slimehelp )
+WALL( '+', 0x300090, "blue slime", waFloorB, ZERO | WF_ALCHEMY | WF_ON, RESERVED, 0, sgFloorB,   slimehelp )
 WALL( '#', 0xA0D0A0, "living wall", waCavewall, WF_WALL | WF_HIGHWALL, RESERVED, 0, sgCave, cavehelp)
 WALL( '.', 0x306060, "living floor", waCavefloor, ZERO, RESERVED, 0, sgNone,cavehelp)
 WALL( '#', 0xD03030, "dead rock troll", waDeadTroll, WF_WALL | WF_HIGHWALL, RESERVED, 0, sgNone,  trollhelp)
@@ -888,7 +888,7 @@ WALL( '%', 0xFFC0C0, "Cloud of Mirage", waCloud, WF_WALL, RESERVED, 0, sgNone,
    "Tiny droplets of magical water. You see images of yourself inside them. "
    "Go inside the cloud, to make these images help you.")
 WALL( '^', 0x8D694F, "Thumper", waThumperOff, WF_WALL | WF_ACTIVABLE | WF_THUMPER, RESERVED, 0, sgNone, thumpdesc)
-WALL( '^', 0x804000, "Fire", waFire, WF_FIRE | WF_TIMEOUT, RESERVED, 0, sgNone,
+WALL( '^', 0x804000, "Fire", waFire, WF_FIRE | WF_TIMEOUT | WF_ON, RESERVED, 0, sgNone,
     "This cell is on fire. Most beings and items cannot survive."
     )
 WALL( '+', 0xC0C0C0, "ancient grave", waAncientGrave, WF_WALL | WF_HIGHWALL | WF_GRAVE | WF_NONBLOCK, RESERVED, 0, sgNone, 
@@ -917,10 +917,10 @@ WALL( '#', 0x006000, "tree", waSmallTree, WF_WALL | WF_HIGHWALL | WF_STDTREE | W
 WALL( '#', 0x421C52*2, "vine", waVinePlant, WF_WALL | WF_HIGHWALL, RESERVED, 0, sgVine, vinehelp)
 WALL( ':', 0x006000, "vine", waVineHalfA, ZERO | WF_NOFLIGHT | WF_HALFVINE, RESERVED, 0, sgVine, hvinehelp)
 WALL( ';', 0x006000, "vine", waVineHalfB, ZERO | WF_NOFLIGHT | WF_HALFVINE, RESERVED, 0, sgVine, hvinehelp)
-WALL( '^', 0x804000, "partial fire", waPartialFire, WF_FIRE | WF_TIMEOUT, RESERVED, 0, sgNone, "This cell is partially on fire.")
-WALL( '#', 0xA07070, "dead wall", waDeadwall, WF_WALL | WF_HIGHWALL, RESERVED, 0, sgCave, deadcavehelp)
-WALL( '.', 0x401010, "dead floor", waDeadfloor, ZERO, RESERVED, 0, sgNone,deadcavehelp)
-WALL( '.', 0x905050, "rubble", waDeadfloor2, ZERO, RESERVED, 1, sgNone, "Dead floor, with some rubble.")
+WALL( '^', 0x804000, "partial fire", waPartialFire, WF_FIRE | WF_TIMEOUT | WF_ON, RESERVED, 0, sgNone, "This cell is partially on fire.")
+WALL( '#', 0xA07070, "dead wall", waDeadwall, WF_WALL | WF_HIGHWALL | WF_ON, RESERVED, 0, sgCave, deadcavehelp)
+WALL( '.', 0x401010, "dead floor", waDeadfloor, ZERO | WF_ON, RESERVED, 0, sgNone,deadcavehelp)
+WALL( '.', 0x905050, "rubble", waDeadfloor2, ZERO | WF_ON, RESERVED, 1, sgNone, "Dead floor, with some rubble.")
 WALL( '#', 0xD0D010, "weird rock", waWaxWall, WF_WALL | WF_HIGHWALL, RESERVED, 0, sgNone, 
     "A weirdly colored rock. Hyperentomologists claim that the "
     "Hyperbug armies use these rocks to navigate back home after a victorious battle."
@@ -932,7 +932,7 @@ WALL( '#', 0x8080C0, "crystal cabinet", waGlass, WF_WALL, RESERVED, 0, sgNone,
     "using an Orb of Aether, your Aether power will be completely drained."
     )
 WALL( '#', 0xC0C0C0, "wall of Camelot", waCamelot, WF_WALL | WF_HIGHWALL, RESERVED, 0, sgNone, camelothelp )
-WALL( '+', 0xA06000, "Round Table", waRoundTable, WF_WALL | WF_NONBLOCK, RESERVED, 1, sgNone, camelothelp )
+WALL( '+', 0xA06000, "Round Table", waRoundTable, WF_WALL | WF_NONBLOCK | WF_ON, RESERVED, 1, sgNone, camelothelp )
 WALL( '=', 0x0000A0, "moat of Camelot", waCamelotMoat, WF_WATER, RESERVED, 0, sgWater, camelothelp)
 WALL( '+', 0x606060, "big statue of Cthulhu", waBigStatue, WF_WALL, RESERVED, 0, sgNone, 
     "These statues of Cthulhu are too large to carry, and they don't look too "
@@ -941,24 +941,24 @@ WALL( '+', 0x606060, "big statue of Cthulhu", waBigStatue, WF_WALL, RESERVED, 0,
     "a statue, you push the statue to the cell you left.\n"
     )
 WALL( '=', 0x0000A0, "sea", waSea, WF_WATER, RESERVED, 0, sgWater, caribbeanhelp)
-WALL( '+', 0x0000A0, "boat", waBoat, ZERO | WF_BOAT | WF_NOFLIGHT, RESERVED, 0, sgNone, 
+WALL( '+', 0x0000A0, "boat", waBoat, ZERO | WF_BOAT | WF_NOFLIGHT | WF_ON, RESERVED, 0, sgNone, 
     "Hyperbolic pirates do not need huge ships, since so many lands to conquest "
     "are so close. These small boats are enough for them.\n\n"
     "Boats allow you to go through water. If you are in a boat, you can move into "
     "a water cell (and the boat will come with you)."
     )
-WALL( '.', 0x00FF00, "island", waCIsland, ZERO | WF_CISLAND, RESERVED, 0, sgNone, cislandhelp)
-WALL( '.', 0x80C060, "island", waCIsland2, ZERO | WF_CISLAND, RESERVED, 0, sgNone, cislandhelp)
+WALL( '.', 0x00FF00, "island", waCIsland, ZERO | WF_CISLAND | WF_ON, RESERVED, 0, sgNone, cislandhelp)
+WALL( '.', 0x80C060, "island", waCIsland2, ZERO | WF_CISLAND | WF_ON, RESERVED, 0, sgNone, cislandhelp)
 WALL( '#', 0x006000, "tree", waCTree, WF_WALL | WF_HIGHWALL | WF_CONE | WF_CISLAND, RESERVED, 0, sgTree, 
     "The forests of Caribbean are too dense to be traversed by humans, "
     "and they are hard to burn. Many colorful parrots can be found there."
     )
-WALL( ',', 0x800000, "rock I", waRed1, ZERO | WF_RED, RESERVED, 1, sgNone, redrockhelp)
-WALL( ':', 0xC00000, "rock II", waRed2, ZERO | WF_RED, RESERVED, 2, sgNone, redrockhelp)
-WALL( ';', 0xFF0000, "rock III", waRed3, ZERO | WF_RED, RESERVED, 3, sgNone, redrockhelp)
+WALL( ',', 0x800000, "rock I", waRed1, ZERO | WF_RED | WF_ON, RESERVED, 1, sgNone, redrockhelp)
+WALL( ':', 0xC00000, "rock II", waRed2, ZERO | WF_RED | WF_ON, RESERVED, 2, sgNone, redrockhelp)
+WALL( ';', 0xFF0000, "rock III", waRed3, ZERO | WF_RED | WF_ON, RESERVED, 3, sgNone, redrockhelp)
 WALL( '.', 0xD0D0D0, "minefield", waMineUnknown, ZERO, RESERVED, 0, sgNone, minedesc)
 WALL( '.', 0xD0D0D0, "minefield", waMineMine, ZERO, RESERVED, 0, sgNone, minedesc)
-WALL( '.', 0x909090, "cell without mine", waMineOpen, ZERO, RESERVED, 0, sgNone, minedesc)
+WALL( '.', 0x909090, "cell without mine", waMineOpen, ZERO | WF_ON, RESERVED, 0, sgNone, minedesc)
 WALL( '+', 0x808000, "stranded boat", waStrandedBoat, ZERO | WF_BOAT | WF_NOFLIGHT, RESERVED, 0, sgNone, 
     "This boat cannot go through the sand. But if you sit inside and "
     "wait for the tide, you will be able to use it to travel through the Ocean."
@@ -966,17 +966,17 @@ WALL( '+', 0x808000, "stranded boat", waStrandedBoat, ZERO | WF_BOAT | WF_NOFLIG
 WALL( '#', 0xFFD500, "palace wall", waPalace, WF_WALL | WF_HIGHWALL, RESERVED, 0, sgNone, palacedesc )
 WALL( '+', 0xFFFFFF, "closed gate", waClosedGate, WF_WALL | WF_HIGHWALL, RESERVED, 0, sgNone, gatedesc )
 WALL( '-', 0x404040, "open gate", waOpenGate, ZERO, RESERVED, 0, sgNone, gatedesc )
-WALL( '_', 0xC00000, "closing plate", waClosePlate, ZERO, RESERVED, 0, sgNone, gatedesc )
-WALL( '_', 0x00C050, "opening plate", waOpenPlate, ZERO, RESERVED, 0, sgNone, gatedesc )
-WALL( '_', 0x202020, "trapdoor", waTrapdoor, ZERO, RESERVED, 0, sgNone, "This floor will fall after someone goes there. Go quickly!" )
-WALL( '+', 0xFF0000, "giant rug", waGiantRug, ZERO, RESERVED, 0, sgNone, 
+WALL( '_', 0xC00000, "closing plate", waClosePlate, ZERO | WF_ON, RESERVED, 0, sgNone, gatedesc )
+WALL( '_', 0x00C050, "opening plate", waOpenPlate, ZERO | WF_ON, RESERVED, 0, sgNone, gatedesc )
+WALL( '_', 0x202020, "trapdoor", waTrapdoor, ZERO | WF_ON, RESERVED, 0, sgNone, "This floor will fall after someone goes there. Go quickly!" )
+WALL( '+', 0xFF0000, "giant rug", waGiantRug, ZERO | WF_ON, RESERVED, 0, sgNone,
     "This is the biggest Hypersian Rug you have ever seen! "
     "Unfortunately, it is too large to take it as a trophy." )
 WALL( '#', 0xfffff0, "platform", waPlatform, WF_WALL | WF_HIGHWALL, RESERVED, 0, sgNone, "You can stand here.")
 WALL( '#', 0x909090, "stone gargoyle", waGargoyle, WF_WALL | WF_HIGHWALL, RESERVED, 0, sgNone, gargdesc)
-WALL( '.', 0xB0B0B0, "stone gargoyle floor", waGargoyleFloor, ZERO, RESERVED, 1, sgNone, gargdesc)
-WALL( '.', 0x909090, "rubble", waRubble, ZERO, RESERVED, 1, sgNone, "Some rubble.")
-WALL( '+', 0x804000, "ladder", waLadder, ZERO, RESERVED, 0, sgNone, 
+WALL( '.', 0xB0B0B0, "stone gargoyle floor", waGargoyleFloor, ZERO | WF_ON, RESERVED, 1, sgNone, gargdesc)
+WALL( '.', 0x909090, "rubble", waRubble, ZERO | WF_ON, RESERVED, 1, sgNone, "Some rubble.")
+WALL( '+', 0x804000, "ladder", waLadder, ZERO | WF_ON, RESERVED, 0, sgNone,
     "You can use this ladder to climb the Tower."
     )
 WALL( '#', 0xC0C0C0, "limestone wall", waStone, WF_WALL | WF_HIGHWALL, RESERVED, 0, sgNone, "Simply a wall. Mostly.")
@@ -985,13 +985,13 @@ WALL( '^', 0x804000, "Bonfire", waBonfireOff, WF_WALL | WF_ACTIVABLE, RESERVED, 
     )
 WALL( '^', 0x8D694F, "Thumper", waThumperOn, WF_WALL | WF_TIMEOUT | WF_PUSHABLE | WF_THUMPER, RESERVED, 0, sgNone,
      "A device that attracts sandworms and other enemies. You need to activate it.")
-WALL( '^', 0x804000, "Eternal Fire", waEternalFire, WF_FIRE, RESERVED, 0, sgNone,
+WALL( '^', 0x804000, "Eternal Fire", waEternalFire, WF_FIRE | WF_ON, RESERVED, 0, sgNone,
     "This fire never burns out."
     )
-WALL( '.', 0x909090, "stone gargoyle bridge", waGargoyleBridge, ZERO, RESERVED, 1, sgNone, gargdesc)
+WALL( '.', 0x909090, "stone gargoyle bridge", waGargoyleBridge, ZERO | WF_ON, RESERVED, 1, sgNone, gargdesc)
 WALL( '#', 0x309060, "temporary wall", waTempWall, WF_WALL | WF_HIGHWALL | WF_TIMEOUT, RESERVED, 0, sgNone, twdesc)
-WALL( '.', 0x309060, "temporary floor", waTempFloor, ZERO | WF_TIMEOUT, RESERVED, 1, sgNone, twdesc)
-WALL( '.', 0x309060, "temporary bridge", waTempBridge, ZERO | WF_TIMEOUT, RESERVED, 1, sgNone, twdesc)
+WALL( '.', 0x309060, "temporary floor", waTempFloor, ZERO | WF_TIMEOUT | WF_ON, RESERVED, 1, sgNone, twdesc)
+WALL( '.', 0x309060, "temporary bridge", waTempBridge, ZERO | WF_TIMEOUT | WF_ON, RESERVED, 1, sgNone, twdesc)
 WALL( '#', 0x3030FF, "charged wall", waCharged, WF_WALL | WF_HIGHWALL, RESERVED, 0, sgNone, elecdesc)
 WALL( '#', 0xFF3030, "grounded wall", waGrounded, WF_WALL | WF_HIGHWALL, RESERVED, 0, sgNone, elecdesc)
 WALL( '#', 0xA0A060, "sandstone wall", waSandstone, WF_WALL | WF_HIGHWALL, RESERVED, 0, sgNone, elecdesc)
@@ -1009,8 +1009,8 @@ WALL( '#', 0x764e7c, "rosebush", waRose, WF_WALL | WF_HIGHWALL | WF_THORNY, RESE
 WALL( '#', 0xC0C000, "warp gate", waWarpGate, WF_WALL | WF_HIGHWALL, RESERVED, 0, sgNone,
     "This gate separates the warped area from the normal land.")
 WALL( '+', 0x804000, "trunk", waTrunk, ZERO | WF_NOFLIGHT, RESERVED, 0, sgNone, "The skeleton of a tree.")
-WALL( '-', 0x402000, "solid branch", waSolidBranch, ZERO, RESERVED, 0, sgNone, "Branches here could bear your weight easily.")
-WALL( ':', 0x804000, "weak branch", waWeakBranch, ZERO, RESERVED, 0, sgNone, 
+WALL( '-', 0x402000, "solid branch", waSolidBranch, ZERO | WF_ON, RESERVED, 0, sgNone, "Branches here could bear your weight easily.")
+WALL( ':', 0x804000, "weak branch", waWeakBranch, ZERO | WF_ON, RESERVED, 0, sgNone,
     "Branches here will bear you weight, but if you use them to move (not fall) to an unstable place, they will break.")
 WALL( '+', 0x60C060, "canopy", waCanopy, ZERO, RESERVED, 0, sgNone, 
     "Only thin twigs and leaves here. They may bear fruits, but for you, these cells count "
@@ -1020,31 +1020,31 @@ WALL( '#', 0xD0C060, "barrow wall", waBarrowWall, WF_WALL | WF_HIGHWALL, RESERVE
 WALL( '#', 0x90A060, "barrow", waBarrowDig, WF_WALL | WF_HIGHWALL, RESERVED, 0, sgNone, "Your Orb of the Sword can be used to dig here.")
 WALL( '#', 0xE0E0E0, "stone statue", waPetrified, WF_WALL | WF_HIGHWALL, RESERVED, 0, sgNone, "A petrified creature.")
 WALL( '.', 0xE8E8E8, "tower of Camelot", waTower, ZERO, RESERVED, 3, sgNone, camelothelp)
-WALL( '-', 0x402000, "big bush", waBigBush, ZERO | WF_NOFLIGHT, RESERVED, 0, sgNone, 
+WALL( '-', 0x402000, "big bush", waBigBush, ZERO | WF_NOFLIGHT | WF_ON, RESERVED, 0, sgNone, 
     "You can hold this bush to climb the Lost Mountain. "
     "Bushes block the movement of birds."
     )
-WALL( ':', 0x804000, "small bush", waSmallBush, ZERO | WF_NOFLIGHT, RESERVED, 0, sgNone, 
+WALL( ':', 0x804000, "small bush", waSmallBush, ZERO | WF_NOFLIGHT | WF_ON, RESERVED, 0, sgNone, 
     "You can hold this bush to climb the Lost Mountain, "
     "but it is not very strong -- it will get destroyed "
     "if you climb from it into an unstable location. "
     "Bushes block the movement of birds.")
-WALL( '.', 0xFFFF00, "Reptile floor", waReptile, ZERO | WF_REPTILE, RESERVED, 0, sgNone, reptiledesc)
-WALL( '.', 0xFFFF00, "Reptile bridge", waReptileBridge, ZERO | WF_REPTILE, RESERVED, 0, sgNone, reptiledesc)
-WALL( '.', 0xFFFF00, "invisible floor", waInvisibleFloor, ZERO, RESERVED, 0, sgNone, NODESCYET)
+WALL( '.', 0xFFFF00, "Reptile floor", waReptile, ZERO | WF_REPTILE | WF_ON, RESERVED, 0, sgNone, reptiledesc)
+WALL( '.', 0xFFFF00, "Reptile bridge", waReptileBridge, ZERO | WF_REPTILE | WF_ON, RESERVED, 0, sgNone, reptiledesc)
+WALL( '.', 0xFFFF00, "invisible floor", waInvisibleFloor, ZERO | WF_ON, RESERVED, 0, sgNone, NODESCYET)
 WALL( '#', 0xC0C0FF, "mirror wall", waMirrorWall, WF_WALL, RESERVED, 0, sgNone, mirroreddesc)
-WALL( '.', 0xE0E0E0, "stepping stones", waPetrifiedBridge, ZERO, RESERVED, 1, sgNone, "A petrified creature.")
+WALL( '.', 0xE0E0E0, "stepping stones", waPetrifiedBridge, WF_ON, RESERVED, 1, sgNone, "A petrified creature.")
 WALL( '#', 0x309060, "temporary wall", waTempBridgeBlocked, WF_WALL | WF_HIGHWALL | WF_TIMEOUT, RESERVED, 0, sgNone, twdesc)
 WALL( 'S', 0xB0B0B0, "warrior statue", waTerraWarrior, WF_WALL, RESERVED, 0, sgNone, terradesc)
 WALL( '=', 0xB0B0B0, "bubbling slime", waBubble, ZERO | WF_CHASM, RESERVED, 0, sgNone, NODESC)
-WALL( '^', 0xD00000, "arrow trap", waArrowTrap, ZERO, RESERVED, 0, sgNone, arrowtrapdesc)
+WALL( '^', 0xD00000, "arrow trap", waArrowTrap, WF_ON, RESERVED, 0, sgNone, arrowtrapdesc)
 WALL( '=', 0xE2E2E2, "mercury river", waMercury, ZERO | WF_CHASM, RESERVED, 0, sgNone, "A river of mercury.")
 WALL( '&', 0xD00000, "lava", waMagma, ZERO, RESERVED, 1, sgNone, lavadesc)
-WALL( '=', 0x804000, "dock", waDock, ZERO, RESERVED, 0, sgNone, "A dock.")
-WALL( '^', 0xFF8000, "burning dock", waBurningDock, WF_FIRE | WF_TIMEOUT, RESERVED, 0, sgNone, "A burning dock.")
+WALL( '=', 0x804000, "dock", waDock, ZERO | WF_ON, RESERVED, 0, sgNone, "A dock.")
+WALL( '^', 0xFF8000, "burning dock", waBurningDock, WF_FIRE | WF_TIMEOUT | WF_ON, RESERVED, 0, sgNone, "A burning dock.")
 WALL( '#', 0xE04030, "ruin wall", waRuinWall, WF_WALL | WF_HIGHWALL, RESERVED, 0, sgNone, ruindesc)
 WALL( '#', 0xA04060, "Brownian generator", waBrownian, WF_WALL | WF_HIGHWALL, RESERVED, 0, sgNone, NODESC)
-WALL( '^', 0xC05000, "fire trap", waFireTrap, ZERO, RESERVED, 0, sgNone, 
+WALL( '^', 0xC05000, "fire trap", waFireTrap, ZERO | WF_ON, RESERVED, 0, sgNone,
     "This trap will explode when stepped on, setting all the adjacent cells on fire. However, this happens on the next turn, "
     "so you can safely escape if you are fast enough.")
 WALL( '^', 0xFD692F, "Explosive Barrel", waExplosiveBarrel, WF_WALL | WF_PUSHABLE, RESERVED, 0, sgNone, 
@@ -1659,7 +1659,7 @@ WALL( '$', 0xFD692F, "Crate", waCrateCrate, WF_WALL | WF_PUSHABLE, RESERVED, 0, 
     "These crates can be pushed."
     )
 
-WALL( '.', 0x40FD40, "Target", waCrateTarget, 0, RESERVED, 0, sgNone, 
+WALL( '.', 0x40FD40, "Target", waCrateTarget, 0 | WF_ON, RESERVED, 0, sgNone,
     "Push all your crates on targets."
     )
 
