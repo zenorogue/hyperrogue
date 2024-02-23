@@ -262,6 +262,7 @@ struct projection_configuration {
   ld clip_min, clip_max;
   ld halfplane_scale;  
   ld collignon_parameter; 
+  ld offside, offside2;
   ld aitoff_parameter, miller_parameter, loximuthal_parameter, winkel_parameter;
   bool show_hyperboloid_flat;
   bool collignon_reflected;
