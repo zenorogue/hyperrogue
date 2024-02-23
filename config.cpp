@@ -352,7 +352,7 @@ struct custom_setting : public setting {
       add_to_changed(this);
       }
     }
-  virtual void load_from(const string& s) {
+  virtual void load_from(const string& s) override {
     if(saver) { saver->load(s); return; }
     if(!custom_load) {
       println(hlog, "cannot load parameter: ", parameter_name, " from: ", s);
