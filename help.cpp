@@ -883,9 +883,9 @@ EX void describeMouseover() {
         out += " (" + its(c->landparam)+")";
       else {
         calcTidalPhase();
-        bool b = c->landparam >= tide[(turncount-1) % tidalsize];
+        bool b = c->landparam >= tide[turncount % tidalsize];
         int t = 1;
-        for(; t < 1000 && b == (c->landparam >= tide[(turncount+t-1) % tidalsize]); t++) ;
+        for(; t < 1000 && b == (c->landparam >= tide[(turncount+t) % tidalsize]); t++) ;
         if(b)
           out += " (" + turnstring(t) + XLAT(" to surface") + ")";
         else 
@@ -894,7 +894,7 @@ EX void describeMouseover() {
       }
     #if CAP_FIELD
     else if(c->land == laVolcano) {
-      int id = lavatide(c, -1)/4;
+      int id = lavatide(c, 0)/4;
       if(id < 96/4)
         out += " (" + turnstring(96/4-id) + XLAT(" to go cold") + ")";
       else
