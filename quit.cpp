@@ -639,7 +639,8 @@ EX void handleKeyQuit(int sym, int uni) {
     popScreen();
     msgs.clear();
     if(!canmove) {
-      addMessage(XLAT("GAME OVER"));
+      if(yasc_message != "") addMessage(XLAT("GAME OVER") + ": " + yasc_message);
+      else addMessage(XLAT("GAME OVER"));
       addMessage(timeline());
       }
     }
