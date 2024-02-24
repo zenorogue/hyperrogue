@@ -351,6 +351,8 @@ EX void create_yasc_message() {
         if(in_ctx) {
           if(c.where->wall == waNone && c.where->land == laBrownian)
             context.push_back("on level 3");
+          else if(c.where->wall == waRoundTable)
+            context.push_back("being polite");
           else
             context.push_back(winf[c.where->wall].flags & WF_ON ? XLAT("on %the1", c.where->wall) : XLAT("in %the1", c.where->wall));
           }
