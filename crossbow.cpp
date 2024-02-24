@@ -384,7 +384,7 @@ EX void shoot() {
   vector<pair<cell*, int>> healthy_dragons;
   map<cell*, pair<int, int>> kraken_hits;
   int dragon_hits = 0;
-  rusalka_curses++;
+  rusalka_curses = 0;
 
   // for achievements
   for(auto& mov: bowpath) {
