@@ -302,22 +302,29 @@ EX bool swordConflict(const player_move_info& sm1, const player_move_info& sm2) 
 
 EX string yasc_message;
 
+EX string blocking_monster_name(const moveissue& mi) {
+  if(mi.monster == moKnight && mi.where)
+    return XLAT("%1 the Knight", camelot::knight_name(mi.where));
+  else
+    return dnameof(mi.monster);
+  }
+
 EX void create_yasc_message() {
-  set<pair<cell*, eMonster>> captures;
+  set<pair<cell*, string>> captures;
   auto all = move_issues;
   all.push_back(stay_issue);
-  for(auto c: all) if(c.type == miTHREAT) captures.emplace(c.where, c.monster);
+  for(auto c: all) if(c.type == miTHREAT) captures.emplace(c.where, blocking_monster_name(c));
 
   vector<string> context;
   if(!captures.empty()) {
     string msg = "captured by ";
-    map<eMonster, int> qties;
+    map<string, int> qties;
     for(auto ca: captures) qties[ca.second]++;
     int iqties = 0;
     for(auto q: qties) {
       if(iqties && iqties == isize(qties) - 1) msg += " and ";
       else if(iqties) msg += ", ";
-      msg += dnameof(q.first);
+      msg += q.first;
       if(q.second > 1) msg += " (x" + its(q.second) + ")";
       iqties++;
       }
@@ -336,9 +343,10 @@ EX void create_yasc_message() {
   set<string> blocks;
   int index = 0;
   for(auto c: all) {
-    if(c.type == miENTITY && !captures.count({c.where, c.monster})) blocks.insert(dnameof(c.monster));
-    if(c.subtype == siITEM) blocks.insert("item");
-    if(c.subtype == siWALL) {
+    if(c.type == miENTITY && !captures.count({c.where, blocking_monster_name(c)})) blocks.insert(blocking_monster_name(c));
+    else if(c.type == miWALL && c.subtype == siMONSTER && !captures.count({c.where, blocking_monster_name(c)})) blocks.insert(blocking_monster_name(c));
+    else if(c.subtype == siITEM) blocks.insert("item");
+    else if(c.subtype == siWALL) {
       if(c.where == cwt.at) {
         if(in_ctx) {
           if(c.where->wall == waNone && c.where->land == laBrownian)
@@ -350,7 +358,7 @@ EX void create_yasc_message() {
         }
       else if(c.where && c.where->wall != cwt.at->wall) blocks.insert(dnameof(c.where->wall));
       }
-    if(c.type == siWARP) blocks.insert("warp");
+    else if(c.type == siWARP) blocks.insert("warp");
     index++;
     }
 
