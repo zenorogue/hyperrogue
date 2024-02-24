@@ -5133,3 +5133,11 @@ Gameplay fixes:
 Other:
 - in Goldberg variation, x/y limit is now based on what the engine allows, and 'dual of current' no longer can circumvent the limits
 - New projection: polar coordinates
+
+2024-02-24 09:54 Update 13.0c:
+
+- fixed the off-by-one error in thehelp line displayed for tides and lava
+- fixed a bug with rusalka-cursing the first tile when you shoot
+- when you press ESC in the gameover screen, the YASC message is displayed
+- special YASC message for pinches, and being on the Round Table
+- in YASC messages, mention the knights blocking the way, and also mention their names
