@@ -596,10 +596,11 @@ EX void applyBoxes() {
   
   for(int i=0; i<43; i++) {
     if(loading) kills[i] = 0;
-    bool fake = (i == moREMOVED || i == moLesserM || i == moTentacletail);
+    bool fake = (i == moLesserM || i == moTentacletail);
     if(i == moWormtail) applyBoxM(moCrystalSage);
     else if(i == moWormwait) applyBoxM(moFireFairy);
     else if(i == moTentacleEscaping) applyBoxM(moMiner);
+    else if(i == moREMOVED) applyBoxI(itFatigue);
     else if(i == moGolemMoved) applyBoxM(moIllusion);
     else if(i == moTentaclewait) applyBoxOrb(itOrbThorns);
     else if(i == moGreater) applyBoxOrb(itOrbDragon);
