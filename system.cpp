@@ -596,7 +596,6 @@ EX void applyBoxes() {
   
   for(int i=0; i<43; i++) {
     if(loading) kills[i] = 0;
-    bool fake = (i == moLesserM);
     if(i == moWormtail) applyBoxM(moCrystalSage);
     else if(i == moWormwait) applyBoxM(moFireFairy);
     else if(i == moTentacleEscaping) applyBoxM(moMiner);
@@ -606,9 +605,10 @@ EX void applyBoxes() {
     else if(i == moTentaclewait) applyBoxOrb(itOrbThorns);
     else if(i == moGreater) applyBoxOrb(itOrbDragon);
     else if(i == moGreaterM) applyBoxOrb(itOrbIllusion);
+    else if(i == moLesserM) applyBoxM(moFriendlyGhost);
     else if(i == moWolfMoved) applyBoxM(moWorldTurtle);
     else if(i == moNone) applyBoxNum(kills[i], "icewalls melted");
-    else applyBoxM(eMonster(i), fake);
+    else applyBoxM(eMonster(i));
     }
     
   if(saving) {
