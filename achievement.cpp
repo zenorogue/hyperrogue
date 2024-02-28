@@ -166,7 +166,7 @@ EX void achievement_gain_once(const string& s, char flags IS(0)) {
 
 namespace rg {
   char check(bool b, char val = special_geometry) { return b ? val : fail; }
-  };
+  }
 
 EX char specgeom_zebra() { return rg::check(geometry == gZebraQuotient && !disksize && BITRUNCATED && firstland == laDesert); }
 EX char specgeom_lovasz() { return rg::check(geometry == gKleinQuartic && variation == eVariation::untruncated && gp::param == gp::loc(1,1) && !disksize && in_lovasz()); }
