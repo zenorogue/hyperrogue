@@ -215,7 +215,7 @@ EX namespace elec {
     if(c->wall == waSea || c->wall == waGrounded) return ecGrounded;
     if(c->wall == waSandstone || c->wall == waDeadTroll || 
       c->wall == waDeadTroll2 || 
-      among(c->wall, waBigTree, waSmallTree, waExplosiveBarrel, waRed1, waRed2, waRed3) ||
+      c->wall == waExplosiveBarrel ||
       c->wall == waVinePlant ||
       c->wall == waMetal || isAlchAny(c)) 
         return isElectricLand(c) ? ecConductor : ecGrounded; 
