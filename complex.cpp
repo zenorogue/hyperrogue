@@ -219,6 +219,8 @@ EX namespace elec {
       c->wall == waVinePlant ||
       c->wall == waMetal || isAlchAny(c)) 
         return isElectricLand(c) ? ecConductor : ecGrounded; 
+    if(c->wall == waBigTree || c->wall == waSmallTree)
+        return ecGrounded;
     if(c->wall == waBarrier)
       return ecIsolator;
     if(c->wall == waChasm)
