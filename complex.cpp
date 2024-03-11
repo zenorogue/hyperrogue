@@ -221,6 +221,8 @@ EX namespace elec {
         return isElectricLand(c) ? ecConductor : ecGrounded; 
     if(c->wall == waBigTree || c->wall == waSmallTree)
         return ecGrounded;
+    if(among(c->wall, waRed1, waRed2, waRed3, waRubble, waDeadfloor2))
+        return ecIsolator;
     if(c->wall == waBarrier)
       return ecIsolator;
     if(c->wall == waChasm)
