@@ -538,7 +538,7 @@ EX void shift_view_portal(hyperpoint H) {
     if(b) maxv = t; else minv = t;
     shift_view(H * -t * scale);
     }
-  println(hlog, "maxv = ", maxv);
+  // println(hlog, "maxv = ", maxv);
   shift_view(H * maxv * scale);
   check_portal_movement();
   shift_view_portal(H * (1 - maxv) * scale);
