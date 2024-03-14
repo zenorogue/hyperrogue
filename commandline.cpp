@@ -335,6 +335,19 @@ int arg::readCommon() {
     clearMessages();
     }
 
+  else if(argis("-save-mode")) {
+    save_mode_to_file(shift_args());
+    }
+
+  else if(argis("-load-mode")) {
+    try {
+      load_mode_from_file(shift_args());
+      }
+    catch(hstream_exception& e) {
+      println(hlog, "exception!");
+      }
+    }
+
 // informational
   else if(argis("-version") || argis("-v")) {
     printf("HyperRogue version " VER "\n");

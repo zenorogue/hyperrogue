@@ -1782,6 +1782,28 @@ EX void finishAll() {
   callhooks(hooks_final_cleanup);
   }
 
+string modheader = "# HyperRogue saved game mode file";
+
+EX void save_mode_to_file(const string& fname) {
+  shstream ss;
+  save_mode_data(ss);
+  string s = as_hexstring(ss.s);
+  fhstream f(fname, "w");
+  println(f, modheader);
+  println(f, s);
+  }
+
+EX void load_mode_from_file(const string& fname) {
+  fhstream f(fname, "r");
+  string header = scanline(f);
+  if(header[0] != '#') throw hstream_exception();
+  string hex = scanline(f);
+  shstream ss;
+  ss.s = from_hexstring(hex + "00");
+  stop_game();
+  load_mode_data_with_zero(ss);
+  start_game();
+  }
 
 auto cgm = addHook(hooks_clearmemory, 40, [] () {
   pathq.clear();
