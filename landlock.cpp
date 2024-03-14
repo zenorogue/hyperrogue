@@ -563,6 +563,7 @@ EX eLand getNewLand(eLand old) {
     }
 
   tab[cnt++] = laHalloween;
+  tab[cnt++] = laWildWest;
 
   // the advanced lands
   if(all_unlocked || gold() >= R60) {

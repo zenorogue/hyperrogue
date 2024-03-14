@@ -1412,7 +1412,7 @@ LAND( 0xFF7518, "Halloween", laHalloween, ZERO, itTreat, RESERVED, halloweendesc
         m == moLancer || m == moFireFairy || 
         m == moBomberbird || m == moRatlingAvenger || 
         m == moVineBeast || m == moDragonHead || m == moDragonTail) ? 1 : 0)
-  REQ( NEVER )
+  REQ( ALWAYS )
 
 LAND( 0x605040, "Dungeon", laDungeon, ZERO | LF_GRAVITY | LF_EQUI, itSlime, RESERVED, 
     "The result of a collaboration of the Great Vizier and the Wizard of the Ivory Tower."
