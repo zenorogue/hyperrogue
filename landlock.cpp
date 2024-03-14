@@ -246,6 +246,7 @@ EX void countHyperstoneQuest(int& i1, int& i2) {
   i1 = 0; i2 = 0;
   generateLandList(isLandIngame);
   for(eLand l: landlist) {
+    if(l == laCA) continue;
     eItem ttype = treasureType(l);
     if(!required_for_hyperstones(ttype)) continue;
     i2++; if(items[ttype] >= R10) i1++;
