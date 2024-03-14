@@ -3498,6 +3498,7 @@ EX namespace ca {
       }
     for(int i=0; i<dcs; i++) {
       cell *c = allcells[i];
+      if(c->land != laCA) continue;
       auto last = c->wall;
       c->wall = willlive[i] ? wlive : waNone;
       if(c->wall != last) {

@@ -1454,7 +1454,7 @@ LAND( 0xC000C0, "Crossroads V", laCrossroads5, ZERO, itHyperstone, RESERVED, "Ex
 
 LAND( 0xC0C0C0, "Cellular Automaton", laCA, ZERO | LF_TECHNICAL, itNone, RESERVED, cadesc)
   NATIVE(0)
-  REQ(NEVER)
+  REQ(ALWAYS)
 
 LAND( 0xC0C0FF, "Mirror Wall", laMirrorWall, ZERO | LF_TECHNICAL | LF_INMIRRORORWALL, itShard, RESERVED, mirroreddesc)
   NATIVE(isNative(laMirror, m))

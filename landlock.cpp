@@ -565,6 +565,7 @@ EX eLand getNewLand(eLand old) {
   tab[cnt++] = laHalloween;
   tab[cnt++] = laWildWest;
   tab[cnt++] = laAsteroids;
+  tab[cnt++] = laCA;
 
   // the advanced lands
   if(all_unlocked || gold() >= R60) {
