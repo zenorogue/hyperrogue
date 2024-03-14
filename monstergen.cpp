@@ -8,7 +8,7 @@
 #include "hyper.h"
 namespace hr {
 
-EX int avengers, mirrorspirits, wandering_jiangshi, jiangshi_on_screen;
+EX int avengers, mirrorspirits, wandering_jiangshi, jiangshi_on_screen, splitrocks;
 
 EX bool timerghost = true;
 EX bool gen_wandering = true;
@@ -562,6 +562,12 @@ EX void wandering() {
     
     else if(c->monst || c->pathdist == PINFD) break;
     
+    else if(c->land == laAsteroids && splitrocks && canReachPlayer(c, moYeti)) {
+      c->monst = moAsteroid;
+      splitrocks--;
+      continue;
+      }
+
     else if(c->land == laAsteroids) {
       int gen = 0;
       if(asteroids_generated * 12 <= items[itAsteroid]) gen = 2;

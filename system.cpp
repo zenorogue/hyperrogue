@@ -224,6 +224,8 @@ EX void initgame() {
   rosephase = 0;
   shmup::count_pauses = 0;
 
+  splitrocks = 0;
+
   if(firstland == laElementalWall) cwt.at->land = randomElementalLand();
   
   resetview();  
