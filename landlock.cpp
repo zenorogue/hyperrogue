@@ -712,8 +712,15 @@ EX eLand getLandForList(cell *c) {
   return l;
   }
 
+EX bool use_custom_land_list;
+EX array<bool, landtypes> custom_land_list;
+EX array<int, landtypes> custom_land_treasure;
+EX array<int, landtypes> custom_land_difficulty;
+EX array<int, landtypes> custom_land_wandering;
+
 EX bool isLandIngame(eLand l) {
   if(isElemental(l)) l = laElementalWall;
+  if(use_custom_land_list) return custom_land_list[l];
   if(dual::state == 2 && !dual::check_side(l)) return false;
   if((eubinary || sol) && isCyclic(l) && l != specialland) return false;
   if(l == laCamelot && hyperbolic && WDIM == 3) return false;
@@ -801,6 +808,112 @@ EX const int frog_when = 205;
 EX const int cursed_when = 386;
 
 EX const int walls_when = 388;
+
+EX void mark_tamper() { cheater++; }
+
+EX void customize_land_in_list(eLand l) {
+  cmode = sm::DARKEN; gamescreen();
+
+  dialog::init(XLATN(linf[l].name), linf[l].color);
+
+  help = generateHelpForLand(l);
+  addHelpWithTitle();
+
+  dialog::addBreak(100);
+
+  dialog::addBoolItem(XLAT("land in game"), custom_land_list[l], 'a');
+  dialog::add_action([l] {
+    custom_land_list[l] = !custom_land_list[l];
+    cheater++;
+    });
+
+  dialog::addSelItem(XLAT("treasure rate"), its(custom_land_treasure[l]), 't');
+  dialog::add_action([l] {
+    dialog::editNumber(custom_land_treasure[l], 0, 1000, 10, 100, XLAT("treasure rate in %the1", linf[l].name), "");
+    dialog::get_ne().reaction = mark_tamper;
+    });
+
+  dialog::addSelItem(XLAT("difficulty"), its(custom_land_difficulty[l]), 'd');
+  dialog::add_action([l] {
+    dialog::editNumber(custom_land_difficulty[l], 0, 1000, 10, 100, XLAT("difficulty of %the1", linf[l].name), "");
+    dialog::get_ne().reaction = mark_tamper;
+    });
+
+  dialog::addSelItem(XLAT("wandering"), its(custom_land_wandering[l]), 'w');
+  dialog::add_action([l] {
+    dialog::editNumber(custom_land_wandering[l], 0, 1000, 10, 100, XLAT("difficulty of %the1", linf[l].name), "");
+    dialog::get_ne().reaction = mark_tamper;
+    });
+
+  dialog::addBack();
+  dialog::display();
+  }
+
+EX void customize_land_list() {
+  cmode = sm::DARKEN; gamescreen();
+  dialog::init(XLAT("custom land list"));
+  if(dialog::infix != "") mouseovers = dialog::infix;
+
+  generateLandList([] (eLand l) {
+    if(!use_custom_land_list) {
+      custom_land_list[l] = isLandIngame(l);
+      custom_land_treasure[l] = 100;
+      custom_land_difficulty[l] = 100;
+      custom_land_wandering[l] = 100;
+      }
+    if(dialog::infix != "" && !dialog::hasInfix(linf[l].name)) return false;
+    if(l == laCanvas) return true;
+    return !!(land_validity(l).flags & lv::appears_in_geom_exp);
+    });
+  stable_sort(landlist.begin(), landlist.end(), [] (eLand l1, eLand l2) { return land_validity(l1).quality_level > land_validity(l2).quality_level; });
+
+  dialog::start_list(900, 900, '1');
+  for(eLand l: landlist) {
+    dialog::addBoolItem(XLAT1(linf[l].name), custom_land_list[l], dialog::list_fake_key++);
+    string s;
+    if(custom_land_treasure[l] != 100) s += "$" + its(custom_land_treasure[l]) + " ";
+    if(custom_land_difficulty[l] != 100) s += "!" + its(custom_land_difficulty[l]) + " ";
+    if(custom_land_wandering[l] != 100) s += "^" + its(custom_land_wandering[l]) + " ";
+    if(s != "") dialog::lastItem().value = s;
+    dialog::add_action_confirmed([l] {
+      stop_game();
+      use_custom_land_list = true;
+      start_game();
+      pushScreen([l] { customize_land_in_list(l); });
+      });
+    }
+  dialog::end_list();
+
+  dialog::addInfo(XLAT("press letters to search"));
+  dialog::addBoolItem("custom land list mode", use_custom_land_list, 'U');
+  dialog::add_action_confirmed([] {
+    stop_game();
+    use_custom_land_list = !use_custom_land_list;
+    start_game();
+    });
+
+  dialog::addHelp();
+  dialog::add_action([] {
+    gotoHelp(XLAT(
+      "In this mode, you can choose the lands you want to be in game. You can also customize their treasure rate and difficulty.\n\n"
+      "While the game automatically selects a list of lands by default, "
+      "based on whether it thinks they work well in the currently selected tiling, "
+      "you might not agree with this selection.\n\n"
+      "Note that, often, lands are enabled or disabled for a GOOD reason! Use at your own risk.\n\n"
+      "Just click on a land to configure it. If you are not in the custom land list mode, "
+      "this will restart the game. You can change the settings during a custom game, but it counts as a cheat."
+      ));
+    });
+  dialog::addBack();
+  dialog::display();
+
+  keyhandler = [] (int sym, int uni) {
+    dialog::handleNavigation(sym, uni);
+
+    if(dialog::editInfix(uni)) dialog::list_skip = 0;
+    else if(doexiton(sym, uni)) popScreen();
+    };
+  }
 
 // check if the given land should appear in lists
 EX land_validity_t& land_validity(eLand l) {

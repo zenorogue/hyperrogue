@@ -192,7 +192,7 @@ EX int reptilemax() {
   return r;
   }
 
-bool wchance(int a, int of, int reduction = 0) {
+bool wchance_in(eLand l, int a, int of, int reduction = 0) {
   of *= 10; 
   a += yendor::hardness() + 1;
   if(isCrossroads(cwt.at->land)) 
@@ -205,6 +205,11 @@ bool wchance(int a, int of, int reduction = 0) {
   
   a -= reduction;
   if(a < 0) return false;
+
+  if(use_custom_land_list) {
+    of *= 100;
+    a *= custom_land_wandering[l];
+    }
 
   return hrand(a+of) < a;
   }
@@ -337,7 +342,7 @@ EX void wandering() {
   if(closed_or_bounded && specialland == laClearing)
     clearing::new_root();
 
-  if(cwt.at->land == laZebra && cwt.at->wall == waNone && wchance(items[itZebra], 20))
+  if(cwt.at->land == laZebra && cwt.at->wall == waNone && wchance_in(laZebra, items[itZebra], 20))
     wanderingZebra(cwt.at);
 
   bool smallbounded_generation = smallbounded || (closed_manifold && specialland == laClearing);
@@ -370,6 +375,8 @@ EX void wandering() {
     cell *c = dcal[i];
     if(!valid(c)) continue;
     if(isPlayerOn(c)) break;
+
+    auto wchance = [c] (int a, int of, int reduction = 0) { return wchance_in(c->land, a, of, reduction); };
     
     if(specialland == laStorms) {
       // place the sandstone wall completely randomly (but not on the player)

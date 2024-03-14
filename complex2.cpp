@@ -166,11 +166,11 @@ EX namespace brownian {
     ONEMPTY {
       if(hrand(10000) < min(250, 100 + 2 * PT(kills[moAcidBird] + kills[moBrownBug], 50)) * (25 + min(items[itBrownian], 100)) / 25 && c->landparam >= 4 && c->landparam < 24)
         c->item = itBrownian;
-      if(hrand_monster(8000) < 15 + items[itBrownian])
+      if(hrand_monster_in(laBrownian, 8000) < 15 + items[itBrownian])
         c->monst = moAcidBird;
-      else if(hrand_monster(8000) < 15)
+      else if(hrand_monster_in(laBrownian, 8000) < 15)
         c->monst = moAlbatross;
-      else if(hrand_monster(8000) < 15 + items[itBrownian]) {
+      else if(hrand_monster_in(laBrownian, 8000) < 15 + items[itBrownian]) {
         c->monst = moBrownBug;
         c->hitpoints = 3;
         }
@@ -291,7 +291,7 @@ extern array<feature, 21> features;
 
 #define VF [] (cell *c)
 
-bool hrand_var(int i) { return hrand_monster(i) < 25 + items[itVarTreasure] + yendor::hardness(); }
+bool hrand_var(int i) { return hrand_monster_in(laVariant, i) < 25 + items[itVarTreasure] + yendor::hardness(); }
 
 array<feature, 21> features {{
   feature{(color_t)(-0x202020), 5, moNecromancer, VF {

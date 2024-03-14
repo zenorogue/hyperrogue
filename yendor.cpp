@@ -986,6 +986,16 @@ void save_mode_data(hstream& f) {
     f.write<char>(bow::weapon);
     f.write<char>(bow::style);
     }
+  if(use_custom_land_list) {
+    f.write<char>(3);
+    f.write<int>(landtypes);
+    for(int i=0; i<landtypes; i++) {
+      f.write<char>(custom_land_list[i]);
+      f.write<int>(custom_land_treasure[i]);
+      f.write<int>(custom_land_difficulty[i]);
+      f.write<int>(custom_land_wandering[i]);
+      }
+    }
   }
 
 EX modecode_t modecode(int mode) {

@@ -685,6 +685,9 @@ EX void showChangeMode() {
   multi::cpid = 0;
   menuitem_land_structure('l');
 
+  dialog::addBoolItem(XLAT("custom land list"), use_custom_land_list, 'L');
+  dialog::add_action_push(customize_land_list);
+
   dialog::addBoolItem(XLAT("weapon selection"), bow::weapon, 'b');
   dialog::add_action_push(bow::showMenu);
 

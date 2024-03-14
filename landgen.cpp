@@ -171,8 +171,8 @@ EX void place_elemental_wall(cell *c) {
   else if(c->land == laEEarth) c->wall = waStone;
   }
 
-// automatically adjust monster generation for 3D geometries
-EX int hrand_monster(int x) {
+// automatically adjust monster generation for 3D geometries and custom difficulty
+EX int hrand_monster_in(eLand l, int x) {
   // dual geometry mode is much harder, so generate less monsters to balance it
   if(dual::state) x *= 3;
   // in 3D monster generation depends on the sight range
@@ -180,8 +180,14 @@ EX int hrand_monster(int x) {
     int t = isize(gmatrix);
     if(t > 500) x = int(((long long)(x)) * t / 500);
     }
+  if(use_custom_land_list) {
+    x = x * 100 / custom_land_difficulty[l];
+    if(x == 0) x = 1;
+    }
   return hrand(x);
   }
+
+#define hrand_monster(x) hrand_monster_in(c->land, x)
 
 EX bool is_zebra_trapdoor(cell *c) {
   if(euclid && closed_or_bounded) return false;
@@ -278,6 +284,12 @@ EX void place_random_gate_continuous(cell *c) {
 EX void gen_baby_tortoise(cell *c) {
   c->item = itBabyTortoise;
   tortoise::babymap[c] = tortoise::getb(c) ^ tortoise::getRandomBits();
+  }
+
+EX int rebalance_treasure(int x, int y, eLand l) {
+  int res = ((tactic::on || quotient == 2 || daily::on) ? (y) : inv::on ? min(2*(y),x) : (x));
+  if(use_custom_land_list) res = (res * custom_land_treasure[l] + 50) / 100;
+  return res;
   }
 
 EX void giantLandSwitch(cell *c, int d, cell *from) {
@@ -3138,5 +3150,7 @@ EX void setdist(cell *c, int d, cell *from) {
     mapeditor::applyModelcell(c);
 #endif
   }
+
+#undef hrand_monster
 
 }

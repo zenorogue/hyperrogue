@@ -1089,16 +1089,7 @@ EX void describeMouseover() {
   #endif
   }
 
-EX void showHelp() {
-  cmode = sm::HELP | sm::DOTOUR | sm::DARKEN;
-  getcstat = SDLK_ESCAPE;
-  if(help == "HELPFUN") {
-    help_delegate();
-    return;
-    }
-
-  gamescreen();
-  string help2;
+EX void addHelpWithTitle() {
   if(help[0] == '@') {
     int iv = help.find("\t");
     int id = help.find("\n");
@@ -1109,6 +1100,19 @@ EX void showHelp() {
     dialog::init("help", forecolor, 120, 100);
     dialog::addHelp(help);
     }
+  }
+
+EX void showHelp() {
+  cmode = sm::HELP | sm::DOTOUR | sm::DARKEN;
+  getcstat = SDLK_ESCAPE;
+  if(help == "HELPFUN") {
+    help_delegate();
+    return;
+    }
+
+  gamescreen();
+  string help2;
+  addHelpWithTitle();
   
   bool in_list = false;
 

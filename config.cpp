@@ -1663,6 +1663,18 @@ EX void initConfig() {
   
   param_i(stamplen, "stamplen");
   param_f(anims::period, "animperiod");
+
+  addsaver(use_custom_land_list, "customland_use");
+  for(int i=0; i<landtypes; i++) {
+    custom_land_list[i] = true;
+    custom_land_treasure[i] = 100;
+    custom_land_difficulty[i] = 100;
+    custom_land_wandering[i] = 100;
+    addsaver(custom_land_list[i], "customland" + its(i) + "i", true);
+    addsaver(custom_land_treasure[i], "customland" + its(i) + "t", 100);
+    addsaver(custom_land_difficulty[i], "customland" + its(i) + "d", 100);
+    addsaver(custom_land_wandering[i], "customland" + its(i) + "w", 100);
+    }
   }
 
 EX bool inSpecialMode() {
