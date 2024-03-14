@@ -1302,7 +1302,7 @@ LAND( 0x00C000, "Palace Quest", laPrincessQuest, ZERO, itSavedPrincess, RESERVED
 
 LAND( 0xD0D060, "Wild West", laWildWest, ZERO, itBounty, RESERVED, wildwestdesc)
   NATIVE((m == moOutlaw) ? 2 : 0)
-  REQ( NEVER )
+  REQ( ALWAYS )
 
 LAND( 0x80A080, "Land of Storms", laStorms, ZERO | LF_TROLL | LF_ELECTRIC, itFulgurite, RESERVED, elecdesc)
   NATIVE((m == moMetalBeast || m == moMetalBeast2 || m == moStormTroll) ? 1 : 0)
