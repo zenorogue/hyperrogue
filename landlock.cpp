@@ -562,6 +562,8 @@ EX eLand getNewLand(eLand old) {
     tab[cnt++] = laDocks;
     }
 
+  tab[cnt++] = laHalloween;
+
   // the advanced lands
   if(all_unlocked || gold() >= R60) {
     tab[cnt++] = laCrossroads;

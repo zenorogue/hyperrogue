@@ -1308,6 +1308,12 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
       break;
     
     case laHalloween:
+      if(!closed_or_bounded) {
+        ONEMPTY {
+          if(hrand(1000) < PT(20, 20)) c->item = itTreat;
+          if(hrand(1000) < 20) c->wall = waChasm;
+          }
+        }
       break;
     
     case laWildWest:
