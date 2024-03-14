@@ -552,7 +552,8 @@ EX eLand getNewLand(eLand old) {
   // the intermediate lands
   if(all_unlocked || gold() >= R30) {
     tab[cnt++] = laCrossroads;
-    tab[cnt++] = (geometry || ls::hv_structure()) ? laMirrorOld : laMirror;
+    tab[cnt++] = laMirrorOld;
+    tab[cnt++] = laMirror;
     tab[cnt++] = laOcean;
     tab[cnt++] = laLivefjord;
     if(all_unlocked || kills[moVizier]) tab[cnt++] = laEmerald;
