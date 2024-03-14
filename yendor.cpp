@@ -996,6 +996,14 @@ void save_mode_data(hstream& f) {
       f.write<int>(custom_land_wandering[i]);
       }
     }
+  if(ls::horodisk_structure()) {
+    f.write<char>(4);
+    f.write<int>(horodisk_from);
+    }
+  if(land_structure == lsChaosRW) {
+    f.write<char>(5);
+    f.write<int>(randomwalk_size);
+    }
   }
 
 EX modecode_t modecode(int mode) {
