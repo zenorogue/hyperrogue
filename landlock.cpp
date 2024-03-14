@@ -884,9 +884,11 @@ EX void customize_land_list() {
     if(custom_land_wandering[l] != 100) s += "^" + its(custom_land_wandering[l]) + " ";
     if(s != "") dialog::lastItem().value = s;
     dialog::add_action_confirmed([l] {
-      stop_game();
-      use_custom_land_list = true;
-      start_game();
+      if(!use_custom_land_list) {
+        stop_game();
+        use_custom_land_list = true;
+        start_game();
+        }
       pushScreen([l] { customize_land_in_list(l); });
       });
     }
@@ -899,6 +901,16 @@ EX void customize_land_list() {
     use_custom_land_list = !use_custom_land_list;
     start_game();
     });
+
+  if(use_custom_land_list) {
+    dialog::addItem("disable/enable all", 'D');
+    dialog::add_action([] {
+      int qty = 0;
+      for(int i=0; i<landtypes; i++) if(custom_land_list[i]) qty++;
+      for(int i=0; i<landtypes; i++) custom_land_list[i] = !qty;
+      });
+    }
+  else dialog::addBreak(100);
 
   dialog::addHelp();
   dialog::add_action([] {
