@@ -3212,7 +3212,7 @@ EX bool do_draw(cell *c) {
 EX ld extra_generation_distance = 99;
 
 // returns false if limited
-bool limited_generation(cell *c) {
+EX bool limited_generation(cell *c) {
   if(c->mpdist <= 7) return true;
   if(cells_generated > vid.cells_generated_limit) return false;
   setdist(c, 7, c);
@@ -3222,7 +3222,11 @@ bool limited_generation(cell *c) {
 
 EX int min_cells_drawn = 50;
 
+EX hookset<int(cell*,const shiftmatrix&)>  hooks_do_draw;
+
 EX bool do_draw(cell *c, const shiftmatrix& T) {
+  int h = callhandlers(0, hooks_do_draw, c, T);
+  if(h) return h > 0;
 
   if(WDIM == 3) {
     // do not care about cells outside of the track
