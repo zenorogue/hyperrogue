@@ -1136,8 +1136,10 @@ void blowoff(const movei& mi) {
   auto& ct = mi.t;
   bool die = cf->wall == waRichDie;
   playSound(ct, "orb-ranged");
-  if(cf->monst)
-  addMessage(XLAT("You blow %the1 away!", cf->monst));
+  if(cf->monst == moVoidBeast)
+    addMessage(XLAT("You blow %the1 closer!", cf->monst));
+  else if(cf->monst)
+    addMessage(XLAT("You blow %the1 away!", cf->monst));
   if(cf->wall == waThumperOff) activateActiv(cf, false);
   if(isPushable(cf->wall) || cf->wall == waBigStatue)
     pushThumper(mi);
@@ -1205,9 +1207,9 @@ EX bool monstersnearO(orbAction a, cell *c) {
 EX bool isCheck(orbAction a) { return a == roCheck || a == roMultiCheck; }
 EX bool isWeakCheck(orbAction a) { return a == roCheck || a == roMultiCheck || a == roMouse; }
 
-EX movei blowoff_destination(cell *c, int& di) {
+EX movei blowoff_destination_dir(cell *c, int& di, int rev) {
   int d = 0;
-  for(; d<c->type; d++) if(c->move(d) && c->move(d)->cpdist < c->cpdist) break;
+  for(; d<c->type; d++) if(c->move(d) && rev*c->move(d)->cpdist < rev*c->cpdist) break;
   if(d<c->type) for(int e=d; e<d+c->type; e++) {
     int di = e % c->type;
     cell *c2 = c->move(di);
@@ -1215,9 +1217,14 @@ EX movei blowoff_destination(cell *c, int& di) {
     if(dice::on(c) && !dice::can_roll(movei(c, di)))
       continue;
     #endif
-    if(c2 && c2->cpdist > c->cpdist && passable(c2, c, P_BLOW)) return movei(c, c2, di);
+    if(c2 && rev*c2->cpdist > rev*c->cpdist && passable(c2, c, P_BLOW)) return movei(c, c2, di);
     }
   return movei(c, c, NO_SPACE);
+  }
+
+EX movei blowoff_destination(cell *c, int& di) {
+  int rev = c->monst == moVoidBeast ? -1 : 1;
+  return blowoff_destination_dir(c, di, rev);
   }
 
 EX int check_jump(cell *cf, cell *ct, flagtype flags, cell*& jumpthru) {

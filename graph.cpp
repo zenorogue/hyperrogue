@@ -4930,9 +4930,10 @@ EX void drawMarkers() {
       }
     if(items[itOrbAir] && mouseover->cpdist > 1) {
       cell *c1 = mouseover;
+      int dir = c1->monst == moVoidBeast ? -1 : 1;
       for(int it=0; it<10; it++) {
         int di;
-        auto mib = blowoff_destination(c1, di);
+        auto mib = blowoff_destination_dir(c1, di, dir);
         if(!mib.proper()) break;
         auto& c2 = mib.t;
         shiftmatrix T1 = ggmatrix(c1);
