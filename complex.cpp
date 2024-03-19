@@ -2126,6 +2126,8 @@ EX namespace heat {
         if(c->monst == moDesertman) hmod += 4 * xrate;
         if(c->monst == moAngryDie) hmod += 4 * xrate;
         if(c->monst == moMonkey) hmod += xrate;
+        if(c->wall == waCharged) hmod += xrate * .25;
+        if(c->wall == waGrounded) hmod -= xrate * .25;
         if(c->wall == waDeadTroll) hmod -= 2 * xrate;
         if(c->wall == waDeadTroll2) hmod -= 1.5 * xrate;
         if(c->wall == waBigStatue) hmod -= .5 * xrate;
