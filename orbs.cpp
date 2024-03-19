@@ -822,7 +822,13 @@ void telekinesis(cell *dest) {
     }    
 
   moveItem(dest, cwt.at, true);
+  eItem it = cwt.at->item;
   collectItem(cwt.at, cwt.at, true);
+  if(cwt.at->item == it)
+    animateMovement(match(dest, cwt.at), LAYER_BOAT);
+  else
+    animate_item_throw(dest, cwt.at, it);
+
   useupOrb(itOrbSpace, cost.first);
   if(cost.second) 
     markOrb(itOrbMagnetism);

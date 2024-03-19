@@ -2510,7 +2510,7 @@ void celldrawer::draw_item_full() {
     }
   
   if(it) {
-    if((c->land == laWhirlwind || c->item == itBabyTortoise || c->land == laWestWall) && c->wall != waBoat) {
+    if(c->wall != waBoat) {
       double footphase = 0;
       applyAnimation(c, Vboat, footphase, LAYER_BOAT);
       }

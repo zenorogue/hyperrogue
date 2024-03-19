@@ -40,6 +40,7 @@ EX bool doPickupItemsWithMagnetism(cell *c) {
           changes.ccell(c3);
           changes.ccell(c4);
           moveItem(c3, c4, false);
+          animateMovement(match(c3, c4), LAYER_BOAT);
           moveEffect(movei(c4, c4, NODIR), moDeadBird);
           markOrb(itCurseRepulsion);
           }
