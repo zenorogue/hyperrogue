@@ -489,7 +489,7 @@ bool pcmove::swing() {
   mirror::act(origd, mirror::SPINMULTI | mirror::ATTACK);
   
   if(monstersnear_add_pmi(movei(cwt.at, STAY))) {
-    if(vmsg_threat())
+    if(nextmovetype == lmAttack ? vmsg(miWALL, siWALL, mi.t, who_kills_me) : vmsg_threat())
       wouldkill("You would be killed by %the1!");          
     return false;
     }
