@@ -85,6 +85,9 @@ static constexpr flagtype w_less_smart_advance = Flag(23); /*< stop early when e
 static constexpr flagtype w_no_queued_extensions = Flag(24); /*< consider extensions one by one */
 static constexpr flagtype w_no_branch_skipping = Flag(24); /*< do not skip branches */
 
+/* extra */
+static constexpr flagtype w_optimize2 = Flag(25); /*< optimize in 2D */
+
 /* for 3D honeycombs */
 static constexpr flagtype w_skip_transducers = Flag(32); /*< skip the transducer test */
 static constexpr flagtype w_skip_transducer_loops = Flag(33); /*< skip loops during the transducer test */
@@ -2000,6 +2003,8 @@ EX void rules_iteration() {
       }
     if(examine_branch(id, fb, sb)) checks_to_skip.insert(b);
     };
+
+  if(WDIM == 2 && (flags & w_optimize2)) optimize();
 
   if(WDIM == 2) for(int id=0; id<isize(treestates); id++) if(treestates[id].is_live) {
     auto r = treestates[id].rules; /* no & because treestates might have moved */

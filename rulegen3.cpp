@@ -1430,7 +1430,7 @@ EX void optimize() {
 
   int N = isize(treestates);
 
-  println(hlog, "optimize: changes = ", changes, " errors = ", errors, " unreachable = ", N - isize(seen));
+  if(rdebug_flags & 64) println(hlog, "optimize: changes = ", changes, " errors = ", errors, " unreachable = ", N - isize(seen));
 
   if(errors) throw rulegen_retry("error found in optimize");
 
@@ -1471,7 +1471,7 @@ EX void optimize() {
       }
     }
 
-  if(steps) { println(hlog, "steps = ", steps); throw rulegen_retry("unreachable found in optimize"); }
+  if(steps) { if(rdebug_flags & 64) println(hlog, "steps = ", steps); throw rulegen_retry("unreachable found in optimize"); }
 
   important.clear();
   for(auto s: seen) important.push_back(treestates[s].giver);
