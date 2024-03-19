@@ -2581,7 +2581,7 @@ void celldrawer::draw_monster_full() {
   bool dm = drawMonster(V, c->type, c, moncol, asciicol);
   if(dm) onradar = false; 
   #if CAP_SHAPES
-  if(isize(ptds) != q) {
+  if(isize(ptds) != q && !(c == lmouseover_distant && isDie(c->monst))) {
     if(WDIM == 2 && GDIM == 3 && abs(cgi.SLEV[sl] - cgi.FLOOR) > 1e-6)
       pushdown(c, q, V, cgi.SLEV[sl] - cgi.FLOOR, false, false);
     if(GDIM ==2 && abs(geom3::factor_to_lev(zlevel(tC0(Vboat.T)))) > 1e-6)
