@@ -940,7 +940,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           bool okay = true;
           forCellCM(c2, c) forCellCM(c3, c2) forCellCM(c4, c3) forCellCM(c5, c4) {
             cell *cx = ls::any_chaos() ? c3 : c5;
-            if(cx->land != laTrollheim && cx->land != laNone)
+            if(cx->land != laTrollheim && cx->land != laNone && !ls::hv_structure())
               okay = false;
             if(cx->bardir != NODIR) okay = false;
             }
