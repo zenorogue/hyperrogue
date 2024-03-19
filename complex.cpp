@@ -2484,7 +2484,9 @@ EX void livecaves() {
       if(hv > 0 && c->wall == waNone) {
         if(c->item && c->cpdist == 1 && markOrb(itOrbWater)) {
           bool saf = c->item == itOrbSafety;
+          eItem it = c->item;
           collectItem(c, c);
+          if(it && !c->item) animate_item_throw(c, cwt.at, it);
           if(saf) return;
           }
         c->wall = waSea;

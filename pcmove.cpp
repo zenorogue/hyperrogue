@@ -1311,7 +1311,11 @@ bool pcmove::perform_actual_move() {
     forCellEx(c3, c2) if(c3->wall == waIcewall && c3->item) {
       changes.ccell(c3);
       markOrb(itOrbWinter);
-      if(collectItem(c3, cwt.at)) return true;
+      eItem it = c3->item;
+      if(collectItem(c3, cwt.at))
+        return true;
+      if(!c3->item)
+        animate_item_throw(c3, c2, it);
       }
   
   movecost(cwt.at, c2, 2);
