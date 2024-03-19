@@ -1566,6 +1566,7 @@ void minimize_rules() {
   int new_ids = 0;
   
   for(int id=0; id<next_id; id++) {
+    if(treestates[id].giver.at == nullptr) { new_id[id] = new_ids++; println(hlog, "no giver in minimize_rules for state ", id); continue; }
     auto aid = get_aid(treestates[id].giver);
     
     if(!new_id_of.count(aid)) new_id_of[aid] = new_ids++;
