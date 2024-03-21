@@ -2317,7 +2317,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           int d = -celldistAlt(c);
           if(hrand_monster(2500) < items[itMutant2] + yendor::hardness() - 10 && !reptilecheat)
             c->monst = moRedFox;
-          else if(hrand(100 + d) < d && !reptilecheat)
+          else if(d > 0 && hrand(100 + d) < d && !reptilecheat)
             c->item = itMutant2;          
           }
         }
