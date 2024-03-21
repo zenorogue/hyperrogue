@@ -848,7 +848,7 @@ void celldrawer::draw_grid() {
   int prec = grid_prec();
   
   if(vid.grid && c->bardir != NODIR && c->bardir != NOBARRIERS && c->land != laHauntedWall &&
-    c->barleft != NOWALLSEP_USED && GDIM == 2) {
+    c->barleft != NOWALLSEP_USED && GDIM == 2 && geometry == gNormal && (PURE || BITRUNCATED)) {
     color_t col = darkena(0x505050, 0, 0xFF);
     gridline(V, C0, tC0(cgi.heptmove[c->bardir]), col, prec+1);
     gridline(V, C0, tC0(cgi.hexmove[c->bardir]), col, prec+1);
