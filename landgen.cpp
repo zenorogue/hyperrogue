@@ -201,7 +201,6 @@ EX bool is_zebra_trapdoor(cell *c) {
   else if(PURE && reg3::exact_rules()) switch(geometry) {
     case gSpace534: {
       if(c->master->fieldval == 0) return true;
-      forCellCM(c1, c) if(c1->master->fieldval == 0) return true;
       return false;
       }
     case gSpace435: {
