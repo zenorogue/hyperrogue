@@ -846,9 +846,9 @@ EX void draw_ascii(const shiftmatrix& V, char glyph, color_t col, ld size) {
   string s = s0 + glyph;
   int id = isize(ptds);
   if(WDIM == 2 && GDIM == 3)
-    queuestrn(V * lzpush(cgi.FLOOR - cgi.scalefactor * size / 4), size, s, darkenedby(col, darken), 0);
+    queuestrn(V * lzpush(cgi.FLOOR - cgi.scalefactor * size / 4), size * mapfontscale / 100, s, darkenedby(col, darken), 0);
   else 
-    queuestrn(V, 1, s, darkenedby(col, darken), GDIM == 3 ? 0 : 2);
+    queuestrn(V, mapfontscale / 100, s, darkenedby(col, darken), GDIM == 3 ? 0 : 2);
   while(id < isize(ptds)) ptds[id++]->prio = PPR::MONSTER_BODY;
   }
 
@@ -3103,15 +3103,15 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
       col = mirrorcolor(geometry == gElliptic ? det(Vs.T) < 0 : mirr);
       if(!mouseout() && !nospins && GDIM == 2) {
         shiftpoint P2 = Vs * inverse_shift(inmirrorcount ? ocwtV : cwtV, mouseh);
-        queuestr(P2, 10, "x", 0xFF00);
-        }     
+        queuestr(P2, 10*mapfontscale/100, "x", 0xFF00);
+        }
       if(!nospins && flipplayer) Vs = Vs * lpispin();
-      
+
       res = res && drawMonsterType(moMimic, c, Vs, col, footphase, asciicol);
       drawPlayerEffects(Vs, Vparam, c, c->monst);
       }
     }
-  
+
   // illusions face randomly
   
   else if(c->monst == moIllusion) {
@@ -3235,7 +3235,7 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
       hyperpoint h = inverse_shift(ocwtV, mouseh);
       if(flipplayer) h = lpispin() * h;
       shiftpoint P2 = Vs * h;
-      queuestr(P2, 10, "x", 0xFF00);
+      queuestr(P2, mapfontscale / 10, "x", 0xFF00);
       }
     
     if(hide_player()) {
@@ -3573,7 +3573,7 @@ void draw_movement_arrows(cell *c, const transmatrix& V, int df) {
         transmatrix T = iso_inverse(Centered) * rgpushxto0(Centered * tC0(V)) * lrspintox(Centered*tC0(V)) * spin(-sd * M_PI/S7) * xpush(0.2);
         
         if(vid.axes >= 5)
-          queuestr(shiftless(T), keysize, s0 + key, col >> 8, 1);
+          queuestr(shiftless(T), keysize * mapfontscale / 100, s0 + key, col >> 8, 1);
         
         else
           queuepoly(shiftless(T), cgi.shArrow, col);
@@ -3581,7 +3581,7 @@ void draw_movement_arrows(cell *c, const transmatrix& V, int df) {
       else if(!confusingGeometry()) break;
       }
     }
-  if(keylist != "") queuestr(shiftless(V), keysize, keylist, col >> 8, 1);
+  if(keylist != "") queuestr(shiftless(V), keysize * mapfontscale / 100, keylist, col >> 8, 1);
   }
 
 EX int celldistAltPlus(cell *c) { return 1000000 + celldistAlt(c); }
@@ -4761,7 +4761,7 @@ EX void drawMarkers() {
     #if CAP_QUEUE
     if(haveMount())
       for (const shiftmatrix& V : hr::span_at(current_display->all_drawn_copies, dragon::target)) {
-        queuestr(V, 1, "X",
+        queuestr(V, mapfontscale/100, "X",
           gradient(0, iinf[itOrbDomination].color, -1, sintick(dragon::whichturn == turncount ? 75 : 150), 1));
         }
     #endif
@@ -4994,12 +4994,12 @@ EX void draw_flash(struct flashdata& f, const shiftmatrix& V, bool& kill) {
     int r = 2;
     apply_neon(col, r);
     if(GDIM == 3 || sphere)
-      queuestr(V, (1 - tim * 1. / f.size) * f.angle, f.text, col, r);
+      queuestr(V, (1 - tim * 1. / f.size) * f.angle * mapfontscale / 100, f.text, col, r);
     else if(!kill) {
       shiftpoint h = tC0(V);
       if(hdist0(h) > .1) {
         transmatrix V2 = rspintox(h.h) * xpush(hdist0(h.h) * (1 / (1 - tim * 1. / f.size)));
-        queuestr(shiftless(V2, h.shift), f.angle, f.text, col, r);
+        queuestr(shiftless(V2, h.shift), f.angle * mapfontscale / 100, f.text, col, r);
         }
       }
     if(static_bubbles) {

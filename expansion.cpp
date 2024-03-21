@@ -655,7 +655,7 @@ void celldrawer::do_viewdist() {
   if(!dist_label_colored) dc = dist_label_color;
 
   if(label != "")
-    queuestr(V, (isize(label) > 1 ? .6 : 1), label, 0xFF000000 + dc, 1);
+    queuestr(V, (isize(label) > 1 ? .6 : 1) * mapfontscale / 100, label, 0xFF000000 + dc, 1);
   }
 
 EX void viewdist_configure_dialog() {

@@ -1634,7 +1634,7 @@ void celldrawer::draw_features() {
       if(numerical_minefield) {
         if(mines) {
           string label = its(mines);
-          queuestr(V, mines >= 10 ? .5 : 1, label, darkened(minecolors[mines]), 8);
+          queuestr(V, (mines >= 10 ? .5 : 1) * mapfontscale / 100, label, darkened(minecolors[mines]), 8);
           }
         }
       else {
@@ -2079,7 +2079,7 @@ void celldrawer::draw_cellstat() {
   
   if(c->land == laMirrored || c->land == laMirrorWall2 || c->land == laMirrored2) {
     string label = its(c->landparam);
-    queuestr(V, 1 * .2, label, 0xFFFFFFFF, 1);
+    queuestr(V, mapfontscale / 500, label, 0xFFFFFFFF, 1);
     }
 
   if(debug_tiles && mod_allowed()) {
@@ -2105,22 +2105,22 @@ void celldrawer::draw_cellstat() {
 #endif
     else
       label = its(shvid(c));
-    queuestr(V, .5, label, 0xFFFFFFFF, 1);
+    queuestr(V, mapfontscale / 200, label, 0xFFFFFFFF, 1);
     for(int i=0; i<c->type; i++) {
-      queuestr(V * rgpushxto0(currentmap->get_corner(c, i, 4)), .2, its(i), 0xFFFFFFFF, 1);
-      queuestr(V * rgpushxto0(mid(currentmap->get_corner(c, i, 4), currentmap->get_corner(c, i+1, 5))), .2, its(i), 0xFFFFFFFF, 1);
+      queuestr(V * rgpushxto0(currentmap->get_corner(c, i, 4)), mapfontscale / 500, its(i), 0xFFFFFFFF, 1);
+      queuestr(V * rgpushxto0(mid(currentmap->get_corner(c, i, 4), currentmap->get_corner(c, i+1, 5))), mapfontscale / 500, its(i), 0xFFFFFFFF, 1);
       }
     }
 
   if(debug_voronoi && ls::voronoi_structure() && mod_allowed()) {
     auto p = get_voronoi_winner(c);
-    queuestr(V, .2, its(p.second), index_pointer_int(p.first) * 0x7F3015, 1);
+    queuestr(V, mapfontscale / 500, its(p.second), index_pointer_int(p.first) * 0x7F3015, 1);
     }
     
   if(cmode & sm::TORUSCONFIG) {
     auto p = euc::coord_display(V, c);
     if(p.second != "")
-      queuestr(V, p.first ? .2 : .6, p.second, p.first ? 0xFFFFFFD0 : 0xFFFF0040, 1);
+      queuestr(V, (p.first ? .2 : .6) * mapfontscale / 100, p.second, p.first ? 0xFFFFFFD0 : 0xFFFF0040, 1);
     }
 
   #if CAP_EDIT
@@ -2135,13 +2135,13 @@ void celldrawer::draw_cellstat() {
     
     string label = its(si.id & 255);
     color_t col = forecolor ^ colorhash(si.id >> 8);
-    queuestr(V, .5, label, 0xFF000000 + col);
+    queuestr(V, mapfontscale / 200, label, 0xFF000000 + col);
     }
   #endif
 
   if(debug_cellnames && pointer_indices.count(c)) {
     shstream ss; print(ss, c);
-    queuestr(V, .5, ss.s, 0xFFFFFFFF);    
+    queuestr(V, mapfontscale / 200, ss.s, 0xFFFFFFFF);    
     queuepoly(V * ddspin(c, 0), cgi.shAsymmetric, darkena(0x000000, 0, 0xC0));
     }
   }
@@ -2962,7 +2962,7 @@ void celldrawer::draw() {
       string s = s0+asciichar;
       dynamicval<color_t> p(poly_outline, asciiborder << 8);
       if(!wmascii3)
-        queuestrn(V, 1, s, darkenedby(asciicol, darken), 2);
+        queuestrn(V, mapfontscale / 100, s, darkenedby(asciicol, darken), 2);
       else if(highwall(c) && conegraph(c)) {
         const int layers = 1 << detaillevel;
         string s1 = s0+asciichar1;
@@ -2970,7 +2970,7 @@ void celldrawer::draw() {
         for(int z=0; z<layers; z++)
           queuestrn(orthogonal_move_fol(V, zgrad0(0, geom3::actual_wall_height(), z, layers)), 1. - z * .5 / layers, s1, darkenedby(gradient(bordcolor, asciicol1, -layers, z, layers), darken), 1);
         poly_outline = asciiborder << 8;
-        queuestrn(orthogonal_move_fol(V, cgi.WALL), asciicol == asciicol1 && asciichar == asciichar1 ? .5 : 1, s, darkenedby(asciicol, darken), 2);
+        queuestrn(orthogonal_move_fol(V, cgi.WALL), (asciicol == asciicol1 && asciichar == asciichar1 ? .5 : 1) * mapfontscale / 100, s, darkenedby(asciicol, darken), 2);
         }
       else if(highwall(c)) {
         const int layers = 1 << detaillevel;
@@ -2979,15 +2979,15 @@ void celldrawer::draw() {
         for(int z=0; z<layers; z++)
           queuestrn(orthogonal_move_fol(V, zgrad0(0, geom3::actual_wall_height(), z, layers)), 1, s1, darkenedby(gradient(bordcolor, asciicol1, -layers, z, layers), darken), 1);
         poly_outline = asciiborder << 8;
-        queuestrn(orthogonal_move_fol(V, cgi.WALL), 1, s, darkenedby(asciicol, darken), 2);
+        queuestrn(orthogonal_move_fol(V, cgi.WALL), mapfontscale / 100, s, darkenedby(asciicol, darken), 2);
         }
       else if((sl = snakelevel(c))) {
         string s1 = s0+asciichar1;
         poly_outline = bordcolor << 8;
         for(int z=0; z<sl*4; z++) if(z%4 == 0)
-          queuestrn(orthogonal_move_fol(V, zgrad0(0, cgi.slev * sl, z, sl*4)), 1, s1, darkenedby(gradient(bordcolor, asciicol1, -sl, z, sl*4), darken), 1);
+          queuestrn(orthogonal_move_fol(V, zgrad0(0, cgi.slev * sl, z, sl*4)), mapfontscale / 100, s1, darkenedby(gradient(bordcolor, asciicol1, -sl, z, sl*4), darken), 1);
         poly_outline = asciiborder << 8;
-        queuestrn(orthogonal_move_fol(V, cgi.SLEV[sl]), 1, s, darkenedby(asciicol, darken), 2);
+        queuestrn(orthogonal_move_fol(V, cgi.SLEV[sl]), mapfontscale / 100, s, darkenedby(asciicol, darken), 2);
         }
 //      else if(c->wall == waChasm) {
 //        const int layers = 1 << detaillevel;
@@ -2996,12 +2996,12 @@ void celldrawer::draw() {
       else if(chasmgraph(c)) {
         string s1 = s0+asciichar1;
         poly_outline = bordcolor << 8;
-        queuestrn(orthogonal_move_fol(V, cgi.BOTTOM), 1, s1, darkenedby(gradient(bordcolor, asciicol1, 0, 0.3, 1), darken), 2);
+        queuestrn(orthogonal_move_fol(V, cgi.BOTTOM), mapfontscale / 100, s1, darkenedby(gradient(bordcolor, asciicol1, 0, 0.3, 1), darken), 2);
         poly_outline = asciiborder << 8;
-        queuestrn(V, 1, s, darkenedby(asciicol, darken), 2);
+        queuestrn(V, mapfontscale / 100, s, darkenedby(asciicol, darken), 2);
         }
       else
-        queuestrn(V, 1, s, darkenedby(asciicol, darken), 2);
+        queuestrn(V, mapfontscale / 100, s, darkenedby(asciicol, darken), 2);
       }
     
     draw_grid();

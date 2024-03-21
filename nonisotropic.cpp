@@ -2358,7 +2358,7 @@ EX namespace rots {
       ptds.clear();
       drawthemap();
       drawqueue();
-      displaychr(current_display->xcenter, current_display->ycenter, 0, 24, '+', 0xFFFFFFFF);
+      displaychr(current_display->xcenter, current_display->ycenter, 0, 24 * mapfontscale / 100, '+', 0xFFFFFFFF);
       glflush();
       });
     gmatrix = std::move(g);

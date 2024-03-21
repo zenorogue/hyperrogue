@@ -146,7 +146,7 @@ EX void draw_radar(bool cornermode) {
     auto compassdir = [&] (char dirname, hyperpoint h) {
       h = NLP * h * .8;
       queueline(sId*atscreenpos(cx+rad * h[0], cy - rad * h[2] * si + rad * h[1] * co, 0)*C0, sId*atscreenpos(cx+rad*h[0], cy - rad*h[2] * si, 0)*C0, 0xA0401040, -1);
-      displaychr(int(cx+rad * h[0]), int(cy - rad * h[2] * si + rad * h[1] * co), 0, 8, dirname, 0xA04010);
+      displaychr(int(cx+rad * h[0]), int(cy - rad * h[2] * si + rad * h[1] * co), 0, 8 * mapfontscale / 100, dirname, 0xA04010);
       };
     compassdir('E', point3(+1, 0, 0));
     compassdir('N', point3(0, +1, 0));
@@ -180,10 +180,10 @@ EX void draw_radar(bool cornermode) {
   glflush();
   
   for(auto& r: cd->radarpoints) {
-    if(d3) displaychr(int(cx + rad * r.h[0]), int(cy - rad * r.h[2] * si + rad * r.h[1] * co), 0, 8, r.glyph, r.color);
+    if(d3) displaychr(int(cx + rad * r.h[0]), int(cy - rad * r.h[2] * si + rad * r.h[1] * co), 0, 8 * mapfontscale / 100, r.glyph, r.color);
     else {
       hyperpoint h = locate(r.h);
-      displaychr(int(h[0]), int(h[1]), 0, int(h[2]) / divby, r.glyph, r.color);
+      displaychr(int(h[0]), int(h[1]), 0, int(h[2]) * mapfontscale / divby / 100, r.glyph, r.color);
       }
     }
 #endif

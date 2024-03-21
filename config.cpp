@@ -1028,6 +1028,8 @@ EX void savecolortable(colortable& ct, string name) {
 
 EX purehookset hooks_configfile;
 
+EX ld mapfontscale = 100;
+
 EX void initConfig() {
   
   // basic config
@@ -1079,6 +1081,13 @@ EX void initConfig() {
   -> editable(25, 400, 10, "font scale", "", 'b')
   -> set_reaction(compute_fsize)
   -> set_sets([] { dialog::bound_low(0); });
+
+  param_f(mapfontscale, "mapfontscale", 100)
+  -> editable(-400, 400, 10, "map font scale",
+      "This affects the size of the characters on the ASCII map. This includes ASCII walls/monster display mode, the minimap, minefield values, and various debug features.", 'B')
+  ->set_extra([] {
+    dialog::get_di().extra_options = [] () { draw_radar(true); };
+    });
 
   param_i(vid.abs_fsize, "fsize", 12)
   -> editable(1, 72, 1, "font size", "", 'b')
@@ -2236,6 +2245,7 @@ EX void showGraphConfig() {
     add_edit(vid.fontscale);
   else
     add_edit(vid.abs_fsize);
+  add_edit(mapfontscale);
 
   dialog::addSelItem(XLAT("vector settings"), XLAT("width") + " " + fts(vid.linewidth), 'w');
   dialog::add_action_push(show_vector_settings);
