@@ -2112,7 +2112,7 @@ void celldrawer::draw_cellstat() {
       }
     }
 
-  if(debug_voronoi && ls::voronoi_structure() && mod_allowed()) {
+  if(debug_voronoi && ls::hv_structure() && mod_allowed()) {
     auto p = get_voronoi_winner(c);
     queuestr(V, mapfontscale / 500, its(p.second), index_pointer_int(p.first) * 0x7F3015, 1);
     }
