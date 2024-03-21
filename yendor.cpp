@@ -1004,6 +1004,10 @@ EX void save_mode_data(hstream& f) {
     f.write<char>(5);
     f.write<int>(randomwalk_size);
     }
+  if(land_structure == lsLandscape) {
+    f.write<char>(6);
+    f.write<int>(landscape_div);
+    }
   }
 
 EX void load_mode_data_with_zero(hstream& f) {
@@ -1060,6 +1064,10 @@ EX void load_mode_data_with_zero(hstream& f) {
 
       case 5:
         randomwalk_size = f.get<int>();
+        break;
+
+      case 6:
+        landscape_div = f.get<int>();
         break;
 
       default:

@@ -3330,7 +3330,12 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
     "larger values might produce horodisks with errors or crashing into each other.", 'H');
   param_i(randomwalk_size, "randomwalk_size", 10)->editable(2, 100, 1,
     "land size in randomwalk mode",
-    "The average size of a land in randomwalk mode.", 'R');
+    "The average size of a land in randomwalk mode.", 'R')
+  ->set_reaction([] { if(game_active) { stop_game(); start_game(); } });
+  param_i(landscape_div, "landscape_div", 32)->editable(1, 100, 1,
+    "land size in landscape mode",
+    "The bigger the value, the larger the lands.", 'R')
+  ->set_reaction([] { if(game_active) { stop_game(); start_game(); } });
 
   param_f(global_boundary_ratio, "global_boundary_ratio")
   ->editable(0, 5, 0.1, "Width of cell boundaries",

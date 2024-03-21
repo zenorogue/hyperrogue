@@ -2900,11 +2900,23 @@ EX void share_land(cell *c, cell *c2) {
   c->land = c2->land;
   }
 
-EX void set_land_for_geometry(cell *c) {
+EX int landscape_div = 32;
 
+EX void set_land_for_geometry(cell *c) {
   if(!c->land && isize(currentlands)) {
     if(land_structure == lsTotalChaos) {
       setland(c, random_land());
+      return;
+      }
+    if(land_structure == lsLandscape) {
+      if(landscape_div < 0) landscape_div = 0;
+      int shift = landscape_div / 2;
+      int a0 = getCdata(c, 0) + shift;
+      int a1 = getCdata(c, 1) + shift;
+      int a2 = getCdata(c, 2) + shift;
+      eLand& l = landscape_lands[{a0/landscape_div,a1/landscape_div,a2/landscape_div}];
+      if(l == laNone) l = random_land();
+      setland(c, l);
       return;
       }
      /* note: Nil patched chaos done in setLandNil */
@@ -3008,7 +3020,7 @@ EX void setdist(cell *c, int d, cell *from) {
       }
     #endif
   
-    if(!c->land && from && (WDIM == 3 || !among(from->land, laBarrier, laElementalWall, laHauntedWall, laOceanWall)) && !quotient && ls::chaoticity() < 60) {
+    if(!c->land && from && (WDIM == 3 || !among(from->land, laBarrier, laElementalWall, laHauntedWall, laOceanWall)) && !quotient && ls::chaoticity() < 60 && land_structure != lsLandscape) {
       if(!hasbardir(c)) setland(c, from->land);
       }
     if(c->land == laTemple && ls::any_order()) setland(c, laRlyeh);

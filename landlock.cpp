@@ -81,7 +81,7 @@ EX eLand firstland = laIce;
 EX eLand specialland = laIce;
 
 #if HDR
-enum eLandStructure { lsNiceWalls, lsChaos, lsPatchedChaos, lsTotalChaos, lsChaosRW, lsWallChaos, lsSingle, lsNoWalls, lsHorodisks, lsVoronoi, lsGUARD };
+enum eLandStructure { lsNiceWalls, lsChaos, lsPatchedChaos, lsTotalChaos, lsChaosRW, lsWallChaos, lsSingle, lsNoWalls, lsHorodisks, lsVoronoi, lsLandscape, lsGUARD };
 #endif
 
 EX eLandStructure land_structure;
@@ -90,7 +90,7 @@ EX namespace ls {
 
 EX bool single() { return land_structure == lsSingle; }
 
-EX bool any_chaos() { return among(land_structure, lsChaos, lsPatchedChaos, lsWallChaos, lsTotalChaos, lsChaosRW); }
+EX bool any_chaos() { return among(land_structure, lsChaos, lsPatchedChaos, lsWallChaos, lsTotalChaos, lsChaosRW, lsLandscape); }
 EX bool std_chaos() { return land_structure == lsChaos; }
 EX bool wall_chaos() { return land_structure == lsWallChaos; }
 EX bool patched_chaos() { return land_structure == lsPatchedChaos; }
@@ -110,6 +110,7 @@ EX int chaoticity() {
   if(land_structure == lsChaosRW) return 80;
   if(land_structure == lsPatchedChaos) return 60;
   if(land_structure == lsChaos) return 40;
+  if(land_structure == lsLandscape) return 35;
   if(land_structure == lsWallChaos) return 30;
   if(land_structure == lsVoronoi) return 20;
   if(land_structure == lsSingle) return 0;
@@ -139,6 +140,8 @@ EX string land_structure_name(bool which) {
       return XLAT("horodisks");
     case lsVoronoi:
       return XLAT("ideal Voronoi");
+    case lsLandscape:
+      return XLAT("landscape");
     case lsNoWalls:
       return XLAT("wall-less");
     default:
@@ -151,6 +154,8 @@ EX void fix_land_structure_choice() {
     if(land_structure != lsTotalChaos && land_structure != lsChaosRW)
       land_structure = lsSingle;
     }
+  if(land_structure == lsLandscape && !geometry_supports_cdata())
+    land_structure = lsChaosRW;
   if(tactic::on || princess::challenge)
     land_structure = lsSingle;
   if(yendor::on)
