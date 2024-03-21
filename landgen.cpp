@@ -1238,7 +1238,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
       if(fargen) {
         if(hrand(500) < 15) 
           createArrowTrapAt(c, laTerracotta);
-        if(pseudohept(c) && hrand(100) < 40 && c->wall == waNone && !racing::on) {
+        if(pseudohept_r(c) && hrand(100) < 40 && c->wall == waNone && !racing::on) {
           c->wall = waTerraWarrior;
           c->wparam = terracotta::randterra ? 0 : 3 + hrand(3);
           if(hrand(100) < items[itTerra]-10)
@@ -1521,7 +1521,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
       if(fargen) {
         if(randomPatternsMode)
           c->wall = RANDPAT ? ((RANDPATV(laCrossroads) || RANDPATV(laCrossroads2)) ? waAncientGrave : waFreshGrave) : waNone;
-        else if(pseudohept(c)) 
+        else if(pseudohept_r(c))
           c->wall = hrand(5) ? waAncientGrave : waFreshGrave;
         }
       ONEMPTY {
@@ -1554,7 +1554,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
                 c->move(i)->wall = waNone;
               }
             }
-          if(pseudohept(c) && hrand(2)) c->wall = waColumn;
+          if(pseudohept_r(c) && hrand(2)) c->wall = waColumn;
           }
         }
       ONEMPTY {
@@ -2273,7 +2273,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           c->monst = moMonkey;
         else if(hrand_monster(80000) < 5 + items[itRuby] + yendor::hardness())
           c->monst = moEagle;
-        else if(pseudohept(c) && c != currentmap->gamestart() && hrand_monster(4000) < 300 + items[itRuby] && !c->monst) {
+        else if(pseudohept_r(c) && c != currentmap->gamestart() && hrand_monster(4000) < 300 + items[itRuby] && !c->monst) {
           int hardchance = items[itRuby] + yendor::hardness();
           if(hardchance > 25) hardchance = 25;
           bool hardivy = hrand(100) < hardchance;

@@ -1493,13 +1493,20 @@ EX bool pseudohept(cell *c) {
   #endif
   if(arb::in()) return arb::pseudohept(c);
   #if CAP_GP
-  if(INVERSE) return false;
+  if(INVERSE) return gp::inverse_pseudohept(c);
   if(GOLDBERG && gp_threecolor() == 2)
     return gp::pseudohept_val(c) == 0;
   if(GOLDBERG && gp_threecolor() == 1 && (S7&1) && (S3 == 3))
     return gp::pseudohept_val(c) == 0;
   #endif
   return pattern_threecolor(c) == 0;
+  }
+
+/** like pseudohept, but return randomly if no pseudohept is available */
+EX bool pseudohept_r(cell *c) {
+  if(UNTRUNCATED || UNRECTIFIED)
+    return hrand(100) < 20;
+  return pseudohept(c);
   }
 
 // while Krakens movement is usually restricted to non-pseudohept cells,

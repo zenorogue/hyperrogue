@@ -1441,10 +1441,16 @@ EX namespace gp {
       return C0;
       }
     };
-  
+
   EX hrmap* new_inverse() { return new hrmap_inverse; }
   
   hrmap_inverse* inv_map() { return (hrmap_inverse*)currentmap; }
+
+  EX bool inverse_pseudohept(cell *c) {
+    cell *c1 = inv_map()->mapping[c];
+    if(!c1) return false;
+    return UIU(pseudohept(c1));
+    }
 
   EX hrmap* get_underlying_map() { return inv_map()->underlying_map; }
   EX cell* get_mapped(cell *c) { return inv_map()->get_mapped(c, 0); }
