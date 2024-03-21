@@ -1134,7 +1134,7 @@ EX land_validity_t& land_validity(eLand l) {
   if(l == laWhirlwind && hyperbolic_not37)
     return pattern_incompatibility;
 
-  bool better_mirror = !geometry && STDVAR && !ls::hv_structure();
+  bool better_mirror = !geometry && STDVAR && !ls::hv_structure() && !among(land_structure, lsTotalChaos, lsPatchedChaos, lsLandscape);
 
   // available only in non-standard geometries
   if(l == laMirrorOld && better_mirror)
