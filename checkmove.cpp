@@ -399,6 +399,11 @@ EX void create_yasc_message() {
   println(hlog, "YASC_MESSAGE: ", yasc_message);
   }
 
+int yasc_recode(int x) {
+  if(cwt.at->type < 10 || x == 0) return x;
+  return yasc_recode(x / 10) * 100 + (x % 10);
+  };
+
 EX void checkmove() {
 
   if(dual::state == 2) return;
@@ -443,7 +448,7 @@ EX void checkmove() {
   
   yasc_code = 0;
   for(int i=0; i<cwt.at->type; i++)
-    yasc_code += move_issues[i].type;
+    yasc_code += yasc_recode(move_issues[i].type);
 
   if(!canmove && bow::crossbow_mode() && !items[itCrossbow]) canmove = bow::have_bow_target();
 

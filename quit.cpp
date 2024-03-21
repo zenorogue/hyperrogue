@@ -32,6 +32,17 @@ EX string getgametime_s(int timespent IS(getgametime())) {
 
 EX bool display_yasc_codes;
 
+string formatted_yasc_code() {
+  if(yasc_code < 100000) return its(yasc_code);
+  int y = yasc_code;
+  string out;
+  while(y >= 100) {
+    out = "-" + its(y%100) + out;
+    y /= 100;
+    }
+  return its(y) + out;
+  }
+
 string timeline() {
   string s;
   if(shmup::on)
@@ -39,7 +50,7 @@ string timeline() {
   else {
     s = XLAT("%1 turns (%2)", its(turncount), getgametime_s());
     if(display_yasc_codes)
-      s+= XLAT(" YASC code: ") + its(yasc_code);
+      s+= XLAT(" YASC code: ") + formatted_yasc_code();
     }
   return s;
   }
