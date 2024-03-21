@@ -646,7 +646,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
             c->wall = waCavewall;
           else c->wall = waCavefloor;
           }
-        else if(a4 || arcm::in() || cryst)
+        else if(a4 || arcm::in() || cryst || bt::in() || S3 >= OINF)
           c->wall = hrand(100) < 50 ? waCavefloor : waCavewall;
         else if(!BITRUNCATED) {
           if(polarb50(c)) 
@@ -823,7 +823,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           }
         else if(WDIM == 3 && hyperbolic && !bt::in())
           c->wall = (c->master->zebraval & 2) ? waVinePlant : waNone;
-        else if(a4 || sphere || arcm::in())
+        else if(a4 || sphere || arcm::in() || bt::in() || S3 >= OINF)
           c->wall = hrand(100) < 50 ? waNone : waVinePlant;
         else {
           int v = emeraldval(c);
@@ -844,6 +844,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
               forCellCM(c2, c) if(emeraldval(c2) == (v^1))
                 c->wall = waVinePlant;
               }
+            if(weirdhyperbolic && cellHalfvine(c)) c->wall = waNone;
             }
           }
         }
