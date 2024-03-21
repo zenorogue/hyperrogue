@@ -2900,7 +2900,8 @@ EX void share_land(cell *c, cell *c2) {
   c->land = c2->land;
   }
 
-EX int landscape_div = 32;
+// odd landscape_div are better
+EX int landscape_div = 25;
 
 EX void set_land_for_geometry(cell *c) {
   if(!c->land && isize(currentlands)) {
@@ -2909,12 +2910,24 @@ EX void set_land_for_geometry(cell *c) {
       return;
       }
     if(land_structure == lsLandscape) {
-      if(landscape_div < 0) landscape_div = 0;
-      int shift = landscape_div / 2;
-      int a0 = getCdata(c, 0) + shift;
-      int a1 = getCdata(c, 1) + shift;
-      int a2 = getCdata(c, 2) + shift;
-      eLand& l = landscape_lands[{a0/landscape_div,a1/landscape_div,a2/landscape_div}];
+      if(landscape_div < 0) landscape_div = 1;
+      array<int, 3> a;
+      for(int i=0; i<3; i++) a[i] = getCdata(c, i);
+      auto ca = a;
+      auto& ld = landscape_div;
+      auto ld2 = ld * 2;
+      int sh = 0;
+      for(int i=0; i<3; i++) {
+        int x = a[i];
+        x = gmod(x, ld2);
+        if(x >= ld) sh += x - ld;
+        else sh += ld - 1 - x;
+        }
+      for(int i=0; i<3; i++) {
+        if(sh * 2 < ld * 3) a[i] = gdiv(a[i], ld2)*2+1;
+        else a[i] = gdiv(a[i]+ld, ld2)*2;
+        }
+      eLand& l = landscape_lands[{a[0], a[1], a[2]}];
       if(l == laNone) l = random_land();
       setland(c, l);
       return;
