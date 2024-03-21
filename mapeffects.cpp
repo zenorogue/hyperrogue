@@ -814,10 +814,12 @@ EX bool makeEmpty(cell *c) {
     }
   
   if(c->land == laWildWest) {
-    forCellEx(c2, c)
-    forCellEx(c3, c2)
-      if(c3->wall != waBarrier)
-        c3->wall = waNone;
+    celllister cl(cwt.at, 100, 1000000, NULL);
+    for(cell *c: cl.lst) {
+      if(c == cwt.at) continue;
+      if(c->wall != waSaloon) break;
+      c->wall = waNone;
+      }
     }
   
   return true;
