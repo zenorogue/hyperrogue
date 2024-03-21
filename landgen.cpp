@@ -648,7 +648,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           }
         else if(a4 || arcm::in() || cryst || bt::in() || S3 >= OINF)
           c->wall = hrand(100) < 50 ? waCavefloor : waCavewall;
-        else if(!BITRUNCATED) {
+        else if(!BITRUNCATED && geometry != gOctagon) {
           if(polarb50(c)) 
             c->wall = waCavewall;
           else c->wall = waCavefloor;
