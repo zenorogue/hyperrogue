@@ -472,6 +472,59 @@ EX void show_chaos() {
   dialog::display();
   }
 
+EX string custom_welcome;
+
+string customfile = "custom.hrm";
+
+EX void show_custom() {
+  cmode = sm::SIDE | sm::MAYDARK;
+  gamescreen();
+  dialog::init(XLAT("custom mode"));
+
+  if(custom_welcome != "") {
+    dialog::addInfo("custom welcome message:");
+    dialog::addInfo(custom_welcome);
+    dialog::addItem("edit", '/');
+    }
+  else {
+    dialog::addItem("custom welcome message", '/');
+    }
+  dialog::add_action([] () {
+    dialog::edit_string(custom_welcome, "custom welcome message", "");
+    });
+  dialog::addBreak(100);
+  dialog::addItem("save custom mode", 's');
+  dialog::add_action([] {
+    dialog::openFileDialog(customfile, XLAT("file to save:"), ".hrm", [] () {
+      try {
+        save_mode_to_file(customfile);
+        addMessage(XLAT("Mode saved to %1", customfile));
+        return true;
+        }
+      catch(hstream_exception& e) {
+        addMessage(XLAT("Failed to save mode to %1", customfile));
+        return false;
+        }
+      });
+    });
+  dialog::addItem("load custom mode", 'l');
+  dialog::add_action([] {
+    dialog::openFileDialog(customfile, XLAT("file to load:"), ".hrm", [] () {
+      try {
+        load_mode_from_file(customfile);
+        addMessage(XLAT("Loaded mode from %1", customfile));
+        return true;
+        }
+      catch(hstream_exception& e) {
+        addMessage(XLAT("Failed to load mode from %1", customfile));
+        return false;
+        }
+      });
+    });
+  dialog::addBack();
+  dialog::display();
+  }
+
 EX void mode_higlights() {
   cmode = sm::NOSCR;
   gamescreen();
@@ -751,6 +804,8 @@ EX void showChangeMode() {
   dialog::addBreak(50);
   dialog::addItem(XLAT("highlights & achievements"), 'h');
   dialog::add_action_push(mode_higlights);
+  dialog::addItem(XLAT("custom mode manager"), 'm');
+  dialog::add_action_push(show_custom);
   
   dialog::addBack();
   dialog::display();  

@@ -80,7 +80,8 @@ EX hookset<bool()> hooks_welcome_message;
 EX void welcomeMessage() {
   if(callhandlers(false, hooks_welcome_message)) return;
   if(nohelp == 1) return;
-  if(embedded_plane) return IPF(welcomeMessage());
+  if(custom_welcome != "") addMessage(custom_welcome);
+  else if(embedded_plane) return IPF(welcomeMessage());
 #if CAP_TOUR
   else if(tour::on) return; // displayed by tour
 #endif
@@ -1796,17 +1797,26 @@ EX void save_mode_to_file(const string& fname) {
   save_mode_data(ss);
   string s = as_hexstring(ss.s);
   fhstream f(fname, "w");
+  if(!f.f) throw hstream_exception();
   println(f, modheader);
   println(f, s);
+  if(custom_welcome != "") println(f, "CMSG ", custom_welcome);
   }
 
 EX void load_mode_from_file(const string& fname) {
   fhstream f(fname, "r");
+  if(!f.f) throw hstream_exception();
   string header = scanline(f);
   if(header[0] != '#') throw hstream_exception();
   string hex = scanline(f);
   shstream ss;
   ss.s = from_hexstring(hex + "00");
+  custom_welcome = "";
+  while(true) {
+    string s = scanline(f);
+    if(s == "") break;
+    if(s.substr(0, 5) == "CMSG ") custom_welcome = s.substr(5);
+    }
   stop_game();
   load_mode_data_with_zero(ss);
   start_game();
