@@ -770,7 +770,7 @@ EX int celldist(cell *c, bool alts) {
   return hi.celldists[alts][cells[cellindex[c]].localindex];
   }
 
-eGeometry orig_geometry;
+eGeometry orig_geometry, base_geometry;
 
 void start_game_on_created_map() {    
   popScreen();
@@ -807,6 +807,31 @@ bool save_map(const string& fname) {
   return true;
   }
 
+EX void save_map_bin(hstream& f) {
+  auto& all = base->allcells();
+  int origcells = 0;
+  for(cellinfo& ci: cells)
+    if(ci.generation == 0)
+      origcells++;
+  f.write<short> (base_geometry);
+  f.write<short> (isize(all));
+  f.write<short> (origcells);
+
+  for(auto h: all) {
+    origcells = 0;
+    for(auto i: cells_of_heptagon[h->master])
+      if(cells[i].generation == 0)
+        origcells++;
+    f.write<short> (origcells);
+    for(auto i: cells_of_heptagon[h->master]) if(cells[i].generation == 0) {
+      auto &ci = cells[i];
+      f.write<ld>(ci.p[0]);
+      f.write<ld>(ci.p[1]);
+      f.write<ld>(ci.p[LDIM]);
+      }
+    }
+  }
+
 bool load_map(const string &fname) {
   fhstream f(fname, "rt");
   if(!f.f) return false;
@@ -837,6 +862,47 @@ bool load_map(const string &fname) {
   make_cells_of_heptagon();
   runlevel = 2;
   return true;
+  }
+
+EX void load_map_bin(hstream& f) {
+  auto& all = base->allcells();
+  eGeometry g = (eGeometry) f.get<short>();
+  int sa = f.get<short>();
+  cellcount = f.get<short>();
+
+  if(g != geometry) throw hstream_exception("bad geometry");
+  if(sa != isize(all)) throw hstream_exception("bad size of all");
+  density = cellcount * 1. / isize(all);
+
+  cells.clear();
+
+  for(auto h: all) {
+    int q = f.get<short>();
+    if(q < 0 || q > cellcount) throw hstream_exception("incorrect quantity");
+    while(q--) {
+      cells.emplace_back();
+      cellinfo& s = cells.back();
+      s.patterndir = -1;
+      double a, b, c;
+      a = f.get<ld>();
+      b = f.get<ld>();
+      c = f.get<ld>();
+      s.p = hpxyz(a, b, c);
+      s.p = normalize(s.p);
+      for(auto c0: all) s.relmatrices[c0] = calc_relative_matrix(c0, h, s.p);
+      s.owner = h;
+      }
+    }
+
+  make_cells_of_heptagon();
+  runlevel = 2;
+  }
+
+EX void load_map_full(hstream& f) {
+  init();
+  load_map_bin(f);
+  while(runlevel < 10) step(1000);
+  start_game_on_created_map();
   }
 
 void cancel_map_creation() {
@@ -950,7 +1016,7 @@ void show_gridmaker() {
     };
   }
 
-EX void visual_creator() {
+EX void init() {
   stop_game();
   orig_geometry = geometry;
   switch(geometry) {
@@ -966,13 +1032,19 @@ EX void visual_creator() {
       break;
     }
 
+  base_geometry = geometry;
   variation = eVariation::pure;
   start_game();
   if(base) delete base;
   base = currentmap; 
   base_config = euc::eu;
-  drawthemap();
   cellcount = int(isize(base->allcells()) * density + .5);
+  gridmaking = true;
+  drawthemap();
+  }
+
+EX void visual_creator() {
+  init();
   pushScreen(show_gridmaker);
   runlevel = 0;
   gridmaking = true;
@@ -1015,7 +1087,7 @@ int readArgs() {
   else if(argis("-irrload")) {
     PHASE(3);
     restart_game();
-    visual_creator();
+    init();
     showstartmenu = false;
     shift();
     load_map(args());

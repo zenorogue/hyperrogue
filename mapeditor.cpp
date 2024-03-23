@@ -491,6 +491,9 @@ EX namespace mapstream {
       f.write(gp::param.second);
       }
     #endif
+    #if CAP_IRR
+    if(IRREGULAR) irr::save_map_bin(f);
+    #endif
     #if MAXMDIM >= 4
     if(variation == eVariation::coxeter) {
       f.write(reg3::coxeter_param);
@@ -586,6 +589,9 @@ EX namespace mapstream {
       f.read(gp::param.first);
       f.read(gp::param.second);
       }
+    #endif
+    #if CAP_IRR
+    if(IRREGULAR) { irr::load_map_full(f); stop_game(); }
     #endif
     #if MAXMDIM >= 4
     if(variation == eVariation::coxeter && vernum >= 0xA908) {
