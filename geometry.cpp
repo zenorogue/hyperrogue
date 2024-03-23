@@ -576,8 +576,6 @@ EX void add_wall(int i, const vector<hyperpoint>& h) {
 static constexpr ld hcrossf7 = 0.620672, hexf7 = 0.378077, tessf7 = 1.090550, hexhexdist7 = 0.566256;
 #endif
 
-EX bool scale_used() { return (shmup::on && geometry == gNormal && BITRUNCATED) ? (cheater || autocheat) : true; }
-
 EX bool is_subcube_based(eVariation var) {
   return among(var, eVariation::subcubes, eVariation::dual_subcubes, eVariation::bch, eVariation::bch_oct);
   }
@@ -784,13 +782,13 @@ void geometry_information::prepare_basics() {
   if(msphere && geuclid) scalefactor *= (1 + vid.depth);
   if(msphere && ghyperbolic) scalefactor *= sinh(1 + vid.depth);
 
-  if(scale_used()) {
+  if(true) {
     scalefactor *= vid.creature_scale;
     orbsize *= vid.creature_scale;
     }
 
   zhexf = BITRUNCATED ? hexf : crossf* .55;
-  if(scale_used()) zhexf *= vid.creature_scale;
+  zhexf *= vid.creature_scale;
   if(WDIM == 2 && GDIM == 3) zhexf *= 1.5, orbsize *= 1.2;
 
   if(cgi.emb->is_euc_in_hyp()) {
@@ -1314,7 +1312,7 @@ EX string cgi_string() {
     V("RS:", fts(geom3::euclid_embed_rotate));
     }
 
-  if(scale_used()) V("CS", fts(vid.creature_scale));
+  if(vid.creature_scale != 1) V("CS", fts(vid.creature_scale));
   
   if(WDIM == 3) V("HTW", fts(vid.height_width));
 

@@ -2955,8 +2955,7 @@ EX void show3D() {
     dialog::addSelItem(XLAT("3D detailed settings"), "", 'D');
     dialog::add_action_push(show3D_height_details);
     
-    if(scale_used())
-      add_edit(vid.creature_scale);
+    add_edit(vid.creature_scale);
     }
   else {
     add_edit(vid.creature_scale);
@@ -3105,7 +3104,9 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
     }, "context help", 'H');
 
   param_f(vid.creature_scale, "creature_scale", "3d-creaturescale", 1)
-    ->editable(0, 1, .1, "Creature scale", "", 'C');
+    ->editable(0, 1, .1, "Creature scale", "", 'C')
+    ->set_extra([] { dialog::addInfo(XLAT("changing this during shmup is counted as cheating")); })
+    ->set_reaction([] { if(shmup::on) cheater++; });
   param_f(vid.height_width, "heiwi", "3d-heightwidth", 1.5)
     ->editable(0, 1, .1, "Height to width", "", 'h');
   param_f(vid.yshift, "yshift", "Y shift", 0)
