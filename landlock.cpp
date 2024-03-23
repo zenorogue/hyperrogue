@@ -826,7 +826,7 @@ EX const int walls_when = 388;
 EX void mark_tamper() { cheater++; }
 
 EX void customize_land_in_list(eLand l) {
-  cmode = sm::DARKEN; gamescreen();
+  cmode = sm::SIDE | sm::MAYDARK; gamescreen();
 
   dialog::init(XLATN(linf[l].name), linf[l].color);
 
@@ -859,12 +859,20 @@ EX void customize_land_in_list(eLand l) {
     dialog::get_ne().reaction = mark_tamper;
     });
 
+  gen_landvisited();
+  if(landvisited[l]) {
+    dialog::addItem(XLAT("test"), 'T');
+    dialog::add_action([l] {
+      stop_game(); firstland = specialland = l; start_game();
+      });
+    }
+
   dialog::addBack();
   dialog::display();
   }
 
 EX void customize_land_list() {
-  cmode = sm::DARKEN; gamescreen();
+  cmode = sm::SIDE | sm::MAYDARK; gamescreen();
   dialog::init(XLAT("custom land list"));
   if(dialog::infix != "") mouseovers = dialog::infix;
 
