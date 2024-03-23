@@ -152,11 +152,8 @@ void validity_info() {
 EX bool showquotients;
 
 string validclasses[4] = {" (X)", " (½)", "", " (!)"};
-  
-EX void ge_land_selection() {
-  cmode = sm::SIDE | sm::MAYDARK;
-  gamescreen();
 
+EX void gen_landvisited() {
   if(cheater) for(int i=0; i<landtypes; i++) landvisited[i] = true;
 
   for(int i=0; i<landtypes; i++)
@@ -177,6 +174,13 @@ EX void ge_land_selection() {
   landvisited[laCamelot] |= hiitemsMax(treasureType(laCamelot)) >= 1;
   landvisited[laCA] = true;
   landvisited[laAsteroids] = true;
+  }
+
+EX void ge_land_selection() {
+  cmode = sm::SIDE | sm::MAYDARK;
+  gamescreen();
+
+  gen_landvisited();
 
   dialog::init(XLAT("select the starting land"));
   if(dialog::infix != "") mouseovers = dialog::infix;
