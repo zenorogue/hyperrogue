@@ -1008,6 +1008,10 @@ EX void save_mode_data(hstream& f) {
     f.write<char>(6);
     f.write<int>(landscape_div);
     }
+  if(shmup::on && vid.creature_scale != 1) {
+    f.write<char>(7);
+    f.write<ld>(vid.creature_scale);
+    }
   }
 
 EX void load_mode_data_with_zero(hstream& f) {
@@ -1028,6 +1032,7 @@ EX void load_mode_data_with_zero(hstream& f) {
   xcheat = f.get<char>();
   casual = false;
   bow::weapon = bow::wBlade;
+  vid.creature_scale = 1;
   
   while(true) {
     char option = f.get<char>();
@@ -1069,6 +1074,9 @@ EX void load_mode_data_with_zero(hstream& f) {
       case 6:
         landscape_div = f.get<int>();
         break;
+
+      case 7:
+        vid.creature_scale = f.get<ld>();
 
       default:
         throw hstream_exception();
