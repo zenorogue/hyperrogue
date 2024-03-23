@@ -144,7 +144,10 @@ template<class T, class U> void hread(hstream& hs, map<T,U>& a) {
 template<class C, class C1, class... CS> void hwrite(hstream& hs, const C& c, const C1& c1, const CS&... cs) { hwrite(hs, c); hwrite(hs, c1, cs...); }
 template<class C, class C1, class... CS> void hread(hstream& hs, C& c, C1& c1, CS&... cs) { hread(hs, c); hread(hs, c1, cs...); }
 
-struct hstream_exception : hr_exception {};
+struct hstream_exception : hr_exception {
+  hstream_exception() : hr_exception("hstream_exception") {}
+  hstream_exception(const std::string &s) : hr_exception(s) {}
+  };
 
 struct fhstream : hstream {
   FILE *f;
