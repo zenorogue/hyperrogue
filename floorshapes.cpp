@@ -507,7 +507,7 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
         }
       }
     
-    else if(arb::in() || aperiodic || arcm::in()) {
+    else if(arb::in() || aperiodic || arcm::in() || IRREGULAR) {
       vector<hyperpoint> actual;
       for(int j=0; j<cor; j++) 
         actual.push_back(get_corner_position(c, j));
