@@ -808,6 +808,7 @@ bool save_map(const string& fname) {
   }
 
 EX void save_map_bin(hstream& f) {
+  if(!base) { f.write<short>(-1); return; }
   auto& all = base->allcells();
   int origcells = 0;
   for(cellinfo& ci: cells)
@@ -867,6 +868,7 @@ bool load_map(const string &fname) {
 EX void load_map_bin(hstream& f) {
   auto& all = base->allcells();
   eGeometry g = (eGeometry) f.get<short>();
+  if(int(g) == -1) return;
   int sa = f.get<short>();
   cellcount = f.get<short>();
 
