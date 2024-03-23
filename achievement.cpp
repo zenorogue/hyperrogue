@@ -119,6 +119,7 @@ EX bool wrongMode(char flags) {
     if(disksize) return true;
     }
   if(ineligible_starting_land && !flags) return true;
+  if(use_custom_land_list) return true;
 
   if(shmup::on != (flags == rg::shmup || flags == rg::racing)) return true;
   if(racing::on != (flags == rg::racing)) return true;
@@ -816,6 +817,7 @@ EX void achievement_final(bool really_final) {
   if(ineligible_starting_land) return;
   if(geometry) return;
   if(NONSTDVAR) return;
+  if(use_custom_land_list) return;
 
   if(numplayers() > 1 && !multi::friendly_fire) return;
   if(numplayers() > 1 && multi::pvp_mode) return;
