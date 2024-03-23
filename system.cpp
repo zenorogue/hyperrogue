@@ -1763,7 +1763,7 @@ EX void initAll() {
 #if CAP_SAVE
   select_savefile();
   loadsave();
-  if(IRREGULAR) irr::auto_creator();
+  if(IRREGULAR && !irr::base) irr::auto_creator();
 #endif
   start_game();
   restore_all_golems();
