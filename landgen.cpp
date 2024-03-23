@@ -2913,7 +2913,6 @@ EX void set_land_for_geometry(cell *c) {
       if(landscape_div < 0) landscape_div = 1;
       array<int, 3> a;
       for(int i=0; i<3; i++) a[i] = getCdata(c, i);
-      auto ca = a;
       auto& ld = landscape_div;
       auto ld2 = ld * 2;
       int sh = 0;
