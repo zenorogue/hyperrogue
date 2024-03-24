@@ -5141,3 +5141,43 @@ Other:
 - when you press ESC in the gameover screen, the YASC message is displayed
 - special YASC message for pinches, and being on the Round Table
 - in YASC messages, mention the knights blocking the way, and also mention their names
+
+2024-03-24 11:32 Update 13.0d:
+
+System:
+* itch.io Windows binaries and Steam Windows/Linux binaries now use SDL2 instead of SDL1.2
+
+Custom mode:
+* A new mode where you can select the lands to be used.
+* Another menu can be used to save a mode to a file.
+* Enabling Halloween or Space Rocks in infinite geometries now produces something that makes sense.
+* Previously changing the creature scale was disabled in non-cheat shmup. Now it can be changed (but it counts as a cheat).
+* New land structure 'landscape'.
+
+Graphics:
+* Font scale used in ASCII maps now can be changed.
+* Items moved by Orb of Water, Magnetism, Winter, Space, and Repulsion are now animated.
+* VR: fixed items, Ivy, compasses, etc. being placed incorrectly in 2.5D.
+* VR: compass/Yendor targets now should be displayed.
+
+Gameplay:
+* Void Beasts are now pulled by Orb of Air.
+* Changed the electrical properties of some walls to make Eclectic City more friendly.
+* Trees etc are now mentioned as blockers in YASC messages.
+* YASC codes work better if killed on a 10+ tile.
+
+Alternate geometries:
+* Clear more walls when generating Wild West in high GP.
+* Better Emerald in Octagon chamfered.
+* Fixed Emerald Mine and Vineyard generating very bad in {n,oo} and binary tiling.
+* Fixed the lack of non-trapdoors in Zebra 435.
+* Better 'pseudohept' tiles in INVERSE tilings.
+* In grid mode, don't try to draw greatwall lines outside of normal geometry pure/bitruncated.
+* Nicer cell boundaries used in Archimedean and irregular tilings.
+* When you save an irregular map using Orb of Safety or map editor (or custom mode), it should now save the irregular map used.
+
+Bug fixes:
+* Fixed dice hints over different heights.
+* Fixed troll nests in Horodisk/Voronoi.
+* Fixed a crash when running away from Clearing in single-land mode.
+* Some values are tracked in savefiles while previously they did not (fatigue, snake oil, crossbow reload time, gun ammo, etc.) (Thanks to jlm)
