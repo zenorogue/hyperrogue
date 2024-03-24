@@ -821,7 +821,8 @@ EX void handleInput(int delta, config &scfg) {
   get_actions(scfg);
 
   const Uint8 *keystate = SDL12_GetKeyState(NULL);
-  if(keystate[SDLK_LCTRL] || keystate[SDLK_RCTRL]) d /= 5;
+
+  if(keystate[SDL12(SDLK_LCTRL, SDL_SCANCODE_LCTRL)] || keystate[SDL12(SDLK_RCTRL, SDL_SCANCODE_RCTRL)]) d /= 5;
   
   double panx = 
     actionspressed[49] - actionspressed[51] + axespressed[2] / 32000.0;
