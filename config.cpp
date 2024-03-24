@@ -1388,7 +1388,7 @@ EX void initConfig() {
   addsaverenum(variation, "mode-variation", eVariation::bitruncated);
   addsaver(peace::on, "mode-peace");
   addsaver(peace::otherpuzzles, "mode-peace-submode");
-  addsaverenum(specialland, "land for special modes");
+  param_enum(specialland, "specialland", "land for special modes", specialland);
   
   addsaver(viewdists, "expansion mode");
   param_f(backbrightness, "back", "brightness behind sphere");
