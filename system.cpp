@@ -1792,6 +1792,10 @@ EX void finishAll() {
 
 string modheader = "# HyperRogue saved game mode file";
 
+set<string> allowed_params = {
+  "creature_scale", "global_boundary_ratio", "specialland"
+  };
+
 EX void save_mode_to_file(const string& fname) {
   shstream ss;
   save_mode_data(ss);
@@ -1801,6 +1805,12 @@ EX void save_mode_to_file(const string& fname) {
   println(f, modheader);
   println(f, s);
   if(custom_welcome != "") println(f, "CMSG ", custom_welcome);
+
+  for(auto& ap: allowed_params) {
+    auto& s = params[ap]->saver;
+    if(s->dosave())
+      println(f, ap, "=", s->save());
+    }
   }
 
 EX void load_mode_from_file(const string& fname) {
@@ -1813,9 +1823,21 @@ EX void load_mode_from_file(const string& fname) {
   ss.s = from_hexstring(hex + "00");
   custom_welcome = "";
   while(true) {
-    string s = scanline(f);
+    string s = scanline_noblank(f);
     if(s == "") break;
-    if(s.substr(0, 5) == "CMSG ") custom_welcome = s.substr(5);
+    else if(s.substr(0, 5) == "CMSG ") custom_welcome = s.substr(5);
+    else {
+      auto pos = s.find("=");
+      if(pos != string::npos) {
+        string name = s.substr(0, pos);
+        string value = s.substr(pos+1);
+        if(!params.count(name) || !allowed_params.count(name))  {
+          println(hlog, "# parameter unknown: ", name);
+          continue;
+          }
+        params[name]->load_as_animation(value);
+        }
+      }
     }
   stop_game();
   load_mode_data_with_zero(ss);
