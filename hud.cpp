@@ -708,9 +708,10 @@ EX void drawStats() {
     if(bow::weapon && bow::style == bow::cbBull) vers += " b/bull";
     if(bow::weapon && bow::style == bow::cbGeodesic) vers += " b/geo";
     if(land_structure != default_land_structure())
-      vers += land_structure_name(true);
+      vers += " " + land_structure_name(true);
     if(princess::challenge) vers += " Princess";
     if(randomPatternsMode) vers += " RPM";
+    if(use_custom_land_list) vers += " custom";
     
     if(geometry != gNormal || !BITRUNCATED) 
       vers = vers + " " + full_geometry_name();
