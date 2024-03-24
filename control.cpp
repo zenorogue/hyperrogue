@@ -872,7 +872,7 @@ EX void mainloopiter() {
     targetclick = pandora_leftclick | pandora_rightclick;
     pandora_leftclick = pandora_rightclick = 0;
     #else
-    targetclick = keystate[SDLK_RSHIFT] | keystate[SDLK_LSHIFT];
+    targetclick = keystate[SDL12(SDLK_RSHIFT, SDL_SCANCODE_RSHIFT)] | keystate[SDL12(SDLK_LSHIFT, SDL_SCANCODE_LSHIFT)];
     #endif
     }
   else {
