@@ -2926,7 +2926,7 @@ EX void set_land_for_geometry(cell *c) {
         if(sh * 2 < ld * 3) a[i] = gdiv(a[i], ld2)*2+1;
         else a[i] = gdiv(a[i]+ld, ld2)*2;
         }
-      eLand& l = landscape_lands[{a[0], a[1], a[2]}];
+      eLand& l = landscape_lands[make_array(a[0], a[1], a[2])];
       if(l == laNone) l = random_land();
       setland(c, l);
       return;

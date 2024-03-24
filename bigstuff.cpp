@@ -1132,7 +1132,7 @@ EX void setLandSphere(cell *c) {
 vector<eLand> euland;
 map<int, eLand> euland3;
 map<int, eLand> euland3_hash;
-EX map<tuple<int, int, int>, eLand> landscape_lands;
+EX map<array<int, 3>, eLand> landscape_lands;
 
 EX eLand& get_euland(int c) {
   euland.resize(max_vec);
@@ -1146,7 +1146,7 @@ EX void clear_euland(eLand first) {
   euland3.clear();
   euland3[0] = first;
   landscape_lands.clear();
-  landscape_lands[{0,0,0}] = first;
+  landscape_lands[make_array(0,0,0)] = first;
   }
 
 bool valid_wall_at(int c) {
