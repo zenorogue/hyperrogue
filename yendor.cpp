@@ -1032,7 +1032,7 @@ EX void load_mode_data_with_zero(hstream& f) {
   xcheat = f.get<char>();
   casual = false;
   bow::weapon = bow::wBlade;
-  vid.creature_scale = 1;
+  if(shmup::on) vid.creature_scale = 1;
   
   while(true) {
     char option = f.get<char>();
