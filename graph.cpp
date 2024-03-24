@@ -852,6 +852,35 @@ EX void draw_ascii(const shiftmatrix& V, char glyph, color_t col, ld size) {
   while(id < isize(ptds)) ptds[id++]->prio = PPR::MONSTER_BODY;
   }
 
+EX void queue_goal_text(shiftpoint P1, ld sizemul, const string& s, color_t color) {
+  #if CAP_VR
+  if(vrhr::enabled) {
+    auto e = inverse_exp(P1);
+    e = e * 3 / hypot_d(GDIM, e);
+    auto T = face_the_player(shiftless(rgpushxto0(direct_exp(e))));
+    queuestrn(T, sizemul * mapfontscale / 100, s, color);
+    return;
+    }
+  #endif
+  queuestr(P1, vid.fsize * sizemul, s, color);
+  }
+
+EX bool mark_compass(cell *c, shiftpoint& P1) {
+  cell *c1 = c ? findcompass(c) : NULL;
+  if(!c1) return false;
+
+  shiftmatrix P = ggmatrix(c1);
+  P1 = tC0(P);
+
+  if(isPlayerOn(c)) {
+    queue_goal_text(P1, 2, "X", 0x10100 * int(128 + 100 * sintick(150)));
+//  queuestr(V, 1, its(compassDist(c)), 0x10101 * int(128 - 100 * sin(ticks / 150.)), 1);
+    queue_goal_text(P1, 1, its(-compassDist(c)), 0x10101 * int(128 - 100 * sintick(150)));
+    addauraspecial(P1, 0xFF0000, 0);
+    }
+  return true;
+  }
+
 EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int pticks, bool hidden) {
   if(!it) return false;
   char xch = iinf[it].glyph;
@@ -953,18 +982,8 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
     else
     #endif
     if(1) {
-      cell *c1 = c ? findcompass(c) : NULL;
-      if(c1) {
-        shiftmatrix P = ggmatrix(c1);
-        shiftpoint P1 = tC0(P);
-        
-        if(isPlayerOn(c)) {
-          queuestr(P1, 2*vid.fsize, "X", 0x10100 * int(128 + 100 * sintick(150)));
-    //      queuestr(V, 1, its(compassDist(c)), 0x10101 * int(128 - 100 * sin(ticks / 150.)), 1);
-          queuestr(P1, vid.fsize, its(-compassDist(c)), 0x10101 * int(128 - 100 * sintick(150)));
-          addauraspecial(P1, 0xFF0000, 0);
-          }
-        
+      shiftpoint P1;
+      if(mark_compass(c, P1)) {
         V2 = V * lrspintox(inverse_shift(V, P1));
         }
       else V2 = V;
@@ -4786,7 +4805,7 @@ EX void drawMarkers() {
             }
           shiftpoint H = tC0(ggmatrix(keycell));
           #if CAP_QUEUE
-          queuestr(H, 2*vid.fsize, "X", 0x10101 * int(128 + 100 * sintick(150)));
+          queue_goal_text(H, 2, "X", 0x10101 * int(128 + 100 * sintick(150)));
           int cd = celldistance(yi[yii].key(), cwt.at);
           if(cd == DISTANCE_UNKNOWN) for(int i2 = 0; i2<YDIST; i2++) {
             int cd2 = celldistance(cwt.at, yi[yii].path[i2]);
@@ -4795,7 +4814,7 @@ EX void drawMarkers() {
               println(hlog, "i2 = ", i2, " cd = ", celldistance(cwt.at, keycell));
               }
             }
-          queuestr(H, vid.fsize, its(cd), 0x10101 * int(128 - 100 * sintick(150)));
+          queue_goal_text(H, 1, its(cd), 0x10101 * int(128 - 100 * sintick(150)));
           #endif
           addauraspecial(H, iinf[itOrbYendor].color, 0);
           }

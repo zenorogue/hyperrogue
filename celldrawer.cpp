@@ -2497,15 +2497,8 @@ void celldrawer::draw_item_full() {
     if(doHighlight()) asciiborder = kind_outline(it) >> 8;
     
     if(it == itCompass && isPlayerOn(c)) {
-      cell *c1 = c ? findcompass(c) : NULL;
-      if(c1) {
-        shiftmatrix P = ggmatrix(c1);
-        shiftpoint P1 = tC0(P);
-      
-        queuestr(P1, 2*vid.fsize, "X", 0x10100 * int(128 + 100 * sintick(150)));
-        queuestr(P1, vid.fsize, its(-compassDist(c)), 0x10101 * int(128 - 100 * sintick(150)));
-        addauraspecial(P1, 0xFF0000, 0);
-        }
+      shiftpoint dummy;
+      mark_compass(c, dummy);
       }
     }
   
