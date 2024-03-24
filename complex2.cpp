@@ -354,6 +354,8 @@ vector<string> knight_names = {
   "JeLomun", "kip", "Warmonger", "Fooruman", "Zyalin", "Prezombie", "ashley89", "bjobae", "MFErtre", "Roaringdragon2", "howilovepi", "Yulgash", "Sir Endipitous", "Roshlev",
   "BTernaryTau", "HiGuy", "coper", "Tirear", "qoala _", "Tyzone", "Tiegon", "Airin", "Metroid26", "Sklorg", "Fumblestealth", "Toph", "Tzaphqiel", "jruderman", "ray",
   "Deathroll", "Sinquetica", "mootmoot", "Noobinator", "freeofme", "Helyea", "Snakebird Priestess", "brisingre", "Khashishi", "Shiny", "kabado", "Berenthas", "Misery", "Altripp", "Aldrenean",
+  // via itch.io and reports on Discord
+  "AntiRogue"
   };
 
 map<cell*, int> knight_id;
