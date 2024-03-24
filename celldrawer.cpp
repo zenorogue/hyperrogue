@@ -1848,6 +1848,12 @@ void celldrawer::draw_features_and_walls_3d() {
           queuepoly(V, cgi.shPlainWall3D[ofs + a], darkena(wcol2 - d * get_darkval(c, a), 0, 0xFF));
         }
       }
+    if(WDIM == 3 && c->wall == waRose) {
+      color_t col = winf[waRose].color;
+      color_t col2 = (col << 8) | 0xFF;
+      if(rosephase == 7) col2 = 0xFFFFFFFF;
+      addradar(V, winf[waRose].glyph, col, col2);
+      }
     } }
   else {
     if(!no_wall_rendering) for(int a=0; a<c->type; a++) if(c->move(a)) {
