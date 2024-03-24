@@ -4029,6 +4029,7 @@ EX int colorhash(color_t i) {
   }
 
 EX bool isWall3(cell *c, color_t& wcol) {
+  if(c->wall == waRose) { wcol = gradient(0, wcol, -5 - 5 * (7-rosephase), sintick(50 * (8 - rosephase)), 1); }
   if(isWall(c)) return true;
   if(c->wall == waChasm && c->land == laMemory && (anyshiftclick || !(cgflags & qFRACTAL))) { wcol = 0x606000; return true; }
   if(c->wall == waInvisibleFloor) return false;
