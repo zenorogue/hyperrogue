@@ -258,7 +258,8 @@ EX bool passable(cell *w, cell *from, flagtype flags) {
     }
     
   if(isWatery(w)) {
-    if(in_gravity_zone(w)) ;
+    if((flags & P_ISPLAYER) && from && isWatery(from) && pickable_from_water(w->item)) ;
+    else if(in_gravity_zone(w)) ;
     else if(from && from->wall == waBoat && F(P_USEBOAT) && 
       (!againstCurrent(w, from) || F(P_MARKWATER)) && !(from->item == itOrbYendor)) ;
     else if(from && isWatery(from) && F(P_CHAIN) && F(P_USEBOAT) && !againstCurrent(w, from)) ;

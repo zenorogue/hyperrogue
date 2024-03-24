@@ -16,7 +16,12 @@ EX array<int, ittypes> items;
 
 EX map<modecode_t, array<int, ittypes> > hiitems;
 
+EX bool pickable_from_water(eItem it) {
+  return among(it, itOrbFish, itOrbAether);
+  }
+
 EX bool cannotPickupItem(cell *c, bool telekinesis) {
+  if(pickable_from_water(c->item) && isWatery(c)) return false;
   return itemHidden(c) && !telekinesis && !(isWatery(c) && markOrb(itOrbFish));
   }
 
@@ -737,7 +742,7 @@ EX void collectMessage(cell *c2, eItem which) {
 
 EX bool itemHiddenFromSight(cell *c) {
   return isWatery(c) && !items[itOrbInvis] && !(items[itOrbFish] && playerInWater())
-    && !(shmup::on && shmup::boatAt(c));
+    && !(shmup::on && shmup::boatAt(c)) && !(c->cpdist <= 1 && playerInWater());
   }
 
 }
