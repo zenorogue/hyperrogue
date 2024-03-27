@@ -741,6 +741,11 @@ EX bool isLandIngame(eLand l) {
   return land_validity(l).flags & lv::appears_in_full;
   }
 
+EX bool landUnlockedIngame(eLand l) {
+  if(!peace::on && !landUnlocked(l)) return false;
+  return isLandIngame(l);
+  }
+
 namespace lv {
 
   flagtype q0 = lv::display_error_message | lv::display_in_help | lv::appears_in_geom_exp;
