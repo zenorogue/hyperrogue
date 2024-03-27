@@ -11,13 +11,14 @@ namespace hr {
 EX namespace multi {
 
   #if HDR
+  static constexpr int SCANCODES = 512;
   static constexpr int MAXJOY = 8;
   static constexpr int MAXBUTTON = 64;
   static constexpr int MAXAXE = 16;
   static constexpr int MAXHAT = 4;
   
   struct config {
-    char keyaction[512];
+    char keyaction[SCANCODES];
     char joyaction[MAXJOY][MAXBUTTON];
     char axeaction[MAXJOY][MAXAXE];
     char hataction[MAXJOY][MAXHAT][4];
@@ -171,7 +172,7 @@ int* dzconfigs[24];
 string listkeys(config& scfg, int id) {
 #if CAP_SDL
   string lk = "";
-  for(int i=0; i<512; i++)
+  for(int i=0; i<SCANCODES; i++)
     if(scfg.keyaction[i] == id)
       #if CAP_SDL2
       lk = lk + " " + SDL_GetScancodeName(SDL_Scancode(i));
@@ -265,7 +266,8 @@ struct key_configurer {
       if(!setwhat) dialog::handleNavigation(sym, uni);
       if(sym) {
         if(setwhat) {
-          which_config->keyaction[sym] = setwhat;
+          int scan = key_to_scan(sym);
+          if(scan >= 0 && scan < SCANCODES) which_config->keyaction[scan] = setwhat;
           setwhat = 0;
           }
         else if(uni >= 'a' && uni < 'a' + isize(shmupcmdtable) && shmupcmdtable[uni-'a'][0])
@@ -584,9 +586,19 @@ void pressaction(int id) {
     actionspressed[id]++;
   }
 
+EX int key_to_scan(int sym) {
+  #if CAP_SDL2
+  return SDL_GetScancodeFromKey(sym);
+  #else
+  return sym;
+  #endif
+  }
+
 EX bool notremapped(int sym) {
   auto& scfg = scfg_default;
-  int k = scfg.keyaction[sym];
+  int sc = key_to_scan(sym);
+  if(sc < 0 || sc >= SCANCODES) return true;
+  int k = scfg.keyaction[sc];
   if(k == 0) return true;
   k /= 16;
   if(k > 3) k--; else if(k==3) k = 0;
@@ -595,7 +607,7 @@ EX bool notremapped(int sym) {
 
 EX void sconfig_savers(config& scfg, string prefix) {
   // unfortunately we cannot use key names here because SDL is not yet initialized
-  for(int i=0; i<512; i++)
+  for(int i=0; i<SCANCODES; i++)
     addsaver(scfg.keyaction[i], prefix + string("key:")+its(i));
 
   for(int i=0; i<MAXJOY; i++) {
@@ -613,7 +625,7 @@ EX void sconfig_savers(config& scfg, string prefix) {
   }
 
 EX void clear_config(config& scfg) {
-  for(int i=0; i<512; i++) scfg.keyaction[i] = 0;
+  for(int i=0; i<SCANCODES; i++) scfg.keyaction[i] = 0;
   }
 
 EX void initConfig() {
