@@ -804,6 +804,8 @@ bool save_map(const string& fname) {
   return true;
   }
 
+vector<ld> float_order;
+
 EX void save_map_bin(hstream& f) {
   if(!base) { f.write<short>(-1); return; }
   auto& all = base->allcells();
@@ -814,6 +816,19 @@ EX void save_map_bin(hstream& f) {
   f.write<short> (base_geometry);
   f.write<short> (isize(all));
   f.write<short> (origcells);
+  int foi = 0;
+
+  auto check_float_order = [&] (ld x) {
+    if(foi >= isize(float_order)) {
+      float_order.push_back(x);
+      f.write<ld>(x);
+      }
+    else if(abs(float_order[foi] - x) > 1e-6) {
+      println(hlog, float_order[foi], " vs ", x, " : abs difference is ", abs(float_order[foi] - x));
+      float_order[foi] = x;
+      }
+    f.write<ld>(float_order[foi++]);
+    };
 
   for(auto h: all) {
     origcells = 0;
@@ -823,9 +838,9 @@ EX void save_map_bin(hstream& f) {
     f.write<short> (origcells);
     for(auto i: cells_of_heptagon[h->master]) if(cells[i].generation == 0) {
       auto &ci = cells[i];
-      f.write<ld>(ci.p[0]);
-      f.write<ld>(ci.p[1]);
-      f.write<ld>(ci.p[LDIM]);
+      check_float_order(ci.p[0]);
+      check_float_order(ci.p[1]);
+      check_float_order(ci.p[LDIM]);
       }
     }
   }
@@ -874,6 +889,7 @@ EX void load_map_bin(hstream& f) {
   density = cellcount * 1. / isize(all);
 
   cells.clear();
+  float_order.clear();
 
   for(auto h: all) {
     int q = f.get<short>();
@@ -886,6 +902,9 @@ EX void load_map_bin(hstream& f) {
       a = f.get<ld>();
       b = f.get<ld>();
       c = f.get<ld>();
+      float_order.push_back(a);
+      float_order.push_back(b);
+      float_order.push_back(c);
       s.p = hpxyz(a, b, c);
       s.p = normalize(s.p);
       for(auto c0: all) s.relmatrices[c0] = calc_relative_matrix(c0, h, s.p);
