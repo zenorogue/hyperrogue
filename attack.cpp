@@ -757,7 +757,7 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
     // a reward for killing him before he shoots!
     c->item = itOrbDragon;
     }
-  if(m == moAsteroid && !shmup::on && c->item == itNone && c->wall != waChasm) {
+  if(m == moAsteroid && !shmup::on && c->item == itNone && c->wall != waChasm && c->land == laAsteroids) {
     c->item = itAsteroid;
     changes.value_add(splitrocks, 2);
     }
