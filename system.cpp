@@ -1047,17 +1047,19 @@ EX void remove_emergency_save() {
 
 scores::score scorebox;
 
+EX bool save_cheats;
+
 EX void saveStats(bool emergency IS(false)) {
   DEBBI(DF_INIT, ("saveStats [", scorefile, "]"));
 
-  if(autocheat) return;
+  if(autocheat && !save_cheats) return;
   if(scorefile == "") return;
   #if CAP_TOUR
-  if(tour::on) return;
+  if(tour::on && !save_cheats) return;
   #endif
-  if(randomPatternsMode) return;
+  if(randomPatternsMode && !save_cheats) return;
   if(daily::on) return;
-  if(peace::on) return;
+  if(peace::on && !save_cheats) return;
   if(experimental) return;
 
   if(!gold() && !racing::on) return;
@@ -1215,8 +1217,13 @@ EX void loadsave() {
       load_modecode_line(s);
       }
     if(buf[0] == 'H' && buf[1] == 'y') {
-      if(fscanf(f, "%s", buf) <= 0) break;
+      if(fscanf(f, "%9999s", buf) <= 0) break;
       sc.ver = buf;
+      if(sc.ver == "CHEATER!" && save_cheats) {
+        fgets(buf, 12000, f);
+        if(fscanf(f, "%9999s", buf) <= 0) break;
+        sc.ver = buf;
+        }
       if(sc.ver[1] != '.') sc.ver = '0' + sc.ver;
       if(verless(sc.ver, "4.4") || sc.ver == "CHEATER!") { ok = false; continue; }
       ok = true;
@@ -1314,6 +1321,7 @@ EX void loadsave() {
 
     }
   fclose(f);
+  // this is the index of Orb of Safety
   if(ok && sc.box[65 + 4 + itOrbSafety - itOrbLightning]) 
     load_last_save();
   }

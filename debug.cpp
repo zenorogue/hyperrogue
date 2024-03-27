@@ -660,6 +660,9 @@ int read_cheat_args() {
     PHASEFROM(2);
     shift(); vid.stereo_mode = eStereo(argi());
     }
+  else if(argis("-save-cheats")) {
+    save_cheats = true;
+    }
   else if(argis("-cmove")) {
     PHASE(3); shift();
     for(char c: args()) cheat_move(c);
