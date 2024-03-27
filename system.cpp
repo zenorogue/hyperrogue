@@ -1340,7 +1340,12 @@ EX void load_last_save() {
     shstream ss;
     ss.s = meaning[sc.box[MODECODE_BOX]];
     ss.read(ss.vernum);
-    mapstream::load_geometry(ss);
+    if(ss.vernum < 0xAA05)
+      mapstream::load_geometry(ss);
+    else {
+      ss.write_char(0);
+      load_mode_data_with_zero(ss);
+      }
     }
 
   loadBox();
