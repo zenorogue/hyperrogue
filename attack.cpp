@@ -944,6 +944,14 @@ EX void fightmessage(eMonster victim, eMonster attacker, bool stun, flagtype fla
       else
         addMessage(XLAT("You pierce %the1.", victim)); // normal
       }
+    else if(items[itOrbSlaying]) {
+      playSound(NULL, "hit-crush"+pick123());
+      addMessage(XLAT("You crush %the1!", victim)); // normal
+      }
+    else if(stun && items[itCurseWeakness]) {
+      playSound(NULL, "click");
+      addMessage(XLAT("You punch %the1.", victim)); // normal
+      }
     else if(!peace::on) {
       playSound(NULL, "hit-sword"+pick123());
       addMessage(XLAT("You kill %the1.", victim)); // normal

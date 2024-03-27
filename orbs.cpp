@@ -664,7 +664,7 @@ EX void teleportTo(cell *dest) {
   }
 
 /* calls changes.rollback or changes.commit */
-EX bool jumpTo(orbAction a, cell *dest, eItem byWhat, int bonuskill IS(0), eMonster dashmon IS(moNone)) {
+EX bool jumpTo(orbAction a, cell *dest, eItem byWhat, int bonuskill IS(0), eMonster dashmon IS(moNone), cell *phasecell IS(nullptr)) {
   if(byWhat != itStrongWind) playSound(dest, "orb-frog");
   cell *from = cwt.at;
   changes.value_keep(cwt);
@@ -683,7 +683,10 @@ EX bool jumpTo(orbAction a, cell *dest, eItem byWhat, int bonuskill IS(0), eMons
   
   if(byWhat == itOrbPhasing) {
     useupOrb(itOrbPhasing, 5);
-    addMessage(XLAT("You jump!"));
+    if(phasecell->monst)
+      addMessage(XLAT("You phase through %the1!", phasecell->monst));
+    else
+      addMessage(XLAT("You phase through %the1!", phasecell->wall));
     }
   
   movecost(from, dest, 1);
@@ -1523,7 +1526,7 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
       }
 
     if(phasestate == 3) {
-      if(jumpTo(a, c, itOrbPhasing)) phasestate = 4;
+      if(jumpTo(a, c, itOrbPhasing, 0, moNone, jumpthru)) phasestate = 4;
       else wouldkill_there = true;
       }
     else changes.rollback();
