@@ -402,10 +402,7 @@ bool step(int delta) {
       if(notfound) { status[4] = XLAT("cells badly paired: %1", its(notfound)); runlevel = 0; break; }
       
       int heptas = 0;
-      for(auto p: cells_of_heptagon) {
-        printf("%p: %d\n", hr::voidp(p.first), isize(p.second));
-        heptas++;
-        }
+      for(auto p: cells_of_heptagon) heptas++;
       
       if(heptas != isize(all)) {
         status[4] = XLAT("cells not covered: %1", its(isize(all) - heptas));
