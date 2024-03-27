@@ -802,6 +802,16 @@ bool pcmove::actual_move() {
         c2->monst = moNone;
         c2->wall = waRichDie;
         }
+      else {
+        if(vmsg(miWALL, siWALL, c2, c2->monst))
+          addMessage(XLAT("You can only push this die if the highest number would be on the top!"));
+        return false;
+        }
+      }
+    else if(mip.d == NO_SPACE) {
+      if(vmsg(miWALL, siWALL, c2, c2->monst))
+        addMessage(XLAT("No room to push %the1.", c2->monst));
+      return false;
       }
     }
   #endif
@@ -921,8 +931,6 @@ void pcmove::tell_why_cannot_attack() {
     addMessage(XLAT("You cannot attack Raiders directly!"));
   else if(isSwitch(c2->monst))
     addMessage(XLAT("You cannot attack Jellies in their wall form!"));
-  else if(c2->monst == moAnimatedDie)
-    addMessage(XLAT("You can only push this die if the highest number would be on the top!"));
   else if(c2->monst == moAngryDie)
     addMessage(XLAT("This die is really angry at you!"));
   else if((attackflags & AF_WEAK) && isIvy(c2))
