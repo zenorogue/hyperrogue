@@ -780,7 +780,7 @@ EX void showChangeMode() {
 #endif
   dialog::addBoolItem(XLAT("%1 Challenge", moPrincess), (princess::challenge), 'P');
   dialog::add_action_confirmed([] {
-    if(!princess::everSaved)
+    if(!princess::everSaved && !autocheat)
       addMessage(XLAT("Save %the1 first to unlock this challenge!", moPrincess));
     else restart_game(rg::princess);
     });  
