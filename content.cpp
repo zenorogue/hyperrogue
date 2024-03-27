@@ -1298,7 +1298,7 @@ LAND( 0xE08020, "Canvas", laCanvas, ZERO | LF_TECHNICAL, itNone, RESERVED, "A fa
 
 LAND( 0x00C000, "Palace Quest", laPrincessQuest, ZERO, itSavedPrincess, RESERVED, princessdesc) // fake
   NATIVE(isNative(laPalace, m))
-  REQ(ACCONLY(laPalace) KILL(moVizier, laPalace))
+  REQ(ACCONLY(laPalace) INMODE(princess::challenge) KILL(moVizier, laPalace))
 
 LAND( 0xD0D060, "Wild West", laWildWest, ZERO, itBounty, RESERVED, wildwestdesc)
   NATIVE((m == moOutlaw) ? 2 : 0)
@@ -1798,3 +1798,4 @@ MONSTER( '*', 0,        "vertex", moRogueviz, ZERO | CF_TECHNICAL, RESERVED, moN
 #undef ACCONLY3
 #undef ACCONLYF
 #undef IFINGAME
+#undef INMODE

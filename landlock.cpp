@@ -230,6 +230,7 @@ EX bool landUnlocked(eLand l) {
     #define ACCONLY3(x,y,z)
     #define ACCONLYF(x)
     #define IFINGAME(land, ok, fallback) if(isLandIngame(land)) { ok } else { fallback }
+    #define INMODE(x) if(x) return true;
     #include "content.cpp"
 
     case landtypes: return false;
