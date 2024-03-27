@@ -387,7 +387,7 @@ EX eLand pickluck(eLand l1, eLand l2) {
   } */
 
 EX eLand getNewSealand(eLand old) {
-  while(true) {
+  for(int it=0; it<100; it++) {
     eLand p = pick(laOcean, pick(laCaribbean, laLivefjord, laWarpSea, laKraken, laDocks));
     if(p == laKraken && !landUnlocked(p)) continue;
     if(p == laKraken && peace::on) continue;
@@ -396,6 +396,7 @@ EX eLand getNewSealand(eLand old) {
     if(!isLandIngame(p)) continue;
     return p;
     }
+  return old;
   }
 
 EX bool createOnSea(eLand old) {
