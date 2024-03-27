@@ -1053,7 +1053,7 @@ EX void load_mode_data_with_zero(hstream& f) {
       case 3: {
         use_custom_land_list = true;
         int lt = f.get<int>();
-        if(lt > landtypes) throw hstream_exception();
+        if(lt > landtypes) throw hstream_exception("too many landtypes");
         for(int i=0; i<lt; i++) {
           custom_land_list[i] = f.get<char>();
           custom_land_treasure[i] = f.get<int>();
@@ -1079,7 +1079,7 @@ EX void load_mode_data_with_zero(hstream& f) {
         vid.creature_scale = f.get<ld>();
 
       default:
-        throw hstream_exception();
+        throw hstream_exception("wrong option");
       }
     }
   }
