@@ -5181,3 +5181,25 @@ Bug fixes:
 * Fixed troll nests in Horodisk/Voronoi.
 * Fixed a crash when running away from Clearing in single-land mode.
 * Some values are tracked in savefiles while previously they did not (fatigue, snake oil, crossbow reload time, gun ammo, etc.) (Thanks to jlm)
+
+2024-03-24 20:10 Update 13.0e:
+
+* in Steam, option `-achievement-always` to always display achievements, even if you already got them.
+* rosebushes now show up on the radar in 3D geometries, and they now blink if they are close to going off
+* if you are in water (and have no Fish), you can now see Orbs of Fish and Aether in adjacent water tiles, and also you can move there and pick them up
+* crossbow bolt now ignore rose restrictions on attack
+* migrating to SDL2 caused crashes in shmup, with the game_keys_scroll option, and with the shift-target option -- this should be fixed
+* 'custom' land list mode is now mentioned in the watermark (bottom left of the screen)
+
+2024-03-27 23:47 Update 13.0f:
+
+* new messages on Orb of Phasing, Slaying, and Weakness
+* more accurate messages on dice pushing
+* when loading save, load full mode data including custom lands
+* irregular maps no longer change on every load due to floating point precision
+* [custom lands list] Space Rock monsters now drop treasure only if in Space Rock land
+* ineligible starting land also if land is not in game
+* [custom lands list] do not freeze if no new sealand is available
+* in countHyperstones, two variants of Mirror are counted once
+* specially generated lands (horocycles, Brown Islands) now respect Unlocked and LandIngame rules
+* fixed some more crashes related to SDL2 (e.g., right-click in shmup)
