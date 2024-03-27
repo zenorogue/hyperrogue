@@ -187,7 +187,7 @@ EX void initgame() {
 
   if(!safety) {
     firstland = specialland;
-    ineligible_starting_land = !landUnlocked(specialland);
+    ineligible_starting_land = !landUnlockedIngame(specialland);
     }
   
   if(firstland == laNone || firstland == laBarrier)
