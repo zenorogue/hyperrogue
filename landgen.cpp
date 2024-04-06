@@ -288,6 +288,7 @@ EX void gen_baby_tortoise(cell *c) {
 EX int rebalance_treasure(int x, int y, eLand l) {
   int res = ((tactic::on || quotient == 2 || daily::on) ? (y) : inv::on ? min(2*(y),x) : (x));
   if(use_custom_land_list) res = (res * custom_land_treasure[l] + 50) / 100;
+  res *= ls::ls_mul();
   return res;
   }
 
@@ -1280,7 +1281,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
       if(d == 8) {
         bool ok = c->landparam == 0;
         forCellEx(c2, c) if(c2->landparam) ok = false;
-        if(ok && hrand(doCross ?450:15000) < 20 + (2 * items[itMutant] + yendor::hardness()) && !safety) {
+        if(ok && hrand(doCross ?450:15000) < (20 + (2 * items[itMutant] + yendor::hardness())) * ls::ls_mul_big() && !safety) {
           if(!peace::on) c->item = itMutant;
           c->landparam = items[itMutant] + 5 + hrand(11);
           c->wall = waNone;
@@ -2065,7 +2066,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
     
     case laHunting:
       if(d == 7 && c->land == laHunting && !racing::on && !safety && !reptilecheat) {
-        if(hrand(1000) < 20) {
+        if(hrand(1000) < 20 * ls::ls_mul_big()) {
           if(openplains(c)) {
             if(hrand(2) == 0) {
               if(!items[itHunting]) {
@@ -2273,7 +2274,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           c->monst = moMonkey;
         else if(hrand_monster(80000) < 5 + items[itRuby] + yendor::hardness())
           c->monst = moEagle;
-        else if(pseudohept_r(c) && c != currentmap->gamestart() && hrand_monster(4000) < 300 + items[itRuby] && !c->monst) {
+        else if(pseudohept_r(c) && c != currentmap->gamestart() && hrand_monster(4000) < (300 + items[itRuby]) * ls::ls_mul_big() && !c->monst) {
           int hardchance = items[itRuby] + yendor::hardness();
           if(hardchance > 25) hardchance = 25;
           bool hardivy = hrand(100) < hardchance;

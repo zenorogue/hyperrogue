@@ -560,6 +560,7 @@ EX bool isbar4(cell *c) {
 
 EX bool barrier_cross(eLand l, eLand r) {
   if(l == laCrossroads3 || r == laCrossroads3) return hrand(100) < 66;
+  if(land_structure == lsCrossWalls) return hrand(100) < 90;
   if(isElemental(l) && isElemental(r)) return hrand(100) < 75;
   return false;
   }
