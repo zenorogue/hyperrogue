@@ -447,7 +447,7 @@ EX namespace scores {
 /** \brief the amount of boxes reserved for each hr::score item */
 #define MAXBOX 500
 /** \brief currently used boxes in hr::score */
-#define POSSCORE 414
+#define POSSCORE 416
 /** \brief a struct to keep local score from an earlier game */
 struct score {
   /** \brief version used */
@@ -956,6 +956,8 @@ EX void applyBoxes() {
   applyBoxNum(items[itRevolver]);
   applyBoxNum(items[itAsteroid]);
   applyBoxM(moAsteroid);
+  applyBoxNum(items[itTreat]);
+  applyBoxM(moVampire);
 
   if(POSSCORE != boxid) printf("ERROR: %d boxes\n", boxid);
   if(isize(invorb)) { println(hlog, "ERROR: Orbs not taken into account"); exit(1); }
