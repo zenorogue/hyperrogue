@@ -292,6 +292,10 @@ EX int rebalance_treasure(int x, int y, eLand l) {
   return res;
   }
 
+EX eItem random_curse() {
+  return pick(itCurseWeakness, itCurseDraining, itCurseWater, itCurseFatigue, itCurseRepulsion, itCurseGluttony);
+  }
+
 EX void giantLandSwitch(cell *c, int d, cell *from) {
   bool fargen = d == 9;
   switch(c->land) {
@@ -2653,7 +2657,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
       }
 
     case laCursed: {
-      if(fargen) {
+      if(fargen && c->wall != waRubble) {
         c->wall = waStone;
         for(int i=0; i<3; i++) {
           auto ew = [i] (cell *c1) {
@@ -2689,7 +2693,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
               c->wall = waStone;
             else {
               c->monst = moHexer;
-              c->item = pick(itCurseWeakness, itCurseDraining, itCurseWater, itCurseFatigue, itCurseRepulsion, itCurseGluttony);
+              c->item = random_curse();
               }
             break;
             }

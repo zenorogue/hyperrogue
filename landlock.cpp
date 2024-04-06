@@ -81,7 +81,7 @@ EX eLand firstland = laIce;
 EX eLand specialland = laIce;
 
 #if HDR
-enum eLandStructure { lsNiceWalls, lsChaos, lsPatchedChaos, lsTotalChaos, lsChaosRW, lsWallChaos, lsSingle, lsNoWalls, lsHorodisks, lsVoronoi, lsLandscape, lsCrossWalls, lsVineWalls, lsGUARD };
+enum eLandStructure { lsNiceWalls, lsChaos, lsPatchedChaos, lsTotalChaos, lsChaosRW, lsWallChaos, lsSingle, lsNoWalls, lsHorodisks, lsVoronoi, lsLandscape, lsCrossWalls, lsVineWalls, lsCursedWalls, lsGUARD };
 #endif
 
 EX eLandStructure land_structure;
@@ -90,9 +90,9 @@ EX namespace ls {
 
 EX bool single() { return land_structure == lsSingle; }
 
-EX bool any_chaos() { return among(land_structure, lsChaos, lsPatchedChaos, lsWallChaos, lsTotalChaos, lsChaosRW, lsCrossWalls, lsVineWalls, lsLandscape); }
+EX bool any_chaos() { return among(land_structure, lsChaos, lsPatchedChaos, lsWallChaos, lsTotalChaos, lsChaosRW, lsCrossWalls, lsVineWalls, lsCursedWalls, lsLandscape); }
 EX bool std_chaos() { return land_structure == lsChaos; }
-EX bool wall_chaos() { return among(land_structure, lsWallChaos, lsCrossWalls, lsVineWalls); }
+EX bool wall_chaos() { return among(land_structure, lsWallChaos, lsCrossWalls, lsVineWalls, lsCursedWalls); }
 EX bool patched_chaos() { return land_structure == lsPatchedChaos; }
 
 EX bool any_order() { return among(land_structure, lsNiceWalls, lsNoWalls, lsHorodisks, lsVoronoi); }
@@ -113,6 +113,7 @@ EX int chaoticity() {
   if(land_structure == lsLandscape) return 35;
   if(land_structure == lsWallChaos) return 30;
   if(land_structure == lsCrossWalls) return 32;
+  if(land_structure == lsCursedWalls) return 34;
   if(land_structure == lsVoronoi) return 20;
   if(land_structure == lsSingle) return 0;
   return 10;  
@@ -123,6 +124,7 @@ EX int ls_mul() {
   if(land_structure == lsWallChaos) return 2;
   if(land_structure == lsCrossWalls) return 3;
   if(land_structure == lsVineWalls) return 3;
+  if(land_structure == lsCursedWalls) return 3;
   return 1;
   }
 
@@ -131,6 +133,7 @@ EX int ls_mul_big() {
   if(land_structure == lsWallChaos) return 5;
   if(land_structure == lsCrossWalls) return 10;
   if(land_structure == lsVineWalls) return 10;
+  if(land_structure == lsCursedWalls) return 10;
   return 1;
   }
 
@@ -165,6 +168,8 @@ EX string land_structure_name(bool which) {
       return XLAT("excessive crossing walls");
     case lsVineWalls:
       return XLAT("regular walls");
+    case lsCursedWalls:
+      return XLAT("cursed walls");
     default:
       return "error structure";
     }
@@ -188,6 +193,8 @@ EX void fix_land_structure_choice() {
   if(!nice_walls_available() && land_structure == lsCrossWalls)
     land_structure = lsChaos;
   if(land_structure == lsVineWalls && (geometry != gNormal || !BITRUNCATED))
+    land_structure = lsNiceWalls;
+  if(land_structure == lsCursedWalls && (geometry != gNormal || !BITRUNCATED))
     land_structure = lsNiceWalls;
   if(ls::hv_structure() && (!hyperbolic || bt::in() || quotient))
     land_structure = lsSingle;

@@ -616,6 +616,12 @@ EX void extendBarrier(cell *c) {
     if(buildBarrier6(cw, 2)) return;    
     }
     
+  if(land_structure == lsCursedWalls && c->barleft != laMirror && c->barright != laMirror && hrand(100) < 80) {
+    cellwalker cw(c, c->bardir);
+    cw = cw + wstep + 3 + wstep - 1;
+    if(buildBarrier6(cw, c->barright, c->barleft)) return;
+    }
+
   if(barrier_cross(c->barleft, c->barright) || (firstmirror && hrand(100) < 60)) {
     
     cellwalker cw(c, c->bardir);
@@ -681,6 +687,7 @@ EX void buildBarrier(cell *c, int d, eLand l IS(laNone)) {
     buildBarrierForce(c, d, l);
   }
 
+/** mirror variant of 6-fold walls */
 EX bool buildBarrier6(cellwalker cw, int type) {
   limitgen("build6 %p/%d (%d)\n", hr::voidp(cw.at), cw.spin, type); 
   
@@ -725,21 +732,28 @@ EX bool buildBarrier6(cellwalker cw, int type) {
     if(!(PURE?checkBarriersFront:checkBarriersBack)(b[0], 6, true)) return false;
     if(!(PURE?checkBarriersFront:checkBarriersBack)(b[3], 6, true)) return false;
     }
-  
+
+  eLand m0 = laMirror;
+  eLand m1 = laMirrored;
+  eLand m2 = laMirrored2;
+  eLand mw1 = laMirrorWall;
+  eLand mw2 = laMirrorWall2;
+  eWall w = waMirrorWall;
+
   for(int d=0; d<4; d++) {
     b[d].at->bardir = b[d].spin;
     
     if(PURE) {
-      b[0].at->barleft = laMirrored, b[0].at->barright = laMirrored2;
-      b[1].at->barleft = laMirror, b[1].at->barright = laMirrored;
-      b[2].at->barleft = laMirrored2, b[2].at->barright = laMirrored;
-      b[3].at->barleft = laMirrored, b[3].at->barright = laMirror;
+      b[0].at->barleft = m1, b[0].at->barright = m2;
+      b[1].at->barleft = m0, b[1].at->barright = m1;
+      b[2].at->barleft = m2, b[2].at->barright = m1;
+      b[3].at->barleft = m1, b[3].at->barright = m0;
       }
     else {    
-      b[0].at->barleft = laMirror, b[0].at->barright = laMirrored;
-      b[1].at->barleft = laMirrored, b[1].at->barright = laMirror;
-      b[2].at->barleft = laMirrored, b[2].at->barright = laMirrored2;
-      b[3].at->barleft = laMirrored2, b[3].at->barright = laMirrored;
+      b[0].at->barleft = m0, b[0].at->barright = m1;
+      b[1].at->barleft = m1, b[1].at->barright = m0;
+      b[2].at->barleft = m1, b[2].at->barright = m2;
+      b[3].at->barleft = m2, b[3].at->barright = m1;
       }
   
     (PURE?extendBarrierFront:extendBarrierBack)(b[d].at);
@@ -753,45 +767,87 @@ EX bool buildBarrier6(cellwalker cw, int type) {
     }
 
   if(BITRUNCATED) {
-    setland((cw+1).cpeek(), laMirrorWall);
-    setland((cw+2).cpeek(), laMirrored);
-    setland((cw+3).cpeek(), laMirrorWall2);
-    setland((cw+4).cpeek(), laMirrorWall2);
-    setland((cw+5).cpeek(), laMirrored);
-    setland((cw+0).cpeek(), laMirrorWall);
-    setland((b[0]+2).cpeek(), laMirrored);
-    setland((b[3]+6).cpeek(), laMirrored2);
-    setland((b[3]+5).cpeek(), laMirrored2);
-    setland((b[1]-1).cpeek(), laMirrored);
-    setland((b[2]-2).cpeek(), laMirrored);
-    setland((b[1]-2).cpeek(), laMirrored);
-    setland((b[0]-2).cpeek(), laMirror);
-    cw.at->land = laMirrorWall;
-    cw.at->wall = waMirrorWall;
+    setland((cw+1).cpeek(), mw1);
+    setland((cw+2).cpeek(), m1);
+    setland((cw+3).cpeek(), mw2);
+    setland((cw+4).cpeek(), mw2);
+    setland((cw+5).cpeek(), m1);
+    setland((cw+0).cpeek(), mw1);
+    setland((b[0]+2).cpeek(), m1);
+    setland((b[3]+6).cpeek(), m2);
+    setland((b[3]+5).cpeek(), m2);
+    setland((b[1]-1).cpeek(), m1);
+    setland((b[2]-2).cpeek(), m1);
+    setland((b[1]-2).cpeek(), m1);
+    setland((b[0]-2).cpeek(), m0);
+    cw.at->land = mw1;
+    cw.at->wall = w;
     cw.at->landparam = 1;
     }
   else {
-    setland(cw.at, laMirrorWall2);
-    setland((cw+0).cpeek(), laMirrorWall2);
-    setland((cw+1).cpeek(), laMirrored);
-    setland((cw+2).cpeek(), laMirrored);
-    setland((cw+3).cpeek(), laMirrorWall);
-    setland((cw+4).cpeek(), laMirrored);
-    setland((cw+5).cpeek(), laMirrorWall2);
-    setland((cw+6).cpeek(), laMirrored2);
+    setland(cw.at, mw2);
+    setland((cw+0).cpeek(), mw2);
+    setland((cw+1).cpeek(), m1);
+    setland((cw+2).cpeek(), m1);
+    setland((cw+3).cpeek(), mw1);
+    setland((cw+4).cpeek(), m1);
+    setland((cw+5).cpeek(), mw2);
+    setland((cw+6).cpeek(), m2);
 
-    setland((b[1]).cpeek(), laMirrorWall);
-    setland((b[1]+1).cpeek(), laMirror);
-    setland((b[1]+2).cpeek(), laMirrorWall);
-    setland((b[1]+6).cpeek(), laMirrored);
+    setland((b[1]).cpeek(), mw1);
+    setland((b[1]+1).cpeek(), m0);
+    setland((b[1]+2).cpeek(), mw1);
+    setland((b[1]+6).cpeek(), m1);
 
-    setland((b[0] + wstep - 2).cpeek(), laMirrored);
-    setland((b[3] + wstep - 2).cpeek(), laMirrored);
+    setland((b[0] + wstep - 2).cpeek(), m1);
+    setland((b[3] + wstep - 2).cpeek(), m1);
     }
 
   return true;
   }
-  
+
+EX int curse_percentage = 10;
+
+/** cursed variant of 6-fold walls */
+EX bool buildBarrier6(cellwalker cw, eLand m0, eLand m1) {
+  cellwalker b[6];
+  if(buggyGeneration) return true;
+
+  for(int i=0; i<6; i+=2)
+    b[i] = cw + i + wstep;
+  for(int i=1; i<6; i+=2)
+    b[i] = cw + i + wstep + 3 + wstep;
+
+  for(int i=0; i<6; i++) if(i != 1) {
+    if(!(PURE?checkBarriersFront:checkBarriersBack)(b[i], 6, true)) return false;
+    }
+
+  for(int d=0; d<6; d++) {
+    b[d].at->bardir = b[d].spin;
+    b[d].at->barleft = (d&1) ? m1 : m0;
+    b[d].at->barright = (d&1) ? m0 : m1;
+    (PURE?extendBarrierFront:extendBarrierBack)(b[d].at);
+    }
+
+  cw.at->land = laBarrier;
+  cw.at->wall = waBarrier;
+  forCellCM(c, cw.at) { c->land = laBarrier; c->wall = waBarrier; }
+  for(int d=0; d<6; d+=2) {
+    setland((b[d]-2).cpeek(), m0);
+    setland((b[d]+2).cpeek(), m1);
+    setland((b[d+1]-2).cpeek(), m1);
+    setland((b[d+1]+2).cpeek(), m0);
+    }
+  if(hrand(100) < curse_percentage) {
+    setland(cw.at, laCursed);
+    cw.at->wall = waRubble;
+    cw.at->monst = moHexer;
+    cw.at->item = random_curse();
+    }
+
+  return true;
+  }
+
 EX bool buildBarrier4(cell *c, int d, int mode, eLand ll, eLand lr) {
   limitgen("build4 %p\n", hr::voidp(c)); 
   if(buggyGeneration) return true;

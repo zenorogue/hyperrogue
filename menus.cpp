@@ -466,6 +466,8 @@ EX void show_chaos() {
     add_edit(randomwalk_size);
   else if(land_structure == lsLandscape)
     add_edit(landscape_div);
+  else if(land_structure == lsCursedWalls)
+    add_edit(curse_percentage);
   else
     dialog::addBreak(100);
   dialog::addBack();

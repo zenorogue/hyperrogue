@@ -3339,6 +3339,11 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
     "Then, we find a cell of the bitruncated cubic honeycomb at these cordinates, and this cell determines which land it is. The bigger the value, the larger the lands.", 'R')
   ->set_reaction([] { if(game_active) { stop_game(); start_game(); } });
 
+  param_i(curse_percentage, "curse_percentage")->editable(0, 100, 1,
+    "curse percentage",
+    "The percentage of towers in Cursed Walls mode to be manned by Canyon Hags", 'R')
+  ->set_reaction([] { if(game_active) { stop_game(); start_game(); } });
+
   param_f(global_boundary_ratio, "global_boundary_ratio")
   ->editable(0, 5, 0.1, "Width of cell boundaries",
     "How wide should the cell boundaries be.", '0');
