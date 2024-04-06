@@ -937,7 +937,13 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
     
     case laTrollheim:
       if(fargen) {
-        if(hrand(50000) < (ls::tame_chaos() ? 1000: ls::any_chaos() ?50:5) && c->wall != waBarrier && celldist(c) >= 7 && !safety && !peace::on) {
+        int freq =
+          land_structure == lsVineWalls ? 10000 :
+          ls::wall_chaos() ? 2500 :
+          ls::tame_chaos() ? 1000 :
+          ls::any_chaos() ? 50 :
+          5;
+        if(hrand(50000) < freq && c->wall != waBarrier && celldist(c) >= 7 && !safety && !peace::on) {
           bool okay = true;
           forCellCM(c2, c) forCellCM(c3, c2) forCellCM(c4, c3) forCellCM(c5, c4) {
             cell *cx = ls::any_chaos() ? c3 : c5;
@@ -2278,7 +2284,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           int hardchance = items[itRuby] + yendor::hardness();
           if(hardchance > 25) hardchance = 25;
           bool hardivy = hrand(100) < hardchance;
-          if((cgflags & qFRACTAL) ? buildIvy(c, 0, 2) : hat::in() ?  buildIvy(c, 0, 4) : (hardivy ? buildIvy(c, 1, 9) : buildIvy(c, 0, c->type)) && !peace::on)
+          if(land_structure == lsVineWalls ? buildIvy(c, 0, 2) : (cgflags & qFRACTAL) ? buildIvy(c, 0, 2) : hat::in() ?  buildIvy(c, 0, 4) : (hardivy ? buildIvy(c, 1, 9) : buildIvy(c, 0, c->type)) && !peace::on)
             c->item = itRuby;
           }
         }

@@ -1771,6 +1771,21 @@ EX void build_walls(cell *c, cell *from) {
   
   else if(good_for_wall(c) && isWarpedType(c->land) && hrand(10000) < 3000 && c->land && 
     buildBarrierNowall(c, eLand(c->land ^ laWarpSea ^ laWarpCoast))) { }
+
+  else if(land_structure == lsVineWalls) {
+    int ev = emeraldval(c);
+    if((ev | 11) == 43 && c->bardir == NODIR) {
+      for(int i=0; i<c->type; i++) if(emeraldval(c->cmove(i)) == ev-4) {
+        bool oldleft = true;
+        for(int j=1; j<=3; j++)
+          if(c->modmove(i+j) && c->modmove(i+j)->mpdist < c->mpdist)
+            oldleft = false;
+        buildBarrierStrong(c, i, oldleft, getNewLand(c->land));
+        extendBarrier(c);
+        }
+      }
+    return;
+    }
   
   else if(ls::single()) return;
     
