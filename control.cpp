@@ -524,7 +524,7 @@ EX void handleKeyNormal(int sym, int uni) {
 
   if(!(uni >= 'A' && uni <= 'Z') && DEFAULTCONTROL && !game_keys_scroll) {
     for(int i=0; i<8; i++)
-      if(among(sym, keys_vi[i], keys_wasd[i], keys_numpad[i]))
+      if(among(sym, keys_vi[i], keys_wasd[i], (uni >= '0' && uni <= '9') ? -1 : keys_numpad[i]))
         movepckeydir(i);
     }
 
