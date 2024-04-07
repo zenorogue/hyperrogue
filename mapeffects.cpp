@@ -575,6 +575,7 @@ EX bool destroyHalfvine(cell *c, eWall newwall IS(waNone), int tval IS(6)) {
   }
 
 EX int coastvalEdge(cell *c) { return coastval(c, laIvoryTower); }
+EX int coastvalWest(cell *c) { return coastval(c, laWestWall); }
 
 EX int gravityLevel(cell *c) {
   if(c->land == laIvoryTower && ls::hv_structure())
@@ -601,10 +602,10 @@ EX int gravityLevelDiff(cell *c, cell *d) {
   if(shmup::on) return 0;
 
   int nid = neighborId(c, d);
-  int id1 = parent_id(c, 1, coastvalEdge) + 1;
+  int id1 = parent_id(c, 1, coastvalWest) + 1;
   int di1 = angledist(c->type, id1, nid);
 
-  int id2 = parent_id(c, -1, coastvalEdge) - 1;
+  int id2 = parent_id(c, -1, coastvalWest) - 1;
   int di2 = angledist(c->type, id2, nid);
   
   if(di1 < di2) return 1;

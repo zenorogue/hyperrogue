@@ -703,6 +703,9 @@ EX int coastval(cell *c, eLand base) {
     if(!c->landparam) return UNKNOWN;
     return c->landparam & 255;
     }
+  else if(base == laWestWall) {
+    if(c->land != base) return 0;
+    }
   else {
     if(c->land == laOceanWall || c->land == laCaribbean || c->land == laWhirlpool ||
       c->land == laLivefjord || c->land == laWarpSea || c->land == laKraken || c->land == laDocks || c->land == laBrownian)
