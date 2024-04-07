@@ -708,8 +708,8 @@ EX void checkTide(cell *c) {
         if(!c2) continue;
         if(c2->land == laBarrier || c2->land == laOceanWall) ;
         else if(c2->land == laOcean) 
-          seadist = min(seadist, c2->SEADIST ? c2->SEADIST+1 : 7),
-          landdist = min(landdist, c2->LANDDIST ? c2->LANDDIST+1 : 7);
+          seadist = min(seadist, c2->SEADIST >= 1 ? c2->SEADIST+1 : 7),
+          landdist = min(landdist, c2->LANDDIST >= 1 ? c2->LANDDIST+1 : 7);
         else if(isSealand(c2->land)) seadist = 1;
         else landdist = 1;
         }
