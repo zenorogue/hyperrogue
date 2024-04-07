@@ -347,6 +347,8 @@ EX void pushThumper(const movei& mi) {
     if(w == waThumperOn)
       explode = 2;
     }
+  if(w == waExplosiveBarrel && cto->wall == waMineMine)
+    explode = 2;
   destroyTrapsOn(cto);
   if(cto->wall == waOpenPlate || cto->wall == waClosePlate) {
     toggleGates(cto, cto->wall);
