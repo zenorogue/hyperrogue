@@ -2586,7 +2586,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           treasure_rate += variant::features[i].rate_change;
           variant::features[i].build(c);
           }
-        if(hrand(2000 - PT(kills[moVariantWarrior] * 5, 250)) < treasure_rate && !c->wall && !c->monst) 
+        if(hrand(max(100, 2000 - PT(kills[moVariantWarrior] * 5, 250))) < treasure_rate && !c->wall && !c->monst)
           c->item = itVarTreasure;
         }
       if(d == 7 && c->wall == waTrapdoor) {
