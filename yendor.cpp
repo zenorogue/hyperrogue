@@ -278,10 +278,12 @@ EX namespace yendor {
         goto retry;
         }
   
+      auto rollbacks = std::move(changes.rollbacks);
       for(int i=-1; i<key->type; i++) {
         cell *c2 = i >= 0 ? key->move(i) : key;
         checkTide(c2);
-        c2->monst = moNone; c2->item = itNone;
+        makeNoMonster(c2);
+        c2->item = itNone;
         if(!passable(c2, NULL, P_MIRROR | P_MONSTER)) {
           if(c2->wall == waCavewall) c2->wall = waCavefloor;
           else if(c2->wall == waDeadwall) c2->wall = waDeadfloor2;
@@ -311,6 +313,7 @@ EX namespace yendor {
         if(c2->land == laMirrorWall && i == -1)
           c2->wall = waNone;
         }
+      changes.rollbacks = std::move(rollbacks);
       key->item = itKey;
       
       bool split_found = false;

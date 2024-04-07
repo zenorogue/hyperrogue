@@ -745,18 +745,27 @@ EX void checkTide(cell *c) {
   #endif
   }
 
-EX bool makeEmpty(cell *c) {
+EX bool makeNoMonster(cell *c) {
+  changes.ccell(c);
+  if(isAnyIvy(c->monst)) killMonster(c, moPlayer, 0);
+  else if(c->monst == moPair) {
+    changes.ccell(c->move(c->mondir));
+    if(c->move(c->mondir)->monst == moPair)
+      c->move(c->mondir)->monst = moNone;
+    }
+  else if(isWorm(c->monst)) {
+    if(!items[itOrbDomination]) return false;
+    }
+  else if(isMultitile(c->monst)) {
+    return false;
+    }
+  else c->monst = moNone;
+  return true;
+  }
 
+EX bool makeEmpty(cell *c) {
   if(c->monst != moPrincess) {
-    if(isAnyIvy(c->monst)) killMonster(c, moPlayer, 0);
-    else if(c->monst == moPair) {
-      if(c->move(c->mondir)->monst == moPair)
-        c->move(c->mondir)->monst = moNone;
-      }
-    else if(isWorm(c->monst)) {
-      if(!items[itOrbDomination]) return false;
-      }
-    else c->monst = moNone;
+    if(!makeNoMonster(c)) return false;
     }
 
   if(c->land == laCanvas) ;
