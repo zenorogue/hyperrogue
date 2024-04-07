@@ -390,7 +390,7 @@ EX void create_yasc_message() {
   if(captures.size() == 2 && context.size() == 1 && cwt.at->type == 6) {
     vector<int> dirs;
     forCellIdEx(c1, i, cwt.at) for(auto cap: captures) if(cap.first == c1) dirs.push_back(i);
-    if(abs(dirs[0]-dirs[1]) == 3) {
+    if(isize(dirs) == 2 && abs(dirs[0]-dirs[1]) == 3) {
       auto c1 = captures.begin(); c1++;
       yasc_message = XLAT("pinched by %the1 and %the2", captures.begin()->second, c1->second);
       }
