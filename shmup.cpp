@@ -2590,7 +2590,7 @@ EX void turn(int delta) {
     lmousetarget = mousetarget;
 
   if(!shmup::on) return;  
-  if(!(cmode & sm::NORMAL)) {
+  if(!(cmode & sm::NORMAL) || outoffocus) {
     #if CAP_RACING
     if(!in_pause) {
       in_pause = true;
