@@ -854,14 +854,35 @@ auto bt_config = arg::add2("-btwidth", [] {arg::shift_arg_formula(vid.binary_wid
 #endif
 
 EX bool pseudohept(cell *c) {
-  if(WDIM == 2)
-    return c->type & c->master->distance & 1;
-  else if(geometry == gHoroRec)
-    return c->c.spin(S7-1) == 0 && (c->master->distance & 1) && c->cmove(S7-1)->c.spin(S7-1) == 0;
-  else if(geometry == gHoroTris)
-    return c->c.spin(S7-1) == 0 && (c->master->distance & 1);
-  else
-    return (c->master->zebraval == 1) && (c->master->distance & 1);
+  switch(geometry) {
+    case gBinary4:
+      c->cmove(3);
+      return (c->master->distance & 1) && (c->c.spin(3) == 0);
+
+    case gBinaryTiling:
+      return c->master->distance & c->type & 1;
+
+    case gTernary: {
+      return c->master->emeraldval & 1;
+      /* auto m = dynamic_cast<hrmap_binary*> (current_map());
+      auto o = m->origin;
+      int flips = 0;
+      while(m != o) {
+        if(m->master->distance >= o->master->distance) { if(m->c.spin(4) == 1) flips++; m = m->cmove(4); }
+        }
+    heptagon *origin;
+      c->cmove(4); return (c->c.spin(4) == 1); */
+      }
+
+    case gHoroRec:
+      return c->c.spin(S7-1) == 0 && (c->master->distance & 1) && c->cmove(S7-1)->c.spin(S7-1) == 0;
+
+    case gHoroTris:
+      return c->c.spin(S7-1) == 0 && (c->master->distance & 1);
+
+    default:
+      return (c->master->zebraval == 1) && (c->master->distance & 1);
+    }
   }
 
 EX pair<gp::loc, gp::loc> gpvalue(heptagon *h) {
