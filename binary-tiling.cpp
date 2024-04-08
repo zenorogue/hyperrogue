@@ -136,7 +136,7 @@ EX namespace bt {
           h->emeraldval = gmod((parent->emeraldval - d1) * 7508, 15015);
         break;
       case gTernary:
-        if(d < 2)
+        if(d <= 2)
           h->emeraldval = gmod(parent->emeraldval * 3 + d, 10010);
         else
           h->emeraldval = gmod((parent->emeraldval - d1) * 3337, 10010);
