@@ -5203,3 +5203,16 @@ Bug fixes:
 * in countHyperstones, two variants of Mirror are counted once
 * specially generated lands (horocycles, Brown Islands) now respect Unlocked and LandIngame rules
 * fixed some more crashes related to SDL2 (e.g., right-click in shmup)
+
+2024-04-09 02:46 Update 13.0g:
+
+- New land structures: CR2-like, CR3-like, and "cursed"
+- Space Rocks and Halloween stuff are now saved correctly (thanks to jlm)
+- since the Aether users now see adjacent items in water, they can also pick them up
+- fixed the bug where moving a boat with Compass would cause items to be picked up
+- pushing an exploding barrel on a mine now causes an explosion
+- fixed pressing numpad keys with numpad on acting both as moves and quick-keys
+- a new pseudoheptagon pattern in standard binary and ternary tiling
+- fixed the Free Fall being not inaccessible from some lands
+- auto-pause shmup game when it loses focus
+- fixed some possible crashes: with keys being generated on ivy, when using Orb of Space on Orb of Safety, Ocean in the chaos modes, after killing 400 mutants, when generating YASC message
