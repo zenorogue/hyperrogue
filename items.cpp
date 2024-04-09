@@ -22,7 +22,7 @@ EX bool pickable_from_water(eItem it) {
 
 EX bool cannotPickupItem(cell *c, bool telekinesis) {
   if(pickable_from_water(c->item) && isWatery(c)) return false;
-  return itemHidden(c) && !telekinesis && !(isWatery(c) && markOrb(itOrbFish));
+  return itemHidden(c) && !telekinesis && !(isWatery(c) && (markOrb(itOrbFish) || markOrb(itOrbAether)));
   }
 
 EX bool canPickupItemWithMagnetism(cell *c, cell *from) {
