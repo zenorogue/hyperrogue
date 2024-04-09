@@ -420,6 +420,8 @@ EX bool canPushStatueOn(cell *c, flagtype flags) {
   }
 
 EX void moveBoat(const movei& mi) {
+  changes.ccell(mi.t);
+  changes.ccell(mi.s);
   eWall x = mi.t->wall; mi.t->wall = mi.s->wall; mi.s->wall = x;
   mi.t->mondir = mi.rev_dir_or(NODIR);
   moveItem(mi.s, mi.t, false);

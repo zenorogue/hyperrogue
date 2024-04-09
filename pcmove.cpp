@@ -214,6 +214,7 @@ struct pcmove {
   bool fmsMove, fmsAttack, fmsActivate;
   int d;
   int subdir;
+  /** used to tell perform_actual_move() that this is a boat move and thus we should not pick up items */
   bool boatmove;
   bool good_tortoise;
   flagtype attackflags;
@@ -844,13 +845,10 @@ bool pcmove::actual_move() {
     return boat_move();  
   
   if(!c2->monst && cwt.at->wall == waBoat && cwt.at->item != itOrbYendor && boatGoesThrough(c2) && markOrb(itOrbWater) && !nonAdjacentPlayer(c2, cwt.at) && fmsMove) {
-
-    if(c2->item && !cwt.at->item) moveItem(c2, cwt.at, false), boatmove = true;
-    placeWater(c2, cwt.at);
-    moveBoat(mi);
+    if(c2->item && collectItem(c2, cwt.at)) return true;
     changes.ccell(c2);
-    c2->mondir = revhint(cwt.at, d);
-    if(c2->item) boatmove = !boatmove;
+    placeWater(c2, cwt.at);
+    moveBoat(mi); boatmove = true;
     return perform_actual_move();
     }
   
@@ -1300,14 +1298,6 @@ bool pcmove::perform_actual_move() {
   movecost(cwt.at, c2, 1);
 
   if(!boatmove && collectItem(c2, cwt.at)) return true;
-  if(boatmove && c2->item && cwt.at->item) {
-     eItem it = c2->item;
-     c2->item = cwt.at->item;
-     if(collectItem(c2, cwt.at)) return true;
-     eItem it2 = c2->item;
-     c2->item = it;
-     cwt.at->item = it2;
-     }
   if(doPickupItemsWithMagnetism(c2)) return true;
 
   if(isIcyLand(cwt.at) && cwt.at->wall == waNone && markOrb(itOrbWinter)) {
