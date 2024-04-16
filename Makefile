@@ -1,7 +1,7 @@
 # This Makefile works for Mac OS X (El Capitan), MinGW, and Linux.
 #
 # For Mac OS X:
-#   Run "brew install sdl" to install SDL in /usr/local.
+#   Run "brew install sdl" to install SDL in $(HOMEBREW_PREFIX).
 #   Run "brew install sdl_gfx".
 #   Run "brew install sdl_mixer".
 #   Run "brew install sdl_ttf".
@@ -13,7 +13,7 @@
 #   Run "make" to build HyperRogue as ./hyperrogue.exe.
 #
 # For Ubuntu Linux:
-#   Run "sudo apt-get install libsdl-dev" to install SDL in /usr/local.
+#   Run "sudo apt-get install libsdl-dev" to install SDL in $(HOMEBREW_PREFIX).
 #   Run "make" to build HyperRogue as ./hyperrogue.
 
 
@@ -68,9 +68,10 @@ ifeq (${OS},mingw)
 endif
 
 ifeq (${OS},osx)
-  CXXFLAGS_EARLY += -DMAC -I/usr/local/include
+  HOMEBREW_PREFIX := $(shell brew --prefix)
+  CXXFLAGS_EARLY += -DMAC -I$(HOMEBREW_PREFIX)/include
   EXE_EXTENSION :=
-  LDFLAGS_EARLY += -L/usr/local/lib
+  LDFLAGS_EARLY += -L$(HOMEBREW_PREFIX)/lib
   LDFLAGS_GL := -framework AppKit -framework OpenGL
   LDFLAGS_GLEW := -lGLEW
   LDFLAGS_PNG := -lpng
