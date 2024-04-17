@@ -4,10 +4,6 @@
 #   Run `brew install sdl12-compat sdl_gfx sdl_mixer sdl_ttf glew`
 #   Run "make" to build HyperRogue as ./hyperrogue.
 #
-#   As a workaround to a build error, macOS users will have 
-#   to manually edit `$(brew --prefix)/include/SDL/SDL_gfxPrimitives.h` at
-#   line 38 to use quote include.
-#
 # For MSYS2 and MinGW-w64:
 #   You might need to run commands such as "pacman -S mingw-w64-x86_64-SDL"
 #   to install SDL and other required libraries.
@@ -70,7 +66,7 @@ endif
 
 ifeq (${OS},osx)
   HOMEBREW_PREFIX := $(shell brew --prefix)
-  CXXFLAGS_EARLY += -DMAC -I$(HOMEBREW_PREFIX)/include
+  CXXFLAGS_EARLY += -DMAC -I$(HOMEBREW_PREFIX)/include -I$(HOMEBREW_PREFIX)/include/SDL
   EXE_EXTENSION :=
   LDFLAGS_EARLY += -L$(HOMEBREW_PREFIX)/lib
   LDFLAGS_GL := -framework AppKit -framework OpenGL
