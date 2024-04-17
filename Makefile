@@ -1,11 +1,12 @@
 # This Makefile works for Mac OS X (El Capitan), MinGW, and Linux.
 #
 # For Mac OS X:
-#   Run "brew install sdl" to install SDL in $(HOMEBREW_PREFIX).
-#   Run "brew install sdl_gfx".
-#   Run "brew install sdl_mixer".
-#   Run "brew install sdl_ttf".
+#   Run `brew install sdl12-compat sdl_gfx sdl_mixer sdl_ttf glew`
 #   Run "make" to build HyperRogue as ./hyperrogue.
+#
+#   As a workaround to a build error, macOS users will have 
+#   to manually edit `$(brew --prefix)/include/SDL/SDL_gfxPrimitives.h` at
+#   line 38 to use quote include.
 #
 # For MSYS2 and MinGW-w64:
 #   You might need to run commands such as "pacman -S mingw-w64-x86_64-SDL"
@@ -13,7 +14,7 @@
 #   Run "make" to build HyperRogue as ./hyperrogue.exe.
 #
 # For Ubuntu Linux:
-#   Run "sudo apt-get install libsdl-dev" to install SDL in $(HOMEBREW_PREFIX).
+#   Run "sudo apt-get install libsdl-dev" to install SDL in /usr/local.
 #   Run "make" to build HyperRogue as ./hyperrogue.
 
 
