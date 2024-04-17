@@ -1,8 +1,15 @@
 # This Makefile works for Mac OS X (El Capitan), MinGW, and Linux.
+# 
+# Environmental vairables:
+#   If you want to build with Glew, set
+#     HYPERROGUE_USE_GLEW=1
+#   If you want to use libpng, set
+#     HYPERROGUE_USE_PNG=1
 #
 # For Mac OS X:
-#   Run `brew install sdl12-compat sdl_gfx sdl_mixer sdl_ttf glew`
-#   Run "make" to build HyperRogue as ./hyperrogue.
+#   Run `brew install sdl12-compat sdl_gfx sdl_mixer sdl_ttf`
+#   Run `brew install glew libpng` to install the optional dependencies
+#   Run `make` to build HyperRogue as `./hyperrogue`.
 #
 # For MSYS2 and MinGW-w64:
 #   You might need to run commands such as "pacman -S mingw-w64-x86_64-SDL"
