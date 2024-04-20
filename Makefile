@@ -14,7 +14,7 @@
 # For MSYS2 and MinGW-w64:
 #   To install SDL and other required libraries, run these commands
 #   from the MSYS2 shell:
-#       pacman -S mingw-w64-ucrt-x86_64-glew
+#       pacman -S mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-glew
 #       pacman -S mingw-w64-ucrt-x86_64-SDL mingw-w64-ucrt-x86_64-SDL_mixer
 #       pacman -S mingw-w64-ucrt-x86_64-SDL_ttf mingw-w64-ucrt-x86_64-SDL_gfx
 #       pacman -S make
