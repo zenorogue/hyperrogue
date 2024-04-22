@@ -28,6 +28,7 @@ EX namespace bow {
 #if HDR
 enum eWeapon { wBlade, wCrossbow };
 enum eCrossbowStyle { cbBull, cbGeodesic, cbGeometric };
+const string bowName[] = { "bull", "geod", "geom" };
 #endif
 
 EX eWeapon weapon;
