@@ -2830,6 +2830,8 @@ void celldrawer::draw() {
 
   cells_drawn++;
 
+  checkTide(c);
+
 #if CAP_TEXTURE
   if(texture::saving) {
     texture::config.apply(c, V, 0xFFFFFFFF);
