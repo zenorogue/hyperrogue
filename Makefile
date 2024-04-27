@@ -1,16 +1,24 @@
 # This Makefile works for Mac OS X (El Capitan), MinGW, and Linux.
+# 
+# Environmental vairables:
+#   If you want to build with Glew, set
+#     HYPERROGUE_USE_GLEW=1
+#   If you want to use libpng, set
+#     HYPERROGUE_USE_PNG=1
 #
 # For Mac OS X:
-#   Run "brew install sdl" to install SDL in /usr/local.
-#   Run "brew install sdl_gfx".
-#   Run "brew install sdl_mixer".
-#   Run "brew install sdl_ttf".
-#   Run "make" to build HyperRogue as ./hyperrogue.
+#   Run `brew install sdl12-compat sdl_gfx sdl_mixer sdl_ttf`
+#   Run `brew install glew libpng` to install the optional dependencies
+#   Run `make` to build HyperRogue as `./hyperrogue`.
 #
 # For MSYS2 and MinGW-w64:
-#   You might need to run commands such as "pacman -S mingw-w64-x86_64-SDL"
-#   to install SDL and other required libraries.
-#   Run "make" to build HyperRogue as ./hyperrogue.exe.
+#   To install SDL and other required libraries, run these commands
+#   from the MSYS2 shell:
+#       pacman -S mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-glew
+#       pacman -S mingw-w64-ucrt-x86_64-SDL mingw-w64-ucrt-x86_64-SDL_mixer
+#       pacman -S mingw-w64-ucrt-x86_64-SDL_ttf mingw-w64-ucrt-x86_64-SDL_gfx
+#       pacman -S make
+#   Then run "make" to build HyperRogue as ./hyperrogue.exe.
 #
 # For Ubuntu Linux:
 #   Run "sudo apt-get install libsdl-dev" to install SDL in /usr/local.
@@ -54,7 +62,7 @@ ifeq (${OS},linux)
 endif
 
 ifeq (${OS},mingw)
-  CXXFLAGS_EARLY += -DWINDOWS -mwindows -D_A_VOLID=8
+  CXXFLAGS_EARLY += -DWINDOWS -mwindows -D_A_VOLID=8 -I/ucrt64/include/SDL
   EXE_EXTENSION := .exe
   LDFLAGS_GL := -lopengl32
   LDFLAGS_GLEW := -lglew32
@@ -68,9 +76,10 @@ ifeq (${OS},mingw)
 endif
 
 ifeq (${OS},osx)
-  CXXFLAGS_EARLY += -DMAC -I/usr/local/include
+  HOMEBREW_PREFIX := $(shell brew --prefix)
+  CXXFLAGS_EARLY += -DMAC -I$(HOMEBREW_PREFIX)/include -I$(HOMEBREW_PREFIX)/include/SDL
   EXE_EXTENSION :=
-  LDFLAGS_EARLY += -L/usr/local/lib
+  LDFLAGS_EARLY += -L$(HOMEBREW_PREFIX)/lib
   LDFLAGS_GL := -framework AppKit -framework OpenGL
   LDFLAGS_GLEW := -lGLEW
   LDFLAGS_PNG := -lpng
@@ -80,7 +89,7 @@ ifeq (${OS},osx)
 endif
 
 ifeq (${TOOLCHAIN},clang)
-  CXXFLAGS_STD = -std=c++11
+  CXXFLAGS_STD = -std=c++14
   CXXFLAGS_EARLY += -fPIC
   CXXFLAGS_EARLY += -W -Wall -Wextra -Wsuggest-override -pedantic
   CXXFLAGS_EARLY += -Wno-unused-parameter -Wno-implicit-fallthrough -Wno-maybe-uninitialized -Wno-char-subscripts -Wno-unknown-warning-option
@@ -88,7 +97,7 @@ ifeq (${TOOLCHAIN},clang)
 endif
 
 ifeq (${TOOLCHAIN},gcc)
-  CXXFLAGS_STD = -std=c++11
+  CXXFLAGS_STD = -std=c++14
   CXXFLAGS_EARLY += -fPIC
   CXXFLAGS_EARLY += -W -Wall -Wextra -pedantic
   CXXFLAGS_EARLY += -Wno-unused-parameter -Wno-implicit-fallthrough -Wno-maybe-uninitialized
@@ -96,7 +105,7 @@ ifeq (${TOOLCHAIN},gcc)
 endif
 
 ifeq (${TOOLCHAIN},mingw)
-  CXXFLAGS_STD = -std=c++11
+  CXXFLAGS_STD = -std=c++14
   CXXFLAGS_EARLY += -W -Wall -Wextra
   CXXFLAGS_EARLY += -Wno-unused-parameter -Wno-implicit-fallthrough -Wno-maybe-uninitialized
   CXXFLAGS_EARLY += -Wno-invalid-offsetof
@@ -173,7 +182,7 @@ mymake$(EXE_EXTENSION): mymake.cpp
 emscripten: hyper.html
 
 %.html %.js %.wasm: %.emscripten-sources
-	emcc -std=c++11 -O3 -s USE_ZLIB=1 -s LEGACY_GL_EMULATION=1 -s TOTAL_MEMORY=128MB hyperweb.cpp -o hyper.html
+	emcc -std=c++14 -O3 -s USE_ZLIB=1 -s LEGACY_GL_EMULATION=1 -s TOTAL_MEMORY=128MB hyperweb.cpp -o hyper.html
 
 hyper.emscripten-sources: *.cpp autohdr.h
 
