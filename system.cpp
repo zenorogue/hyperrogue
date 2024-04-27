@@ -1224,7 +1224,7 @@ EX void loadsave() {
       if(fscanf(f, "%9999s", buf) <= 0) break;
       sc.ver = buf;
       if(sc.ver == "CHEATER!" && save_cheats) {
-        fgets(buf, 12000, f);
+        if(fgets(buf, 12000, f) == NULL) break;
         if(fscanf(f, "%9999s", buf) <= 0) break;
         sc.ver = buf;
         }
