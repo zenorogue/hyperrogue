@@ -149,7 +149,7 @@ ld evaluate_measure(manidata& emb, manidata& orig, vector<int>& mapp, vector<pai
 
 }
 
-static constexpr string som_test_dir = "results/";
+static const string som_test_dir = "results/";
 }
 
 
