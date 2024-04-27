@@ -319,7 +319,7 @@ void load_embedded(const string s) {
     while(true) {
       char who[500], where[500];
       who[0] = 0;
-      fscanf(f, "%s%s", who, where);
+      if(fscanf(f, "%s%s", who, where) < 0) throw hstream_exception("error loading embedding");
       if(who[0] == 0) break;
       if(!ids.count(who)) printf("unknown vertex: %s\n", who);
       string wh = where;
