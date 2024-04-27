@@ -139,8 +139,7 @@ void cellcoords() {
 // needs cellcoords/rvcoords/origcoords
 void build_disttable() {
   indenter_finish im("build_disttable");
-  int tab[N];
-  for(int i=0; i<N; i++) tab[i] = N;
+  vector<int> tab(N, N);
   disttable0.clear();
   disttable1.clear();
 
