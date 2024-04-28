@@ -268,7 +268,7 @@ void writestats() {
   ld placement_loglik = loglik_placement();
   
   for(int u=0; u<MAXDIST; u++) if(tally[u]) {
-    println(hlog, hr::format("* %4d: %8d / %12Ld = %lf %.10" PLDF " %.10" PLDF, 
+    println(hlog, hr::format("* %4d: %8d / %12lld = %lf %.10" PLDF " %.10" PLDF,
       u, edgetally[u], tally[u], double(edgetally[u]) / tally[u], 
       saved_logistic.yes(u), current_logistic.yes(u)));
     }
