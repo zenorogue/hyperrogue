@@ -1,11 +1,4 @@
 # HyperRogue
-<p>
-<a href="https://travis-ci.org/zenorogue/hyperrogue/builds">
-<img src="https://badges.herokuapp.com/travis/zenorogue/hyperrogue?branch=master&env=TRAVIS_BUILD_SYSTEM=Makefile&label=make" alt="TravisCI badge">
-<img src="https://badges.herokuapp.com/travis/zenorogue/hyperrogue?branch=master&env=TRAVIS_BUILD_SYSTEM=mymake&label=mymake" alt="TravisCI badge">
-<img src="https://badges.herokuapp.com/travis/zenorogue/hyperrogue?branch=master&env=TRAVIS_BUILD_SYSTEM=emscripten&label=web" alt="TravisCI badge">
-</a>
-</p>
 
 A puzzle roguelike in the hyperbolic plane. See the [HyperRogue website](http://roguetemple.com/z/hyper.php) for detailed and most up-to-date information.
 Compiled executables can be downloaded from [itch.io](https://zenorogue.itch.io/hyperrogue) and from the [HyperRogue website](http://www.roguetemple.com/z/hyper/download.php).
