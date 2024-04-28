@@ -643,7 +643,7 @@ bool view_ads_ca() {
       flatresult center;
       vector<flatresult> hlist;
 
-      color_t statecolor;
+      color_t statecolor = 0;
       if(1) {
         dynamicval<eGeometry> b(geometry, gRotSpace);
         shiftmatrix S = where_matrix[c];
@@ -750,7 +750,7 @@ bool view_ads_ca() {
           break;
           }
         }
-      addaura(shiftless(center.h), statecolor, 0);
+      addaura(shiftless(center.h), statecolor, 0); // todo statecolor not changed
       }
     if(acc) {
       poly_outline = 0xFF;
