@@ -534,6 +534,12 @@ bool vr_keys(int sym, int uni) {
 
 // all generators will add to the current scene
 
+#if CAP_VR
+#define IF_VR(x) x
+#else
+#define IF_VR(x)
+#endif
+
 auto hooks = 
   // generate scene with H3, H2xE, E3, S2xE (8x6), S3 (16-cell) with floors; runs automatically
   arg::add3("-intra-floors", create_intra_floors)
@@ -574,11 +580,11 @@ auto hooks =
         mapstream::loadMap(s);
         slide_backup(ray::fixed_map, true);
         slide_backup(ray::max_iter_intra, y);
-        #if CAP_VR
+        IF_VR(
         slide_backup(vrhr::hsm, vrhr::eHeadset::holonomy);
         slide_backup(vrhr::eyes, vrhr::eEyes::truesim);
         slide_backup(vrhr::cscr, vrhr::eCompScreen::eyes);
-        #endif
+        )
         starter.clear();
         rogueviz::rv_hook(hooks_handleKey, 101, vr_keys);
         popScreenAll();
@@ -630,5 +636,6 @@ auto hooks =
       {loader{"run this visualization", 'r', load("solv-h3-scene.lev", 0.05, 3000)}});
     }));
 }
+#undef IF_VR
 #endif
 }

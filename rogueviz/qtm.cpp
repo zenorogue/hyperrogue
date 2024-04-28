@@ -190,6 +190,12 @@ int args() {
   return 0;
   }
 
+#if CAP_RAY
+#define IF_RAY(x) x
+#else
+#define IF_RAY(x)
+#endif
+
 auto hooks = 
     addHook(hooks_args, 100, args)
   + addHook_rvslides(180, [] (string s, vector<tour::slide>& v) {
@@ -214,10 +220,10 @@ auto hooks =
               set_geometry(gRotSpace);
               slide_backup(rots::underlying_scale, .25);
               slide_backup(qmode, m);
-              #if CAP_RAY
+              IF_RAY(
               slide_backup(ray::max_cells, 32768);
               slide_backup(ray::fixed_map, true);
-              #endif
+              )
               slide_backup(camera_speed, .1);
               enable();
               start_game();
@@ -240,11 +246,11 @@ auto hooks =
               set_geometry(gRotSpace);
               slide_backup(rots::underlying_scale, .25);
               slide_backup(qmode, m);
-              #if CAP_RAY
+              IF_RAY(
               slide_backup(ray::max_cells, 32768);
               slide_backup(ray::fixed_map, true);
               slide_backup(ray::want_use, 2);
-              #endif
+              )
               slide_backup(camera_speed, .1);
               enable();
               start_game();
@@ -256,6 +262,7 @@ auto hooks =
         }
       });
 
+#undef IF_RAY
 }
 
 }
