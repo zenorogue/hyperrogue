@@ -337,8 +337,7 @@ void build_disttable_approx() {
   for(int k=0; k<threads; k++)
     v.emplace_back([&,k] () {
       auto& dt = results[k];
-      int tab[N];
-      for(int i=0; i<N; i++) tab[i] = N;
+      vector<int>  tab(N, N);
       auto p = k ? nullptr : new progressbar(N/threads, "build_disttable_approx");
       for(int i=k; i<N; i+=threads) {
         if(p) (*p)++;
