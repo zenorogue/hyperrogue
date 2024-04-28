@@ -734,7 +734,7 @@ namespace sag {
 
         hyperpoint np = rgpushxto0(placement[i]) * h;
         
-        ld change;
+        ld change = 0;
         for(auto e: edges_yes[i]) change -= lgemb.lyes(pdist(placement[i], placement[e]));
         for(auto e: edges_no[i]) change -= lgemb.lno(pdist(placement[i], placement[e]));
         for(auto e: edges_yes[i]) change += lgemb.lyes(pdist(np, placement[e]));
