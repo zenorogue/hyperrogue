@@ -86,7 +86,8 @@ int movearound() {
 int move_restart() {
   indenter_finish im("move_restart");
   ld llo = loglik_chosen();
-  array<array<int, 128>, 2> distances_map = {0};
+  array<array<int, 128>, 2> distances_map;
+  for(int a=0; a<2; a++) for(int b=0; b<128; b++) distances_map[a][b] = 0;
   int moves = 0;
 //  int im = 0;
   
