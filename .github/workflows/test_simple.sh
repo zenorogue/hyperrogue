@@ -9,7 +9,9 @@ cat << ENDOFCMDS > .github/workflows/gdb_cmds.txt
   exit 1
 ENDOFCMDS
 
-  gdb --batch -x .github/workflows/gdb_cmds.txt ./hyperrogue
+  echo not running gdb -- not working currently
+  echo gdb --batch -x .github/workflows/gdb_cmds.txt ./hyperrogue
+
 else
   ./hyperrogue --version
 fi
