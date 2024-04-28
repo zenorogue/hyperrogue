@@ -342,6 +342,8 @@ namespace objmodels {
     virtual void process_triangle(vector<hyperpoint>& hys, vector<hyperpoint>& tot, bool textured, object *co);
     
     bool available();
+
+    virtual ~model() {}
     };
 
   void add_model_settings();

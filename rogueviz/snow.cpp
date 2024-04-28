@@ -314,6 +314,12 @@ auto hchook = addHook(hooks_drawcell, 100, draw_snow)
     param_b(snow_not_player, "snow_not_player");
     })
 
+#if CAP_SOLV
+#define IF_SOLV(x) x
+#else
+#define IF_SOLV(x)
+#endif
+
 #if CAP_RVSLIDES
 + addHook_rvslides(161, [] (string s, vector<tour::slide>& v) {
   if(s != "noniso") return;
@@ -381,16 +387,16 @@ auto hchook = addHook(hooks_drawcell, 100, draw_snow)
     set_geometry(gRotSpace);
     snow_lambda = 5;
     });
-#if CAP_SOLV
-  snow_slide(v, "Solv", "Solv geometry. Like the non-isotropic hyperbolic geometry but where the horizontal and vertical curvatures work in the other way.", [] {
+  IF_SOLV(snow_slide(v, "Solv", "Solv geometry. Like the non-isotropic hyperbolic geometry but where the horizontal and vertical curvatures work in the other way.", [] {
     set_geometry(gSol);
     // tour::slide_backup(snow_shape, 2);
     snow_lambda = 3;
-    });
-#endif
+    });)
   })
 #endif
   + 0;
+
+#undef IF_SOLV
 
 }
 }
