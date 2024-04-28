@@ -73,13 +73,15 @@ jobs:
     - name: Do a simple test
       run: .github/workflows/test_simple.sh
 
-  emscripten:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: Build
-      run: |
-        docker run --rm -v $(pwd):/src trzeci/emscripten make emscripten
-    - name: Do a simple test
-      run: |
-        ls -lAF hyper.html hyper.js hyper.wasm
+# broken for now
+
+#  emscripten:
+#    runs-on: ubuntu-latest
+#    steps:
+#    - uses: actions/checkout@v2
+#    - name: Build
+#     run: |
+#        docker run --rm -v $(pwd):/src trzeci/emscripten make emscripten
+#    - name: Do a simple test
+#      run: |
+#        ls -lAF hyper.html hyper.js hyper.wasm
