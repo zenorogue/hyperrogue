@@ -46,8 +46,7 @@ void run_sb() {
   crystal::set_crystal(6);
   set_variation(eVariation::pure);
   enable_canvas();
-  patterns::whichCanvas = 'g';
-  patterns::canvasback = 0x101010;
+  ccolor::set_plain(0x101010);
   check_cgi();
   start_game();  
 

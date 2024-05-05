@@ -114,7 +114,7 @@ void run_snub(int v, int w) {
   check_cgi();
   cgi.require_basics();
   specialland = laCanvas;
-  patterns::whichCanvas = 'A';
+  ccolor::which = &ccolor::shape;
   // vid.wallmode = 1;
   printf("start game\n");
   printf("distlimit = %d\n", cgi.base_distlimit);

@@ -26,10 +26,10 @@ auto geoslide(eGeometry g, char canvas, int jhole, int jblock) {
       tour::slide_backup<ld>(sightranges[gSol], 7);
       tour::slide_backup<ld>(sightranges[gSpace435], 7);
       vid.texture_step = 4;
-      tour::slide_backup(patterns::jhole, jhole);
-      tour::slide_backup(patterns::rwalls, jhole);
-      tour::slide_backup(patterns::jblock, jblock);
-      tour::slide_backup(patterns::whichCanvas, canvas);
+      tour::slide_backup(ccolor::jhole, jhole);
+      tour::slide_backup(ccolor::rwalls, jhole);
+      tour::slide_backup(ccolor::jblock, jblock);
+      tour::slide_backup(ccolor::which, ccolor::legacy(canvas));
       tour::slide_backup(vid.linewidth, vid.linewidth / 10);
       start_game();
       if(jblock < 0) {
@@ -45,7 +45,7 @@ auto geoslide(eGeometry g, char canvas, int jhole, int jblock) {
     if(in_special && among(mode, pmGeometrySpecial, pmStop)) {
       in_special = false;
       gamestack::pop();
-      patterns::whichCanvas = canvas;
+      ccolor::which = ccolor::legacy(canvas);
       vid.grid = false;
       fat_edges = false;
       sightranges[gSpace435] = 7;
@@ -54,7 +54,7 @@ auto geoslide(eGeometry g, char canvas, int jhole, int jblock) {
     else if(mode == pmGeometrySpecial && !in_special) {
       in_special = true;
       gamestack::push();
-      patterns::whichCanvas = 'g';
+      ccolor::set_plain(0);
       vid.grid = true;
       stdgridcolor = 0xFFFF00FF;
       fat_edges = true;

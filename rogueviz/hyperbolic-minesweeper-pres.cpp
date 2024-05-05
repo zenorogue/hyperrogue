@@ -246,7 +246,7 @@ vector<cell*> current_list;
 
 void mine_slide(tour::presmode mode, reaction_t set_geom, function<vector<cell*>()> celllister, function<void(cell*)> assigner) {
   using namespace tour;
-  patterns::canvasback = 0;
+  ccolor::plain.ctab = {0};
   setCanvas(mode, '0');
   if(mode == pmStart) {
     slide_backup(mapeditor::drawplayer, false);
@@ -334,7 +334,7 @@ void enable_earth() {
   stop_game();
   set_geometry(gSphere);
   enable_canvas();
-  patterns::whichCanvas = 'F';
+  ccolor::which = &ccolor::football;
   start_game();        
   texture::config.configname = "textures/earth.txc";
   texture::config.load();
@@ -543,8 +543,8 @@ slide sweeper_slides[] = {
         stop_game();
         set_geometry(g45);
         set_variation(eVariation::pure);
-        tour::slide_backup(colortables['c'][0], 0x104010);
-        tour::slide_backup(colortables['c'][1], 0x10F010);
+        tour::slide_backup(ccolor::chessboard.ctab[0], 0x104010);
+        tour::slide_backup(ccolor::chessboard.ctab[1], 0x10F010);
         tour::slide_backup(vid.use_smart_range, 2);
         tour::slide_backup(vid.smart_range_detail, 1);
         start_game();
@@ -562,7 +562,7 @@ slide sweeper_slides[] = {
       setCanvas(mode, 'g');
       non_game_slide_scroll(mode);
       if(mode == pmStart) {
-        tour::slide_backup(patterns::canvasback, 0x10A010);
+        tour::slide_backup(ccolor::plain.ctab[0], 0x10A010);
         stop_game();
         set_geometry(gBinary4);
         set_variation(eVariation::pure);
@@ -840,7 +840,7 @@ slide sweeper_slides[] = {
       setCanvas(mode, 'g');
       non_game_slide_scroll(mode);
       if(mode == pmStart) {
-        tour::slide_backup(patterns::canvasback, 0x10A010);
+        tour::slide_backup(ccolor::plain.ctab[0], 0x10A010);
         stop_game();
         set_geometry(gBinary4);
         set_variation(eVariation::pure);

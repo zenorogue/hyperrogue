@@ -1097,7 +1097,7 @@ namespace sag {
     create_viz();
 
     for(int i=0; i<DN; i++) {
-      color_t col = patterns::compute_cell_color(sagcells[sagid[i]]);
+      color_t col = ccolor::formula.f(sagcells[sagid[i]], ccolor::formula);
       col <<= 8;
       col |= 0xFF;
       vdata[i].cp.color1 = vdata[i].cp.color2 = col;

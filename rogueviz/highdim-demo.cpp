@@ -74,8 +74,7 @@ void run_cpick() {
   crystal::set_crystal(6);
   set_variation(eVariation::pure);
   enable_canvas();
-  patterns::whichCanvas = 'g';
-  patterns::canvasback = 0;
+  ccolor::set_plain(0);
   check_cgi();
   start_game();
   current_center = currentmap->gamestart();
@@ -208,8 +207,7 @@ void run_sb() {
   crystal::set_crystal(6);
   set_variation(eVariation::pure);
   enable_canvas();
-  patterns::whichCanvas = 'g';
-  patterns::canvasback = 0;
+  ccolor::set_plain(0);
   check_cgi();
   rv_hook(hooks_drawcell, 100, sokomap);
   start_game();
@@ -394,7 +392,7 @@ int mycanvas(cell *c) {
   }
 
 void enable() {
-  rv_hook(patterns::hooks_generate_canvas, 100, mycanvas);
+  rv_hook(ccolor::hooks_generate_canvas, 100, mycanvas);
   }
 
 auto explore_structure(int _shapeid) {
@@ -407,7 +405,7 @@ auto explore_structure(int _shapeid) {
       stop_game();
       set_geometry(geometry == gCrystal534 ? gCrystal534 : gCrystal344);
       enable_canvas();
-      patterns::whichCanvas = ' ';
+      ccolor::which = &ccolor::plain;
       shapeid = _shapeid;
       enable();
       crystal::crystal_period = 4;
@@ -444,7 +442,7 @@ void house(int sides, int shape = 10) {
     crystal::set_crystal(sides);
   set_variation(eVariation::pure);
   enable_canvas();
-  patterns::whichCanvas = ' ';
+  ccolor::which = &ccolor::plain;
   shapeid = shape;
   check_cgi();
   enable();
@@ -466,7 +464,7 @@ tour::slide *gen_high_demo() {
         sync(mode, VC);
         if(mode == pmStart) {        
           crystal::set_crystal(6);
-          patterns::whichCanvas = 'K';
+          ccolor::which = &ccolor::crystal_colors;
           start_game();
           }
         }
@@ -479,7 +477,7 @@ tour::slide *gen_high_demo() {
         sync(mode, VC);
         if(mode == pmStart) {
           crystal::set_crystal(8);
-          patterns::whichCanvas = 'K';
+          ccolor::which = &ccolor::crystal_colors;
           start_game();
           }
         }
@@ -563,10 +561,7 @@ tour::slide *gen_high_demo() {
         sync(mode, NO_VC | PLAYER);
         if(mode == pmStart) {
           crystal::set_crystal(6);
-          patterns::whichCanvas = 'c';
-          colortables['c'][0] = 0x208020;
-          colortables['c'][1] = 0x105010;
-          patterns::canvasback = 0x101010;
+          ccolor::set_colors(ccolor::chessboard, {0x208020, 0x105010});
           start_game();
           auto & us = vid.cs;
           us.charid = 4;

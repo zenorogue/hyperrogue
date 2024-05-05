@@ -591,7 +591,7 @@ void enable_earth() {
   stop_game();
   set_geometry(gSphere);
   enable_canvas();
-  patterns::whichCanvas = 'F';
+  ccolor::which = &ccolor::football;
   start_game();        
   texture::config.configname = "textures/earth.txc";
   texture::config.load();
@@ -635,8 +635,8 @@ slide dmv_slides[] = {
         set_geometry(gArchimedean); arcm::current.parse("3^6");
         set_variation(eVariation::pure);
 
-        slide_backup(colortables['F'][0], 0xC0FFC0);
-        slide_backup(colortables['F'][1], 0x80FF80);
+        slide_backup(ccolor::football.ctab[0], 0xC0FFC0);
+        slide_backup(ccolor::football.ctab[1], 0x80FF80);
         slide_backup(pconf.alpha, 1); 
         slide_backup(pconf.scale, 1); 
         start_game();
@@ -708,8 +708,8 @@ slide dmv_slides[] = {
         slide_backup(specialland, laCanvas);
         set_geometry(gNormal);
         set_variation(eVariation::bitruncated);
-        slide_backup(colortables['F'][0], 0xC0FFC0);
-        slide_backup(colortables['F'][1], 0x80FF80);
+        slide_backup(ccolor::football.ctab[0], 0xC0FFC0);
+        slide_backup(ccolor::football.ctab[1], 0x80FF80);
         slide_backup(pconf.alpha, 1); 
         slide_backup(pconf.scale, 1); 
         slide_backup(rug::mouse_control_rug, true);
@@ -755,7 +755,7 @@ slide dmv_slides[] = {
     
     [] (presmode mode) {
       if(mode == pmStart) {
-        slide_backup(patterns::rwalls, 10);
+        slide_backup(ccolor::rwalls, 10);
         slide_backup(vid.fov, 120);
         }
 

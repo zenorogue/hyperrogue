@@ -179,7 +179,7 @@ namespace rogueviz {
 template<class T, class U> function<void(presmode)> roguevizslide(char c, const T& t, const U& f) {
   return [c,t,f] (presmode mode) {
     f(mode);
-    patterns::canvasback = 0x101010;
+    ccolor::plain.ctab = {0x101010};
     setCanvas(mode, c);
     if(mode == 1 || mode == pmGeometryStart) t();
   
@@ -201,7 +201,7 @@ template<class T> function<void(presmode)> roguevizslide(char c, const T& t) { r
 template<class T, class U>
 function<void(presmode)> roguevizslide_action(char c, const T& t, const U& act) {
   return [c,t,act] (presmode mode) {
-    patterns::canvasback = 0x101010;
+    ccolor::plain.ctab = {0x101010};
     setCanvas(mode, c);
     if(mode == pmStart || mode == pmGeometryStart) t();
   

@@ -108,7 +108,7 @@ bool labeller(cell* c, const shiftmatrix& V) {
   if(m) {
     string s = m->asg[c->master].second;
     cgi.scalefactor = 1;
-    queuestr(V, 0.5, s, colortables['j'][c->master->distance+1]);
+    queuestr(V, 0.5, s, ccolor::jmap.ctab[c->master->distance+1]);
     }
   return false;
   }

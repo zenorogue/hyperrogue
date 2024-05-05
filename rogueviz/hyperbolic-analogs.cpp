@@ -374,10 +374,8 @@ void enable() {
   
   vid.linequality = 4;
   enable_canvas();
-  patterns::whichCanvas = 'F';
 
-  colortables['F'][0] = 0x80C080;
-  colortables['F'][1] = 0x80A080;
+  ccolor::set_colors(ccolor::football, {0x80C080, 0x80A080});
   pconf.scale = .3;
   
   vid.use_smart_range = 2;

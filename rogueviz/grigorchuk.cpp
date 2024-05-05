@@ -325,6 +325,8 @@ bool view_labels = true, view_lines = true;
 
 namespace hr {
 
+extern ccolor::data grigorchuk_coloring;
+
 struct hrmap_grigorchuk : hrmap_standard {
 
   heptagon *origin;
@@ -411,8 +413,8 @@ struct hrmap_grigorchuk : hrmap_standard {
 
       if(grigorchuk::view_labels) queuestr(V, 0.3, grigorchuk::deform(dec[c->master]), 0xFFFFFF);
 
-      if(patterns::whichCanvas == 'G' && c->landparam == 0)
-        c->landparam = 0x102008 * (1 + ((hrmap_grigorchuk*)currentmap)->dec[c->master]->len);
+      if(ccolor::which == &grigorchuk_coloring && c->landparam == 0)
+        c->landparam = grigorchuk_coloring(c);
       
       drawcell(c, V * currentmap->master_relative(c, false));
       
@@ -436,6 +438,10 @@ struct hrmap_grigorchuk : hrmap_standard {
 
 eGeometry gGrigorchuk(eGeometry(-1));
 
+ccolor::data grigorchuk_coloring = ccolor::data("Grigorchuk", [] { return geometry == gGrigorchuk; }, [] (cell *c, ccolor::data& cco) {
+  return 0x102008 * (1 + ((hrmap_grigorchuk*)currentmap)->dec[c->master]->len);
+  }, {});
+
 void create_grigorchuk_geometry() {
   if(gGrigorchuk != eGeometry(-1)) return;
   ginf.push_back(ginf[gNormal]);
@@ -449,6 +455,7 @@ void create_grigorchuk_geometry() {
   gi.menu_displayed_name = "Grigorchuk group";
   gi.shortname = "Grig";
   gi.default_variation = eVariation::pure;
+  ccolor::all.push_back(&grigorchuk_coloring);
   }
 
 int readArgsG() {
@@ -483,11 +490,6 @@ int readArgsG() {
 
 auto hook = addHook(hooks_args, 100, readArgsG)
   + addHook(hooks_newmap, 100, [] { return geometry == gGrigorchuk ? new hrmap_grigorchuk : nullptr; })
-  + addHook(patterns::hooks_generate_canvas, 100, [] (cell* c) {
-    if(patterns::whichCanvas == 'G' && geometry == gGrigorchuk) 
-      return 0x102008 * (1 + ((hrmap_grigorchuk*)currentmap)->dec[c->master]->len);
-    return -1;
-    })
   + addHook(dialog::hooks_display_dialog, 100, [] () {
     if(current_screen_cfunction() == showEuclideanMenu && geometry == gGrigorchuk) {
       dialog::addBoolItem_action(XLAT("Grigorchuk lines"), grigorchuk::view_lines, 'L'); 
@@ -516,7 +518,7 @@ auto hook = addHook(hooks_args, 100, readArgsG)
         if(mode == pmStart) {
           grigorchuk::grig_limit = 10000;
           gamestack::push();
-          slide_backup(patterns::whichCanvas, 'G');
+          slide_backup(ccolor::which, &grigorchuk_coloring);
           slide_backup(firstland, laCanvas);
           slide_backup(specialland, laCanvas);          
           set_geometry(gGrigorchuk);

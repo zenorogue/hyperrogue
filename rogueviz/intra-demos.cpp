@@ -217,8 +217,7 @@ void create_intra_solv() {
   }
 
 void create_intra_120() {
-  patterns::whichCanvas = 'r';
-  patterns::rwalls = 0;
+  ccolor::set_random(0);
   if(intra::in) intra::become();
   else stop_game();
   arcm::current.parse("8,4,6");
@@ -261,8 +260,7 @@ void create_intra_120() {
   }
 
 void create_intra_1440() {
-  patterns::whichCanvas = 'r';
-  patterns::rwalls = 0;
+  ccolor::set_random(0);
   if(intra::in) intra::become();
   else stop_game();
   set_geometry(gCell8);
@@ -330,8 +328,7 @@ vector<reaction_t> portals;
 
 void create_intra_bxe() {
   println(hlog, "called create_intra_bxe");
-  patterns::whichCanvas = 'r';
-  patterns::rwalls = 100;
+  ccolor::set_random(100);
   if(intra::in) intra::become();
   else stop_game();
   hybrid::csteps = 0;
@@ -404,8 +401,7 @@ void recurse_portal_solv2(int r, cell *cl, cell *cr) {
 
 void create_intra_sol() {
   println(hlog, "called create_intra_sol");
-  patterns::whichCanvas = 'r';
-  patterns::rwalls = 100;
+  ccolor::set_random(100);
   if(intra::in) intra::become();
   else stop_game();
 

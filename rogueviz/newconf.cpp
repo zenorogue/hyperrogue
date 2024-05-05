@@ -559,7 +559,7 @@ void pick_pattern() {
   dialog::add_action([] { 
     chg_pattern([] {
       enable_canvas();
-      patterns::whichCanvas = 'B';
+      ccolor::which = &ccolor::sides;
       });
     });
 
@@ -570,7 +570,7 @@ void pick_pattern() {
       gp::param.second = 0;
       set_variation(eVariation::goldberg);
       enable_canvas();
-      patterns::whichCanvas = 'F';
+      ccolor::which = &ccolor::football;
       });
     });
 
@@ -579,7 +579,7 @@ void pick_pattern() {
     chg_pattern([] {
       set_geometry(gOctagon);
       enable_canvas();
-      patterns::whichCanvas = 'T';
+      ccolor::which = &ccolor::zebra_stripes;
       });
     });
 
@@ -612,7 +612,7 @@ void pick_pattern() {
       arcm::current.parse("4^5");
       set_geometry(gArchimedean);
       enable_canvas();
-      patterns::whichCanvas = 'A';
+      ccolor::which = &ccolor::shape;
       });
     });
     

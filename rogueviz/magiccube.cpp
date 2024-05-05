@@ -144,8 +144,7 @@ void magic(int sides) {
     crystal::set_crystal(sides);
   set_variation(eVariation::pure);
   enable_canvas();
-  patterns::whichCanvas = 'g';
-  patterns::canvasback = back;
+  ccolor::set_plain(back);
   check_cgi();
   start_game();
   
