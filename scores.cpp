@@ -108,7 +108,11 @@ string displayfor(int scoredisplay, score* S, bool shorten = false) {
     return buf;
     }
   if(scoredisplay == POSSCORE) return modedesc(S);
-  if(scoredisplay == 68) return S->yasc_message + XLAT(" in %the1", eLand(S->box[68]));
+  if(scoredisplay == 68) {
+    eLand which = eLand(S->box[68]);
+    if(which >= landtypes || which < 0) return "fail";
+    return S->yasc_message + XLAT(" in %the1", which);
+    }
   if(scoredisplay == 1) {
     time_t tim = S->box[1];
     char buf[128]; strftime(buf, 128, "%c", localtime(&tim));
