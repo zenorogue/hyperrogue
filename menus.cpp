@@ -374,6 +374,9 @@ EX void showCreative() {
     }
 #endif
 
+  dialog::addItem(XLAT("line patterns"), 'l');
+  dialog::add_action_push(linepatterns::showMenu);
+
 //  dialog::addBoolItem(XLAT("expansion"), viewdists, 'x');
   
   dialog::addBreak(50);
