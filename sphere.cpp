@@ -178,6 +178,7 @@ struct hrmap_spherical : hrmap_standard {
     }
 
   transmatrix relative_matrixc(cell *c2, cell *c1, const hyperpoint& hint) override {
+    if(IRREGULAR) return relative_matrix_via_masters(c2, c1, hint);
     transmatrix T = iso_inverse(get_where(c1)) * get_where(c2);
     if(elliptic) fixelliptic(T);
     return T;
