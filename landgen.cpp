@@ -2921,7 +2921,7 @@ EX void set_land_for_geometry(cell *c) {
       return;
       }
     if(land_structure == lsLandscape) {
-      if(landscape_div < 0) landscape_div = 1;
+      if(landscape_div <= 0) landscape_div = 1;
       array<int, 3> a;
       for(int i=0; i<3; i++) a[i] = getCdata(c, i);
       auto& ld = landscape_div;

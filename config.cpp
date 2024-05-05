@@ -3337,6 +3337,7 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
     "land size in landscape structure",
     "Each cell gets three coordinates, each of which change smoothly, using the same method as used for the generation of landscapes e.g. in Dragon Chasms. "
     "Then, we find a cell of the bitruncated cubic honeycomb at these cordinates, and this cell determines which land it is. The bigger the value, the larger the lands.", 'R')
+  ->set_sets([] { dialog::bound_low(1); })
   ->set_reaction([] { if(game_active) { stop_game(); start_game(); } });
 
   param_i(curse_percentage, "curse_percentage")->editable(0, 100, 1,
