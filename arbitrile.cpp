@@ -220,8 +220,7 @@ void ensure_geometry(eGeometryClass c) {
 
   if(specialland != laCanvas) {   
     canvas_default_wall = waInvisibleFloor;
-    patterns::whichCanvas = 'g';
-    patterns::canvasback = 0xFFFFFF;
+    ccolor::set_plain(0xFFFFFF);
     enable_canvas();
     }
   start_game();
@@ -1283,7 +1282,7 @@ void connection_debugger() {
 
     curvepoint(sh[0]);
     
-    color_t col = colortables['A'][id];
+    color_t col = ccolor::shape.ctab[id];
     col = darkena(col, 0, 0xFF);
     
     if(&p == &last) {

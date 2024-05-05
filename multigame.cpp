@@ -78,7 +78,7 @@ void gamedata_all(gamedata& gd) {
   gd.store(genrange_bonus);
   gd.store(gamerange_bonus);
   gd.store(targets);
-  gd.store(patterns::rwalls);
+  gd.store(ccolor::rwalls);
   if(GOLDBERG) gd.store(gp::param);
   callhooks(hooks_gamedata, &gd);
   }

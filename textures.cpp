@@ -1329,14 +1329,13 @@ EX void showMenu() {
 
     dialog::addBoolItem(XLATN("Canvas"), specialland == laCanvas, 'X');
     dialog::add_action([] () {
-      bool inwhite = specialland == laCanvas && patterns::whichCanvas == 'g' && patterns::canvasback == 0xFFFFFF;
+      bool inwhite = specialland == laCanvas && ccolor::which == &ccolor::plain && ccolor::plain.ctab.size() == 1 && ccolor::plain.ctab[0] == 0xFFFFFF;
       if(inwhite) 
         pushScreen(patterns::showPrePattern);
       else {
         stop_game();
         enable_canvas();
-        patterns::whichCanvas = 'g';
-        patterns::canvasback = 0xFFFFFF;
+        ccolor::set_plain(0xFFFFFF);
         start_game();
         }
       });

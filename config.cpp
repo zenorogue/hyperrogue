@@ -1050,8 +1050,8 @@ EX void initConfig() {
   param_f(linepatterns::tree_starter, "tree_starter")
   -> editable(0, 1, 0.05, "tree-drawing parameter", "How much of edges to draw for tree patterns (to show how the tree edges are oriented).", 't');
 
-  param_char(patterns::whichCanvas, "whichCanvas", 0);
-  param_i(patterns::rwalls, "randomwalls");
+  // param_char(patterns::whichCanvas, "whichCanvas", 0); %TODO
+  param_i(ccolor::rwalls, "randomwalls");
 
   param_b(vid.grid, "grid");
   param_b(models::desitter_projections, "desitter_projections", false);
@@ -1347,7 +1347,7 @@ EX void initConfig() {
   ->set_extra(draw_crosshair);
   
   param_b(mapeditor::drawplayer, "drawplayer");
-  param_color((color_t&) patterns::canvasback, "color:canvasback", false);
+  param_color((color_t&) ccolor::plain.ctab[0], "color:canvasback", false);
 
   param_color(backcolor, "color:background", false);
   param_color(forecolor, "color:foreground", false);
@@ -1359,8 +1359,8 @@ EX void initConfig() {
   param_color(stdgridcolor, "color:stdgrid", true);
   param_f(vid.multiplier_grid, "mgrid", "mult:grid", 1);
   param_color(dialog::dialogcolor, "color:dialog", false);
-  for(auto& p: colortables)
-    savecolortable(p.second, s0+"canvas"+p.first);
+  for(auto p: ccolor::all)
+    savecolortable(p->ctab, s0+"canvas:"+p->name);
   savecolortable(distcolors, "distance");
   savecolortable(minecolors, "mines");
   #if CAP_COMPLEX2
@@ -3456,7 +3456,7 @@ EX void refresh_canvas() {
   int at = 0;
   while(at < isize(cl.lst)) {
     cell *c2 = cl.lst[at];
-    c2->landparam = patterns::generateCanvas(c2);
+    c2->landparam = ccolor::generateCanvas(c2);
     at++;
     
     forCellEx(c3, c2) cl.add(c3);
@@ -3547,13 +3547,13 @@ EX void show_color_dialog() {
   dialog::add_action([] () { dialog::openColorDialog(dialog::dialogcolor); dialog::colorAlpha = false; dialog::get_di().dialogflags |= sm::SIDE; });
 
   dialog::addBreak(50);
-  if(specialland == laCanvas && colortables.count(patterns::whichCanvas)) {
+  if(specialland == laCanvas && ccolor::which->ctab.size()) {
     dialog::addItem(XLAT("pattern colors"), 'P');
-    dialog::add_action_push([] { edit_color_table(colortables[patterns::whichCanvas], refresh_canvas, true); });
+    dialog::add_action_push([] { edit_color_table(ccolor::which->ctab, refresh_canvas, true); });
 
-    if(patterns::whichCanvas == 'R') {
+    if(ccolor::which == &ccolor::shape_mirror) {
       dialog::addItem(XLAT("unreversed colors"), 'U');
-      dialog::add_action_push([] { edit_color_table(colortables['A'], refresh_canvas, true); });
+      dialog::add_action_push([] { edit_color_table(ccolor::shape.ctab, refresh_canvas, true); });
       }
     }
  
@@ -3970,7 +3970,7 @@ EX int read_color_args() {
     PHASEFROM(2); shift(); modelcolor = argcolor(32);
     }
   else if(argis("-apeirocolor")) {
-    PHASEFROM(2); shift(); patterns::apeirogonal_color = argcolor(32);
+    PHASEFROM(2); shift(); ccolor::apeirogonal_color = argcolor(32);
     }
   else if(argis("-ring")) {
     PHASEFROM(2); shift(); ringcolor = argcolor(32);

@@ -746,14 +746,16 @@ EX namespace mapstream {
     f.write(gen_wandering);
     f.write(reptilecheat);
     f.write(timerghost);
-    f.write(patterns::canvasback);
+    f.write(ccolor::plain.ctab[0]);
     f.write(patterns::whichShape);
     f.write(patterns::subpattern_flags);
-    f.write(patterns::whichCanvas);
+    char wc = '*';
+    f.write(wc);
+    f.write(ccolor::which->name);
     f.write(patterns::displaycodes);
     f.write(canvas_default_wall);
     f.write(mapeditor::drawplayer);
-    if(patterns::whichCanvas == 'f') f.write(patterns::color_formula);
+    if(ccolor::which == &ccolor::formula) f.write(ccolor::color_formula);
     f.write(canvasfloor);
     f.write(canvasdark);
     
@@ -946,15 +948,21 @@ EX namespace mapstream {
       f.read(gen_wandering);
       f.read(reptilecheat);
       f.read(timerghost);
-      f.read(patterns::canvasback);
+      f.read(ccolor::plain.ctab[0]);
       f.read(patterns::whichShape);
       f.read(patterns::subpattern_flags);
-      f.read(patterns::whichCanvas);
+      char wc;
+      f.read(wc);
+      if(wc == '*') {
+        string name;
+        f.read(name);
+        for(auto& p: ccolor::all) if(p->name == name) ccolor::which = p;
+        }
       f.read(patterns::displaycodes);
       if(f.vernum >= 0xA816)
         f.read(canvas_default_wall);
       f.read(mapeditor::drawplayer);
-      if(patterns::whichCanvas == 'f') f.read(patterns::color_formula);
+      if(wc == 'f') f.read(ccolor::color_formula);
       if(f.vernum >= 0xA90D) {
         f.read(canvasfloor);
         f.read(canvasdark);
@@ -2744,8 +2752,7 @@ EX namespace mapeditor {
           stop_game();
           enable_canvas();
           canvas_default_wall = waInvisibleFloor;
-          patterns::whichCanvas = 'g';
-          patterns::canvasback = 0xFFFFFF;
+          ccolor::set_plain(0xFFFFFF);
           dtcolor = (forecolor << 8) | 255;
           drawplayer = false;
           vid.use_smart_range = 2;

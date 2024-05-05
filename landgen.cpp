@@ -3066,7 +3066,7 @@ EX void setdist(cell *c, int d, cell *from) {
     }
   
   if(d == BARLEV && c->land == laCanvas)  {
-    color_t col = patterns::generateCanvas(c);
+    color_t col = ccolor::generateCanvas(c);
     c->landparam = col;
     c->wall = canvas_default_wall;
     if((GDIM == 3 || geom3::flipped) && (col & 0x1000000)) c->wall = waWaxWall;

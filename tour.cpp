@@ -110,8 +110,8 @@ EX void slide_action(presmode mode, char key, string text, reaction_t act) {
     help_extensions.push_back(help_extension{key, text, act});
   }
 
-EX void enable_canvas_backup(char canv) {
-  slide_backup(patterns::whichCanvas, canv);
+EX void enable_canvas_backup(ccolor::data *canv) {
+  slide_backup(ccolor::which, canv);
   slide_backup(firstland, laCanvas);
   slide_backup(specialland, laCanvas);
   slide_backup(land_structure);
@@ -120,7 +120,7 @@ EX void enable_canvas_backup(char canv) {
   }
 
 /** \brief an auxiliary function to enable a visualization in the Canvas land */
-EX void setCanvas(presmode mode, char canv) {
+EX void setCanvas(presmode mode, ccolor::data *canv) {
   if(mode == pmStart) {
     gamestack::push();
     enable_canvas_backup(canv);
@@ -131,6 +131,10 @@ EX void setCanvas(presmode mode, char canv) {
     gamestack::pop();
     slide_restore_all();
     }
+  }
+
+EX void setCanvas(presmode mode, char c) {
+  setCanvas(mode, ccolor::legacy(c));
   }
 
 /** \brief static mode: we get Orbs of Teleport to use them instead of movement */
@@ -638,7 +642,7 @@ EX slide default_slides[] = {
     "The world of HyperRogue is tiled with hexagons "
     "and heptagons; heptagons give extra space!\n\n",
     [] (presmode mode) {
-      setCanvas(mode, 'F');
+      setCanvas(mode, &ccolor::football);
       if(mode == 5) {
         cwt.at->move(0)->monst = moRunDog;
         cwt.at->move(1)->monst = moGoblin;
@@ -700,7 +704,7 @@ EX slide default_slides[] = {
     "running away in a straight line. "
     "Press '2' to try the same in the Euclidean world -- it is impossible.",
     [] (presmode mode) {
-      setCanvas(mode, 'F');
+      setCanvas(mode, &ccolor::football);
       if(mode == 5) {
         cwt.at->move(0)->monst = moRunDog;
         cwt.at->move(1)->monst = moGoblin;
@@ -861,7 +865,7 @@ EX slide default_slides[] = {
     "Hyperbolic geometry yields much more interesting periodic patterns "
     "than Euclidean.",
     [] (presmode mode) {
-      setCanvas(mode, 't');
+      setCanvas(mode, &ccolor::zebra_stripes);
       if(mode == 1) 
         patterns::displaycodes = true,
         patterns::whichPattern = patterns::PAT_ZEBRA;
@@ -895,7 +899,7 @@ EX slide default_slides[] = {
     "On the following slide, the colors change smoothly in the whole infinite world. "
     "Again, this works better than in Euclidean geometry.",
     [] (presmode mode) {
-      setCanvas(mode, 'l');
+      setCanvas(mode, &ccolor::landscape);
       SHOWLAND ( l == laCanvas );
       }
     },

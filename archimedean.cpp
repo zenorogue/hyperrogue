@@ -1340,11 +1340,12 @@ EX void enable(archimedean_tiling& arct) {
   start_game();
   }
 
-function<void()> setcanvas(char c) {
-  return [c] () {
+function<void()> setcanvas(ccolor::data& c) {
+  auto pc = &c;
+  return [pc] () {
     stop_game();
     enable_canvas();
-    patterns::whichCanvas = c;
+    ccolor::which = pc;
     start_game();
     };
   }
@@ -1467,9 +1468,9 @@ EX void show() {
       dialog::addSelItem(XLAT("edge length"), current.get_class() == gcEuclid ? (fts(current.edgelength) + XLAT(" (arbitrary)")) : fts(current.edgelength), 0);
 
       dialog::addItem(XLAT("color by symmetries"), 't');
-      dialog::add_action(setcanvas('A'));
+      dialog::add_action(setcanvas(ccolor::shape));
       dialog::addItem(XLAT("color by symmetries (reversed tiles marked)"), 'r');
-      dialog::add_action(setcanvas('R'));
+      dialog::add_action(setcanvas(ccolor::shape_mirror));
       }
     else {
       dialog::addBreak(100);
@@ -1479,20 +1480,20 @@ EX void show() {
 
     if(true) {
       dialog::addItem(XLAT("color by sides"), 'u');
-      dialog::add_action(setcanvas('B'));
+      dialog::add_action(setcanvas(ccolor::sides));
       }
     
     if(geosupport_threecolor() == 2) {
       dialog::addItem(XLAT("three colors"), 'w');
-      dialog::add_action(setcanvas('T'));
+      dialog::add_action(setcanvas(ccolor::threecolor));
       }
     else if(geosupport_football() == 2) {
       dialog::addItem(XLAT("football"), 'w');
-      dialog::add_action(setcanvas('F'));
+      dialog::add_action(setcanvas(ccolor::football));
       }
     else if(geosupport_chessboard()) {
       dialog::addItem(XLAT("chessboard"), 'w');
-      dialog::add_action(setcanvas('c'));
+      dialog::add_action(setcanvas(ccolor::chessboard));
       }
     else dialog::addBreak(100);
 

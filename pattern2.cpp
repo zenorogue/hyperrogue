@@ -1544,45 +1544,426 @@ EX bool warptype(cell *c) {
     return pattern_threecolor(c) == 0;
   }
 
-EX map<char, colortable> colortables = {
-  {'A', {
+EX namespace ccolor {
+
+  #if HDR
+  struct data;
+  using color_function = std::function<color_t(cell *c, data& cco)>;
+
+  struct data {
+    string name;
+    bool_reaction_t available;
+    color_function f;
+    colortable ctab;
+    data(string name, bool_reaction_t av, color_function f, const colortable& ctab) : name(name), available(av), f(f), ctab(ctab) {}
+    color_t operator () (cell *c) { return f(c, *this); }
+    };
+  #endif
+
+  EX color_t apeirogonal_color = 0xFFFFFFFF;
+
+  EX int jhole = 0;
+  EX int jblock = 0;
+  EX int rwalls = 50;
+
+  EX void edit_rwalls() {
+    if(WDIM == 2) return;
+    dialog::editNumber(rwalls, 0, 100, 10, 50, XLAT("probability of a wall (%)"), "");
+    dialog::get_di().reaction = [] { stop_game(); start_game(); };
+    }
+
+  EX hookset<int(cell*)> hooks_generate_canvas;
+
+  EX int generateCanvas(cell *c) {
+    int i = callhandlers(-1, hooks_generate_canvas, c);
+    if(i != -1) return i;
+    if(arb::apeirogon_consistent_coloring && arb::is_apeirogonal(c)) {
+      for(cell *c1: {c->move(c->type-1), c->move(c->type-2), c->cmove(c->type-1)->move(c->type-1), c->cmove(c->type-2)->move(c->type-2)})
+        if(c1 && c1->mpdist <= BARLEV) return c1->landparam;
+      }
+
+    return (*which)(c);
+    }
+
+  EX bool always_available() { return true; }
+
+  #define CCO [] (cell *c, data& cco) -> color_t
+
+  bool is_mirrored(cell *c) {
+    if(arcm::in()) {
+      int id = arcm::id_of(c->master);
+      int tid = arcm::current.tilegroup[id];
+      int tid2 = arcm::current.tilegroup[id^1];
+      return (id&1) && (tid != tid2);
+      }
+    if(arb::in()) {
+      int id = shvid(c);
+      auto& sh = arb::current.shapes[id];
+      return c->master->emeraldval || sh.is_mirrored;
+      }
+    return false;
+    }
+
+  EX data shape = data("shape", always_available, CCO {
+    #if CAP_ARCM
+    if(arcm::in()) {
+      int id = arcm::id_of(c->master);
+      int tid = arcm::current.tilegroup[id];
+      int tid2 = arcm::current.tilegroup[id^1];
+      if(tid2 >= 0) tid = min(tid, tid2);
+      return cco.ctab[tid];
+      }
+    #endif
+    if(arb::in()) {
+      int id = shvid(c);
+      auto& sh = arb::current.shapes[id];
+      int oid = sh.orig_id;
+      return cco.ctab[oid];
+      }
+    return cco.ctab[shvid(c)];
+    }, {
     0xF04040, 0x40F040, 0x4040F0,
     0xD0D000, 0xD000D0, 0x00D0D0,
     0xC0C0C0, 0x404040, 0x808080,
     0xF08040, 0xF04080, 0x40F080,
     0x4080F0, 0x8040F0, 0x80F040,
-    0xFFD500 }},
-  {'R', { // reverse versions of 'A'
+    0xFFD500 }
+    );
+
+  EX data shape_mirror = data("shape (mirror)", [] { return arcm::in() || arb::in(); }, CCO {
+    return shape.f(c, is_mirrored(c) ? cco : shape);
+    }, {
     0xF04080, 0x40F080, 0x3030D0,
     0xA0A060, 0xA000F0, 0x00A060,
     0xC0C0F0, 0x404070, 0x8080C0,
     0xF08080, 0xF040C0, 0x40F0C0,
     0x3060D0, 0x6030D0, 0x80F080,
-    0xFFD580 }},
-  {'B', {
+    0xFFD580 });
+
+  EX data sides = data("sides", always_available, CCO {
+    if(arb::is_apeirogonal(c)) return apeirogonal_color;
+    return cco.ctab[c->type];
+    }, {
     // trying to get colors as in Wikipedia [ https://en.wikipedia.org/wiki/Euclidean_tilings_by_convex_regular_polygons#k-uniform_tilings ]
-    0, 0, 0xFFFFFF, 0xFFFF00, 
-    0xFF0000, 0xC000C0 /* unknown5 */, 0x00FF00, 0x00C0C0 /* unknown7 */, 0xFF8000, 
+    0, 0x40C040, 0xFFFFFF, 0xFFFF00,
+    0xFF0000, 0xC000C0 /* unknown5 */, 0x00FF00, 0x00C0C0 /* unknown7 */, 0xFF8000,
     0xFFFF80, 0xC040C0, 0xFFD500, 0x000080,
     0x404040, 0x606060, 0x808080
-    }},
-  {'a', {0x800000, 0x503000, 0x206000, 0x202020, 0x004040, 0x001070, 0x606060, 0x500030}},
-  {'e', {0x404040, 0x1800000, 0x1008000, 0x000080 }},
-  {'b', {0x404040, 0x1800000, 0x1008000, 0x000080 }},
-  {'z', {0x1C0C0C0, 0x1E0E0E0, 0x404040, 0x606060 }},
-  {'x', {0xC0C0C0, 0x1800000, 0x1008000, 0x000080 }},
-  {'t', {0x804040, 0x1408040, 0x404080, 0x1808040 }},
-  {'c', {0x202020, 0x1C0C0C0}},
-  {'F', {0x1C0C0C0, 0x202020}},
-  {'L', {0xA0FFA0, 0x60C060}},
-  {'w', {0x303030, 0x1C0C0C0}},
-  {'v', {0xC00000, 0xC08000, 0xC0C000, 0x00C000, 0xC0C0, 0x00C0, 0xC000C0}},
-  {'j', {0x100FFFF, 0x100FF00, 0x1FFFF00, 0x1FF8000, 0x1FF0000, 0x1FF00FF}},  
-  {'!', {0x1202020, 0x1000080, 0x1008000, 0x1008080, 0x1800000, 0x1800080, 0x1808000, 0x1C0C0C0,
-         0x1808080, 0x10000FF, 0x100FF00, 0x100FFFF, 0x1FF0000, 0x1FF00FF, 0x1FFFF00, 0x1FFFFFF}},
-  };
+    });
 
-color_t random_landscape(cell *c, int mul, int div, int step, color_t base) {
+  EX data plain = data("single color", always_available, CCO {
+    color_t r = isize(cco.ctab) == 1 ? cco.ctab[0] : cco.ctab[cco.ctab.size()];
+    if(hrand(100) < rwalls) r |= 0x1000000;
+    if(c == cwt.at) r &= 0xFFFFFF;
+    return r;
+    },
+    {linf[laCanvas].color >> 2});
+
+  EX ld random_bright = 0;
+
+  EX data random = data("random", always_available, CCO {
+    color_t r = hrand(0xFFFFFF + 1);
+    if(hrand(100) < rwalls) r |= 0x1000000;
+    if(random_bright) r = gradient(r, 0xFFFFFF, 0, random_bright, 1);
+    if(c == cwt.at && rwalls <= 100) r &= 0xFFFFFF;
+    return r;
+    }, {0, 0xFFFFFF});
+
+  EX string color_formula = "to01(rgb(x,y,z))";
+
+  EX data formula = data("formula", always_available, CCO {
+    color_t res;
+    for(int i=0; i<4; i++) {
+      ld v = real(patterns::compute_map_function(c, 1+i, color_formula));
+      if(i == 3) part(res, i) = (v > 0);
+      else if(v < 0) part(res, i) = 0;
+      else if(v > 1) part(res, i) = 255;
+      else part(res, i) = int(v * 255 + .5);
+      }
+    return res;
+    }, {});
+
+  EX data threecolor = data("threecolor", [] { return geosupport_threecolor(); }, CCO {
+    return nestcolors[pattern_threecolor(c)]; // TODO%
+    }, {});
+
+  EX data football = data("football", [] { return geosupport_football(); }, CCO {
+    return cco.ctab[pseudohept(c)];
+    }, {0x1C0C0C0, 0x202020});
+
+  EX data chessboard = data("chessboard", [] { return geosupport_chessboard(); }, CCO {
+    return cco.ctab[chessvalue(c)];
+    }, {0x202020, 0x1C0C0C0});
+
+  EX data landscape = data("rainbow landscape", [] { return geometry_supports_cdata(); }, CCO {
+    return random_landscape(c, 3, 1, 17, 0x808080);
+    }, {});
+
+  EX data landscape_dark = data("dark landscape", [] { return geometry_supports_cdata(); }, CCO {
+    return random_landscape(c, 6, 8, 2, 0x101010);
+    }, {});
+
+  EX data seven = data("seven-coloring", [] { return euc::in(2, 6); },
+    CCO { return cco.ctab[patterns::sevenval(c)]; },
+    {0xC00000, 0xC08000, 0xC0C000, 0x00C000, 0xC0C0, 0x00C0, 0xC000C0});
+
+  EX data crystal_colors = data("Crystal coordinates", [] { return cryst; },
+    CCO { return crystal::colorize(c, 'K'); }, {});
+
+  EX data crystal_cage = data("Crystal cage", [] { return cryst; },
+    CCO { return crystal::colorize(c, '#'); }, {});
+
+  EX data crystal_hyperplanes = data("Crystal hyperplanes", [] { return cryst; },
+    CCO { return crystal::colorize(c, '='); }, {});
+
+  EX data crystal_honeycomb = data("Crystal honeycomb", [] { return cryst; },
+    CCO { return crystal::colorize(c, 'O'); }, {});
+
+  EX data crystal_diagonal = data("Crystal diagonal", [] { return cryst; },
+    CCO { return crystal::colorize(c, '/'); }, {});
+
+  EX data nil_penrose = data("Nil staircase", [] { return nil; },
+    CCO { return nilv::colorize(c, '/'); }, {});
+
+  EX data jmap = data("rainbow by distance", always_available,
+    CCO {
+      if(c == currentmap->gamestart()) return plain(c);
+      int d = c->master->distance;
+      if(geometry == gNil) d = c->master->zebraval;
+      if(euc::in()) d = euc::get_ispacemap()[c->master][0];
+      if(d % 2 == 0 || d < -5 || d > 5) return hrand(100) < jblock ? 0xFFFFFFFF : plain(c);
+      return hrand(100) < jhole ? plain(c) : cco.ctab[(d+5)/2];
+      },
+    {0x100FFFF, 0x100FF00, 0x1FFFF00, 0x1FF8000, 0x1FF0000, 0x1FF00FF}
+    );
+
+  EX data distance = data("distance from origin", always_available,
+    CCO {
+      int d = celldist(c);
+      color_t res = gradient(cco.ctab[0], cco.ctab[1], 0, min(1.8/(1+d), 1.), 1);
+      if(d > 3) res |= 0x1000000;
+      return res;
+      },
+    {0, 0xFFFFFF}
+    );
+
+  EX data randbw = data("random black-and-white", always_available, CCO {
+    return cco.ctab[randpattern(c, patterns::subcanvas) ? 1 : 0];
+    }, {0x303030, 0x1C0C0C0});
+
+  auto non_sphere = [] { return !msphere; };
+
+  #if CAP_FIELD
+  EX data field_c = data("field pattern C", non_sphere, CCO {
+    if(!hyperbolic) return plain(c);
+    using namespace fieldpattern;
+    int z = currfp.getdist(fieldval(c), make_pair(0,false));
+    if(z < currfp.circrad) return 0x00C000;
+    int z2 = currfp.getdist(fieldval(c), make_pair(currfp.otherpole,false));
+    if(z2 < currfp.disthep[currfp.otherpole] - currfp.circrad)
+      return 0x3000;
+    return 0x6000;
+    }, {});
+
+  EX data field_d = data("field pattern D", non_sphere, CCO {
+    if(!hyperbolic) return plain(c);
+    using namespace fieldpattern;
+    int z = currfp.getdist(fieldval(c), make_pair(0,false));
+    return 255 * (currfp.maxdist+1-z) / currfp.maxdist;
+    }, {});
+
+  EX data field_n = data("field pattern N", non_sphere, CCO {
+    if(!hyperbolic) return plain(c);
+    using namespace fieldpattern;
+    int z = currfp.getdist(fieldval(c), make_pair(0,false));
+    int z2 = currfp.getdist(fieldval(c), make_pair(currfp.otherpole,false));
+    if(z < z2) return 0x00C000;
+    if(z > z2) return 0xC00000;
+    return 0xCCCC00;
+    }, {});
+
+  EX data field_s = data("field pattern S", non_sphere, CCO {
+    if(!hyperbolic) return plain(c);
+    return 0x3F1F0F * fieldpattern::subval(c).second + 0x000080;
+    }, {});
+  #endif
+
+  EX data zebra_pattern = data("zebra", [] { return stdhyperbolic || a4; }, CCO {
+    return cco.ctab[zebra40(c)];
+    }, {0x1C0C0C0, 0x1E0E0E0, 0x404040, 0x606060 });
+
+  EX data zebra_triangles = data("four triangles", [] { return stdhyperbolic; }, CCO {
+    int fv = zebra40(c);
+    if(fv/4 == 4 || fv/4 == 6 || fv/4 == 5 || fv/4 == 10) fv ^= 2;
+    return cco.ctab[fv];
+    }, {0x804040, 0x1408040, 0x404080, 0x1808040 });
+
+  EX data zebra_stripes = data("three stripes", [] { return stdhyperbolic; }, CCO {
+    return cco.ctab[zebra3(c)];
+    }, {0xC0C0C0, 0x1800000, 0x1008000, 0x000080 });
+
+  // e,b,a
+
+  EX data emerald_pattern = data("emerald pattern", [] { return stdhyperbolic; }, CCO {
+    return cco.ctab[emeraldval(c)];
+    }, {0x404040, 0x1800000, 0x1008000, 0x000080 });
+
+  EX data palace_elements = data("four elements", [] { return stdhyperbolic; }, CCO {
+    return cco.ctab[polara50(c) + 2 * polarb50(c)];
+    }, {0x404040, 0x1800000, 0x1008000, 0x000080 });
+
+  EX data palace_domains = data("eight domains", [] { return stdhyperbolic; }, CCO {
+    color_t col = cco.ctab[land50(c)];
+    if(polara50(c)) col += 0x181818;
+    return col;
+    }, {0x800000, 0x503000, 0x206000, 0x202020, 0x004040, 0x001070, 0x606060, 0x500030});
+
+  EX data masters = data("masters", always_available, CCO {
+    return cco.ctab[c == c->master->c7];
+    }, {0xA0FFA0, 0x60C060});
+
+  EX data hat_in_cluster = data("hat in cluster", [] { return hat::in(); }, CCO {
+    if(!cco.available()) return plain(c);
+    return hat::hatcolor(c, 6);
+    }, {});
+
+  EX data hat_clusters = data("hat clusters", [] { return hat::in(); }, CCO {
+    if(!cco.available()) return plain(c);
+    return hat::hatcolor(c, 7);
+    }, {});
+
+  EX data hat_superclusters = data("hat superclusters", [] { return hat::in(); }, CCO {
+    if(!cco.available()) return plain(c);
+    return hat::hatcolor(c, 8);
+    }, {});
+
+  EX data manifold_nearer = data("nearer end", [] { return closed_manifold; }, CCO {
+    return patterns::nearer_map(c);
+    }, {});
+
+  EX data manifold_furthest = data("furthest from start", [] { return closed_manifold; }, CCO {
+    return patterns::furthest_map(c, 0); // what about 1 and 2?
+    }, {});
+
+  EX vector<data*> all = {
+    &plain, &random, &sides, &formula,
+    &shape, &shape_mirror,
+    &threecolor, &football, &chessboard,
+    &landscape, &landscape_dark, &seven, &randbw, &jmap, &distance,
+    &crystal_colors, &crystal_cage, &crystal_hyperplanes, &crystal_honeycomb, &crystal_diagonal, &nil_penrose,
+    &zebra_pattern, &zebra_triangles, &zebra_stripes, &emerald_pattern, &palace_elements, &palace_domains,
+    #if CAP_FIELD
+    &field_c, &field_d, &field_n, &field_s,
+    #endif
+    &masters,
+    &hat_in_cluster, &hat_clusters, &hat_superclusters, &manifold_furthest, &manifold_nearer,
+    };
+
+  EX data *which = &plain;
+
+  EX void set_plain(color_t col) { which = &plain; plain.ctab = {col}; }
+  EX void set_random(int r) { which = &random; rwalls = r; }
+  EX void set_formula(const string& s) { which = &formula; color_formula = s; }
+  EX void set_colors(data& d, const colortable& tab) { which = &d; d.ctab = tab; }
+
+  void config_plain(bool instant) {
+    static unsigned c = (plain.ctab[0] << 8) | 0xFF;
+    static unsigned canvasbacks[] = {
+      6, 0xFFFFFFFF, 0x101010FF, 0x404040FF, 0x808080FF, 0x800000FF, unsigned(linf[laCanvas].color >> 2) << 8
+      };
+    dialog::openColorDialog(c, canvasbacks);
+    dialog::get_di().reaction = [instant] () {
+      if(instant) {
+        stop_game();
+        set_plain(c >> 8);
+        enable_canvas();
+        start_game();
+        }
+      else {
+        set_plain(c >> 8);
+        }
+      };
+    dialog::get_di().reaction_final = edit_rwalls;
+    return;
+    }
+
+  void config_formula(bool instant) {
+    string s = XLAT(
+      "This lets you specify the color pattern as a function of the cell. "
+      "Available parameters:\n\n"
+      "x, y, z (hyperboloid/sphere/plane coordinates in non-crystal geometries)\n"
+      "ex, ey, ez (in Euclidean geometries)\n"
+      "x0, x1, x2... (crystal geometry only)\n"
+      "0 is black, 1 is white, rgb(1,0,0) is red, ifp(p-2,1,0) is blue (p=1 for red, 2 for green, 3 for blue).");
+
+    if(MDIM == 4) s += XLAT(
+      "w (fourth coordinate)\n"
+      "wallif(condition, color)\n"
+      );
+
+    s += XLAT("see compute_map_function in pattern2.cpp for more\n");
+
+    dialog::edit_string(ccolor::color_formula, "formula", s);
+
+    dialog::get_di().extra_options = dialog::parser_help;
+    dialog::get_di().reaction_final = [instant] () {
+      if(instant) stop_game();
+      ccolor::which = &formula;
+      if(instant) {
+        enable_canvas();
+        start_game();
+        }
+      };
+    }
+
+  void list(bool instant) {
+    dialog::start_list(900, 900, 'a');
+    for(auto p: ccolor::all) if(p->available()) {
+      dialog::addBoolItem(p->name, p == which, dialog::list_fake_key++);
+      dialog::add_action([instant, p] {
+        if(p == &plain) {
+          config_plain(instant);
+          return;
+          }
+        if(p == &formula) {
+          config_formula(instant);
+          return;
+          }
+        if(p == &random) {
+          ccolor::edit_rwalls();
+          }
+        if(instant) stop_game();
+        ccolor::which = p;
+        patterns::subcanvas = rand();
+        if(instant) {
+          enable_canvas();
+          start_game();
+          }
+        using namespace patterns;
+        if(among(p, &zebra_pattern, &zebra_stripes, &zebra_triangles))
+          whichPattern = PAT_ZEBRA, subpattern_flags = SPF_SYM0123 | SPF_ROT;
+        if(p == &zebra_pattern && a46)
+          whichPattern = PAT_COLORING, subpattern_flags = SPF_CHANGEROT | SPF_SYM0123;
+        if(p == &emerald_pattern)
+          whichPattern = PAT_EMERALD, subpattern_flags = SPF_SYM0123 | SPF_ROT;
+        if(p == &palace_domains)
+          whichPattern = PAT_PALACE, subpattern_flags = SPF_SYM0123 | SPF_ROT;
+
+        });
+      }
+
+    dialog::end_list();
+    }
+
+  EX data *legacy(char c) {
+    if(c == 'd') return &landscape_dark;
+    return &plain;
+    }
+
+#undef CCO
+EX }
+
+EX color_t random_landscape(cell *c, int mul, int div, int step, color_t base) {
   int col[4];
   for(int j=0; j<4; j++) {
     col[j] = getCdata(c, j);
@@ -1601,24 +1982,20 @@ color_t random_landscape(cell *c, int mul, int div, int step, color_t base) {
   }
 
 EX namespace patterns {
-  EX int canvasback = linf[laCanvas].color >> 2;
   EX int subcanvas;
   EX bool displaycodes;
   EX char whichShape = 0;
-  EX char whichCanvas = 0;
   EX bool innerwalls;
   
-  int sevenval(cell *c) {
+  EX int sevenval(cell *c) {
     if(!meuclid) return 0;
     auto p = euc2_coordinates(c);
     return gmod(p.first - p.second * 2, 7);
     }
 
-  EX string color_formula = "to01(rgb(x,y,z))";
-  
   map<cell*, color_t> computed_nearer_map;
   
-  color_t nearer_map(cell *c) {
+  EX color_t nearer_map(cell *c) {
     if(computed_nearer_map.count(c)) return computed_nearer_map[c];
     if(!closed_manifold) return 0;
 
@@ -1658,7 +2035,7 @@ EX namespace patterns {
 
   map<cell*, color_t> computed_furthest_map;
 
-  color_t furthest_map(cell *c, int reduce) {
+  EX color_t furthest_map(cell *c, int reduce) {
     auto& cfm = computed_furthest_map;
     if(cfm.count(c)) return cfm[c];
     if(!closed_manifold) return 0;
@@ -1685,7 +2062,7 @@ EX namespace patterns {
     }
   
 
-  cld compute_map_function(cell *c, int p, const string& formula) {
+  EX cld compute_map_function(cell *c, int p, const string& formula) {
     exp_parser ep;
     ep.extra_params["p"] = p;
 
@@ -1767,450 +2144,59 @@ EX namespace patterns {
       }
     }
   
-  EX color_t compute_cell_color(cell *c) {
-    color_t res;
-    for(int i=0; i<4; i++) {
-      ld v = real(compute_map_function(c, 1+i, color_formula));
-      if(i == 3) part(res, i) = (v > 0);
-      else if(v < 0) part(res, i) = 0;
-      else if(v > 1) part(res, i) = 255;
-      else part(res, i) = int(v * 255 + .5);
-      }
-    return res;
-    }
-
-  EX hookset<int(cell*)> hooks_generate_canvas;
-
-  EX color_t apeirogonal_color = 0xFFFFFFFF;
-
-  EX int jhole = 0;
-  EX int jblock = 0;
-  EX int rwalls = 50;
-  
-  EX void edit_rwalls() {
-    if(WDIM == 2) return;
-    dialog::editNumber(rwalls, 0, 100, 10, 50, XLAT("probability of a wall (%)"), "");
-    dialog::get_di().reaction = [] { stop_game(); start_game(); };
-    }  
-
-  EX int generateCanvas(cell *c) {
-    
-    int i = callhandlers(-1, hooks_generate_canvas, c);
-    if(i != -1) return i;
-    if(arb::apeirogon_consistent_coloring && arb::is_apeirogonal(c)) {
-      for(cell *c1: {c->move(c->type-1), c->move(c->type-2), c->cmove(c->type-1)->move(c->type-1), c->cmove(c->type-2)->move(c->type-2)})
-        if(c1 && c1->mpdist <= BARLEV) return c1->landparam;
-      }
-
-    switch(whichCanvas) {
-      #if CAP_CRYSTAL
-      case 'K': case '#': case '=': case 'O': case '/': case '@':
-        if(nil)
-          return nilv::colorize(c, whichCanvas);
-        else
-          return crystal::colorize(c, whichCanvas);
-      #endif
-      case 'A': case 'R':
-        #if CAP_ARCM
-        if(arcm::in()) {
-          int id = arcm::id_of(c->master);
-          int tid = arcm::current.tilegroup[id];
-          int tid2 = arcm::current.tilegroup[id^1];
-          bool mirrored = (id&1) && (tid != tid2);
-          if(tid2 >= 0) tid = min(tid, tid2);
-          return colortables[mirrored ? whichCanvas : 'A'][tid];
-          }
-        #endif
-        if(arb::in()) {
-          int id = shvid(c);
-          auto& sh = arb::current.shapes[id];
-          int oid = sh.orig_id;
-          bool mirrored = c->master->emeraldval || sh.is_mirrored;
-          return colortables[mirrored ? whichCanvas : 'A'][oid];
-          }
-        return colortables['A'][shvid(c)];
-      case 'B':
-        if(arb::is_apeirogonal(c)) return apeirogonal_color;
-        return colortables['B'][c->type & 15];
-      #if CAP_FIELD
-      case 'C': {
-        if(!hyperbolic) return canvasback;
-        using namespace fieldpattern;
-        int z = currfp.getdist(fieldval(c), make_pair(0,false));
-        if(z < currfp.circrad) return 0x00C000;
-        int z2 = currfp.getdist(fieldval(c), make_pair(currfp.otherpole,false));
-        if(z2 < currfp.disthep[currfp.otherpole] - currfp.circrad)
-          return 0x3000;
-        return 0x6000;
-        }
-      case 'D': {
-        if(!hyperbolic) return canvasback;
-        using namespace fieldpattern;
-        int z = currfp.getdist(fieldval(c), make_pair(0,false));
-        return 255 * (currfp.maxdist+1-z) / currfp.maxdist;
-        }
-      case 'N': {
-        if(!hyperbolic) return canvasback;
-        using namespace fieldpattern;
-        int z = currfp.getdist(fieldval(c), make_pair(0,false));
-        int z2 = currfp.getdist(fieldval(c), make_pair(currfp.otherpole,false));
-        if(z < z2) return 0x00C000;
-        if(z > z2) return 0xC00000;
-        return 0xCCCC00;
-        }
-      #endif
-      case 'M': {
-        int d = celldist(c);
-        color_t res = gradient(0, canvasback, 0, min(1.8/(1+d), 1.), 1);
-        if(d > 3) res |= 0x1000000;
-        return res;
-        }
-      case 'P': {
-        cell *s = currentmap->gamestart()->move(0);
-        if(exhaustive_distance_appropriate() && !keep_distances_from.count(s))
-          permanent_long_distances(s);
-        int d = celldistance(s, c);
-        color_t res = distcolors[d];
-        if(d > 3) res |= 0x1000000;
-        return res;
-        }
-      #if CAP_FIELD
-      case 'S': 
-        if(!hyperbolic) return canvasback;
-        return 0x3F1F0F * fieldpattern::subval(c).second + 0x000080;
-      #endif
-      case 'g': {
-        color_t r = canvasback;
-        if(hrand(100) < rwalls) r |= 0x1000000;
-        if(c == cwt.at) r &= 0xFFFFFF;
-        return r;
-        }
-      case 'r': {
-        color_t r = hrand(0xFFFFFF + 1);
-        if(hrand(100) < rwalls) r |= 0x1000000;
-        if(c == cwt.at && rwalls <= 100) r &= 0xFFFFFF;
-        return r;
-        }
-      case 'I': {
-        color_t r = 0xFFD500;
-        if(c->type != (variation == eVariation::dual_subcubes ? 6 : 14)) r |= 0x1000000;
-        return r;
-        }
-      case '^': {
-        int x = c->master->fieldval & 4095;
-        int y = (c->master->fieldval >> 12) & 4095;
-        ignore(x);
-        if(c->master->distance % 3) return 0;
-        if(c->c.spin(bt::updir()) != 1) return 0;
-        // if(c->master->distance % 2 == 0) return 0;
-        if(hrand(100) == 0) return 0;
-        return 0x1000000 | (0xFFFFFF & (0x671349 + y * 0x512369));
-        if(hrand(100) >= 1) return 0;
-        return 0x1000000 | hrand(0x1000000);
-//        if(c->master->distance == 1) return 0x1FF0000;
-//        if(c->master->distance == -1) return 0x100FF00;
-//        return 0;        
-        }
-      case '!': {
-        if(c == currentmap->gamestart()) return 0;
-        for(int a=0; a<S7; a++) if(c == currentmap->gamestart()->move(a))
-          {
-          if(among(a,4,5,10,11)) return 0;
-          return colortables['!'][a];
-          }
-        return hrand(0x1000000) | 0x1000000;
-        }
-        
-      case 'e':
-        return colortables['e'][emeraldval(c)];
-      case 'a': {
-        color_t col = colortables['a'][land50(c)];
-        if(polara50(c)) col += 0x181818;
-        return col;
-        }
-      case 'b':
-        return colortables['b'][polara50(c) + 2 * polarb50(c)];
-      case 'z':
-        return colortables['z'][zebra40(c)];
-      case 't': {
-        int fv = zebra40(c);
-        if(fv/4 == 4 || fv/4 == 6 || fv/4 == 5 || fv/4 == 10) fv ^= 2;
-        return colortables['t'][fv];
-        }
-      case 'x':
-        return colortables['x'][zebra3(c)];
-      case 'w':
-        return colortables['w'][randpattern(c, subcanvas) ? 1 : 0];
-      case 'H':
-        return colortables['c'][c->master->c7 == c ? 0 : 1];
-      case 'l': 
-        return random_landscape(c, 3, 1, 17, 0x808080);
-      case 'd':
-        return random_landscape(c, 6, 8, 2, 0x101010);
-      case 'h':
-        return random_landscape(c, 6, 4, 4, 0x202020);
-      case 'c':
-        return colortables['c'][chessvalue(c)];
-      case 'F':
-        return colortables['F'][pseudohept(c)];
-      case 'T':
-        return nestcolors[pattern_threecolor(c)];
-      case 'v':
-        return colortables['v'][sevenval(c)];
-      case 'j': {
-        if(c == currentmap->gamestart()) return canvasback;
-        int d = c->master->distance;
-        if(geometry == gNil) d = c->master->zebraval;
-        if(euc::in()) d = euc::get_ispacemap()[c->master][0];
-        if(d % 2 == 0 || d < -5 || d > 5) return hrand(100) < jblock ? 0xFFFFFFFF : canvasback;
-        return hrand(100) < jhole ? canvasback : colortables['j'][(d+5)/2];
-        }
-      case 'J': {
-        if(c == currentmap->gamestart()) return canvasback;
-        int d = c->master->distance;
-        if(geometry == gNil) d = c->master->zebraval;
-        if((d&3) != 2) return hrand(100) < jblock ? 0xFFFFFFFF : canvasback;
-        return hrand(100) < jhole ? canvasback : colortables['j'][(d+10)/4];
-        }
-      case 'G': {
-        color_t r = hrand(0xFFFFFF + 1);
-        if(hrand(100) < rwalls && pseudohept(c) && c != cwt.at) r |= 0x1000000;
-        return r;
-        }
-      case 'f': {
-        return compute_cell_color(c);
-        }
-      case 'k': {
-        /* just keep the old color */
-        return c->landparam;
-        }
-      case 'Z': {
-        if(hat::in()) return hat::hatcolor(c, 6);
-        return nearer_map(c);
-        }
-      case 'Y': {
-        if(hat::in()) return hat::hatcolor(c, 7);
-        return furthest_map(c, 0);
-        }
-      case 'X': {
-        if(hat::in()) return hat::hatcolor(c, 8);
-        return furthest_map(c, 1);
-        }
-      case 'L': {
-        return colortables['L'][c->master->c7 == c];
-        }
-      case 'W': {
-        return furthest_map(c, 2);
-        }
-      }
-    return canvasback;
-    }
-
   void showPrePatternP(bool instant) {
     cmode = sm::SIDE | sm::MAYDARK;
     gamescreen();
 
     dialog::init("predesigned patterns");
-    dialog::addItem(WDIM == 3 ? XLAT("empty") : XLAT("single color"), 'g');
-    dialog::addItem(XLAT("random colors"), 'r');
-
-    if(WDIM == 2) dialog::addItem(XLAT("distance from origin"), 'M');
-    dialog::addSelItem(XLAT("rainbow by distance"), "binary/Solv", 'j');
-    
-    if(geometry_supports_cdata()) {
-      dialog::addItem(XLAT("rainbow landscape"), 'l');
-      dialog::addItem(XLAT("dark rainbow landscape"), 'd');
-      }
-
-    dialog::addItem(XLAT("football"), 'F');
-    if(geosupport_chessboard())
-      dialog::addItem(XLAT("chessboard"), 'c');
-
-    dialog::addItem(XLAT("nice coloring"), 'T');
-
-    if(euc::in(2,6))
-      dialog::addItem(XLAT("seven-coloring"), 'v');
-
-    if(stdhyperbolic) {      
-      dialog::addSelItem(XLAT("emerald pattern"), "emerald", 'e');
-      dialog::addSelItem(XLAT("four elements"), "palace", 'b');
-      dialog::addSelItem(XLAT("eight domains"), "palace", 'a');
-      dialog::addSelItem(XLAT("zebra pattern"), "zebra", 'z');
-      dialog::addSelItem(XLAT("four triangles"), "zebra", 't');
-      dialog::addSelItem(XLAT("three stripes"), "zebra", 'x');
-      }
-    
-    if(a4)
-      dialog::addSelItem(XLAT("zebra pattern"), "coloring", 'z');
-
-    dialog::addSelItem(XLAT("random black-and-white"), "current", 'w');
-
-    #if CAP_FIELD
-    if(!msphere) {
-      dialog::addSelItem(XLAT("field pattern C"), "field", 'C');
-      dialog::addSelItem(XLAT("field pattern D"), "field", 'D');
-      dialog::addSelItem(XLAT("field pattern N"), "field", 'N');
-      dialog::addSelItem(XLAT("field pattern S"), "field", 'S');
-      }
-    #endif
-    
-    if(arcm::in())
-      dialog::addSelItem(XLAT("Archimedean"), "Archimedean", 'A');
-
-    if(cryst)
-      dialog::addSelItem(XLAT("Crystal coordinates"), "Crystal", 'K');
-    
-    if(cryst || geometry == gSpace344) {
-      dialog::addSelItem(XLAT("Cage"), "Crystal", '#');
-      dialog::addSelItem(XLAT("Hyperplanes"), "Crystal", '=');
-      dialog::addSelItem(XLAT("Honeycomb"), "Crystal", 'O');
-      dialog::addSelItem(XLAT("Diagonal"), "Crystal", '/');
-      }
-    if(nil) {
-      dialog::addSelItem(XLAT("Penrose staircase"), "Nil", '/');
-      }
-    
-    if(closed_manifold) {
-      dialog::addSelItem(XLAT("nearer end"), "bounded", 'Z');
-      dialog::addSelItem(XLAT("furthest from start"), "bounded", 'Y');
-      }
-
-    if(hat::in()) {
-      dialog::addSelItem(XLAT("hat in cluster"), "hat", 'Z');
-      dialog::addSelItem(XLAT("hat clusters"), "hat", 'Y');
-      dialog::addSelItem(XLAT("hat superclusters"), "hat", 'X');
-      }
-
-    dialog::addSelItem(XLAT("types"), "types", 'A');
-    dialog::addSelItem(XLAT("types (mark reverse)"), "types", 'R');
-    dialog::addSelItem(XLAT("sides"), "sides", 'B');
-
-    if(!ISMOBILE)
-      dialog::addSelItem(XLAT("formula"), "formula", 'f');
+    ccolor::list(instant);
 
     dialog::addBreak(100);
 
     dialog::addBoolItem_action(XLAT("display the inner walls"), innerwalls, '1');
-    
-    if(geosupport_threecolor() == 2) {    
-      dialog::addBoolItem(XLAT("display only hexagons"), (whichShape == '6'), '6');
-      dialog::addBoolItem(XLAT("display only heptagons"), (whichShape == '7'), '7');
-      dialog::addBoolItem(XLAT("display the triheptagonal grid"), (whichShape == '8'), '8');
-      }
-    
-    if(geosupport_chessboard()) {
-      dialog::addBoolItem(XLAT("display only chessboard white"), (whichShape == '6'), '6');
-      dialog::addBoolItem(XLAT("display only chessboard black"), (whichShape == '7'), '7');
+
+    auto select_whichShape = [] (string s, char key) {
+      dialog::addBoolItem(s, (whichShape == key), key);
+      dialog::add_action([key] {
+        if(whichShape == key) whichShape = 0;
+        else whichShape = key;
+        });
+      };
+
+    if(geosupport_threecolor() == 2) {
+      select_whichShape(XLAT("display only hexagons"), '6');
+      select_whichShape(XLAT("display only heptagons"), '7');
+      select_whichShape(XLAT("display the triheptagonal grid"), '8');
       }
 
-    dialog::addBoolItem(XLAT("display full floors"), (whichShape == '9'), '9');
-    dialog::addBoolItem(XLAT("display small floors"), (whichShape == '5'), '5');
+    if(geosupport_chessboard()) {
+      select_whichShape(XLAT("display only chessboard white"), '6');
+      select_whichShape(XLAT("display only chessboard black"), '7');
+      }
+
+    select_whichShape(XLAT("display full floors"), '9');
+    select_whichShape(XLAT("display small floors"), '5');
 
     add_edit(global_boundary_ratio);
     dialog::addSelItem(XLAT("floor type"), XLATN(winf[canvas_default_wall].name), 'i');
+    dialog::add_action([instant] {
+      if(instant)
+        stop_game();
 
-    dialog::addItem(XLAT("line patterns"), 'L');
-    
+      vector<eWall> choices = {waNone, waInvisibleFloor, waChasm, waEternalFire, waStone, waSea, waBarrier, waCavewall};
+      for(int i=0; i<isize(choices); i++)
+        if(canvas_default_wall == choices[i]) {
+          canvas_default_wall = choices[(i+1) % isize(choices)];
+          break;
+          }
+      if(instant) {
+        enable_canvas();
+        start_game();
+        }
+      });
+
     dialog::addBack();
     dialog::display();
-    
-    keyhandler = [instant] (int sym, int uni) {
-      dialog::handleNavigation(sym, uni);
-      if(uni == 'g') {
-        static unsigned c = (canvasback << 8) | 0xFF;
-        static unsigned canvasbacks[] = {
-          6, 0xFFFFFFFF, 0x101010FF, 0x404040FF, 0x808080FF, 0x800000FF, unsigned(linf[laCanvas].color >> 2) << 8
-          }; 
-        dialog::openColorDialog(c, canvasbacks);
-        dialog::get_di().reaction = [instant] () {
-          if(instant) {
-            stop_game();
-            whichCanvas = 'g';
-            canvasback = c >> 8;
-            enable_canvas();
-            start_game();
-            }
-          else {
-            whichCanvas = 'g';
-            canvasback = c >> 8;
-            }
-          };
-        dialog::get_di().reaction_final = edit_rwalls;
-        }
-      else if(uni == 'i') {
-        if(instant) 
-          stop_game();
-        
-        vector<eWall> choices = {waNone, waInvisibleFloor, waChasm, waEternalFire, waStone, waSea, waBarrier, waCavewall};
-        for(int i=0; i<isize(choices); i++) 
-          if(canvas_default_wall == choices[i]) {
-            canvas_default_wall = choices[(i+1) % isize(choices)];
-            break;
-            }
-        if(instant) {
-          enable_canvas();
-          start_game();
-          }
-        }
-      
-      else if((uni >= '2' && uni <= '9')) {
-        if(whichShape == uni) whichShape = 0;
-        else whichShape = uni;
-        }
-      else if(uni == 'L')
-        pushScreen(linepatterns::showMenu);
-
-      else if(uni == 'f') {
-        string s = XLAT(
-          "This lets you specify the color pattern as a function of the cell. "
-          "Available parameters:\n\n"
-          "x, y, z (hyperboloid/sphere/plane coordinates in non-crystal geometries)\n"
-          "ex, ey, ez (in Euclidean geometries)\n"
-          "x0, x1, x2... (crystal geometry only)\n"
-          "0 is black, 1 is white, rgb(1,0,0) is red, ifp(p-2,1,0) is blue (p=1 for red, 2 for green, 3 for blue).");
-        
-        if(MDIM == 4) s += XLAT(
-          "w (fourth coordinate)\n"
-          "wallif(condition, color)\n"
-          );
-        
-        s += XLAT("see compute_map_function in pattern2.cpp for more\n");
-        
-        dialog::edit_string(color_formula, "formula", s);
-
-        dialog::get_di().extra_options = dialog::parser_help;
-        dialog::get_di().reaction_final = [instant] () {
-          if(instant) stop_game();
-          whichCanvas = 'f';
-          if(instant) {
-            enable_canvas();
-            start_game();
-            }
-          };
-        }
-      
-      else if((uni >= 'a' && uni <= 'z') || (uni >= 'A' && uni <= 'Z') || among(uni, '#', '=', '/')) {
-        if(instant)
-          stop_game();
-        whichCanvas = uni;
-        subcanvas = rand();
-        if(instant) {
-          enable_canvas();
-          start_game();
-          }
-        if(uni == 'r') 
-          edit_rwalls();
-        if(uni == 'x' || uni == 'z' || uni == 't')
-          whichPattern = PAT_ZEBRA, subpattern_flags = SPF_SYM0123 | SPF_ROT;
-        if(uni == 'e')
-          whichPattern = PAT_EMERALD, subpattern_flags = SPF_SYM0123 | SPF_ROT;
-        if(uni == 'b')
-          whichPattern = PAT_PALACE, subpattern_flags = SPF_SYM0123 | SPF_ROT;
-        if(uni == 'z' && a46)
-          whichPattern = PAT_COLORING, subpattern_flags = SPF_CHANGEROT | SPF_SYM0123;
-        }
-      else if(doexiton(sym, uni)) popScreen();
-      };    
     }
   
   EX void showPrePattern() { showPrePatternP(true); }
@@ -3251,7 +3237,7 @@ int read_pattern_args() {
   else if(argis("-drawplayer")) { shift(); mapeditor::drawplayer = argi(); }
   else if(argis("-pcol")) {
     shift();
-    colortable *ct = &(colortables[patterns::whichCanvas]);
+    colortable *ct = &(ccolor::which->ctab);
     if(args()[0] > '9') {
       char c = args()[0];
       if(c == 't') ct = &nestcolors;
@@ -3265,7 +3251,7 @@ int read_pattern_args() {
           ((color_t*)(&vid.cs.skincolor)) [d] = h;
         return 0;
         }
-      else ct = &(colortables[args()[0]]);
+      else throw hr_exception("cannot understand color pattern by character");
       shift();
       }
     int d = argi();
@@ -3278,23 +3264,29 @@ int read_pattern_args() {
     enable_canvas();
     shift();
     if(args() == "i") canvas_default_wall = waInvisibleFloor;
-    else if(args().size() == 1) patterns::whichCanvas = args()[0];
-    else patterns::canvasback = argcolor(24);
+    else {
+      bool found = false;
+      for(auto p: ccolor::all) if(appears(p->name, args())) {
+        found = true;
+        ccolor::which = p;
+        break;
+        }
+      if(!found) ccolor::set_plain(argcolor(24));
+      }
     stop_game_and_switch_mode(rg::nothing);
     }
   else if(argis("-canvas-random")) {
     PHASEFROM(2);
     stop_game();
     enable_canvas();
-    patterns::whichCanvas = 'r';
-    shift(); patterns::rwalls = argi();
+    shift(); ccolor::set_random(argi());
     }
   else if(argis("-cformula")) {
     PHASEFROM(2);
     stop_game();
     enable_canvas();
-    patterns::whichCanvas = 'f';
-    shift(); patterns::color_formula = args();
+    ccolor::which = &ccolor::formula;
+    shift(); ccolor::set_formula(args());
     }
   else if(argis("-innerwall")) {
     PHASEFROM(2);

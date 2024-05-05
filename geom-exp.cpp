@@ -1113,7 +1113,7 @@ EX void showEuclideanMenu() {
     }
   
   dialog::addBoolItem(XLAT("pattern"), specialland == laCanvas, 'p');
-  if(specialland == laCanvas) dialog::lastItem().value = patterns::whichCanvas;
+  if(specialland == laCanvas) dialog::lastItem().value = ccolor::which->name;
   dialog::add_action_push(patterns::showPrePattern);
   validity_info();
   if(WDIM == 3) {
