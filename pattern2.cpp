@@ -3055,6 +3055,38 @@ EX namespace linepatterns {
         gridlinef(V, C0, V, mid(C0, U*C0), col2, 2 + vid.linequality);
       )
     );
+
+  linepattern patWallHighlight("Great Wall highlight", 0xFFFFFF00, always_available,
+    ALLCELLS(
+      if(c->bardir < 0 || c->bardir >= c->type) continue;
+      if(c->land == laHauntedWall && !cheater) continue;
+      if(GDIM != 2) continue;
+      if(c->barleft == NOWALLSEP_USED) continue;
+      hyperpoint ends[2];
+      for(int i=0; i<2; i++) {
+        cellwalker cw(c, c->bardir);
+        if(i == 1 && (c->type & 1)) {
+          cw += c->type/2;
+          hyperpoint a = tC0(currentmap->adj(cw.at, cw.spin));
+          cw++;
+          hyperpoint b = tC0(currentmap->adj(cw.at, cw.spin));
+          ends[i] = mid(a, b);
+          break;
+          }
+        if(i == 1) cw += c->type/2;
+        transmatrix T = currentmap->adj(cw.at, cw.spin);
+        cw += wstep;
+        if(cw.at->bardir == cw.spin) ends[i] = mid(C0, tC0(T));
+        else if(cw.at->type % 2 == 0) {
+          cw += rev;
+          transmatrix U = currentmap->adj(cw.at, cw.spin);
+          ends[i] = T * mid(C0, tC0(U));
+          }
+        }
+      gridlinef(V, ends[0], V, ends[1], col, grid_prec());
+      )
+   );
+
   
   #if HDR
   extern linepattern patTriTree, patTriRings, patTriWalls, patDual;
@@ -3067,7 +3099,8 @@ EX namespace linepatterns {
     &patVine, &patPalacelike, &patPalace, &patPower, &patHorocycles,
     &patTriRings, &patTriTree, &patTriWalls,
     &patGoldbergTree, &patIrregularMaster, &patGoldbergSep, &patHeawood, &patArcm,
-    &patCircles, &patRadii, &patMeridians, &patParallels, &patSublines, &patUltra
+    &patCircles, &patRadii, &patMeridians, &patParallels, &patSublines, &patUltra,
+    &patWallHighlight
     };
 
   EX void clearAll() {
