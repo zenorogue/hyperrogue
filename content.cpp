@@ -973,7 +973,7 @@ WALL( '+', 0xFF0000, "giant rug", waGiantRug, ZERO | WF_ON, RESERVED, 0, sgNone,
     "This is the biggest Hypersian Rug you have ever seen! "
     "Unfortunately, it is too large to take it as a trophy." )
 WALL( '#', 0xfffff0, "platform", waPlatform, WF_WALL | WF_HIGHWALL, RESERVED, 0, sgNone, "You can stand here.")
-WALL( '#', 0x909090, "stone gargoyle", waGargoyle, WF_WALL | WF_HIGHWALL, RESERVED, 0, sgNone, gargdesc)
+WALL( '#', 0x909090, "stone gargoyle", waGargoyle, WF_WALL | WF_HIGHWALL | WF_NONBLOCK, RESERVED, 0, sgNone, gargdesc)
 WALL( '.', 0xB0B0B0, "stone gargoyle floor", waGargoyleFloor, ZERO | WF_ON, RESERVED, 1, sgNone, gargdesc)
 WALL( '.', 0x909090, "rubble", waRubble, ZERO | WF_ON, RESERVED, 1, sgNone, "Some rubble.")
 WALL( '+', 0x804000, "ladder", waLadder, ZERO | WF_ON, RESERVED, 0, sgNone,
@@ -1018,7 +1018,7 @@ WALL( '+', 0x60C060, "canopy", waCanopy, ZERO, RESERVED, 0, sgNone,
     )
 WALL( '#', 0xD0C060, "barrow wall", waBarrowWall, WF_WALL | WF_HIGHWALL, RESERVED, 0, sgNone, "This wall is quite strong. You will need another way in.")
 WALL( '#', 0x90A060, "barrow", waBarrowDig, WF_WALL | WF_HIGHWALL, RESERVED, 0, sgNone, "Your Orb of the Sword can be used to dig here.")
-WALL( '#', 0xE0E0E0, "stone statue", waPetrified, WF_WALL | WF_HIGHWALL, RESERVED, 0, sgNone, "A petrified creature.")
+WALL( '#', 0xE0E0E0, "stone statue", waPetrified, WF_WALL | WF_HIGHWALL | WF_NONBLOCK, RESERVED, 0, sgNone, "A petrified creature.")
 WALL( '.', 0xE8E8E8, "tower of Camelot", waTower, ZERO, RESERVED, 3, sgNone, camelothelp)
 WALL( '-', 0x402000, "big bush", waBigBush, ZERO | WF_NOFLIGHT | WF_ON, RESERVED, 0, sgNone, 
     "You can hold this bush to climb the Lost Mountain. "
