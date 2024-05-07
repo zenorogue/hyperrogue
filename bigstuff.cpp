@@ -1329,7 +1329,7 @@ EX void setLandEuclid(cell *c) {
     return;
     }
   #endif
-  setland(c, specialland);
+  if(!c->land) setland(c, specialland);
   if(ls::any_nowall()) {
     auto co = euc2_coordinates(c);
     int y = co.second;
