@@ -296,6 +296,12 @@ EX eItem random_curse() {
   return pick(itCurseWeakness, itCurseDraining, itCurseWater, itCurseFatigue, itCurseRepulsion, itCurseGluttony);
   }
 
+EX void clear_item(cell *c) {
+  if(c->item == itOrbWater && c->wall == waStrandedBoat)
+    c->wall = waNone;
+  c->item = itNone;
+  }
+
 EX void giantLandSwitch(cell *c, int d, cell *from) {
   bool fargen = d == 9;
   switch(c->land) {
@@ -552,7 +558,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           // no Plates or Trapdoors in the Princess cell
           if(d < 3 && (c->wall == waClosePlate || c->wall == waOpenPlate || c->wall == waTrapdoor))
             c->wall = waNone;
-          if(d > 1) c->item = itNone;
+          if(d > 1) clear_item(c);
           // the Princess herself
           if(d == 0) {
             c->monst = moPrincess;
@@ -2407,7 +2413,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
         if(hrand(1500) < PT(30 + kills[moHexDemon] + kills[moAltDemon] + kills[moMonk] + kills[moPair] + kills[moCrusher], 100) && notDippingFor(itRuins)) {
           c->item = itRuins;
           forCellEx(c2, c) if(c2->monst == moMonk)
-            c->item = itNone;
+            clear_item(c);
           }
         if(hrand_monster(7000) < kf && !c->monst) {
           c->monst = genRuinMonster(c);
@@ -2545,7 +2551,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
       if(d == 7) {
         c->wall = waNone;
   
-        c->item = itNone; c->monst = moNone;
+        clear_item(c); c->monst = moNone;
         
         if(hrand(100) < 25)
           c->wall = hrand(2) ? waBigTree : waSmallTree;
