@@ -2602,16 +2602,16 @@ EX namespace mapeditor {
   bool onelayeronly;
   
   bool loadPicFile(const string& s) {
-    fhstream f(picfile, "rt");
+    fhstream f(s, "rt");
     if(!f.f) {
-      addMessage(XLAT("Failed to load pictures from %1", picfile));
+      addMessage(XLAT("Failed to load pictures from %1", s));
       return false;
       }
     scanline(f);
     scan(f, f.vernum);
     printf("vernum = %x\n", f.vernum);
     if(f.vernum == 0) {
-      addMessage(XLAT("Failed to load pictures from %1", picfile));
+      addMessage(XLAT("Failed to load pictures from %1", s));
       return false;
       }
 
@@ -2639,6 +2639,7 @@ EX namespace mapeditor {
         }
 
       initShape(i, j);
+      println(hlog, "shape ", tie(i, j), " layer ", l);
       usershapelayer& ds(usershapes[i][j]->d[l]);
       if(f.vernum >= 0xA608) scan(f, ds.zlevel);
       ds.shift = readHyperpoint(f);
