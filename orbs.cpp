@@ -884,6 +884,10 @@ EX eMonster summonedAt(cell *dest) {
       dest->land == laWarpCoast ? moRatling : 
       dest->land == laDocks ? moWaterElemental :
       moPirate;
+  if(among(dest->wall, waDeepWater, waShallow))
+    return moRusalka;
+  if(dest->wall == waCamelotMoat)
+    return moWaterElemental;
   if(isReptile(dest->wall))
     return moReptile;
   if(dest->wall == waChasm)
