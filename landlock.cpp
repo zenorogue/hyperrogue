@@ -808,6 +808,7 @@ namespace lv {
   land_validity_t out_of_theme = { 3, qm2 &~ lv::appears_in_full, "Out of theme for the full game."};
   land_validity_t no_game = { 2, q2 &~ lv::appears_in_full, "No game here."};  
   land_validity_t not_in_chaos = { 0, q0, "Does not work in chaos mode."};  
+  land_validity_t not_in_landscape = { 0, q0, "Does not work in landscape mode."};
   land_validity_t not_in_full_game = {2, qm2 &~ lv::appears_in_full, "Not in the full game."};
   land_validity_t not_in_full_game3 = {3, qm2 &~ lv::appears_in_full, "Not in the full game."};
   land_validity_t special_chaos = { 2, qm2, "Special construction in the Chaos mode." };
@@ -1205,6 +1206,9 @@ EX land_validity_t& land_validity(eLand l) {
   if(l == laHaunted && ls::std_chaos())
     return not_in_chaos;
   
+  if(among(l, laHaunted, laElementalWall) && land_structure == lsLandscape)
+    return not_in_landscape;
+
   // standard, non-PTM specific
   if(l == laCrossroads5 && old_daily_id < 999 && tactic::on)
     return not_in_ptm;
