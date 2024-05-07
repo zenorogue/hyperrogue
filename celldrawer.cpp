@@ -94,6 +94,14 @@ void eclectic_red(color_t& col) {
 
 constexpr ld spinspeed = .75 / M_PI;
 
+EX color_t apply_mine_knowledge(color_t wcol, cell* c) {
+  if(mine::marked_safe(c))
+    return gradient(wcol, 0x40FF40, 0, 0.2, 1);
+  if(mine::marked_mine(c))
+    return gradient(wcol, 0xFF4040, -1, vid.ispeed ? sintick(100) : 1, 1);
+  return wcol;
+  }
+
 void celldrawer::setcolors() {
 
   wcol = fcol = winf[c->wall].color;
@@ -541,10 +549,7 @@ void celldrawer::setcolors() {
 
     case waMineUnknown: case waMineMine: 
       #if CAP_COMPLEX2
-      if(mine::marked_safe(c))
-        fcol = wcol = gradient(wcol, 0x40FF40, 0, 0.2, 1);
-      else if(mine::marked_mine(c))
-        fcol = wcol = gradient(wcol, 0xFF4040, -1, vid.ispeed ? sintick(100) : 1, 1);
+      if(!mine_markers) fcol = wcol = apply_mine_knowledge(wcol, c);
       goto fallthrough;
       #endif
 
@@ -1379,6 +1384,39 @@ bool celldrawer::set_randompattern_floor() {
   }
 
 EX bool numerical_minefield;
+EX int mine_zero_display = 1;
+EX bool mine_hollow;
+EX bool mine_markers;
+
+EX void draw_mine_numbers(int mines, const shiftmatrix& V, int ct6) {
+  auto hollow = [&] (hpcshape& sh, color_t col) {
+    if(mine_hollow) {
+      dynamicval<color_t> dc(poly_outline, col);
+      queuepoly(V, sh, 0);
+      }
+    else
+      queuepoly(V, sh, col);
+    };
+  if(mines == 0 && mine_zero_display < (WDIM == 3 ? 2 : 1)) return;
+  if(numerical_minefield) {
+    string label = its(mines);
+    queuestr(V, (mines >= 10 ? .5 : 1) * mapfontscale / 100, label, darkened(minecolors[mines]), 8);
+    }
+  else {
+    if(mines >= isize(minecolors)) hollow(cgi.shBigMineMark[ct6], darkena(minecolors[mines/isize(minecolors)], 0, 0xFF));
+    hollow(cgi.shMineMark[ct6], darkena(minecolors[mines], 0, 0xFF));
+    }
+  }
+
+EX void draw_mine_markers(cell *c, const shiftmatrix& V) {
+  if(mine_markers && !mine::marked_safe(c)) {
+    color_t col = 0xFF4040;
+    if(mine::marked_mine(c))
+      col = gradient(winf[waMineMine].color, col, -1, vid.ispeed ? sintick(100) : 1, 1);
+    dynamicval<color_t> dc(poly_outline, (col << 8) | 0xFF);
+    queuepoly(V, cgi.shJoint, 0);
+    }
+  }
 
 void celldrawer::draw_features() {
   char xch = winf[c->wall].glyph;
@@ -1624,18 +1662,12 @@ void celldrawer::draw_features() {
     
     case waMineOpen: {
       int mines = countMinesAround(c);
-      if(numerical_minefield) {
-        if(mines) {
-          string label = its(mines);
-          queuestr(V, (mines >= 10 ? .5 : 1) * mapfontscale / 100, label, darkened(minecolors[mines]), 8);
-          }
-        }
-      else {
-        if(mines >= isize(minecolors))
-          queuepoly(V, cgi.shBigMineMark[ct6], darkena(minecolors[mines/isize(minecolors)], 0, 0xFF));
-        if(mines)
-          queuepoly(V, cgi.shMineMark[ct6], darkena(minecolors[mines], 0, 0xFF));
-        }
+      draw_mine_numbers(mines, V, ct6);
+      break;
+      }
+
+    case waMineUnknown: case waMineMine: {
+      draw_mine_markers(c, V);
       break;
       }
     
@@ -1765,6 +1797,9 @@ void celldrawer::draw_features_and_walls_3d() {
     if(anyshiftclick) return;
     }
 
+  if(among(c->wall, waMineUnknown, waMineMine))
+    draw_mine_markers(c, face_the_player(V));
+
   if(isWall3(c, wcol)) {
     if(!no_wall_rendering) {
     if(c->wall == waChasm && c->land == laMemory && !in_perspective()) {
@@ -1874,9 +1909,7 @@ void celldrawer::draw_features_and_walls_3d() {
         }
       else {
         int mines = countMinesAround(c);
-        if(mines >= isize(minecolors))
-          queuepoly(face_the_player(V), cgi.shBigMineMark[0], darkena(minecolors[mines/isize(minecolors)], 0, 0xFF));
-        queuepoly(face_the_player(V), cgi.shMineMark[0], darkena(minecolors[mines], 0, 0xFF));
+        draw_mine_numbers(mines, face_the_player(V), 0);
         }
       }
     

@@ -553,6 +553,18 @@ EX string generateHelpForItem(eItem it) {
   return help;
   }
 
+void mine_dialog() {
+  cmode = sm::SIDE;
+  gamescreen();
+  dialog::init("Minefield graphics");
+  add_edit(numerical_minefield);
+  add_edit(mine_zero_display);
+  add_edit(mine_opacity);
+  add_edit(mine_hollow);
+  add_edit(mine_markers);
+  dialog::display();
+  }
+
 void addMinefieldExplanation(string& s) {
 
   s += XLAT(
@@ -568,7 +580,7 @@ void addMinefieldExplanation(string& s) {
   s += XLAT("Known mines may be marked by touching while in drag mode. Your allies won't step on marked mines.");
 #endif
 
-  help_extensions.push_back(help_extension{'n', XLAT("toggle numerical display"), [] () { numerical_minefield = !numerical_minefield; }});
+  help_extensions.push_back(help_extension{'c', XLAT("configure"), [] () { pushScreen(mine_dialog); } });
   }
 
 EX string generateHelpForWall(eWall w) {

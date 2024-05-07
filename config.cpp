@@ -3121,7 +3121,15 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
   param_b(vid.fixed_yz, "fixed YZ", true);
   param_b(frustum_culling, "frustum_culling");
   param_b(numerical_minefield, "numerical_minefield")
-  ->editable("display mine counts numerically", 'n');
+  -> editable("toggle numerical display", 'n');
+  param_b(mine_hollow, "mine_hollow")
+  -> editable("hollow mine symbols", 'h');
+  param_b(mine_markers, "mine_markers")
+  -> editable("markers on possible mines", 'm');
+  param_i(mine_opacity, "minefield opacity", 255)
+   ->editable(0, 255, 51, "opacity of undiscovered minefield", "3D modes only\n\n0 = invisible, 255 = fully opaque", 'o');
+  param_enum(mine_zero_display, "minefield_zero", "minefield_zero", 1)
+  ->editable({{"OFF", "never display zeros"}, {"3D", "only in 3D modes"}, {"ON", "always display zeros"}}, "display zeros in minefield", 'z');
   param_b(dont_display_minecount, "dont_display_minecount");
   #if MAXMDIM >= 4
   param_enum(draw_sky, "draw_sky", "draw_sky", skyAutomatic)

@@ -4028,13 +4028,16 @@ EX int colorhash(color_t i) {
   return (i * 0x471211 + i*i*0x124159 + i*i*i*0x982165) & 0xFFFFFF;
   }
 
+EX int mine_opacity = 255;
+
 EX bool isWall3(cell *c, color_t& wcol) {
   if(c->wall == waRose) { wcol = gradient(0, wcol, -5 - 5 * (7-rosephase), sintick(50 * (8 - rosephase)), 1); }
   if(isWall(c)) return true;
   if(c->wall == waChasm && c->land == laMemory && (anyshiftclick || !(cgflags & qFRACTAL))) { wcol = 0x606000; return true; }
   if(c->wall == waInvisibleFloor) return false;
   // if(chasmgraph(c)) return true;
-  if(among(c->wall, waMirror, waCloud, waMineUnknown, waMineMine)) return true;
+  if(among(c->wall, waMirror, waCloud)) return true;
+  if(among(c->wall, waMineUnknown, waMineMine) && mine_opacity == 255) return true;
   return false;
   }
 
@@ -4077,6 +4080,8 @@ EX color_t transcolor(cell *c, cell *c2, color_t wcol) {
     }
   if(among(c->wall, waRubble, waDeadfloor2) && !snakelevel(c2)) return darkena3(winf[c->wall].color, 0, 0x40);
   if(c->wall == waMagma && c2->wall != waMagma) return darkena3(magma_color(lavatide(c, -1)/4), 0, 0x80);
+  if(among(c->wall, waMineUnknown, waMineMine) && !among(c2->wall, waMineMine, waMineUnknown) && mine_opacity > 0 && mine_opacity < 255) 
+    return 0xFFFFFF00 | mine_opacity;
   return 0;
   }
 
