@@ -4799,13 +4799,13 @@ EX void drawMarkers() {
       using namespace yendor;
       if(yii < isize(yi) && !yi[yii].found) {
         cell *keycell = NULL;
-        int i;
-        for(i=0; i<YDIST; i++) 
+        int last_i = 0;
+        for(int i=0; i<YDIST; i++)
           if(yi[yii].path[i]->cpdist <= get_sightrange_ambush()) {
-            keycell = yi[yii].path[i];
+            keycell = yi[yii].path[i]; last_i = i;
             }
         if(keycell) {
-          for(; i<YDIST; i++) {
+          for(int i = last_i+1; i<YDIST; i++) {
             cell *c = yi[yii].path[i];
             if(inscreenrange(c))
               keycell = c;
