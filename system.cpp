@@ -1630,6 +1630,7 @@ EX void switch_game_mode(char switchWhat) {
       land_structure = princess::challenge ? lsSingle : lsNiceWalls;
       inv::on = false;
       racing::on = false;
+      use_custom_land_list = false;
       dual::disable();
       break;
     
