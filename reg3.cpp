@@ -2585,7 +2585,7 @@ int celldistance_534(cell *c1, cell *c2) {
 
   vector<cell*> s1 = {c1};
   vector<cell*> s2 = {c2};
-  int best = 99999999;
+  int best = DISTANCE_UNKNOWN;
   int d0 = 0;
 
   auto go_nearer = [&] (vector<cell*>& v, int& d) {
