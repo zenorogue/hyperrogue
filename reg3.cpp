@@ -2585,13 +2585,13 @@ int celldistance_534(cell *c1, cell *c2) {
 
   vector<cell*> s1 = {c1};
   vector<cell*> s2 = {c2};
-  int best = DISTANCE_UNKNOWN;
+  int best = DISTANCE_UNKNOWN_BIG;
   int d0 = 0;
 
   auto go_nearer = [&] (vector<cell*>& v, int& d) {
     vector<cell*> w;
-    for(cell *c: v) 
-      forCellEx(c1, c) 
+    for(cell *c: v)
+      forCellCM(c1, c)
         if(celldist(c1) < d)
           w.push_back(c1);
     sort(w.begin(), w.end());
@@ -2601,7 +2601,7 @@ int celldistance_534(cell *c1, cell *c2) {
     v = w;
     };
 
-  while(d0 < best) {  
+  while(d0 < best) {
     for(cell *a1: s1) for(cell *a2: s2) {
       if(a1 == a2) best = min(best, d0);
       else if(isNeighbor(a1, a2)) best = min(best, d0+1);
@@ -2612,6 +2612,7 @@ int celldistance_534(cell *c1, cell *c2) {
     if(d1 >= d2) go_nearer(s1, d1);
     if(d1 < d2) go_nearer(s2, d2);
     }
+  if(best == DISTANCE_UNKNOWN_BIG) best = DISTANCE_UNKNOWN; /* just in case */
   
   return best;  
   }
