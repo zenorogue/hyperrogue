@@ -691,6 +691,7 @@ EX void achievement_score(int cat, int number) {
     return;
   if(racing::on && cat != LB_RACING) return;
   if(bow::weapon) return;
+  if(use_custom_land_list) return;
   upload_score(cat, number);
 #endif
   }
@@ -922,6 +923,7 @@ EX void achievement_victory(bool hyper) {
   if(tactic::on) return;
   if(!ls::nice_walls()) return;
   if(ineligible_starting_land) return;
+  if(use_custom_land_list) return;
   LATE( achievement_victory(hyper); )
   DEBB(DF_STEAM, ("after checks"))
 
