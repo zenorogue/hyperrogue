@@ -86,9 +86,12 @@ EX const char* leadernames[NUMLEADER] = {
   "Crossbow (geometric)", // 89
   };
 
+#if HDR
+#define LB_PRINCESS 36
 #define LB_STATISTICS 62
-#define LB_HALLOWEEN  63
+#define LB_HALLOWEEN 63
 #define LB_RACING 81
+#endif
 
 EX bool haveLeaderboard(int id);
 EX int get_currentscore(int id);

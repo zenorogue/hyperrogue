@@ -648,7 +648,7 @@ struct info {
       if(newdist == OUT_OF_PRISON && princess::challenge) {
         addMessage(XLAT("Congratulations! Your score is %1.", its(i->value)));
         achievement_gain_once("PRINCESS2", rg::princess);
-        if(!cheater) achievement_score(36, i->value);
+        if(!cheater) achievement_score(LB_PRINCESS, i->value);
         LATE( showMissionScreen(); )
         }
       }
