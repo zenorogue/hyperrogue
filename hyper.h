@@ -771,6 +771,7 @@ enum orbAction { roMouse, roKeyboard, roCheck, roMouseForce, roMultiCheck, roMul
 #define pmodel (pconf.model)
 
 static constexpr int DISTANCE_UNKNOWN = 127;
+static constexpr int DISTANCE_UNKNOWN_BIG = 99999999;
 
 template<class T, class U> int addHook(hookset<T>& m, int prio, U&& hook) {
   return m.add(prio, static_cast<U&&>(hook));
