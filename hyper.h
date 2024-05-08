@@ -221,15 +221,6 @@ void addMessage(string s, char spamtype = 0);
 
 #define NUMWITCH 7
 
-// achievements
-
-#define LB_YENDOR_CHALLENGE 40
-#define LB_PURE_TACTICS 41
-#define NUMLEADER 90
-#define LB_PURE_TACTICS_SHMUP 49
-#define LB_PURE_TACTICS_COOP 50
-#define LB_RACING 81
-
 #if ISMOBILE || ISWEB || ISPANDORA || 1
 typedef double ld;
 #define LDF "%lf"

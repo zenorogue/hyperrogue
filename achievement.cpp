@@ -10,7 +10,9 @@
 #include "hyper.h"
 namespace hr {
 
+#if HDR
 #define NUMLEADER 90
+#endif
 
 EX bool test_achievements = false;
 
@@ -90,6 +92,10 @@ EX const char* leadernames[NUMLEADER] = {
 #define LB_PRINCESS 36
 #define LB_STATISTICS 62
 #define LB_HALLOWEEN 63
+#define LB_YENDOR_CHALLENGE 40
+#define LB_PURE_TACTICS 41
+#define LB_PURE_TACTICS_SHMUP 49
+#define LB_PURE_TACTICS_COOP 50
 #define LB_RACING 81
 #endif
 
