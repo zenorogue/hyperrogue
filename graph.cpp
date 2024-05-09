@@ -878,6 +878,7 @@ EX bool mark_compass(cell *c, shiftpoint& P1) {
 //  queuestr(V, 1, its(compassDist(c)), 0x10101 * int(128 - 100 * sin(ticks / 150.)), 1);
     queue_goal_text(P1, 1, its(-compassDist(c)), 0x10101 * int(128 - 100 * sintick(150)));
     addauraspecial(P1, 0xFF0000, 0);
+    addradar(P, 'X', iinf[itCompass].color, 0xFF, true);
     }
   return true;
   }
