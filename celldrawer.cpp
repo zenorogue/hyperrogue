@@ -2856,8 +2856,6 @@ void celldrawer::draw() {
 
   cells_drawn++;
 
-  checkTide(c);
-
 #if CAP_TEXTURE
   if(texture::saving) {
     texture::config.apply(c, V, 0xFFFFFFFF);
@@ -2882,7 +2880,7 @@ void celldrawer::draw() {
   
   if(callhandlers(false, hooks_drawcell, c, V)) return;
   
-  if(history::on || inHighQual || WDIM == 3 || shmup::on || sightrange_bonus > gamerange_bonus || !playermoved) checkTide(c);
+  checkTide(c);
   
   if(1) {
   
