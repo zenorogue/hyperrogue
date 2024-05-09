@@ -2,7 +2,7 @@
 namespace hr {
 
 #if MAXMDIM >= 4
-pair<bool, hyperpoint> makeradar(shiftpoint h) {
+pair<bool, hyperpoint> makeradar(shiftpoint h, bool distant) {
 
   hyperpoint h1;
 
@@ -23,8 +23,13 @@ pair<bool, hyperpoint> makeradar(shiftpoint h) {
   
   if(WDIM == 3) {
     ld d = hdist0(h);
-    if(d >= vid.radarrange) return {false, h1};
-    if(d) h1 = h1 * (d / vid.radarrange / hypot_d(3, h1));
+    if(distant) {
+      h1 = h1 / hypot_d(3, h1);
+      }
+    else {
+      if(d >= vid.radarrange) return {false, h1};
+      if(d) h1 = h1 * (d / vid.radarrange / hypot_d(3, h1));
+      }
     }
   else {
     h1 = cgi.emb->actual_to_base(h1);
@@ -45,16 +50,16 @@ pair<bool, hyperpoint> makeradar(shiftpoint h) {
   return {true, h1};
   }
 
-EX void addradar(const shiftmatrix& V, char ch, color_t col, color_t outline) {
+EX void addradar(const shiftmatrix& V, char ch, color_t col, color_t outline, bool distant IS(false)) {
   shiftpoint h = V * tile_center();
-  auto hp = makeradar(h);
+  auto hp = makeradar(h, distant);
   if(hp.first)
     current_display->radarpoints.emplace_back(radarpoint{hp.second, ch, col, outline});
   }
 
 EX void addradar(const shiftpoint h1, const shiftpoint h2, color_t col) {
-  auto hp1 = makeradar(h1);
-  auto hp2 = makeradar(h2);
+  auto hp1 = makeradar(h1, false);
+  auto hp2 = makeradar(h2, false);
   if(hp1.first && hp2.first)
     current_display->radarlines.emplace_back(radarline{hp1.second, hp2.second, col});
   }

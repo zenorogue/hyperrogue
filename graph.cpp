@@ -4823,6 +4823,7 @@ EX void drawMarkers() {
           queue_goal_text(H, 1, its(cd), 0x10101 * int(128 - 100 * sintick(150)));
           #endif
           addauraspecial(H, iinf[itOrbYendor].color, 0);
+          addradar(ggmatrix(keycell), 'X', iinf[itKey].color, kind_outline(itKey), true);
           }
         }
       }
