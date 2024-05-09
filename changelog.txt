@@ -5216,3 +5216,25 @@ Bug fixes:
 - fixed the Free Fall being not inaccessible from some lands
 - auto-pause shmup game when it loses focus
 - fixed some possible crashes: with keys being generated on ivy, when using Orb of Space on Orb of Safety, Ocean in the chaos modes, after killing 400 mutants, when generating YASC message
+
+2024-05-09 10:45 Update 13.0h
+
+- some leaderboards still activated when custom_land_list was used
+- Orb of Summoning now works on deep water, shallow water, and Camelot moat tiles
+- more settings for minefield graphics
+- removed Haunted and Elemental from the landscape mode
+- stone gargoyles and statues are now non-blocking for missiles
+- Orb of Earth now cancels Invisibility only if it is doing something
+- new line pattern 'wall highlight', and also line patterns are now easier to reach (via creative mode)
+- fixed the Yendor beacon to appear in the correct place (usually on the boundary, not the closest visible tile)
+
+Minor bug fixes:
+- fixed CR3 generated in CR2 layout
+- fixed CR2 generated in CR3/CR4 layouts
+- fixed single wrong tile of the first land when safetying in landscape etc
+- fixed 534 distance computation
+- fixed CLI -picload
+- clear boats from removed Orbs of Water
+- fixed a crash setting landscape_div to 0
+- fixed a crash with irregular spherical maps
+- show weapon watermark with geometric xbow (thanks to @jlm)
