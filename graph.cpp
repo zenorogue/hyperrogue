@@ -4818,7 +4818,6 @@ EX void drawMarkers() {
             int cd2 = celldistance(cwt.at, yi[yii].path[i2]);
             if(cd2 != DISTANCE_UNKNOWN) {
               cd = cd2 + (YDIST-1-i2);
-              println(hlog, "i2 = ", i2, " cd = ", celldistance(cwt.at, keycell));
               }
             }
           queue_goal_text(H, 1, its(cd), 0x10101 * int(128 - 100 * sintick(150)));
