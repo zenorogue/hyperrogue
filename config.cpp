@@ -3486,8 +3486,8 @@ EX void edit_color_table(colortable& ct, const reaction_t& r IS(reaction_t()), b
         ct[i] ^= 0x1000000;
         if(!(ct[i] & 0x1000000)) return;
         }
-      dialog::openColorDialog(ct[i]); 
-      dialog::get_di().reaction = r; 
+      dialog::openColorDialog(ct[i]);
+      if(r) dialog::get_di().reaction = r;
       dialog::colorAlpha = false;
       dialog::get_di().dialogflags |= sm::SIDE;
       });
@@ -3496,14 +3496,14 @@ EX void edit_color_table(colortable& ct, const reaction_t& r IS(reaction_t()), b
   dialog::addItem("add a color", 'A');
   dialog::add_action([&ct, r] {
     ct.push_back(rand() & 0x1FFFFFF);
-    r();
+    if(r) r();
     });
 
   if(isize(ct) > 2) {
     dialog::addItem("delete a color", 'D');
     dialog::add_action([&ct, r] {
       ct.pop_back();
-      r();
+      if(r) r();
       });
     }
 
