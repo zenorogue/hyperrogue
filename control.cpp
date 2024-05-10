@@ -376,6 +376,7 @@ EX void full_ystrafe_camera(ld t) {
 EX ld third_person_rotation = 0;
 
 EX void full_rotate_camera(int dir, ld val) {
+  if(!val) return;
   if(rug::rug_control() && lshiftclick) {
     val *= camera_rot_speed;
     hyperpoint h;
