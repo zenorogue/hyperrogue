@@ -765,7 +765,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           }
         }
       // seal entrances to the Land of Power.
-      if(d == 7 && ctof(c)) {
+      if(d == 7 && ctof(c) && land_structure != lsLandscape) {
         bool onwall = false;
         for(int i=0; i<c->type; i++) if(c->move(i) && c->move(i)->land == laBarrier)
           onwall = true;
@@ -775,12 +775,15 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           cell *c3 = c2->modmove(c->c.spin(i) + 3);
           if(!c3) continue;
           if(c3->land != laPower && c3->land != laBarrier)
-          if(c2->wall != waFire && c2->wall != waGlass) {
+          if(c2->wall != waEternalFire && c2->wall != waGlass) {
             if(isFire(c)) c->monst = moWitchWinter;
             else if(c->wall == waGlass) c->monst = moWitchGhost;
             else c->monst = moEvilGolem;
             }
           }
+        }
+      if(d == 7 && land_structure == lsLandscape) {
+        forCellEx(c2, c) if(c2->land != laPower) c->wall = waEternalFire;
         }
       ONEMPTY {
         if(hrand(5000+50*items[itPower]) < 1200) {
