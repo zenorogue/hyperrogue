@@ -1397,7 +1397,7 @@ EX void draw_mine_numbers(int mines, const shiftmatrix& V, int ct6) {
     else
       queuepoly(V, sh, col);
     };
-  if(mines == 0 && mine_zero_display < (WDIM == 3 ? 2 : 1)) return;
+  if(mines == 0 && mine_zero_display < (WDIM == 3 ? 1 : 2)) return;
   if(numerical_minefield) {
     string label = its(mines);
     queuestr(V, (mines >= 10 ? .5 : 1) * mapfontscale / 100, label, darkened(minecolors[mines]), 8);
