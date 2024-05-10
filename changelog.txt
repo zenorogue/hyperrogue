@@ -5219,7 +5219,6 @@ Bug fixes:
 
 2024-05-09 10:45 Update 13.0h
 
-- some leaderboards still activated when custom_land_list was used
 - Orb of Summoning now works on deep water, shallow water, and Camelot moat tiles
 - more settings for minefield graphics
 - removed Haunted and Elemental from the landscape mode
@@ -5229,6 +5228,7 @@ Bug fixes:
 - fixed the Yendor beacon to appear in the correct place (usually on the boundary, not the closest visible tile)
 
 Minor bug fixes:
+- some leaderboards still activated when custom_land_list was used
 - fixed CR3 generated in CR2 layout
 - fixed CR2 generated in CR3/CR4 layouts
 - fixed single wrong tile of the first land when safetying in landscape etc
@@ -5238,3 +5238,14 @@ Minor bug fixes:
 - fixed a crash setting landscape_div to 0
 - fixed a crash with irregular spherical maps
 - show weapon watermark with geometric xbow (thanks to @jlm)
+
+2024-05-10 19:36 Update 13.0i
+
+- reverted numlock fix on MAC since it apparently does not work as expected
+- right shift no longer assumes mouse-strafe if no mouse moved
+- fixed the "display zeros in minefield" option
+- fixed crashes when adding/deleting colors
+- rosewaves no longer go through the fake cells in Crystal World
+- changed the guarding in Power landscape
+- display Compass and Orb of Yendor beacon on radar
+- fixed some problems with tides (thanks to jlm)
