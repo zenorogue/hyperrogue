@@ -1684,8 +1684,8 @@ EX namespace ccolor {
     }, {});
 
   EX data threecolor = data("threecolor", [] { return geosupport_threecolor(); }, CCO {
-    return nestcolors[pattern_threecolor(c)]; // TODO%
-    }, {});
+    return cco.ctab[pattern_threecolor(c)];
+    }, { 0x7C0000, 0x007C00, 0x00007C, 0x404040, 0x700070, 0x007070, 0x707000, 0x606060 });
 
   EX data football = data("football", [] { return geosupport_football(); }, CCO {
     return cco.ctab[pseudohept(c)];
