@@ -181,9 +181,7 @@ EX bool monstersnear(cell *c, eMonster who) {
       } 
 
     // consider normal monsters
-    if(c2 && 
-      isArmedEnemy(c2, who) && 
-      (c2->monst != moLancer || isUnarmed(who) || !logical_adjacent(c, who, c2))) {
+    if(c2 && isArmedEnemy(c2, who)) {
       eMonster m = c2->monst;
       if(elec::affected(c2)) continue;
       if(fast && c2->monst != moWitchSpeed) continue;

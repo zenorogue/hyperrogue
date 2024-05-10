@@ -562,6 +562,8 @@ void mine_dialog() {
   add_edit(mine_opacity);
   add_edit(mine_hollow);
   add_edit(mine_markers);
+  dialog::addItem(XLAT("minefield colors"), 'c');
+  dialog::add_action_push([] { edit_color_table(minecolors); });
   dialog::display();
   }
 
