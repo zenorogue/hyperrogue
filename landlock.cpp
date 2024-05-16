@@ -675,7 +675,6 @@ EX eLand getNewLand(eLand old) {
 
   if(ls::horodisk_structure() && tortoise::seek()) LIKELY tab[cnt++] = laTortoise;
   
-  printf("Before pruning: %d entries\n", cnt);
   int idx = 0;
   while (idx < cnt) {
     eLand n = tab[idx];
@@ -684,14 +683,16 @@ EX eLand getNewLand(eLand old) {
     else
       idx++;
     }
-  printf("After pruning: %d entries\n", cnt);
+
+  if (!cnt) {
+    addMessage("No eligible land candidates!");
+    return old;
+    }
 
   eLand n = tab[hrand(cnt)];
   if (weirdhyperbolic && specialland == laCrossroads4 && isCrossroads(n))
     n = laCrossroads4;
 
-  //printf("Took %d attempts.\n", attempts);
-  
   return n;  
   }
 
