@@ -1041,7 +1041,6 @@ void race_projection() {
     dialog::add_action([] () {
       dialog::editMatrix(race_angle.get(), XLAT("race angle"), "", GDIM);
       auto& d = dialog::get_di();
-      println(hlog, format("d = %p", &d));
       auto q = rot_inverse(race_angle) * pconf.mori();
       auto last = d.reaction;
       d.reaction = [q, last] () {
