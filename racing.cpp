@@ -1039,10 +1039,16 @@ void race_projection() {
   if(GDIM == 2) {
     dialog::addMatrixItem(XLAT("race angle"), race_angle.get(), 'a');
     dialog::add_action([] () {
-      dialog::editMatrix(race_angle.get(), XLAT("model orientation"), "", GDIM);
+      dialog::editMatrix(race_angle.get(), XLAT("race angle"), "", GDIM);
+      auto& d = dialog::get_di();
+      println(hlog, format("d = %p", &d));
       auto q = rot_inverse(race_angle) * pconf.mori();
-      auto last = dialog::get_ne().reaction;
-      dialog::get_ne().reaction = [q, last] () { last(); pconf.mori() = race_angle * q; };
+      auto last = d.reaction;
+      d.reaction = [q, last] () {
+        if(last) last();
+        pconf.mori() = race_angle * q;
+        if(racing::on) set_view();
+        };
       });
     }
 
