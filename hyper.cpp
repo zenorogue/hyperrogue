@@ -132,9 +132,7 @@
 #include "rogueviz/rogueviz-all.cpp"
 #endif
 
-#if CAP_DAILY
-#include "private/daily.cpp"
-#else
+#if !CAP_DAILY
 namespace hr { namespace daily { bool on; int historical; } }
 #endif
 

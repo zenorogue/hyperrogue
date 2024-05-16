@@ -122,7 +122,7 @@ EX namespace yendor {
   
   int tscorelast;
 
-  void uploadScore() {
+  EX void uploadScore() {
     int tscore = 0;
     for(int i=1; i<YENDORLEVELS; i++)
       if(bestscore[0][i]) tscore += 999 + bestscore[0][i];
@@ -763,18 +763,18 @@ EX namespace tactic {
     if(csum > recordsum[xc][land]) recordsum[xc][land] = csum;
     }
 
-  void record() {
+  EX void record() {
     record(lasttactic, items[treasureType(lasttactic)]);
     }
 
-  void unrecord(eLand land, flagtype xc = modecode()) {
+  EX void unrecord(eLand land, flagtype xc IS(modecode())) {
     if(land >=0 && land < landtypes) {
       for(int i=0; i<MAXTAC-1; i++) lsc[xc][land][i] = lsc[xc][land][i+1];
       lsc[xc][land][MAXTAC-1] = -1;
       }
     }
 
-  void unrecord() {
+  EX void unrecord() {
     unrecord(lasttactic);
     }
   
@@ -795,7 +795,7 @@ EX namespace tactic {
     achievement_score(lb, tscore);
     }
 
-  void uploadScore() {
+  EX void uploadScore() {
     uploadScoreCode(0, LB_PURE_TACTICS);
     uploadScoreCode(2, LB_PURE_TACTICS_SHMUP);
     uploadScoreCode(4, LB_PURE_TACTICS_COOP);

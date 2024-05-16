@@ -99,13 +99,24 @@ EX const char* leadernames[NUMLEADER] = {
 #define LB_RACING 81
 #endif
 
+EX void achievement_init();
+EX string myname();
+EX void achievement_close();
+EX void achievement_pump();
+
+/** gain the given achievement.
+ * @param s name of the achievement, e.g., DIAMOND1
+ * @param flags one of the constants from namespace rg. The achievement is only awarded if special modes are matched exactly.
+ */
+EX void achievement_gain(const char* s, char flags IS(0));
+
 EX bool haveLeaderboard(int id);
 EX int get_currentscore(int id);
 EX void set_priority_board(int id);
 EX int get_sync_status();
 EX bool score_loaded(int id);
 EX int score_default(int id);
-
+EX void improveItemScores();
 EX void upload_score(int id, int v);
 
 string achievementMessage[3];
@@ -228,29 +239,24 @@ EX void achievement_log(const char* s, char flags) {
 #endif
   }
 
-EX void achievement_init();
-EX string myname();
-EX void achievement_close();
+#ifndef LEADER
+#define LEADER "Unknown"
+#define LEADERFULL "Unknown"
+#endif
 
-/** gain the given achievement.
- * @param s name of the achievement, e.g., DIAMOND1
- * @param flags one of the constants from namespace rg. The achievement is only awarded if special modes are matched exactly.
- */
-EX void achievement_gain(const char* s, char flags IS(0));
-
-#if ISSTEAM
-void improveItemScores();
-#include "private/hypersteam.cpp"
-#elif !ISANDROID && !ISIOS
+#if !CAP_ACHIEVE
 void achievement_init() {}
 string myname() { return "Rogue"; }
 void achievement_close() {}
 // gain the achievement with the given name.
 // flags: 'e' - for Euclidean, 's' - for Shmup, '7' - for heptagonal
 // Only awarded if special modes are matched exactly.
-void achievement_gain(const char* s, char flags IS(0)) {
+void achievement_gain(const char* s, char flags) {
   achievement_log(s, flags);
   }
+void achievement_pump() {}
+EX int get_sync_status() { return 0; }
+EX void set_priority_board(int) { }
 #endif
 
 // gain the achievement for collecting a number of 'it'.
@@ -655,7 +661,7 @@ int specific_what = 0;
 EX void improve_score(int i, eItem what) {
   if(offlineMode) return;
   LATE( improve_score(i, what); )
-#ifdef HAVE_ACHIEVEMENTS
+#if CAP_ACHIEVE
   if(haveLeaderboard(i)) updateHi(what, get_currentscore(i));
   if(items[what] && haveLeaderboard(i)) {
     if(items[what] > get_currentscore(i) && score_loaded(i)) {
@@ -669,7 +675,7 @@ EX void improve_score(int i, eItem what) {
 // scores for special challenges
 EX void achievement_score(int cat, int number) {
   if(offlineMode) return;
-#ifdef HAVE_ACHIEVEMENTS
+#if CAP_ACHIEVE
   if(cheater) return;
   if(casual) return;
   LATE( achievement_score(cat, number); )
@@ -775,7 +781,7 @@ EX void achievement_final(bool really_final) {
 
   LATE( achievement_final(really_final); )
 
-#ifdef HAVE_ACHIEVEMENTS
+#if CAP_ACHIEVE
   if(ticks > next_stat_tick) {
     upload_score(LB_STATISTICS, time(NULL));
     next_stat_tick = ticks + 600000;
@@ -910,7 +916,7 @@ EX void check_total_victory() {
 EX void achievement_victory(bool hyper) {
   DEBBI(DF_STEAM, ("achievement_victory"))
   if(offlineMode) return;
-#ifdef HAVE_ACHIEVEMENTS
+#if CAP_ACHIEVE
   if(cheater) return;
   if(casual) return;
   if(bow::weapon) return;
@@ -1044,13 +1050,9 @@ EX string get_rich_presence_text() {
   return res;
   }
 
-#ifndef HAVE_ACHIEVEMENTS
-void achievement_pump() {}
-#endif
-
 /** display the last achievement gained. */
 EX void achievement_display() {
-  #ifdef HAVE_ACHIEVEMENTS
+  #if CAP_ACHIEVE
   if(achievementTimer) {
     int col = (ticks - achievementTimer);
     if(col > 5000) { achievementTimer = 0; return; }
@@ -1079,10 +1081,5 @@ EX int score_default(int i) {
   if(isAscending(i)) return 1999999999;
   else return 0;
   }
-
-#ifndef HAVE_ACHIEVEMENTS
-EX int get_sync_status() { return 0; }
-EX void set_priority_board(int) { }
-#endif
 
 }
