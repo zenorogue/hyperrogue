@@ -9,7 +9,7 @@
 #include <string>
 
 namespace hr {
-  string scorefile = "fakemobile_score.txt";  
+  std::string scorefile = "fakemobile_score.txt";
   }
 
 #include <SDL/SDL.h>
