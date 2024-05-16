@@ -1173,6 +1173,8 @@ EX void initConfig() {
 
   param_i(min_cells_drawn, "min_cells_drawn");
 
+  param_b(show_turns, "show_turns", false)
+  -> editable("show turn count", 'T');
   param_i(menu_darkening, "menu_darkening", 2)
   -> editable(0, 8, 1, "menu map darkening", "A larger number means darker game map in the background. Set to 8 to disable the background.", 'd')
   -> set_sets([] { dialog::bound_low(0); dialog::bound_up(8); dialog::get_di().dialogflags |= sm::DARKEN; });
@@ -2443,6 +2445,7 @@ EX void configureInterface() {
       };
     });
 
+  add_edit(show_turns);
   add_edit(menu_darkening);
   add_edit(centered_menus);
   add_edit(startanims::enabled);
