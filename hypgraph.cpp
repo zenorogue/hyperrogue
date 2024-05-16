@@ -1467,7 +1467,10 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
     
     case mdSpiral: {
       cld z;
-      if(hyperbolic || sphere) makeband(H_orig, ret, band_conformal);
+      if(hyperbolic || sphere) {
+        makeband(H_orig, ret, band_conformal);
+        models::scr_to_ori(ret);
+        }
       else ret = H;
       z = cld(ret[0], ret[1]) * models::spiral_multiplier;
       
@@ -1492,6 +1495,7 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
         if(pconf.skiprope) 
           ret = mobius(ret, pconf.skiprope, 1);
         }
+      models::ori_to_scr(ret);
       break;
       }
     
@@ -3019,6 +3023,7 @@ EX void draw_boundary(int w) {
           hyperpoint ret = point2(real(z), imag(z));
           ret = mobius(ret, pconf.skiprope, 1);
           ret *= current_display->radius;
+          models::ori_to_scr(ret);
           curvepoint(ret);
           }
         queuecurve(shiftless(Id), ringcolor, 0, p).flags |= POLY_ALWAYS_IN;
