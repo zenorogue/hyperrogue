@@ -675,14 +675,22 @@ EX eLand getNewLand(eLand old) {
 
   if(ls::horodisk_structure() && tortoise::seek()) LIKELY tab[cnt++] = laTortoise;
   
-  int attempts = 0;
-  eLand n = old;
-  while(incompatible(n, old) || !isLandIngame(n)) {
-    n = tab[hrand(cnt)];
-    if(weirdhyperbolic && specialland == laCrossroads4 && isCrossroads(n))
-      n = laCrossroads4;
-    attempts++; if(attempts == 2000) break;
+  printf("Before pruning: %d entries\n", cnt);
+  int idx = 0;
+  while (idx < cnt) {
+    eLand n = tab[idx];
+    if (incompatible(n, old) || !isLandIngame(n))
+      tab[idx] = tab[--cnt];
+    else
+      idx++;
     }
+  printf("After pruning: %d entries\n", cnt);
+
+  eLand n = tab[hrand(cnt)];
+  if (weirdhyperbolic && specialland == laCrossroads4 && isCrossroads(n))
+    n = laCrossroads4;
+
+  //printf("Took %d attempts.\n", attempts);
   
   return n;  
   }
