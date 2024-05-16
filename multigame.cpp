@@ -29,7 +29,7 @@ struct gamedata {
       ::new (&record[index]) T(std::move(x));
       }
     else {
-      T& at = (T&) record[index];
+      T& at = *((T*) (void*) &(record[index]));
       x = std::move(at);
       at.~T();
       }
