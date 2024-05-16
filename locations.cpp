@@ -213,7 +213,7 @@ template<class T> struct walker {
   int spin;
   /** \brief are we mirrored */
   bool mirrored;
-  walker<T> (T *at = NULL, int s = 0, bool m = false) : at(at), spin(s), mirrored(m) { if(at) s = at->c.fix(s); }
+  walker(T *at = NULL, int s = 0, bool m = false) : at(at), spin(s), mirrored(m) { if(at) s = at->c.fix(s); }
   /** \brief spin by i to the left (or right, when mirrored */
   walker<T>& operator += (int i) {
     spin = at->c.fix(spin+(mirrored?-i:i));
