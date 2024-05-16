@@ -1360,6 +1360,7 @@ EX namespace hybrid {
     cell* gamestart() override { return getCell(underlying_map->gamestart(), 0); }
   
     hrmap_hybrid() {
+      underlying_map = nullptr;
       twisted = false;
       disc_quotient = 0;
       in_underlying([this] { initcells(); underlying_map = currentmap; });

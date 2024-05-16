@@ -75,6 +75,7 @@ EX namespace fake {
       }
   
     hrmap_fake() {
+      underlying_map = nullptr;
       in_underlying([this] { initcells(); underlying_map = currentmap; });
       for(hrmap*& m: allmaps) if(m == underlying_map) m = NULL;
       }

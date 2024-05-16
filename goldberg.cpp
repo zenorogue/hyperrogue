@@ -1269,6 +1269,7 @@ EX namespace gp {
       }
 
     hrmap_inverse() {
+      underlying_map = nullptr;
       if(0) {
         println(hlog, "making ucgi");
         dynamicval<eVariation> gva(variation, variation_for(param));
