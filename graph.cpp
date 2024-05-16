@@ -5803,8 +5803,8 @@ EX void normalscreen() {
 #if CAP_TOUR
   else if(tour::on) 
     displayButton(vid.xres-8, vid.yres-vid.fsize, XLAT("(ESC) tour menu"), SDLK_ESCAPE, 16);
-  else
 #endif
+  else
     displayButton(vid.xres-8, vid.yres-vid.fsize, XLAT("(v) menu"), 'v', 16);
   keyhandler = handleKeyNormal;
 
