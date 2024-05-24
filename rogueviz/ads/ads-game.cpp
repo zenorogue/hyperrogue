@@ -154,8 +154,8 @@ void default_settings() {
   lps_add(lps_relhell, vid.drawmousecircle, false);
   lps_add(lps_relhell, draw_centerover, false);
   lps_add(lps_relhell, vid.axes3, false);
-  lps_add(lps_relhell, patterns::whichCanvas, 'r');
-  lps_add(lps_relhell, patterns::rwalls, 0);
+  lps_add(lps_relhell, ccolor::which, &ccolor::random);
+  lps_add(lps_relhell, ccolor::rwalls, 0);
   lps_add(lps_relhell, vid.fov, 150.);
 
   lps_add(lps_relhell_ds_spacetime_klein, pmodel, mdDisk);

@@ -1296,14 +1296,14 @@ void visual_menu() {
 
   dialog::addSelItem(XLAT("iterations in raycasting"), its(ray::max_iter_current()), 's');
   dialog::add_action([&] {
-    dialog::editNumber(ray::max_iter_current(), 0, 600, 1, 60, XLAT("iterations in raycasting"), "");
-    dialog::reaction = ray::reset_raycaster;
+    auto& di = dialog::editNumber(ray::max_iter_current(), 0, 600, 1, 60, XLAT("iterations in raycasting"), "");
+    di.reaction = ray::reset_raycaster;
     });
 
   dialog::addSelItem(XLAT("reflective walls in raycasting"), fts(ray::reflect_val), 'R');
   dialog::add_action([&] {
-    dialog::editNumber(ray::reflect_val, 0, 1, 0.1, 0, XLAT("reflective walls"), "");
-    dialog::reaction = ray::reset_raycaster;
+    auto& di = dialog::editNumber(ray::reflect_val, 0, 1, 0.1, 0, XLAT("reflective walls"), "");
+    di.reaction = ray::reset_raycaster;
     });
 
   dialog::addSelItem(XLAT("cells to draw per level"), its(draw_per_level), 'R');

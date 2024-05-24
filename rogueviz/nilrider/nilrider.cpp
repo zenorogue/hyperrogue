@@ -585,12 +585,12 @@ local_parameter_set lps_nilrider("nilrider:");
 
 void default_settings() {
   lps_add(lps_nilrider, vid.cells_drawn_limit, 1);
-  lps_add(lps_nilrider, (color_t&) patterns::canvasback, 0);
+  lps_add(lps_nilrider, ccolor::plain.ctab, colortable{0});
   lps_add(lps_nilrider, smooth_scrolling, true);
   lps_add(lps_nilrider, mapeditor::drawplayer, false);
   lps_add(lps_nilrider, backcolor, 0xC0C0FFFF);
   lps_add(lps_nilrider, logfog, 1);
-  lps_add(lps_nilrider, patterns::whichCanvas, 0);
+  lps_add(lps_nilrider, ccolor::which, &ccolor::plain);
 
   #if CAP_VR
   lps_add(lps_nilrider, vrhr::hsm, vrhr::eHeadset::reference);
