@@ -209,6 +209,7 @@ void drawSpeed(const shiftmatrix& V, ld scale=1) {
   }
 
 void drawSafety(const shiftmatrix& V, int ct) {
+  if(inHighQual) return;
 #if CAP_QUEUE
   ld ds = ptick(50);
   color_t col = darkena(iinf[itOrbSafety].color, 0, 0xFF);
