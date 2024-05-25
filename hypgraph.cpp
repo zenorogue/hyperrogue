@@ -2526,13 +2526,14 @@ void circle_around_center(ld radius, color_t linecol, color_t fillcol, PPR prio)
   #if CAP_QUEUE
   ld rad = 10;
   if(euclid) rad = 1000;
-  for(int i=0; i<=360; i++) curvepoint(xspinpush0(i * degree, rad));
+  for(int i=0; i<=36000; i+=10) curvepoint(xspinpush0(i * degree / 100., rad));
   auto& c = queuecurve(shiftless(Id), linecol, fillcol, prio);
   if(pmodel == mdDisk && hyperbolic && pconf.alpha <= -1)
     c.flags |= POLY_FORCE_INVERTED;
   if(pmodel == mdJoukowsky)
     c.flags |= POLY_FORCE_INVERTED;
   c.flags |= POLY_ALWAYS_IN;
+  c.flags |= POLY_FORCEWIDE;
   #endif
   }
 
