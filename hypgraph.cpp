@@ -559,7 +559,7 @@ ld ellFaux(ld cos_phi, ld sin_phi, ld k) {
 
 ld sqrt_clamp(ld x) { if(x<0) return 0; return sqrt(x); }
 
-hyperpoint to_square(hyperpoint H) {
+EX hyperpoint to_square(hyperpoint H) {
 
   ld d = hypot_d(2, H);
   ld x = d / (H[2] + 1);
