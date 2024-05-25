@@ -1810,9 +1810,9 @@ EX void build_walls(cell *c, cell *from) {
       return;
     }
   
-  else if(good_for_wall(c) && ls::any_wall() && c->land == laCrossroads4 && hrand(10000) < 7000 && c->land && !c->master->alt && !tactic::on && !racing::on &&
+  else if(good_for_wall(c) && ls::any_wall() && c->land == laCrossroads4 && hrand(10000) < 7000 && c->land && !c->master->alt && !tactic::on && !racing::on && 
     buildBarrierNowall(c, getNewLand(laCrossroads4))) ;
-  
+
   else if(good_for_wall(c) && ls::any_wall() && hrand(I10000) < 20 && !generatingEquidistant && !yendor::on && !tactic::on && !racing::on && !isCrossroads(c->land) &&
     landUnlockedIngame(laCrossroads4) && !weirdhyperbolic && !c->master->alt && c->bardir != NOBARRIERS &&
     !inmirror(c) && !isSealand(c->land) && !isHaunted(c->land) && !isGravityLand(c->land) && 

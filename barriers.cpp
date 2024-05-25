@@ -1157,6 +1157,7 @@ EX bool buildBarrier3D(cell *c, eLand l2, int forced_dir) {
 #endif
 
 EX bool buildBarrierNowall(cell *c, eLand l2, int forced_dir IS(NODIR)) {
+  if(among(l2, laCrossroads2, laCrossroads5)) return false;
   return general_barrier_build(NOWALLSEP, c, l2, forced_dir);
   }
 
