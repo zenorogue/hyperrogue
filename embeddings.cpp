@@ -402,7 +402,7 @@ struct emb_none : embedding_method {
     return embedding_method::flatten(a);
     }
 
-  hyperpoint normalize_flat(hyperpoint a) override { return normalize(a); }
+  hyperpoint normalize_flat(hyperpoint a) override { return gproduct ? flatten(a) : normalize(a); }
 
   transmatrix base_to_actual(const transmatrix& T) override { return T; }
   hyperpoint base_to_actual(hyperpoint h) override { return h; }
