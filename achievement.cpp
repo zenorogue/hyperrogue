@@ -119,8 +119,8 @@ EX int score_default(int id);
 EX void improveItemScores();
 EX void upload_score(int id, int v);
 
-string achievementMessage[3];
-int achievementTimer;
+EX string achievementMessage[3];
+EX int achievementTimer;
 /** achievements received this game */
 EX vector<string> achievementsReceived;
 
