@@ -90,7 +90,7 @@ struct parameter : public std::enable_shared_from_this<parameter> {
   virtual void reset() = 0;
   virtual void swap_with(parameter*) = 0;
 
-  virtual shared_ptr<parameter> clone(struct local_parameter_set& lps, void *value) { println(hlog, "parameter not cloneable: ", name); throw hr_exception("not cloneable"); }
+  virtual shared_ptr<parameter> clone(struct local_parameter_set& lps, void *value) override { println(hlog, "parameter not cloneable: ", name); throw hr_exception("not cloneable"); }
 
   void setup(const parameter_names& s);
   };
@@ -408,7 +408,7 @@ struct custom_parameter : public parameter {
   reaction_t custom_reset;
   function<shared_ptr<parameter>(struct local_parameter_set& lps, void *value)> custom_clone;
 
-  virtual shared_ptr<parameter> clone(struct local_parameter_set& lps, void *value) {
+  virtual shared_ptr<parameter> clone(struct local_parameter_set& lps, void *value) override {
     if(custom_clone) return custom_clone(lps, value);
     return parameter::clone(lps, value);
     }
