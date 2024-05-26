@@ -566,4 +566,12 @@ EX void debug_view(string context, string s) {
   if(s != old) { old = s; println(hlog, s); }
   }
 
+EX vector<string> split_string(const string& s, char sep) {
+  vector<string> res;
+  string next = "";
+  for(char c: s) if(c == sep) { res.push_back(next); next = ""; } else next += c;
+  res.push_back(next);
+  return res;
+  }
+
 }
