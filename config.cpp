@@ -756,7 +756,7 @@ EX shared_ptr<custom_parameter> param_colortable(colortable& val, const paramete
   colortable dft = val;
   u->last_value = -1;
   u->custom_viewer = [] (char key) {};
-  u->custom_value = [&val] () { return -1; };
+  u->custom_value = [] () { return -1; };
   u->custom_affect = [&val] (void *v) { return &val == v; };
   u->custom_load = [&val] (const string& s) {
     auto seq = split_string(s, ',');
