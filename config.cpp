@@ -405,6 +405,7 @@ struct custom_parameter : public parameter {
   function<void(const string&)> custom_load;
   function<string()> custom_save;
   function<bool()> custom_do_save;
+  reaction_t custom_reset;
   function<shared_ptr<parameter>(struct local_parameter_set& lps, void *value)> custom_clone;
 
   virtual shared_ptr<parameter> clone(struct local_parameter_set& lps, void *value) {
@@ -447,7 +448,7 @@ struct custom_parameter : public parameter {
   virtual cld get_cld() override { return custom_value(); }
   virtual string save() override { if(custom_save) return custom_save(); else return "not saveable"; }
   virtual bool dosave() override { if(custom_do_save) return custom_do_save(); else return false; }
-  virtual void reset() override {}
+  virtual void reset() override { if(custom_reset) custom_reset(); }
   virtual void swap_with(parameter*) override {}
   };
 #endif
@@ -723,6 +724,7 @@ shared_ptr<custom_parameter> param_custom_int(T& val, const parameter_names& n, 
   u->custom_save = [&val] { return its(int(val)); };
   u->custom_do_save = [dft, &val] { return int(val) != dft; };
   u->custom_clone = [u] (struct local_parameter_set& lps, void *value) { auto val = (int*) value; return param_i(*val, lps.mod(&*u), *val); };
+  u->custom_reset = [dft, &val] { val = (T) dft; };
   u->default_key = key;
   u->is_editable = true;
   return u;
@@ -741,6 +743,7 @@ EX shared_ptr<custom_parameter> param_custom_ld(ld& val, const parameter_names& 
   u->custom_save = [&val] { return fts(val, 10); };
   u->custom_do_save = [dft, &val] { return val != dft; };
   u->custom_clone = [u] (struct local_parameter_set& lps, void *value) { auto val = (ld*) value; return param_f(*val, lps.mod(&*u), *val); };
+  u->custom_reset = [dft, &val] { val = dft; };
 
   u->default_key = key;
   u->is_editable = true;
