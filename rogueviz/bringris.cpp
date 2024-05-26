@@ -2032,7 +2032,7 @@ int args() {
   }
 
 void change_default_key(int key, int val) {
-  char* t = scfg_bringris.keyaction;
+  int* t = scfg_bringris.keyaction;
   t[key] = val;
   }
 

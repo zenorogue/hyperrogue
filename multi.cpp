@@ -18,11 +18,11 @@ EX namespace multi {
   static constexpr int MAXHAT = 4;
   
   struct config {
-    char keyaction[SCANCODES];
-    char joyaction[MAXJOY][MAXBUTTON];
-    char axeaction[MAXJOY][MAXAXE];
-    char hataction[MAXJOY][MAXHAT][4];
-    int  deadzoneval[MAXJOY][MAXAXE];
+    int keyaction[SCANCODES];
+    int joyaction[MAXJOY][MAXBUTTON];
+    int axeaction[MAXJOY][MAXAXE];
+    int hataction[MAXJOY][MAXHAT][4];
+    int deadzoneval[MAXJOY][MAXAXE];
     };
   #endif
   
@@ -166,7 +166,7 @@ EX const char* axemodes3[4] = {
 
 EX int centerplayer = -1;
 
-char* axeconfigs[24]; int numaxeconfigs;
+int* axeconfigs[24]; int numaxeconfigs;
 int* dzconfigs[24];
 
 string listkeys(config& scfg, int id) {
@@ -608,18 +608,18 @@ EX bool notremapped(int sym) {
 EX void sconfig_savers(config& scfg, string prefix) {
   // unfortunately we cannot use key names here because SDL is not yet initialized
   for(int i=0; i<SCANCODES; i++)
-    addsaver(scfg.keyaction[i], prefix + string("key:")+its(i));
+    param_i(scfg.keyaction[i], prefix + string("key:")+its(i));
 
   for(int i=0; i<MAXJOY; i++) {
     string pre = prefix +  "joystick "+cts('A'+i);
     for(int j=0; j<MAXBUTTON; j++)
-      addsaver(scfg.joyaction[i][j], pre+"-B"+its(j));
+      param_i(scfg.joyaction[i][j], pre+"-B"+its(j));
     for(int j=0; j<MAXAXE; j++) {
-      addsaver(scfg.axeaction[i][j], pre+" axis "+its(j));
-      addsaver(scfg.deadzoneval[i][j], pre+" deadzone "+its(j));
+      param_i(scfg.axeaction[i][j], pre+" axis "+its(j));
+      param_i(scfg.deadzoneval[i][j], pre+" deadzone "+its(j));
       }
     for(int j=0; j<MAXHAT; j++) for(int k=0; k<4; k++) {
-      addsaver(scfg.hataction[i][j][k], pre+" hat "+its(j)+" "+"URDL"[k]);
+      param_i(scfg.hataction[i][j][k], pre+" hat "+its(j)+" "+"URDL"[k]);
       }
     }
   }
@@ -631,7 +631,7 @@ EX void clear_config(config& scfg) {
 EX void initConfig() {
   auto& scfg = scfg_default;
   
-  char* t = scfg.keyaction;
+  int* t = scfg.keyaction;
   
   #if CAP_SDL2
 
@@ -766,7 +766,7 @@ EX void initConfig() {
   multi::scs[6].uicolor = 0xC0C0C0FF;
   
   #if CAP_CONFIG
-  addsaver(multi::players, "mode-number of players");
+  param_i(multi::players, "mode-number of players")->be_non_editable();
   param_b(multi::split_screen, "splitscreen", false)
     ->editable("split screen mode", 's');
   param_b(multi::pvp_mode, "pvp_mode", false)
@@ -777,9 +777,9 @@ EX void initConfig() {
     ->editable("self hits", 'h');
   param_b(multi::two_focus, "two_focus", false)
     ->editable("auto-adjust dual-focus projections", 'f');
-  addsaver(alwaysuse, "use configured keys");  
+  param_b(alwaysuse, "use configured keys");
 
-  for(int i=0; i<7; i++) addsaver(multi::scs[i], "player"+its(i));
+  for(int i=0; i<7; i++) paramset(multi::scs[i], "player"+its(i));
 
   sconfig_savers(scfg, "");
   #endif

@@ -16,32 +16,30 @@ EX eCentering centering;
 
 EX function<bool()> auto_restrict;
 
-EX void add_to_changed(struct setting *f);
+EX void add_to_changed(struct parameter *f);
 
 EX bool return_false() { return false; }
 
+EX string param_esc(string s);
+
+EX void non_editable_reaction() {
+  if(game_active) { stop_game(); if(!delayed_start) start_game(); }
+  }
+
 #if HDR
-struct supersaver {
+
+struct parameter_names {
   string name;
-  virtual string save() = 0;
-  virtual void load(const string& s) = 0;
-  virtual bool dosave() = 0;
-  virtual void reset() = 0;
-  virtual bool affects(void* v) { return false; }
-  virtual void set_default() = 0;
-  virtual ~supersaver() = default;
-  virtual void swap_with(supersaver*) = 0;
-  virtual void clone(struct local_parameter_set& lps, void *value) = 0;
+  string legacy_config_name;
+  parameter_names(const string& s) { name = param_esc(s); legacy_config_name = s; }
+  parameter_names(const char* s) { name = param_esc(s); legacy_config_name = s; }
+  parameter_names(const string& p, const string& s) { name = p; legacy_config_name = s; }
   };
 
-typedef vector<shared_ptr<supersaver>> saverlist;
-
-extern saverlist savers;
-
-struct setting {
+struct parameter : public std::enable_shared_from_this<parameter> {
   function<bool()> restrict;
-  string parameter_name;
-  string config_name;
+  string name;
+  string legacy_config_name;
   string menu_item_name;
   bool menu_item_name_modified;
   string help_text;
@@ -49,34 +47,29 @@ struct setting {
   char default_key;
   bool is_editable;
   bool needs_confirm;
-  supersaver *saver;
   virtual bool available() { if(restrict) return restrict(); return true; }
   virtual bool affects(void *v) { return false; }
-  virtual supersaver *make_saver() { return nullptr; }
-  virtual void register_saver() { saver = make_saver(); }
   void show_edit_option() { show_edit_option(default_key); }
   virtual void show_edit_option(int key) {
     println(hlog, "default called!"); }
   virtual string search_key() { 
-    return parameter_name + "|" + config_name + "|" + menu_item_name + "|" + help_text;
+    return name + "|" + legacy_config_name + "|" + menu_item_name + "|" + help_text;
     }
-  explicit setting() { restrict = auto_restrict; is_editable = false; needs_confirm = false; }
+  explicit parameter() { restrict = auto_restrict; is_editable = false; needs_confirm = false; }
+  void be_non_editable() {
+    reaction = non_editable_reaction;
+    }
   virtual void check_change() { }
   reaction_t sets;
-  setting *set_sets(const reaction_t& s) { sets = s; return this; }
-  setting *set_extra(const reaction_t& r);
-  setting *set_reaction(const reaction_t& r);
-  virtual ~setting() = default;
-  virtual void load_from(const string& s) {
-    if(saver) { saver->load(s); return; }
-    println(hlog, "cannot load parameter: ", parameter_name, " from: ", s);
-    throw hr_exception("parameter cannot be loaded");
-    }
+  parameter *set_sets(const reaction_t& s) { sets = s; return this; }
+  parameter *set_extra(const reaction_t& r);
+  parameter *set_reaction(const reaction_t& r);
+  virtual ~parameter() = default;
   virtual bool load_from_animation(const string& s) {
-    load_from(s); return false;
+    load(s); return false;
     }
   virtual void load_as_animation(const string& s) {
-    load_from(s);
+    load(s);
     }
   virtual bool anim_unchanged() { return true; }
   virtual void anim_restore() { }
@@ -87,27 +80,54 @@ struct setting {
     set_cld_raw(value);
     if(value != bak && reaction) reaction();
     }
+
+  virtual string save() = 0;
+  virtual void load(const string& s) {
+    println(hlog, "cannot load parameter: ", name, " from: ", s);
+    throw hr_exception("parameter cannot be loaded");
+    }
+  virtual bool dosave() = 0;
+  virtual void reset() = 0;
+  virtual void set_default() = 0;
+  virtual void swap_with(parameter*) = 0;
+
+  virtual shared_ptr<parameter> clone(struct local_parameter_set& lps, void *value) { println(hlog, "parameter not cloneable: ", name); throw hr_exception("not cloneable"); }
+
+  void setup(const parameter_names& s);
+  };
+
+struct local_parameter_set {
+  string label;
+  local_parameter_set* extends;
+  vector<pair<shared_ptr<parameter>, shared_ptr<parameter>>> swaps;
+  void pswitch();
+  local_parameter_set(string l, local_parameter_set *ext = nullptr) : label(l), extends(ext) {}
+  parameter_names mod(parameter *t);
   };
 #endif
 
-setting *setting::set_extra(const reaction_t& r) {
+parameter *parameter::set_extra(const reaction_t& r) {
   auto s = sets; set_sets([s, r] { if(s) s(); dialog::get_di().extra_options = r; }); return this;
   }
 
-setting *setting::set_reaction(const reaction_t& r) {
+parameter *parameter::set_reaction(const reaction_t& r) {
   reaction = r; return this;
   }
 
-EX map<string, std::unique_ptr<setting>> params;
+#if HDR
+using paramlist = map<string, std::shared_ptr<parameter>>;
+#endif
 
-EX void show_edit_option_enum(char* value, const string& name, const vector<pair<string, string>>& options, char key, setting *s);
+EX paramlist params;
+
+EX void show_edit_option_enum(char* value, const string& name, const vector<pair<string, string>>& options, char key, parameter *s);
 
 #if HDR
-struct list_setting : setting {
+struct list_parameter : parameter {
   virtual int get_value() = 0;
   virtual void set_value(int i) = 0;
   vector<pair<string, string> > options;
-  list_setting* editable(const vector<pair<string, string> >& o, string menu_item_name, char key) {
+  list_parameter* editable(const vector<pair<string, string> >& o, string menu_item_name, char key) {
     is_editable = true;
     options = o;
     this->menu_item_name = menu_item_name;
@@ -119,16 +139,15 @@ struct list_setting : setting {
   };
 
 namespace anims {
-  extern void animate_setting(setting*, string);
+  extern void animate_parameter(parameter*, string);
   }
 
-template<class T> struct enum_setting : list_setting {
+template<class T> struct enum_parameter : list_parameter {
   T *value, last_value, dft, anim_value;
   int get_value() override { return (int) *value; }
   hr::function<void(T)> set_value_to;
   void set_value(int i) override { set_value_to((T)i); }
   bool affects(void* v) override { return v == value; }
-  supersaver *make_saver() override;
   virtual void load_from_raw(const string& s) {
     int N = isize(options);
     for(int i=0; i<N; i++) if(appears(options[i].first, s)) {
@@ -144,49 +163,51 @@ template<class T> struct enum_setting : list_setting {
       }
     }
 
-  void load_from(const string& s) override {
+  void load(const string& s) override {
     auto bak = *value;
     load_from_raw(s);
     if(*value != bak && reaction) reaction();
     }
   bool load_from_animation(const string& s) override {
     if(anim_value != *value) return false;
-    load_from(s);
+    load(s);
     anim_value = *value;
     return true;
     }
   void load_as_animation(const string& s) override {
-    load_from(s);
+    load(s);
     anim_value = *value;
-    anims::animate_setting(this, s);
+    anims::animate_parameter(this, s);
     }
 
-  enum_setting<T>* editable(const vector<pair<string, string> >& o, string menu_item_name, char key) {
-    list_setting::editable(o, menu_item_name, key);
+  enum_parameter<T>* editable(const vector<pair<string, string> >& o, string menu_item_name, char key) {
+    list_parameter::editable(o, menu_item_name, key);
     return this;
     }
-  enum_setting<T>* set_need_confirm() {
+  enum_parameter<T>* set_need_confirm() {
     needs_confirm = true;
     return this;
     }
   virtual cld get_cld() override { return get_value(); }
+
+  bool dosave() override { return *value != dft; }
+  void reset() override { *value = dft; }
+  string save() override { return its(int(*value)); }
+  void set_default() override { dft = *value; }
+  shared_ptr<parameter> clone(struct local_parameter_set& lps, void *value) override;
+  void swap_with(parameter *s) override { swap(*value, *(((enum_parameter<T>*)s)->value)); }
   };
 
-/** transmatrix with equality, so we can construct val_setting<matrix_eq> */
-struct matrix_eq : transmatrix {
-  bool operator == (const transmatrix& t) const {
-    for(int i=0; i<MAXMDIM; i++) for(int j=0; j<MAXMDIM; j++)  if(self[i][j] != t[i][j]) return false;
-    return true;
-    }
-  bool operator != (const transmatrix& t) const {
-    return ! (self == t);
-    }
-  };
+template<class T> struct val_parameter;
 
-template<class T> struct val_setting : public setting {
+template<class T> struct val_parameter : public parameter {
   T *value, last_value, anim_value, dft;
 
-  bool affects(void *v) override { return v == value; }
+  bool dosave() override { return *value != dft; }
+  void reset() override { *value = dft; }
+  bool affects(void* v) override { return v == value; }
+  void set_default() override { dft = *value; }
+
   void check_change() override {
     if(*value != last_value) {
       last_value = *value;
@@ -199,28 +220,29 @@ template<class T> struct val_setting : public setting {
 
   virtual void load_from_raw(const string& s) { throw hr_exception("load_from_raw not defined"); }
 
-  void load_from(const string& s) override {
+  void load(const string& s) override {
     auto bak = *value;
     load_from_raw(s);
     if(*value != bak && reaction) reaction();
     }
   bool load_from_animation(const string& s) override {
     if(anim_value != *value) return false;
-    load_from(s);
+    load(s);
     anim_value = *value;
     return true;
     }
   void load_as_animation(const string& s) override {
-    load_from(s);
+    load(s);
     anim_value = *value;
-    anims::animate_setting(this, s);
+    anims::animate_parameter(this, s);
     }
+  void swap_with(parameter *s) override { swap(*value, *(((val_parameter<T>*)s)->value)); }  
   };
 
-struct float_setting : public val_setting<ld> {
+struct float_parameter : public val_parameter<ld> {
   ld min_value, max_value, step;
   string unit;
-  float_setting *editable(ld min_value, ld max_value, ld step, string menu_item_name, string help_text, char key) {
+  float_parameter *editable(ld min_value, ld max_value, ld step, string menu_item_name, string help_text, char key) {
     is_editable = true;
     this->min_value = min_value;
     this->max_value = max_value;
@@ -231,29 +253,29 @@ struct float_setting : public val_setting<ld> {
     default_key = key;
     return this;
     }
-  function<void(float_setting*)> modify_me;
-  float_setting *modif(const function<void(float_setting*)>& r) { modify_me = r; return this; }
-  supersaver *make_saver() override;
+  function<void(float_parameter*)> modify_me;
+  float_parameter *modif(const function<void(float_parameter*)>& r) { modify_me = r; return this; }
   void show_edit_option(int key) override;
   void load_from_raw(const string& s) override { *value = parseld(s); }
   cld get_cld() override { return *value; }
   void set_cld_raw(cld x) override { *value = real(x); }
+  string save() override { return fts(*value, 10); }
+  shared_ptr<parameter> clone(struct local_parameter_set& lps, void *value) override;
   };
 
-struct float_setting_dft : public float_setting {
+struct float_parameter_dft : public float_parameter {
   void show_edit_option(int key) override;
   function<ld()> get_hint;
-  float_setting_dft* set_hint(const function<ld()>& f) { get_hint = f; return this; }
+  float_parameter_dft* set_hint(const function<ld()>& f) { get_hint = f; return this; }
   };
 
-struct int_setting : public val_setting<int> {
+struct int_parameter : public val_parameter<int> {
   int min_value, max_value;
   ld step;
-  supersaver *make_saver() override;
-  function<void(int_setting*)> modify_me;
-  int_setting *modif(const function<void(int_setting*)>& r) { modify_me = r; return this; }
+  function<void(int_parameter*)> modify_me;
+  int_parameter *modif(const function<void(int_parameter*)>& r) { modify_me = r; return this; }
   void show_edit_option(int key) override;
-  int_setting *editable(int min_value, int max_value, ld step, string menu_item_name, string help_text, char key) {
+  int_parameter *editable(int min_value, int max_value, ld step, string menu_item_name, string help_text, char key) {
     this->is_editable = true;
     this->min_value = min_value;
     this->max_value = max_value;
@@ -276,13 +298,50 @@ struct int_setting : public val_setting<int> {
       add_to_changed(this);
       }
     }
+
+  string save() override { return its(*value); }
+  shared_ptr<parameter> clone(struct local_parameter_set& lps, void *value) override;
   };
 
-struct color_setting : public val_setting<color_t> {
-  bool has_alpha;
-  supersaver *make_saver() override;
+struct string_parameter: public val_parameter<string> {
+  string save() override { return *value; }
+  void load_from_raw(const string& s) override { *value = s; }
+  };
+
+struct char_parameter : public val_parameter<char> {
+  string save() override { return "\\" + its(*value); }
   void show_edit_option(int key) override;
-  color_setting *editable(string menu_item_name, string help_text, char key) {
+  void load_from_raw(const string& s) override {
+    if(s[0] == '\\' && s.size() > 1) *value = parseint(s.substr(1));
+    else sscanf(s.c_str(), "%c", value);
+    }
+  };
+
+struct bool_parameter : public val_parameter<bool> {
+  string save() override { return (*value) ? "yes" : "no"; }
+  reaction_t switcher;
+  bool_parameter* editable(string cap, char key ) {
+    is_editable = true;
+    menu_item_name = cap; default_key = key;
+    menu_item_name_modified = true;
+    return this;
+    }
+  void show_edit_option(int key) override;
+
+  void load_from_raw(const string& s) override {
+    if(s == "yes") *value = true;
+    else if(s == "no") *value = false;
+    else *value = parseint(s);
+    }
+
+  cld get_cld() override { return *value; }
+  shared_ptr<parameter> clone(struct local_parameter_set& lps, void *value) override;
+  };
+
+struct color_parameter : public val_parameter<color_t> {
+  bool has_alpha;
+  void show_edit_option(int key) override;
+  color_parameter *editable(string menu_item_name, string help_text, char key) {
     this->is_editable = true;
     this->menu_item_name = menu_item_name;
     menu_item_name_modified = true;
@@ -292,13 +351,30 @@ struct color_setting : public val_setting<color_t> {
     }
 
   void load_from_raw(const string& s) override { sscanf(s.c_str(), "%x", value); }
+  string save() override { return itsh(*value); }
+  shared_ptr<parameter> clone(struct local_parameter_set& lps, void *value) override;
   };
 
-struct matrix_setting : public val_setting<matrix_eq> {
+/** transmatrix with equality, so we can construct val_parameter<matrix_eq> */
+struct matrix_eq : transmatrix {
+  bool operator == (const transmatrix& t) const {
+    for(int i=0; i<MAXMDIM; i++) for(int j=0; j<MAXMDIM; j++)  if(self[i][j] != t[i][j]) return false;
+    return true;
+    }
+  bool operator != (const transmatrix& t) const {
+    return ! (self == t);
+    }
+  };
+
+struct matrix_parameter : public val_parameter<matrix_eq> {
+
+  void reset() override { *value = dft; }
+  void set_default() override { dft = *value; }
+  bool dosave() override { return !eqmatrix(*value, dft); }
+
   int dim;
-  supersaver *make_saver() override;
   void show_edit_option(int key) override;
-  matrix_setting *editable(string menu_item_name, string help_text, char key) {
+  matrix_parameter *editable(string menu_item_name, string help_text, char key) {
     this->is_editable = true;
     this->menu_item_name = menu_item_name;
     menu_item_name_modified = true;
@@ -307,44 +383,38 @@ struct matrix_setting : public val_setting<matrix_eq> {
     return this;
     }
 
-  void load_from_raw(const string& s) override { (transmatrix&)*value = parsematrix(s); }
-  };
-
-struct char_setting : public val_setting<char> {
-  supersaver *make_saver() override;
-  void show_edit_option(int key) override;
-
+  string save() override {
+    shstream ss;
+    print(ss, "matrix ");
+    for(int a=0; a<4; a++) for(int b=0; b<4; b++) print(ss, (*value)[a][b], " ");
+    return ss.s;
+    }
   void load_from_raw(const string& s) override {
-    if(s == "\\0") *value = 0;
-    else sscanf(s.c_str(), "%c", value);
+    if(s.substr(0, 7) == "matrix ") {
+      shstream ss;
+      ss.s = s.substr(7);
+      for(int a=0; a<4; a++) for(int b=0; b<4; b++) scan(ss, (*value)[a][b]);
+      }
+    else {
+      (transmatrix&)*value = parsematrix(s);
+      }
     }
   };
 
-struct bool_setting : public val_setting<bool> {
-  supersaver *make_saver() override;
-  reaction_t switcher;
-  bool_setting* editable(string cap, char key ) {
-    is_editable = true;
-    menu_item_name = cap; default_key = key;
-    menu_item_name_modified = true;
-    return this;
-    } 
-  void show_edit_option(int key) override;
-
-  void load_from_raw(const string& s) override { *value = parseint(s); }
-
-  cld get_cld() override { return *value; }
-  };
-
-struct custom_setting : public setting {
-  cld last_value;
+struct custom_parameter : public parameter {
+  cld last_value, anim_value;
   function<void(char)> custom_viewer;
   function<cld()> custom_value;
   function<bool(void*)> custom_affect;
   function<void(const string&)> custom_load;
+  function<shared_ptr<parameter>(struct local_parameter_set& lps, void *value)> custom_clone;
+
+  virtual shared_ptr<parameter> clone(struct local_parameter_set& lps, void *value) {
+    if(custom_clone) return custom_clone(lps, value);
+    return parameter::clone(lps, value);
+    }
 
   void show_edit_option(int key) override { custom_viewer(key); }
-  supersaver *make_saver() override { throw hr_exception("make_saver for custom_setting"); }
   bool affects(void *v) override { return custom_affect(v); }
   void check_change() override {
     if(custom_value() != last_value) {
@@ -352,223 +422,51 @@ struct custom_setting : public setting {
       add_to_changed(this);
       }
     }
-  virtual void load_from(const string& s) override {
-    if(saver) { saver->load(s); return; }
+  virtual void load_from_raw(const string& s) {
     if(!custom_load) {
-      println(hlog, "cannot load parameter: ", parameter_name, " from: ", s);
+      println(hlog, "cannot load parameter: ", name, " from: ", s);
       throw hr_exception("parameter cannot be loaded");
       }
     custom_load(s);
     }
+  void load(const string& s) override {
+    auto bak = get_cld();
+    load_from_raw(s);
+    if(bak != get_cld() && reaction) reaction();
+    }
+  bool load_from_animation(const string& s) override {
+    if(anim_value != get_cld()) return false;
+    load(s);
+    anim_value = get_cld();
+    return true;
+    }
+  void load_as_animation(const string& s) override {
+    load(s);
+    anim_value = get_cld();
+    anims::animate_parameter(this, s);
+    }
+
   virtual cld get_cld() override { return custom_value(); }
+  virtual string save() override { return "not saveable"; }
+  virtual bool dosave() override { return false; }
+  virtual void reset() override {}
+  virtual void set_default() override {}
+  virtual void swap_with(parameter*) override {}
   };
-  
-struct local_parameter_set {
-  string label;
-  local_parameter_set* extends;
-  vector<pair<supersaver*, supersaver*>> swaps;
-  void pswitch();
-  local_parameter_set(string l, local_parameter_set *ext = nullptr) : label(l), extends(ext) {}
-  };
-
-#if CAP_CONFIG
-
-template<class T> struct dsaver : supersaver {
-  T& val;
-  T dft;
-  bool dosave() override { return val != dft; }
-  void reset() override { val = dft; }
-  explicit dsaver(T& val) : val(val) { }
-  bool affects(void* v) override { return v == &val; }
-  void set_default() override { dft = val; }
-  };
-
-template<class T> struct saver : dsaver<T> {};
-
-template<class T, class U, class V> supersaver* addsaver(T& i, U name, V dft) {
-  auto s = make_shared<saver<T>> (i);
-  s->dft = dft;
-  s->name = name;
-  savers.push_back(s);
-  return &*s;
-  }
-
-template<class T> supersaver* addsaver(T& i, string name) {
-  return addsaver(i, name, i);
-  }
-
-template<class T> void removesaver(T& val) {
-  for(int i=0; i<isize(savers); i++)
-    if(savers[i]->affects(&val))
-      savers.erase(savers.begin() + i);
-  }
 
 template<class T> void set_saver_default(T& val) {
-  for(auto sav: savers)
-    if(sav->affects(&val))
-      sav->set_default();
+  for(auto param: params)
+    if(param.second->affects(&val))
+      param.second->set_default();
   }
 
-template<class T, class U> supersaver *addsaverenum(T& i, U name);
-
-template<class T> struct saverenum : supersaver {
-  T& val;
-  T dft;
-  explicit saverenum(T& v) : val(v) { }
-  bool dosave() override { return val != dft; }
-  void reset() override { val = dft; }
-  string save() override { return its(int(val)); }
-  void load(const string& s) override { val = (T) atoi(s.c_str()); }
-  bool affects(void* v) override { return v == &val; }
-  void set_default() override { dft = val; }
-  void clone(struct local_parameter_set& lps, void *value) override { addsaverenum(*(T*) value, lps.label + name); }
-  void swap_with(supersaver *s) override { swap(val, ((saverenum<T>*)s)->val); }
-  };
-
-template<class T, class U> supersaver *addsaverenum(T& i, U name, T dft) {
-  auto s = make_shared<saverenum<T>> (i);
-  s->dft = dft;
-  s->name = name;
-  savers.push_back(s);
-  return &*s;
-  }
-
-template<class T, class U> supersaver *addsaverenum(T& i, U name) {
-  return addsaverenum(i, name, i);
-  }
-
-template<> struct saver<int> : dsaver<int> {
-  explicit saver(int& val) : dsaver<int>(val) { }
-  string save() override { return its(val); }
-  void load(const string& s) override { val = atoi(s.c_str()); }
-  void clone(struct local_parameter_set& lps, void *value) override { addsaver(*(int*) value, lps.label + name); }
-  void swap_with(supersaver *s) override { swap(val, ((saver<int>*)s)->val); }
-  };
-
-template<> struct saver<char> : dsaver<char> {
-  explicit saver(char& val) : dsaver<char>(val) { }
-  string save() override { return its(val); }
-  void load(const string& s) override { val = atoi(s.c_str()); }
-  void clone(struct local_parameter_set& lps, void *value) override { addsaver(*(char*) value, lps.label + name); }
-  void swap_with(supersaver *s) override { swap(val, ((saver<char>*)s)->val); }
-  };
-
-template<> struct saver<bool> : dsaver<bool> {
-  explicit saver(bool& val) : dsaver<bool>(val) { }
-  string save() override { return val ? "yes" : "no"; }
-  void load(const string& s) override { val = isize(s) && s[0] == 'y'; }
-  void clone(struct local_parameter_set& lps, void *value) override { addsaver(*(bool*) value, lps.label + name); }
-  void swap_with(supersaver *s) override { swap(val, ((saver<bool>*)s)->val); }
-  };
-
-template<> struct saver<unsigned> : dsaver<unsigned> {
-  explicit saver(unsigned& val) : dsaver<unsigned>(val) { }
-  string save() override { return itsh(val); }
-  void load(const string& s) override { val = (unsigned) strtoll(s.c_str(), NULL, 16); }
-  void clone(struct local_parameter_set& lps, void *value) override { addsaver(*(unsigned*) value, lps.label + name); }
-  void swap_with(supersaver *s) override { swap(val, ((saver<unsigned>*)s)->val); }
-  };
-
-template<> struct saver<string> : dsaver<string> {
-  explicit saver(string& val) : dsaver<string>(val) { }
-  string save() override { return val; }
-  void load(const string& s) override { val = s; }
-  void clone(struct local_parameter_set& lps, void *value) override { addsaver(*(string*) value, lps.label + name); }
-  void swap_with(supersaver *s) override { swap(val, ((saver<string>*)s)->val); }
-  };
-
-template<> struct saver<matrix_eq> : supersaver {
-
-  matrix_eq& val;
-  matrix_eq dft;
-
-  explicit saver(matrix_eq& _val) : val(_val) { }
-
-  void reset() override { val = dft; }
-  bool affects(void* v) override { return v == &val; }
-  void set_default() override { dft = val; }
-  bool dosave() override { return !eqmatrix(val, dft); }
-
-  string save() override {
-    shstream ss;
-    for(int a=0; a<4; a++) for(int b=0; b<4; b++) print(ss, val[a][b], " ");
-    return ss.s;
-    }
-  void load(const string& s) override {
-    shstream ss;
-    ss.s = s;
-    for(int a=0; a<4; a++) for(int b=0; b<4; b++) scan(ss, val[a][b]);
-    }
-  void clone(struct local_parameter_set& lps, void *value) override { addsaver(*(matrix_eq*) value, lps.label + name); }
-  void swap_with(supersaver *s) override { swap(val, ((saver<matrix_eq>*)s)->val); }
-  };
-
-template<> struct saver<ld> : dsaver<ld> {
-  explicit saver(ld& val) : dsaver<ld>(val) { }
-  string save() override { return fts(val, 10); }
-  void load(const string& s) override {
-    if(s == "0.0000000000e+000") ; // ignore!
-    else val = atof(s.c_str()); 
-    }
-  void clone(struct local_parameter_set& lps, void *value) override { addsaver(*(ld*) value, lps.label + name); }
-  void swap_with(supersaver *s) override { swap(val, ((saver<ld>*)s)->val); }
-  };
 #endif
-#endif
-
-supersaver *float_setting::make_saver() {
-#if CAP_CONFIG
-  return addsaver(*value, config_name, dft);
-#else
-  return nullptr;
-#endif
-  }
-
-supersaver *int_setting::make_saver() {
-#if CAP_CONFIG
-  return addsaver(*value, config_name, dft);
-#else
-  return nullptr;
-#endif
-  }
-
-supersaver* color_setting::make_saver() {
-#if CAP_CONFIG
-  return addsaver(*value, config_name, dft);
-#else
-  return nullptr;
-#endif
-  }
-
-supersaver* matrix_setting::make_saver() {
-#if CAP_CONFIG
-  return addsaver(*value, config_name, dft);
-#else
-  return nullptr;
-#endif
-  }
-
-supersaver *char_setting::make_saver() {
-#if CAP_CONFIG
-  return addsaver(*value, config_name, dft);
-#else
-  return nullptr;
-#endif
-  }
-
-supersaver *bool_setting::make_saver() {
-#if CAP_CONFIG
-  return addsaver(*value, config_name, dft);
-#else
-  return nullptr;
-#endif
-  }
 
 void non_editable() {
   dialog::addHelp("Warning: editing this value through this menu may not work correctly");
   }
 
-void float_setting::show_edit_option(int key) {
+void float_parameter::show_edit_option(int key) {
   if(modify_me) modify_me(this);
   dialog::addSelItem(XLAT(menu_item_name), fts(*value) + unit, key);
   if(*value == use_the_default_value) dialog::lastItem().value = XLAT("default");
@@ -581,7 +479,7 @@ void float_setting::show_edit_option(int key) {
     });
   }
 
-void float_setting_dft::show_edit_option(int key) {
+void float_parameter_dft::show_edit_option(int key) {
   if(modify_me) modify_me(this);
   dialog::addSelItem(XLAT(menu_item_name), fts(*value) + unit, key);
   if(*value == use_the_default_value) dialog::lastItem().value = XLAT("default: ") + fts(get_hint());
@@ -601,7 +499,7 @@ void float_setting_dft::show_edit_option(int key) {
     });
   }
 
-void int_setting::show_edit_option(int key) {
+void int_parameter::show_edit_option(int key) {
   if(modify_me) modify_me(this);
   dialog::addSelItem(XLAT(menu_item_name), its(*value), key);
   dialog::add_action([this] () {
@@ -613,7 +511,7 @@ void int_setting::show_edit_option(int key) {
     });
   }
 
-void bool_setting::show_edit_option(int key) {
+void bool_parameter::show_edit_option(int key) {
   dialog::addBoolItem(XLAT(menu_item_name), *value, key);
   dialog::add_action([this] () {
     add_to_changed(this);
@@ -622,7 +520,7 @@ void bool_setting::show_edit_option(int key) {
     });
   }
 
-void color_setting::show_edit_option(int key) {
+void color_parameter::show_edit_option(int key) {
   dialog::addColorItem(XLAT(menu_item_name), has_alpha ? *value : addalpha(*value), key);
   dialog::add_action([this] () {
     dialog::openColorDialog(*value);
@@ -631,7 +529,7 @@ void color_setting::show_edit_option(int key) {
     });
   }
 
-void matrix_setting::show_edit_option(int key) {
+void matrix_parameter::show_edit_option(int key) {
   dialog::addMatrixItem(XLAT(menu_item_name), *value, key, dim);
   dialog::add_action([this] () {
     dialog::editMatrix(*value, XLAT(menu_item_name), help_text, dim);
@@ -640,16 +538,23 @@ void matrix_setting::show_edit_option(int key) {
     });
   }
 
-void char_setting::show_edit_option(int key) {
+void char_parameter::show_edit_option(int key) {
   string s = s0; s += value;
   dialog::addSelItem(XLAT(menu_item_name), s, key);
   }
 
-EX float_setting *param_f(ld& val, const string p, const string s, ld dft) {
-  unique_ptr<float_setting> u ( new float_setting );
-  u->parameter_name = p;
-  u->config_name = s;
-  u->menu_item_name = s;
+void parameter::setup(const parameter_names& n) {
+  name = n.name;
+  legacy_config_name = n.legacy_config_name;
+  menu_item_name = n.legacy_config_name;
+  menu_item_name_modified = false;
+  if(params.count(name)) println(hlog, "ERROR: repeated parameter name ", name);
+  params[name] = shared_from_this();
+  }
+
+EX shared_ptr<float_parameter> param_f(ld& val, const parameter_names& n, ld dft) {
+  shared_ptr<float_parameter> u ( new float_parameter );
+  u->setup(n);
   u->value = &val;
   u->last_value = dft;
   if(dft == 0) {
@@ -663,17 +568,12 @@ EX float_setting *param_f(ld& val, const string p, const string s, ld dft) {
   u->step = dft / 10;
   u->dft = dft;
   val = dft;
-  u->register_saver();
-  auto f = &*u;
-  params[u->parameter_name] = std::move(u);
-  return f;
+  return u;
   }
 
-EX float_setting_dft *param_fd(ld& val, const string s, ld dft IS(use_the_default_value) ) {
-  unique_ptr<float_setting_dft> u ( new float_setting_dft );
-  u->parameter_name = s;
-  u->config_name = s;
-  u->menu_item_name = s;
+EX shared_ptr<float_parameter_dft> param_fd(ld& val, const parameter_names& n, ld dft IS(use_the_default_value) ) {
+  shared_ptr<float_parameter_dft> u ( new float_parameter_dft );
+  u->setup(n);
   u->value = &val;
   u->last_value = dft;
   u->min_value = -100;
@@ -681,10 +581,7 @@ EX float_setting_dft *param_fd(ld& val, const string s, ld dft IS(use_the_defaul
   u->step = 1;
   u->dft = dft;
   val = dft;
-  u->register_saver();
-  auto f = &*u;
-  params[u->parameter_name] = std::move(u);
-  return f;
+  return u;
   }
 
 EX string param_esc(string s) {
@@ -697,12 +594,9 @@ EX string param_esc(string s) {
   return out;
   }
 
-EX int_setting *param_i(int& val, const string s, int dft) {
-  unique_ptr<int_setting> u ( new int_setting );
-  u->parameter_name = param_esc(s);
-  u->config_name = s;
-  u->menu_item_name = s;
-  u->menu_item_name_modified = false;
+EX shared_ptr<int_parameter> param_i(int& val, const parameter_names& n, int dft) {
+  shared_ptr<int_parameter> u ( new int_parameter );
+  u->setup(n);
   u->value = &val;
   u->last_value = dft;
   u->dft = dft;
@@ -715,143 +609,147 @@ EX int_setting *param_i(int& val, const string s, int dft) {
     u->min_value = 0;
     u->max_value = 2 * dft;
     }
-  u->register_saver();
-  auto f = &*u;
-  params[u->parameter_name] = std::move(u);
-  return f;
+  return u;
   }
 
-EX int_setting *param_i(int& val, const string s) { return param_i(val, s, val); }
+EX shared_ptr<int_parameter> param_i(int& val, const parameter_names& n) { return param_i(val, n, val); }
 
-EX bool_setting *param_b(bool& val, const string s, bool dft) {
-  unique_ptr<bool_setting> u ( new bool_setting );
-  u->parameter_name = param_esc(s);
-  u->config_name = s;
-  u->menu_item_name = s;
-  u->menu_item_name_modified = false;
+EX shared_ptr<bool_parameter> param_b(bool& val, const parameter_names& n, bool dft) {
+  shared_ptr<bool_parameter> u ( new bool_parameter );
+  u->setup(n);
   u->value = &val;
   u->last_value = dft;
   u->dft = dft;
   u->switcher = [&val] { val = !val; };
   val = dft;
-  u->register_saver();
-  auto f = &*u;
-  params[u->parameter_name] = std::move(u);
-  return f;
+  return u;
   }
 
-EX color_setting *param_color(color_t& val, const string s, bool has_alpha, color_t dft) {
-  unique_ptr<color_setting> u ( new color_setting );
-  u->parameter_name = param_esc(s);
-  u->config_name = s;
-  u->menu_item_name = s;
-  u->menu_item_name_modified = false;
+EX shared_ptr<color_parameter> param_color(color_t& val, const parameter_names& n, bool has_alpha, color_t dft) {
+  shared_ptr<color_parameter> u ( new color_parameter );
+  u->setup(n);
   u->value = &val;
   u->last_value = dft;
   u->dft = dft;
   u->has_alpha = has_alpha;
   val = dft;
-  u->register_saver();
-  auto f = &*u;
-  params[u->parameter_name] = std::move(u);
-  return f;
+  return u;
   }
 
-EX matrix_setting *param_matrix(transmatrix& val0, const string s, int dim) {
+EX shared_ptr<matrix_parameter> param_matrix(transmatrix& val0, const parameter_names& n, int dim) {
   matrix_eq& val = (matrix_eq&) val0;
-  unique_ptr<matrix_setting> u ( new matrix_setting );
-  u->parameter_name = param_esc(s);
-  u->config_name = s;
-  u->menu_item_name = s;
-  u->menu_item_name_modified = false;
+  shared_ptr<matrix_parameter> u ( new matrix_parameter );
+  u->setup(n);
   u->value = &val;
   u->last_value = val;
   u->dft = val;
   u->dim = dim;
-  u->register_saver();
-  auto f = &*u;
-  params[u->parameter_name] = std::move(u);
-  return f;
+  return u;
   }
 
-EX char_setting *param_char(char& val, const string s, char dft) {
-  unique_ptr<char_setting> u ( new char_setting );
-  u->parameter_name = param_esc(s);
-  u->config_name = s;
-  u->menu_item_name = s;
-  u->menu_item_name_modified = false;
+EX shared_ptr<char_parameter> param_char(char& val, const parameter_names& n, char dft) {
+  shared_ptr<char_parameter> u ( new char_parameter );
+  u->setup(n);
   u->value = &val;
   u->last_value = dft;
   u->dft = dft;
   val = dft;
-  u->register_saver();
-  auto f = &*u;
-  params[u->parameter_name] = std::move(u);
-  return f;
+  return u;
   }
 
-EX color_setting *param_color(color_t& val, const string s, bool has_alpha) { return param_color(val, s, has_alpha, val); }
+EX shared_ptr<string_parameter> param_str(string& val, const parameter_names& n, const string dft) {
+  shared_ptr<string_parameter> u ( new string_parameter );
+  u->setup(n);
+  u->value = &val;
+  u->last_value = val;
+  u->dft = dft;
+  val = dft;
+  return u;
+  }
 
-EX bool_setting *param_b(bool& val, const string s) { return param_b(val, s, val); }
+EX shared_ptr<string_parameter> param_str(string& val, const parameter_names& n) { return param_str(val, n, val); }
+
+EX shared_ptr<color_parameter> param_color(color_t& val, const parameter_names& n, bool has_alpha) { return param_color(val, n, has_alpha, val); }
+
+EX shared_ptr<bool_parameter> param_b(bool& val, const parameter_names& n) { return param_b(val, n, val); }
 
 #if HDR
-template<class T> supersaver* enum_setting<T>::make_saver() {
-#if CAP_CONFIG
-  return addsaverenum(*value, config_name, dft);
-#endif
-  return nullptr;
-  }
-
-template<class T> enum_setting<T> *param_enum(T& val, const string p, const string s, T dft) {
-  unique_ptr<enum_setting<T>> u ( new enum_setting<T> );
-  u->parameter_name = p;
-  u->config_name = s;
-  u->menu_item_name = s;
-  u->menu_item_name_modified = false;
+template<class T> shared_ptr<enum_parameter<T>> param_enum(T& val, const parameter_names& n, T dft) {
+  shared_ptr<enum_parameter<T>> u ( new enum_parameter<T> );
+  u->setup(n);
   u->value = &val;
   u->dft = dft;
   val = dft;
   u->last_value = dft;
-  u->register_saver();
   auto f = &*u;
   u->set_value_to = [f] (T val) { *f->value = val; };
-  params[p] = std::move(u);
-  return f;
+  return u;
   }
+
+template<class T> shared_ptr<enum_parameter<T>> param_enum(T& val, const parameter_names& n) { return param_enum(val, n, val); }
+
+template<class T> shared_ptr<parameter> enum_parameter<T>::clone(struct local_parameter_set& lps, void *value) { return param_enum(*(T*) value, lps.mod(this), *(T*) value); }
 #endif
 
-EX float_setting* param_f(ld& val, const string s) {
-  return param_f(val, param_esc(s), s, val);
+EX shared_ptr<float_parameter> param_f(ld& val, const parameter_names& n) {
+  return param_f(val, n, val);
   }
 
-EX float_setting* param_f(ld& val, const string p, const string s) {
-  return param_f(val, p, s, val);
+parameter_names local_parameter_set::mod(parameter *t) {
+  return parameter_names(label + t->name, label + t->legacy_config_name);
   }
 
-EX float_setting* param_f(ld& val, const string s, ld dft) {
-  return param_f(val, param_esc(s), s, dft);
+shared_ptr<parameter> int_parameter::clone(struct local_parameter_set& lps, void *value) {
+  auto val = (int*) value; 
+  return param_i(*val, lps.mod(this), *val);
+  }
+
+shared_ptr<parameter> bool_parameter::clone(struct local_parameter_set& lps, void *value) {
+  auto val = (bool*) value;
+  return param_b(*val, lps.mod(this), *val);
+  }
+
+shared_ptr<parameter> color_parameter::clone(struct local_parameter_set& lps, void *value) {
+  auto val = (color_t*) value;
+  return param_color(*val, lps.mod(this), has_alpha, *val);
+  }
+
+shared_ptr<parameter> float_parameter::clone(struct local_parameter_set& lps, void *value) {
+  auto val = (ld*) value;
+  return param_f(*val, lps.mod(this), *val);
   }
 
 #if HDR
 template<class T>
-custom_setting* param_custom(T& val, const string& s, function<void(char)> menuitem, char key) {
-  unique_ptr<custom_setting> u ( new custom_setting );
-  u->parameter_name = param_esc(s);
-  u->config_name = s;
-  u->menu_item_name = s;
-  u->menu_item_name_modified = false;
+shared_ptr<custom_parameter> param_custom_int(T& val, const parameter_names& n, function<void(char)> menuitem, char key) {
+  shared_ptr<custom_parameter> u ( new custom_parameter );
+  u->setup(n);
   u->last_value = (int) val;
   u->custom_viewer = menuitem;
   u->custom_value = [&val] () { return (int) val; };
   u->custom_affect = [&val] (void *v) { return &val == v; };
   u->custom_load = [&val] (const string& s) { val = (T) parseint(s); };
+  u->custom_clone = [u] (struct local_parameter_set& lps, void *value) { auto val = (int*) value; return param_i(*val, lps.mod(&*u), *val); };
   u->default_key = key;
   u->is_editable = true;
-  auto f = &*u;
-  params[s] = std::move(u);
-  return f;  
+  return u;
   }
 #endif
+
+EX shared_ptr<custom_parameter> param_custom_ld(ld& val, const parameter_names& n, function<void(char)> menuitem, char key) {
+  shared_ptr<custom_parameter> u ( new custom_parameter );
+  u->setup(n);
+  u->last_value = (int) val;
+  u->custom_viewer = menuitem;
+  u->custom_value = [&val] () { return val; };
+  u->custom_affect = [&val] (void *v) { return &val == v; };
+  u->custom_load = [&val] (const string& s) { val = parseld(s); };
+  u->custom_clone = [u] (struct local_parameter_set& lps, void *value) { auto val = (ld*) value; return param_f(*val, lps.mod(&*u), *val); };
+
+  u->default_key = key;
+  u->is_editable = true;
+  return u;
+  }
 
 EX ld bounded_mine_percentage = 0.1;
 EX int bounded_mine_quantity, bounded_mine_max;
@@ -968,34 +866,18 @@ EX int lang() {
 
 EX bool autojoy = true;
 
-#if CAP_CONFIG
-saverlist savers;
-#endif
-
-#if !CAP_CONFIG
-#if HDR
-template<class T, class U, class V> void addsaver(T& i, U name, V dft) {
-  i = dft;
-  }
-
-template<class T, class U> void addsaver(T& i, U name) {}
-template<class T, class U> void addsaverenum(T& i, U name) {}
-template<class T, class U> void addsaverenum(T& i, U name, T dft) { i = dft; }
-#endif
-#endif
-
-EX void addsaver(charstyle& cs, string s) {
-  addsaver(cs.charid, s + ".charid");
-  addsaver(cs.skincolor, s + ".skincolor");
-  addsaver(cs.eyecolor, s + ".eyecolor");
-  addsaver(cs.bowcolor, s + ".bowcolor");
-  addsaver(cs.bowcolor2, s + ".bowcolor2");
-  addsaver(cs.haircolor, s + ".haircolor");
-  addsaver(cs.dresscolor, s + ".dresscolor");
-  addsaver(cs.swordcolor, s + ".swordcolor");
-  addsaver(cs.dresscolor2, s + ".dresscolor2");
-  addsaver(cs.uicolor, s + ".uicolor");
-  addsaver(cs.lefthanded, s + ".lefthanded");
+EX void paramset(charstyle& cs, string s) {
+  param_i(cs.charid, s + ".charid");
+  param_color(cs.skincolor, s + ".skincolor", true, cs.skincolor);
+  param_color(cs.eyecolor, s + ".eyecolor", true, cs.eyecolor);
+  param_color(cs.bowcolor, s + ".bowcolor", true, cs.bowcolor);
+  param_color(cs.bowcolor2, s + ".bowcolor2", true, cs.bowcolor2);
+  param_color(cs.haircolor, s + ".haircolor", true, cs.haircolor);
+  param_color(cs.dresscolor, s + ".dresscolor", true, cs.dresscolor);
+  param_color(cs.swordcolor, s + ".swordcolor", true, cs.swordcolor);
+  param_color(cs.dresscolor2, s + ".dresscolor2", true, cs.dresscolor2);
+  param_color(cs.uicolor, s + ".uicolor", true, cs.uicolor);
+  param_b(cs.lefthanded, s + ".lefthanded");
   }
   
 // R:239, G:208, B:207 
@@ -1023,7 +905,7 @@ EX void initcs(charstyle &cs) {
 
 EX void savecolortable(colortable& ct, string name) {
   for(int i=0; i<isize(ct); i++)
-    addsaver(ct[i], "color:" + name + ":" + its(i));
+    param_color(ct[i], "color:" + name + ":" + its(i), false, ct[i]);
   }
 
 EX purehookset hooks_configfile;
@@ -1034,8 +916,6 @@ EX void initConfig() {
   
   // basic config
   param_i(vid.flashtime, "flashtime", 8);
-  param_enum(vid.msgleft, "message_style", "message style", 2)
-    -> editable({{"centered", ""}, {"left-aligned", ""}, {"line-broken", ""}}, "message style", 'a');
 
   param_i(vid.msglimit, "message limit", 5);
   param_i(vid.timeformat, "message log time format", 0);
@@ -1100,10 +980,10 @@ EX void initConfig() {
   param_i(vid.axes, "movement help", 1);
   param_b(vid.axes3, "movement help3", true);
   param_i(vid.shifttarget, "shift-targetting", 2);
-  addsaver(vid.steamscore, "scores to Steam", 1);
-  initcs(vid.cs); addsaver(vid.cs, "single");
+  param_i(vid.steamscore, "scores to Steam", 1);
+  initcs(vid.cs); paramset(vid.cs, "single");
   param_b(vid.samegender, "princess choice", false);
-  addsaver(vid.language, "language", -1);  
+  param_i(vid.language, "language", -1);  
   param_b(vid.drawmousecircle, "mouse circle", ISMOBILE || ISPANDORA);
   param_b(vid.revcontrol, "reverse control", false);
   #if CAP_AUDIO
@@ -1112,7 +992,7 @@ EX void initConfig() {
   ->set_sets(sets_music_volume);
   #endif
   #if CAP_SDLAUDIO
-  addsaver(music_out_of_focus, "music out of focus", false);
+  param_b(music_out_of_focus, "music out of focus", false);
   #endif
   #if CAP_AUDIO
   param_i(effvolume, "sound effect volume")
@@ -1120,13 +1000,13 @@ EX void initConfig() {
   ->set_sets(sets_sfx_volume);
   #endif
 
-  param_enum(vid.faraway_highlight, "faraway_highlight", "highlight faraway monsters", tlNoThreat)
+  param_enum(vid.faraway_highlight, parameter_names("faraway_highlight", "highlight faraway monsters"), tlNoThreat)
     ->editable({{"off", ""}, {"spam", ""}, {"normal monsters", ""}, {"high-threat monsters only", ""}}, "highlight faraway monsters", 'h');
 
   param_i(vid.faraway_highlight_color, "faraway_highlight_color", 50)
   -> editable(0, 100, 10, "faraway highlight color", "0 = monster color, 100 = red-light oscillation", 'c');
 
-  param_enum(glyphsortorder, "glyph_sort", "glyph sort order", glyphsortorder)
+  param_enum(glyphsortorder, parameter_names("glyph_sort", "glyph sort order"), glyphsortorder)
     ->editable({
       {"first on top", ""},
       {"first on bottom", ""},
@@ -1136,7 +1016,7 @@ EX void initConfig() {
       {"by number", ""}
       }, "inventory/kill sorting", 'k');
 
-  param_enum(vid.orbmode, "orb_mode", "orb display mode", 2)
+  param_enum(vid.orbmode, parameter_names("orb_mode", "orb display mode"), 2)
     ->editable({
       {"plain", ""},
       {"types", ""},
@@ -1156,19 +1036,19 @@ EX void initConfig() {
   param_b(vid.wantGL, "usingGL", true)
   ->editable("openGL mode", 'o');
   
-  addsaver(vid.want_antialias, "antialias", AA_NOGL | AA_FONT | (ISWEB ? AA_MULTI : AA_LINES) | AA_VERSION);
+  param_i(vid.want_antialias, "antialias", AA_NOGL | AA_FONT | (ISWEB ? AA_MULTI : AA_LINES) | AA_VERSION);
   param_b(vid.fineline, "fineline", true);
   param_f(vid.linewidth, "linewidth", 1);
-  addsaver(precise_width, "precisewidth", .5);
+  param_f(precise_width, "precisewidth", .5);
   param_i(perfect_linewidth, "perfect_linewidth", 1);
-  param_f(linepatterns::width, "lpwidth", "pattern-linewidth", 1);
-  addsaver(fat_edges, "fat-edges");
-  param_f(vid.sspeed, "sspeed", "scrollingspeed", 0);
-  param_f(vid.mspeed, "mspeed", "movement speed", 1);
-  param_f(vid.ispeed, "ispeed", "idle speed", 1);
-  addsaver(vid.aurastr, "aura strength", ISMOBILE ? 0 : 128);
-  addsaver(vid.aurasmoothen, "aura smoothen", 5);
-  param_enum(vid.graphglyph, "graphglyph", "graphical items/kills", 1)
+  param_f(linepatterns::width, parameter_names("lpwidth", "pattern-linewidth"), 1);
+  param_b(fat_edges, "fat-edges");
+  param_f(vid.sspeed, parameter_names("sspeed", "scrollingspeed"), 0);
+  param_f(vid.mspeed, parameter_names("mspeed", "movement speed"), 1);
+  param_f(vid.ispeed, parameter_names("ispeed", "idle speed"), 1);
+  param_i(vid.aurastr, "aura strength", ISMOBILE ? 0 : 128);
+  param_i(vid.aurasmoothen, "aura smoothen", 5);
+  param_enum(vid.graphglyph, parameter_names("graphglyph", "graphical items/kills"), 1)
   -> editable({{"letters", ""}, {"auto", ""}, {"images", ""}}, "inventory/kill mode", 'd');
 
   param_i(min_cells_drawn, "min_cells_drawn");
@@ -1184,14 +1064,14 @@ EX void initConfig() {
   param_b(startanims::enabled, "startanim", true)
   -> editable("start animations", 's');
 
-  addsaver(vid.flasheffects, "flasheffects", 1);
+  param_b(vid.flasheffects, "flasheffects", 1);
 
-  param_f(vid.binary_width, "bwidth", "binary-tiling-width", 1);
-  param_custom(vid.binary_width, "binary tiling width", menuitem_binary_width, 'v');
+  param_f(vid.binary_width, parameter_names("bwidth", "binary-tiling-width"), 1);
+  param_custom_ld(vid.binary_width, "binary tiling width", menuitem_binary_width, 'v');
 
   param_b(fake::multiple_special_draw, "fake_multiple", true);
 
-  param_f(hat::hat_param, "hat_param", "hat_param", 1)
+  param_f(hat::hat_param, "hat_param", 1)
   -> editable(0, 2, 0.1, "hat/spectre/turtle parameter",
     "Apeirodic hat tiling based on: https://arxiv.org/pdf/2303.10798.pdf\n\n"
     "This controls the parameter discussed in Section 6. Parameter p is Tile(p, (2-p)√3), scaled so that the area is the same for every p.\n\n"
@@ -1214,13 +1094,13 @@ EX void initConfig() {
       })
   -> set_reaction(hat::reshape);
 
-  param_f(hat::hat_param_imag, "hat_param_imag", "hat_param_imag", 0)
+  param_f(hat::hat_param_imag, "hat_param_imag", 0)
   -> editable(0, 2, 0.1, "hat parameter (imaginary)",
     "Imaginary part of the hat parameter. This corresponds to the usual interpretation of complex numbers in Euclidean planar geometry: rather than shortened or lengthened, the edges are moved in the other dimension.", 'v'
     )
   -> set_reaction(hat::reshape);
 
-  addsaver(vid.particles, "extra effects", 1);
+  param_b(vid.particles, "extra effects", 1);
   param_i(vid.framelimit, "frame limit", 999);
 
   #if !ISMOBWEB
@@ -1235,8 +1115,8 @@ EX void initConfig() {
   param_b(vid.relative_window_size, "window_relative", true)
   ->editable("specify relative window size", 'g');
 
-  param_custom(vid.xres, "xres", [] (char ch) {}, 0)->restrict = return_false;
-  param_custom(vid.yres, "yres", [] (char ch) {}, 0)->restrict = return_false;
+  param_custom_int(vid.xres, "xres", [] (char ch) {}, 0)->restrict = return_false;
+  param_custom_int(vid.yres, "yres", [] (char ch) {}, 0)->restrict = return_false;
   
   param_i(vid.fullscreen_x, "fullscreen_x", 1280)
   -> editable(640, 3840, 640, "fullscreen resolution to use (X)", "", 'x')
@@ -1267,40 +1147,40 @@ EX void initConfig() {
   param_b(logfog, "logfog", false);
 
   for(auto& lp: linepatterns::patterns) {
-    addsaver(lp->color, "lpcolor-" + lp->lpname);
-    addsaver(lp->multiplier, "lpwidth-" + lp->lpname);
+    param_color(lp->color, "lpcolor-" + lp->lpname, true, lp->color);
+    param_f(lp->multiplier, "lpwidth-" + lp->lpname);
     }
   
   // special graphics
 
-  addsaver(vid.monmode, "monster display mode", DEFAULT_MONMODE);
-  addsaver(vid.wallmode, "wall display mode", DEFAULT_WALLMODE);
-  addsaver(vid.highlightmode, "highlightmode");
+  param_i(vid.monmode, "monster display mode", DEFAULT_MONMODE);
+  param_i(vid.wallmode, "wall display mode", DEFAULT_WALLMODE);
+  param_i(vid.highlightmode, "highlightmode");
 
-  addsaver(vid.always3, "3D always", false);
+  param_b(vid.always3, "3D always", false);
 
-  param_f(geom3::euclid_embed_scale, "euclid_embed_scale", "euclid_embed_scale")
+  param_f(geom3::euclid_embed_scale, "euclid_embed_scale")
   -> editable(0, 2, 0.05, "Euclidean embedding scale", "How to scale the Euclidean map, relatively to the 3D absolute unit.", 'X')
   -> set_sets([] { dialog::bound_low(0.05); })
   -> set_reaction(geom3::apply_settings_light);
 
-  param_f(geom3::euclid_embed_scale_y, "euclid_embed_scale_y", "euclid_embed_scale_y")
+  param_f(geom3::euclid_embed_scale_y, "euclid_embed_scale_y")
   -> editable(0, 2, 0.05, "Euclidean embedding scale Y/X", "This scaling factor affects only the Y coordinate.", 'Y')
   -> set_sets([] { dialog::bound_low(0.05); })
   -> set_reaction(geom3::apply_settings_light);
 
-  param_f(geom3::euclid_embed_rotate, "euclid_embed_rotate", "euclid_embed_rotate")
+  param_f(geom3::euclid_embed_rotate, "euclid_embed_rotate")
   -> editable(0, 360, 15, "Euclidean embedding rotation", "How to rotate the Euclidean embedding, in degrees.", 'F')
   -> set_reaction(geom3::apply_settings_light);
 
-  param_enum(embedded_shift_method_choice, "embedded_shift_method", "embedded_shift_method", smcBoth)
+  param_enum(embedded_shift_method_choice, "embedded_shift_method", smcBoth)
   -> editable({
     {"geodesic", "always move on geodesics"},
     {"keep levels", "keep the vertical angle of the camera"},
     {"mixed", "on geodesics when moving camera manually, keep level when auto-centering"}
     }, "view shift for embedded planes", 'H');
 
-  param_b(geom3::auto_configure, "auto_configure_3d", "auto_configure_3d")
+  param_b(geom3::auto_configure, "auto_configure_3d")
   -> editable("set 3D settings automatically", 'A');
 
   param_b(geom3::inverted_embedding, "inverted_3d", false)
@@ -1311,19 +1191,19 @@ EX void initConfig() {
   -> editable("flat, not equidistant", 'F')
   -> set_reaction(geom3::apply_settings_full);
 
-  param_enum(geom3::spatial_embedding, "spatial_embedding", "spatial_embedding", geom3::seDefault)
+  param_enum(geom3::spatial_embedding, "spatial_embedding", geom3::seDefault)
   ->editable(geom3::spatial_embedding_options, "3D embedding method", 'E')
   ->set_reaction(geom3::apply_settings_full);
   
   param_b(memory_saving_mode, "memory_saving_mode", (ISMOBILE || ISPANDORA || ISWEB) ? 1 : 0);
   param_i(reserve_limit, "memory_reserve", 128);
-  addsaver(show_memory_warning, "show_memory_warning");
+  param_b(show_memory_warning, "show_memory_warning");
 
-  addsaver(rug::renderonce, "rug-renderonce");
-  addsaver(rug::rendernogl, "rug-rendernogl");
-  addsaver(rug::texturesize, "rug-texturesize");
+  param_b(rug::renderonce, "rug-renderonce");
+  param_b(rug::rendernogl, "rug-rendernogl");
+  param_i(rug::texturesize, "rug-texturesize");
 #if CAP_RUG
-  param_f(rug::model_distance, "rug_model_distance", "rug-model-distance");
+  param_f(rug::model_distance, "rug-model-distance");
 #endif
 
   param_b(vid.backeffects, "background particle effects", (ISMOBILE || ISPANDORA) ? false : true);
@@ -1334,7 +1214,7 @@ EX void initConfig() {
   param_i(vid.joysmooth, "vid.joysmooth", 200);
   param_i(vid.joypanthreshold, "vid.joypanthreshold", 2500);
   param_f(vid.joypanspeed, "vid.joypanspeed", ISPANDORA ? 0.0001 : 0);
-  addsaver(autojoy, "autojoy");
+  param_b(autojoy, "autojoy");
     
   vid.killreduction = 0;
   
@@ -1355,11 +1235,11 @@ EX void initConfig() {
   param_color(forecolor, "color:foreground", false);
   param_color(bordcolor, "color:borders", false);
   param_color(ringcolor, "color:ring", true);
-  param_f(vid.multiplier_ring, "mring", "mult:ring", 1);
+  param_f(vid.multiplier_ring, parameter_names("mring", "mult:ring"), 1);
   param_color(modelcolor, "color:model", true);
   param_color(periodcolor, "color:period", true);
   param_color(stdgridcolor, "color:stdgrid", true);
-  param_f(vid.multiplier_grid, "mgrid", "mult:grid", 1);
+  param_f(vid.multiplier_grid, parameter_names("mgrid", "mult:grid"), 1);
   param_color(dialog::dialogcolor, "color:dialog", false);
   for(auto p: ccolor::all)
     savecolortable(p->ctab, s0+"canvas:"+p->name);
@@ -1370,40 +1250,38 @@ EX void initConfig() {
   #endif
   
   for(int i=0; i<motypes; i++)
-    addsaver(minf[i].color, "color:monster:" + its(i));
+    param_color(minf[i].color, "color:monster:" + its(i), false);
   for(int i=0; i<ittypes; i++)
-    addsaver(iinf[i].color, "color:item:" + its(i));
+    param_color(iinf[i].color, "color:item:" + its(i), false);
   for(int i=0; i<landtypes; i++)
-    addsaver(floorcolors[i], "color:land:" + its(i));
+    param_color(floorcolors[i], "color:land:" + its(i), false);
   for(int i=0; i<walltypes; i++)
-    addsaver(winf[i].color, "color:wall:" + its(i));
+    param_color(winf[i].color, "color:wall:" + its(i), false);
 
   // modes
     
-  addsaverenum(geometry, "mode-geometry");
-  addsaver(shmup::on, "mode-shmup", false);
-  addsaver(hardcore, "mode-hardcore", false);
-  addsaverenum(land_structure, "mode-chaos");
+  param_b(shmup::on, "mode-shmup", false)->be_non_editable();
+  param_b(hardcore, "mode-hardcore", false)->be_non_editable();
+  param_enum(land_structure, "mode-chaos", lsNiceWalls)->be_non_editable();
   #if CAP_INV
-  addsaver(inv::on, "mode-Orb Strategy");
+  param_b(inv::on, "mode-Orb Strategy");
   #endif
-  addsaverenum(variation, "mode-variation", eVariation::bitruncated);
-  addsaver(peace::on, "mode-peace");
-  addsaver(peace::otherpuzzles, "mode-peace-submode");
-  param_enum(specialland, "specialland", "land for special modes", specialland);
+  param_b(peace::on, "mode-peace");
+  param_b(peace::otherpuzzles, "mode-peace-submode");
+  param_enum(specialland, parameter_names("specialland", "land for special modes"), specialland)->be_non_editable();
   
-  addsaver(viewdists, "expansion mode");
-  param_f(backbrightness, "back", "brightness behind sphere");
+  param_b(viewdists, "expansion mode");
+  param_f(backbrightness, parameter_names("back", "brightness behind sphere"));
   param_b(auto_extend, "expansion_auto_extend")
   -> editable("extend automatically", 'E');
 
-  param_f(vid.ipd, "ipd", "interpupilar-distance", 0.05);
-  param_f(vid.lr_eyewidth, "lr", "eyewidth-lr", 0.5);
-  param_f(vid.anaglyph_eyewidth, "anaglyph", "eyewidth-anaglyph", 0.1);
-  param_f(vid.fov, "fov", "field-of-vision", 90);
-  addsaver(vid.desaturate, "desaturate", 0);
+  param_f(vid.ipd, parameter_names("ipd", "interpupilar-distance"), 0.05);
+  param_f(vid.lr_eyewidth, parameter_names("lr", "eyewidth-lr"), 0.5);
+  param_f(vid.anaglyph_eyewidth, parameter_names("anaglyph", "eyewidth-anaglyph"), 0.1);
+  param_f(vid.fov, parameter_names("fov", "field-of-vision"), 90);
+  param_i(vid.desaturate, "desaturate", 0);
   
-  param_enum(vid.stereo_mode, "stereo_mode", "stereo-mode", vid.stereo_mode)
+  param_enum(vid.stereo_mode, "stereo-mode", vid.stereo_mode)
     ->editable({
     {"OFF", "linear perspective"}, {"anaglyph", "for red-cyan glasses"}, {"side-by-side", "for mobile VR"},
     {"ODS", "for rendering 360° VR videos (implemented only in raycaster and some other parts)"},
@@ -1416,44 +1294,39 @@ EX void initConfig() {
 
   param_f(vid.plevel_factor, "plevel_factor", 0.7);
 
-  #if CAP_GP
-  addsaver(gp::param.first, "goldberg-x", gp::param.first);
-  addsaver(gp::param.second, "goldberg-y", gp::param.second);
-  #endif
-  
   param_b(nohud, "no-hud", false);
   param_b(nomap, "nomap", false);
   param_b(nofps, "no-fps", false);
   
   #if CAP_IRR
-  addsaver(irr::density, "irregular-density", 2);
-  addsaver(irr::cellcount, "irregular-cellcount", 150);
-  addsaver(irr::quality, "irregular-quality", .2);
-  addsaver(irr::place_attempts, "irregular-place", 10);
-  addsaver(irr::rearrange_max_attempts, "irregular-rearrange-max", 50);
-  addsaver(irr::rearrange_less, "irregular-rearrangeless", 10);
+  param_f(irr::density, "irregular-density", 2);
+  param_i(irr::cellcount, "irregular-cellcount", 150);
+  param_f(irr::quality, "irregular-quality", .2);
+  param_i(irr::place_attempts, "irregular-place", 10);
+  param_i(irr::rearrange_max_attempts, "irregular-rearrange-max", 50);
+  param_i(irr::rearrange_less, "irregular-rearrangeless", 10);
   #endif
   
   param_i(vid.linequality, "line quality", 0);
   
   #if CAP_FILES && CAP_SHOT && CAP_ANIMATIONS
-  addsaver(anims::animfile, "animation file format");
+  param_str(anims::animfile, "animation file format");
   #endif
 
   #if CAP_RUG
-  addsaver(rug::move_on_touch, "rug move on touch");
+  param_f(rug::move_on_touch, "rug move on touch");
   #endif
   
   #if CAP_CRYSTAL
-  param_f(crystal::compass_probability, "cprob", "compass-probability");
-  addsaver(crystal::view_coordinates, "crystal-coordinates");
+  param_f(crystal::compass_probability, parameter_names("cprob", "compass-probability"));
+  param_b(crystal::view_coordinates, "crystal-coordinates");
   #endif
   
 #if CAP_TEXTURE  
   param_b(texture::texture_aura, "texture-aura", false);
 #endif
 
-  addsaver(vid.use_smart_range, "smart-range", 0);
+  param_i(vid.use_smart_range, "smart-range", 0);
   param_f(vid.smart_range_detail, "smart-range-detail", 8)
   ->editable(1, 50, 1, "minimum visible cell in pixels", "", 'd')
   ->set_extra([] { add_cells_drawn('C'); });
@@ -1466,7 +1339,7 @@ EX void initConfig() {
   param_i(vid.cells_drawn_limit, "limit on cells drawn", 10000);
   param_i(vid.cells_generated_limit, "limit on cells generated", 250);
 
-  param_enum(diskshape, "disk_shape", "disk_shape", dshTiles)
+  param_enum(diskshape, "disk_shape", dshTiles)
     ->editable({{"distance in tiles", ""}, {"distance in vertices", ""}, {"geometric distance", ""}
     }, "disk shape", 'S')
   ->set_reaction([] { if(game_active) { stop_game(); start_game(); } });
@@ -1480,8 +1353,8 @@ EX void initConfig() {
     });
   
   #if CAP_SOLV
-  addsaver(sn::solrange_xy, "solrange-xy");
-  addsaver(sn::solrange_z, "solrange-z");
+  param_f(sn::solrange_xy, "solrange-xy");
+  param_f(sn::solrange_z, "solrange-z");
   #endif
   param_i(slr::shader_iterations, "slr-steps");
   param_f(slr::range_xy, "slr-range-xy");
@@ -1490,9 +1363,9 @@ EX void initConfig() {
   param_f(arcm::euclidean_edge_length, "arcm-euclid-length");
   
   #if CAP_ARCM
-  addsaver(arcm::current.symbol, "arcm-symbol", "4^5");
+  param_str(arcm::current.symbol, "arcm-symbol", "4^5")->be_non_editable();
   #endif
-  addsaverenum(hybrid::underlying, "product-underlying");
+  param_enum(hybrid::underlying, "product_underlying", hybrid::underlying)->be_non_editable();
   
   for(int i=0; i<isize(ginf); i++) {
     if(ginf[i].flags & qELLIPTIC)
@@ -1508,7 +1381,7 @@ EX void initConfig() {
     else
       sightranges[i] = 5;
     sightranges[gArchimedean] = 10;
-    if(i < gBinary3) addsaver(sightranges[i], "sight-g" + its(i));
+    if(i < gBinary3) param_f(sightranges[i], "sight-g" + its(i));
     }
   
   ld bonus = 0;
@@ -1519,47 +1392,47 @@ EX void initConfig() {
   
   param_b(context_fog, "coolfog");
 
-  addsaver(sightranges[gBinary3], "sight-binary3", 3.1 + bonus);
-  addsaver(sightranges[gCubeTiling], "sight-cubes", 10);
-  addsaver(sightranges[gCell120], "sight-120cell", TAU);
-  addsaver(sightranges[gECell120], "sight-120cell-elliptic", M_PI);
-  addsaver(sightranges[gRhombic3], "sight-rhombic", 10.5 * emul);
-  addsaver(sightranges[gBitrunc3], "sight-bitrunc", 12 * emul);
-  addsaver(sightranges[gSpace534], "sight-534", 4 + bonus);
-  addsaver(sightranges[gSpace435], "sight-435", 3.8 + bonus);
+  param_f(sightranges[gBinary3], "sight-binary3", 3.1 + bonus);
+  param_f(sightranges[gCubeTiling], "sight-cubes", 10);
+  param_f(sightranges[gCell120], "sight-120cell", TAU);
+  param_f(sightranges[gECell120], "sight-120cell-elliptic", M_PI);
+  param_f(sightranges[gRhombic3], "sight-rhombic", 10.5 * emul);
+  param_f(sightranges[gBitrunc3], "sight-bitrunc", 12 * emul);
+  param_f(sightranges[gSpace534], "sight-534", 4 + bonus);
+  param_f(sightranges[gSpace435], "sight-435", 3.8 + bonus);
 
-  addsaver(sightranges[gCell5], "sight-5cell", TAU);
-  addsaver(sightranges[gCell8], "sight-8cell", TAU);
-  addsaver(sightranges[gECell8], "sight-8cell-elliptic", M_PI);
-  addsaver(sightranges[gCell16], "sight-16cell", TAU);
-  addsaver(sightranges[gECell16], "sight-16cell-elliptic", M_PI);
-  addsaver(sightranges[gCell24], "sight-24cell", TAU);
-  addsaver(sightranges[gECell24], "sight-24cell-elliptic", M_PI);
-  addsaver(sightranges[gCell600], "sight-600cell", TAU);
-  addsaver(sightranges[gECell600], "sight-600cell-elliptic", M_PI);
-  addsaver(sightranges[gHoroTris], "sight-horotris", 2.9 + bonus);
-  addsaver(sightranges[gHoroRec], "sight-hororec", 2.2 + bonus);
-  addsaver(sightranges[gHoroHex], "sight-horohex", 2.75 + bonus);
+  param_f(sightranges[gCell5], "sight-5cell", TAU);
+  param_f(sightranges[gCell8], "sight-8cell", TAU);
+  param_f(sightranges[gECell8], "sight-8cell-elliptic", M_PI);
+  param_f(sightranges[gCell16], "sight-16cell", TAU);
+  param_f(sightranges[gECell16], "sight-16cell-elliptic", M_PI);
+  param_f(sightranges[gCell24], "sight-24cell", TAU);
+  param_f(sightranges[gECell24], "sight-24cell-elliptic", M_PI);
+  param_f(sightranges[gCell600], "sight-600cell", TAU);
+  param_f(sightranges[gECell600], "sight-600cell-elliptic", M_PI);
+  param_f(sightranges[gHoroTris], "sight-horotris", 2.9 + bonus);
+  param_f(sightranges[gHoroRec], "sight-hororec", 2.2 + bonus);
+  param_f(sightranges[gHoroHex], "sight-horohex", 2.75 + bonus);
 
-  addsaver(sightranges[gKiteDart3], "sight-kd3", 2.25 + bonus);
+  param_f(sightranges[gKiteDart3], "sight-kd3", 2.25 + bonus);
   
-  addsaver(sightranges[gField435], "sight-field435", 4 + bonus);
-  addsaver(sightranges[gField534], "sight-field534", 3.8 + bonus);
-  addsaver(sightranges[gSol], "sight-sol");
-  addsaver(sightranges[gNil], "sight-nil", 6.5 + bonus);
-  addsaver(sightranges[gNIH], "sight-nih");
-  addsaver(sightranges[gSolN], "sight-solnih");
+  param_f(sightranges[gField435], "sight-field435", 4 + bonus);
+  param_f(sightranges[gField534], "sight-field534", 3.8 + bonus);
+  param_f(sightranges[gSol], "sight-sol");
+  param_f(sightranges[gNil], "sight-nil", 6.5 + bonus);
+  param_f(sightranges[gNIH], "sight-nih");
+  param_f(sightranges[gSolN], "sight-solnih");
 
-  addsaver(sightranges[gCrystal344], "sight-crystal344", 2.5); /* assume raycasting */
-  addsaver(sightranges[gSpace344], "sight-344", 4.5);
-  addsaver(sightranges[gSpace336], "sight-336", 4);
+  param_f(sightranges[gCrystal344], "sight-crystal344", 2.5); /* assume raycasting */
+  param_f(sightranges[gSpace344], "sight-344", 4.5);
+  param_f(sightranges[gSpace336], "sight-336", 4);
 
   param_b(vid.sloppy_3d, "sloppy3d", true);
 
   param_i(vid.texture_step, "wall-quality", 4);
   
   param_b(smooth_scrolling, "smooth-scrolling", false);
-  addsaver(mouseaim_sensitivity, "mouseaim_sensitivity", 0.01);
+  param_f(mouseaim_sensitivity, "mouseaim_sensitivity", 0.01);
 
   param_b(vid.consider_shader_projection, "shader-projection", true);
   param_b(semidirect_rendering, "semidirect_rendering", false)
@@ -1576,15 +1449,15 @@ EX void initConfig() {
     if(game_active) { stop_game(); start_game(); }
     });
 
-  param_enum(nisot::geodesic_movement, "solv_geodesic_movement", "solv_geodesic_movement", true)
+  param_enum(nisot::geodesic_movement, "solv_geodesic_movement", true)
   -> editable({{"Lie group", "light, camera, and objects move in lines of constant direction, in the Lie group sense"}, {"geodesics", "light, camera, and objects always take the shortest path"}}, "straight lines", 'G')
   -> set_reaction([] {
     if(pmodel == mdLiePerspective && nisot::geodesic_movement) pmodel = hyperbolic ? mdPerspective : mdGeodesic;
     if(among(pmodel, mdGeodesic, mdPerspective) && !nisot::geodesic_movement) pmodel = mdLiePerspective;
     });
 
-  addsaver(s2xe::qrings, "s2xe-rings");
-  addsaver(rots::underlying_scale, "rots-underlying-scale");
+  param_i(s2xe::qrings, "s2xe-rings");
+  param_f(rots::underlying_scale, "rots-underlying-scale");
   
   param_b(vid.bubbles_special, "bubbles-special", 1);
   param_b(vid.bubbles_threshold, "bubbles-threshold", 1);
@@ -1594,19 +1467,19 @@ EX void initConfig() {
   multi::initConfig();
 #endif
 
-  addsaver(asonov::period_xy, "asonov:period_xy");
-  addsaver(asonov::period_z, "asonov:period_z");
-  addsaver(nilv::nilperiod[0], "nilperiod_x");
-  addsaver(nilv::nilperiod[1], "nilperiod_y");
-  addsaver(nilv::nilperiod[2], "nilperiod_z");
+  param_i(asonov::period_xy, "asonov:period_xy");
+  param_i(asonov::period_z, "asonov:period_z");
+  param_i(nilv::nilperiod[0], "nilperiod_x");
+  param_i(nilv::nilperiod[1], "nilperiod_y");
+  param_i(nilv::nilperiod[2], "nilperiod_z");
   
-  param_enum(neon_mode, "neon_mode", "neon_mode", neon_mode)
+  param_enum(neon_mode, "neon_mode", neon_mode)
     ->editable(
         {{"OFF", ""}, {"standard", ""}, {"no boundary mode", ""}, {"neon mode II", ""}, {"illustration mode", ""}}, 
         "neon mode", 'M'
         );
 
-  param_enum(bow::weapon, "pc_class", "pc_class", bow::weapon)
+  param_enum(bow::weapon, "pc_class", bow::weapon)
     -> editable({{"blade", "Standard Rogue weapon. Bump into a monster to hit. Most monsters attack you the same way."},
       {"crossbow", "Hits all monsters in a straight line, but slow to reload. Press 'f' or click the crossbow icon to target."}},
       "weapon selection", 'w')
@@ -1615,7 +1488,7 @@ EX void initConfig() {
       peace::on = false; if(dual::state) dual::disable(); if(multi::players > 1 && !shmup::on) multi::players = 1;
       if(b) start_game();
       };
-  param_enum(bow::style, "bow_style", "bow_style", bow::style)
+  param_enum(bow::style, "bow_style", bow::style)
     -> editable({{"bull line", "Can go in either direction on odd shapes. 3 turns to reload."},
       {"geodesic", "Graph geodesic: any sequence of tiles is OK as long as there are no shortcuts. 4 turns to reload."},
       {"geometric", "Approximations of geometric straight lines."}},
@@ -1623,26 +1496,26 @@ EX void initConfig() {
     -> set_need_confirm()
     -> set_value_to = [] (bow::eCrossbowStyle s) { bool b = game_active; if(s != bow::style) stop_game(); bow::style = s; if(b) start_game(); };
   param_b(bow::bump_to_shoot, "bump_to_shoot", true)->editable("bump to shoot", 'b');
-  param_enum(bow::mouse_fire_mode, "mouse_fire_mode", "mouse_fire_mode", bow::mfmPriority)
+  param_enum(bow::mouse_fire_mode, "mouse_fire_mode", bow::mfmPriority)
      ->editable({{"explicit", "You need to click crossbow or be close to fire."},
       {"priority", "Click on a faraway monster to fire if possible, or move if not."},
       {"always", "Clicking on a faraway monster always means an attempt to fire."}},
       "mouse auto-fire mode", 'm');
 
-  param_enum(vid.msgleft, "message_style", "message style", 2)
+  param_enum(vid.msgleft, "message_style", 2)
     -> editable({{"centered", ""}, {"left-aligned", ""}, {"line-broken", ""}}, "message style", 'a');
 
-  addsaverenum(neon_nofill, "neon_nofill");
+  param_enum(neon_nofill, "neon_nofill", neon_nofill);
   param_b(noshadow, "noshadow");
   param_b(bright, "bright");
   param_b(cblind, "cblind");
   
-  addsaver(berger_limit, "berger_limit");
+  param_i(berger_limit, "berger_limit");
   
-  addsaverenum(centering, "centering");
+  param_enum(centering, "centering", centering);
   
-  param_f(camera_speed, "camspd", "camera-speed", 1);
-  param_f(camera_rot_speed, "camrot", "camera-rot-speed", 1);
+  param_f(camera_speed, parameter_names("camspd", "camera-speed"), 1);
+  param_f(camera_rot_speed, parameter_names("camrot", "camera-rot-speed"), 1);
   param_f(third_person_rotation, "third_person_rotation", 0);
 
   param_f(vid.stereo_param, "stereo_param", 0.9)
@@ -1659,32 +1532,32 @@ EX void initConfig() {
   #endif
 
 #if CAP_CONFIG
-  for(auto s: savers) s->reset();
+  for(auto s: params) s.second->reset();
 #endif
 
-  param_custom(sightrange_bonus, "sightrange_bonus", menuitem_sightrange_bonus, 'r');
-  param_custom(vid.use_smart_range, "sightrange_style", menuitem_sightrange_style, 's');
+  param_custom_int(sightrange_bonus, "sightrange_bonus", menuitem_sightrange_bonus, 'r');
+  param_custom_int(vid.use_smart_range, "sightrange_style", menuitem_sightrange_style, 's');
   
-  param_custom(gp::param.first, "Goldberg x", menuitem_change_variation, 0);
-  param_custom(gp::param.second, "Goldberg y", menuitem_change_variation, 0);
-  param_custom(variation, "variation", menuitem_change_variation, 'v')
+  param_custom_int(gp::param.first, "Goldberg x", menuitem_change_variation, 0);
+  param_custom_int(gp::param.second, "Goldberg y", menuitem_change_variation, 0);
+  param_custom_int(variation, parameter_names("variation", "mode-variation"), menuitem_change_variation, 'v')
   ->help_text = "variation|dual|bitruncated";
-  param_custom(geometry, "geometry", menuitem_change_geometry, 0)
+  param_custom_int(geometry, parameter_names("geometry", "mode-geometry"), menuitem_change_geometry, 0)
   ->help_text = "hyperbolic|spherical|Euclidean";
   
   param_i(stamplen, "stamplen");
   param_f(anims::period, "animperiod");
 
-  addsaver(use_custom_land_list, "customland_use");
+  param_b(use_custom_land_list, "customland_use")->be_non_editable();
   for(int i=0; i<landtypes; i++) {
     custom_land_list[i] = true;
     custom_land_treasure[i] = 100;
     custom_land_difficulty[i] = 100;
     custom_land_wandering[i] = 100;
-    addsaver(custom_land_list[i], "customland" + its(i) + "i", true);
-    addsaver(custom_land_treasure[i], "customland" + its(i) + "t", 100);
-    addsaver(custom_land_difficulty[i], "customland" + its(i) + "d", 100);
-    addsaver(custom_land_wandering[i], "customland" + its(i) + "w", 100);
+    param_b(custom_land_list[i], "customland" + its(i) + "i", true)->be_non_editable();
+    param_i(custom_land_treasure[i], "customland" + its(i) + "t", 100)->be_non_editable();
+    param_i(custom_land_difficulty[i], "customland" + its(i) + "d", 100)->be_non_editable();
+    param_i(custom_land_wandering[i], "customland" + its(i) + "w", 100)->be_non_editable();
     }
   }
 
@@ -1785,9 +1658,9 @@ EX void resetConfig() {
   dynamicval<int> ry(vid.yres, 0);
   dynamicval<int> rf(vid.fsize, 0);
   dynamicval<bool> rfs(vid.full, false);
-  for(auto s: savers) 
-    if(s->name.substr(0,5) != "mode-")
-      s->reset();
+  for(auto s: params)
+    if(s.second->legacy_config_name.substr(0,5) != "mode-")
+      s.second->reset();
   }
 #endif
 
@@ -1813,8 +1686,8 @@ EX void saveConfig() {
   vid.tc_depth = pt_depth;
   }
   
-  for(auto s: savers) if(s->dosave())
-    fprintf(f, "%s=%s\n", s->name.c_str(), s->save().c_str());
+  for(auto s: params) if(s.second->dosave())
+    fprintf(f, "%s=%s\n", s.second->name.c_str(), s.second->save().c_str());
   
   fclose(f);
 #if !ISMOBILE
@@ -1830,7 +1703,7 @@ void readf(FILE *f, ld& x) {
   x = fl;
   }
 
-map<string, shared_ptr<supersaver> > allconfigs;
+map<string, shared_ptr<parameter> > allconfigs;
 
 EX void parseline(const string& str) {
   if(str[0] == '#') return;
@@ -1848,7 +1721,7 @@ EX void parseline(const string& str) {
   }
 
 EX void loadNewConfig(FILE *f) {
-  for(auto& c: savers) allconfigs[c->name] = c;
+  for(auto& c: params) allconfigs[c.second->name] = allconfigs[c.second->legacy_config_name] = c.second;
   string rd;
   while(true) {
     int c = fgetc(f);
@@ -3093,34 +2966,34 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
         });
       });
   
-  addsaver(vid.auto_eye, "auto-eyelevel", false);
+  param_b(vid.auto_eye, "auto-eyelevel", false);
 
   param_b(nomenukey, "nomenukey");
   param_b(showstartmenu, "showstartmenu");
   param_b(draw_centerover, "draw_centerover");
 
-  param_enum(nohelp, "help_messages", "help_messages", 0)
+  param_enum(nohelp, "help_messages", 0)
   -> editable({
     {"all", "all context help/welcome messages"},
     {"none", "no context help/welcome messages"},
     {"automatic", "I know I can press F1 for help"},
     }, "context help", 'H');
 
-  param_f(vid.creature_scale, "creature_scale", "3d-creaturescale", 1)
+  param_f(vid.creature_scale, parameter_names("creature_scale", "3d-creaturescale"), 1)
     ->editable(0, 1, .1, "Creature scale", "", 'C')
     ->set_extra([] { dialog::addInfo(XLAT("changing this during shmup is counted as cheating")); })
     ->set_reaction([] { if(shmup::on) cheater++; });
-  param_f(vid.height_width, "heiwi", "3d-heightwidth", 1.5)
+  param_f(vid.height_width, parameter_names("heiwi", "3d-heightwidth"), 1.5)
     ->editable(0, 1, .1, "Height to width", "", 'h');
-  param_f(vid.yshift, "yshift", "Y shift", 0)
+  param_f(vid.yshift, parameter_names("yshift", "Y shift"), 0)
     ->editable(0, 1, .1, "Y shift", "Don't center on the player character.", 'y')
     ->set_extra([] {
       if(WDIM == 3 && pmodel == mdPerspective) 
         dialog::addBoolItem_action(XLAT("reduce if walls on the way"), vid.use_wall_radar, 'R');
       });
-  addsaver(vid.use_wall_radar, "wallradar", true);
-  addsaver(vid.fixed_facing, "fixed facing", 0);
-  addsaver(vid.fixed_facing_dir, "fixed facing dir", 90);
+  param_b(vid.use_wall_radar, "wallradar", true);
+  param_b(vid.fixed_facing, "fixed facing", 0);
+  param_f(vid.fixed_facing_dir, "fixed facing dir", 90);
   param_b(vid.fixed_yz, "fixed YZ", true);
   param_b(frustum_culling, "frustum_culling");
   param_b(numerical_minefield, "numerical_minefield")
@@ -3131,11 +3004,11 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
   -> editable("markers on possible mines", 'm');
   param_i(mine_opacity, "minefield opacity", 255)
    ->editable(0, 255, 51, "opacity of undiscovered minefield", "3D modes only\n\n0 = invisible, 255 = fully opaque", 'o');
-  param_enum(mine_zero_display, "minefield_zero", "minefield_zero", 1)
+  param_enum(mine_zero_display, "minefield_zero", 1)
   ->editable({{"OFF", "never display zeros"}, {"3D", "only in 3D modes"}, {"ON", "always display zeros"}}, "display zeros in minefield", 'z');
   param_b(dont_display_minecount, "dont_display_minecount");
   #if MAXMDIM >= 4
-  param_enum(draw_sky, "draw_sky", "draw_sky", skyAutomatic)
+  param_enum(draw_sky, "draw_sky", skyAutomatic)
   -> editable({{"NO", "do not draw sky"}, {"automatic", ""}, {"skybox", "works only in Euclidean"}, {"always", "might be glitched in some settings"}}, "sky rendering", 's');
   param_b(use_euclidean_infinity, "use_euclidean_infinity", true)
   -> editable("infinite sky", 'i');
@@ -3168,13 +3041,13 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
 
   param_f(vid.depth_bonus, "depth_bonus", 0)
     ->editable(-5, 5, .1, "depth bonus in pseudohedral", "", 'b');
-  param_enum(vid.pseudohedral, "pseudohedral", "pseudohedral", phOFF)
+  param_enum(vid.pseudohedral, "pseudohedral", phOFF)
     ->editable(
     {{"OFF", "the tiles are curved"},
     {"inscribed", "the tiles are inscribed"},
     {"circumscribed", "the tiles are circumscribed"}},
     "make the tiles flat", 'p');
-  param_f(vid.depth, "depth", "3D depth", 1)
+  param_f(vid.depth, parameter_names("depth", "3D depth"), 1)
     ->editable(0, 5, .1, "Ground level below the plane", "", 'd')
     ->set_extra([] {
         vid.tc_depth = ticks;
@@ -3215,9 +3088,9 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
         if(vid.tc_alpha == vid.tc_camera) (b ? vid.tc_alpha : vid.tc_camera)--;
         geom3::apply_settings_light();
         });
-  param_f(vid.camera, "camera", "3D camera level", 1)
+  param_f(vid.camera, parameter_names("camera", "3D camera level"), 1)
     ->editable(0, 5, .1, "", "", 'c')
-    ->modif([] (float_setting* x) { x->menu_item_name = (GDIM == 2 ? "Camera level above the plane" : "Z shift"); })
+    ->modif([] (float_parameter* x) { x->menu_item_name = (GDIM == 2 ? "Camera level above the plane" : "Z shift"); })
     ->set_extra([] {    
        vid.tc_camera = ticks;
        if(GDIM == 2)
@@ -3237,7 +3110,7 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
        if(GDIM == 3 && pmodel == mdPerspective) 
          dialog::addBoolItem_action(XLAT("reduce if walls on the way"), vid.use_wall_radar, 'R');
        });
-  param_f(vid.wall_height, "wall_height", "3D wall height", .3)
+  param_f(vid.wall_height, parameter_names("wall_height", "3D wall height"), .3)
     ->editable(0, 1, .1, "Height of walls", "", 'w')
     ->set_extra([] () {
         dialog::addHelp(GDIM == 3 ? "" : XLAT(
@@ -3250,7 +3123,7 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
           });
         })
     ->set_reaction(geom3::apply_settings_light);
-  param_f(vid.rock_wall_ratio, "rock_wall_ratio", "3D rock-wall ratio", .9)
+  param_f(vid.rock_wall_ratio, parameter_names("rock_wall_ratio", "3D rock-wall ratio"), .9)
     ->editable(0, 1, .1, "Rock-III to wall ratio", "", 'r')
     ->set_extra([] { dialog::addHelp(XLAT(
         "The ratio of Rock III to walls is %1, so Rock III are %2 absolute units high. "
@@ -3259,7 +3132,7 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
         fts(vid.rock_wall_ratio), fts(vid.wall_height * vid.rock_wall_ratio),
         fts(cosh(vid.depth - vid.wall_height * vid.rock_wall_ratio) / cosh(vid.depth))));
         });
-  param_f(vid.human_wall_ratio, "human_wall_ratio", "3D human-wall ratio", .7)
+  param_f(vid.human_wall_ratio, parameter_names("human_wall_ratio", "3D human-wall ratio"), .7)
     ->editable(0, 1, .1, "Human to wall ratio", "", 'h')
     ->set_extra([] { dialog::addHelp(XLAT(
         "Humans are %1 "
@@ -3274,17 +3147,17 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
     "Note that, in exponentially expanding spaces, too high values could cause rendering issues. So "
     "if you want infinity, values of 5 or similar should be used -- there is no visible difference "
     "from infinity and glitches are avoided.";
-  param_f(vid.lake_top, "lake_top", "3D lake top", .25 / 0.3)
+  param_f(vid.lake_top, parameter_names("lake_top", "3D lake top"), .25 / 0.3)
     ->editable(0, 1, .1, "Level of water surface", unitwarn, 'l');
-  param_f(vid.lake_shallow, "lake_shallow", "3D lake shallow", .4 / 0.3)
+  param_f(vid.lake_shallow, parameter_names("lake_shallow", "3D lake shallow"), .4 / 0.3)
     ->editable(0, 1, .1, "Level of shallow water", unitwarn, 's');
-  param_f(vid.lake_bottom, "lake_bottom", "3D lake bottom", .9 / 0.3)
+  param_f(vid.lake_bottom, parameter_names("lake_bottom", "3D lake bottom"), .9 / 0.3)
     ->editable(0, 1, .1, "Level of water bottom", unitwarn, 'k');
-  param_f(vid.wall_height2, "wall_height2", "wall_height2", 2)
+  param_f(vid.wall_height2, "wall_height2", 2)
     ->editable(0, 5, .1, "ratio of high walls to normal walls", unitwarn, '2');
-  param_f(vid.wall_height3, "wall_height3", "wall_height3", 3)
+  param_f(vid.wall_height3, "wall_height3", 3)
     ->editable(0, 5, .1, "ratio of very high walls to normal walls", unitwarn, '3');
-  param_f(vid.lowsky_height, "lowsky_height", "lowsky_height", 2)
+  param_f(vid.lowsky_height, "lowsky_height", 2)
     ->editable(0, 5, .1, "sky fake height", "Sky is rendered at the distance computed based on "
       "the sky height, which might be beyond the range visible in fog. To prevent this, "
       "the intensity of the fog effect depends on the value here rather than the actual distance. "
@@ -3301,9 +3174,9 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
   param_fd(vid.infdeep_height, "infdeep_height")
     ->set_hint([] { return geom3::to_wh(cgi.INFDEEP); })
     ->editable(0, 10, .1, "infinite depth", unitwarn, '7');
-  param_f(vid.sun_size, "sun_size", "sun_size", 8)
+  param_f(vid.sun_size, "sun_size", 8)
     ->editable(0, 10, .1, "sun size (relative to item sizes)", "", '8');
-  param_f(vid.star_size, "star_size", "star_size", 0.75)
+  param_f(vid.star_size, "star_size", 0.75)
     ->editable(0, 10, .1, "night star size (relative to item sizes)", "", '9');
   #if MAXMDIM >= 4
   param_f(star_prob, "star_prob", 0.3)
@@ -3313,16 +3186,16 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
     ->editable("prevent exceeding recommended altitudes", 'l');
   param_b(auto_remove_roofs, "auto_remove_roofs", true)
     ->editable("do not render higher levels if camera too high", 'r');
-  addsaver(vid.tc_depth, "3D TC depth", 1);
-  addsaver(vid.tc_camera, "3D TC camera", 2);
-  addsaver(vid.tc_alpha, "3D TC alpha", 3);
-  param_f(vid.highdetail, "highdetail", "3D highdetail", 8)
+  param_i(vid.tc_depth, "3D TC depth", 1);
+  param_i(vid.tc_camera, "3D TC camera", 2);
+  param_i(vid.tc_alpha, "3D TC alpha", 3);
+  param_f(vid.highdetail, parameter_names("highdetail", "3D highdetail"), 8)
     ->editable(0, 5, .5, "High detail range", "", 'n')
     ->set_extra(explain_detail)
     ->set_reaction([] {
       if(vid.highdetail > vid.middetail) vid.middetail = vid.highdetail;
       });  
-  param_f(vid.middetail, "middetail", "3D middetail", 8)
+  param_f(vid.middetail, parameter_names("middetail", "3D middetail"), 8)
     ->editable(0, 5, .5, "Mid detail range", "", 'm')
     ->set_extra(explain_detail)
     ->set_reaction([] {
@@ -3359,8 +3232,8 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
   param_f(global_boundary_ratio, "global_boundary_ratio")
   ->editable(0, 5, 0.1, "Width of cell boundaries",
     "How wide should the cell boundaries be.", '0');
-  addsaver(vid.gp_autoscale_heights, "3D Goldberg autoscaling", true);  
-  addsaver(scorefile, "savefile");
+  param_b(vid.gp_autoscale_heights, "3D Goldberg autoscaling", true);
+  param_str(scorefile, "savefile");
   param_b(savefile_selection, "savefile_selection")
   -> editable("select the score/save file on startup", 's')
   -> set_reaction([] {
@@ -3767,9 +3640,9 @@ EX void configureMouse() {
   dialog::display();
   }
 
-vector<setting*> last_changed;
+vector<parameter*> last_changed;
 
-EX void add_to_changed(setting *f) {
+EX void add_to_changed(parameter *f) {
   auto orig_f = f;
   for(int i=0; i<isize(last_changed); i++) {
     if(last_changed[i] == f)
@@ -3780,7 +3653,7 @@ EX void add_to_changed(setting *f) {
   last_changed.push_back(f);
   }
 
-EX setting *find_edit(void *val) {
+EX parameter *find_edit(void *val) {
   for(auto& fs: params) {
     fs.second->check_change();
     if(fs.second->affects(val))
@@ -3819,7 +3692,7 @@ template<class T> void add_edit(T& val, char key) {
   }
 #endif
 
-EX void find_setting() {
+EX void find_parameter() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen();
 
@@ -3853,7 +3726,7 @@ EX void find_setting() {
     };
   }
 
-EX void edit_all_settings() {
+EX void edit_all_parameters() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen();
   dialog::init(XLAT("recently changed settings"));
@@ -3868,12 +3741,12 @@ EX void edit_all_settings() {
 
   dialog::addBreak(100);
   dialog::addItem(XLAT("find a setting"), '/');
-  dialog::add_action_push(find_setting);
+  dialog::add_action_push(find_parameter);
   dialog::addBack();
   dialog::display();
   }
 
-void list_setting::show_edit_option(int key) {
+void list_parameter::show_edit_option(int key) {
   string opt;
   if(get_value() < 0 || get_value() >= isize(options)) opt = its(get_value());
   else opt = options[get_value()].first;
@@ -3954,7 +3827,7 @@ EX void showSettings() {
 
 #if CAP_CONFIG
   dialog::addItem(XLAT("find a setting"), '/');
-  dialog::add_action_push(edit_all_settings);
+  dialog::add_action_push(edit_all_parameters);
 
   dialog::addItem(XLAT("save the current config"), 's');
   dialog::add_action(saveConfig);
@@ -4217,10 +4090,10 @@ EX int read_config_args() {
     shift_arg_formula(precise_width);
     }
   else if(argis("-d:all")) {
-    PHASEFROM(2); launch_dialog(edit_all_settings);
+    PHASEFROM(2); launch_dialog(edit_all_parameters);
     }
   else if(argis("-d:find")) {
-    PHASEFROM(2); launch_dialog(find_setting);
+    PHASEFROM(2); launch_dialog(find_parameter);
     }
   else if(argis("-d:param")) {
     PHASEFROM(2);
@@ -4346,7 +4219,7 @@ local_parameter_set* current_lps;
 void local_parameter_set::pswitch() {
   if(extends) extends->pswitch();
   for(auto s: swaps) {
-    s.first->swap_with(s.second);
+    s.first->swap_with(&*s.second);
     swap(s.first->name, s.second->name);
     }
   }
@@ -4364,13 +4237,14 @@ extern vector<void*> lps_of_type;
 
 template<class T, class U> void lps_add(local_parameter_set& lps, T&val, U nvalue) {
   int found = 0;
-  for(auto& fs: savers) {
-    if(fs->affects(&val)) {
+  for(auto& fs: params) {
+    if(fs.second->affects(&val)) {
       found++;
       T* nv = new T(nvalue);
       lps_of_type.emplace_back(nv);
-      println(hlog, lps.label, " found saver: ", fs->name);
-      fs->clone(lps, nv);
+      println(hlog, lps.label, " found saver: ", fs.second->name);
+      auto fs2 = fs.second->clone(lps, nv);
+      lps.swaps.emplace_back(fs.second, fs2);
       return;
       }
     }

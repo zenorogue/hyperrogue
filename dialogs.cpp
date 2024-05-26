@@ -1368,12 +1368,12 @@ EX namespace dialog {
     dialog::addBreak(50);
     auto f = find_edit(!ptr ? nullptr : ne.intval ? (void*) ne.intval : (void*) ne.editwhat);
     if(f)
-      dialog::addHelp(XLAT("Parameter names, e.g. '%1'", f->parameter_name));
+      dialog::addHelp(XLAT("Parameter names, e.g. '%1'", f->name));
     else
       dialog::addHelp(XLAT("Parameter names"));
     dialog::addBreak(50);
     for(auto& ap: anims::aps) {
-      dialog::addInfo(ap.par->parameter_name + " = " + ap.formula);
+      dialog::addInfo(ap.par->name + " = " + ap.formula);
       }
     #endif
     dialog::addBreak(50);

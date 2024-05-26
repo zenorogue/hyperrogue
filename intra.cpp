@@ -1181,7 +1181,7 @@ EX void add_options() {
   }
 
 auto a = addHook(hooks_configfile, 100, [] {
-  param_b(auto_eyelevel, "auto_eyelevel")
+  param_b(auto_eyelevel, "intra_eyelevel")
       -> editable("keep eye level when walking enabled", 'L');
   param_f(eye_level, "walk_eye_level")
       -> editable(0, 5, .1, "walking eye level",

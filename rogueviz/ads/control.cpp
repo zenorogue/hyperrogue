@@ -82,7 +82,7 @@ void fire() {
 
 bool handleKey(int sym, int uni) {
   if(cmode & sm::NORMAL) {
-    char* t = scfg_ads.keyaction;
+    int* t = scfg_ads.keyaction;
     if(t[sym] >= 16 && t[sym] < 32) return true;
     if(sym == 'v') pushScreen(game_menu);
     if(sym == SDLK_ESCAPE) pushScreen(game_menu);

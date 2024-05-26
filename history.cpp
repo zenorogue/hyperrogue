@@ -756,19 +756,19 @@ EX namespace history {
     history::includeHistory = false;
     }) + addHook(hooks_configfile, 0, [] {
 
-    addsaver(autobandhistory, "include history"); // check!
-    param_f(lvspeed, "lvspeed", "lineview speed");
-    addsaver(extra_line_steps, "lineview extension");
+    param_b(autobandhistory, "include history"); // check!
+    param_f(lvspeed, parameter_names("lvspeed", "lineview speed"));
+    param_f(extra_line_steps, "lineview extension");
       
-    addsaver(bandhalf, "band width");
-    addsaver(bandsegment, "band segment");
-    addsaver(autoband, "automatic band");
-    addsaver(autobandhistory, "automatic band history");
-    addsaver(dospiral, "do spiral");      
+    param_i(bandhalf, "band width");
+    param_i(bandsegment, "band segment");
+    param_b(autoband, "automatic band");
+    param_b(autobandhistory, "automatic band history");
+    param_b(dospiral, "do spiral");
 
     #if CAP_SHOT && CAP_SDL
-    addsaver(band_format_auto, "band_format_auto");
-    addsaver(band_format_now, "band_format_now");
+    param_str(band_format_auto, "band_format_auto");
+    param_str(band_format_now, "band_format_now");
     #endif
     });
 

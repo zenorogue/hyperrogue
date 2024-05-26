@@ -972,7 +972,7 @@ void mousemovement() {
 
 patterns::patterninfo si_save;  
 
-saverlist texturesavers;
+paramlist texturesavers;
 
 eVariation targetvariation;
 eGeometry targetgeometry;
@@ -983,49 +983,49 @@ string tes;
 
 void init_textureconfig() {
 #if CAP_CONFIG
-  texturesavers = std::move(savers);  
+  texturesavers = std::move(params);  params.clear();
   for(int i=0; i<3; i++)
   for(int j=0; j<3; j++)
-    addsaver(config.itt[i][j], "texturematrix_" + its(i) + its(j), i==j ? 1 : 0);
+    param_f(config.itt[i][j], "texturematrix_" + its(i) + its(j), i==j ? 1 : 0);
 
   for(int i=0; i<3; i++)
   for(int j=0; j<3; j++)
-    addsaver(View[i][j], "viewmatrix_" + its(i) + its(j), i==j ? 1 : 0);
+    param_f(View[i][j], "viewmatrix_" + its(i) + its(j), i==j ? 1 : 0);
 
-  addsaverenum(targetgeometry, "geometry", gNormal);
-  addsaver(tes, "tes", "");
-  addsaverenum(pmodel, "used model", mdDisk);
-  addsaver(vid.yshift, "Y shift", 0);
-  addsaver(pconf.yposition, "Y position", 0);
-  addsaver(pconf.xposition, "X position", 0);
-  addsaver((matrix_eq&)pconf.cam(), "camera angle");
-  addsaverenum(targetvariation, "bitruncated", eVariation::bitruncated);
+  param_enum(targetgeometry, "geometry", gNormal);
+  param_str(tes, "tes", "");
+  param_enum(pmodel, "used model", mdDisk);
+  param_f(vid.yshift, "Y shift", 0);
+  param_f(pconf.yposition, "Y position", 0);
+  param_f(pconf.xposition, "X position", 0);
+  param_matrix((matrix_eq&)pconf.cam(), "camera angle", 2);
+  param_enum(targetvariation, "bitruncated", eVariation::bitruncated);
   // ... geometry parameters
 
-  addsaverenum(patterns::whichPattern, "pattern", patterns::PAT_TYPES);
-  addsaver(patterns::subpattern_flags, "pattern flags", 0);
+  param_enum(patterns::whichPattern, "pattern", patterns::PAT_TYPES);
+  param_i(patterns::subpattern_flags, "pattern flags", 0);
 
-  addsaver(si_save.id, "center type", 1);
-  addsaver(si_save.dir, "center direction", 0);
-  addsaver(si_save.reflect, "center reflection", false);
-  addsaver(config.data.twidth, "texture resolution", 2048);
-  addsaver(config.gsplits, "precision", 1);
+  param_i(si_save.id, "center type", 1);
+  param_i(si_save.dir, "center direction", 0);
+  param_b(si_save.reflect, "center reflection", false);
+  param_i(config.data.twidth, "texture resolution", 2048);
+  param_i(config.gsplits, "precision", 1);
   
-  addsaver(config.grid_color, "grid color", 0);
-  addsaver(config.color_alpha, "alpha color", 0);
-  addsaver(config.mesh_color, "mesh color", 0);
+  param_color(config.grid_color, "grid color", true, 0);
+  param_i(config.color_alpha, "alpha color", 0);
+  param_color(config.mesh_color, "mesh color", true, 0);
   
-  addsaver(pconf.alpha, "projection", 1);
-  addsaver(pconf.scale, "scale", 1);
-  addsaver(pconf.stretch, "stretch", 1);
-  addsaver(vid.binary_width, "binary-tiling-width", 1);
+  param_f(pconf.alpha, "projection", 1);
+  param_f(pconf.scale, "scale", 1);
+  param_f(pconf.stretch, "stretch", 1);
+  param_f(vid.binary_width, "binary-tiling-width", 1);
   
-  addsaver(config.texturename, "texture filename", "");
-  addsaver(config.texture_tuner, "texture tuning", "");
+  param_str(config.texturename, "texture filename", "");
+  param_str(config.texture_tuner, "texture tuning", "");
   
-  addsaver(csymbol, "symbol", "");
+  param_str(csymbol, "symbol", "");
   
-  swap(texturesavers, savers);
+  swap(texturesavers, params); texturesavers.clear();
 #endif
   }
 
@@ -1059,8 +1059,8 @@ bool texture_config::save() {
   if(arcm::in()) csymbol = arcm::current.symbol;
   #endif
   
-  for(auto s: texturesavers) if(s->dosave())
-    fprintf(f, "%s=%s\n", s->name.c_str(), s->save().c_str());
+  for(auto s: texturesavers) if(s.second->dosave())
+    fprintf(f, "%s=%s\n", s.second->name.c_str(), s.second->save().c_str());
   
   fclose(f);
 #endif
@@ -1073,10 +1073,10 @@ bool texture_config::load() {
 
   FILE *f = fopen(configname.c_str(), "rt");
   if(!f) return false;
-  swap(texturesavers, savers);
-  for(auto s: savers) s->reset();
+  swap(texturesavers, params);
+  for(auto s: params) s.second->reset();
   loadNewConfig(f);
-  swap(texturesavers, savers);
+  swap(texturesavers, params);
   fclose(f);
   polygonal::solve();
   

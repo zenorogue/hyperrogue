@@ -1828,7 +1828,7 @@ EX void save_mode_to_file(const string& fname) {
   if(custom_welcome != "") println(f, "CMSG ", custom_welcome);
 
   for(auto& ap: allowed_params) {
-    auto& s = params[ap]->saver;
+    auto& s = params[ap];
     if(s->dosave())
       println(f, ap, "=", s->save());
     }

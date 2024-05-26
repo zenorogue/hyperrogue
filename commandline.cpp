@@ -445,6 +445,8 @@ EX hookset<int()> hooks_args;
 
 EX map<string, pair<int, reaction_t>> *added_commands;
 
+EX bool delayed_start;
+
 EX namespace arg {
 
   int read_added_commands() {
@@ -477,6 +479,7 @@ EX namespace arg {
   void read(int phase) { 
     curphase = phase;
     callhooks(hooks_config);
+    dynamicval<bool> ds(delayed_start, true);
     while(pos < isize(argument)) {
       int r = callhandlers(1, hooks_args);
       switch (r) {

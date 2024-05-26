@@ -245,12 +245,12 @@ auto ah = addHook(hooks_args, 0, read_args);
 #endif
 auto ah2 = addHook(hooks_configfile, 100, [] {
   #if CAP_CONFIG
-  addsaver(shot::shotx, "shotx");
-  addsaver(shot::shoty, "shoty");
-  addsaverenum(shot::format, "shotsvg");
-  addsaver(shot::transparent, "shottransparent");
+  param_i(shot::shotx, "shotx");
+  param_i(shot::shoty, "shoty");
+  param_enum(shot::format, "shotsvg", shot::png);
+  param_b(shot::transparent, "shottransparent");
   param_f(shot::gamma, "shotgamma");
-  addsaver(shot::caption, "shotcaption");
+  param_str(shot::caption, "shotcaption");
   param_f(shot::fade, "shotfade");
   #endif
   });
@@ -1181,27 +1181,27 @@ EX void moved() {
 
 #if HDR
 struct animated_parameter {
-  setting *par;
+  parameter *par;
   string formula;
   };
 #endif
 
 EX vector<animated_parameter> aps;
 
-EX setting *find_param(void *x) {
+EX parameter *find_param(void *x) {
   for(auto& fs: params)
     if(fs.second->affects(x))
       return &*fs.second;
   return nullptr;
   }
 
-EX void deanimate(setting *p) {
+EX void deanimate(parameter *p) {
   for(int i=0; i<isize(aps); i++) 
     if(aps[i].par == p)
       aps.erase(aps.begin() + (i--));
   }
 
-EX void get_parameter_animation(setting *p, string &s) {
+EX void get_parameter_animation(parameter *p, string &s) {
   for(auto &ap: aps)
     if(ap.par == p && ap.par->anim_unchanged())
       s = ap.formula;
@@ -1214,7 +1214,7 @@ EX void animate_parameter(ld &x, string f) {
   aps.emplace_back(animated_parameter{par, f});
   }
 
-EX void animate_setting(setting *par, string f) {
+EX void animate_parameter(parameter *par, string f) {
   if(!par) { println(hlog, "parameter not animatable"); return; }
   deanimate(par);
   aps.emplace_back(animated_parameter{par, f});
@@ -1759,15 +1759,15 @@ auto animhook = addHook(hooks_frame, 100, display_animation)
   #endif
   + addHook(hooks_configfile, 100, [] {
     #if CAP_CONFIG
-    param_f(anims::period, "aperiod", "animation period");
-    addsaver(anims::noframes, "animation frames");
-    param_f(anims::cycle_length, "acycle", "animation cycle length");
-    param_f(anims::parabolic_length, "aparabolic", "animation parabolic length")
+    param_f(anims::period, parameter_names("aperiod", "animation period"));
+    param_i(anims::noframes, "animation frames");
+    param_f(anims::cycle_length, parameter_names("acycle", "animation cycle length"));
+    param_f(anims::parabolic_length, parameter_names("aparabolic", "animation parabolic length"))
       ->editable(0, 10, 1, "cells to go", "", 'c');
     param_matrix(anims::rug_angle, "arugangle", 3)
       ->editable("animation rug angle", "", 'C');
-    param_f(anims::circle_radius, "acradius", "animation circle radius");
-    param_f(anims::circle_spins, "acspins", "animation circle spins");
+    param_f(anims::circle_radius, parameter_names("acradius", "animation circle radius"));
+    param_f(anims::circle_spins, parameter_names("acspins", "animation circle spins"));
     param_matrix(anims::rug_movement_angle, "rug forward movement angle", 3)
       ->editable("rug forward movement angle", "", 'b');
     param_matrix(anims::movement_angle.v2, "movement_angle", 2)->editable("movement angle", "", 'm');
@@ -1781,7 +1781,7 @@ auto animhook = addHook(hooks_frame, 100, display_animation)
     param_b(wallopt, "wallopt");
     param_b(clearup, "anim_clearup");
     param_color(circle_display_color, "circle_display_color", true);
-    param_enum(anims::ma, "ma", "movement_animation", maNone)
+    param_enum(anims::ma, parameter_names("ma", "movement_animation"), maNone)
     -> editable({{"none", ""}, {"translation", ""}, {"rotation", ""}, {"circle", ""}, {"parabolic", ""}, {"translation+rotation", ""}}, "movement animation", 'a')
     -> set_reaction(ma_reaction);
 

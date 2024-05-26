@@ -3164,10 +3164,10 @@ void addconfig() {
   param_f(hard_limit, "ray_hard_limit");
   param_i(want_use, "ray_want_use");
   param_f(exp_decay_poly, "ray_exp_decay_poly");
-  addsaver(max_iter_iso, "ray_max_iter_iso");
-  addsaver(max_iter_sol, "ray_max_iter_sol");
+  param_i(max_iter_iso, "ray_max_iter_iso");
+  param_i(max_iter_sol, "ray_max_iter_sol");
   param_i(max_cells, "ray_max_cells");
-  addsaver(rays_generate, "ray_generate");
+  param_b(rays_generate, "ray_generate");
   param_b(fixed_map, "ray_fixed_map");
   param_i(max_wall_offset, "max_wall_offset");
   param_i(max_celltype, "max_celltype");
