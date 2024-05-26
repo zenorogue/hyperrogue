@@ -407,6 +407,7 @@ struct custom_parameter : public parameter {
   function<cld()> custom_value;
   function<bool(void*)> custom_affect;
   function<void(const string&)> custom_load;
+  function<string()> custom_save;
   function<shared_ptr<parameter>(struct local_parameter_set& lps, void *value)> custom_clone;
 
   virtual shared_ptr<parameter> clone(struct local_parameter_set& lps, void *value) {
@@ -447,7 +448,7 @@ struct custom_parameter : public parameter {
     }
 
   virtual cld get_cld() override { return custom_value(); }
-  virtual string save() override { return "not saveable"; }
+  virtual string save() override { if(custom_save) return custom_save(); else return "not saveable"; }
   virtual bool dosave() override { return false; }
   virtual void reset() override {}
   virtual void set_default() override {}
@@ -729,6 +730,7 @@ shared_ptr<custom_parameter> param_custom_int(T& val, const parameter_names& n, 
   u->custom_value = [&val] () { return (int) val; };
   u->custom_affect = [&val] (void *v) { return &val == v; };
   u->custom_load = [&val] (const string& s) { val = (T) parseint(s); };
+  u->custom_save = [&val] { return its(int(val)); };
   u->custom_clone = [u] (struct local_parameter_set& lps, void *value) { auto val = (int*) value; return param_i(*val, lps.mod(&*u), *val); };
   u->default_key = key;
   u->is_editable = true;
@@ -744,6 +746,7 @@ EX shared_ptr<custom_parameter> param_custom_ld(ld& val, const parameter_names& 
   u->custom_value = [&val] () { return val; };
   u->custom_affect = [&val] (void *v) { return &val == v; };
   u->custom_load = [&val] (const string& s) { val = parseld(s); };
+  u->custom_save = [&val] { return fts(val, 10); };
   u->custom_clone = [u] (struct local_parameter_set& lps, void *value) { auto val = (ld*) value; return param_f(*val, lps.mod(&*u), *val); };
 
   u->default_key = key;
@@ -2949,6 +2952,22 @@ EX void show3D() {
   dialog::display();
   }
 
+#if HDR
+namespace ccolor { struct data; }
+#endif
+
+EX shared_ptr<custom_parameter> param_ccolor(ccolor::data*& val, const parameter_names& n) {
+  shared_ptr<custom_parameter> u ( new custom_parameter );
+  u->setup(n);
+  u->custom_value = [&val] { for(int i=0; i<isize(ccolor::all); i++) if(ccolor::all[i] == val) return i; return -1; };
+  u->last_value = u->custom_value();
+  u->custom_affect = [&val] (void *v) { return &val == v; };
+  u->custom_load = [&val] (const string& s) { for(auto c: ccolor::all) if(c->name == s) val = c; };
+  u->custom_save = [&val] { return val->name; };
+  u->custom_clone = [u] (struct local_parameter_set& lps, void *value) { auto val = (ccolor::data**) value; return param_ccolor(*val, lps.mod(&*u)); };
+  return u;
+  }
+
 EX int config3 = addHook(hooks_configfile, 100, [] {
   param_f(vid.eye, "eyelevel", 0)
     ->editable(-5, 5, .1, "eye level", "", 'E')
@@ -3244,6 +3263,8 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
     else
       addMessage(XLAT("Save the config to always use %1.", scorefile));
     });
+
+  param_ccolor(ccolor::which, "pattern");
   });
 
 EX void switchcolor(unsigned int& c, unsigned int* cs) {
