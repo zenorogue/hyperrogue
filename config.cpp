@@ -750,6 +750,34 @@ EX shared_ptr<custom_parameter> param_custom_ld(ld& val, const parameter_names& 
   return u;
   }
 
+EX shared_ptr<custom_parameter> param_colortable(colortable& val, const parameter_names& n) {
+  shared_ptr<custom_parameter> u ( new custom_parameter );
+  u->setup(n);
+  colortable dft = val;
+  u->last_value = -1;
+  u->custom_viewer = [] (char key) {};
+  u->custom_value = [&val] () { return -1; };
+  u->custom_affect = [&val] (void *v) { return &val == v; };
+  u->custom_load = [&val] (const string& s) {
+    auto seq = split_string(s, ',');
+    val.resize(isize(seq));
+    for(int i=0; i<isize(seq); i++) sscanf(seq[i].c_str(), "%x", &(val[i]));
+    };
+  u->custom_save = [&val] {
+    bool first = true;
+    string str;
+    for(auto v: val) { if(first) first = false; else str += ","; str += itsh(v); }
+    return str;
+    };
+  u->custom_do_save = [dft, &val] { return val != dft; };
+  u->custom_clone = [u] (struct local_parameter_set& lps, void *value) { auto val = (colortable*) value; return param_colortable(*val, lps.mod(&*u)); };
+  u->custom_reset = [dft, &val] { val = dft; };
+
+  u->default_key = 0;
+  u->is_editable = true;
+  return u;
+  }
+
 EX ld bounded_mine_percentage = 0.1;
 EX int bounded_mine_quantity, bounded_mine_max;
 
@@ -900,11 +928,6 @@ EX void initcs(charstyle &cs) {
   cs.bowcolor   = 0x603000FF;
   cs.bowcolor2  = 0xFFD500FF;
   cs.lefthanded = false;
-  }
-
-EX void savecolortable(colortable& ct, string name) {
-  for(int i=0; i<isize(ct); i++)
-    param_color(ct[i], "color:" + name + ":" + its(i), false, ct[i]);
   }
 
 EX purehookset hooks_configfile;
@@ -1228,7 +1251,6 @@ EX void initConfig() {
   ->set_extra(draw_crosshair);
   
   param_b(mapeditor::drawplayer, "drawplayer");
-  param_color((color_t&) ccolor::plain.ctab[0], "color:canvasback", false);
 
   param_color(backcolor, "color:background", false);
   param_color(forecolor, "color:foreground", false);
@@ -1241,11 +1263,11 @@ EX void initConfig() {
   param_f(vid.multiplier_grid, parameter_names("mgrid", "mult:grid"), 1);
   param_color(dialog::dialogcolor, "color:dialog", false);
   for(auto p: ccolor::all)
-    savecolortable(p->ctab, s0+"canvas:"+p->name);
-  savecolortable(distcolors, "distance");
-  savecolortable(minecolors, "mines");
+    param_colortable(p->ctab, s0+"canvas:"+p->name);
+  param_colortable(distcolors, "distance");
+  param_colortable(minecolors, "mines");
   #if CAP_COMPLEX2
-  savecolortable(brownian::colors, "color:brown");
+  param_colortable(brownian::colors, "color:brown");
   #endif
   
   for(int i=0; i<motypes; i++)
@@ -2955,6 +2977,7 @@ namespace ccolor { struct data; }
 EX shared_ptr<custom_parameter> param_ccolor(ccolor::data*& val, const parameter_names& n) {
   shared_ptr<custom_parameter> u ( new custom_parameter );
   u->setup(n);
+  u->custom_viewer = [] (char key) {};
   u->custom_value = [&val] { for(int i=0; i<isize(ccolor::all); i++) if(ccolor::all[i] == val) return i; return -1; };
   u->last_value = u->custom_value();
   u->custom_affect = [&val] (void *v) { return &val == v; };
