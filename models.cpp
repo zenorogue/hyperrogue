@@ -949,8 +949,9 @@ EX namespace models {
       dynamicval<function<bool()>> ds(auto_restrict);
       auto_restrict = [&p] { return &vpconf == &p; };
 
-      param_enum(p.model, parameter_names(pp+"used_model", pp+"used model"), mdDisk);
-      if(&p.model == &pmodel) param_custom_int(pmodel, "projection|Poincare|Klein|half-plane|perspective", menuitem_projection, '1');
+      if(&p.model == &pmodel)
+        param_custom_int(pmodel, "projection|Poincare|Klein|half-plane|perspective", menuitem_projection, '1');
+      else param_enum(p.model, parameter_names(pp+"used_model", pp+"used model"), mdDisk);
 
       param_matrix(p.mori().v2, pp+"mori", 2)
       -> editable("model orientation", "", 'o');
@@ -1063,9 +1064,9 @@ EX namespace models {
       param_i(p.back_and_front, sp+"backandfront", 0);
 
       if(&p.model == &pmodel) {
+        p.alpha = 1;
         auto proj = param_custom_ld(p.alpha, sp+"projection", menuitem_projection_distance, 'p');
         proj->help_text = "projection distance|Gans Klein Poincare orthographic stereographic";
-        p.alpha = 1;
         }
       else {
         param_f(p.alpha, sp+"projection", 1);

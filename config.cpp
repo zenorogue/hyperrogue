@@ -408,6 +408,7 @@ struct custom_parameter : public parameter {
   function<bool(void*)> custom_affect;
   function<void(const string&)> custom_load;
   function<string()> custom_save;
+  function<bool()> custom_do_save;
   function<shared_ptr<parameter>(struct local_parameter_set& lps, void *value)> custom_clone;
 
   virtual shared_ptr<parameter> clone(struct local_parameter_set& lps, void *value) {
@@ -449,7 +450,7 @@ struct custom_parameter : public parameter {
 
   virtual cld get_cld() override { return custom_value(); }
   virtual string save() override { if(custom_save) return custom_save(); else return "not saveable"; }
-  virtual bool dosave() override { return false; }
+  virtual bool dosave() override { if(custom_do_save) return custom_do_save(); else return false; }
   virtual void reset() override {}
   virtual void set_default() override {}
   virtual void swap_with(parameter*) override {}
@@ -725,12 +726,14 @@ template<class T>
 shared_ptr<custom_parameter> param_custom_int(T& val, const parameter_names& n, function<void(char)> menuitem, char key) {
   shared_ptr<custom_parameter> u ( new custom_parameter );
   u->setup(n);
-  u->last_value = (int) val;
+  int dft = (int) val;
+  u->last_value = dft;
   u->custom_viewer = menuitem;
   u->custom_value = [&val] () { return (int) val; };
   u->custom_affect = [&val] (void *v) { return &val == v; };
   u->custom_load = [&val] (const string& s) { val = (T) parseint(s); };
   u->custom_save = [&val] { return its(int(val)); };
+  u->custom_do_save = [dft, &val] { return int(val) != dft; };
   u->custom_clone = [u] (struct local_parameter_set& lps, void *value) { auto val = (int*) value; return param_i(*val, lps.mod(&*u), *val); };
   u->default_key = key;
   u->is_editable = true;
@@ -741,12 +744,14 @@ shared_ptr<custom_parameter> param_custom_int(T& val, const parameter_names& n, 
 EX shared_ptr<custom_parameter> param_custom_ld(ld& val, const parameter_names& n, function<void(char)> menuitem, char key) {
   shared_ptr<custom_parameter> u ( new custom_parameter );
   u->setup(n);
-  u->last_value = (int) val;
+  ld dft = val;
+  u->last_value = dft;
   u->custom_viewer = menuitem;
   u->custom_value = [&val] () { return val; };
   u->custom_affect = [&val] (void *v) { return &val == v; };
   u->custom_load = [&val] (const string& s) { val = parseld(s); };
   u->custom_save = [&val] { return fts(val, 10); };
+  u->custom_do_save = [dft, &val] { return val != dft; };
   u->custom_clone = [u] (struct local_parameter_set& lps, void *value) { auto val = (ld*) value; return param_f(*val, lps.mod(&*u), *val); };
 
   u->default_key = key;
