@@ -88,7 +88,6 @@ struct parameter : public std::enable_shared_from_this<parameter> {
     }
   virtual bool dosave() = 0;
   virtual void reset() = 0;
-  virtual void set_default() = 0;
   virtual void swap_with(parameter*) = 0;
 
   virtual shared_ptr<parameter> clone(struct local_parameter_set& lps, void *value) { println(hlog, "parameter not cloneable: ", name); throw hr_exception("not cloneable"); }
@@ -193,7 +192,6 @@ template<class T> struct enum_parameter : list_parameter {
   bool dosave() override { return *value != dft; }
   void reset() override { *value = dft; }
   string save() override { return its(int(*value)); }
-  void set_default() override { dft = *value; }
   shared_ptr<parameter> clone(struct local_parameter_set& lps, void *value) override;
   void swap_with(parameter *s) override { swap(*value, *(((enum_parameter<T>*)s)->value)); }
   };
@@ -206,7 +204,6 @@ template<class T> struct val_parameter : public parameter {
   bool dosave() override { return *value != dft; }
   void reset() override { *value = dft; }
   bool affects(void* v) override { return v == value; }
-  void set_default() override { dft = *value; }
 
   void check_change() override {
     if(*value != last_value) {
@@ -369,7 +366,6 @@ struct matrix_eq : transmatrix {
 struct matrix_parameter : public val_parameter<matrix_eq> {
 
   void reset() override { *value = dft; }
-  void set_default() override { dft = *value; }
   bool dosave() override { return !eqmatrix(*value, dft); }
 
   int dim;
@@ -452,16 +448,8 @@ struct custom_parameter : public parameter {
   virtual string save() override { if(custom_save) return custom_save(); else return "not saveable"; }
   virtual bool dosave() override { if(custom_do_save) return custom_do_save(); else return false; }
   virtual void reset() override {}
-  virtual void set_default() override {}
   virtual void swap_with(parameter*) override {}
   };
-
-template<class T> void set_saver_default(T& val) {
-  for(auto param: params)
-    if(param.second->affects(&val))
-      param.second->set_default();
-  }
-
 #endif
 
 void non_editable() {
