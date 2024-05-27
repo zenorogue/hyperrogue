@@ -1567,7 +1567,6 @@ EX namespace ccolor {
   EX int rwalls = 50;
 
   EX void edit_rwalls() {
-    if(WDIM == 2) return;
     dialog::editNumber(rwalls, 0, 100, 10, 50, XLAT("probability of a wall (%)"), "");
     dialog::get_di().reaction = [] { stop_game(); start_game(); };
     }
