@@ -744,6 +744,12 @@ EX void checkTide(cell *c) {
     else if(c->wall == waMagma) c->wall = waNone;
     }
   #endif
+  if(c->land == laCanvas && ccolor::live_canvas) {
+    color_t col = ccolor::generateCanvas(c);
+    c->landparam = col;
+    c->wall = canvas_default_wall;
+    if(col & 0x1000000) c->wall = waWaxWall;
+    }
   }
 
 EX bool makeNoMonster(cell *c) {

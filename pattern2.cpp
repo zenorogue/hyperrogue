@@ -1565,6 +1565,7 @@ EX namespace ccolor {
   EX int jhole = 0;
   EX int jblock = 0;
   EX int rwalls = 50;
+  EX bool live_canvas;
 
   EX void edit_rwalls() {
     dialog::editNumber(rwalls, 0, 100, 10, 50, XLAT("probability of a wall (%)"), "");

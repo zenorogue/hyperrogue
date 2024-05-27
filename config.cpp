@@ -3293,6 +3293,8 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
     });
 
   param_ccolor(ccolor::which, "pattern");
+  param_b(ccolor::live_canvas, "live_canvas")
+  -> editable("apply color/pattern changes to canvas automatically", 'l');
   param_str(ccolor::color_formula, "color_formula");
   });
 
@@ -3383,19 +3385,7 @@ EX void showCustomizeChar() {
     };
   }
 
-EX void refresh_canvas() {
-  manual_celllister cl;
-  cl.add(cwt.at);
-    
-  int at = 0;
-  while(at < isize(cl.lst)) {
-    cell *c2 = cl.lst[at];
-    c2->landparam = ccolor::generateCanvas(c2);
-    at++;
-    
-    forCellEx(c3, c2) cl.add(c3);
-    }
-  }
+EX void refresh_canvas() { ccolor::live_canvas = true; }
 
 EX color_t addalpha(color_t c) { return (c << 8) | 0xFF; }
 
@@ -3489,6 +3479,8 @@ EX void show_color_dialog() {
       dialog::addItem(XLAT("unreversed colors"), 'U');
       dialog::add_action_push([] { edit_color_table(ccolor::shape.ctab, refresh_canvas, true); });
       }
+
+    add_edit(ccolor::live_canvas);
     }
  
   if(cwt.at->land == laMinefield) {
