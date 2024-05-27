@@ -2089,6 +2089,11 @@ EX namespace patterns {
     ep.extra_params["chess"] = chessvalue(c);
     ep.extra_params["ph"] = pseudohept(c);
     ep.extra_params["kph"] = kraken_pseudohept(c);
+    ep.extra_params["windmap"] = windmap::at(c) / 256.;
+    ep.extra_params["cdata0"] = getCdata(c, 0);
+    ep.extra_params["cdata1"] = getCdata(c, 1);
+    ep.extra_params["cdata2"] = getCdata(c, 2);
+    ep.extra_params["cdata3"] = getCdata(c, 3);
     if(true) {
       ep.extra_params["md"] = c->master->distance;
       ep.extra_params["me"] = c->master->emeraldval;
