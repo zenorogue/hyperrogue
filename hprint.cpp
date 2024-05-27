@@ -36,6 +36,7 @@ EX string s0;
 EX string its(int i) { return hr::format("%d", i); }
 
 EX string itsh8(int i) { return hr::format("%08X", i); }
+EX string itsh6(int i) { return hr::format("%06X", i); }
 
 EX string fts(ld x, int prec IS(6)) {
   std::stringstream ss;

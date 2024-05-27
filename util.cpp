@@ -578,8 +578,16 @@ color_t exp_parser::parsecolor(int prio) {
   if(token == "black") return 0x000000FF;
   if(token == "white") return 0xFFFFFFFF;
   color_t res;
-  int qty = sscanf(s.c_str(), "%x", &res);
-  if(qty == 0) throw hr_parse_exception("color parse error");
+  if(s.size() == 6) {
+    int qty = sscanf(s.c_str(), "%x", &res);
+    if(qty == 0) throw hr_parse_exception("color parse error");
+    return res * 256 + 0xFF;
+    }
+  else if(s.size() == 8) {
+    int qty = sscanf(s.c_str(), "%x", &res);
+    if(qty == 0) throw hr_parse_exception("color parse error");
+    return res;
+   }
   return res;
   }
 

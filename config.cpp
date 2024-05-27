@@ -356,7 +356,7 @@ struct color_parameter : public val_parameter<color_t> {
 
   cld get_cld() override { return has_alpha ? *value : (*value * 256 + 0xFF); }
   void load_from_raw(const string& s) override { *value = parsecolor(s, has_alpha); }
-  string save() override { return itsh(*value); }
+  string save() override { return has_alpha ? itsh8(*value) : itsh6(*value); }
   shared_ptr<parameter> clone(struct local_parameter_set& lps, void *value) override;
   };
 
