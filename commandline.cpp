@@ -105,11 +105,7 @@ EX namespace arg {
   EX bool argis(const string& s) { if(args()[0] == '-' && args()[1] == '-') return args().substr(1) == s; return args() == s; }
 
   EX color_t argcolor(int bits) {
-    string s = args();
-    auto p = find_color_by_name(s);
-    if(p && bits == 24) return p->second;
-    if(p && bits == 32) return (p->second << 8) | 0xFF;
-    return strtoll(argcs(), NULL, 16);
+    return parsecolor(args(), bits == 32);
     }
   
   int parameter_id;
