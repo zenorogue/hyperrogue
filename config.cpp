@@ -1203,7 +1203,7 @@ EX void initConfig() {
   param_i(vid.wallmode, "wall display mode", DEFAULT_WALLMODE);
   param_i(vid.highlightmode, "highlightmode");
 
-  param_b(vid.always3, "3D always", false);
+  param_b(vid.always3, "3D always", false)->switcher = geom3::switch_fpp;
 
   param_f(geom3::euclid_embed_scale, "euclid_embed_scale")
   -> editable(0, 2, 0.05, "Euclidean embedding scale", "How to scale the Euclidean map, relatively to the 3D absolute unit.", 'X')
