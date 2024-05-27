@@ -276,13 +276,17 @@ EX void enable_cheat() {
   
 // -- game modes -- 
 
-EX void switchHardcore() {
+EX void switchHardcore_quiet() {
   if(hardcore && !canmove) { 
-    restart_game();
+    if(delayed_start) stop_game(); else restart_game();
     hardcore = false;
     }
   else if(hardcore && canmove) { hardcore = false; }
   else { hardcore = true; canmove = true; hardcoreAt = turncount; }
+  }
+
+EX void switchHardcore() {
+  switchHardcore_quiet();
   if(hardcore)
       addMessage(XLAT("One wrong move and it is game over!"));
   else

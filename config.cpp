@@ -1286,7 +1286,7 @@ EX void initConfig() {
   // modes
     
   param_b(shmup::on, "mode-shmup", false)->be_non_editable();
-  param_b(hardcore, "mode-hardcore", false)->be_non_editable();
+  param_b(hardcore, "mode-hardcore", false)->set_reaction([] { hardcore = !hardcore; switchHardcore_quiet(); });
   param_enum(land_structure, "mode-chaos", lsNiceWalls)->be_non_editable();
   #if CAP_INV
   param_b(inv::on, "mode-Orb Strategy");
