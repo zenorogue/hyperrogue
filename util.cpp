@@ -557,10 +557,10 @@ color_t exp_parser::parsecolor(int prio) {
     }
   if(eat("rgb(")) {
     array<ld, 4> parts;
-    parts[0] = rparse(); force_eat(",");
-    parts[1] = rparse(); force_eat(",");
-    parts[2] = rparse();
-    if(eat(",")) parts[3] = rparse(); else parts[3] = 1;
+    parts[3] = rparse(); force_eat(",");
+    parts[2] = rparse(); force_eat(",");
+    parts[1] = rparse();
+    if(eat(",")) parts[0] = rparse(); else parts[0] = 1;
     force_eat(")");
     return part_to_col(parts);
     }
