@@ -64,6 +64,12 @@ EX ld lerp(ld a0, ld a1, ld x) {
   return a0 + (a1-a0) * x;
   }
 
+EX ld clamp(ld a, ld v0, ld v1) {
+  if(a < v0) return v0;
+  if(a > v1) return v1;
+  return a;
+  }
+
 EX cld lerp(cld a0, cld a1, ld x) {
   return a0 + (a1-a0) * x;
   }
