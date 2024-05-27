@@ -537,9 +537,7 @@ color_t part_to_col(array<ld, 4> parts) {
   color_t res;
   for(int i=0; i<4; i++) {
     ld v = parts[i];
-    if(v < 0) part(res, i) = 0;
-    else if(v > 1) part(res, i) = 255;
-    else part(res, i) = int(v * 255 + .5);
+    part(res, i) = clamp(int(v * 255 + .5), 0, 255);
     }
   return res;
   }
@@ -578,6 +576,15 @@ color_t exp_parser::parsecolor(int prio) {
     if(eat(",")) parts[0] = rparse(); else parts[0] = 1;
     force_eat(")");
     return part_to_col(parts);
+    }
+  if(eat("hsv(")) {
+    ld hue = rparse();
+    ld sat = eat(",") ? rparse() : 1;
+    ld value = eat(",") ? rparse() : 1;
+    ld alpha = eat(",") ? rparse() : 1;
+    color_t col = (rainbow_color(sat, hue) << 8) | 0xFF;
+    if(value < 1) col = gradient(0, col, 0, value, 1);
+    if(alpha < 1) part(col, 0) = clamp(alpha * 255, 0, 255);
     }
   if(eat("lerp(")) {
     color_t a = parsecolor();
