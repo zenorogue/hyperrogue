@@ -5933,8 +5933,12 @@ EX void drawscreen() {
   color_t col = linf[cwt.at->land].color;
   if(cwt.at->land == laRedRock) col = 0xC00000;
   if(titlecolor) col = titlecolor;
-  if(nohelp != 1)
-    displayfr(vid.xres/2, vid.fsize,   2, vid.fsize, mouseovers, col, 8);
+  if(nohelp != 1) {
+    int size = vid.fsize;
+    while(size > 3 && textwidth(size, mouseovers) > vid.xres) size--;
+    println(hlog, "mouseovers size changed from ", vid.fsize, " to ", size);
+    displayfr(vid.xres/2, vid.fsize,   2, size, mouseovers, col, 8);
+    }
 #endif
 
   drawmessages();
