@@ -130,6 +130,7 @@ struct exp_parser {
   cld parse(int prio = 0);
 
   transmatrix parsematrix(int prio = 0);
+  color_t parsecolor(int prio = 0);
 
   ld rparse(int prio = 0) { return validate_real(parse(prio)); }
   int iparse(int prio = 0) { return int(floor(rparse(prio) + .5)); }
@@ -345,19 +346,6 @@ cld exp_parser::parse(int prio) {
     if(real(extra_params["p"]) >= 3.5) res = val0;
     else res = val1;
     }
-  else if(eat("rgb(")) {     
-    cld val0 = parse(0);
-    force_eat(",");
-    cld val1 = parse(0);
-    force_eat(",");
-    cld val2 = parsepar();
-    switch(int(real(extra_params["p"]) + .5)) {
-      case 1: res = val0; break;
-      case 2: res = val1; break;
-      case 3: res = val2; break;
-      default: res = 0;
-      }
-    }
   else if(eat("let(")) {
     string name = next_token();
     force_eat("=");
@@ -539,6 +527,62 @@ transmatrix exp_parser::parsematrix(int prio) {
   return res;
   }
 
+color_t part_to_col(array<ld, 4> parts) {
+  color_t res;
+  for(int i=0; i<4; i++) {
+    ld v = parts[i];
+    if(v < 0) part(res, i) = 0;
+    else if(v > 1) part(res, i) = 255;
+    else part(res, i) = int(v * 255 + .5);
+    }
+  return res;
+  }
+
+color_t exp_parser::parsecolor(int prio) {
+  skip_white();
+  if(eat("indexed(")) {
+    int pos = at;
+    array<ld, 4> parts;
+    bool have_index = extra_params.count("p");
+    auto val = extra_params["p"];
+    for(int i=0; i<4; i++) {
+      at = pos;
+      extra_params["p"] = i+1;
+      parts[i] = rparse();
+      }
+    if(!have_index) extra_params.erase("p");
+    extra_params["p"] = val;
+    force_eat(")");
+    return part_to_col(parts);
+    }
+  if(eat("rgb(")) {
+    array<ld, 4> parts;
+    parts[0] = rparse(); force_eat(",");
+    parts[1] = rparse(); force_eat(",");
+    parts[2] = rparse();
+    if(eat(",")) parts[3] = rparse(); else parts[3] = 1;
+    force_eat(")");
+    return part_to_col(parts);
+    }
+  if(eat("lerp(")) {
+    color_t a = parsecolor();
+    force_eat(",");
+    color_t b = parsecolor();
+    force_eat(",");
+    ld x = rparse();
+    force_eat(")");
+    return gradient(a, b, 0, x, 1);
+    }
+  string token = next_token();
+  if(params.count(token)) return (color_t) real(params[token]->get_cld());
+  if(token == "black") return 0x000000FF;
+  if(token == "white") return 0xFFFFFFFF;
+  color_t res;
+  int qty = sscanf(s.c_str(), "%x", &res);
+  if(qty == 0) throw hr_parse_exception("color parse error");
+  return res;
+  }
+
 EX ld parseld(const string& s) {
   exp_parser ep;
   ep.s = s;
@@ -549,6 +593,14 @@ EX transmatrix parsematrix(const string& s) {
   exp_parser ep;
   ep.s = s;
   return ep.parsematrix();
+  }
+
+EX color_t parsecolor(const string& s, bool has_alpha) {
+  exp_parser ep;
+  ep.s = s;
+  auto col = ep.parsecolor(has_alpha);
+  if(!has_alpha) col >>= 8;
+  return col;
   }
 
 EX trans23 parsematrix23(const string& s) {

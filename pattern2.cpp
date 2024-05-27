@@ -1669,18 +1669,10 @@ EX namespace ccolor {
     return r;
     }, {0, 0xFFFFFF});
 
-  EX string color_formula = "to01(rgb(x,y,z))";
+  EX string color_formula = "rgb(to01(x),to01(y),to01(z))";
 
   EX data formula = data("formula", always_available, CCO {
-    color_t res;
-    for(int i=0; i<4; i++) {
-      ld v = real(patterns::compute_map_function(c, 1+i, color_formula));
-      if(i == 3) part(res, i) = (v > 0);
-      else if(v < 0) part(res, i) = 0;
-      else if(v > 1) part(res, i) = 255;
-      else part(res, i) = int(v * 255 + .5);
-      }
-    return res;
+    return patterns::compute_map_function(c, color_formula);
     }, {});
 
   EX data threecolor = data("threecolor", [] { return geosupport_threecolor(); }, CCO {
@@ -2062,9 +2054,8 @@ EX namespace patterns {
     }
   
 
-  EX cld compute_map_function(cell *c, int p, const string& formula) {
+  EX color_t compute_map_function(cell *c, const string& formula) {
     exp_parser ep;
-    ep.extra_params["p"] = p;
 
     hyperpoint h = calc_relative_matrix(c, currentmap->gamestart(), C0) * C0;
     ep.extra_params["x"] = h[0];
@@ -2137,7 +2128,7 @@ EX namespace patterns {
         
     ep.s = formula;
     try {
-      return ep.parse();
+      return ep.parsecolor();
       }
     catch(hr_parse_exception&) {
       return 0;
