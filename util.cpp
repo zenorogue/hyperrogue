@@ -577,8 +577,10 @@ color_t exp_parser::parsecolor(int prio) {
     }
   string token = next_token();
   if(params.count(token)) return (color_t) real(params[token]->get_cld());
-  if(token == "black") return 0x000000FF;
-  if(token == "white") return 0xFFFFFFFF;
+
+  auto p = find_color_by_name(s);
+  if(p) return (p->second << 8) | 0xFF;
+
   color_t res;
   if(s.size() == 6) {
     int qty = sscanf(s.c_str(), "%x", &res);
