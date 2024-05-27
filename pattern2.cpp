@@ -2094,6 +2094,8 @@ EX namespace patterns {
     ep.extra_params["cdata1"] = getCdata(c, 1);
     ep.extra_params["cdata2"] = getCdata(c, 2);
     ep.extra_params["cdata3"] = getCdata(c, 3);
+    ep.extra_params["sides"] = c->type;
+    ep.extra_params["shape"] = shvid(c);
     if(true) {
       ep.extra_params["md"] = c->master->distance;
       ep.extra_params["me"] = c->master->emeraldval;
