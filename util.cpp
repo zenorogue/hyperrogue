@@ -339,13 +339,6 @@ cld exp_parser::parse(int prio) {
     cld no = parsepar();
     res = abs(cond) < 1e-8 ? yes : no;
     }
-  else if(eat("wallif(")) {
-    cld val0 = parse(0);
-    force_eat(",");
-    cld val1 = parsepar();
-    if(real(extra_params["p"]) >= 3.5) res = val0;
-    else res = val1;
-    }
   else if(eat("let(")) {
     string name = next_token();
     force_eat("=");
@@ -554,6 +547,15 @@ color_t exp_parser::parsecolor(int prio) {
     extra_params["p"] = val;
     force_eat(")");
     return part_to_col(parts);
+    }
+  if(eat("wallif(")) {
+    ld val0 = rparse();
+    force_eat(",");
+    color_t res = parsecolor();
+    force_eat(")");
+    res &= 0xFFFFFF;
+    if(val0 <= 0) res |= 0x1000000;
+    return res;
     }
   if(eat("rgb(")) {
     array<ld, 4> parts;
