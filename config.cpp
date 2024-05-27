@@ -3295,6 +3295,7 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
     });
 
   param_ccolor(ccolor::which, "pattern");
+  param_str(ccolor::color_formula, "color_formula");
   });
 
 EX void switchcolor(unsigned int& c, unsigned int* cs) {

@@ -1672,7 +1672,10 @@ EX namespace ccolor {
   EX string color_formula = "rgb(to01(x),to01(y),to01(z))";
 
   EX data formula = data("formula", always_available, CCO {
-    return patterns::compute_map_function(c, color_formula);
+    color_t col = patterns::compute_map_function(c, color_formula);
+    bool wall = (col & 0xFF);
+    col >>= 8; if(wall) col |= 0x1000000;
+    return col;
     }, {});
 
   EX data threecolor = data("threecolor", [] { return geosupport_threecolor(); }, CCO {
