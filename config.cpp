@@ -966,29 +966,43 @@ EX void initConfig() {
   param_i(vid.timeformat, "message log time format", 0);
   
   param_b(resizable, "resizable", true)
-  -> editable("resizable window", 'r');
+  -> editable("resizable window", 'r')
+  -> help("This lets your operating system resize the window.");
 
-  param_b(no_find_player, "no_find_player");
+  param_b(no_find_player, "no_find_player")
+  -> help("Do not show the 'find player' button even if the player seems to be lost.");
   param_b(game_keys_scroll, "game_keys_scroll")
-  -> editable("pure exploration (game keys scroll)", 'P');
+  -> editable("pure exploration (game keys scroll)", 'P')
+  -> help("Enables easier control of the camera for watching visualizations (when you are not playing the game).");
   param_b(reg3::cubes_reg3, "cubes_reg3");
   param_f(linepatterns::tree_starter, "tree_starter")
   -> editable(0, 1, 0.05, "tree-drawing parameter", "How much of edges to draw for tree patterns (to show how the tree edges are oriented).", 't');
 
   // param_char(patterns::whichCanvas, "whichCanvas", 0); %TODO
   param_f(ccolor::rwalls, "randomwalls");
-  param_b(patterns::innerwalls, "innerwalls");
+  param_b(patterns::innerwalls, "innerwalls")
+  -> help("In 3D modes, display all the walls, including the walls between adjacent wall tiles.");
+
+  param_b(use_bool_dialog, "use_bool_dialog")
+  ->editable("on/off dialog/help", 'B')
+  ->help(
+     "Enable this for a full dialog when editing some on/off settings (otherwise, the dialog is not shown, we just switch). "
+     "This lets you see an explanation of what the setting does. "
+     "You can also press ALT while changing such settings.");
 
   param_b(vid.grid, "grid");
   param_b(models::desitter_projections, "desitter_projections", false);
   param_b(nonisotropic_weird_transforms, "nonisotropic_weird_transforms", false);
 
   param_b(arb::apeirogon_consistent_coloring, "apeirogon_consistent_coloring", true)
-  -> editable("apeirogon_consistent_coloring", 'c');
+  -> editable("apeirogon_consistent_coloring", 'c')
+  -> help("In arbitrary tilings, apeirogons are internally represented as multiple tiles. This option ensures that all subtiles have the same color.");
   param_b(arb::apeirogon_hide_grid_edges, "apeirogon_hide_grid_edges", true)
-  -> editable("apeirogon_hide_grid_edges", 'h');
+  -> editable("apeirogon_hide_grid_edges", 'h')
+  -> help("In arbitrary tilings, apeirogons are internally represented as multiple tiles. This option hides the subtile edges.");
   param_b(arb::apeirogon_simplified_display, "apeirogon_simplified_display", false)
-  -> editable("simplified display of apeirogons", 'f');
+  -> editable("simplified display of apeirogons", 'f')
+  -> help("Connect the ends of the apeirogon segment with the boundary point using straight lines. This should be faster and, in most cases, actually more correct.");
   param_b(arb::convert::minimize_on_convert, "tes_minimize_on_convert", false)
   -> editable("consider all symmetries when converting", 'm');
   param_b(arb::convert::reverse_order, "tes_reverse_order", false)
@@ -1002,6 +1016,7 @@ EX void initConfig() {
 
   param_b(vid.relative_font, "relative_font", true)
   -> editable("set relative font size", 'r')
+  -> help("Font size is set as a relation to screen size.")
   -> set_reaction(compute_fsize);
   param_i(vid.fontscale, "fontscale", 100)
   -> editable(25, 400, 10, "font scale", "", 'b')
