@@ -613,7 +613,7 @@ color_t exp_parser::parsecolor(int prio) {
     if(qty == 0) throw hr_parse_exception("color parse error");
     return res;
    }
-  return res;
+  throw hr_parse_exception("color parse error");
   }
 
 EX ld parseld(const string& s) {
