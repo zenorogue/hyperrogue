@@ -553,8 +553,8 @@ color_t exp_parser::parsecolor(int prio) {
     force_eat(",");
     color_t res = parsecolor();
     force_eat(")");
-    res &= 0xFFFFFF;
-    if(val0 <= 0) res |= 0x1000000;
+    res &= 0xFFFFFF00;
+    if(val0 > 0) res |= 0x1;
     return res;
     }
   if(eat("rgb(")) {
