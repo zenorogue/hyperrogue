@@ -20,6 +20,8 @@ EX void add_to_changed(struct parameter *f);
 
 EX bool return_false() { return false; }
 
+EX bool use_bool_dialog;
+
 EX string param_esc(string s);
 
 EX void non_editable_reaction() {
@@ -330,6 +332,10 @@ struct bool_parameter : public val_parameter<bool> {
     menu_item_name_modified = true;
     return this;
     }
+  bool_parameter* help(string help) {
+    help_text = help;
+    return this;
+    }
   void show_edit_option(int key) override;
 
   void load_from_raw(const string& s) override {
@@ -512,9 +518,17 @@ void int_parameter::show_edit_option(int key) {
 void bool_parameter::show_edit_option(int key) {
   dialog::addBoolItem(XLAT(menu_item_name), *value, key);
   dialog::add_action([this] () {
-    add_to_changed(this);
-    switcher(); if(sets) sets();
-    if(reaction) reaction();
+    if(use_bool_dialog || hiliteclick) {
+      auto& bd = dialog::editBool(*value, dft, XLAT(menu_item_name), XLAT(help_text), switcher);
+      if(sets) sets();
+      if(reaction) bd.reaction = reaction;
+      if(!is_editable) bd.extra_options = non_editable;
+      }
+    else {
+      add_to_changed(this);
+      switcher(); if(sets) sets();
+      if(reaction) reaction();
+      }
     });
   }
 
@@ -2353,6 +2367,7 @@ EX void configureInterface() {
   add_edit(menu_darkening);
   add_edit(centered_menus);
   add_edit(startanims::enabled);
+  add_edit(use_bool_dialog);
    
   dialog::addBreak(50);
   dialog::addBack();

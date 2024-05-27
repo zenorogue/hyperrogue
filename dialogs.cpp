@@ -70,11 +70,19 @@ EX namespace dialog {
     scaler sc;
     int *intval; ld intbuf;
     bool animatable;
+    bool *boolval;
     void draw() override;
     void apply_edit();
     void apply_slider();
     string disp(ld x);
     void reset_str() { s = disp(*editwhat); }
+    };
+
+  /** bool dialog */
+  struct bool_dialog : extdialog {
+    bool *editwhat, dft;
+    reaction_t switcher;
+    void draw() override;
     };
 #endif
 
@@ -1486,7 +1494,43 @@ EX namespace dialog {
         }
       else if(doexiton(sym, uni)) ne.popfinal();
       };
-    }  
+    }
+
+  void bool_dialog::draw() {
+    cmode = dialogflags;
+    gamescreen();
+    init(title);
+
+    dialog::addBreak(100);
+
+    auto switch_to = [this] (bool b) {
+      bool do_switch = (*editwhat != b);
+      auto sw = switcher;
+      auto re = reaction;
+      popScreen();
+      if(do_switch) { sw(); if(re) re(); }
+      };
+
+    dialog::addBoolItem(XLAT("disable"), false, '0');
+    dialog::add_action([switch_to] { switch_to(false); });
+
+    dialog::addBoolItem(XLAT("enable"), true, '1');
+    dialog::add_action([switch_to] { switch_to(true); });
+
+    dialog::addBoolItem(XLAT("switch"), !*editwhat, 's');
+    dialog::add_action([switch_to, this] { switch_to(!*editwhat); });
+
+    dialog::addBoolItem(XLAT("set default"), dft, 'd');
+    dialog::add_action([switch_to, this] { switch_to(dft); });
+
+    dialog::addBreak(100);
+
+    if(help != "") addHelp(help);
+
+    if(extra_options) extra_options();
+
+    display();
+    }
 
   int nlpage = 1;
   int wheelshift = 0;
@@ -1565,6 +1609,17 @@ EX namespace dialog {
     ne.reset_str();
     pushScreen(ne);
     return get_ne();
+    }
+
+  EX extdialog& editBool(bool& b, bool dft, string title, string help, const reaction_t& switcher) {
+    bool_dialog be;
+    be.editwhat = &b;
+    be.dft = dft;
+    be.title = title;
+    be.help = help;
+    be.switcher = switcher;
+    pushScreen(be);
+    return get_di();
     }
 
   EX number_dialog& editNumber(int& x, int vmin, int vmax, ld step, int dft, string title, string help) {
