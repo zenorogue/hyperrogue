@@ -8756,20 +8756,21 @@ S("display only chessboard white", "tylko białe pola szachownicy")
 S("display only chessboard black", "tylko czarne pola szachownicy")
 
 S(
-          "This lets you specify the color pattern as a function of the cell. "
+          "This lets you specify the color pattern as a function of the cell.\n",
+          "Tu możesz określić wzór jako funkcję komórki.\n")
+
+S(
           "Available parameters:\n\n"
           "x, y, z (hyperboloid/sphere/plane coordinates in non-crystal geometries)\n"
           "ex, ey, ez (in Euclidean geometries)\n"
-          "x0, x1, x2... (crystal geometry only)\n"
-          "0 is black, 1 is white, rgb(1,0,0) is red, ifp(p-2,1,0) is blue (p=1 for red, 2 for green, 3 for blue).",
+          "x0, x1, x2... (crystal geometry only)\n",
 
-          "Tu możesz określić wzór jako funkcję komórki. Dostępne parametry:\n\n"
+          "Dostępne parametry:\n\n"
           "x, y, z (współrzędne hiperboloidy/sfery/powierczni, poza kryształami)\n"
           "ex, ey, ez (w geometriach euklidesowych)\n"
           "x0, x1, x2... (w kryształach)\n"
-          "0 to czarny, 1 to biały, rgb(1,0,0) to czerwony, ifp(p-2,1,0) to niebieski (p=1 to czerwony, 2 to zielony, 3 to niebieski)."
           )
-          
+
 S(
           "w (fourth coordinate)\n"
           "wallif(condition, color)\n", 

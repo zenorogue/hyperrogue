@@ -9037,19 +9037,20 @@ S("display only chessboard white", "zobrazit pouze bílá políčka šachovnice"
 S("display only chessboard black", "zobrazit pouze černá políčka šachovnice")
 
 S(
-          "This lets you specify the color pattern as a function of the cell. "
+          "This lets you specify the color pattern as a function of the cell.\n",
+
+          "Zde můžeš specifikovat barevný vzor jako funkci políčka.\n")
+
+S(
           "Available parameters:\n\n"
           "x, y, z (hyperboloid/sphere/plane coordinates in non-crystal geometries)\n"
           "ex, ey, ez (in Euclidean geometries)\n"
-          "x0, x1, x2... (crystal geometry only)\n"
-          "0 is black, 1 is white, rgb(1,0,0) is red, ifp(p-2,1,0) is blue (p=1 for red, 2 for green, 3 for blue).",
+          "x0, x1, x2... (crystal geometry only)\n",
 
-          "Zde můžeš specifikovat barevný vzor jako funkci políčka. "
           "Dostupné parametry:\n\n"
           "x, y, z (souřadnice hyperboloidu/koule/roviny v nekrystalových geometriích)\n"
           "ex, ey, ez (v eukleidovských geometriích)\n"
           "x0, x1, x2... (pouze v krystalové geometrii)\n"
-          "0 je černá, 1 bílá, rbg(1,0,0) červená, ifp(p-2,1,0) modrá (p=1 pro červenou, 2 pro zelenou, 3 pro modrou)."
           )
 
 S(

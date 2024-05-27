@@ -8652,19 +8652,20 @@ S("display only chessboard white", "afficher seulement le plateau d'échec blanc
 S("display only chessboard black", "afficher seulement le plateau d'échec noir")
 
 S(
-          "This lets you specify the color pattern as a function of the cell. "
+          "This lets you specify the color pattern as a function of the cell.\n",
+
+          "Vous laisse choisir le motif de couleur comme fonction de la case.\n")
+
+S(
           "Available parameters:\n\n"
           "x, y, z (hyperboloid/sphere/plane coordinates in non-crystal geometries)\n"
           "ex, ey, ez (in Euclidean geometries)\n"
-          "x0, x1, x2... (crystal geometry only)\n"
-          "0 is black, 1 is white, rgb(1,0,0) is red, ifp(p-2,1,0) is blue (p=1 for red, 2 for green, 3 for blue).",
+          "x0, x1, x2... (crystal geometry only)\n",
 
-          "Vous laisse choisir le motif de couleur comme fonction de la case. "
 	  "Paramètres disponibles : \n\n"
           "x, y, z (coordonnées hyperboloïde/sphère/plan dans des géométries non-cristallines)\n"
           "ex, ey, ez (dans une géométrie euclidienne)\n"
           "x0, x1, x2... (dans les géométries cristallines seulement)\n"
-          "0 est noir, 1 est blanc, rgb(1,0,0) est rouge, ifp(p-2,1,0) est bleu (p=1 pour rouge, 2 pour vert, 3 pour bleu)."
           )
           
 S(

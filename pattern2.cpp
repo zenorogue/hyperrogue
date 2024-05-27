@@ -1884,12 +1884,15 @@ EX namespace ccolor {
 
   void config_formula(bool instant) {
     string s = XLAT(
-      "This lets you specify the color pattern as a function of the cell. "
+      "This lets you specify the color pattern as a function of the cell.\n");
+    s += XLAT("rgb(r,g,b)\n");
+    s += XLAT("indexed(f) (where f is a function of p, p=1 for red, 2 for green, 3 for blue)");
+    s += XLAT(
       "Available parameters:\n\n"
       "x, y, z (hyperboloid/sphere/plane coordinates in non-crystal geometries)\n"
       "ex, ey, ez (in Euclidean geometries)\n"
       "x0, x1, x2... (crystal geometry only)\n"
-      "0 is black, 1 is white, rgb(1,0,0) is red, ifp(p-2,1,0) is blue (p=1 for red, 2 for green, 3 for blue).");
+      );
 
     if(MDIM == 4) s += XLAT(
       "w (fourth coordinate)\n"
