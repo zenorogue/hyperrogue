@@ -236,6 +236,13 @@ cld exp_parser::parse(int prio) {
     force_eat(")");
     res = a;
     }
+  else if(eat("atan2(")) {
+    ld y = rparse(0);
+    force_eat(",");
+    ld x = rparse(0);
+    force_eat(")");
+    res = atan2(y, x);
+    }
   else if(eat("edge(")) {
     ld a = rparse(0);
     force_eat(",");
