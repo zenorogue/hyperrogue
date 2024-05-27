@@ -28,6 +28,12 @@ EX void non_editable_reaction() {
 
 #if HDR
 
+struct param_exception : hr_exception {
+  struct parameter *which;
+  param_exception() : hr_exception("param_exception"), which(nullptr) {}
+  param_exception(const std::string &s, parameter *p) : hr_exception(s), which(p) {}
+  };
+
 struct parameter_names {
   string name;
   string legacy_config_name;
@@ -73,8 +79,8 @@ struct parameter : public std::enable_shared_from_this<parameter> {
     }
   virtual bool anim_unchanged() { return true; }
   virtual void anim_restore() { }
-  virtual cld get_cld() { throw hr_exception("parameter has no complex value"); }
-  virtual void set_cld_raw(cld x) { throw hr_exception("parameter has no complex value"); }
+  virtual cld get_cld() { throw param_exception("parameter has no complex value", this); }
+  virtual void set_cld_raw(cld x) { throw param_exception("parameter has no complex value", this); }
   virtual void set_cld(cld value) {
     auto bak = get_cld();
     set_cld_raw(value);
@@ -83,14 +89,13 @@ struct parameter : public std::enable_shared_from_this<parameter> {
 
   virtual string save() = 0;
   virtual void load(const string& s) {
-    println(hlog, "cannot load parameter: ", name, " from: ", s);
-    throw hr_exception("parameter cannot be loaded");
+    throw param_exception("parameter cannot be loaded", this);
     }
   virtual bool dosave() = 0;
   virtual void reset() = 0;
   virtual void swap_with(parameter*) = 0;
 
-  virtual shared_ptr<parameter> clone(struct local_parameter_set& lps, void *value) { println(hlog, "parameter not cloneable: ", name); throw hr_exception("not cloneable"); }
+  virtual shared_ptr<parameter> clone(struct local_parameter_set& lps, void *value) { throw param_exception("not cloneable", this); }
 
   void setup(const parameter_names& s);
   };
@@ -215,7 +220,7 @@ template<class T> struct val_parameter : public parameter {
   bool anim_unchanged() override { return *value == anim_value; }
   void anim_restore() override { *value = anim_value; if(reaction) reaction(); }
 
-  virtual void load_from_raw(const string& s) { throw hr_exception("load_from_raw not defined"); }
+  virtual void load_from_raw(const string& s) { throw param_exception("load_from_raw not defined", this); }
 
   void load(const string& s) override {
     auto bak = *value;
@@ -423,8 +428,7 @@ struct custom_parameter : public parameter {
     }
   virtual void load_from_raw(const string& s) {
     if(!custom_load) {
-      println(hlog, "cannot load parameter: ", name, " from: ", s);
-      throw hr_exception("parameter cannot be loaded");
+      throw param_exception("parameter cannot be loaded", this);
       }
     custom_load(s);
     }

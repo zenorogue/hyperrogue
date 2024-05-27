@@ -1227,6 +1227,7 @@ EX namespace dialog {
           if(p) p->load_as_animation(formula);
           }
         catch(hr_parse_exception&) { }
+        catch(param_exception&) { }
         };
       dialog::get_di().dialogflags |= dialogflags;
       });
@@ -1298,6 +1299,7 @@ EX namespace dialog {
       }
     catch(const hr_parse_exception&) { 
       }
+    catch(param_exception&) { }
     }
 
   EX void bound_low(ld val) {
