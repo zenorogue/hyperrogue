@@ -57,7 +57,8 @@ struct parameter : public std::enable_shared_from_this<parameter> {
   virtual bool affects(void *v) { return false; }
   void show_edit_option() { show_edit_option(default_key); }
   virtual void show_edit_option(int key) {
-    println(hlog, "default called!"); }
+    println(hlog, "warning: no edit option defined for ", name);
+    }
   virtual string search_key() { 
     return name + "|" + legacy_config_name + "|" + menu_item_name + "|" + help_text;
     }
@@ -308,6 +309,7 @@ struct int_parameter : public val_parameter<int> {
 struct string_parameter: public val_parameter<string> {
   string save() override { return *value; }
   void load_from_raw(const string& s) override { *value = s; }
+  void show_edit_option(int key) override;
   };
 
 struct char_parameter : public val_parameter<char> {
@@ -534,8 +536,12 @@ void matrix_parameter::show_edit_option(int key) {
   }
 
 void char_parameter::show_edit_option(int key) {
-  string s = s0; s += value;
+  string s = s0; s += *(value);
   dialog::addSelItem(XLAT(menu_item_name), s, key);
+  }
+
+void string_parameter::show_edit_option(int key) {
+  dialog::addSelItem(XLAT(menu_item_name), *value, key);
   }
 
 void parameter::setup(const parameter_names& n) {
