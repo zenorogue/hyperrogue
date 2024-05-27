@@ -394,6 +394,9 @@ cld exp_parser::parse(int prio) {
     else if(number == "step") res = hdist0(tC0(currentmap->adj(cwt.at, 0)));
     else if(number == "edgelen") { start_game(); res = hdist(get_corner_position(cwt.at, 0), get_corner_position(cwt.at, 1)); }
     else if(number == "mousey") res = mousey;
+    else if(number == "turncount") res = turncount;
+    else if(number == "framecount") res = frameid;
+    else if(number == "illegal_moves") res = illegal_moves;
     else if(number == "mousexs") {
       if(!inHighQual) bmousexs = (1. * mousex - current_display->xcenter) / current_display->radius;
       res = bmousexs;
