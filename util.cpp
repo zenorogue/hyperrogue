@@ -615,6 +615,17 @@ EX color_t parsecolor(const string& s, bool has_alpha) {
   return col;
   }
 
+EX colortable parsecolortable(const string& s) {
+  colortable tab;
+  tab.clear();
+  exp_parser ep;
+  ep.s = s;
+  tab.push_back(ep.parsecolor() >> 8);
+  while(ep.eat(","))
+    tab.push_back(ep.parsecolor() >> 8);
+  return tab;
+  }
+
 EX trans23 parsematrix23(const string& s) {
   trans23 t;
   #if MAXMDIM == 3

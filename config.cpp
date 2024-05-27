@@ -770,9 +770,7 @@ EX shared_ptr<custom_parameter> param_colortable(colortable& val, const paramete
   u->custom_value = [] () { return -1; };
   u->custom_affect = [&val] (void *v) { return &val == v; };
   u->custom_load = [&val] (const string& s) {
-    auto seq = split_string(s, ',');
-    val.resize(isize(seq));
-    for(int i=0; i<isize(seq); i++) sscanf(seq[i].c_str(), "%x", &(val[i]));
+    val = parsecolortable(s);
     };
   u->custom_save = [&val] {
     bool first = true;
