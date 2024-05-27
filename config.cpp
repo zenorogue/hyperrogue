@@ -1087,10 +1087,12 @@ EX void initConfig() {
 
   param_b(less_in_landscape, "less_in_landscape", false)
   ->editable("less items/kills in landscape", 'L')
+  -> help("If set, only the important items and kills will be shown")
   -> set_reaction([] { vid.killreduction = 0; });
 
   param_b(less_in_portrait, "less_in_portrait", false)
   ->editable("less items/kills in portrait", 'P')
+  -> help("If set, only the important items and kills will be shown")
   -> set_reaction([] { vid.killreduction = 0; });
   
   // basic graphics
@@ -1099,12 +1101,12 @@ EX void initConfig() {
   ->editable("openGL mode", 'o');
   
   param_i(vid.want_antialias, "antialias", AA_NOGL | AA_FONT | (ISWEB ? AA_MULTI : AA_LINES) | AA_VERSION);
-  param_b(vid.fineline, "fineline", true);
+  param_b(vid.fineline, "fineline", true)->help("Disable this to make all line widths 1.");
   param_f(vid.linewidth, "linewidth", 1);
   param_f(precise_width, "precisewidth", .5);
   param_i(perfect_linewidth, "perfect_linewidth", 1);
   param_f(linepatterns::width, parameter_names("lpwidth", "pattern-linewidth"), 1);
-  param_b(fat_edges, "fat-edges");
+  param_b(fat_edges, "fat-edges")->help("When this setting is ON, grid lines and various line patterns are drawn as pipes.");
   param_f(vid.sspeed, parameter_names("sspeed", "scrollingspeed"), 0);
   param_f(vid.mspeed, parameter_names("mspeed", "movement speed"), 1);
   param_f(vid.ispeed, parameter_names("ispeed", "idle speed"), 1);
@@ -1126,7 +1128,9 @@ EX void initConfig() {
   param_b(startanims::enabled, "startanim", true)
   -> editable("start animations", 's');
 
-  param_b(vid.flasheffects, "flasheffects", 1);
+  param_b(vid.flasheffects, "flasheffects", 1)
+  -> editable("flashing effects", 'h')
+  -> help("Disable if you are photosensitive. Replaces flashing effects such as Orb of Storms lightning with slow, adjustable animations.");
 
   param_f(vid.binary_width, parameter_names("bwidth", "binary-tiling-width"), 1);
   param_custom_ld(vid.binary_width, "binary tiling width", menuitem_binary_width, 'v');
@@ -1162,11 +1166,13 @@ EX void initConfig() {
     )
   -> set_reaction(hat::reshape);
 
-  param_b(vid.particles, "extra effects", 1);
+  param_b(vid.particles, "extra effects", 1)
+  -> help("Disable if you do not want particle effects and similar.");
   param_i(vid.framelimit, "frame limit", 999);
 
   #if !ISMOBWEB
   param_b(vid.want_vsync, "vsync", true)
+  -> help("Disable if you want to see the actual framerate rendered by the engine.")
   ->editable("vsync", 'v');
   #endif
   
@@ -1268,7 +1274,8 @@ EX void initConfig() {
   param_f(rug::model_distance, "rug-model-distance");
 #endif
 
-  param_b(vid.backeffects, "background particle effects", (ISMOBILE || ISPANDORA) ? false : true);
+  param_b(vid.backeffects, "background particle effects", (ISMOBILE || ISPANDORA) ? false : true)
+  -> help("Background particle effects, e.g., in the Blizzard.");
   // control
   
   param_i(vid.joyvalue, "vid.joyvalue", 4800);
@@ -1281,7 +1288,8 @@ EX void initConfig() {
   vid.killreduction = 0;
   
   param_b(vid.skipstart, "skip the start menu", false);
-  param_b(vid.quickmouse, "quick mouse", !ISPANDORA);
+  param_b(vid.quickmouse, "quick mouse", !ISPANDORA)
+  -> help("Buttons activate when they are pressed (by clicking), not when they are released.");
   
   // colors
 
@@ -1325,10 +1333,10 @@ EX void initConfig() {
   param_b(hardcore, "mode-hardcore", false)->set_reaction([] { hardcore = !hardcore; switchHardcore_quiet(); });
   param_enum(land_structure, "mode-chaos", lsNiceWalls)->be_non_editable();
   #if CAP_INV
-  param_b(inv::on, "mode-Orb Strategy");
+  param_b(inv::on, "mode-Orb Strategy")->be_non_editable();
   #endif
-  param_b(peace::on, "mode-peace");
-  param_b(peace::otherpuzzles, "mode-peace-submode");
+  param_b(peace::on, "mode-peace")->be_non_editable();
+  param_b(peace::otherpuzzles, "mode-peace-submode")->be_non_editable();
   param_enum(specialland, parameter_names("specialland", "land for special modes"), specialland)->be_non_editable();
   
   param_b(viewdists, "expansion mode");
@@ -1488,14 +1496,20 @@ EX void initConfig() {
   param_f(sightranges[gSpace344], "sight-344", 4.5);
   param_f(sightranges[gSpace336], "sight-336", 4);
 
-  param_b(vid.sloppy_3d, "sloppy3d", true);
+  param_b(vid.sloppy_3d, "sloppy3d", true)
+  ->editable("sloppy range checking", 's')
+  ->help("Do not draw if their distance is greater than the sight range (although some points might be closer). This is faster.");
 
   param_i(vid.texture_step, "wall-quality", 4);
   
-  param_b(smooth_scrolling, "smooth-scrolling", false);
+  param_b(smooth_scrolling, "smooth-scrolling", false)
+  ->editable("smooth scrolling", 'c');
   param_f(mouseaim_sensitivity, "mouseaim_sensitivity", 0.01);
 
-  param_b(vid.consider_shader_projection, "shader-projection", true);
+  param_b(vid.consider_shader_projection, "shader-projection", true)
+  ->editable("use GPU to compute projections", 'G')
+  ->help("Computing projections using a GPU (vertex shader) is faster, but sometimes, some projections or their minor details are not available.");
+
   param_b(semidirect_rendering, "semidirect_rendering", false)
   ->editable("semidirect_rendering (perspective on GPU)", 'k');
 
@@ -1944,7 +1958,7 @@ EX void edit_sightrange() {
     dialog::add_action([] () { gamerange_bonus = sightrange_bonus; doOvergenerate(); });
     }
   if(wdim == 3 && !vid.use_smart_range) {
-    dialog::addBoolItem_action(XLAT("sloppy range checking"), vid.sloppy_3d, 's');
+    add_edit(vid.sloppy_3d);
     }
   if(GDIM == 3 && !vid.use_smart_range) {
     dialog::addSelItem(XLAT("limit generation"), fts(extra_generation_distance), 'e');
@@ -2217,9 +2231,7 @@ EX void showGraphConfig() {
       );
     });
 
-  dialog::addBoolItem_action(XLAT("flashing effects"), (vid.flasheffects), 'h');
-  if(getcstat == 'h') 
-    mouseovers = XLAT("Disable if you are photosensitive. Replaces flashing effects such as Orb of Storms lightning with slow, adjustable animations.");
+  add_edit(vid.flasheffects);
 
   dialog::addItem(XLAT("extra graphical effects"), 'u');
 
