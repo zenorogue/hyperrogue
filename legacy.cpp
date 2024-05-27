@@ -427,6 +427,14 @@ int read_legacy_args_anim() {
       shift_arg_formula(normal_angle);
       }
     }
+  else if(argis("-innerwall")) {
+    PHASEFROM(2);
+    patterns::innerwalls = true;
+    }
+  else if(argis("-noinnerwall")) {
+    PHASEFROM(2);
+    patterns::innerwalls = false;
+    }
   else if(argis("-animrotd")) {
     start_game();
     ma = maRotation;

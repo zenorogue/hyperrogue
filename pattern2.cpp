@@ -3299,14 +3299,6 @@ int read_pattern_args() {
     ccolor::which = &ccolor::formula;
     shift(); ccolor::set_formula(args());
     }
-  else if(argis("-innerwall")) {
-    PHASEFROM(2);
-    patterns::innerwalls = true;
-    }
-  else if(argis("-noinnerwall")) {
-    PHASEFROM(2);
-    patterns::innerwalls = false;
-    }
   else if(argis("-d:line")) 
     launch_dialog(linepatterns::showMenu);
 

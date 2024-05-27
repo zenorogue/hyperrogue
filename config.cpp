@@ -963,6 +963,7 @@ EX void initConfig() {
 
   // param_char(patterns::whichCanvas, "whichCanvas", 0); %TODO
   param_f(ccolor::rwalls, "randomwalls");
+  param_b(patterns::innerwalls, "innerwalls");
 
   param_b(vid.grid, "grid");
   param_b(models::desitter_projections, "desitter_projections", false);
