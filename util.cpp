@@ -610,7 +610,7 @@ EX transmatrix parsematrix(const string& s) {
 EX color_t parsecolor(const string& s, bool has_alpha) {
   exp_parser ep;
   ep.s = s;
-  auto col = ep.parsecolor(has_alpha);
+  auto col = ep.parsecolor();
   if(!has_alpha) col >>= 8;
   return col;
   }
