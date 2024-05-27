@@ -1564,7 +1564,7 @@ EX namespace ccolor {
 
   EX int jhole = 0;
   EX int jblock = 0;
-  EX int rwalls = 50;
+  EX ld rwalls = 50;
   EX bool live_canvas;
 
   EX void edit_rwalls() {
@@ -1651,10 +1651,17 @@ EX namespace ccolor {
     0x404040, 0x606060, 0x808080
     });
 
+  EX map<cell*, pair<int, ld>> percentages;
+  auto pct_hook = addHook(hooks_clearmemory, 40, [] { percentages = {}; });
+
   EX data plain = data("single color", always_available, CCO {
-    color_t r = isize(cco.ctab) == 1 ? cco.ctab[0] : cco.ctab[cco.ctab.size()];
-    if(hrand(100) < rwalls) r |= 0x1000000;
-    if(c == cwt.at) r &= 0xFFFFFF;
+    if(!percentages.count(c)) {
+      percentages[c].first = hrand(1000000);
+      percentages[c].second = c == cwt.at ? 100 : hrand(10000) / 100.;
+      }
+    auto& p = percentages[c];
+    color_t r = cco.ctab[gmod(p.first, cco.ctab.size())];
+    if(p.second < rwalls) r |= 0x1000000;
     return r;
     },
     {linf[laCanvas].color >> 2});

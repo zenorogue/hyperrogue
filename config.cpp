@@ -962,7 +962,7 @@ EX void initConfig() {
   -> editable(0, 1, 0.05, "tree-drawing parameter", "How much of edges to draw for tree patterns (to show how the tree edges are oriented).", 't');
 
   // param_char(patterns::whichCanvas, "whichCanvas", 0); %TODO
-  param_i(ccolor::rwalls, "randomwalls");
+  param_f(ccolor::rwalls, "randomwalls");
 
   param_b(vid.grid, "grid");
   param_b(models::desitter_projections, "desitter_projections", false);
