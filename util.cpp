@@ -488,6 +488,7 @@ ld angle_unit(char ch) {
   if(ch == 'r') return 1;
   if(ch == 'd') return degree;
   if(ch == 't') return TAU;
+  if(ch == 'q') return TAU/4;
   if(ch == 'l') return -1;
   return 0;
   }
