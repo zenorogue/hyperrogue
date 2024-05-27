@@ -517,6 +517,7 @@ void int_parameter::show_edit_option(int key) {
 
 void bool_parameter::show_edit_option(int key) {
   dialog::addBoolItem(XLAT(menu_item_name), *value, key);
+  if(is_highlight(dialog::items.back()) && help_text != menu_item_name) mouseovers = XLAT(help_text);
   dialog::add_action([this] () {
     if(use_bool_dialog || hiliteclick) {
       auto& bd = dialog::editBool(*value, dft, XLAT(menu_item_name), XLAT(help_text), switcher);
