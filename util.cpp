@@ -376,6 +376,7 @@ cld exp_parser::parse(int prio) {
     else if(number == "inf") res = HUGE_VAL;
     else if(number == "p" || number == "pi") res = M_PI;
     else if(number == "tau") res = TAU;
+    else if(number == "phi") res = (1 + sqrt(5)) / 2;
     else if(number == "" && next() == '-') { at++; res = -parse(20); }
     else if(number == "") throw hr_parse_exception("number missing, " + where());
     else if(number == "s") res = ticks / 1000.;
