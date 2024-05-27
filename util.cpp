@@ -397,6 +397,10 @@ cld exp_parser::parse(int prio) {
     else if(number == "mousey") res = mousey;
     else if(number == "turncount") res = turncount;
     else if(number == "framecount") res = frameid;
+    else if(number == "last_a") res = anims::last_anim_vars[0];
+    else if(number == "last_b") res = anims::last_anim_vars[1];
+    else if(number == "last_c") res = anims::last_anim_vars[2];
+    else if(number == "last_d") res = anims::last_anim_vars[3];
     else if(number == "illegal_moves") res = illegal_moves;
     else if(number == "mousexs") {
       if(!inHighQual) bmousexs = (1. * mousex - current_display->xcenter) / current_display->radius;

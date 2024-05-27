@@ -1368,6 +1368,7 @@ EX void apply() {
   #endif
 
   apply_animated_parameters();
+  last_anim_vars = anim_vars;
   calcparam();
   }
 
@@ -1514,7 +1515,7 @@ void animator(string caption, ld& param, char key) {
     });
   }
 
-EX ld a, b;
+EX array<ld, 10> anim_vars, last_anim_vars;
 
 ld animation_period;
 
@@ -1670,14 +1671,14 @@ EX void show() {
     }
   #endif
   
-  dialog::addSelItem(XLAT("animate parameters"), fts(a), 'a');
+  dialog::addSelItem(XLAT("animate parameters"), fts(anim_vars[0]), 'a');
   dialog::add_action([] () {
-    dialog::editNumber(a, -100, 100, 1, 0, XLAT("animate parameters"), "");
+    dialog::editNumber(anim_vars[0], -100, 100, 1, 0, XLAT("animate parameters"), "");
     });
 
-  dialog::addSelItem(XLAT("animate parameters"), fts(b), 'b');
+  dialog::addSelItem(XLAT("animate parameters"), fts(anim_vars[1]), 'b');
   dialog::add_action([] () {
-    dialog::editNumber(b, -100, 100, 1, 0, XLAT("animate parameters"), "");
+    dialog::editNumber(anim_vars[1], -100, 100, 1, 0, XLAT("animate parameters"), "");
     });
 
   dialog::addBoolItem(XLAT("history mode"), (history::on || history::includeHistory), 'h');
@@ -1785,8 +1786,10 @@ auto animhook = addHook(hooks_frame, 100, display_animation)
     -> editable({{"none", ""}, {"translation", ""}, {"rotation", ""}, {"circle", ""}, {"parabolic", ""}, {"translation+rotation", ""}}, "movement animation", 'a')
     -> set_reaction(ma_reaction);
 
-    param_f(anims::a, "a", 0);
-    param_f(anims::b, "b", 0);
+    param_f(anims::anim_vars[0], "a", 0);
+    param_f(anims::anim_vars[1], "b", 0);
+    param_f(anims::anim_vars[2], "c", 0);
+    param_f(anims::anim_vars[3], "d", 0);
     #endif
     });
 
