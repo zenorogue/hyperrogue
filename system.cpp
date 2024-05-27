@@ -224,6 +224,7 @@ EX void initgame() {
   clearing::imputed = 0;
   rosephase = 0;
   shmup::count_pauses = 0;
+  illegal_moves = 0;
 
   splitrocks = 0;
 

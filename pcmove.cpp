@@ -9,6 +9,8 @@
 
 namespace hr {
 
+EX int illegal_moves;
+
 EX bool keepLightning = false;
 
 EX bool seenSevenMines = false;
@@ -198,6 +200,7 @@ bool pcmove::checkNeedMove(bool checkonly, bool attacking) {
       yasc_message = XLAT("did not leave %the1", cwt.at->wall);
     killHardcorePlayer(multi::cpid, flags);
     }
+  if(!checkonly) illegal_moves++;
   return true;
   }
 
@@ -444,6 +447,8 @@ bool pcmove::movepcto() {
           }
         }
       }
+
+    if(checked_move_issue.type == miTHREAT && !checkonly) illegal_moves++;
     }
 
   return b;
