@@ -559,6 +559,7 @@ typedef unsigned GLuint;
 #include "mingw.condition_variable.h"
 #else
 #include <thread>
+#include <atomic>
 #include <mutex>
 #include <condition_variable>
 #endif
