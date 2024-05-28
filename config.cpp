@@ -1278,6 +1278,8 @@ EX void initConfig() {
   -> help("Background particle effects, e.g., in the Blizzard.");
   // control
   
+  param_enum(joy_init, "joyinit", jiFast)
+    ->editable({{"off", "do not use joysticks"}, {"fast", "do not wait until the joysticks are initialized"}, {"wait", "wait until the joysticks are initialized"}}, "joystick initialization", 'j');
   param_i(vid.joyvalue, "vid.joyvalue", 4800);
   param_i(vid.joyvalue2, "vid.joyvalue2", 5600);
   param_i(vid.joysmooth, "vid.joysmooth", 200);
@@ -2426,6 +2428,8 @@ EX void showJoyConfig() {
   dialog::addSelItem(XLAT("second joystick: pan threshold"), its(vid.joypanthreshold), 'c');
   dialog::addSelItem(XLAT("second joystick: panning speed"), fts(vid.joypanspeed * 1000), 'd');
   dialog::addSelItem(XLAT("smoothen"), its(vid.joysmooth) + " ms", 'e');
+
+  add_edit(joy_init);
 
   dialog::addBreak(50);
   dialog::addBack();

@@ -1516,12 +1516,14 @@ EX void initialize_all() {
 
   DEBBI(DF_INIT | DF_GRAPH, ("initgraph"));
   
+  DEBB(DF_INIT, ("initconfig"));
   initConfig();
 
 #if CAP_SDLJOY
   joyx = joyy = 0; joydir.d = -1;
 #endif
   
+  DEBB(DF_INIT, ("restartGraph"));
   restartGraph();
   
   if(noGUI) {
@@ -1531,11 +1533,14 @@ EX void initialize_all() {
     return;
     }
 
+  DEBB(DF_INIT, ("preparesort"));
   preparesort();
 #if CAP_CONFIG
+  DEBB(DF_INIT, ("loadConfig"));
   loadConfig();
 #endif
 #if CAP_ARCM
+  DEBB(DF_INIT, ("parse symbol"));
   arcm::current.parse();
 #endif
   if(mhybrid) geometry = hybrid::underlying;
@@ -1544,19 +1549,26 @@ EX void initialize_all() {
   arg::read(2);
 #endif
 
+  DEBB(DF_INIT | DF_GRAPH, ("init graph"));
   init_graph();
+  DEBB(DF_INIT | DF_POLY, ("check CGI"));
   check_cgi();
+  DEBB(DF_INIT | DF_POLY, ("require basic"));
   cgi.require_basics();
   
+  DEBB(DF_INIT | DF_GRAPH, ("init font"));
   init_font();
 
 #if CAP_SDLJOY  
-  initJoysticks();
+  initJoysticks_async();
 #endif
 
 #if CAP_SDLAUDIO
+  DEBB(DF_INIT, ("init audio"));
   initAudio();
 #endif
+
+  DEBB(DF_INIT, ("initialize_all done"));
   }
 
 EX void quit_all() {
