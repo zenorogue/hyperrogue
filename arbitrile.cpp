@@ -1867,17 +1867,34 @@ EX void convert_max() {
 
 EX void convert_minimize(int N, vector<int>& old_shvids, map<int, int>& old_to_new) {
   vector<pair<int, int>> address;
-  vector<int> next;
+  vector<int> address_start;
+
   for(int i=0; i<N; i++) {
     int q = identification[old_shvids[i]].modval;
     int c = isize(address);
+    address_start.push_back(c);
     for(int j=0; j<q; j++) {
       address.emplace_back(i, j);
-      next.emplace_back(j == q-1 ? c : c+j+1);
       }
     }
 
   int K = isize(address);  
+  vector<int> next(K), step(K);
+
+  for(int k=0; k<K; k++) {
+    auto i = address[k].first;
+    auto j = address[k].second;
+
+    auto& id = identification[old_shvids[i]];
+    next[k] = address_start[i] + (j+1) % id.modval;
+
+    cell *s = id.sample;
+    cellwalker cw(s, j);
+    cw += wstep;
+    auto idx = get_identification(cw.at);
+    step[k] = address_start[old_to_new.at(idx.target)] + gmod(cw.spin - idx.shift, idx.modval);
+    }
+
   vector<array<ld, 3> > dists(K);
   for(int i=0; i<K; i++) {
     auto pi = address[i];
@@ -1910,11 +1927,18 @@ EX void convert_minimize(int N, vector<int>& old_shvids, map<int, int>& old_to_n
   
   int chg = 1;
   while(chg) {
-    for(auto& eq: equal) println(hlog, eq);
+    if(debugflags & DF_GEOM) {
+      println(hlog, "current table of equals:");
+      int eqid = 0;
+      for(auto& eq: equal) {
+        println(hlog, eq, " for ", eqid, ": ", address[eqid], " next= ", next[eqid], " step= ", step[eqid]);
+        eqid++;
+        }
+      }
     chg = 0;
     for(int i=0; i<K; i++)
     for(int j=0; j<K; j++)
-      if(equal[i][j] && !equal[next[i]][next[j]]) {
+      if(equal[i][j] && (!equal[next[i]][next[j]] || !equal[step[i]][step[j]])) {
         equal[i][j] = false;
         chg++;
         }
