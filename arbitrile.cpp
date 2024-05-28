@@ -2007,6 +2007,7 @@ EX void convert() {
     sh.vertices.clear();
     sh.connections.clear();
     sh.cycle_length = id.modval;
+    sh.orig_id = arcm::get_graphical_id(s);
     sh.repeat_value = t / id.modval;
     sh.flags = hr::pseudohept(s) ? arcm::sfPH : 0;
     #if CAP_ARCM

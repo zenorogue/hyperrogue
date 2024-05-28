@@ -1607,11 +1607,7 @@ EX namespace ccolor {
   EX data shape = data("shape", always_available, CCO {
     #if CAP_ARCM
     if(arcm::in()) {
-      int id = arcm::id_of(c->master);
-      int tid = arcm::current.tilegroup[id];
-      int tid2 = arcm::current.tilegroup[id^1];
-      if(tid2 >= 0) tid = min(tid, tid2);
-      return cco.ctab[tid];
+      return cco.ctab[arcm::get_graphical_id(c)];
       }
     #endif
     if(arb::in()) {

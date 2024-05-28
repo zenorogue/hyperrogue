@@ -1570,6 +1570,14 @@ EX bool is_vertex(heptagon *h) {
   return id_of(h) >= 2 * current.N;
   }
 
+EX int get_graphical_id(cell *c) {
+  int id = arcm::id_of(c->master);
+  int tid = arcm::current.tilegroup[id];
+  int tid2 = arcm::current.tilegroup[id^1];
+  if(tid2 >= 0) tid = min(tid, tid2);
+  return tid;
+  }
+
 bool archimedean_tiling::get_step_values(int& steps, int& single_step) {
 
   int nom = -2;
