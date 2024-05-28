@@ -1164,8 +1164,18 @@ EX void initConfig() {
   param_i(min_cells_drawn, "min_cells_drawn");
 
   param_str(menu_format, "menu_format", "")
-  ->editable("menu format", "programmable menu key", 'T')
-  ->set_standard_editor();
+  ->set_standard_editor()
+  ->editable("menu line format",
+     "Displays an arbitrary text instead of menu. "
+     "You can use e.g. $(turncount) or $(gametime,2) "
+     "to display the values of parameters and statistics.",
+     'T')
+  ->set_extra([] {
+    dialog::addSelItem(XLAT("default"), "", SDLK_F1);
+    dialog::add_action([] { menu_format = ""; popScreen(); });
+    dialog::addSelItem(XLAT("show turn count"), "", SDLK_F2);
+    dialog::add_action([] { menu_format = "t:$(turncount)"; popScreen(); });
+    });
   param_i(menu_darkening, "menu_darkening", 2)
   -> editable(0, 8, 1, "menu map darkening", "A larger number means darker game map in the background. Set to 8 to disable the background.", 'd')
   -> set_sets([] { dialog::bound_low(0); dialog::bound_up(8); dialog::get_di().dialogflags |= sm::DARKEN; });
