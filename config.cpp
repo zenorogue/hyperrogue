@@ -578,21 +578,24 @@ void string_parameter::show_edit_option(int key) {
   }
 
 string_parameter* string_parameter::set_standard_editor() {
-  shared_ptr<string> bak = make_shared<string>(*value);
+  shared_ptr<string> bak = make_shared<string>();
   editor = [this, bak] {
+    *bak = *value;
     dialog::edit_string(*bak, menu_item_name, help_text);
     dialog::get_di().reaction = [this, bak] {
       if(pre_reaction) pre_reaction();
       *value = *bak;
       if(reaction) reaction();
       };
+    if(sets) sets();
     };
   return this;
   }
 
 string_parameter* string_parameter::set_file_editor(string ext) {
-  shared_ptr<string> bak = make_shared<string>(*value);
+  shared_ptr<string> bak = make_shared<string>();
   editor = [this, bak, ext] {
+    *bak = *value;
     dialog::openFileDialog(*bak, menu_item_name, ext, [this, bak] {
       if(pre_reaction) pre_reaction();
       *value = *bak;
