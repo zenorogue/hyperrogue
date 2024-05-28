@@ -311,9 +311,20 @@ struct int_parameter : public val_parameter<int> {
   };
 
 struct string_parameter: public val_parameter<string> {
+  reaction_t editor;
   string save() override { return *value; }
   void load_from_raw(const string& s) override { *value = s; }
   void show_edit_option(int key) override;
+  string_parameter* set_standard_editor();
+  string_parameter* set_file_editor(string ext);
+  string_parameter* editable(string cap, string help, char key ) {
+    is_editable = true;
+    menu_item_name = cap;
+    default_key = key;
+    menu_item_name_modified = true;
+    help_text = help;
+    return this;
+    }
   };
 
 struct char_parameter : public val_parameter<char> {
@@ -560,6 +571,36 @@ void char_parameter::show_edit_option(int key) {
 
 void string_parameter::show_edit_option(int key) {
   dialog::addSelItem(XLAT(menu_item_name), *value, key);
+  if(!editor) {
+    if(is_highlight(dialog::items.back())) mouseovers = XLAT("not editable");
+    }
+  else dialog::add_action(editor);
+  }
+
+string_parameter* string_parameter::set_standard_editor() {
+  shared_ptr<string> bak = make_shared<string>(*value);
+  editor = [this, bak] {
+    dialog::edit_string(*bak, menu_item_name, help_text);
+    dialog::get_di().reaction = [this, bak] {
+      if(pre_reaction) pre_reaction();
+      *value = *bak;
+      if(reaction) reaction();
+      };
+    };
+  return this;
+  }
+
+string_parameter* string_parameter::set_file_editor(string ext) {
+  shared_ptr<string> bak = make_shared<string>(*value);
+  editor = [this, bak, ext] {
+    dialog::openFileDialog(*bak, menu_item_name, ext, [this, bak] {
+      if(pre_reaction) pre_reaction();
+      *value = *bak;
+      if(reaction) reaction();
+      return true;
+      });
+    };
+  return this;
   }
 
 void parameter::setup(const parameter_names& n) {
@@ -1383,7 +1424,7 @@ EX void initConfig() {
   param_i(vid.linequality, "line quality", 0);
   
   #if CAP_FILES && CAP_SHOT && CAP_ANIMATIONS
-  param_str(anims::animfile, "animation file format");
+  param_str(anims::animfile, "animation file format")->set_file_editor(".png");
   #endif
 
   #if CAP_RUG
@@ -1436,7 +1477,10 @@ EX void initConfig() {
   param_f(arcm::euclidean_edge_length, "arcm-euclid-length");
   
   #if CAP_ARCM
-  param_str(arcm::current.symbol, "arcm-symbol", "4^5")->be_non_editable();
+  auto arcms = param_str(arcm::current.symbol, "arcm-symbol", "4^5");
+  arcms->editor = [] { pushScreen(arcm::show); arcm::init_symbol_edit(); };
+  arcms->pre_reaction = non_editable_pre;
+  arcms->reaction = [] { if(!arcm::load_symbol(arcm::current.symbol)) throw hr_parse_exception("wrong Archimedean symbol"); non_editable_post(); };
   #endif
   param_enum(hybrid::underlying, "product_underlying", hybrid::underlying)->be_non_editable();
   
@@ -3330,7 +3374,8 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
   ->editable(0, 5, 0.1, "Width of cell boundaries",
     "How wide should the cell boundaries be.", '0');
   param_b(vid.gp_autoscale_heights, "3D Goldberg autoscaling", true);
-  param_str(scorefile, "savefile");
+  auto scf = param_str(scorefile, "savefile");
+  scf->be_non_editable(); scf->reaction = [] { exit(1); };
   param_b(savefile_selection, "savefile_selection")
   -> editable("select the score/save file on startup", 's')
   -> set_reaction([] {
@@ -3345,7 +3390,8 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
   param_ccolor(ccolor::which, "pattern");
   param_b(ccolor::live_canvas, "live_canvas")
   -> editable("apply color/pattern changes to canvas automatically", 'l');
-  param_str(ccolor::color_formula, "color_formula");
+  param_str(ccolor::color_formula, "color_formula")
+  -> editor = [] { ccolor::config_formula(false); };
   });
 
 EX void switchcolor(unsigned int& c, unsigned int* cs) {

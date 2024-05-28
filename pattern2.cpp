@@ -1885,7 +1885,7 @@ EX namespace ccolor {
     return;
     }
 
-  void config_formula(bool instant) {
+  EX void config_formula(bool instant) {
     string s = XLAT(
       "This lets you specify the color pattern as a function of the cell.\n");
     s += XLAT("rgb(r,g,b)\n");

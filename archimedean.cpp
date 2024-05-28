@@ -1078,6 +1078,19 @@ void archimedean_tiling::parse() {
   prepare();  
   }
 
+EX bool load_symbol(const string& s) {
+  archimedean_tiling at; at.parse(s);
+  if(at.errors) {
+    DEBB(DF_ERROR | DF_GEOM, ("error: ", at.errormsg));
+    return false;
+    }
+  stop_game();
+  set_geometry(gArchimedean);
+  current = at;
+  if(!delayed_start) start_game();
+  return true;
+  }
+
 #if CAP_COMMANDLINE  
 int readArgs() {
   using namespace arg;
@@ -1085,16 +1098,8 @@ int readArgs() {
   if(0) ;
   else if(argis("-symbol")) {
     PHASEFROM(2);
-    archimedean_tiling at;
-    shift(); at.parse(args());
-    if(at.errors) {
-      DEBB(DF_ERROR | DF_GEOM, ("error: ", at.errormsg));
-      }
-    else {
-      set_geometry(gArchimedean);
-      current = at;
-      showstartmenu = false;
-      }
+    shift(); load_symbol(args());
+    showstartmenu = false;
     }
   else if(argis("-dual")) { PHASEFROM(2); set_variation(eVariation::dual); }
   else if(argis("-d:arcm")) 
@@ -1352,6 +1357,13 @@ function<void()> setcanvas(ccolor::data& c) {
 
 dialog::string_dialog se;
 
+EX void init_symbol_edit() {
+  symbol_editing = true;
+  edited = current;
+  se.start_editing(edited.symbol);
+  edited.parse();
+  }
+
 EX void show() {
   if(lastsample < isize(samples)) {
     string s = samples[lastsample].first;
@@ -1405,12 +1417,7 @@ EX void show() {
   else {
     string cs = in() ? current.symbol : XLAT("OFF");
     dialog::addSelItem("edit", cs, '/');  
-    dialog::add_action([] () { 
-      symbol_editing = true;
-      edited = current;
-      se.start_editing(edited.symbol);
-      edited.parse();
-      });
+    dialog::add_action(init_symbol_edit);
     dialog::addBreak(100);
     int nextpos = spos;
     int shown = 0;
