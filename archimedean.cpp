@@ -1464,7 +1464,9 @@ EX void show() {
       });
     
     if(in()) {
-      dialog::addSelItem(XLAT("size of the world"), current.world_size(), 0);
+      dialog::addSelItem(XLAT("size of the world"), current.world_size(), 'S');
+      add_size_action();
+
       dialog::addSelItem(XLAT("edge length"), current.get_class() == gcEuclid ? (fts(current.edgelength) + XLAT(" (arbitrary)")) : fts(current.edgelength), 0);
 
       dialog::addItem(XLAT("color by symmetries"), 't');
