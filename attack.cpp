@@ -340,6 +340,10 @@ EX eWall conditional_flip_slime(bool flip, eWall t) {
   return t;
   }
 
+EX void chainspill(cell *c) {
+  if(c->wall == waMagma && c->monst == moSlimeNextTurn) killMonster(c, moNone, 0);
+  }
+
 EX void spillfix(cell* c, eWall t, int rad) {
   if(c->wall == waTemporary) {
     changes.ccell(c);
@@ -348,6 +352,7 @@ EX void spillfix(cell* c, eWall t, int rad) {
   if(rad) for(auto p: adj_minefield_cells_full(c)) {
     spillfix(p.c, conditional_flip_slime(p.mirrored, t), rad-1);
     }
+  chainspill(c);
   }
 
 EX void spill(cell* c, eWall t, int rad) {
@@ -362,6 +367,7 @@ EX void spill(cell* c, eWall t, int rad) {
       si.second.spill_b > si.second.spill_a ? waFloorB :
       isAlchAny(si.second.orig) ? si.second.orig :
       waNone;
+    chainspill(c);
     }
   }
 
