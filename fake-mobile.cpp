@@ -2,7 +2,6 @@
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 //
 // Compile with: g++ fake-mobile.cpp -o fake-mobile -I/usr/include/SDL -lSDL -lSDL_gfx -lGL -lSDL_ttf -lz -Wno-invalid-offsetof
-// Copy/link font file "VeraBd.ttf" to the current directory if needed.
 
 #define ISFAKEMOBILE 1
 #define MOBPAR_FORMAL int
@@ -58,6 +57,17 @@ int gdpop() { return graphdata[gdpos++]; }
 
 TTF_Font *font[256];
 
+const char* fontname = "DejaVuSans-Bold.ttf";
+
+void load_font() {
+  if(!font[size])
+    font[size] = TTF_OpenFont(fontname, size);
+  if(!font[size]) {
+    fprintf(stderr, "failed to open font: %s", fontname);
+    exit(1);
+    }
+  }
+
 bool rawdisplaystr(int x, int y, int shift, int size, const char *str, int color, int align) {
 
   if(strlen(str) == 0) return false;
@@ -72,8 +82,7 @@ bool rawdisplaystr(int x, int y, int shift, int size, const char *str, int color
   
   col.r >>= darken; col.g >>= darken; col.b >>= darken;
 
-  if(!font[size])
-    font[size] = TTF_OpenFont("DejaVuSans-Bold.ttf", size);
+  load_font();
 
   SDL_Surface *txt = TTF_RenderText_Solid(font[size], str, col);
   
@@ -98,11 +107,7 @@ bool rawdisplaystr(int x, int y, int shift, int size, const char *str, int color
 int textwidth(int siz, const string &str) {
   if(isize(str) == 0) return 0;
   
-  if(!font[siz]) font[siz] = TTF_OpenFont("VeraBd.ttf", siz);
-  if(!font[siz]) {
-    fprintf(stderr, "TTF_OpenFont(\"VeraBd.ttf\", %d) failed\n", siz);
-    exit(1);
-    }
+  load_font();
   
   int w, h;
   TTF_SizeUTF8(font[siz], str.c_str(), &w, &h);
