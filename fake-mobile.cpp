@@ -70,7 +70,7 @@ bool rawdisplaystr(int x, int y, int shift, int size, const char *str, int color
   col.r >>= darken; col.g >>= darken; col.b >>= darken;
 
   if(!font[size])
-    font[size] = TTF_OpenFont("VeraBd.ttf", size);
+    font[size] = TTF_OpenFont("DejaVuSans-Bold.ttf", size);
 
   SDL_Surface *txt = TTF_RenderText_Solid(font[size], str, col);
   
