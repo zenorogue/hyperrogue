@@ -315,7 +315,7 @@ struct string_parameter: public val_parameter<string> {
   string save() override { return *value; }
   void load_from_raw(const string& s) override { *value = s; }
   void show_edit_option(int key) override;
-  string_parameter* set_standard_editor();
+  string_parameter* set_standard_editor(bool direct);
   string_parameter* set_file_editor(string ext);
   string_parameter* editable(string cap, string help, char key ) {
     is_editable = true;
@@ -577,14 +577,14 @@ void string_parameter::show_edit_option(int key) {
   else dialog::add_action(editor);
   }
 
-string_parameter* string_parameter::set_standard_editor() {
+string_parameter* string_parameter::set_standard_editor(bool direct) {
   shared_ptr<string> bak = make_shared<string>();
-  editor = [this, bak] {
+  editor = [this, bak, direct] {
     *bak = *value;
-    dialog::edit_string(*bak, menu_item_name, help_text);
-    dialog::get_di().reaction = [this, bak] {
-      if(pre_reaction) pre_reaction();
-      *value = *bak;
+    dialog::edit_string(direct ? *value : *bak, menu_item_name, help_text);
+    dialog::get_di().reaction = [direct, this, bak] {
+      if(!direct) if(pre_reaction) pre_reaction();
+      if(!direct) *value = *bak;
       if(reaction) reaction();
       };
     if(sets) sets();
@@ -1164,7 +1164,7 @@ EX void initConfig() {
   param_i(min_cells_drawn, "min_cells_drawn");
 
   param_str(menu_format, "menu_format", "")
-  ->set_standard_editor()
+  ->set_standard_editor(true)
   ->editable("menu line format",
      "Displays an arbitrary text instead of menu. "
      "You can use e.g. $(turncount) or $(gametime,2) "
@@ -1175,6 +1175,7 @@ EX void initConfig() {
     dialog::add_action([] { menu_format = ""; popScreen(); });
     dialog::addSelItem(XLAT("show turn count"), "", SDLK_F2);
     dialog::add_action([] { menu_format = "t:$(turncount)"; popScreen(); });
+    dialog::addSelItem(XLAT("testing"), eval_programmable_string(menu_format), 0);
     });
   param_i(menu_darkening, "menu_darkening", 2)
   -> editable(0, 8, 1, "menu map darkening", "A larger number means darker game map in the background. Set to 8 to disable the background.", 'd')
