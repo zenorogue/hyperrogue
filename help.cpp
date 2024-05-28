@@ -527,6 +527,10 @@ EX string generateHelpForItem(eItem it) {
         }
       }
     }
+
+  int oc = orbcharges(it); if(oc) help += XLAT("\n\nOrb charges gained: %1", its(oc));
+  if(among(it, itOrbFrog, itOrbPhasing, itOrbDash))
+    help += XLAT("\n\nActivation cost: %1 charges\n", its(5));
   
   if(it == itOrb37 && (S7 != 7 || !BITRUNCATED))
     help += "\n\n" + other_geometry() + forbidden_unmarked();
