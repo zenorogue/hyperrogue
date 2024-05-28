@@ -528,9 +528,31 @@ EX string generateHelpForItem(eItem it) {
       }
     }
 
-  int oc = orbcharges(it); if(oc) help += XLAT("\n\nOrb charges gained: %1", its(oc));
-  if(among(it, itOrbFrog, itOrbPhasing, itOrbDash))
-    help += XLAT("\n\nActivation cost: %1 charges\n", its(5));
+  int oc = orbcharges(it); if(oc) {
+
+    if(items[itOrbIntensity]) {
+      int oc2 = intensify(oc);
+      help += XLAT("\n\nOrb charges gained on pickup: %1 (increased to %2 by %the3)", its(oc), its(oc2), itOrbIntensity);
+      }
+    else
+      help += XLAT("\n\nOrb charges gained on pickup: %1", its(oc));
+    }
+
+  int ac = 0;
+  if(among(it, itOrbFrog, itOrbPhasing, itOrbDash)) ac = 5;
+  if(among(it, itOrbSummon)) ac = 20;
+  if(among(it, itOrbPsi)) ac = 30;
+  if(among(it, itOrbStunning)) ac = 10;
+  if(among(it, itOrbMorph)) ac = 3;
+  if(among(it, itOrbIllusion)) ac = 5;
+  if(among(it, itOrbDragon)) ac = 5;
+
+  if(ac) {
+    if(items[itOrbEnergy])
+      help += XLAT("\n\nActivation cost: %1 charges (reduced to %2 by %the3)\n", its(ac), " ", its((1+ac)/2), itOrbEnergy);
+    else
+      help += XLAT("\n\nActivation cost: %1 charges\n", its(ac));
+    }
   
   if(it == itOrb37 && (S7 != 7 || !BITRUNCATED))
     help += "\n\n" + other_geometry() + forbidden_unmarked();
