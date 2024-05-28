@@ -1688,6 +1688,7 @@ EX namespace hive {
 
   EX eMonster randomHyperbug() {
     int h = hivehard();
+    if(h && markOrb(itOrbLuck)) h /= 4;
     if(hrand(200) < h)
       return moBug2;
     return eMonster(moBug0 + hrand(BUGCOLORS));
