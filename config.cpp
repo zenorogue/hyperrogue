@@ -24,9 +24,8 @@ EX bool use_bool_dialog;
 
 EX string param_esc(string s);
 
-EX void non_editable_reaction() {
-  if(game_active) { stop_game(); if(!delayed_start) start_game(); }
-  }
+EX void non_editable_pre() { if(game_active) stop_game(); };
+EX void non_editable_post() { if(!delayed_start) start_game(); };
 
 #if HDR
 
@@ -51,7 +50,7 @@ struct parameter : public std::enable_shared_from_this<parameter> {
   string menu_item_name;
   bool menu_item_name_modified;
   string help_text;
-  reaction_t reaction;
+  reaction_t pre_reaction, reaction;
   char default_key;
   bool is_editable;
   bool needs_confirm;
@@ -66,7 +65,8 @@ struct parameter : public std::enable_shared_from_this<parameter> {
     }
   explicit parameter() { restrict = auto_restrict; is_editable = false; needs_confirm = false; }
   void be_non_editable() {
-    reaction = non_editable_reaction;
+    pre_reaction = non_editable_pre;
+    reaction = non_editable_post;
     }
   virtual void check_change() { }
   reaction_t sets;
@@ -173,6 +173,7 @@ template<class T> struct enum_parameter : list_parameter {
   void load(const string& s) override {
     auto bak = *value;
     load_from_raw(s);
+    if(*value != bak && pre_reaction) { swap(*value, bak); pre_reaction(); swap(*value, bak); }
     if(*value != bak && reaction) reaction();
     }
   bool load_from_animation(const string& s) override {
@@ -228,6 +229,7 @@ template<class T> struct val_parameter : public parameter {
   void load(const string& s) override {
     auto bak = *value;
     load_from_raw(s);
+    if(*value != bak && pre_reaction) { swap(*value, bak); pre_reaction(); swap(*value, bak); }
     if(*value != bak && reaction) reaction();
     }
   bool load_from_animation(const string& s) override {
