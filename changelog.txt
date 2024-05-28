@@ -5249,3 +5249,21 @@ Minor bug fixes:
 - changed the guarding in Power landscape
 - display Compass and Orb of Yendor beacon on radar
 - fixed some problems with tides (thanks to jlm)
+
+2024-05-28 19:35 Update 13.0j
+
+- display charge count for all orbs, and activation costs for frog-like orbs
+- "(v) menu" can now be replaced to show turn count or another parameter/formula
+- Orb of Luck now removes the blue bug bias
+- fixed the shape pattern for converted tilings
+- fixed a bug in the tessellation converter
+- the game spent 5s on startup initializing SDL joysticks -- this now can be avoided
+- chainspilling lava slimes
+- more explanation is now available for ON/OFF parameters
+- fixed product rendering
+- fixed model orientation for spiral
+- fixed a crash when changing the 'race angle' setting
+- fixed a possible crash when trying to build CR2 or CR5 next to CR4
+
+Changes to the parameter/formula system:
+- more values and functions are now available in formulas (including the new color formulas, including the 'formula' canvas pattern)
