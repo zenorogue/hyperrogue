@@ -5673,7 +5673,8 @@ EX bool just_refreshing;
 
 EX int menu_darkening = 2;
 EX bool centered_menus = false;
-EX bool show_turns = false;
+
+EX string menu_format = "";
 
 EX void gamescreen() {
 
@@ -5800,8 +5801,8 @@ EX void normalscreen() {
   cmode = sm::NORMAL | sm::DOTOUR | sm::CENTER;
   if(viewdists && show_distance_lists) cmode |= sm::SIDE | sm::MAYDARK;
   gamescreen(); drawStats();
-  if(show_turns)
-    displayButton(vid.xres-8, vid.yres-vid.fsize, "t:" + its(turncount), 'v', 16);
+  if(menu_format != "")
+    displayButton(vid.xres-8, vid.yres-vid.fsize, eval_programmable_string(menu_format), 'v', 16);
   else if(nomenukey || ISMOBILE)
     ;
 #if CAP_TOUR

@@ -1029,6 +1029,39 @@ EX string read_file_as_string(string fname) {
   return buf;
   }
 
+EX string eval_programmable_string(const string& fmt) {
+  try {
+    exp_parser ep;
+    ep.s = fmt;
+    string out;
+    while(ep.at < (int) fmt.size()) {
+      if(ep.eat("$(")) {
+        auto res = ep.parse();
+        if(ep.eat(",")) {
+          int prec = ep.iparse();
+          std::stringstream str;
+          str.precision(prec);
+          str << std::fixed;
+          if(prec) str << std::showpoint;
+          str << real(res);
+          if(imag(res)) str << "+i" << imag(res);
+          out += str.str();
+          }
+        else {
+          out += fts(real(res));
+          if(imag(res)) out += "+i" + fts(imag(res));
+          }
+        ep.force_eat(")");
+        }
+      else out += ep.eatchar();
+      }
+    return out;
+    }
+  catch(hr_parse_exception& ex) {
+    return fmt;
+    }
+  }
+
 EX void floyd_warshall(vector<vector<char>>& v) {
   int N = isize(v);
   for(int k=0; k<N; k++)
