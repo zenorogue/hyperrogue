@@ -93,6 +93,7 @@ EX bool appears(const string& haystack, const string& needle) {
 #if HDR
 struct hr_parse_exception : hr_exception {
   string s;
+  const char *what() const noexcept override { return s.c_str(); }
   hr_parse_exception(const string& z) : s(z) {}
   ~hr_parse_exception() noexcept(true) {}
   };
