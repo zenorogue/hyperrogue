@@ -1078,12 +1078,13 @@ void archimedean_tiling::parse() {
   prepare();  
   }
 
-EX bool load_symbol(const string& s) {
+EX bool load_symbol(const string& s, bool switch_geom) {
   archimedean_tiling at; at.parse(s);
   if(at.errors) {
     DEBB(DF_ERROR | DF_GEOM, ("error: ", at.errormsg));
     return false;
     }
+  if(!switch_geom && geometry != gArchimedean) return true;
   stop_game();
   set_geometry(gArchimedean);
   current = at;
@@ -1098,7 +1099,7 @@ int readArgs() {
   if(0) ;
   else if(argis("-symbol")) {
     PHASEFROM(2);
-    shift(); load_symbol(args());
+    shift(); load_symbol(args(), true);
     showstartmenu = false;
     }
   else if(argis("-dual")) { PHASEFROM(2); set_variation(eVariation::dual); }

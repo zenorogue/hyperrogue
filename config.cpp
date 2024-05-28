@@ -1495,7 +1495,7 @@ EX void initConfig() {
   auto arcms = param_str(arcm::current.symbol, "arcm-symbol", "4^5");
   arcms->editor = [] { pushScreen(arcm::show); arcm::init_symbol_edit(); };
   arcms->pre_reaction = non_editable_pre;
-  arcms->reaction = [] { if(!arcm::load_symbol(arcm::current.symbol)) throw hr_parse_exception("wrong Archimedean symbol"); non_editable_post(); };
+  arcms->reaction = [] { if(!arcm::load_symbol(arcm::current.symbol, false)) throw hr_parse_exception("wrong Archimedean symbol"); non_editable_post(); };
   #endif
   param_enum(hybrid::underlying, "product_underlying", hybrid::underlying)->be_non_editable();
   
