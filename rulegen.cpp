@@ -2596,11 +2596,18 @@ EX void show() {
   dialog::addBoolItem(XLAT("in tes internal format"), arb::in(), 't');
   dialog::add_action([] {
     if(!arb::in()) {
-      arb::convert::convert();
-      arb::convert::activate();
-      start_game();
-      rule_status = XLAT("converted successfully -- %1 cell types", its(isize(arb::current.shapes)));
-      rules_known_for = "unknown";
+      try {
+        arb::convert::convert();
+        arb::convert::activate();
+        start_game();
+        rule_status = XLAT("converted successfully -- %1 cell types", its(isize(arb::current.shapes)));
+        rules_known_for = "unknown";
+        }
+      catch(hr_parse_exception& ex) {
+        println(hlog, "failed: ", ex.s);
+        rule_status = XLAT("failed to convert: ") + ex.s;
+        rules_known_for = "unknown";
+        }
       }
     else if(arb::convert::in()) {
       stop_game();
