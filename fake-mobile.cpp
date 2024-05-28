@@ -1,5 +1,8 @@
 // Hyperbolic Rogue -- fake mobile target
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
+//
+// Compile with: g++ fake-mobile.cpp -o fake-mobile -I/usr/include/SDL -lSDL -lSDL_gfx -lGL -lSDL_ttf -lz -Wno-invalid-offsetof
+// Copy/link font file "VeraBd.ttf" to the current directory if needed.
 
 #define ISFAKEMOBILE 1
 #define MOBPAR_FORMAL int
@@ -96,6 +99,10 @@ int textwidth(int siz, const string &str) {
   if(isize(str) == 0) return 0;
   
   if(!font[siz]) font[siz] = TTF_OpenFont("VeraBd.ttf", siz);
+  if(!font[siz]) {
+    fprintf(stderr, "TTF_OpenFont(\"VeraBd.ttf\", %d) failed\n", siz);
+    exit(1);
+    }
   
   int w, h;
   TTF_SizeUTF8(font[siz], str.c_str(), &w, &h);
