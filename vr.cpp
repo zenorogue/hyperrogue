@@ -1489,7 +1489,7 @@ auto hooka = addHook(hooks_args, 100, readArgs);
 
 #if CAP_CONFIG
 void addconfig() {
-  addsaver(enabled, "vr-enabled");
+  param_b(enabled, "vr-enabled");
 
   param_f(absolute_unit_in_meters, "vr-abs-unit");
 
@@ -1506,11 +1506,11 @@ void addconfig() {
   param_f(vrhr::ui_depth, "vr_ui_depth");
   param_f(vrhr::ui_size, "vr_ui_size");
   
-  param_enum(vrhr::hsm, "vr_headset_mode", "vr_headset_mode", vrhr::hsm)
+  param_enum(vrhr::hsm, "vr_headset_mode", vrhr::hsm)
     ->editable(headset_desc, "VR headset movement", 'h');
-  param_enum(vrhr::eyes, "vr_eyes_mode", "vr_eyes_mode", vrhr::eyes)
+  param_enum(vrhr::eyes, "vr_eyes_mode", vrhr::eyes)
     ->editable(eyes_desc, "VR binocular vision", 'b');
-  param_enum(vrhr::cscr, "vr_screen_mode", "vr_screen_mode", vrhr::cscr)
+  param_enum(vrhr::cscr, "vr_screen_mode", vrhr::cscr)
     ->editable(comp_desc, "VR computer screen", 'c');
   }
 auto hookc = addHook(hooks_configfile, 100, addconfig);
