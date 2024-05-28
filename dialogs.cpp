@@ -223,12 +223,16 @@ EX namespace dialog {
   EX string keyname(int k) {
     if(k == 0) return "";
     if(k == SDLK_ESCAPE) return "Esc";
-    if(k == SDLK_F5) return "F5";
-    if(k == SDLK_F10) return "F10";
-    if(k == SDLK_F9) return "F9";
     if(k == SDLK_F1) return "F1";
-    if(k == SDLK_F4) return "F4";
+    if(k == SDLK_F2) return "F2";
     if(k == SDLK_F3) return "F3";
+    if(k == SDLK_F4) return "F4";
+    if(k == SDLK_F5) return "F5";
+    if(k == SDLK_F6) return "F6";
+    if(k == SDLK_F7) return "F7";
+    if(k == SDLK_F8) return "F8";
+    if(k == SDLK_F9) return "F9";
+    if(k == SDLK_F10) return "F10";
     if(k >= 10000 && k < 10500) return "";
     if(k == SDLK_HOME) return "Home";
     if(k == SDLK_BACKSPACE) return "Backspace";
