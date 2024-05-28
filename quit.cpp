@@ -26,6 +26,10 @@ EX int getgametime() {
   return (int) (savetime + (timerstopped ? 0 : (time(NULL) - timerstart)));
   }
 
+EX ld getgametime_precise() {
+  return savetime + (timerstopped ? 0 : (ticks - tickstart) / 1000.);
+  }
+
 EX string getgametime_s(int timespent IS(getgametime())) {
   return hr::format("%d:%02d", timespent/60, timespent % 60);
   }

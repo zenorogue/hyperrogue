@@ -54,7 +54,7 @@ EX int truelotus;
 
 EX int asteroids_generated, asteroid_orbs_generated;
 
-EX time_t timerstart, savetime;
+EX time_t timerstart, savetime, tickstart;
 EX bool timerstopped;
 EX int savecount;
 EX int save_turns;
@@ -378,6 +378,7 @@ EX void initgame() {
   if(!safety) {
     usedSafety = false;
     timerstart = time(NULL); turncount = 0; rosewave = 0; rosephase = 0;
+    tickstart = ticks;
     noiseuntil = 0;
     sagephase = 0; hardcoreAt = 0;
     timerstopped = false;
