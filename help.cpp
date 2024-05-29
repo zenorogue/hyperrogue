@@ -546,10 +546,11 @@ EX string generateHelpForItem(eItem it) {
   if(among(it, itOrbMorph)) ac = 3;
   if(among(it, itOrbIllusion)) ac = 5;
   if(among(it, itOrbDragon)) ac = 5;
+  if(among(it, itOrbAir)) ac = 1;
 
   if(ac) {
     if(items[itOrbEnergy])
-      help += XLAT("\n\nActivation cost: %1 charges (reduced to %2 by %the3)\n", its(ac), " ", its((1+ac)/2), itOrbEnergy);
+      help += XLAT("\n\nActivation cost: %1 charges (reduced to %2 by %the3)\n", its(ac), its((1+ac)/2), itOrbEnergy);
     else
       help += XLAT("\n\nActivation cost: %1 charges\n", its(ac));
     }
