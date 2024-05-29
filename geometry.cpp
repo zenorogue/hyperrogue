@@ -1177,7 +1177,7 @@ EX namespace geom3 {
     }
 
   EX void apply_settings_full() {
-    if(vid.always3) {
+    if(cgip && vid.always3) {
       changing_embedded_settings = true;
       geom3::switch_fpp();
       #if MAXMDIM >= 4
@@ -1192,7 +1192,7 @@ EX namespace geom3 {
 
   EX void apply_settings_light() {
   #if MAXMDIM >= 4
-    if(vid.always3) {
+    if(cgip && vid.always3) {
       changing_embedded_settings = true;
       geom3::switch_always3();
       geom3::switch_always3();
