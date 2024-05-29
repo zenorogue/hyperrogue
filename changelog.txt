@@ -5268,8 +5268,13 @@ Minor bug fixes:
 Changes to the parameter/formula system:
 - more values and functions are now available in formulas (including the new color formulas, including the 'formula' canvas pattern)
 
-2024-05-28 20:21 Update 13.0j
+2024-05-28 20:21 Update 13.0k
 
 - fixed orb change display
 - fixed backward incompatible color reading from config
 - fixed symbol changed enable archimedean unexpectedly
+
+2024-05-29 13:54 Update 13.0l
+
+- fixed some more errors with the config file
+- show charges for Orb of Air, also fixed the line for Orb Energy
