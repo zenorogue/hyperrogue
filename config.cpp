@@ -3397,7 +3397,7 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
     "How wide should the cell boundaries be.", '0');
   param_b(vid.gp_autoscale_heights, "3D Goldberg autoscaling", true);
   auto scf = param_str(scorefile, "savefile");
-  scf->be_non_editable(); scf->reaction = [] { exit(1); };
+  scf->be_non_editable(); scf->reaction = [] { if(save_loaded) exit(1); };
   param_b(savefile_selection, "savefile_selection")
   -> editable("select the score/save file on startup", 's')
   -> set_reaction([] {
