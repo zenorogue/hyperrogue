@@ -949,8 +949,10 @@ EX namespace models {
       dynamicval<function<bool()>> ds(auto_restrict);
       auto_restrict = [&p] { return &vpconf == &p; };
 
-      if(&p.model == &pmodel)
-        param_custom_int(pmodel, parameter_names(pp+"used_model", "projection|Poincare|Klein|half-plane|perspective"), menuitem_projection, '1');
+      if(&p.model == &pmodel) {
+        auto par = param_custom_int(pmodel, parameter_names(pp+"used_model", "used model"), menuitem_projection, '1');
+        par->help_text = "projection|Poincare|Klein|half-plane|perspective";
+        }
       else param_enum(p.model, parameter_names(pp+"used_model", sp+"used model"), mdDisk);
 
       param_matrix(p.mori().v2, pp+"mori", 2)
