@@ -1865,6 +1865,7 @@ EX void parseline(const string& str) {
   }
 
 EX void loadNewConfig(FILE *f) {
+  dynamicval<bool> ds(delayed_start, true);
   for(auto& c: params) allconfigs[c.second->name] = allconfigs[c.second->legacy_config_name] = c.second;
   string rd;
   while(true) {
