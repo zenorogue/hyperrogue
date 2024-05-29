@@ -1765,6 +1765,8 @@ EX void restore_all_golems() {
     }
   }
 
+EX bool save_loaded;
+
 EX void initAll() {
   callhooks(hooks_initialize);
   init_floorcolors();
@@ -1785,6 +1787,7 @@ EX void initAll() {
 
 #if CAP_SAVE
   select_savefile();
+  save_loaded = true;
   loadsave();
   if(IRREGULAR && !irr::base) irr::auto_creator();
 #endif
