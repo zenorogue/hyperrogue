@@ -1131,6 +1131,17 @@ EX void handle_event(SDL_Event& ev) {
       sym = ev.key.keysym.sym;
       #if CAP_SDL2
       uni = ev.key.keysym.sym;
+      if(uni == '=' && (ev.key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT))) uni = '+';
+      if(uni == '1' && (ev.key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT))) uni = '!';
+      if(uni == '2' && (ev.key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT))) uni = '@';
+      if(uni == '3' && (ev.key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT))) uni = '#';
+      if(uni == '4' && (ev.key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT))) uni = '$';
+      if(uni == '5' && (ev.key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT))) uni = '%';
+      if(uni == '6' && (ev.key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT))) uni = '^';
+      if(uni == '7' && (ev.key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT))) uni = '&';
+      if(uni == '8' && (ev.key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT))) uni = '*';
+      if(uni == '9' && (ev.key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT))) uni = '(';
+      if(uni == '0' && (ev.key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT))) uni = ')';
       if(uni >= 'a' && uni <= 'z') {
         if(ev.key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT)) uni -= 32;
         else if(ev.key.keysym.mod & (KMOD_LCTRL | KMOD_RCTRL)) uni -= 96;        

@@ -5278,3 +5278,4 @@ Changes to the parameter/formula system:
 
 - fixed some more errors with the config file
 - show charges for Orb of Air, also fixed the line for Orb Energy
+- fixed some characters not being enterable in SDL2
