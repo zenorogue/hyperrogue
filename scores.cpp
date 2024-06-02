@@ -388,7 +388,15 @@ void load() {
     });
   }
 
-}}
+}
+
+EX map<int, int> qty_scores_for;
+
+EX void count_scores() {
+  qty_scores_for.clear();
+  for(auto s: scores::scores) qty_scores_for[scores::MODECODE_BOX]++;
+  }
+}
 
 #endif
 

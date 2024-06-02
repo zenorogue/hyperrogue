@@ -979,7 +979,9 @@ void loadBox() {
   boxid = 0; loading = true; applyBoxes(); loading = false;
   }
 
-const int MODECODE_BOX = 387;
+#if HDR
+constexpr int MODECODE_BOX = 387;
+#endif
 
 modecode_t fill_modecode() {
   dynamicval<int> sp1(multi::players, save.box[197]);
