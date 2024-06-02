@@ -1138,6 +1138,9 @@ EX modecode_t get_identify(modecode_t xc) {
   return identify_modes[xc];
   }
 
+/** handle cases where the encoding changed in the new version */
+EX string expected_modecode;
+
 EX modecode_t modecode(int mode) {
   modecode_t x = legacy_modecode();
   if(x != UNKNOWN) return x;
@@ -1155,6 +1158,11 @@ EX modecode_t modecode(int mode) {
   
   modecode_t next = FIRST_MODECODE;
   while(meaning.count(next)) next++;
+
+  if(expected_modecode != "" && expected_modecode != nover && code_for.count(expected_modecode)) {
+    next = code_for[expected_modecode];
+    // fallthrough -- will make an alias with the current encoding
+    }
   
   meaning[next] = code;
   code_for[nover] = next;
@@ -1412,10 +1420,10 @@ void mode_screen_for_current() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen();
 
-  dialog::init(XLAT("recorded mode"), iinf[itOrbYendor].color, 150, 100);
+  auto mc = modecode();
+  dialog::init(XLAT("recorded mode %1", its(mc)), iinf[itOrbYendor].color, 150, 100);
   dialog::addInfo(mode_description1());
 
-  auto mc = modecode();
   dialog::addBreak(100);
 
   dialog::addSelItem(XLAT("scores recorded"), its(qty_scores_for[mc]), 's');
@@ -1457,6 +1465,9 @@ void enable_mode_by_code(modecode_t mf) {
       load_mode_data_with_zero(ss);
       }
     mode_description_of[mf] = mode_description1();
+    dynamicval<string> s(expected_modecode, meaning[mf].substr(2));
+    auto mc = modecode(); hr::ignore(mc);
+    println(hlog, "read mode ", mc, " correctly");
     }
   catch(hr_exception& e) {
     stop_game();
