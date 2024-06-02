@@ -1478,6 +1478,10 @@ void push_mode_screen_for(modecode_t mf) {
   pushScreen(mode_screen_for_current);
   }
 
+EX bool include_unused_modes;
+
+EX string mode_to_search;
+
 EX void list_saved_custom_modes() {
   dialog::start_list(2000, 2000, 'a');
 
@@ -1486,6 +1490,8 @@ EX void list_saved_custom_modes() {
   auto current_mc = modecode();
 
   int unidentified = 0;
+  int unused = 0;
+  int allmodes = 0;
 
   for(auto m: meaning) {
     auto mf = m.first;
@@ -1496,20 +1502,30 @@ EX void list_saved_custom_modes() {
     if(tactic::recordsum.count(m.first)) {
       out += XLAT(" tactic: %1", its(tactic::compute_tscore(mf)));
       }
-    if(out == "") out = XLAT(" NONE");
-    out = out.substr(1);
+    if(out == "") { unused++; if(!include_unused_modes) continue; }
+    else out = out.substr(1);
     if(mf == current_mc) mode_description_of[mf] = mode_description1();
     string what;
     if(mode_description_of.count(mf)) what = mode_description_of[mf];
     else what = "(mode " + its(mf) + ")", unidentified++;
+    if(what.find(mode_to_search) == string::npos) continue;
     if(mf == current_mc) out += XLAT(" (ON)");
     dialog::addSelItem(what, out, dialog::list_fake_key++);
     dialog::add_action_confirmed([mf] { push_mode_screen_for(mf); });
+    allmodes++;
     }
 
   dialog::end_list();
 
   dialog::addBreak(50);
+  if(unused)
+    dialog::addBoolItem_action(XLAT("unused modes: %1", its(unused)), include_unused_modes, 'U');
+
+  if(allmodes >= 10) {
+    dialog::addSelItem(XLAT("search for mode"), mode_to_search, 'M');
+    dialog::add_action([] { dialog::edit_string(mode_to_search, XLAT("search for mode"), ""); });
+    }
+
   if(unidentified) {
     dialog::addSelItem(XLAT("unidentified modes"), its(unidentified), 'I');
     dialog::add_action_confirmed([] {
