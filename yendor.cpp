@@ -1485,6 +1485,8 @@ EX void list_saved_custom_modes() {
   int unused = 0;
   int allmodes = 0;
 
+  vector<modecode_t> unid_modes;
+
   for(auto m: meaning) {
     auto mf = m.first;
 
@@ -1499,7 +1501,11 @@ EX void list_saved_custom_modes() {
     if(mf == current_mc) mode_description_of[mf] = mode_description1();
     string what;
     if(mode_description_of.count(mf)) what = mode_description_of[mf];
-    else what = "(mode " + its(mf) + ")", unidentified++;
+    else {
+      what = "(mode " + its(mf) + ")";
+      unidentified++;
+      unid_modes.push_back(mf);
+      }
     if(what.find(mode_to_search) == string::npos) continue;
     if(mf == current_mc) out += XLAT(" (ON)");
     dialog::addSelItem(what, out, dialog::list_fake_key++);
@@ -1520,10 +1526,10 @@ EX void list_saved_custom_modes() {
 
   if(unidentified) {
     dialog::addSelItem(XLAT("unidentified modes"), its(unidentified), 'I');
-    dialog::add_action_confirmed([] {
-      for(auto m: meaning) if(!mode_description_of.count(m.first)) {
-        enable_mode_by_code(m.first);
-        println(hlog, "identified ", m.first, " as ", mode_description_of[m.first]);
+    dialog::add_action_confirmed([unid_modes] {
+      for(auto m: unid_modes) {
+        enable_mode_by_code(m);
+        println(hlog, "identified ", m, " as ", mode_description_of[m]);
         }
       start_game();
       });
