@@ -1028,8 +1028,39 @@ EX void save_mode_data(hstream& f) {
     }
   }
 
+EX eLandStructure get_default_land_structure() {
+  return
+    (princess::challenge || tactic::on) ? lsSingle :
+    racing::on ? lsSingle :
+    yendor::on ? yendor::get_land_structure() :
+    lsNiceWalls;
+  }
+
+EX void other_settings_default() {
+  land_structure = get_default_land_structure();
+  shmup::on = false;
+  inv::on = false;
+  #if CAP_TOUR
+  tour::on = false;
+  #endif
+  peace::on = false;
+  peace::otherpuzzles = false;
+  peace::explore_other = false;
+  multi::players = 1;
+  xcheat = false;
+  casual = false;
+  bow::weapon = bow::wBlade;
+  vid.creature_scale = 1;
+  use_custom_land_list = false;
+  horodisk_from = -2;
+  randomwalk_size = 10;
+  landscape_div = 25;
+  }
+
 EX void load_mode_data_with_zero(hstream& f) {
   mapstream::load_geometry(f);
+
+  other_settings_default();
 
   land_structure = (eLandStructure) f.get<char>();
   shmup::on = f.get<char>();
@@ -1044,9 +1075,6 @@ EX void load_mode_data_with_zero(hstream& f) {
   peace::explore_other = f.get<char>();
   multi::players = f.get<char>();
   xcheat = f.get<char>();
-  casual = false;
-  bow::weapon = bow::wBlade;
-  if(shmup::on) vid.creature_scale = 1;
   
   while(true) {
     char option = f.get<char>();
@@ -1496,8 +1524,10 @@ int read_mode_args() {
         shstream ss;
         ss.s = m.second;
         ss.read(ss.vernum);
-        if(ss.vernum < 0xAA05)
+        if(ss.vernum < 0xAA05) {
           mapstream::load_geometry(ss);
+          other_settings_default();
+          }
         else {
           ss.write_char(0);
           load_mode_data_with_zero(ss);
