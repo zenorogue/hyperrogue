@@ -490,6 +490,8 @@ EX void show_custom() {
   gamescreen();
   dialog::init(XLAT("custom mode"));
 
+  list_saved_custom_modes();
+  dialog::addBreak(100);
   if(custom_welcome != "") {
     dialog::addInfo("custom welcome message:");
     dialog::addInfo(custom_welcome);
@@ -502,7 +504,7 @@ EX void show_custom() {
     dialog::edit_string(custom_welcome, "custom welcome message", "");
     });
   dialog::addBreak(100);
-  dialog::addItem("save custom mode", 's');
+  dialog::addItem("save custom mode", 'S');
   dialog::add_action([] {
     dialog::openFileDialog(customfile, XLAT("file to save:"), ".hrm", [] () {
       try {
@@ -516,7 +518,7 @@ EX void show_custom() {
         }
       });
     });
-  dialog::addItem("load custom mode", 'l');
+  dialog::addItem("load custom mode", 'L');
   dialog::add_action([] {
     dialog::openFileDialog(customfile, XLAT("file to load:"), ".hrm", [] () {
       try {
@@ -1258,6 +1260,9 @@ int read_menu_args() {
     }
   else if(argis("-d:mode")) {
     PHASEFROM(2); launch_dialog(showChangeMode);
+    }
+  else if(argis("-d:custom")) {
+    PHASEFROM(2); launch_dialog(show_custom);
     }
   else if(argis("-d:history")) {
     PHASEFROM(2); launch_dialog(history::history_menu);

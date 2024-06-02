@@ -1371,6 +1371,94 @@ EX namespace peace {
     }
     
   auto aNext = addHook(hooks_nextland, 100, getNext);
+EX }
+
+map<modecode_t, string> mode_description_of;
+
+void mode_screen_for_current() {
+  cmode = sm::SIDE | sm::MAYDARK;
+  gamescreen();
+
+  dialog::init(XLAT("recorded mode"), iinf[itOrbYendor].color, 150, 100);
+  dialog::addInfo(mode_description1());
+
+  auto mc = modecode();
+  dialog::addBreak(100);
+
+  dialog::addSelItem(XLAT("scores recorded"), its(qty_scores_for[mc]), 's');
+  dialog::add_action([] { scores::load(); });
+
+  dialog::addSelItem(XLAT("Yendor Challenge"), its(yendor::compute_tscore(mc)), 'y');
+  dialog::add_action([] {
+    clearMessages();
+    if(yendor::everwon || autocheat)
+      pushScreen(yendor::showMenu);
+    else gotoHelp(yendor::chelp);
+    });
+
+  dialog::addSelItem(XLAT("Pure Tactics Mode"), its(tactic::compute_tscore(mc)), 't');
+  dialog::add_action(tactic::start);
+
+  dialog::addBreak(100);
+  dialog::addItem(XLAT("play"), 'p');
+  dialog::add_action(popScreenAll);
+
+  dialog::addItem(XLAT("customize"), 'c');
+  dialog::add_action([] { popScreenAll(); pushScreen(showChangeMode); });
+  dialog::display();
+  }
+
+void push_mode_screen_for(modecode_t mf) {
+  stop_game();
+  shstream ss;
+  ss.s = meaning[mf];
+  if(ss.s == "LEGACY") {
+    legacy_modecode_read(mf);
+    }
+  else {
+    ss.read(ss.vernum);
+    if(ss.vernum < 0xAA05)
+      mapstream::load_geometry(ss);
+    else {
+      ss.write_char(0);
+      load_mode_data_with_zero(ss);
+      }
+    }
+  start_game();
+  mode_description_of[mf] = mode_description1();
+  pushScreen(mode_screen_for_current);
+  }
+
+EX void list_saved_custom_modes() {
+  dialog::start_list(2000, 2000, 'a');
+
+  count_scores();
+
+  auto current_mc = modecode();
+
+  for(auto m: meaning) {
+    auto mf = m.first;
+
+    string out;
+    if(qty_scores_for.count(mf)) out += XLAT(" scores: %1", its(qty_scores_for[mf]));
+    if(yendor::bestscore.count(mf)) out = XLAT(" Yendor: %1", its(yendor::compute_tscore(mf)));
+    if(tactic::recordsum.count(m.first)) {
+      out += XLAT(" tactic: %1", its(tactic::compute_tscore(mf)));
+      }
+    if(out == "") continue;
+    out = out.substr(1);
+    if(mf == current_mc) mode_description_of[mf] = mode_description1();
+    string what;
+    if(mode_description_of.count(mf)) what = mode_description_of[mf];
+    else what = "(mode " + its(mf) + ")";
+    if(mf == current_mc) out += XLAT(" (ON)");
+    dialog::addSelItem(what, out, dialog::list_fake_key++);
+    dialog::add_action_confirmed([mf] { push_mode_screen_for(mf); });
+    }
+
+  if(!game_active) start_game();
+
+  dialog::end_list();
   }
 
 #if CAP_COMMANDLINE
