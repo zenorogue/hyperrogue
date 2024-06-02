@@ -1038,9 +1038,6 @@ EX bool valid_dir(const vector<char>& ad, int j, cell *c) {
   auto ad1 = currentmap->get_cellshape(c).dirdist[j];
   int a = 0;
   for(auto& dd: ad1) if(dd == 1) a++;
-
-  int a0 = 0;
-  for(auto& dd: ad) if(dd == 1) a0++;
   return a < 6;
   }
 
