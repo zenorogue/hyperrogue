@@ -800,7 +800,7 @@ string XLAT(string);
 #define DKEY (get_direction_key(sym, uni))
 #define DIRECTIONKEY (interpret_as_direction(sym, uni) ? uni : 0)
 
-namespace scores { void load(); }
+namespace scores { void load(); void load_only(); }
 
 #if ISMOBILE
 namespace leader { void showMenu(); void handleKey(int sym, int uni); }
