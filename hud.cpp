@@ -447,6 +447,34 @@ EX void draw_crosshair() {
   }
 
 EX bool less_in_portrait, less_in_landscape;
+
+EX string mode_description() {
+  string md;
+  if(autocheat) md += " god";
+  if(casual) md += " casual";
+  else if(cheater) md += " cheat";
+  if(inv::on) md += " inv";
+  if(tour::on) md += " tour";
+  if(shmup::on) md += " shmup";
+  if(multi::players > 1) md += " P" + its(multi::players);
+  if(pureHardcore()) md += " hardcore";
+  else if(hardcore) md += " partial hardcore";
+  if(daily::on) md += " strange";
+  if(bow::crossbow_mode()) md += " b/" + bow::bowName[bow::style];
+  if(land_structure != default_land_structure())
+    md += " " + land_structure_name(true);
+  if(randomPatternsMode) md += " RPM";
+  if(use_custom_land_list) md += " custom";
+  if(geometry != gNormal || !BITRUNCATED)
+    md = md + " " + full_geometry_name();
+  return md;
+  }
+
+EX string mode_description1() {
+  string md = mode_description();
+  if(md == "") return "standard";
+  return md.substr(1);
+  }
   
 EX void drawStats() {
   if(vid.stereo_mode == sLR) return;
@@ -691,29 +719,12 @@ EX void drawStats() {
     }
   string vers = VER;
   if(true) {
-    if(casual) vers += " casual";
-    if(autocheat) vers += " god";
-    else if(cheater) vers += " cheat";
-    if(yendor::on) vers += " Yendor";
-    if(tactic::on) vers += " PTM";
-    if(inv::on) vers += " inv";
-    if(tour::on) vers += " tour";
-    if(shmup::on) vers += " shmup";
-    if(multi::players > 1) vers += " P" + its(multi::players);
-    if(pureHardcore()) vers += " hardcore";
-    else if(hardcore) vers += " partial hardcore";
+    vers += mode_description();
     if(peace::on) vers += " peace";
     if(racing::on) vers += " racing";
-    if(daily::on) vers += " strange";
-    if(bow::crossbow_mode()) vers += " b/" + bow::bowName[bow::style];
-    if(land_structure != default_land_structure())
-      vers += " " + land_structure_name(true);
     if(princess::challenge) vers += " Princess";
-    if(randomPatternsMode) vers += " RPM";
-    if(use_custom_land_list) vers += " custom";
-    
-    if(geometry != gNormal || !BITRUNCATED) 
-      vers = vers + " " + full_geometry_name();
+    if(yendor::on) vers += " Yendor";
+    if(tactic::on) vers += " PTM";
     }
   if(!nofps) vers += XLAT(" fps: ") + its(calcfps());
   
