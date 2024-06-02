@@ -967,6 +967,7 @@ EX }
 
 map<string, modecode_t> code_for;
 EX map<modecode_t, string> meaning;
+EX map<modecode_t, modecode_t> identify_modes;
 
 char xcheat;
 
@@ -1095,6 +1096,18 @@ EX void load_mode_data_with_zero(hstream& f) {
     }
   }
 
+#if HDR
+constexpr int FIRST_MODECODE = 100000;
+#endif
+
+EX modecode_t get_identify(modecode_t xc) {
+  if(xc < FIRST_MODECODE) {
+    meaning[xc] = "LEGACY";
+    return xc;
+    }
+  return identify_modes[xc];
+  }
+
 EX modecode_t modecode(int mode) {
   modecode_t x = legacy_modecode();
   if(x != UNKNOWN) return x;
@@ -1103,16 +1116,19 @@ EX modecode_t modecode(int mode) {
   shstream ss;
   ss.write(ss.vernum);
   save_mode_data(ss);
+  string code = ss.s;
+  string nover = ss.s.substr(2);
   
-  if(code_for.count(ss.s)) return code_for[ss.s];
+  if(code_for.count(nover)) return code_for[nover];
 
   if(mode == 1) return UNKNOWN;
   
-  modecode_t next = 100000;
+  modecode_t next = FIRST_MODECODE;
   while(meaning.count(next)) next++;
   
-  meaning[next] = ss.s;
-  code_for[ss.s] = next;
+  meaning[next] = code;
+  code_for[nover] = next;
+  identify_modes[next] = next;
   
   if(mode == 2) return next;
 
@@ -1134,8 +1150,12 @@ EX void load_modecode_line(string s) {
   if(!s[pos]) return;
   pos++;
   string t = from_hexstring(s.substr(pos));
-  code_for[t] = code;
+  string nover = t.substr(2);
   meaning[code] = t;
+  if(code_for.count(nover))
+    code = identify_modes[code] = code_for[nover];
+  else identify_modes[code] = code;
+  code_for[nover] = code;
   }
 
 EX namespace peace {

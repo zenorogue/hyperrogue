@@ -1287,7 +1287,7 @@ EX void loadsave() {
           && !(land == laOcean && verless(ver, "8.0f"))
           && !(land == laTerracotta && verless(ver, "10.3e"))
           && !(land == laWildWest && verless(ver, "11.3b") && !verless(ver, "11.3")))
-          tactic::record(l2, score, xc);
+          tactic::record(l2, score, get_identify(xc));
         anticheat::nextid(tactic::id, ver, cert);
         }
       }
@@ -1305,6 +1305,7 @@ EX void loadsave() {
 
       if(won) if(anticheat::check(cert, ver, won ? "WON" : "LOST", tc, t, ts, xc*999 + cid + 256 * oy)) {
         if(xc == 19 && cid == 25) xc = 0;
+        xc = get_identify(xc);
         if(cid > 0 && cid < YENDORLEVELS)
         if(!(verless(ver, "8.0f") && oy > 1 && cid == 15))
         if(!(verless(ver, "9.3b") && oy > 1 && (cid == 27 || cid == 28)))
