@@ -1485,8 +1485,6 @@ EX string mode_to_search;
 EX void list_saved_custom_modes() {
   dialog::start_list(2000, 2000, 'a');
 
-  count_scores();
-
   auto current_mc = modecode();
 
   int unidentified = 0;

@@ -315,7 +315,7 @@ void show() {
     };
   }
 
-void load() {
+void load_only() {
   if(scorefile == "") return;
   scores.clear();
   FILE *f = fopen(scorefile.c_str(), "rt");
@@ -368,15 +368,27 @@ void load() {
       }
     }
 
+  fclose(f);
+
+  qty_scores_for.clear();
+  for(auto s: scores::scores) {
+    int modeid = s.box[scores::MODECODE_BOX];
+    qty_scores_for[get_identify(modeid)]++;
+    }
+  }
+
+void load() {
+  load_only();
+
+  saved_modecode = modecode();
   saveBox();
-  score sc; 
+  score sc;
   for(int i=0; i<POSSCORE; i++) sc.box[i] = save.box[i];
   sc.box[POSSCORE] = 0;
   sc.box[MAXBOX-1] = 1; sc.ver = "NOW";
   sc.yasc_message = canmove ? "on the run" : yasc_message;
   scores.push_back(sc);
   
-  fclose(f);
   clearMessages();
   // addMessage(its(isize(scores))+" games have been recorded in "+scorefile);
   pushScreen(show);
@@ -392,10 +404,6 @@ void load() {
 
 EX map<int, int> qty_scores_for;
 
-EX void count_scores() {
-  qty_scores_for.clear();
-  for(auto s: scores::scores) qty_scores_for[scores::MODECODE_BOX]++;
-  }
 }
 
 #endif
