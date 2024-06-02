@@ -1987,7 +1987,8 @@ EX void convert() {
 
   auto& ac = arb::current;
   ac.order++; 
-  ac.comment = ac.filename = "converted from: " + full_geometry_name();
+  ac.filename = full_geometry_name();
+  ac.comment = "converted from: " + ac.filename;
   ac.cscale = cgi.scalefactor;
   ac.boundary_ratio = 1;
   ac.floor_scale = cgi.hexvdist / cgi.scalefactor;
@@ -1997,6 +1998,7 @@ EX void convert() {
 
   ginf[gArbitrary].g = cginf.g;
   ginf[gArbitrary].flags = cgflags & qCLOSED;
+  ginf[gArbitrary].tiling_name = full_geometry_name();
   
   for(int i=0; i<N; i++) {
     auto id = identification[old_shvids[i]];
