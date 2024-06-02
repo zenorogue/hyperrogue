@@ -71,8 +71,7 @@ EX namespace euc {
         break;
       
       default:
-        printf("euc::get_shifttable() called in geometry that is not euclid3");
-        exit(1);
+        throw hr_exception("euc::get_shifttable() called in geometry that is not euclid3");
       }
     
     // reverse everything
