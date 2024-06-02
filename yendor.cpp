@@ -122,11 +122,15 @@ EX namespace yendor {
   
   int tscorelast;
 
-  EX void uploadScore() {
+  EX int compute_tscore(modecode_t mc) {
     int tscore = 0;
     for(int i=1; i<YENDORLEVELS; i++)
-      if(bestscore[0][i]) tscore += 999 + bestscore[0][i];
-    // printf("Yendor score = %d\n", tscore);
+      if(bestscore[mc][i]) tscore += 999 + bestscore[0][i];
+    return tscore;
+    }
+
+  EX void uploadScore() {
+    int tscore = compute_tscore(0);
 
     if(tscore > tscorelast) {
       tscorelast = tscore;
@@ -780,11 +784,15 @@ EX namespace tactic {
   
   int tscorelast;
 
-  void uploadScoreCode(int code, int lb) {
+  int compute_tscore(modecode_t code) {
     int tscore = 0;
     for(int i=0; i<landtypes; i++) 
       tscore += recordsum[code][i] * tacmultiplier(eLand(i));
-    // printf("PTM score = %d\n", tscore);
+    return tscore;
+    }
+
+  void uploadScoreCode(modecode_t code, int lb) {
+    int tscore = compute_tscore(code);
     
     if(code == 0 && tscore > tscorelast) {
       tscorelast = tscore;
