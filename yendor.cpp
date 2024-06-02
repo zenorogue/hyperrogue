@@ -1453,14 +1453,8 @@ void enable_mode_by_code(modecode_t mf) {
       }
     else {
       ss.read(ss.vernum);
-      if(ss.vernum < 0xAA05) {
-        use_custom_land_list = false;
-        mapstream::load_geometry(ss);
-        }
-      else {
-        ss.write_char(0);
-        load_mode_data_with_zero(ss);
-        }
+      ss.write_char(0);
+      load_mode_data_with_zero(ss);
       }
     mode_description_of[mf] = mode_description1();
     }
