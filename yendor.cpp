@@ -1131,7 +1131,7 @@ constexpr int FIRST_MODECODE = 100000;
 #endif
 
 EX modecode_t get_identify(modecode_t xc) {
-  if(xc < FIRST_MODECODE) {
+  if(xc < FIRST_MODECODE && !meaning.count(xc)) {
     meaning[xc] = "LEGACY";
     return xc;
     }
