@@ -1160,7 +1160,10 @@ EX modecode_t modecode(int mode) {
   code_for[nover] = next;
   identify_modes[next] = next;
   
-  if(mode == 2) return next;
+  if(mode == 2) {
+    mode_description_of[next] = mode_description1();
+    return next;
+    }
 
   if(scorefile == "") return next;
   
@@ -1403,7 +1406,7 @@ EX namespace peace {
   auto aNext = addHook(hooks_nextland, 100, getNext);
 EX }
 
-map<modecode_t, string> mode_description_of;
+EX map<modecode_t, string> mode_description_of;
 
 void mode_screen_for_current() {
   cmode = sm::SIDE | sm::MAYDARK;
@@ -1438,24 +1441,40 @@ void mode_screen_for_current() {
   dialog::display();
   }
 
-void push_mode_screen_for(modecode_t mf) {
+void enable_mode_by_code(modecode_t mf) {
   stop_game();
   shstream ss;
   ss.s = meaning[mf];
-  if(ss.s == "LEGACY") {
-    legacy_modecode_read(mf);
-    }
-  else {
-    ss.read(ss.vernum);
-    if(ss.vernum < 0xAA05)
-      mapstream::load_geometry(ss);
-    else {
-      ss.write_char(0);
-      load_mode_data_with_zero(ss);
+  println(hlog, "enabling modecode ", mf, " : ", as_hexstring(ss.s));
+  hlog.flush();
+  try {
+    if(ss.s == "LEGACY" || mf < FIRST_MODECODE) {
+      legacy_modecode_read(mf);
       }
+    else {
+      ss.read(ss.vernum);
+      if(ss.vernum < 0xAA05) {
+        use_custom_land_list = false;
+        mapstream::load_geometry(ss);
+        }
+      else {
+        ss.write_char(0);
+        load_mode_data_with_zero(ss);
+        }
+      }
+    mode_description_of[mf] = mode_description1();
     }
+  catch(hr_exception& e) {
+    stop_game();
+    println(hlog, "failed: ", e.what());
+    mode_description_of[mf] = "FAILED";
+    geometry = gNormal; variation = eVariation::bitruncated;
+    }
+  }
+
+void push_mode_screen_for(modecode_t mf) {
+  enable_mode_by_code(mf);
   start_game();
-  mode_description_of[mf] = mode_description1();
   pushScreen(mode_screen_for_current);
   }
 

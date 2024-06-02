@@ -202,14 +202,6 @@ int modecodetable[42][6] = {
   };
 // unused codes: 6 (cheat/tampered), 25, 254, 255
 
-EX eLandStructure get_default_land_structure() {
-  return
-    (princess::challenge || tactic::on) ? lsSingle :
-    racing::on ? lsSingle :
-    yendor::on ? yendor::get_land_structure() :
-    lsNiceWalls;
-  }
-
 EX modecode_t legacy_modecode() {
   if(int(geometry) > 3 || int(variation) > 1) return UNKNOWN;
   if(casual) return UNKNOWN;
