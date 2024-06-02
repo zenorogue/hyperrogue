@@ -16,6 +16,8 @@ score *currentgame;
 int scorefrom = 0;
 bool scorerev = false;
 
+int which_mode;
+
 string csub(const string& str, int q) {
   int i = 0;
   for(int j=0; j<q && i<isize(str); j++) getnext(str.c_str(), i);
@@ -66,6 +68,8 @@ int modediff(score *S) {
   }
     
 string modedesc(score *S) {
+  modecode_t mc = S->box[scores::MODECODE_BOX];
+  if(mc && mode_description_of.count(mc)) return mode_description_of[mc];
   eGeometry g = (eGeometry) S->box[116]; 
   if(S->box[238]) g = gSphere;
   if(S->box[239]) g = gElliptic;
@@ -214,6 +218,8 @@ void show() {
     if(id >= isize(scores)) break;
         
     score& S(scores[id]);
+
+    if(S.box[MODECODE_BOX] != which_mode && which_mode != -1) { id++; continue; }
     
     if(omit) { omit--; rank++; id++; continue; }
     
@@ -379,6 +385,7 @@ void load_only() {
 
 void load() {
   load_only();
+  which_mode = -1;
 
   saved_modecode = modecode();
   saveBox();
