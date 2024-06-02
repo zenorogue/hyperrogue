@@ -770,7 +770,6 @@ EX int celldist(cell *c, bool alts) {
 eGeometry orig_geometry, base_geometry;
 
 void start_game_on_created_map() {    
-  popScreen();
   for(hrmap *& hm : allmaps) if(hm == base) hm = NULL;
   stop_game();
   geometry = orig_geometry;
@@ -986,7 +985,7 @@ void show_gridmaker() {
     dialog::addInfo(status[i]);
   dialog::addBreak(100);
   dialog::addSelItem(XLAT("activate"), runlevel == 10 ? XLAT("ready") : XLAT("wait..."), 'f');
-  if(runlevel == 10) dialog::add_action(start_game_on_created_map);
+  if(runlevel == 10) dialog::add_action([] { popScreen(); start_game_on_created_map(); });
   dialog::addItem(XLAT("cancel"), 'c');
   dialog::add_action([] { cancel_map_creation(); popScreen(); start_game(); });
   dialog::addItem(XLAT("save"), 's');
