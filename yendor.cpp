@@ -1485,6 +1485,8 @@ EX void list_saved_custom_modes() {
 
   auto current_mc = modecode();
 
+  int unidentified = 0;
+
   for(auto m: meaning) {
     auto mf = m.first;
 
@@ -1494,20 +1496,30 @@ EX void list_saved_custom_modes() {
     if(tactic::recordsum.count(m.first)) {
       out += XLAT(" tactic: %1", its(tactic::compute_tscore(mf)));
       }
-    if(out == "") continue;
+    if(out == "") out = XLAT(" NONE");
     out = out.substr(1);
     if(mf == current_mc) mode_description_of[mf] = mode_description1();
     string what;
     if(mode_description_of.count(mf)) what = mode_description_of[mf];
-    else what = "(mode " + its(mf) + ")";
+    else what = "(mode " + its(mf) + ")", unidentified++;
     if(mf == current_mc) out += XLAT(" (ON)");
     dialog::addSelItem(what, out, dialog::list_fake_key++);
     dialog::add_action_confirmed([mf] { push_mode_screen_for(mf); });
     }
 
-  if(!game_active) start_game();
-
   dialog::end_list();
+
+  dialog::addBreak(50);
+  if(unidentified) {
+    dialog::addSelItem(XLAT("unidentified modes"), its(unidentified), 'I');
+    dialog::add_action_confirmed([] {
+      for(auto m: meaning) if(!mode_description_of.count(m.first)) {
+        enable_mode_by_code(m.first);
+        println(hlog, "identified ", m.first, " as ", mode_description_of[m.first]);
+        }
+      start_game();
+      });
+    }
   }
 
 #if CAP_COMMANDLINE
