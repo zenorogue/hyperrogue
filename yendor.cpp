@@ -123,6 +123,7 @@ EX namespace yendor {
   int tscorelast;
 
   EX int compute_tscore(modecode_t mc) {
+    if(!bestscore.count(mc)) return 0;
     int tscore = 0;
     for(int i=1; i<YENDORLEVELS; i++)
       if(bestscore[mc][i]) tscore += 999 + bestscore[0][i];
@@ -785,6 +786,7 @@ EX namespace tactic {
   int tscorelast;
 
   int compute_tscore(modecode_t code) {
+    if(!recordsum.count(code)) return 0;
     int tscore = 0;
     for(int i=0; i<landtypes; i++) 
       tscore += recordsum[code][i] * tacmultiplier(eLand(i));
