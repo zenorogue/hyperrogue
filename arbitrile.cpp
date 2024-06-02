@@ -1643,6 +1643,7 @@ EX void run_raw(string fname) {
   load(fname);
   ginf[gArbitrary].tiling_name = current.name;
   tes = fname;
+  convert::base_geometry = gArbitrary;
   }
 
 EX void run(string fname) {
@@ -1737,7 +1738,7 @@ EX void set_sliders() {
 /** convert a tessellation (e.g. Archimedean, regular, etc.) to the arb::current internal representation */
 EX namespace convert {
 
-EX eGeometry base_geometry;
+EX eGeometry base_geometry = gArbitrary;
 EX eVariation base_variation;
 
 struct id_record {
