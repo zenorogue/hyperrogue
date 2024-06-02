@@ -1637,16 +1637,20 @@ struct hrmap_arbi : hrmap {
 
 EX hrmap *new_map() { return new hrmap_arbi; }
 
-EX void run(string fname) {
+EX void run_raw(string fname) {
   stop_game();
+  set_geometry(gArbitrary);
+  load(fname);
+  ginf[gArbitrary].tiling_name = current.name;
+  tes = fname;
+  }
+
+EX void run(string fname) {
   eGeometry g = geometry;
   arbi_tiling t = current;
   auto v = variation;
-  set_geometry(gArbitrary);
   try {
-     load(fname);
-     ginf[gArbitrary].tiling_name = current.name;
-     tes = fname;
+     run_raw(fname);
      }
    catch(hr_polygon_error& poly) {
      set_geometry(g);
@@ -2087,7 +2091,7 @@ int readArgs() {
   else if(argis("-tes") || argis("-arbi")) {
     PHASEFROM(2);
     shift(); 
-    run(args());
+    run_raw(args());
     }
   else if(argis("-tes-opt")) {
      arg::run_arguments(current.options);

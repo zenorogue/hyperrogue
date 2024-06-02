@@ -662,7 +662,7 @@ EX namespace mapstream {
       else {
         string s;
         f.read(s);
-        arb::run(s);
+        arb::run_raw(s);
         stop_game();
         }
       if(rk) rulegen::prepare_rules();

@@ -1098,7 +1098,7 @@ bool texture_config::load() {
         }
       #endif
       if(targetgeometry == gArbitrary) {
-        arb::run(tes);
+        arb::run_raw(tes);
         stop_game();
         }
       set_geometry(targetgeometry);
