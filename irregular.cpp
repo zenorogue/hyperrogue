@@ -932,7 +932,6 @@ EX void load_map_full(hstream& f) {
 EX void cancel_map_creation() {
   base = NULL;
   runlevel = 0;
-  popScreen();
   gridmaking = false;
   stop_game();
   geometry = orig_geometry;
@@ -989,7 +988,7 @@ void show_gridmaker() {
   dialog::addSelItem(XLAT("activate"), runlevel == 10 ? XLAT("ready") : XLAT("wait..."), 'f');
   if(runlevel == 10) dialog::add_action(start_game_on_created_map);
   dialog::addItem(XLAT("cancel"), 'c');
-  dialog::add_action([] { cancel_map_creation(); start_game(); });
+  dialog::add_action([] { cancel_map_creation(); popScreen(); start_game(); });
   dialog::addItem(XLAT("save"), 's');
   dialog::add_action([] () {
     dialog::openFileDialog(irrmapfile, XLAT("irregular to save:"), ".txt", [] () {
