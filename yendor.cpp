@@ -1388,6 +1388,52 @@ int read_mode_args() {
     peace::otherpuzzles = false;
     stop_game_and_switch_mode(peace::on ? 0 : rg::peace);
     }
+  else if(argis("-listmodes")) { println(hlog, "analyzing modes");
+    stop_game();
+    auto st = stamplen;
+    PHASE(3);
+    for(auto m: meaning) {
+      if(identify_modes[m.first] != m.first) continue;
+      println(hlog, "meaning of: ", m.first);
+
+      for(auto& p: params) p.second->reset();
+      stamplen = st;
+
+      if(m.first < FIRST_MODECODE) {
+        legacy_modecode_read(m.first);
+        }
+      else {
+        shstream ss;
+        ss.s = m.second;
+        ss.read(ss.vernum);
+        if(ss.vernum < 0xAA05)
+          mapstream::load_geometry(ss);
+        else {
+          ss.write_char(0);
+          load_mode_data_with_zero(ss);
+          }
+        println(hlog, "version code: ", ss.vernum);
+        }
+
+      for(auto& p: params) if(p.second->dosave())  if(p.first != "stamplen")
+        println(hlog, p.first, "=", p.second->save());
+
+      if(yendor::bestscore.count(m.first))
+        println(hlog, "Yendor scores: ", yendor::bestscore[m.first]);
+
+      if(tactic::recordsum.count(m.first)) {
+        for(int i=0; i<landtypes; i++) if(tactic::recordsum[m.first][i] > 0) {
+          vector<int> res;
+          for(auto& v: tactic::lsc[m.first][i]) res.push_back(v);
+          while(res.size() && res.back() == 0) res.pop_back();
+          reverse(res.begin(), res.end());
+          println(hlog, "record sum for ", dnameof(eLand(i)), ": ", tactic::recordsum[m.first][i], " = ", res);
+          }
+        }
+
+      println(hlog);
+      }
+    }
   TOGGLE('T', tactic::on, stop_game_and_switch_mode(rg::tactic))
 
   else return 1;
