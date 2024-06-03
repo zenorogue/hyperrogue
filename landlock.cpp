@@ -241,6 +241,10 @@ EX bool landUnlocked(eLand l) {
   back:
   
   if(princess::challenge) return among(l, laPalace, laPrincessQuest);
+
+  if(ls::any_chaos() && isCrossroads(l)) {
+    return hyperstonesUnlocked();
+    }
   
   switch(l) {
     #define LAND(a,b,c,d,e,f,g) case c:
@@ -1333,10 +1337,7 @@ EX land_validity_t& land_validity(eLand l) {
     if(closed_or_bounded) return unbounded_only;
     if(INVERSE) return not_implemented;
     }
-  
-  if(ls::any_chaos() && isCrossroads(l))
-    return not_in_chaos;
-  
+
   // this pattern does not work on elliptic and small spheres
   if((l == laBlizzard || l == laVolcano) && elliptic && S7 < 5 && !arcm::in())
     return not_enough_space;
