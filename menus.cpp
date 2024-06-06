@@ -49,6 +49,8 @@ EX void showOverview() {
   }
   
   bool not_in_game = false;
+
+  auto displayed_landlist = landlist;
   
   if(dialog::infix != "") {
     auto land_matches = [] (eLand l) {
@@ -63,14 +65,14 @@ EX void showOverview() {
     vector<eLand> filtered;
     for(eLand l: landlist) if(land_matches(l)) filtered.push_back(l);
     if(filtered.size())
-      landlist = filtered;
+      displayed_landlist = filtered;
     else {
       for(int i=0; i<landtypes; i++) if(land_matches(eLand(i))) filtered.push_back(eLand(i));
-      if(filtered.size()) landlist = filtered, not_in_game = true;
+      if(filtered.size()) displayed_landlist = filtered, not_in_game = true;
       }
     }
-  
-  int nl = isize(landlist), nlm;
+
+  int nl = isize(displayed_landlist), nlm;
   
   int lstart = 0;
   
@@ -92,7 +94,7 @@ EX void showOverview() {
     }
   
   for(int i=0; i<nl; i++) {
-    eLand l = landlist[lstart + i];
+    eLand l = displayed_landlist[lstart + i];
     int xr = vid.xres / 64;
     int i0 = 56 + vid.fsize + i * vf;
     color_t col;
