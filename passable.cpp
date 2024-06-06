@@ -425,6 +425,8 @@ EX void moveBoat(const movei& mi) {
   changes.ccell(mi.s);
   eWall x = mi.t->wall; mi.t->wall = mi.s->wall; mi.s->wall = x;
   mi.t->mondir = mi.rev_dir_or(NODIR);
+  changes.map_value(rosemap, mi.t);
+  rosemap.erase(mi.t);
   moveItem(mi.s, mi.t, false);
   animateMovement(mi, LAYER_BOAT);
   }
