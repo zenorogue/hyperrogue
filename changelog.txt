@@ -5279,3 +5279,21 @@ Changes to the parameter/formula system:
 - fixed some more errors with the config file
 - show charges for Orb of Air, also fixed the line for Orb Energy
 - fixed some characters not being enterable in SDL2
+
+2024-06-06 19:06 Update 13.0n
+
+Bugfixes:
+- (v13.0m) fixed a bug with smart range
+- (v13.0m) partially fixed a bug with non-enterable characters in string edit in SDL2 (Windows)
+- fixed some bugs with not recognizing modes from earlier versions (for saved score purposes)
+- fixed land search in Overview
+- fixed a problem when loading saved maps from tes files
+- YASC code explanation now appears when it should (not when it should not)
+
+Gameplay:
+- boats now erase rose waves when moved
+- illegal moves into dice now become kills if you have an Orb of Slaying
+- in Chaos mode, crossroads now appear if Hyperstones are unlocked (thanks to jlm)
+
+Modes:
+- improved custom mode manager: it now displays all the modes you have tried (with PTM/YC/saved scores), and also you can name modes
