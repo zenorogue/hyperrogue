@@ -1487,6 +1487,52 @@ EX bool include_unused_modes;
 
 EX string mode_to_search;
 
+int gscore(modecode_t xc) { if(!qty_scores_for.count(xc)) return 0; return qty_scores_for[xc]; }
+int gscoreall(modecode_t xc) { return gscore(xc) * 100 + tactic::compute_tscore(xc) * 10 + yendor::compute_tscore(xc); }
+string gdisplay(modecode_t xc) {
+  if(mode_description_of.count(xc)) return mode_description_of[xc];
+  else return "(mode " + its(xc) + ")";
+  }
+
+EX vector<modecode_t> mode_list;
+
+EX void prepare_custom() {
+  scores::load_only();
+  gen_mode_list();
+  pushScreen(show_custom);
+  }
+
+EX void gen_mode_list() {
+  mode_list.clear();
+  for(auto m: meaning)
+    mode_list.push_back(m.first);
+  }
+
+EX void set_mode_sort_order() {
+  cmode = sm::SIDE | sm::MAYDARK;
+  gamescreen();
+
+  dialog::init(XLAT("set mode sort order"), iinf[itOrbYendor].color, 150, 100);
+
+  dialog::addItem(XLAT("reverse order"), 'r');
+  dialog::add_action([] { reverse(mode_list.begin(), mode_list.end()); popScreen(); });
+
+  dialog::addItem(XLAT("by number of scores"), 's');
+  dialog::add_action([] { stable_sort(mode_list.begin(), mode_list.end(), [] (modecode_t a, modecode_t b) { return gscore(a) > gscore(b); }); popScreen(); });
+
+  dialog::addItem(XLAT("by Pure Tactics Mode score"), 't');
+  dialog::add_action([] { stable_sort(mode_list.begin(), mode_list.end(), [] (modecode_t a, modecode_t b) { return tactic::compute_tscore(a) > tactic::compute_tscore(b); }); popScreen(); });
+
+  dialog::addItem(XLAT("by Yendor Challenge score"), 'y');
+  dialog::add_action([] { stable_sort(mode_list.begin(), mode_list.end(), [] (modecode_t a, modecode_t b) { return yendor::compute_tscore(a) > yendor::compute_tscore(b); }); popScreen(); });
+
+  dialog::addItem(XLAT("alphabetically"), 'a');
+  dialog::add_action([] { stable_sort(mode_list.begin(), mode_list.end(), [] (modecode_t a, modecode_t b) { return gdisplay(a) < gdisplay(b); }); popScreen(); });
+
+  dialog::addBack();
+  dialog::display();
+  }
+
 EX void list_saved_custom_modes() {
   dialog::start_list(2000, 2000, 'a');
 
@@ -1498,35 +1544,32 @@ EX void list_saved_custom_modes() {
 
   vector<modecode_t> unid_modes;
 
-  for(auto m: meaning) {
-    auto mf = m.first;
-
+  for(auto m: mode_list) {
     string out;
-    if(qty_scores_for.count(mf)) out += XLAT(" scores: %1", its(qty_scores_for[mf]));
-    if(yendor::bestscore.count(mf)) out = XLAT(" Yendor: %1", its(yendor::compute_tscore(mf)));
-    if(tactic::recordsum.count(m.first)) {
-      out += XLAT(" tactic: %1", its(tactic::compute_tscore(mf)));
-      }
+    if(qty_scores_for.count(m)) out += XLAT(" scores: %1", its(qty_scores_for[m]));
+    if(yendor::bestscore.count(m)) out = XLAT(" Yendor: %1", its(yendor::compute_tscore(m)));
+    if(tactic::recordsum.count(m)) out += XLAT(" tactic: %1", its(tactic::compute_tscore(m)));
     if(out == "") { unused++; if(!include_unused_modes) continue; }
     else out = out.substr(1);
-    if(mf == current_mc) mode_description_of[mf] = mode_description1();
-    string what;
-    if(mode_description_of.count(mf)) what = mode_description_of[mf];
-    else {
-      what = "(mode " + its(mf) + ")";
+    if(m == current_mc) mode_description_of[m] = mode_description1();
+    string what = gdisplay(m);
+    if(!mode_description_of.count(m)) {
       unidentified++;
-      unid_modes.push_back(mf);
+      unid_modes.push_back(m);
       }
     if(what.find(mode_to_search) == string::npos) continue;
-    if(mf == current_mc) out += XLAT(" (ON)");
+    if(m == current_mc) out += XLAT(" (ON)");
     dialog::addSelItem(what, out, dialog::list_fake_key++);
-    dialog::add_action_confirmed([mf] { push_mode_screen_for(mf); });
+    dialog::add_action_confirmed([m] { push_mode_screen_for(m); });
     allmodes++;
     }
 
   dialog::end_list();
 
   dialog::addBreak(50);
+  dialog::addItem("mode sorting order", 'S');
+  dialog::add_action_push(set_mode_sort_order);
+
   if(unused)
     dialog::addBoolItem_action(XLAT("unused modes: %1", its(unused)), include_unused_modes, 'U');
 

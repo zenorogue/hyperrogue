@@ -818,8 +818,7 @@ EX void showChangeMode() {
   dialog::addItem(XLAT("highlights & achievements"), 'h');
   dialog::add_action_push(mode_higlights);
   dialog::addItem(XLAT("custom mode manager"), 'm');
-  dialog::add_action([] { scores::load_only(); pushScreen(show_custom); });
-  
+  dialog::add_action(prepare_custom);
   dialog::addBack();
   dialog::display();  
   }
@@ -1265,8 +1264,7 @@ int read_menu_args() {
     }
   else if(argis("-d:custom")) {
     PHASEFROM(3);
-    scores::load_only();
-    launch_dialog(show_custom);
+    prepare_custom();
     }
   else if(argis("-d:history")) {
     PHASEFROM(2); launch_dialog(history::history_menu);
