@@ -809,23 +809,32 @@ bool pcmove::actual_move() {
         c2->wall = waRichDie;
         }
       else {
+        if(markOrb(itOrbSlaying)) goto after_die;
         if(vmsg(miWALL, siWALL, c2, c2->monst))
           addMessage(XLAT("You can only push this die if the highest number would be on the top!"));
         return false;
         }
       }
     else if(mip.d == NO_SPACE) {
+      if(markOrb(itOrbSlaying)) goto after_die;
       if(vmsg(miWALL, siWALL, c2, c2->monst))
         addMessage(XLAT("No room to push %the1.", c2->monst));
       return false;
       }
     }
   #endif
+  after_die:
 
   if(isPushable(c2->wall) && !c2->monst && !nonAdjacentPlayer(c2, cwt.at) && fmsMove) {
     mip = determinePush(cwt, subdir, [] (movei mi) { return canPushThumperOn(mi, cwt.at); });
     if(mip.t) changes.ccell(mip.t);
     if(mip.d == NO_SPACE) {
+      if(isDie(c2->wall) && markOrb(itOrbSlaying)) {
+        changes.ccell(c2);
+        c2->monst = moAngryDie;
+        c2->wall = waNone;
+        goto after_die;
+        }
       if(vmsg(miWALL, siWALL, c2, moNone)) addMessage(XLAT("No room to push %the1.", c2->wall));
       return false;
       }
