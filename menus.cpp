@@ -487,6 +487,8 @@ EX string custom_welcome;
 
 string customfile = "custom.hrm";
 
+string name_to_edit;
+
 EX void show_custom() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen();
@@ -506,6 +508,14 @@ EX void show_custom() {
     dialog::edit_string(custom_welcome, "custom welcome message", "");
     });
   dialog::addBreak(100);
+  auto m = at_or_null(modename, current_modecode);
+  dialog::addSelItem("name custom mode", m ? *m : "", 'N');
+  dialog::add_action([] {
+    name_to_edit = modename[current_modecode];
+    dialog::edit_string(name_to_edit, "name custom mode", "");
+    dialog::get_di().reaction_final = [] { update_modename(name_to_edit); };
+    });
+
   dialog::addItem("save custom mode", 'S');
   dialog::add_action([] {
     dialog::openFileDialog(customfile, XLAT("file to save:"), ".hrm", [] () {

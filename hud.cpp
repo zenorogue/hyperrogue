@@ -719,6 +719,7 @@ EX void drawStats() {
     }
   string vers = VER;
   if(true) {
+    if(modename.count(current_modecode)) vers == " '" + modename[current_modecode] + "' ";
     vers += mode_description();
     if(peace::on) vers += " peace";
     if(racing::on) vers += " racing";

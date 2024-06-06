@@ -1141,9 +1141,11 @@ EX modecode_t get_identify(modecode_t xc) {
 /** handle cases where the encoding changed in the new version */
 EX string expected_modecode;
 
+EX modecode_t current_modecode;
+
 EX modecode_t modecode(int mode) {
   modecode_t x = legacy_modecode();
-  if(x != UNKNOWN) return x;
+  if(x != UNKNOWN) return current_modecode = x;
 
   xcheat = (cheater ? 1 : 0);
   shstream ss;
@@ -1181,7 +1183,7 @@ EX modecode_t modecode(int mode) {
   fprintf(f, "MODE %d %s\n", next, s.c_str());
   fclose(f);
 
-  return next;
+  return current_modecode = next;
   }
 
 EX void load_modecode_line(string s) {
@@ -1197,6 +1199,26 @@ EX void load_modecode_line(string s) {
     code = identify_modes[code] = code_for[nover];
   else identify_modes[code] = code;
   code_for[nover] = code;
+  }
+
+EX void load_modename_line(string s) {
+  int code = atoi(&s[5]);
+  int pos = 5;
+  while(s[pos] != ' ' && s[pos]) pos++;
+  if(!s[pos]) { modename.erase(get_identify(code)); return; }
+  pos++;
+  modename[get_identify(code)] = s.substr(pos);
+  }
+
+EX void update_modename(string newname) {
+  string old = modename.count(current_modecode) ? modename[current_modecode] : "";
+  if(old == newname) return;
+  if(newname == "") modename.erase(current_modecode);
+  else modename[current_modecode] = newname;
+  FILE *f = fopen(scorefile.c_str(), "at");
+  if(!f) return;
+  fprintf(f, "NAME %d %s\n", current_modecode, newname.c_str());
+  fclose(f);
   }
 
 EX namespace peace {
@@ -1420,7 +1442,8 @@ void mode_screen_for_current() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen();
 
-  auto mc = modecode();
+  modecode();
+  auto& mc = current_modecode;
   dialog::init(XLAT("recorded mode %1", its(mc)), iinf[itOrbYendor].color, 150, 100);
   dialog::addInfo(mode_description1());
 
@@ -1490,11 +1513,14 @@ EX string mode_to_search;
 int gscore(modecode_t xc) { if(!qty_scores_for.count(xc)) return 0; return qty_scores_for[xc]; }
 int gscoreall(modecode_t xc) { return gscore(xc) * 100 + tactic::compute_tscore(xc) * 10 + yendor::compute_tscore(xc); }
 string gdisplay(modecode_t xc) {
-  if(mode_description_of.count(xc)) return mode_description_of[xc];
-  else return "(mode " + its(xc) + ")";
+  string out = "";
+  if(modename.count(xc)) out = modename[xc] + ": ";
+  if(mode_description_of.count(xc)) return out + mode_description_of[xc];
+  else return out + "(mode " + its(xc) + ")";
   }
 
 EX vector<modecode_t> mode_list;
+EX map<modecode_t, string> modename;
 
 EX void prepare_custom() {
   scores::load_only();
