@@ -1450,7 +1450,7 @@ void mode_screen_for_current() {
   dialog::addBreak(100);
 
   dialog::addSelItem(XLAT("scores recorded"), its(qty_scores_for[mc]), 's');
-  dialog::add_action([mc] { scores::load(); scores::which_mode = mc; });
+  dialog::add_action([] { scores::load(); scores::which_mode = current_modecode; });
 
   dialog::addSelItem(XLAT("Yendor Challenge"), its(yendor::compute_tscore(mc)), 'y');
   dialog::add_action([] {
