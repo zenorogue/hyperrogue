@@ -1355,9 +1355,10 @@ EX void load_last_save() {
   for(int i=boxid; i<MAXBOX; i++) save.box[i] = 0;
 //  for(int i=160; i<200; i++) printf("%d: %d ", i, save.box[i]);
 
-  if(meaning.count(sc.box[MODECODE_BOX])) {
+  modecode_t mc = sc.box[MODECODE_BOX];
+  if(mc >= FIRST_MODECODE && meaning.count(mc)) {
     shstream ss;
-    ss.s = meaning[sc.box[MODECODE_BOX]];
+    ss.s = meaning[mc];
     ss.read(ss.vernum);
     if(ss.vernum < 0xAA05)
       mapstream::load_geometry(ss);
