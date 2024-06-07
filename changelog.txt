@@ -5297,3 +5297,6 @@ Gameplay:
 
 Modes:
 - improved custom mode manager: it now displays all the modes you have tried (with PTM/YC/saved scores), and also you can name modes
+
+2024-06-06 19:06 Update 13.0o
+Fixed a crash on load.
