@@ -129,7 +129,7 @@ EX bool available() {
     return true;
   if(sphere && pmodel == mdPerspective && !rotspace)
     return true;
-  if(nil && S7 == 8)
+  if(nil && nilv::nil_structure_index == 1)
     return false;
   if((sn::in() || nil || sl2) && pmodel == mdGeodesic)
     return true;
@@ -880,14 +880,32 @@ void raygen::move_forward() {
         }
       }
 
-    if(nil) fmain +=
-      "mediump float rz = (abs(nposition.x) > abs(nposition.y) ?  -nposition.x*nposition.y : 0.) + nposition.z;\n";
+    string hnilw = to_glsl(nilv::nilwidth / 2);
+    string hnilw2 = to_glsl(nilv::nilwidth * nilv::nilwidth / 2);
+    string hnilw3 = to_glsl(nilv::nilwidth * nilv::nilwidth * sqrt(3) / 8);
+    string hsqrt3 = to_glsl(sqrt(3)/2);
+
+    if(nil && nilv::nil_structure_index == 0) {
+      fmain +=
+      "mediump float rz = (abs(nposition.x) > abs(nposition.y) ? -nposition.x*nposition.y : 0.) + nposition.z;\n";
+      fmain += "rz += nposition.x * nposition.y * " + comu + ";";
+      }
+    if(nil && nilv::nil_structure_index == 2) {
+      fmain += "mediump float x0 = nposition.x; mediump float y0 = nposition.y;\n";
+      fmain +=
+        "mediump float x1 = nposition.x * .5 + nposition.y * " + hsqrt3 + ";\n"
+        "mediump float y1 = nposition.y * .5 - nposition.x * " + hsqrt3 + ";\n";
+      fmain +=
+        "mediump float x2 = nposition.x * .5 - nposition.y * " + hsqrt3 + ";\n"
+        "mediump float y2 = nposition.y * .5 + nposition.x * " + hsqrt3 + ";\n";
+      fmain += "mediump float rz =\n"
+        "((abs(x0) > abs(x1) && abs(x0) > abs(x2)) ? -x0*y0/2. :\n"
+        "(abs(x1) > abs(x2)) ? -x1*y1/2. : -x2*y2/2.) + nposition.z;\n";
+      fmain += "rz -= nposition.x * nposition.y * " + to_glsl(nilv::model_used) + ";";
+      }
 
     fmain +=
       "if(next >= minstep) {\n";
-
-    string hnilw = to_glsl(nilv::nilwidth / 2);
-    string hnilw2 = to_glsl(nilv::nilwidth * nilv::nilwidth / 2);
 
     if(reg) fmain += "if(which != -1) {\n";
     else if(embedded_plane) {
@@ -918,8 +936,10 @@ void raygen::move_forward() {
         "if(abs(nposition.x) > uBinaryWidth || abs(nposition.y) > uBinaryWidth || abs(nposition.z) > .5) {\n";
     else if(sol) fmain +=
         "if(abs(nposition.x) > uBinaryWidth || abs(nposition.y) > uBinaryWidth || abs(nposition.z) > log(2.)/2.) {\n";
-    else fmain +=
+    else if(nil && nilv::nil_structure_index == 0) fmain +=
         "if(abs(nposition.x) > "+hnilw+" || abs(nposition.y) > "+hnilw+" || abs(rz) > "+hnilw2+") {\n";
+    else if(nil && nilv::nil_structure_index == 2) fmain +=
+        "if(abs(nposition.x) > "+hnilw+" || abs(nposition.x/2. + nposition.y*"+hsqrt3+") > "+hnilw+" || abs(nposition.x/2. - nposition.y*"+hsqrt3+") > "+hnilw+" || abs(rz) > "+hnilw3+") {\n";
 
     fmain +=
           "next = dist / 2.; continue;\n"
@@ -969,13 +989,22 @@ void raygen::move_forward() {
         "if(nposition.z > log(2.)/2.) which = nposition.x > 0. ? 3 : 2;\n"
         "if(nposition.z <-log(2.)/2.) which = nposition.y > 0. ? 7 : 6;\n";
       }
-    else if(nil) fmain +=
+    else if(nil && nilv::nil_structure_index == 0) fmain +=
         "if(nposition.x > "+hnilw+") which = 3;\n"
         "if(nposition.x <-"+hnilw+") which = 0;\n"
         "if(nposition.y > "+hnilw+") which = 4;\n"
         "if(nposition.y <-"+hnilw+") which = 1;\n"
         "if(rz > "+hnilw2+") which = 5;\n"
         "if(rz <-"+hnilw2+") which = 2;\n";
+    else if(nil && nilv::nil_structure_index == 2) fmain +=
+        "if(nposition.x > "+hnilw+") which = 0;\n"
+        "if(nposition.x <-"+hnilw+") which = 3;\n"
+        "if(nposition.x/2.+nposition.y*"+hsqrt3+" > "+hnilw+") which = 5;\n"
+        "if(nposition.x/2.+nposition.y*"+hsqrt3+" <-"+hnilw+") which = 2;\n"
+        "if(nposition.x/2.-nposition.y*"+hsqrt3+" > "+hnilw+") which = 1;\n"
+        "if(nposition.x/2.-nposition.y*"+hsqrt3+" <-"+hnilw+") which = 4;\n"
+        "if(rz > "+hnilw3+") which = 7;\n"
+        "if(rz <-"+hnilw3+") which = 6;\n";
 
     fmain +=
         "next = maxstep;\n"
@@ -1378,7 +1407,8 @@ void raygen::emit_iterate(int gid1) {
 
   if(!(levellines && disable_texture)) {
     fmain += "  mediump vec4 pos = position;\n";
-    if(nil) fmain += "if(which == 2 || which == 5) pos.z = 0.;\n";
+    if(nil && nilv::nil_structure_index == 0) fmain += "if(which == 2 || which == 5) pos.z = 0.;\n";
+    if(nil && nilv::nil_structure_index == 2) fmain += "if(which == 6 || which == 7) pos.z = 0.;\n";
     else if(hyperbolic && bt::in()) fmain +=
         "pos = deparabolici13(pos);\n"
         "pos.xyz = pos.zxy;\n";
@@ -1410,8 +1440,24 @@ void raygen::emit_iterate(int gid1) {
   if(!volumetric::on) fmain +=
     "    col.xyz = col.xyz * d + uFogColor.xyz * (1.-d);\n";
 
-  if(nil) fmain +=
+  if(nil && nilv::nil_structure_index == 0) fmain +=
     "    if(abs(abs(position.x)-abs(position.y)) < .005) col.xyz /= 2.;\n";
+
+  if(nil && nilv::nil_structure_index == 2) {
+    string hsqrt3 = to_glsl(sqrt(3)/2);
+    fmain += "mediump float x0 = position.x; mediump float y0 = position.y;\n";
+    fmain +=
+      "mediump float x1 = position.x * .5 + position.y * " + hsqrt3 + ";\n";
+    fmain +=
+      "mediump float x2 = position.x * .5 - position.y * " + hsqrt3 + ";\n";
+
+    fmain +=
+    "    if(abs(abs(x0)-abs(x1)) < .005 && abs(x0) > abs(x2)) col.xyz /= 2.;\n";
+    fmain +=
+    "    if(abs(abs(x0)-abs(x2)) < .005 && abs(x0) > abs(x1)) col.xyz /= 2.;\n";
+    fmain +=
+    "    if(abs(abs(x1)-abs(x2)) < .005 && abs(x1) > abs(x0)) col.xyz /= 2.;\n";
+    }
 
   if(use_reflect) fmain +=
     "  if(col.w == 1.) {\n"

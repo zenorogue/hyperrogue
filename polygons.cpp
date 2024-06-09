@@ -878,7 +878,8 @@ void geometry_information::compute_cornerbonus() { }
 // Make a wall
 
 hyperpoint ray_kleinize(hyperpoint h, int id, ld pz) {
-  if(nil && among(id, 2, 5)) h[2] = 0;
+  if(nil && nilv::nil_structure_index == 0 && among(id, 2, 5)) h[2] = 0;
+  if(nil && nilv::nil_structure_index == 2 && among(id, 6, 7)) h[2] = 0;
   #if CAP_BT
   if(hyperbolic && bt::in()) {
     // ld co = vid.binary_width / log(2) / 4;
