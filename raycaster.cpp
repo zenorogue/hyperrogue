@@ -535,12 +535,33 @@ void raygen::move_forward() {
       fsh +=
       "mediump vec4 christoffel(mediump vec4 pos, mediump vec4 vel, mediump vec4 tra) {\n"
       "  mediump float x = pos.x;\n"
-      "  const float mu = " + to_glsl((1-nilv::model_used)/2) + ";\n"
-      "  pos[2] += pos[0] * pos[1] * mu;\n"
-      "  vel[2] += (pos[0] * vel[1] + pos[1] * vel[0]) * mu;\n"
-      "  tra[2] += (pos[0] * tra[1] + pos[1] * tra[0]) * mu;\n"
-      "  vec4 res = vec4(x*vel.y*tra.y - 0.5*dot(vel.yz,tra.zy), -.5*x*dot(vel.yx,tra.xy) + .5 * dot(vel.zx,tra.xz), -.5*(x*x-1.)*dot(vel.yx,tra.xy)+.5*x*dot(vel.zx,tra.xz), 0.);\n"
-      "  res[2] -= (pos[0] * res[1] + vel[0] * vel[1] + pos[2] * res[0]) * mu;\n"
+
+      "  mediump float y = pos.y;\n"
+      "  const float mu = " + to_glsl(nilv::model_used) + ";\n"
+      "  vec4 res; res.w = 0.;\n"
+
+    "res.x = 0."
+    " + vel.x * tra.y * ( y*(mu - 1.)/4. )"
+    " + vel.y * tra.x * ( y*(mu - 1.)/4. )"
+    " + vel.y * tra.y * ( x*(mu + 1.)/2. )"
+    " + vel.y * tra.z * ( -1./2. )"
+    " + vel.z * tra.y * ( -1./2. );"
+    "res.y = 0."
+    " + vel.x * tra.x * ( y*(1. - mu)/2. )"
+    " + vel.x * tra.y * ( -x*(mu + 1.)/4. )"
+    " + vel.x * tra.z * ( 1./2. )"
+    " + vel.y * tra.x * ( -x*(mu + 1.)/4. )"
+    " + vel.z * tra.x * ( 1./2. );"
+    "res.z = 0."
+    " + vel.x * tra.x * ( x*y*(1. - mu*mu)/4. )"
+    " + vel.x * tra.y * ( -mu*mu*x*x/8. + mu*mu*y*y/8. - mu*x*x/4. - mu*y*y/4. + mu/2. - x*x/8. + y*y/8. )"
+    " + vel.x * tra.z * ( x*(mu + 1.)/4. )"
+    " + vel.y * tra.x * ( -mu*mu*x*x/8. + mu*mu*y*y/8. - mu*x*x/4. - mu*y*y/4. + mu/2. - x*x/8. + y*y/8. )"
+    " + vel.y * tra.y * ( x*y*(mu*mu - 1.)/4. )"
+    " + vel.y * tra.z * ( y*(1. - mu)/4. )"
+    " + vel.z * tra.x * ( x*(mu + 1.)/4. )"
+    " + vel.z * tra.y * ( y*(1. - mu)/4. );"
+
       "  return res;\n"
       "  }\n";
       use_christoffel = false;
@@ -591,19 +612,24 @@ void raygen::move_forward() {
     fmain +=
       "  dist = next < minstep ? 2.*next : next;\n";
 
-    if(nil && !use_christoffel) fsh +=
+    auto mu = to_glsl((1+nilv::model_used)/2);
+    auto comu = to_glsl((1-nilv::model_used)/2);
+
+    if(nil && !use_christoffel) {
+      fsh +=
       "mediump vec4 translate(mediump vec4 a, mediump vec4 b) {\n"
-        "return vec4(a[0] + b[0], a[1] + b[1], a[2] + b[2] + a[0] * b[1], b[3]);\n"
+        "return vec4(a[0] + b[0], a[1] + b[1], a[2] + b[2] + a[0] * b[1] * "+mu+" - a[1] * b[0] * "+comu+", b[3]);\n"
         "}\n"
       "mediump vec4 translatev(mediump vec4 a, mediump vec4 t) {\n"
-        "return vec4(t[0], t[1], t[2] + a[0] * t[1], 0.);\n"
+        "return vec4(t[0], t[1], t[2] + a[0] * t[1] * "+mu+" - a[1] * t[0] * "+comu+", 0.);\n"
         "}\n"
       "mediump vec4 itranslate(mediump vec4 a, mediump vec4 b) {\n"
-        "return vec4(-a[0] + b[0], -a[1] + b[1], -a[2] + b[2] - a[0] * (b[1]-a[1]), b[3]);\n"
+        "return vec4(-a[0] + b[0], -a[1] + b[1], -a[2] + b[2] - a[0] * (b[1]-a[1]) * "+mu+" + a[1] * (b[0]-a[0]) * "+comu+", b[3]);\n"
         "}\n"
       "mediump vec4 itranslatev(mediump vec4 a, mediump vec4 t) {\n"
-        "return vec4(t[0], t[1], t[2] - a[0] * t[1], 0.);\n"
+        "return vec4(t[0], t[1], t[2] - a[0] * t[1] * "+mu+" + a[1] * t[0] * "+comu+", 0.);\n"
         "}\n";
+      }
 
     // if(nil) fmain += "tangent = translate(position, itranslate(position, tangent));\n";
 
@@ -719,19 +745,20 @@ void raygen::move_forward() {
       }
 
     if(nil && !use_christoffel && !eyes) {
+      auto fixmod = "xp.z -= xp.x * xp.y * "+comu+"; xt.z -= (xp.x * xt.y + xp.y * xt.x) * "+comu+";\n";
       fmain +=
         "mediump vec4 xp, xt;\n"
         "mediump vec4 back = itranslatev(position, tangent);\n"
         "if(back.x == 0. && back.y == 0.) {\n"
         "  xp = vec4(0., 0., back.z*dist, 1.);\n"
-        "  xt = back;\n"
+        "  xt = back;\n" + fixmod +
         "  }\n"
         "else if(abs(back.z) == 0.) {\n"
         "  xp = vec4(back.x*dist, back.y*dist, back.x*back.y*dist*dist/2., 1.);\n"
-        "  xt = vec4(back.x, back.y, dist*back.x*back.y, 0.);\n"
+        "  xt = vec4(back.x, back.y, dist*back.x*back.y, 0.);\n" + fixmod +
         "  }\n"
         "else if(abs(back.z) < 1e-1) {\n"
-// we use the midpoint method here, because the formulas below cause glitches due to mediump float precision
+// We use the midpoint method here, because the formulas below cause glitches due to mediump float precision. Note: no fixmod!
         "  mediump vec4 acc = christoffel(vec4(0,0,0,1), back, back);\n"
         "  mediump vec4 pos2 = back * dist / 2.;\n"
         "  mediump vec4 tan2 = back + acc * dist / 2.;\n"
@@ -748,8 +775,10 @@ void raygen::move_forward() {
              "c*cos(alpha+w),"
              "c*sin(alpha+w),"
              "1. + c*c*2.*sin(w/2.)*sin(alpha+w)*cos(alpha+w/2.),"
-             "0.);\n"
-        "  }\n"
+             "0.);\n" + fixmod +
+        "  }\n";
+      
+      fmain +=
         "mediump vec4 nposition = translate(position, xp);\n";
       }
 
