@@ -905,16 +905,24 @@ EX namespace nilv {
     }
   
   #if HDR
+  bool mvec_uses_hex();
+
+  /** This type is used for indexed Nil cells. See mvec_to_point to convert from this to hyperpoint the tile is centered at.
+      In non-hex Nils, these correspond exactly to coordinates in nmHeis model (with nilwidth equal 1).
+      In hex Nils, these would be valid in nmSym models if the 'z' coordinates were halved. (But, they are sheared, as for usual hex coordinates in HyperRogue.)
+   **/
   struct mvec : array<int, 3> {
-    /** these are in nmHeis */
     explicit mvec() = default;
     constexpr explicit mvec(int x, int y, int z) : array<int, 3>{{x, y, z}} {}
     mvec inverse() {  
       auto& a = *this;
+      if(mvec_uses_hex()) return mvec(-a[0], -a[1], -a[2]);
       return mvec(-a[0], -a[1], -a[2]+a[1] * a[0]); 
       }
     mvec operator * (const mvec b) {
       auto& a = *this;
+      if(mvec_uses_hex())
+        return mvec(a[0]+b[0], a[1]+b[1], a[2]+b[2]+a[0]*b[1]-a[1]*b[0]);
       return mvec(a[0] + b[0], a[1] + b[1], a[2] + b[2] + a[0] * b[1]);
       }
     };
@@ -924,16 +932,29 @@ EX namespace nilv {
 
   EX ld nilwidth = 1;
       
-  hyperpoint mvec_to_point(mvec m) { return convert(hpxy3(m[0] * nilwidth, m[1] * nilwidth, m[2] * nilwidth * nilwidth), nmHeis, model_used); }
+  EX bool mvec_uses_hex() { return current_ns().mvec_hex; }
+
+  EX hyperpoint mvec_to_point(mvec m) {
+    if(mvec_uses_hex())
+      return convert(hpxy3((m[0] + m[1] / 2.) * nilwidth, (m[1] * sqrt(3)/2) * nilwidth, m[2] * sqrt(3) / 4 * nilwidth * nilwidth), nmSym, model_used);
+    return convert(hpxy3(m[0] * nilwidth, m[1] * nilwidth, m[2] * nilwidth * nilwidth), nmHeis, model_used);
+    }
   
   #if HDR
   struct nilstructure {
     vector<mvec> movevectors;
     vector<vector<hyperpoint>> facevertices;
+    bool mvec_hex;
+    vector<int> other_side;
+    string name;
     };
   #endif
   
   EX hyperpoint heis(ld x, ld y, ld z) { return convert(point31(x, y, z), nmHeis, model_used); }
+
+  EX hyperpoint hexrota(ld x, ld y, ld z) { return convert(point31(x/2, y * sqrt(3)/6, z / 24 * sqrt(3)), nmSym, model_used); }
+
+  EX int nil_structure_index;
 
   nilstructure ns6 = {
     {{ mvec(-1,0,0), mvec(0,-1,0), mvec(0,0,-1), mvec(1,0,0), mvec(0,1,0), mvec(0,0,1) }},
@@ -945,7 +966,10 @@ EX namespace nilv {
     { heis(0.5,0.5,-0.25), heis(0.5,0.5,0.75), heis(0.5,-0.5,0.25), heis(0.5,-0.5,-0.75), },
     { heis(-0.5,0.5,-0.5), heis(-0.5,0.5,0.5), heis(0.5,0.5,0.5), heis(0.5,0.5,-0.5), },
     { heis(0,0,0.5), heis(-0.5,0.5,0.25), heis(-0.5,-0.5,0.75), heis(0,0,0.5), heis(-0.5,-0.5,0.75), heis(-0.5,-0.5,0.5), heis(0,0,0.5), heis(-0.5,-0.5,0.5), heis(0.5,-0.5,0.5), heis(0,0,0.5), heis(0.5,-0.5,0.5), heis(0.5,-0.5,0.25), heis(0,0,0.5), heis(0.5,-0.5,0.25), heis(0.5,0.5,0.75), heis(0,0,0.5), heis(0.5,0.5,0.75), heis(0.5,0.5,0.5), heis(0,0,0.5), heis(0.5,0.5,0.5), heis(-0.5,0.5,0.5), heis(0,0,0.5), heis(-0.5,0.5,0.5), heis(-0.5,0.5,0.25), },
-    }}
+    }},
+    false,
+    {3,4,5,0,1,2},
+    "six sides"
     };
   
   nilstructure ns8 = {
@@ -960,10 +984,34 @@ EX namespace nilv {
       { heis(0.5,0.5,-0.75), heis(0.5,0.5,0.25), heis(0.5,-0.5,-0.75), },
       { heis(-0.5,0.5,0.75), heis(-0.5,0.5,-0.25), heis(0.5,0.5,-0.75), heis(0.5,0.5,0.25), },
       { heis(-0.5,-0.5,0.75), heis(-0.5,0.5,0.75), heis(0.5,0.5,0.25), heis(0.5,-0.5,0.25), },
-      }}
+      }},
+    false,
+    {4,5,6,7,0,1,2,3},
+    "eight sides"
     };
+
+  nilstructure nshex = {
+    {{ mvec(1,0,0), mvec(1,-1,0), mvec(0,-1,0), mvec(-1,0,0), mvec(-1,1,0), mvec(0,1,0), mvec(0,0,-1), mvec(0,0,1) }}, 
+
+    {{
+{hexrota(1,-1,2),hexrota(1,-1,-4),hexrota(1,1,-2),hexrota(1,1,4)},
+{hexrota(0,-2,2),hexrota(0,-2,-4),hexrota(1,-1,-2),hexrota(1,-1,4)},
+{hexrota(-1,-1,2),hexrota(-1,-1,-4),hexrota(0,-2,-2),hexrota(0,-2,4)},
+{hexrota(-1,1,2),hexrota(-1,1,-4),hexrota(-1,-1,-2),hexrota(-1,-1,4)},
+{hexrota(0,2,2),hexrota(0,2,-4),hexrota(-1,1,-2),hexrota(-1,1,4)},
+{hexrota(1,1,2),hexrota(1,1,-4),hexrota(0,2,-2),hexrota(0,2,4)},
+{hexrota(0,0,-3),hexrota(1,1,-2),hexrota(1,-1,-4),hexrota(0,0,-3),hexrota(1,-1,-4),hexrota(1,-1,-2),hexrota(0,0,-3),hexrota(1,-1,-2),hexrota(0,-2,-4),hexrota(0,0,-3),hexrota(0,-2,-4),hexrota(0,-2,-2),hexrota(0,0,-3),hexrota(0,-2,-2),hexrota(-1,-1,-4),hexrota(0,0,-3),hexrota(-1,-1,-4),hexrota(-1,-1,-2),hexrota(0,0,-3),hexrota(-1,-1,-2),hexrota(-1,1,-4),hexrota(0,0,-3),hexrota(-1,1,-4),hexrota(-1,1,-2),hexrota(0,0,-3),hexrota(-1,1,-2),hexrota(0,2,-4),hexrota(0,0,-3),hexrota(0,2,-4),hexrota(0,2,-2),hexrota(0,0,-3),hexrota(0,2,-2),hexrota(1,1,-4),hexrota(0,0,-3),hexrota(1,1,-4),hexrota(1,1,-2)},
+{hexrota(0,0,3),hexrota(1,1,4),hexrota(1,-1,2),hexrota(0,0,3),hexrota(1,-1,2),hexrota(1,-1,4),hexrota(0,0,3),hexrota(1,-1,4),hexrota(0,-2,2),hexrota(0,0,3),hexrota(0,-2,2),hexrota(0,-2,4),hexrota(0,0,3),hexrota(0,-2,4),hexrota(-1,-1,2),hexrota(0,0,3),hexrota(-1,-1,2),hexrota(-1,-1,4),hexrota(0,0,3),hexrota(-1,-1,4),hexrota(-1,1,2),hexrota(0,0,3),hexrota(-1,1,2),hexrota(-1,1,4),hexrota(0,0,3),hexrota(-1,1,4),hexrota(0,2,2),hexrota(0,0,3),hexrota(0,2,2),hexrota(0,2,4),hexrota(0,0,3),hexrota(0,2,4),hexrota(1,1,2),hexrota(0,0,3),hexrota(1,1,2),hexrota(1,1,4)}
+       }},
+
+    true,
+    {3,4,5,0,1,2,7,6},
+    "hex"
+    };
+
+  EX vector<nilstructure*> nil_structures = { &ns6, &ns8, &nshex };
   
-  EX nilstructure& current_ns() { return S7 == 6 ? ns6 : ns8; }
+  EX nilstructure& current_ns() { return *nil_structures[nil_structure_index]; }
 
   EX array<int,3> nilperiod, nilperiod_edit;
   int S7_edit;
@@ -999,7 +1047,7 @@ EX namespace nilv {
       auto q = p * current_ns().movevectors[d];
       for(int a=0; a<3; a++) q[a] = zgmod(q[a], nilperiod[a]);
       auto child = get_at(q);
-      parent->c.connect(d, child, (d + S7/2) % S7, false);
+      parent->c.connect(d, child, current_ns().other_side[d], false);
       return child;
       }
 
@@ -1018,6 +1066,7 @@ EX namespace nilv {
   EX heptagon *get_heptagon_at(mvec m) { return ((hrmap_nil*)currentmap)->get_at(m); }
 
   EX void set_flags() {
+    ginf[gNil].sides = isize(current_ns().movevectors);
     int coords = 0;
     for(int a=0; a<3; a++) if(nilperiod[a]) coords++;
     set_flag(ginf[gNil].flags, qANYQ, coords);
@@ -1054,9 +1103,9 @@ EX color_t colorize(cell *c, char whichCanvas) {
 
 EX void prepare_niltorus3() {
   nilperiod_edit = nilperiod;
-  S7_edit = ginf[gNil].sides;
+  S7_edit = nil_structure_index;
   }
-  
+
 EX void show_niltorus3() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen();
@@ -1071,8 +1120,8 @@ EX void show_niltorus3() {
       dialog::bound_low(0);
       });      
     }
-  dialog::addSelItem(XLAT("honeycomb"), its(S7_edit), 'h');
-  dialog::add_action([] { S7_edit = S7_edit ^ 6 ^ 8; });
+  dialog::addSelItem(XLAT("honeycomb"), XLAT(nil_structures[S7_edit]->name), 'h');
+  dialog::add_action([] { S7_edit = (S7_edit+1)%isize(nil_structures);  });
   
   bool ok = (!nilperiod_edit[1]) || (nilperiod_edit[2] && nilperiod_edit[1] % nilperiod_edit[2] == 0);
 
@@ -1083,7 +1132,7 @@ EX void show_niltorus3() {
     dialog::add_action([] {
       stop_game();
       nilperiod = nilperiod_edit;
-      ginf[gNil].sides = S7_edit;
+      nil_structure_index = S7_edit;
       set_flags();
       geometry = gNil;
       start_game();
@@ -3024,12 +3073,14 @@ EX namespace nisot {
       shift_arg_formula(nilv::nilwidth);
       return 0;
       }
-    else if(argis("-nilh")) {
+    else if(argis("-nilsi")) {
       PHASEFROM(2);
       stop_game();
-      shift(); ginf[gNil].sides = argi();
+      shift(); 
+      nilv::nil_structure_index = argi();
       nilv::set_flags();
       start_game();
+      return 0;
       }
     else if(argis("-rk-steps")) {
       PHASEFROM(2);

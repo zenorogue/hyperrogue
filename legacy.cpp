@@ -404,6 +404,14 @@ int read_legacy_args() {
     if(GDIM == 3) shift_arg_formula(models::rotation_xz);
     if(GDIM == 3) shift_arg_formula(models::rotation_xy2); */
     }
+  else if(argis("-nilh")) {
+    PHASEFROM(2);
+    stop_game();
+    shift();
+    nilv::nil_structure_index = argi() == 8 ? 1 : 0;
+    nilv::set_flags();
+    start_game();
+    }
   else if(argis("-yca")) {
     PHASEFROM(2);
     shift_arg_formula(vid.yshift);
