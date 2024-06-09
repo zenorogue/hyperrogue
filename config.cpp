@@ -1599,6 +1599,8 @@ EX void initConfig() {
 
   param_i(s2xe::qrings, "s2xe-rings");
   param_f(rots::underlying_scale, "rots-underlying-scale");
+  param_b(rots::underlying_as_pc, "underlying_as_pc")
+  -> editable("draw PC on the underlying map", 'P');
   
   param_b(vid.bubbles_special, "bubbles-special", 1);
   param_b(vid.bubbles_threshold, "bubbles-threshold", 1);

@@ -2305,6 +2305,7 @@ EX namespace rots {
     }
     
   EX bool drawing_underlying = false;
+  EX bool underlying_as_pc = true;
   
   EX void draw_underlying(bool cornermode) {
     if(underlying_scale <= 0) return;
@@ -2314,6 +2315,7 @@ EX namespace rots {
   
     if(det(T) < 0) T = centralsym * T;
     
+    ld orig_d = d;
     if(mproduct) d = 0;
   
     hyperpoint h = inverse(View * spin(master_to_c7_angle()) * T) * C0;
@@ -2322,12 +2324,23 @@ EX namespace rots {
     auto g0 = std::move(gmatrix0);
     
     ld alpha = atan2(ortho_inverse(NLP) * point3(1, 0, 0));
+
+    dynamicval<transmatrix> dn(NLP);
+    dynamicval<transmatrix> dv(View);
     
     bool inprod = mproduct;
     transmatrix pView = View;
+
     if(inprod) {
-      pView = spin(alpha) * View;
       ld z = zlevel(tC0(View));
+
+      /* special case when we are actually in E2xE as a rotation space */
+      if(in_e2xe() && abs(cgi.plevel * hybrid::csteps - TAU) < 1e-6) alpha = orig_d - z;
+
+      println(hlog, "depth = ", cgi.plevel * hybrid::csteps, " orig_d = ", orig_d, " z = ", z);
+
+      pView = spin(alpha) * View;
+
       for(int a=0; a<3; a++) pView[a] *= exp(-z);
       }
     
@@ -2358,14 +2371,15 @@ EX namespace rots {
       reset_projection(); current_display->set_all(0, 0);
       ptds.clear();
       drawthemap();
+      if(underlying_as_pc) drawPlayer(moPlayer, centerover, shiftless(spin90()), 0xFFFFFFFF, 0);
       drawqueue();
-      displaychr(current_display->xcenter, current_display->ycenter, 0, 24 * mapfontscale / 100, '+', 0xFFFFFFFF);
+      if(!underlying_as_pc) displaychr(current_display->xcenter, current_display->ycenter, 0, 24 * mapfontscale / 100, '+', 0xFFFFFFFF);
       glflush();
       });
     gmatrix = std::move(g);
     gmatrix0 = std::move(g0);
     calcparam();
-    reset_projection(); current_display->set_all(0, 0);
+    reset_projection(); current_display->set_all(0, 0); make_actual_view();
     }
 
   /** @brief exponential function for both slr and Berger sphere */
