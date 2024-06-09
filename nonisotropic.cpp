@@ -3046,6 +3046,15 @@ EX namespace nisot {
       set_geometry(gProduct);
       return 0;
       }
+    else if(argis("-prodlevel")) {
+      /* specify an exact value for cgi.plevel */
+      stop_game();
+      vid.plevel_factor = 1;
+      check_cgi(); cgi.prepare_basics();
+      shift(); vid.plevel_factor = argf() / cgi.plevel;
+      check_cgi();
+      return 0;
+      }
     else if(argis("-s2xe")) {
       PHASEFROM(2);
       shift(); s2xe::qrings = argi();
