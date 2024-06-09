@@ -322,6 +322,7 @@ template<class T, class U>
 void virtualRebase(cell*& base, T& at, const U& check) {
 
   if(nil && WDIM == 3 && nilv::nil_structure_index != 2) {
+    /** todo: implement for hex nil too */
     hyperpoint h = check(at);
     auto step = [&] (int i) {
       at = currentmap->adj(base, (i+S7/2) % S7) * at;
