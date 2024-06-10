@@ -4371,6 +4371,7 @@ EX subcellshape& generate_subcellshape_if_needed(cell *c, int id) {
         l.push_back(hybrid::get_corner(c1, i, 0, z));
         }
     if(a == 0) std::reverse(l.begin()+1, l.end());
+    if(a == 1) std::rotate(l.begin(), l.begin()+3, l.end());
     ss.faces.push_back(l);
     }
   
