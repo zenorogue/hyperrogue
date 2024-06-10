@@ -468,7 +468,7 @@ hpcshape
   void pushShape(usershapelayer& ds);
   void make_sidewalls();
   void procedural_shapes();
-  void make_wall(int id, const vector<hyperpoint> vertices, vector<ld> weights = equal_weights);
+  void make_wall(int wo, int id, const vector<hyperpoint> vertices, vector<ld> weights = equal_weights);
   
   void reserve_wall3d(int i);
   void compute_cornerbonus();

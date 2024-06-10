@@ -4396,7 +4396,7 @@ int hrmap::wall_offset(cell *c) {
 
     
     for(int i=0; i<isize(ss.faces); i++) {
-      cgi.make_wall(wo + i, ss.faces[i]);
+      cgi.make_wall(wo, i, ss.faces[i]);
       cgi.walltester[wo + i] = ss.walltester[i];
       }
     

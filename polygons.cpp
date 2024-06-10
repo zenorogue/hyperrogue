@@ -867,7 +867,7 @@ void geometry_information::procedural_shapes() {
 vector<ld> equal_weights(1000, 1);
 
 #if MAXMDIM < 4
-void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector<ld> weights) { }
+void geometry_information::make_wall(int wo, int id, vector<hyperpoint> vertices, vector<ld> weights) { }
 void geometry_information::reserve_wall3d(int i) { }
 void geometry_information::create_wall3d() { }
 void geometry_information::compute_cornerbonus() { }
@@ -894,7 +894,9 @@ hyperpoint ray_kleinize(hyperpoint h, int id, ld pz) {
   return kleinize(h);
   }
 
-void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector<ld> weights) {
+void geometry_information::make_wall(int wo, int id, vector<hyperpoint> vertices, vector<ld> weights) {
+
+  int id1 = wo + id;
 
   wallstart.push_back(isize(raywall));
 
@@ -908,7 +910,7 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
     reverse(vertices.begin(), vertices.end()),
     reverse(weights.begin(), weights.end());
 
-  bshape(shWall3D[id], PPR::WALL);
+  bshape(shWall3D[id1], PPR::WALL);
   last->flags |= POLY_TRIANGLES | POLY_PRINTABLE;
   
   hyperpoint center = Hypc;
@@ -971,7 +973,7 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
       });
     }
 
-  bshape(shWireframe3D[id], PPR::WALL);
+  bshape(shWireframe3D[id1], PPR::WALL);
   if(true) {
     int STEP = vid.texture_step;
     for(int a=0; a<n; a++) for(int y=0; y<STEP; y++) {
@@ -990,21 +992,21 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
     hpcpush(hpc[last->s]);
     }
 
-  bshape(shMiniWall3D[id], PPR::WALL);
-  bshape(shMiniWall3D[id], PPR::WALL);
-  for(int a=shWall3D[id].s; a < shWall3D[id].e; a++)
+  bshape(shMiniWall3D[id1], PPR::WALL);
+  bshape(shMiniWall3D[id1], PPR::WALL);
+  for(int a=shWall3D[id1].s; a < shWall3D[id1].e; a++)
     hpcpush(mid(C0, hpc[a]));
-  if(shWall3D[id].flags & POLY_TRIANGLES)
+  if(shWall3D[id1].flags & POLY_TRIANGLES)
     last->flags |= POLY_TRIANGLES;
-  if(shWall3D[id].flags & POLY_PRINTABLE)
+  if(shWall3D[id1].flags & POLY_PRINTABLE)
     last->flags |= POLY_PRINTABLE;
 
   finishshape();
   
-  shWall3D[id].intester = C0;
-  shMiniWall3D[id].intester = C0;
+  shWall3D[id1].intester = C0;
+  shMiniWall3D[id1].intester = C0;
 
-  shPlainWall3D[id] = shWall3D[id]; // force_triangles ? shWall3D[id] : shWireframe3D[id];
+  shPlainWall3D[id1] = shWall3D[id1]; // force_triangles ? shWall3D[id] : shWireframe3D[id];
   }
 
 void geometry_information::reserve_wall3d(int i) {
@@ -1031,7 +1033,7 @@ void geometry_information::create_wall3d() {
     for(auto& ss: cgi.subshapes) {
       walloffsets.emplace_back(id, nullptr);
       for(auto& face: ss.faces_local)
-        make_wall(id++, face);
+        make_wall(0, id++, face);
       }
     hassert(id == tot);
     compute_cornerbonus();
@@ -1045,11 +1047,11 @@ void geometry_information::create_wall3d() {
     auto& we = cgi.heptshape->weights;
     if(we.empty()) {
       for(int w=0; w<isize(faces); w++)
-        make_wall(w, faces[w]);
+        make_wall(0, w, faces[w]);
       }
     else {
       for(int w=0; w<isize(faces); w++)
-        make_wall(w, faces[w], we[w]);
+        make_wall(0, w, faces[w], we[w]);
       }
     }
 
