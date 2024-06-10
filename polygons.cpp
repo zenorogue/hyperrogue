@@ -877,9 +877,53 @@ void geometry_information::compute_cornerbonus() { }
 
 // Make a wall
 
+EX int kleinize_sides;
+
+hyperpoint ray_kleinize_rotspace(hyperpoint h, int ks, int id) {
+
+  /* todo: in Archimedean tilings it may be the case that pispin is incorrect, as shown by `angle of zero` -- need to carry it to raycaster */
+  h = pispin * h;
+
+  ld& x = h[0];
+  ld& y = h[1];
+  ld& z = h[2];
+  ld& w = h[3];
+
+  if(id < ks) h = spin(-TAU * id / ks) * h;
+
+  ld dx, dy;
+
+  if(sl2) {
+    dx = -2 * (y*z - x*w);
+    dy = -2 * (x*z + y*w);
+    }
+  else {
+    dx = +2 * (x*z + y*w);
+    dy = -2 * (y*z - x*w);
+    }
+
+  if(id >= ks) return hyperpoint(dx, dy, 0, 1);
+
+  if(sl2) {
+    ld vy = -asinh(dy)/2;
+    ld vx = asinh(dx / cosh(2*vy)) / 2;
+    hyperpoint h1 = lorentz(1, 3, -vy) * lorentz(0, 2, -vy) * lorentz(0, 3, -vx) * lorentz(2, 1, vx) * h;
+    ld vz = atan2(h1[2], h1[3]);
+    return hyperpoint(vx, vy, vz, 1);
+    }
+  else {
+    ld vy = -asin(dy)/2;
+    ld vx = asin(dx / cos(2*vy)) / 2;
+    hyperpoint h1 = cspin(0, 3, vy) * cspin(1, 2, -vy) * cspin(1, 3, -vx) * cspin(0, 2, -vx) * h;
+    ld vz = atan2(h1[2], h1[3]);
+    return hyperpoint(vx, vy, vz, 1);
+    }
+  }
+
 hyperpoint ray_kleinize(hyperpoint h, int id, ld pz) {
   if(nil && nilv::nil_structure_index == 0 && among(id, 2, 5)) h[2] = 0;
   if(nil && nilv::nil_structure_index == 2 && among(id, 6, 7)) h[2] = 0;
+  if(rotspace) return ray_kleinize_rotspace(h, kleinize_sides, id);
   #if CAP_BT
   if(hyperbolic && bt::in()) {
     // ld co = vid.binary_width / log(2) / 4;

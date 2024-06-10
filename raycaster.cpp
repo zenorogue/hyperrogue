@@ -80,7 +80,7 @@ EX bool is_eyes() {
   }
 
 EX bool is_stepbased() {
-  return nonisotropic || stretch::in() || is_eyes();
+  return nonisotropic || stretch::in() || is_eyes() || rotspace;
   }
 
 EX bool horos() {
@@ -127,7 +127,7 @@ EX bool available() {
   #endif
   if(hyperbolic && pmodel == mdPerspective && !kite::in())
     return true;
-  if(sphere && pmodel == mdPerspective && !rotspace)
+  if(sphere && pmodel == mdPerspective)
     return true;
   if(nil && nilv::nil_structure_index == 1)
     return false;
@@ -341,7 +341,7 @@ struct raygen {
   void create();
 
   string f_xpush() { return hyperbolic ? "xpush_h3" : "xpush_s3"; }
-  string f_len() { return hyperbolic ? "len_h3" : (sphere && rotspace) ? "len_sr" : sl2 ? "len_sl2" : sphere ? "len_s3" : "len_x"; }
+  string f_len() { return hyperbolic ? "len_h3" : rotspace ? "rot_flatdist" : sphere ? "len_s3" : "len_x"; }
   string f_len_prod() { return in_h2xe() ? "len_h2" : in_s2xe() ? "len_s2" : "len_e2"; }
   void add_functions();
   };
@@ -867,11 +867,9 @@ void raygen::move_forward() {
     "      }\n";
       if(rotspace) fmain +=
     "   if(which == -1) {\n"
-    "     best = len_rotspace(nposition);\n"
-    "     mediump float cand1 = len_rotspace(" + getM("walloffset+sides-2") + "*nposition);\n"
-    "     if(cand1 < best) { best = cand1; which = sides-2; }\n"
-    "     mediump float cand2 = len_rotspace(" + getM("walloffset+sides-1") + "*nposition);\n"
-    "     if(cand2 < best) { best = cand2; which = sides-1; }\n"
+    "     mediump float z = rot_zlevel(nposition, sides-2);\n"
+    "     if(z > uPLevel) which = sides-1;\n"
+    "     if(z <-uPLevel) which = sides-2;\n"
     "     }\n";
       if(gproduct) {
         fmain +=
@@ -1409,6 +1407,50 @@ void raygen::emit_iterate(int gid1) {
     fmain += "  mediump vec4 pos = position;\n";
     if(nil && nilv::nil_structure_index == 0) fmain += "if(which == 2 || which == 5) pos.z = 0.;\n";
     if(nil && nilv::nil_structure_index == 2) fmain += "if(which == 6 || which == 7) pos.z = 0.;\n";
+    else if(rotspace) {
+      fmain += "pos = rot_coordinates(pos, sides-2, which);\n";
+      string spinner = "h = cspin(0, 1, PI) * h;\n";
+      string calc_dxy = sl2 ?
+            "dx = -2. * (h.y*h.z - h.x*h.w);\n"
+            "dy = -2. * (h.x*h.z + h.y*h.w);\n" :
+            "dx = +2. * (h.x*h.z + h.y*h.w);\n"
+            "dy = -2. * (h.y*h.z - h.x*h.w);\n";
+      string dcalc_dxy = "mediump float dx, dy;\n" + calc_dxy;
+      string calc_vxy = sl2 ?
+            "mediump float vy = -asinh(dy)/2.;\n"
+            "mediump float vx = asinh(dx / cosh(2.*vy)) / 2.;\n" :
+            "mediump float vy = -asin(dy)/2.;\n"
+            "mediump float vx = asin(dx / cos(2.*vy)) / 2.;\n";
+      string calc_h1 = sl2 ?
+            "vec4 h1 = lorentz(1, 3, -vy) * lorentz(0, 2, -vy) * lorentz(0, 3, -vx) * lorentz(2, 1, vx) * h;\n" :
+            "vec4 h1 = cspin(0, 3, vy) * cspin(1, 2, -vy) * cspin(1, 3, -vx) * cspin(0, 2, -vx) * h;\n";
+      fsh +=
+        "vec4 rot_coordinates(vec4 h, int ks, int id) {\n"
+          +spinner+
+          "if(id < ks) h = cspin(0, 1, -TAU * float(id) / float(ks)) * h;\n"
+          +dcalc_dxy +
+          "if(id >= ks) return vec4(dx, dy, 0, 1);\n"
+          + calc_vxy + calc_h1 +
+          "float vz = atan2(h1[2], h1[3]);\n"
+          "return vec4(vx, vy, vz, 1);\n"
+          "}\n\n";
+      fsh +=
+        "mediump float rot_flatdist(mediump vec4 h) {\n" + dcalc_dxy +
+           "return dx*dx+dy*dy;\n"
+           "}\n";
+      fsh +=
+        "mediump float rot_zlevel(vec4 h, int ks) {\n" + spinner + dcalc_dxy +
+          "float alpha = (floor(atan2(dy, dx) * float(ks) / TAU + 0.5)) * TAU / float(ks);\n"
+          "h = cspin(1, 0, alpha) * h;\n" + calc_dxy + calc_vxy + calc_h1 +
+          "return atan2(h1[2], h1[3]);\n"
+          "}\n\n";
+      fsh +=
+        "mediump bool rot_dark(vec4 h, int ks) {\n" + spinner + dcalc_dxy +
+          "float alpha = atan2(dy, dx) * float(ks);\n"
+          "return cos(alpha) < -0.99;\n"
+          "}\n\n";
+       }
+
     else if(hyperbolic && bt::in()) fmain +=
         "pos = deparabolici13(pos);\n"
         "pos.xyz = pos.zxy;\n";
@@ -1440,6 +1482,8 @@ void raygen::emit_iterate(int gid1) {
   if(!volumetric::on) fmain +=
     "    col.xyz = col.xyz * d + uFogColor.xyz * (1.-d);\n";
 
+  if(rotspace) fmain +=
+    "    if(rot_dark(position, sides-2)) col.xyz /= 2.;\n";
   if(nil && nilv::nil_structure_index == 0) fmain +=
     "    if(abs(abs(position.x)-abs(position.y)) < .005) col.xyz /= 2.;\n";
 
@@ -1811,16 +1855,27 @@ void raygen::add_functions() {
         "  return res;\n"
         "  }\n\n");
 
-  add_if("len_rotspace", "mediump float len_rotspace(vec4 h) { return 1. - h[3]; }\n");
-
   add_if("len_h3",  "  mediump float len_h3(mediump vec4 x) { return x[3]; }\n");
   add_if("len_sr", "  mediump float len_sr(mediump vec4 x) { return 1.+x.x*x.x+x.y*x.y-x.z*x.z-x.w*x.w; }\n");
-  add_if("len_sl2","  mediump float len_sl2(mediump vec4 x) { return 1.+x.x*x.x+x.y*x.y; }\n");
   add_if("len_s3",  "  mediump float len_s3(mediump vec4 x) { return 1.-x[3]; }\n");
   add_if("len_x",  "  mediump float len_x(mediump vec4 x) { return length(x.xyz); }\n");
   add_if("len_h2",  "  mediump float len_h2(mediump vec4 x) { return x[2]; }\n");
   add_if("len_s2",  "  mediump float len_s2(mediump vec4 x) { return 1.-x[2]; }\n");
   add_if("len_e2",  "  mediump float len_e2(mediump vec4 x) { return length(x.xy); }\n");
+
+  add_if("cspin",
+    "mediump mat4 cspin(int a, int b, mediump float x) {\n"
+    "  mat4 m = mat4(1.,0.,0.,0.,0.,1.,0.,0.,0.,0.,1.,0.,0.,0.,0.,1.);\n"
+    "  m[a][a] = m[b][b] = cos(x); m[b][a] = sin(x); m[a][b] = -m[b][a];\n"
+    "  return m;\n"
+    "  }\n");
+
+  add_if("lorentz",
+    "mediump mat4 lorentz(int a, int b, mediump float x) {\n"
+    "  mat4 m = mat4(1.,0.,0.,0.,0.,1.,0.,0.,0.,0.,1.,0.,0.,0.,0.,1.);\n"
+    "  m[a][a] = m[b][b] = cosh(x); m[a][b] = m[b][a] = sinh(x);\n"
+    "  return m;\n"
+    "  }\n");
   }
 
 void raygen::emit_raystarter() {
@@ -1989,7 +2044,7 @@ void raygen::create() {
     if((gproduct || intra::in) && vid.stereo_mode != sODS) fsh +=
       "uniform mediump mat4 uLP;\n";
 
-    if(gproduct || intra::in) fsh +=
+    if(gproduct || intra::in || rotspace) fsh +=
       "uniform mediump float uPLevel;\n";
 
     if(many_cell_types) fsh +=

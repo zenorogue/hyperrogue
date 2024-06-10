@@ -956,6 +956,7 @@ EX void add_fixed_functions(string& shader) {
         "  }\n\n");
 
   add_if(shader, "PI", "#define PI 3.14159265358979324\n");
+  add_if(shader, "TAU", "#define TAU 6.28318530367958648\n");
   #ifndef GLES_ONLY
   add_if(shader, "mediump", "#define mediump\n");
   #endif
