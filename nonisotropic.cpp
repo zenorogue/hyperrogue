@@ -2429,7 +2429,7 @@ EX namespace rots {
       reset_projection(); current_display->set_all(0, 0);
       ptds.clear();
       drawthemap();
-      if(underlying_as_pc) drawPlayer(moPlayer, centerover, shiftless(spin90()), 0xFFFFFFFF, 0);
+      if(underlying_as_pc) drawPlayer(moPlayer, centerover, sphere ? shiftless(xpush(M_PI) * spin90()) : shiftless(spin90()), 0xFFFFFFFF, 0);
       drawqueue();
       if(!underlying_as_pc) displaychr(current_display->xcenter, current_display->ycenter, 0, 24 * mapfontscale / 100, '+', 0xFFFFFFFF);
       glflush();
