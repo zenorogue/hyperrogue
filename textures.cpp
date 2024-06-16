@@ -1736,10 +1736,6 @@ int textureArgs() {
     shift(); config.configname = args();
     }
 
-  else if(argis("-txc")) {
-    shift(); config.configname = args();
-    }
-
   else if(argis("-txpsize")) {
     shift(); txp.twidth = argi();
     }
