@@ -1961,11 +1961,6 @@ EX namespace ccolor {
     dialog::end_list();
     }
 
-  EX data *legacy(char c) {
-    if(c == 'd') return &landscape_dark;
-    return &plain;
-    }
-
 #undef CCO
 EX }
 

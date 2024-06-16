@@ -134,10 +134,6 @@ EX void setCanvas(presmode mode, ccolor::data *canv, reaction_t f) {
     }
   }
 
-EX void setCanvas(presmode mode, char c) {
-  setCanvas(mode, ccolor::legacy(c));
-  }
-
 EX void setCanvas(presmode mode, ccolor::data *canv) { setCanvas(mode, canv, [] {}); }
 
 EX void setCanvasColor(presmode mode, color_t col, reaction_t f) {
