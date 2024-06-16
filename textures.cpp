@@ -1745,7 +1745,7 @@ int textureArgs() {
     }
 
   else if(argis("-txcl")) {
-    PHASE(3); drawscreen();
+    PHASE(3);
     config.load();
     }
 
