@@ -1405,23 +1405,24 @@ void raygen::emit_iterate(int gid1) {
 
   if(!(levellines && disable_texture)) {
     fmain += "  mediump vec4 pos = position;\n";
-    if(nil && nilv::nil_structure_index == 0) fmain += "if(which == 2 || which == 5) pos.z = 0.;\n";
-    if(nil && nilv::nil_structure_index == 2) fmain += "if(which == 6 || which == 7) pos.z = 0.;\n";
+    if(!mtwisted && nil && nilv::nil_structure_index == 0) fmain += "if(which == 2 || which == 5) pos.z = 0.;\n";
+    if(!mtwisted && nil && nilv::nil_structure_index == 2) fmain += "if(which == 6 || which == 7) pos.z = 0.;\n";
     else if(mtwisted) {
       fmain += "pos = twist_coordinates(pos, sides-2, which);\n";
       string spinner = "h = cspin(0, 1, PI) * h;\n";
-      string calc_dxy = sl2 ?
+      string calc_dxy = nil ? "dx = h.x; dy = h.y;\n" : sl2 ?
             "dx = -2. * (h.y*h.z - h.x*h.w);\n"
             "dy = -2. * (h.x*h.z + h.y*h.w);\n" :
             "dx = +2. * (h.x*h.z + h.y*h.w);\n"
             "dy = -2. * (h.y*h.z - h.x*h.w);\n";
       string dcalc_dxy = "mediump float dx, dy;\n" + calc_dxy;
-      string calc_vxy = sl2 ?
+      string calc_vxy = nil ? "mediump float vx = h.x; mediump float vy = h.y;\n" : sl2 ?
             "mediump float vy = -asinh(dy)/2.;\n"
             "mediump float vx = asinh(dx / cosh(2.*vy)) / 2.;\n" :
             "mediump float vy = -asin(dy)/2.;\n"
             "mediump float vx = asin(dx / cos(2.*vy)) / 2.;\n";
-      string calc_h1 = sl2 ?
+      string calc_vz = nil ? "mediump float vz = h.z - h.x * h.y / 2;\n" : "float vz = atan2(h1[2], h1[3]);\n";
+      string calc_h1 = nil ? "" : sl2 ?
             "vec4 h1 = lorentz(1, 3, -vy) * lorentz(0, 2, -vy) * lorentz(0, 3, -vx) * lorentz(2, 1, vx) * h;\n" :
             "vec4 h1 = cspin(0, 3, vy) * cspin(1, 2, -vy) * cspin(1, 3, -vx) * cspin(0, 2, -vx) * h;\n";
       fsh +=
@@ -1430,8 +1431,7 @@ void raygen::emit_iterate(int gid1) {
           "if(id < ks) h = cspin(0, 1, -TAU * float(id) / float(ks)) * h;\n"
           +dcalc_dxy +
           "if(id >= ks) return vec4(dx, dy, 0, 1);\n"
-          + calc_vxy + calc_h1 +
-          "float vz = atan2(h1[2], h1[3]);\n"
+          + calc_vxy + calc_h1 + calc_vz +
           "return vec4(vx, vy, vz, 1);\n"
           "}\n\n";
       fsh +=
@@ -1441,8 +1441,8 @@ void raygen::emit_iterate(int gid1) {
       fsh +=
         "mediump float twist_zlevel(vec4 h, int ks) {\n" + spinner + dcalc_dxy +
           "float alpha = (floor(atan2(dy, dx) * float(ks) / TAU + 0.5)) * TAU / float(ks);\n"
-          "h = cspin(1, 0, alpha) * h;\n" + calc_dxy + calc_vxy + calc_h1 +
-          "return atan2(h1[2], h1[3]);\n"
+          "h = cspin(1, 0, alpha) * h;\n" + calc_dxy + calc_vxy + calc_h1 + calc_vz +
+          "return vz;\n"
           "}\n\n";
       fsh +=
         "mediump bool twist_dark(vec4 h, int ks) {\n" + spinner + dcalc_dxy +
