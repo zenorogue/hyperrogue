@@ -120,10 +120,11 @@ EX void enable_canvas_backup(ccolor::data *canv) {
   }
 
 /** \brief an auxiliary function to enable a visualization in the Canvas land */
-EX void setCanvas(presmode mode, ccolor::data *canv) {
+EX void setCanvas(presmode mode, ccolor::data *canv, reaction_t f) {
   if(mode == pmStart) {
     gamestack::push();
     enable_canvas_backup(canv);
+    f();
     start_game();
     resetview();
     }
@@ -136,6 +137,23 @@ EX void setCanvas(presmode mode, ccolor::data *canv) {
 EX void setCanvas(presmode mode, char c) {
   setCanvas(mode, ccolor::legacy(c));
   }
+
+EX void setCanvas(presmode mode, ccolor::data *canv) { setCanvas(mode, canv, [] {}); }
+
+EX void setCanvasColor(presmode mode, color_t col, reaction_t f) {
+  setCanvas(mode, &ccolor::plain, [f, col] { slide_backup(ccolor::rwalls, 0); slide_backup(ccolor::plain.ctab, colortable{{col}}); f(); });
+  }
+
+EX void setWhiteCanvas(presmode mode, reaction_t f) {
+  setCanvasColor(mode, 0xFFFFFF, f);
+  }
+
+EX void setWhiteCanvas(presmode mode) { setWhiteCanvas(mode, [] {}); }
+
+EX void setPlainCanvas(presmode mode, reaction_t f) { setCanvas(mode, &ccolor::plain, [f] {slide_backup(ccolor::rwalls, 0); f(); }); }
+
+EX void setPlainCanvas(presmode mode) { setCanvas(mode, &ccolor::plain, [] {slide_backup(ccolor::rwalls, 0); }); }
+
 
 /** \brief static mode: we get Orbs of Teleport to use them instead of movement */
 bool sickmode;
