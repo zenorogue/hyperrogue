@@ -1569,6 +1569,10 @@ EX namespace ccolor {
 
   EX void edit_rwalls() {
     dialog::editNumber(rwalls, 0, 100, 10, 50, XLAT("probability of a wall (%)"), "");
+    dialog::get_di().extra_options = [] {
+      dialog::addSelItem(XLAT("no walls"), "0", 'N');
+      dialog::add_action([] { rwalls = 0; stop_game(); start_game(); popScreen(); });
+      };
     dialog::get_di().reaction = [] { stop_game(); start_game(); };
     }
 
