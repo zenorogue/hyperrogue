@@ -1497,7 +1497,7 @@ void geodesic_screen(tour::presmode mode, int id) {
   static hyperpoint start, middle, target, nlh, nlh1, nlh2;
   const ld coord = 10;
   
-  setCanvas(mode, '0');
+  setWhiteCanvas(mode);
   if(mode == pmStart) {
     slide_backup(pmodel);
     slide_backup(pconf.clip_min);
@@ -1686,7 +1686,7 @@ slide embchess_slides[] = {
    "to access various options. The next slides are slides from that video.\n\n",
 
   [] (presmode mode) {
-    setCanvas(mode, '0');
+    setWhiteCanvas(mode);
     slide_url(mode, 'y', "YouTube link", "https://youtu.be/Rhjv_PazzZE");
     slide_action(mode, 'a', "activate / configure", act_or_config);
     if(mode == pmKey) act_or_config();

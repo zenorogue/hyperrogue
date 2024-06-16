@@ -247,7 +247,7 @@ vector<cell*> current_list;
 void mine_slide(tour::presmode mode, reaction_t set_geom, function<vector<cell*>()> celllister, function<void(cell*)> assigner) {
   using namespace tour;
   ccolor::plain.ctab = {0};
-  setCanvas(mode, '0');
+  setWhiteCanvas(mode);
   if(mode == pmStart) {
     slide_backup(mapeditor::drawplayer, false);
     slide_backup(no_find_player, true);
@@ -299,7 +299,7 @@ using namespace rogueviz::pres;
 
 void wfc_slide(presmode mode, int type, int rad, int cutoff) {
   static vector<pair<cell*, int>> colors;
-  setCanvas(mode, '0');
+  setWhiteCanvas(mode);
   dynamic_wfc::wfctype = type;
   dynamic_wfc::wfcrad = rad;
   dynamic_wfc::cutoff = cutoff;
@@ -419,7 +419,7 @@ slide sweeper_slides[] = {
   {"Variants: HyperRogue minefield", 123, LEGAL::ANY | QUICKGEO, 
     "The other one is the Minefield land in HyperRogue. It is heavily modified from the original but the basic idea stays the same.", 
     [] (presmode mode) {
-      setCanvas(mode, '0');
+      setWhiteCanvas(mode);
       if(mode == pmStart) {
         stop_game();
         firstland = specialland = laMinefield;
@@ -509,7 +509,7 @@ slide sweeper_slides[] = {
     "For creatures restricted to just this surface, they are indeed striaght lines!\n\n"
     ,
     [] (presmode mode) {
-      setCanvas(mode, '0');
+      setWhiteCanvas(mode);
       if(mode == pmStart) {
         tour::slide_backup(mapeditor::drawplayer, false);
         enable_earth();
@@ -538,17 +538,13 @@ slide sweeper_slides[] = {
     "The hyperbolic geometry is the opposite. We can have a pentagon with five right angles.\n\n"
     ,
     [] (presmode mode) {
-      setCanvas(mode, 'c');
-      if(mode == pmStart) {
-        stop_game();
+      setCanvas(mode, &ccolor::chessboard, [] {
         set_geometry(g45);
         set_variation(eVariation::pure);
-        tour::slide_backup(ccolor::chessboard.ctab[0], 0x104010);
-        tour::slide_backup(ccolor::chessboard.ctab[1], 0x10F010);
+        tour::slide_backup(ccolor::chessboard.ctab, colortable{0x104010, 0x10F010});
         tour::slide_backup(vid.use_smart_range, 2);
         tour::slide_backup(vid.smart_range_detail, 1);
-        start_game();
-        }        
+        });
       // mine_slide(mode, geom_pentagos, cl_pentagons, chessboard_assigner);
       non_game_slide_scroll(mode);
       tour::slide_backup(draw_centerover, false);
@@ -559,14 +555,12 @@ slide sweeper_slides[] = {
     "The hyperbolic plane has a tree-like structure. It is best seen in the 'binary tiling'. Press '5' to show the pattern.\n\n"
     ,
     [] (presmode mode) {
-      setCanvas(mode, 'g');
-      non_game_slide_scroll(mode);
-      if(mode == pmStart) {
-        tour::slide_backup(ccolor::plain.ctab[0], 0x10A010);
-        stop_game();
+      setCanvasColor(mode, 0x10A010, [] {
         set_geometry(gBinary4);
         set_variation(eVariation::pure);
-        start_game();
+        });
+      non_game_slide_scroll(mode);
+      if(mode == pmStart) {
         tour::slide_backup(vid.use_smart_range, 2);
         tour::slide_backup(vid.smart_range_detail, 1);
         View = spin90();
@@ -589,13 +583,12 @@ slide sweeper_slides[] = {
     "Other hyperbolic tessellations have a similar structure, just a bit more complicated...\n\n"
     ,
     [] (presmode mode) {
-      setCanvas(mode, '0');
-      non_game_slide_scroll(mode);
-      if(mode == pmStart) {
-        stop_game();
+      setWhiteCanvas(mode, [] {
         set_variation(eVariation::pure);
         tour::slide_backup(vid.creature_scale, 0.5);
-        start_game();
+        });
+      non_game_slide_scroll(mode);
+      if(mode == pmStart) {
         tour::slide_backup(viewdists, true);
         using linepatterns::patTree;
         tour::slide_backup(patTree.color, 0xFFFFFFFF);
@@ -837,14 +830,12 @@ slide sweeper_slides[] = {
     "To see this, let's remind you of the binary tiling..."
     ,
     [] (presmode mode) {
-      setCanvas(mode, 'g');
-      non_game_slide_scroll(mode);
-      if(mode == pmStart) {
-        tour::slide_backup(ccolor::plain.ctab[0], 0x10A010);
-        stop_game();
+      setCanvasColor(mode, 0x10A010, [] {
         set_geometry(gBinary4);
         set_variation(eVariation::pure);
-        start_game();
+        });
+      non_game_slide_scroll(mode);
+      if(mode == pmStart) {
         tour::slide_backup(vid.use_smart_range, 2);
         tour::slide_backup(vid.smart_range_detail, 1);
         View = spin90();

@@ -827,7 +827,7 @@ auto chk = arg::add3("-platformer", enable)
           slide_url(mode, 'y', "non-Euclidean platformer (YouTube)", "https://www.youtube.com/watch?v=eb2DhCcGH7U");
           slide_url(mode, 't', "non-Euclidean platformer (Twitter)", "https://twitter.com/ZenoRogue/status/1467233150380089345");
           slide_url(mode, 'g', "how to edit this", "https://github.com/zenorogue/hyperrogue/blob/master/rogueviz/platformer.cpp");
-          setCanvas(mode, '0');
+          setPlainCanvas(mode);
           using namespace tour;
           if(mode == pmStart) {
             mapstream::loadMap("platformer.lev");

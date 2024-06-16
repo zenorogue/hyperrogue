@@ -1443,7 +1443,7 @@ void portal_slideshow(tour::ss::slideshow_callback cb) {
       portal_slides.emplace_back(
         tour::slide{s, 100, LEGAL::NONE | QUICKGEO | QUICKSKIP | ALWAYS_TEXT, text,
           [=] (presmode mode) {
-            setCanvas(mode, '0');
+            setPlainCanvas(mode);
             if(youtube != "")
               slide_url(mode, 'y', "YouTube link", youtube);
             non_game_slide_scroll(mode);

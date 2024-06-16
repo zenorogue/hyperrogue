@@ -131,16 +131,14 @@ auto hypcity_ah = arg::add3("-hypcity", enable)
               if(mode == pmStart && dim == 2 && !vid.always3) {
                 geom3::switch_fpp();
                 }
-              setCanvas(mode, '0');
-              if(mode == pmStart) {
+              setWhiteCanvas(mode, [setter, dim] {
                 slide_backup(canvas_default_wall, waInvisibleFloor);
                 if(dim == 2) slide_backup(vid.camera, 0);
                 if(dim == 2) slide_backup(vid.depth, 0);
                 slide_backup(context_fog, false);
                 setter();
-                start_game();
-                enable();
-                }
+                });
+              if(mode == pmStart) enable();
               non_game_slide_scroll(mode);
               }});
         };

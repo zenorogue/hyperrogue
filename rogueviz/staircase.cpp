@@ -248,7 +248,7 @@ int phooks = arg::add3("-stair", enable)
      "Press '5' to change the curvature or other parameters.",
      
     [] (presmode mode) {
-      setCanvas(mode, '0');
+      setPlainCanvas(mode);
       if(mode == pmStart) staircase::make_staircase();
       slidecommand = "staircase menu";
       if(mode == pmKey) pushScreen(staircase::showMenu);

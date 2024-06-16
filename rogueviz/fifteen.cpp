@@ -469,7 +469,7 @@ auto fifteen_hook =
                 slide_error(mode, "file " + fname + " not found");
                 return;
                 }
-              setCanvas(mode, '0');
+              setWhiteCanvas(mode);
               if(mode == pmStart) {
                 slide_backup(mapeditor::drawplayer, mapeditor::drawplayer);
                 slide_backup(vid.wallmode, 2);

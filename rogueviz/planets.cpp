@@ -526,11 +526,12 @@ auto msc =
         ,
         [] (presmode mode) {
           slide_url(mode, 't', "Twitter link (with description)", "https://twitter.com/ZenoRogue/status/1339946298460483589");
-          setCanvas(mode, '0');
+          setPlainCanvas(mode, [] {
+            set_geometry(gSphere);
+            });
           
           if(mode == pmStart) {
             enable();
-            set_geometry(gSphere);
             slide_backup(canvas_default_wall, waInvisibleFloor);
             slide_backup(pmodel, mdDisk);
             slide_backup(pconf.scale, 1000);

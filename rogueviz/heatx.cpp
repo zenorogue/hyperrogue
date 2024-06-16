@@ -167,7 +167,7 @@ void heat_slide(vector<tour::slide>& v, string title, string desc, reaction_t t)
     tour::slide{cap + title, 18, LEGAL::NONE | QUICKGEO, desc, 
    
   [t] (presmode mode) {
-    setCanvas(mode, '0');
+    setPlainCanvas(mode);
     slide_backup(vid.use_smart_range, 2);
     slide_backup(vid.smart_range_detail, 1);
     slide_backup(vid.cells_drawn_limit, 100000);

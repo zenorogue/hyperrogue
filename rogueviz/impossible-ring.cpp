@@ -284,7 +284,12 @@ auto hchook =
    
   [] (presmode mode) {
     slide_url(mode, 'y', "YouTube link", "https://youtu.be/3WejR74o6II");
-    setCanvas(mode, '0');
+    setWhiteCanvas(mode, [] {
+      set_geometry(gNil);
+      tour::on_restore(nilv::set_flags);
+      tour::slide_backup(nilv::nilperiod, make_array(3, 3, 3));
+      nilv::set_flags();
+      });
     
     slidecommand = "animation";
     if(mode == pmKey) {
@@ -292,14 +297,8 @@ auto hchook =
       }
     
     if(mode == pmStart) {
-      stop_game();
-      set_geometry(gNil);
       tour::slide_backup(mapeditor::drawplayer, false);
       tour::slide_backup(smooth_scrolling, true);
-      tour::on_restore(nilv::set_flags);
-      tour::slide_backup(nilv::nilperiod, make_array(3, 3, 3));
-      nilv::set_flags();
-      start_game();
       playermoved = false;
       enable();
       }

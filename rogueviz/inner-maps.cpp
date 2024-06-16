@@ -324,7 +324,7 @@ auto hook = arg::add3("-inner-map", enable)
         ,
         [] (presmode mode) {
           slide_url(mode, 't', "Twitter link (with description)", "https://twitter.com/zenorogue/status/1212408644941295619");
-          setCanvas(mode, 'r');
+          setCanvas(mode, &ccolor::random, [] { slide_backup(ccolor::rwalls, 0); });
           
           if(mode == pmStart) {
             if(!shmup::on) restart_game(rg::shmup);

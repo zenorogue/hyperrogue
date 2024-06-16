@@ -500,7 +500,7 @@ bool draw_ptriangle(cell *c, const shiftmatrix& V) {
 #if CAP_RVSLIDES
 void slide_itri(tour::presmode mode, int id) {
   using namespace tour;
-  setCanvas(mode, '0');
+  setPlainCanvas(mode);
   
   if(mode == pmStart) {
     stop_game();

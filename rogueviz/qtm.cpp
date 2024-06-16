@@ -211,7 +211,7 @@ auto hooks =
           "You can also obtain a different geometry (Berger sphere) by stretching along the fibers. Press 5 to stretch."+bonus
           ,
           [m] (presmode mode) {
-            setCanvas(mode, '0');
+            setWhiteCanvas(mode);
             slide_url(mode, 't', "Twitter link", "https://twitter.com/ZenoRogue/status/1166723332840001536");
             slide_url(mode, 's', "stretched Twitter link", "https://twitter.com/ZenoRogue/status/1258035231996682244");
             if(mode == pmStart) {
@@ -238,7 +238,7 @@ auto hooks =
           "Again, press 5 to stretch."+bonus
           ,
           [m] (presmode mode) {
-            setCanvas(mode, '0');
+            setWhiteCanvas(mode);
             slide_url(mode, 's', "stretched Twitter link", "https://twitter.com/ZenoRogue/status/1259143275115687936");
             if(mode == pmStart) {
               set_geometry(gKleinQuartic);

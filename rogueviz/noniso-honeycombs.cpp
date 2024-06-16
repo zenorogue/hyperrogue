@@ -12,8 +12,7 @@ bool in_special = false;
 auto geoslide(eGeometry g, char canvas, int jhole, int jblock) {
   using namespace tour;
   return [=] (presmode mode) {
-    setCanvas(mode, '0');
-    if(mode == pmStart) {
+    setWhiteCanvas(mode, [&] {
       set_geometry(g);
       if(g == gSphere) {
         set_geometry(gProduct);
@@ -31,12 +30,11 @@ auto geoslide(eGeometry g, char canvas, int jhole, int jblock) {
       tour::slide_backup(ccolor::jblock, jblock);
       tour::slide_backup(ccolor::which, ccolor::legacy(canvas));
       tour::slide_backup(vid.linewidth, vid.linewidth / 10);
-      start_game();
       if(jblock < 0) {
         pmodel = mdDisk;
         sightranges[gSol] = 4;
         }
-      }
+      });
     rogueviz::pres::non_game_slide_scroll(mode);
     if(mode == pmStop && jblock < 0)
       pmodel = mdGeodesic;
@@ -163,11 +161,9 @@ tour::slide *gen_noniso_demo() {
       "This is a presentation of non-isotropic geometries.",
       [] (presmode mode) {
         slide_url(mode, 'p', "paper about non-isotropic geometries", "https://arxiv.org/abs/2002.09533");
-        setCanvas(mode, 'r');
-        if(mode == pmStart) {
+        setCanvas(mode, &ccolor::random, [] {
           set_geometry(gCubeTiling);
-          start_game();
-          }
+          });
         }
       });
 

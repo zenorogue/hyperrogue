@@ -436,7 +436,7 @@ auto msc = arg::add3("-analogs", enable)
         [] (presmode mode) {
           slide_url(mode, 'y', "YouTube link (with description)", "https://youtu.be/H7NKhKTjHVE");
           slide_url(mode, 'm', "HyperRogue page about projections", "http://www.roguetemple.com/z/hyper/models.php");
-          setCanvas(mode, '0');
+          setWhiteCanvas(mode);
           if(mode == pmStart) {
             slide_backup(mapeditor::drawplayer);
             slide_backup(vid.use_smart_range);

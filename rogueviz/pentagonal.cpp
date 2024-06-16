@@ -328,7 +328,7 @@ auto xhook =
      "Move the mouse nearer and further away from the X.",
      
     [] (presmode mode) {
-      setCanvas(mode, '0');
+      setPlainCanvas(mode);
       slide_url(mode, 'u', "open the URL", "http://www.roguetemple.com/z/sims/snub/");
       slide_backup(rug::model_distance);
       slide_backup(vid.rug_config.model);

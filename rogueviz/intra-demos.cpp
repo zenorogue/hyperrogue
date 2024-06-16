@@ -598,7 +598,7 @@ auto hooks =
       v.push_back(tour::slide{
         s, 10, tour::LEGAL::NONE | tour::QUICKSKIP | tour::QUICKGEO | tour::ALWAYS_TEXT, desc,
         [=] (tour::presmode mode) {
-          setCanvas(mode, '0');
+          setWhiteCanvas(mode);
           if(youtube != "")
             slide_url(mode, 'y', "YouTube link", youtube);
           if(twitter != "")

@@ -556,7 +556,7 @@ bool drawVertex(const shiftmatrix &V, cell *c, shmup::monster *m) {
   
   void flock_slide(tour::presmode mode, int _N, reaction_t t) {
     using namespace tour;
-    setCanvas(mode, '0');
+    setWhiteCanvas(mode);
     if(mode == pmStart) {
       slide_backup(mapeditor::drawplayer);
       t();

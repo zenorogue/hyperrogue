@@ -332,7 +332,7 @@ auto hook = 0
   [] (presmode mode) {
     slide_url(mode, 'y', "YouTube link", "https://www.youtube.com/watch?v=bKzibaNqEog");
     slide_url(mode, 't', "Twitter link", "https://twitter.com/ZenoRogue/status/1247900522905886723");
-    setCanvas(mode, '0');
+    setPlainCanvas(mode);
     
     if((mode == pmStop || mode == pmGeometry) && rug::rugged) rug::close();
     

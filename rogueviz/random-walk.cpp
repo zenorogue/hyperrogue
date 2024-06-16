@@ -160,7 +160,7 @@ void rw_slide(vector<tour::slide>& v, string title, string desc, reaction_t t) {
     tour::slide{cap + title, 18, LEGAL::NONE | QUICKGEO, desc, 
    
   [t] (presmode mode) {
-    setCanvas(mode, '0');
+    setPlainCanvas(mode);
 
     if(mode == pmStart) {
       tour::slide_backup(mapeditor::drawplayer, false);
