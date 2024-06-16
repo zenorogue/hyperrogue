@@ -1296,6 +1296,7 @@ EX namespace hybrid {
 
     const int SHIFT_UNKNOWN = 30000;
     map<cell*, vector<int>> shifts;
+    map<cell*, ld> orig_height;
   
     EX vector<int>& make_shift(cell *c) {
       auto& res = shifts[c];
@@ -1316,6 +1317,25 @@ EX namespace hybrid {
       auto& v = get_shift_current(cw0);
       if(v != SHIFT_UNKNOWN) return v;
       
+      if(nil) {
+        /** we prevent possible 'two candidate' errors by computing the correct value, we know all the positions in the underlying map, so we can do that */
+        transmatrix uT, uU, uT1;
+        in_underlying([&] {
+          uT = currentmap->relative_matrix(cw0.at, currentmap->gamestart(), C0);
+          uU = currentmap->adj(cw0.at, cw0.spin);
+          uT1 = currentmap->relative_matrix(cw0.cpeek(), currentmap->gamestart(), C0);
+          });
+        transmatrix lT = twist::lift_matrix(uT);
+        transmatrix lU = twist::lift_matrix(uU);
+        transmatrix lT1 = twist::lift_matrix(uT1);
+        if(!orig_height.count(cw0.at)) orig_height[cw0.at] = (lT*C0) [2];
+        if(!orig_height.count(cw0.peek())) orig_height[cw0.peek()] = (lT1*C0) [2];
+        ld diff = (lT * lU * iso_inverse(lT1) * C0)[2] - orig_height[cw0.at] + orig_height[cw0.peek()];
+        if(abs(frac(diff / cgi.plevel + 0.5) - 0.5) > 1e-6) throw hr_exception("not an integer");
+        v = floor(diff / cgi.plevel + 0.5);
+        return v;
+        }
+
       vector<int> candidates;
       
       for(int a: {1, -1}) {
