@@ -1623,7 +1623,6 @@ EX namespace hybrid {
         tf = hdist0(hm)/2;
         alpha = atan2(hm[1], hm[0]);
         });
-      if(nil) return spin(-alpha) * xpush(tf*2) * ypush(-he*2) * zpush(lev) * C0;
       return spin(alpha) * twist::uxpush(tf) * twist::uypush(he) * twist::uzpush(lev) * C0;
       #else
       throw hr_exception();
@@ -2349,30 +2348,23 @@ EX namespace twist {
 #if MAXMDIM >= 4
   EX transmatrix uxpush(ld x) { 
     if(sl2) return xpush(x);
+    if(nil) return xpush(x*2);
     return cspin(1, 3, x) * cspin(0, 2, x);
     }
 
   EX transmatrix uypush(ld y) { 
     if(sl2) return ypush(y);
+    if(nil) return ypush(y*2);
     return cspin(0, 3, -y) * cspin(1, 2, y);
     }
      
   EX transmatrix uzpush(ld z) {
     if(sl2) return zpush(z);
+    if(nil) return zpush(z) * spin(-2*z);
     return cspin(3, 2, -z) * cspin(0, 1, -z);
     }
   
   EX transmatrix lift_matrix(const transmatrix& T) {
-    if(nil) {
-      ld alpha;
-      hybrid::in_underlying_geometry([&] {
-        hyperpoint h = tC0(T);
-        transmatrix Spin = iso_inverse(gpushxto0(h) * T);
-        alpha = atan2(Spin[0][1], Spin[0][0]);
-        });
-      hyperpoint h(T[0][2], T[1][2], 0, 1);
-      return nisot::translate(h) * spin(-alpha);
-      }
     hyperpoint d;
     ld alpha, beta, distance;
     transmatrix Spin;
@@ -2395,8 +2387,6 @@ EX namespace twist {
     std::map<int, transmatrix> saved_matrices;
 
     transmatrix adj(cell *c1, int i) override {
-      if(nil && i == c1->type-2) return zpush(-cgi.plevel);
-      if(nil && i == c1->type-1) return zpush(+cgi.plevel);
       if(i == c1->type-2) return uzpush(-cgi.plevel) * spin(-2*cgi.plevel);
       if(i == c1->type-1) return uzpush(+cgi.plevel) * spin(+2*cgi.plevel);
       cell *c2 = c1->cmove(i);
@@ -2425,8 +2415,6 @@ EX namespace twist {
       }
 
     transmatrix ray_iadj(cell *c1, int i) override {
-      if(nil && i == c1->type-2) return zpush(-cgi.plevel);
-      if(nil && i == c1->type-1) return zpush(+cgi.plevel);
       if(i == c1->type-1) return uzpush(-cgi.plevel) * spin(-2*cgi.plevel);
       if(i == c1->type-2) return uzpush(+cgi.plevel) * spin(+2*cgi.plevel);
       cell *c2 = c1->cmove(i);
