@@ -176,11 +176,19 @@ namespace rogueviz {
 
     extern map<string, texture::texture_data> textures;
 
+inline void setCanvasChar(presmode mode, char c) {
+  if(c == '0') {
+    setCanvasColor(mode, 0x101010, [] {});
+    }
+  if(c == 'd') {
+    setCanvas(mode, &ccolor::landscape_dark);
+    }
+  }
+
 template<class T, class U> function<void(presmode)> roguevizslide(char c, const T& t, const U& f) {
   return [c,t,f] (presmode mode) {
     f(mode);
-    ccolor::plain.ctab = {0x101010};
-    setCanvas(mode, c);
+    setCanvasChar(mode, c);
     if(mode == 1 || mode == pmGeometryStart) t();
   
     if(mode == 3 || mode == pmGeometry || mode == pmGeometryReset) {
@@ -201,8 +209,7 @@ template<class T> function<void(presmode)> roguevizslide(char c, const T& t) { r
 template<class T, class U>
 function<void(presmode)> roguevizslide_action(char c, const T& t, const U& act) {
   return [c,t,act] (presmode mode) {
-    ccolor::plain.ctab = {0x101010};
-    setCanvas(mode, c);
+    setCanvasChar(mode, c);
     if(mode == pmStart || mode == pmGeometryStart) t();
   
     act(mode);
