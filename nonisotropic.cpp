@@ -1602,7 +1602,8 @@ EX namespace hybrid {
         tf = hdist0(hm)/2;
         alpha = atan2(hm[1], hm[0]);
         });
-      return spin(alpha) * rots::uxpush(tf) * rots::uypush(he) * rots::uzpush(lev) * C0;
+      if(nil) return spin(alpha) * xpush(tf*2) * ypush(he*2) * zpush(lev) * C0;
+      return spin(alpha) * twist::uxpush(tf) * twist::uypush(he) * twist::uzpush(lev) * C0;
       #else
       throw hr_exception();
       #endif
@@ -2341,6 +2342,10 @@ EX namespace twist {
     }
   
   EX transmatrix lift_matrix(const transmatrix& T) {
+    if(nil) {
+      hyperpoint h(T[0][2], T[1][2], 0, 0); /* todo take rotate into account */
+      return nisot::translate(h);
+      }
     hyperpoint d;
     ld alpha, beta, distance;
     transmatrix Spin;
@@ -2362,7 +2367,9 @@ EX namespace twist {
 
     std::map<int, transmatrix> saved_matrices;
 
-    transmatrix adj(cell *c1, int i) override {    
+    transmatrix adj(cell *c1, int i) override {
+      if(nil && i == c1->type-2) return zpush(-cgi.plevel);
+      if(nil && i == c1->type-1) return zpush(+cgi.plevel);
       if(i == c1->type-2) return uzpush(-cgi.plevel) * spin(-2*cgi.plevel);
       if(i == c1->type-1) return uzpush(+cgi.plevel) * spin(+2*cgi.plevel);
       cell *c2 = c1->cmove(i);
@@ -2391,6 +2398,8 @@ EX namespace twist {
       }
 
     transmatrix ray_iadj(cell *c1, int i) override {
+      if(nil && i == c1->type-2) return zpush(-cgi.plevel);
+      if(nil && i == c1->type-1) return zpush(+cgi.plevel);
       if(i == c1->type-1) return uzpush(-cgi.plevel) * spin(-2*cgi.plevel);
       if(i == c1->type-2) return uzpush(+cgi.plevel) * spin(+2*cgi.plevel);
       cell *c2 = c1->cmove(i);

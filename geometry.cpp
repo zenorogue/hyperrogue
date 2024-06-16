@@ -825,6 +825,11 @@ void geometry_information::prepare_basics() {
       }
     DEBB(DF_GEOM | DF_POLY, ("steps = ", psl_steps, " / ", single_step));
     plevel = M_PI * single_step / psl_steps;
+
+    if(hybrid::underlying == gEuclid && PURE) {
+      cgi.plevel = sqrt(3)/4.;
+      single_step = 1;
+      }
     }
   
   set_sibling_limit();
