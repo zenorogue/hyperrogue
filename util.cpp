@@ -418,7 +418,15 @@ cld exp_parser::parse(int prio) {
     else if(number[0] >= 'a' && number[0] <= 'z') throw hr_parse_exception("unknown value: " + number);
     else if(number[0] >= 'A' && number[0] <= 'Z') throw hr_parse_exception("unknown value: " + number);
     else if(number[0] == '_') throw hr_parse_exception("unknown value: " + number);
-    else { std::stringstream ss; res = 0; ss << number; ss >> res; }
+    else {
+      if(among(number.back(), 'e', 'E')) {
+        if(eat("-")) number = number + "-" + next_token();
+        else if(eat("+")) number = number + "+" + next_token();
+        }
+      std::stringstream ss; res = 0; ss << number;
+      ss >> res;
+      if(ss.fail() || !ss.eof()) throw hr_parse_exception("unknown value: " + number);
+      }
     }
   while(true) {
     skip_white();
