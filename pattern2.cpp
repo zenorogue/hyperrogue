@@ -1691,11 +1691,11 @@ EX namespace ccolor {
 
   EX data football = data("football", [] { return geosupport_football(); }, CCO {
     return cco.ctab[pseudohept(c)];
-    }, {0x1C0C0C0, 0x202020});
+    }, {0xC0C0C0, 0x202020});
 
   EX data chessboard = data("chessboard", [] { return geosupport_chessboard(); }, CCO {
     return cco.ctab[chessvalue(c)];
-    }, {0x202020, 0x1C0C0C0});
+    }, {0x202020, 0xC0C0C0});
 
   EX data landscape = data("rainbow landscape", [] { return geometry_supports_cdata(); }, CCO {
     return random_landscape(c, 3, 1, 17, 0x808080);
