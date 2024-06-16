@@ -1246,6 +1246,14 @@ EX namespace hybrid {
   #define PIA(x) hr::hybrid::in_actual([&] { return (x); })
   #endif
   
+  EX void set_plevel(ld lev) {
+    stop_game();
+    vid.plevel_factor = 1;
+    check_cgi(); cgi.prepare_basics();
+    vid.plevel_factor = lev / cgi.plevel;
+    check_cgi();
+    }
+
   struct hrmap_hybrid : hrmap {
     
     hrmap *underlying_map;
@@ -3049,11 +3057,7 @@ EX namespace nisot {
       }
     else if(argis("-prodlevel")) {
       /* specify an exact value for cgi.plevel */
-      stop_game();
-      vid.plevel_factor = 1;
-      check_cgi(); cgi.prepare_basics();
-      shift(); vid.plevel_factor = argf() / cgi.plevel;
-      check_cgi();
+      shift(); hybrid::set_plevel(argf());
       return 0;
       }
     else if(argis("-s2xe")) {
