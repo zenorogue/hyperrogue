@@ -1562,8 +1562,6 @@ EX namespace ccolor {
 
   EX color_t apeirogonal_color = 0xFFFFFFFF;
 
-  EX int jhole = 0;
-  EX int jblock = 0;
   EX ld rwalls = 50;
   EX bool live_canvas;
 
@@ -1727,18 +1725,6 @@ EX namespace ccolor {
   EX data nil_penrose = data("Nil staircase", [] { return nil; },
     CCO { return nilv::colorize(c, '/'); }, {});
 
-  EX data jmap = data("rainbow by distance", always_available,
-    CCO {
-      if(c == currentmap->gamestart()) return plain(c);
-      int d = c->master->distance;
-      if(geometry == gNil) d = c->master->zebraval;
-      if(euc::in()) d = euc::get_ispacemap()[c->master][0];
-      if(d % 2 == 0 || d < -5 || d > 5) return hrand(100) < jblock ? 0xFFFFFFFF : plain(c);
-      return hrand(100) < jhole ? plain(c) : cco.ctab[(d+5)/2];
-      },
-    {0x100FFFF, 0x100FF00, 0x1FFFF00, 0x1FF8000, 0x1FF0000, 0x1FF00FF}
-    );
-
   EX data distance = data("distance from origin", always_available,
     CCO {
       int d = celldist(c);
@@ -1851,7 +1837,7 @@ EX namespace ccolor {
     &plain, &random, &sides, &formula,
     &shape, &shape_mirror,
     &threecolor, &football, &chessboard,
-    &landscape, &landscape_dark, &seven, &randbw, &jmap, &distance,
+    &landscape, &landscape_dark, &seven, &randbw, &distance,
     &crystal_colors, &crystal_cage, &crystal_hyperplanes, &crystal_honeycomb, &crystal_diagonal, &nil_penrose,
     &zebra_pattern, &zebra_triangles, &zebra_stripes, &emerald_pattern, &palace_elements, &palace_domains,
     #if CAP_FIELD
