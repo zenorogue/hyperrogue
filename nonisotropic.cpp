@@ -1329,9 +1329,10 @@ EX namespace hybrid {
         transmatrix lU = twist::lift_matrix(uU);
         transmatrix lT1 = twist::lift_matrix(uT1);
         if(!orig_height.count(cw0.at)) orig_height[cw0.at] = (lT*C0) [2];
-        if(!orig_height.count(cw0.peek())) orig_height[cw0.peek()] = (lT1*C0) [2];
-        ld diff = (lT * lU * iso_inverse(lT1) * C0)[2] - orig_height[cw0.at] + orig_height[cw0.peek()];
-        if(abs(frac(diff / cgi.plevel + 0.5) - 0.5) > 1e-6) throw hr_exception("not an integer");
+        ld diff = (lT * lU * iso_inverse(lT1) * C0)[2] - orig_height[cw0.at];
+        if(!orig_height.count(cw0.peek())) orig_height[cw0.peek()] = -diff;
+        diff += orig_height[cw0.peek()];
+        if(abs(frac(diff / cgi.plevel + 0.5) - 0.5) > 1e-6) throw hr_exception("not an integer in get_shift");
         v = floor(diff / cgi.plevel + 0.5);
         return v;
         }
