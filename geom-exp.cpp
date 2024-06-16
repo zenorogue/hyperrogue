@@ -1069,10 +1069,10 @@ EX void showEuclideanMenu() {
   
   #if MAXMDIM >= 4
   if(mhybrid) {
-    auto r = rots::underlying_scale;
+    auto r = hybrid::underlying_scale;
     dialog::addSelItem(XLAT("view the underlying geometry"), r > 0 ? fts(r)+"x" : ONOFF(false), '6');
     dialog::add_action([] {
-      dialog::editNumber(rots::underlying_scale, 0, 1, 0.05, 0.25, XLAT("view the underlying geometry"),        
+      dialog::editNumber(hybrid::underlying_scale, 0, 1, 0.05, 0.25, XLAT("view the underlying geometry"),        
         geometry == gTwistedProduct ? 
           XLAT("The space you are currently in a twisted product space. ")
         : XLAT("You are currently in a product space.") +
@@ -1083,7 +1083,7 @@ EX void showEuclideanMenu() {
         );
       dialog::bound_low(0);
       dialog::bound_up(1);
-      dialog::get_di().extra_options = [] () { rots::draw_underlying(true); };
+      dialog::get_di().extra_options = [] () { hybrid::draw_underlying(true); };
       });
     }
   #endif

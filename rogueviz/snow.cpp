@@ -99,8 +99,8 @@ transmatrix random_snow_matrix(cell *c) {
     transmatrix T = PIU(random_snow_matrix(c));
     return orthogonal_move(T, (randd() - .5) * cgi.plevel);
     }
-  else if(mhybrid && !mproduct) {
-    return rots::lift_matrix(PIU(random_snow_matrix(c))); // * zpush((randd() - .5) * cgi.plevel);
+  else if(mtwisted) {
+    return twist::lift_matrix(PIU(random_snow_matrix(c))); // * zpush((randd() - .5) * cgi.plevel);
     }
   else if(nonisotropic || bt::in()) {
 
@@ -384,7 +384,7 @@ auto hchook = addHook(hooks_drawcell, 100, draw_snow)
   snow_slide(v, "SL(2,R)", "Here is SL(2,R), like Nil but based on hyperbolic plane instead. Geometric lensing effects are strong in both Nil and SL(2,R). (Starting with S^2 yields spherical geometry.)", [] {
     set_geometry(gNormal);
     set_variation(eVariation::pure);
-    set_geometry(gRotSpace);
+    set_geometry(gTwistedProduct);
     snow_lambda = 5;
     });
   IF_SOLV(snow_slide(v, "Solv", "Solv geometry. Like the non-isotropic hyperbolic geometry but where the horizontal and vertical curvatures work in the other way.", [] {

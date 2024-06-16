@@ -1730,6 +1730,85 @@ EX namespace hybrid {
       };
     }
 
+  EX ld underlying_scale = 0;
+  EX bool drawing_underlying = false;
+  EX bool underlying_as_pc = true;
+
+  EX void draw_underlying(bool cornermode) {
+    if(underlying_scale <= 0) return;
+    ld d = hybrid::get_where(centerover).second;
+    d *= cgi.plevel;
+    transmatrix T = twist::uzpush(-d) * spin(-2*d);
+
+    if(det(T) < 0) T = centralsym * T;
+
+    ld orig_d = d;
+    if(mproduct) d = 0;
+
+    hyperpoint h = inverse(View * spin(master_to_c7_angle()) * T) * C0;
+
+    auto g = std::move(gmatrix);
+    auto g0 = std::move(gmatrix0);
+
+    ld alpha = atan2(ortho_inverse(NLP) * point3(1, 0, 0));
+
+    dynamicval<transmatrix> dn(NLP);
+    dynamicval<transmatrix> dv(View);
+
+    bool inprod = mproduct;
+    transmatrix pView = View;
+
+    if(inprod) {
+      ld z = zlevel(tC0(View));
+
+      /* special case when we are actually in E2xE as a rotation space */
+      if(in_e2xe() && abs(cgi.plevel * hybrid::csteps - TAU) < 1e-6) alpha = orig_d - z;
+
+      println(hlog, "depth = ", cgi.plevel * hybrid::csteps, " orig_d = ", orig_d, " z = ", z);
+
+      pView = spin(alpha) * View;
+
+      for(int a=0; a<3; a++) pView[a] *= exp(-z);
+      }
+
+    cell *co = hybrid::get_where(centerover).first;
+
+    hybrid::in_underlying_geometry([&] {
+      cgi.require_shapes();
+      dynamicval<int> pcc(corner_centering, cornermode ? 1 : 2);
+      dynamicval<bool> pf(playerfound, true);
+      dynamicval<cell*> m5(centerover, co);
+      dynamicval<transmatrix> m2(View, inprod ? pView : ypush(0) * twist::qtm(h));
+      if(PURE && !inprod) View = View * pispin;
+      View = inverse(stretch::mstretch_matrix) * spin(2*d) * View;
+      dynamicval<shiftmatrix> m3(playerV, shiftless(Id));
+      dynamicval<transmatrix> m4(actual_view_transform, Id);
+      dynamicval<shiftmatrix> m6(cwtV, shiftless(Id));
+      dynamicval<eModel> pm(pmodel, mdDisk);
+      dynamicval<ld> pss(pconf.scale, (sphere ? 10 : euclid ? .4 : 1) * underlying_scale);
+      dynamicval<ld> psa(pconf.alpha, sphere ? 10 : 1);
+      dynamicval<hrmap*> p(hybrid::pmap, NULL);
+      dynamicval<int> psr(sightrange_bonus, 0);
+
+      dynamicval<int> psx(vid.use_smart_range, 2);
+      dynamicval<ld> psy(vid.smart_range_detail, 1);
+      dynamicval<bool> pdu(drawing_underlying, true);
+
+      calcparam();
+      reset_projection(); current_display->set_all(0, 0);
+      ptds.clear();
+      drawthemap();
+      if(underlying_as_pc) drawPlayer(moPlayer, centerover, sphere ? shiftless(xpush(M_PI) * spin90()) : shiftless(spin90()), 0xFFFFFFFF, 0);
+      drawqueue();
+      if(!underlying_as_pc) displaychr(current_display->xcenter, current_display->ycenter, 0, 24 * mapfontscale / 100, '+', 0xFFFFFFFF);
+      glflush();
+      });
+    gmatrix = std::move(g);
+    gmatrix0 = std::move(g0);
+    calcparam();
+    reset_projection(); current_display->set_all(0, 0); make_actual_view();
+    }
+
 EX }
   
 EX namespace product {
@@ -2243,8 +2322,7 @@ EX namespace slr {
 
 EX }
 
-EX namespace rots {
-  EX ld underlying_scale = 0;
+EX namespace twist {
   
 #if MAXMDIM >= 4
   EX transmatrix uxpush(ld x) { 
@@ -2280,7 +2358,7 @@ EX namespace rots {
   
   EX std::map<int, transmatrix> saved_matrices_ray;
 
-  struct hrmap_rotation_space : hybrid::hrmap_hybrid {
+  struct hrmap_twisted : hybrid::hrmap_hybrid {
 
     std::map<int, transmatrix> saved_matrices;
 
@@ -2388,84 +2466,6 @@ EX namespace rots {
 
 
     return M;
-    }
-    
-  EX bool drawing_underlying = false;
-  EX bool underlying_as_pc = true;
-  
-  EX void draw_underlying(bool cornermode) {
-    if(underlying_scale <= 0) return;
-    ld d = hybrid::get_where(centerover).second;
-    d *= cgi.plevel;
-    transmatrix T = rots::uzpush(-d) * spin(-2*d);
-  
-    if(det(T) < 0) T = centralsym * T;
-    
-    ld orig_d = d;
-    if(mproduct) d = 0;
-  
-    hyperpoint h = inverse(View * spin(master_to_c7_angle()) * T) * C0;
-    
-    auto g = std::move(gmatrix);
-    auto g0 = std::move(gmatrix0);
-    
-    ld alpha = atan2(ortho_inverse(NLP) * point3(1, 0, 0));
-
-    dynamicval<transmatrix> dn(NLP);
-    dynamicval<transmatrix> dv(View);
-    
-    bool inprod = mproduct;
-    transmatrix pView = View;
-
-    if(inprod) {
-      ld z = zlevel(tC0(View));
-
-      /* special case when we are actually in E2xE as a rotation space */
-      if(in_e2xe() && abs(cgi.plevel * hybrid::csteps - TAU) < 1e-6) alpha = orig_d - z;
-
-      println(hlog, "depth = ", cgi.plevel * hybrid::csteps, " orig_d = ", orig_d, " z = ", z);
-
-      pView = spin(alpha) * View;
-
-      for(int a=0; a<3; a++) pView[a] *= exp(-z);
-      }
-    
-    cell *co = hybrid::get_where(centerover).first;
-  
-    hybrid::in_underlying_geometry([&] {
-      cgi.require_shapes();
-      dynamicval<int> pcc(corner_centering, cornermode ? 1 : 2);
-      dynamicval<bool> pf(playerfound, true);
-      dynamicval<cell*> m5(centerover, co);
-      dynamicval<transmatrix> m2(View, inprod ? pView : ypush(0) * qtm(h));
-      if(PURE && !inprod) View = View * pispin;
-      View = inverse(stretch::mstretch_matrix) * spin(2*d) * View;
-      dynamicval<shiftmatrix> m3(playerV, shiftless(Id));
-      dynamicval<transmatrix> m4(actual_view_transform, Id);
-      dynamicval<shiftmatrix> m6(cwtV, shiftless(Id));
-      dynamicval<eModel> pm(pmodel, mdDisk);
-      dynamicval<ld> pss(pconf.scale, (sphere ? 10 : euclid ? .4 : 1) * underlying_scale);
-      dynamicval<ld> psa(pconf.alpha, sphere ? 10 : 1);
-      dynamicval<hrmap*> p(hybrid::pmap, NULL);
-      dynamicval<int> psr(sightrange_bonus, 0);
-
-      dynamicval<int> psx(vid.use_smart_range, 2);
-      dynamicval<ld> psy(vid.smart_range_detail, 1);
-      dynamicval<bool> pdu(drawing_underlying, true);
-
-      calcparam();
-      reset_projection(); current_display->set_all(0, 0);
-      ptds.clear();
-      drawthemap();
-      if(underlying_as_pc) drawPlayer(moPlayer, centerover, sphere ? shiftless(xpush(M_PI) * spin90()) : shiftless(spin90()), 0xFFFFFFFF, 0);
-      drawqueue();
-      if(!underlying_as_pc) displaychr(current_display->xcenter, current_display->ycenter, 0, 24 * mapfontscale / 100, '+', 0xFFFFFFFF);
-      glflush();
-      });
-    gmatrix = std::move(g);
-    gmatrix0 = std::move(g0);
-    calcparam();
-    reset_projection(); current_display->set_all(0, 0); make_actual_view();
     }
 
   /** @brief exponential function for both slr and Berger sphere */
@@ -3047,7 +3047,7 @@ EX namespace nisot {
     #endif
     if(mproduct) return new product::hrmap_product;
     #if MAXMDIM >= 4
-    if(mhybrid) return new rots::hrmap_rotation_space;
+    if(mhybrid) return new twist::hrmap_twisted;
     if(nil) return new nilv::hrmap_nil;
     #endif
     return NULL;
@@ -3105,7 +3105,7 @@ EX namespace nisot {
       }
     else if(argis("-rot_uscale")) {
       PHASEFROM(2);
-      shift_arg_formula(rots::underlying_scale);
+      shift_arg_formula(hybrid::underlying_scale);
       return 0;
       }
     else if(argis("-nilperiod")) {

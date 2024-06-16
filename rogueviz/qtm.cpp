@@ -240,8 +240,8 @@ auto hooks =
             if(mode == pmStart) {
               set_geometry(gSphere);
               set_variation(eVariation::bitruncated);
-              set_geometry(gRotSpace);
-              slide_backup(rots::underlying_scale, .25);
+              hybrid::enable_rotspace();
+              slide_backup(hybrid::underlying_scale, .25);
               slide_backup(qmode, m);
               IF_RAY(
               slide_backup(ray::max_cells, 32768);
@@ -266,8 +266,8 @@ auto hooks =
             if(mode == pmStart) {
               set_geometry(gKleinQuartic);
               set_variation(eVariation::bitruncated);
-              set_geometry(gRotSpace);
-              slide_backup(rots::underlying_scale, .25);
+              hybrid::enable_rotspace();
+              slide_backup(hybrid::underlying_scale, .25);
               slide_backup(qmode, m);
               IF_RAY(
               slide_backup(ray::max_cells, 32768);

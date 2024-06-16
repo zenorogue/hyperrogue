@@ -2641,7 +2641,7 @@ EX int rmap_get_id_of(cell *c) {
 EX void reset_raycaster() { 
   our_raycaster = nullptr; 
   reset_rmap = true;
-  rots::saved_matrices_ray = {};
+  twist::saved_matrices_ray = {};
   }
 
 EX void reset_raycaster_map() { 
