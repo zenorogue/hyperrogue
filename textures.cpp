@@ -1025,7 +1025,7 @@ void init_textureconfig() {
   
   param_str(csymbol, "symbol", "");
   
-  swap(texturesavers, params); texturesavers.clear();
+  swap(texturesavers, params);
 #endif
   }
 
