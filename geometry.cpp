@@ -733,7 +733,7 @@ void geometry_information::prepare_basics() {
   #if CAP_BT
   else if(bt::in()) bt::create_faces();
   #endif
-  else if(nil) nilv::create_faces();
+  else if(nil && !mtwisted) nilv::create_faces();
   #endif
   
   scalefactor = crossf / hcrossf7;
@@ -809,7 +809,7 @@ void geometry_information::prepare_basics() {
   
   plevel = vid.plevel_factor * scalefactor;
   single_step = 1;
-  if(mhybrid && !mproduct) {
+  if(mtwisted && ginf[hybrid::underlying].cclass != gcEuclid) {
     #if CAP_ARCM
     if(hybrid::underlying == gArchimedean) 
       arcm::current.get_step_values(psl_steps, single_step);
@@ -825,11 +825,14 @@ void geometry_information::prepare_basics() {
       }
     DEBB(DF_GEOM | DF_POLY, ("steps = ", psl_steps, " / ", single_step));
     plevel = M_PI * single_step / psl_steps;
-
-    if(hybrid::underlying == gEuclid && PURE) {
-      cgi.plevel = sqrt(3)/4.;
-      single_step = 1;
-      }
+    }
+  if(mtwisted && ginf[hybrid::underlying].cclass == gcEuclid) {
+    single_step = 1;
+    if(hybrid::underlying == gArchimedean) plevel = arcm::current.dual_tile_area();
+    if(hybrid::underlying == gEuclid && PURE) plevel = sqrt(3)/4.;
+    if(hybrid::underlying == gEuclidSquare && PURE) plevel = 1;
+    if(hybrid::underlying == gEuclidSquare && BITRUNCATED) plevel = 0.25;
+    if(hybrid::underlying == gEuclid && BITRUNCATED) plevel = sqrt(3)/12.;
     }
   
   set_sibling_limit();

@@ -89,6 +89,8 @@ struct archimedean_tiling {
 
   bool get_step_values(int& steps, int& single_step);
 
+  ld dual_tile_area();
+
   transmatrix adjcell_matrix(heptagon *h, int d);
   
   ld scale();
@@ -1586,6 +1588,14 @@ EX int get_graphical_id(cell *c) {
   int tid2 = arcm::current.tilegroup[id^1];
   if(tid2 >= 0) tid = min(tid, tid2);
   return tid;
+  }
+
+ld archimedean_tiling::dual_tile_area() {
+  // we need this only in Euclidean for now
+  if(get_geometry().kind != gcEuclid) throw hr_exception("dual_tile_area only implemented in Euclidean");
+  ld total = 0;
+  for(auto r: inradius) total += r;
+  return total * edgelength / 2;
   }
 
 bool archimedean_tiling::get_step_values(int& steps, int& single_step) {
