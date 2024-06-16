@@ -80,7 +80,7 @@ EX bool is_eyes() {
   }
 
 EX bool is_stepbased() {
-  return nonisotropic || stretch::in() || is_eyes() || rotspace;
+  return nonisotropic || stretch::in() || is_eyes() || mtwisted;
   }
 
 EX bool horos() {
@@ -153,7 +153,7 @@ EX bool requested() {
   #endif
   if(!available()) return false;
   if(want_use == 2) return true;
-  if(rotspace) return false; // not very good
+  if(mtwisted) return false; // not very good, sometimes
   if(WDIM == 2) return false; // not very good
   return racing::on || quotient || fake::in();
   }
@@ -341,7 +341,7 @@ struct raygen {
   void create();
 
   string f_xpush() { return hyperbolic ? "xpush_h3" : "xpush_s3"; }
-  string f_len() { return hyperbolic ? "len_h3" : rotspace ? "rot_flatdist" : sphere ? "len_s3" : "len_x"; }
+  string f_len() { return hyperbolic ? "len_h3" : mtwisted ? "rot_flatdist" : sphere ? "len_s3" : "len_x"; }
   string f_len_prod() { return in_h2xe() ? "len_h2" : in_s2xe() ? "len_s2" : "len_e2"; }
   void add_functions();
   };
@@ -858,14 +858,14 @@ void raygen::move_forward() {
     bool reg = hyperbolic || sphere || euclid || sl2 || gproduct;
 
     if(reg) {
-      string s = (rotspace || gproduct) ? "-2" : "";
+      string s = (mtwisted || gproduct) ? "-2" : "";
       fmain +=
     "    mediump float best = "+f_len()+"(nposition);\n"
     "    for(int i=0; i<sides"+s+"; i++) {\n"
     "      mediump float cand = "+f_len()+"(" + getM("walloffset+i") + " * nposition);\n"
     "      if(cand < best) { best = cand; which = i; }\n"
     "      }\n";
-      if(rotspace) fmain +=
+      if(mtwisted) fmain +=
     "   if(which == -1) {\n"
     "     mediump float z = rot_zlevel(nposition, sides-2);\n"
     "     if(z > uPLevel) which = sides-1;\n"
@@ -1283,7 +1283,7 @@ void raygen::emit_iterate(int gid1) {
     fmain += "  const mediump float uPLevel = " + to_glsl(cgi.plevel/2) + ";\n";
 
   int flat1 = 0, flat2 = deg;
-  if(gproduct || rotspace) flat2 -= 2;
+  if(gproduct || mtwisted) flat2 -= 2;
 
 #if CAP_BT
   if(horos()) {
@@ -1407,7 +1407,7 @@ void raygen::emit_iterate(int gid1) {
     fmain += "  mediump vec4 pos = position;\n";
     if(nil && nilv::nil_structure_index == 0) fmain += "if(which == 2 || which == 5) pos.z = 0.;\n";
     if(nil && nilv::nil_structure_index == 2) fmain += "if(which == 6 || which == 7) pos.z = 0.;\n";
-    else if(rotspace) {
+    else if(mtwisted) {
       fmain += "pos = rot_coordinates(pos, sides-2, which);\n";
       string spinner = "h = cspin(0, 1, PI) * h;\n";
       string calc_dxy = sl2 ?
@@ -1482,7 +1482,7 @@ void raygen::emit_iterate(int gid1) {
   if(!volumetric::on) fmain +=
     "    col.xyz = col.xyz * d + uFogColor.xyz * (1.-d);\n";
 
-  if(rotspace) fmain +=
+  if(mtwisted) fmain +=
     "    if(rot_dark(position, sides-2)) col.xyz /= 2.;\n";
   if(nil && nilv::nil_structure_index == 0) fmain +=
     "    if(abs(abs(position.x)-abs(position.y)) < .005) col.xyz /= 2.;\n";
@@ -2044,7 +2044,7 @@ void raygen::create() {
     if((gproduct || intra::in) && vid.stereo_mode != sODS) fsh +=
       "uniform mediump mat4 uLP;\n";
 
-    if(gproduct || intra::in || rotspace) fsh +=
+    if(gproduct || intra::in || mtwisted) fsh +=
       "uniform mediump float uPLevel;\n";
 
     if(many_cell_types) fsh +=

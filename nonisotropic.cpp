@@ -1189,11 +1189,12 @@ EX namespace hybrid {
     underlying = geometry;
     underlying_cgip = cgip;
     bool sph = sphere;
+    bool euc = euclid;
     auto keep = ginf[g].menu_displayed_name;
     ginf[g] = ginf[underlying];
     ginf[g].menu_displayed_name = keep;
-    if(g == gRotSpace) {
-      ginf[g].g = sph ? giSphere3 : giSL2;
+    if(g == gTwistedProduct) {
+      ginf[g].g = euc ? giNil : sph ? giSphere3 : giSL2;
       ginf[g].tiling_name = "Iso(" + ginf[g].tiling_name + ")";
       string& qn = ginf[g].quotient_name;
       if(csteps && csteps != (sph ? cgi.psl_steps*2 : 0)) {
@@ -1211,7 +1212,7 @@ EX namespace hybrid {
         ginf[g].flags |= qANYQ;
       }
     else {
-      ginf[g].cclass = g == gRotSpace ? gcSL2 : gcProduct;
+      ginf[g].cclass = gcProduct;
       ginf[g].g.gameplay_dimension++;
       ginf[g].g.graphical_dimension++;
       ginf[g].tiling_name += "xZ";
@@ -1227,6 +1228,25 @@ EX namespace hybrid {
     geometry = underlying;
     configure(g);
     geometry = g;
+    }
+
+  EX void enable_rotspace() {
+    if(euclid) {
+      start_game();
+      int q = cwt.at->type;
+      stop_game();
+      hybrid::csteps = q;
+      set_plevel(TAU / q);
+      set_geometry(gProduct);
+      hybrid::reconfigure();
+      }
+    else {
+      stop_game();
+      set_geometry(gTwistedProduct);
+      check_cgi(); cgi.require_basics();
+      hybrid::csteps = cgi.psl_steps;
+      hybrid::reconfigure();
+      }
     }
 
   EX hrmap *pmap;
@@ -1356,7 +1376,7 @@ EX namespace hybrid {
       }
     
     EX void fix_bounded_cycles() {
-      if(!rotspace) return;
+      if(!mtwisted) return;
       if(!closed_manifold) return;
       in_underlying([&] {
         cellwalker final(currentmap->gamestart(), 0);
@@ -1474,7 +1494,7 @@ EX namespace hybrid {
       auto cu1 = m->in_underlying([&] { return cu->cmove(d); });
       int d1 = cu->c.spin(d);
       int s = 0;
-      if(geometry == gRotSpace) {
+      if(geometry == gTwistedProduct) {
         auto cm = (hrmap_hybrid*)currentmap;
         m->in_underlying([&] { cm->ensure_shifts(cu); });
         s = ((hrmap_hybrid*)currentmap)->get_shift(cellwalker(cu, d));
@@ -1660,7 +1680,7 @@ EX namespace hybrid {
     static int s;
     s = csteps / cgi.single_step;
     string str = "";
-    if(rotspace)
+    if(mtwisted)
       str = XLAT(
         "If the 2D underlying manifold is bounded, the period should be a divisor of the 'rotation space' "
         "value (PSL(2,R)) times the Euler characteristics of the underlying manifold. "
@@ -1680,7 +1700,7 @@ EX namespace hybrid {
         };
       };
     dialog::get_di().extra_options = [=] () {
-      if(rotspace) {
+      if(mtwisted) {
         int e_steps = cgi.psl_steps / gcd(cgi.single_step, cgi.psl_steps); 
         bool ubounded = PIU(closed_manifold);
         dialog::addSelItem( sphere ? XLAT("elliptic") : XLAT("PSL(2,R)"), its(e_steps), 'P');
@@ -2627,7 +2647,7 @@ EX namespace stretch {
     }
 
   EX bool applicable() {
-    return rotspace || (cgflags & qSTRETCHABLE);
+    return mtwisted || (cgflags & qSTRETCHABLE);
     }
 
   EX bool in() {
@@ -3065,9 +3085,14 @@ EX namespace nisot {
       shift(); s2xe::qrings = argi();
       return 0;
       }
+    else if(argis("-twisted-product")) {
+      PHASEFROM(2);
+      set_geometry(gTwistedProduct);
+      return 0;
+      }
     else if(argis("-rotspace")) {
       PHASEFROM(2);
-      set_geometry(gRotSpace);
+      hybrid::enable_rotspace();
       return 0;
       }
     else if(argis("-rot_uscale")) {

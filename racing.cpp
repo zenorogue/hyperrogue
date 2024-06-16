@@ -1106,7 +1106,7 @@ void race_projection() {
       add_thurston_race(XLAT("S2xE"), [] { set_geometry(gSphere); set_variation(eVariation::bitruncated); set_geometry(gProduct); });
       add_thurston_race(XLAT("H2xE"), [] { set_geometry(gNormal); set_variation(eVariation::bitruncated); set_geometry(gProduct); });
       add_thurston_race(XLAT("Nil"), [] { stop_game(); nilv::nilperiod[0] = 0; set_geometry(gNil); });
-      add_thurston_race(XLAT("PSL(2,R)"), [] { set_geometry(gNormal); set_variation(eVariation::pure); set_geometry(gRotSpace); });
+      add_thurston_race(XLAT("PSL(2,R)"), [] { set_geometry(gNormal); set_variation(eVariation::pure); hybrid::enable_rotspace(); });
       }
     else {
       #if CAP_SOLV

@@ -420,7 +420,7 @@ EX hyperpoint hpxy(ld x, ld y) {
     return cgi.emb->base_to_actual(h);
     }
   if(sl2) return hyperpoint(x, y, 0, sqrt(1+x*x+y*y));
-  if(rotspace) return hyperpoint(x, y, 0, sqrt(1-x*x-y*y));
+  if(mtwisted) return hyperpoint(x, y, 0, sqrt(1-x*x-y*y));
   return PIU(hpxyz(x,y, translatable ? 1 : sphere ? sqrt(1-x*x-y*y) : sqrt(1+x*x+y*y)));
   }
 

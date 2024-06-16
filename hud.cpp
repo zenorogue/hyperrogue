@@ -492,7 +492,7 @@ EX void drawStats() {
   bool cornermode = (vid.xres > vid.yres * 85/100 && vid.yres > vid.xres * 85/100);
   
   #if MAXMDIM >= 4
-  if(geometry == gRotSpace || geometry == gProduct) rots::draw_underlying(!cornermode);
+  if(among(geometry, gProduct, gTwistedProduct)) rots::draw_underlying(!cornermode);
   #endif
   
   {

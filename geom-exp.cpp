@@ -314,16 +314,16 @@ void set_or_configure_geometry(eGeometry g) {
   else if(g == gArbitrary)
     arb::choose();
   else {
-    if(among(g, gProduct, gRotSpace)) {
-      if(WDIM == 3 || (g == gRotSpace && euclid)) {
+    if(among(g, gProduct, gTwistedProduct)) {
+      if(WDIM == 3 || (g == gTwistedProduct && euclid)) {
         addMessage(
-          g == gRotSpace ?
+          g == gTwistedProduct ?
             XLAT("Only works with 2D non-Euclidean geometries")
           : XLAT("Only works with 2D geometries")
             );
         return;
         }
-      if(g == gRotSpace) {
+      if(g == gTwistedProduct) {
         bool ok = true;
         if(arcm::in()) ok = PURE;
         else if(bt::in() || aperiodic) ok = false;
@@ -387,7 +387,7 @@ void ge_select_tiling() {
   
   for(int i=0; i<isize(ginf); i++) {
     eGeometry g = eGeometry(i);
-    if(among(g, gProduct, gRotSpace)) hybrid::configure(g);
+    if(among(g, gProduct, gTwistedProduct)) hybrid::configure(g);
     bool orig_el = elliptic;
     bool on = geometry == g;
     bool in_2d = WDIM == 2;
@@ -408,10 +408,10 @@ void ge_select_tiling() {
       }
     
     bool is_product = (geometry == gProduct && in_2d);
-    bool is_rotspace = (geometry == gRotSpace && in_2d);
+    bool is_twisted = (geometry == gTwistedProduct && in_2d);
     dialog::addBoolItem(
       is_product ? XLAT("current geometry x E") : 
-      is_rotspace ? XLAT("space of rotations in current geometry") : 
+      is_twisted ? XLAT("twisted current x E") : 
       XLAT(ginf[g].menu_displayed_name), on, dialog::list_fake_key++);
     dialog::lastItem().value += validclasses[land_validity(specialland).quality_level];
     dialog::add_action([g] { set_or_configure_geometry(g); });
@@ -624,7 +624,7 @@ EX void select_quotient() {
   #endif
   else if(mproduct)
     pushScreen(product::show_config);
-  else if(rotspace)
+  else if(mtwisted)
     hybrid::configure_period();
   else {
     vector<eGeometry> choices;
@@ -1068,8 +1068,8 @@ EX void showEuclideanMenu() {
     dialog::addSelItem(XLAT("view the underlying geometry"), r > 0 ? fts(r)+"x" : ONOFF(false), '6');
     dialog::add_action([] {
       dialog::editNumber(rots::underlying_scale, 0, 1, 0.05, 0.25, XLAT("view the underlying geometry"),        
-        geometry == gRotSpace ? 
-          XLAT("The space you are currently in is the space of rotations of the underlying hyperbolic or spherical geometry. ")
+        geometry == gTwistedProduct ? 
+          XLAT("The space you are currently in a twisted product space. ")
         : XLAT("You are currently in a product space.") +
         XLAT(
           "This option lets you see the underlying space. Lands and some walls (e.g. in the Graveyard) are based on "

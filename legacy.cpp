@@ -5,6 +5,12 @@
 namespace hr {
 
 #if CAP_LEGACY
+
+#if HDR
+/** legacy name */
+constexpr eGeometry gRotSpace = gTwistedProduct;
+#endif
+
 namespace shmup {
 
 void scanchar(FILE *f, char& c) {

@@ -556,7 +556,7 @@ EX namespace mapstream {
       f.write(product::cmirror);
       f.write(vid.plevel_factor);
       }
-    if(rotspace) {
+    if(mtwisted) {
       f.write(hybrid::csteps);
       }
     if(mhybrid) {
@@ -695,7 +695,7 @@ EX namespace mapstream {
       if(vernum >= 0xA833) f.read(product::cmirror);
       if(vernum >= 0xA908) f.read(vid.plevel_factor);
       }
-    if(geometry == gRotSpace && vernum >= 0xA833) {
+    if(geometry == gTwistedProduct && vernum >= 0xA833) {
       f.read(hybrid::csteps);
       }
     if(mhybrid && vernum >= 0xA80C) {

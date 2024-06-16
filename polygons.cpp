@@ -879,7 +879,7 @@ void geometry_information::compute_cornerbonus() { }
 
 EX int kleinize_sides;
 
-hyperpoint ray_kleinize_rotspace(hyperpoint h, int ks, int id) {
+hyperpoint ray_kleinize_twisted(hyperpoint h, int ks, int id) {
 
   /* todo: in Archimedean tilings it may be the case that pispin is incorrect, as shown by `angle of zero` -- need to carry it to raycaster */
   h = pispin * h;
@@ -923,7 +923,7 @@ hyperpoint ray_kleinize_rotspace(hyperpoint h, int ks, int id) {
 hyperpoint ray_kleinize(hyperpoint h, int id, ld pz) {
   if(nil && nilv::nil_structure_index == 0 && among(id, 2, 5)) h[2] = 0;
   if(nil && nilv::nil_structure_index == 2 && among(id, 6, 7)) h[2] = 0;
-  if(rotspace) return ray_kleinize_rotspace(h, kleinize_sides, id);
+  if(mtwisted) return ray_kleinize_twisted(h, kleinize_sides, id);
   #if CAP_BT
   if(hyperbolic && bt::in()) {
     // ld co = vid.binary_width / log(2) / 4;
