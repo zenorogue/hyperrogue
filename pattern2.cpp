@@ -1860,6 +1860,7 @@ EX namespace ccolor {
   EX data *which = &plain;
 
   EX void set_plain(color_t col) { which = &plain; plain.ctab = {col}; }
+  EX void set_plain_nowall(color_t col) { which = &plain; plain.ctab = {col}; if(GDIM == 2) rwalls = 0; }
   EX void set_random(int r) { which = &random; rwalls = r; }
   EX void set_formula(const string& s) { which = &formula; color_formula = s; }
   EX void set_colors(data& d, const colortable& tab) { which = &d; d.ctab = tab; }
@@ -3278,7 +3279,7 @@ int read_pattern_args() {
         ccolor::which = p;
         break;
         }
-      if(!found) ccolor::set_plain(argcolor(24));
+      if(!found) { ccolor::set_plain_nowall(argcolor(24)); }
       }
     stop_game_and_switch_mode(rg::nothing);
     }
