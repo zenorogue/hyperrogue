@@ -1622,7 +1622,7 @@ EX namespace hybrid {
         tf = hdist0(hm)/2;
         alpha = atan2(hm[1], hm[0]);
         });
-      if(nil) return spin(alpha) * xpush(tf*2) * ypush(he*2) * zpush(lev) * C0;
+      if(nil) return spin(-alpha) * xpush(tf*2) * ypush(-he*2) * zpush(lev) * C0;
       return spin(alpha) * twist::uxpush(tf) * twist::uypush(he) * twist::uzpush(lev) * C0;
       #else
       throw hr_exception();
@@ -2363,8 +2363,14 @@ EX namespace twist {
   
   EX transmatrix lift_matrix(const transmatrix& T) {
     if(nil) {
-      hyperpoint h(T[0][2], T[1][2], 0, 0); /* todo take rotate into account */
-      return nisot::translate(h);
+      ld alpha;
+      hybrid::in_underlying_geometry([&] {
+        hyperpoint h = tC0(T);
+        transmatrix Spin = iso_inverse(gpushxto0(h) * T);
+        alpha = atan2(Spin[0][1], Spin[0][0]);
+        });
+      hyperpoint h(T[0][2], T[1][2], 0, 1);
+      return nisot::translate(h) * spin(-alpha);
       }
     hyperpoint d;
     ld alpha, beta, distance;
