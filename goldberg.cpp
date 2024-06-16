@@ -1383,7 +1383,7 @@ EX namespace gp {
             gp::current_li = gp::get_local_info(c1);
             }
           else {
-            gp::current_li.relative.first = shvid(c1);
+            gp::current_li.relative.first = currentmap->shvid(c1);
             gp::current_li.relative.second = shift[c];
             }
           });
