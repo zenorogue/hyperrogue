@@ -103,12 +103,14 @@ struct hrmap_rewrite : hrmap_hyperbolic {
 
   };
 
+colortable labels = {0x100FFFF, 0x100FF00, 0x1FFFF00, 0x1FF8000, 0x1FF0000, 0x1FF00FF};
+
 bool labeller(cell* c, const shiftmatrix& V) {
   auto m = dynamic_cast<hrmap_rewrite*> (currentmap);
   if(m) {
     string s = m->asg[c->master].second;
     cgi.scalefactor = 1;
-    queuestr(V, 0.5, s, ccolor::jmap.ctab[c->master->distance+1]);
+    queuestr(V, 0.5, s, labels[c->master->distance+1]);
     }
   return false;
   }
