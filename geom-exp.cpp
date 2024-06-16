@@ -262,7 +262,7 @@ bool forced_quotient() { return quotient && !(cgflags & qOPTQ); }
 EX geometry_filter gf_hyperbolic = {"hyperbolic", 'h', [] { return (arcm::in() || arb::in() || hyperbolic) && !forced_quotient(); }};
 EX geometry_filter gf_spherical = {"spherical", 's', [] { return (arcm::in() || arb::in() || sphere) && !forced_quotient(); }};
 EX geometry_filter gf_euclidean = {"Euclidean", 'e', [] { return (arcm::in() || arb::in() || euclid) && !forced_quotient(); }};
-EX geometry_filter gf_other = {"non-isotropic", 'n', [] { return mproduct || nonisotropic; }};
+EX geometry_filter gf_other = {"non-isotropic", 'n', [] { return mproduct || mtwisted || nonisotropic; }};
 EX geometry_filter gf_regular_2d = {"regular 2D tesselations", 'r', [] { 
   return standard_tiling() && WDIM == 2 && !forced_quotient();
   }};
@@ -314,6 +314,7 @@ void set_or_configure_geometry(eGeometry g) {
   else if(g == gArbitrary)
     arb::choose();
   else {
+    bool quo = false;
     if(among(g, gProduct, gTwistedProduct)) {
       if(WDIM == 3 || (g == gTwistedProduct && euclid)) {
         addMessage(
@@ -325,6 +326,7 @@ void set_or_configure_geometry(eGeometry g) {
         }
       if(g == gTwistedProduct) {
         bool ok = true;
+        quo = sphere || quotient;
         if(arcm::in()) ok = PURE;
         else if(bt::in() || aperiodic) ok = false;
         else ok = PURE || BITRUNCATED;
@@ -343,7 +345,10 @@ void set_or_configure_geometry(eGeometry g) {
         #endif
         }
       }
-    dual::may_split_or_do([g] { set_geometry(g); });
+    dual::may_split_or_do([g, quo] {
+      set_geometry(g);
+      if(quo) hybrid::fixup_csteps();
+      });
     start_game();
     }
   }

@@ -1249,6 +1249,14 @@ EX namespace hybrid {
       }
     }
 
+  EX void fixup_csteps() {
+    check_cgi(); cgi.require_basics();
+    if(!hybrid::csteps || gmod(cgi.psl_steps, hybrid::csteps)) {
+      hybrid::csteps = cgi.psl_steps;
+      hybrid::reconfigure();
+      }
+    }
+
   EX hrmap *pmap;
   EX geometry_information *pcgip;
   EX eGeometry actual_geometry;
