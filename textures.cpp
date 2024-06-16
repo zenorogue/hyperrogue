@@ -1102,11 +1102,12 @@ bool texture_config::load() {
         stop_game();
         }
       set_geometry(targetgeometry);
+      set_variation(targetvariation);
       start_game();
       return config.load();
       }
-    
-    if(variation != targetvariation) {
+    else if(variation != targetvariation) {
+      stop_game();
       set_variation(targetvariation);
       start_game();
       return config.load();
