@@ -341,7 +341,7 @@ struct raygen {
   void create();
 
   string f_xpush() { return hyperbolic ? "xpush_h3" : "xpush_s3"; }
-  string f_len() { return hyperbolic ? "len_h3" : mtwisted ? "rot_flatdist" : sphere ? "len_s3" : "len_x"; }
+  string f_len() { return hyperbolic ? "len_h3" : mtwisted ? "twist_flatdist" : sphere ? "len_s3" : "len_x"; }
   string f_len_prod() { return in_h2xe() ? "len_h2" : in_s2xe() ? "len_s2" : "len_e2"; }
   void add_functions();
   };
@@ -867,7 +867,7 @@ void raygen::move_forward() {
     "      }\n";
       if(mtwisted) fmain +=
     "   if(which == -1) {\n"
-    "     mediump float z = rot_zlevel(nposition, sides-2);\n"
+    "     mediump float z = twist_zlevel(nposition, sides-2);\n"
     "     if(z > uPLevel) which = sides-1;\n"
     "     if(z <-uPLevel) which = sides-2;\n"
     "     }\n";
@@ -1408,7 +1408,7 @@ void raygen::emit_iterate(int gid1) {
     if(nil && nilv::nil_structure_index == 0) fmain += "if(which == 2 || which == 5) pos.z = 0.;\n";
     if(nil && nilv::nil_structure_index == 2) fmain += "if(which == 6 || which == 7) pos.z = 0.;\n";
     else if(mtwisted) {
-      fmain += "pos = rot_coordinates(pos, sides-2, which);\n";
+      fmain += "pos = twist_coordinates(pos, sides-2, which);\n";
       string spinner = "h = cspin(0, 1, PI) * h;\n";
       string calc_dxy = sl2 ?
             "dx = -2. * (h.y*h.z - h.x*h.w);\n"
@@ -1425,7 +1425,7 @@ void raygen::emit_iterate(int gid1) {
             "vec4 h1 = lorentz(1, 3, -vy) * lorentz(0, 2, -vy) * lorentz(0, 3, -vx) * lorentz(2, 1, vx) * h;\n" :
             "vec4 h1 = cspin(0, 3, vy) * cspin(1, 2, -vy) * cspin(1, 3, -vx) * cspin(0, 2, -vx) * h;\n";
       fsh +=
-        "vec4 rot_coordinates(vec4 h, int ks, int id) {\n"
+        "vec4 twist_coordinates(vec4 h, int ks, int id) {\n"
           +spinner+
           "if(id < ks) h = cspin(0, 1, -TAU * float(id) / float(ks)) * h;\n"
           +dcalc_dxy +
@@ -1435,17 +1435,17 @@ void raygen::emit_iterate(int gid1) {
           "return vec4(vx, vy, vz, 1);\n"
           "}\n\n";
       fsh +=
-        "mediump float rot_flatdist(mediump vec4 h) {\n" + dcalc_dxy +
+        "mediump float twist_flatdist(mediump vec4 h) {\n" + dcalc_dxy +
            "return dx*dx+dy*dy;\n"
            "}\n";
       fsh +=
-        "mediump float rot_zlevel(vec4 h, int ks) {\n" + spinner + dcalc_dxy +
+        "mediump float twist_zlevel(vec4 h, int ks) {\n" + spinner + dcalc_dxy +
           "float alpha = (floor(atan2(dy, dx) * float(ks) / TAU + 0.5)) * TAU / float(ks);\n"
           "h = cspin(1, 0, alpha) * h;\n" + calc_dxy + calc_vxy + calc_h1 +
           "return atan2(h1[2], h1[3]);\n"
           "}\n\n";
       fsh +=
-        "mediump bool rot_dark(vec4 h, int ks) {\n" + spinner + dcalc_dxy +
+        "mediump bool twist_dark(vec4 h, int ks) {\n" + spinner + dcalc_dxy +
           "float alpha = atan2(dy, dx) * float(ks);\n"
           "return cos(alpha) < -0.99;\n"
           "}\n\n";
@@ -1483,7 +1483,7 @@ void raygen::emit_iterate(int gid1) {
     "    col.xyz = col.xyz * d + uFogColor.xyz * (1.-d);\n";
 
   if(mtwisted) fmain +=
-    "    if(rot_dark(position, sides-2)) col.xyz /= 2.;\n";
+    "    if(twist_dark(position, sides-2)) col.xyz /= 2.;\n";
   if(nil && nilv::nil_structure_index == 0) fmain +=
     "    if(abs(abs(position.x)-abs(position.y)) < .005) col.xyz /= 2.;\n";
 
