@@ -3047,12 +3047,12 @@ EX namespace nisot {
     #endif
     if(mproduct) return new product::hrmap_product;
     #if MAXMDIM >= 4
-    if(nil) return new nilv::hrmap_nil;
     if(mhybrid) return new rots::hrmap_rotation_space;
+    if(nil) return new nilv::hrmap_nil;
     #endif
     return NULL;
     }
-  
+
   #if CAP_COMMANDLINE
   auto config = addHook(hooks_args, 0, [] () {
     using namespace arg;

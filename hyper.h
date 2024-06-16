@@ -148,7 +148,7 @@ void addMessage(string s, char spamtype = 0);
 #define nih (among(cgclass, gcNIH, gcSolN))
 #define nil (cgclass == gcNil)
 #define sl2 (cgclass == gcSL2)
-#define rotspace (geometry == gRotSpace)
+#define gtwisted (geometry == gTwistedProduct)
 #define hyperbolic (cgclass == gcHyperbolic)
 #define nonisotropic (among(cgclass, gcSol, gcSolN, gcNIH, gcSL2, gcNil))
 #define translatable (euclid || nonisotropic)
@@ -167,6 +167,8 @@ void addMessage(string s, char spamtype = 0);
 #define embedded_plane (WDIM == 2 && GDIM == 3)
 /** the actual map is product, not just the graphics */
 #define mproduct (gproduct && !embedded_plane)
+/** the actual map is twisted, not just the graphics */
+#define mtwisted (gtwisted && !embedded_plane)
 /** the actual map is product, not just the graphics */
 #define meuclid (geom3::mgclass() == gcEuclid)
 #define msphere (geom3::mgclass() == gcSphere)
