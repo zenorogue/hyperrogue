@@ -23,7 +23,7 @@ EX namespace dialog {
     tDialogItem type;
     string body;
     string value;
-    int key;
+    key_type key;
     color_t color, colorv, colork, colors, colorc;
     int scale;
     double param;
@@ -180,13 +180,13 @@ EX namespace dialog {
 
   EX item& titleItem() { return items[0]; }
   
-  EX map<int, reaction_t> key_actions;
+  EX map<key_type, reaction_t> key_actions;
   
-  EX void add_key_action(int key, const reaction_t& action) {
+  EX void add_key_action(key_type key, const reaction_t& action) {
     key_actions[key] = action;
     }
   
-  EX void add_key_action_adjust(int& key, const reaction_t& action) {
+  EX void add_key_action_adjust(key_type& key, const reaction_t& action) {
     while(key_actions.count(key)) key++;
     add_key_action(key, action);
     }
@@ -220,7 +220,7 @@ EX namespace dialog {
     keyhandler = dialog::handler;
     }
   
-  EX string keyname(int k) {
+  EX string keyname(key_type k) {
     if(k == 0) return "";
     if(k == SDLK_ESCAPE) return "Esc";
     if(k == SDLK_F1) return "F1";
@@ -254,14 +254,14 @@ EX namespace dialog {
     scale = 100;
     }
 
-  EX void addSlider(double d1, double d2, double d3, int key) {
+  EX void addSlider(double d1, double d2, double d3, key_type key) {
     item it(diSlider);
     it.key = key;
     it.param = (d2-d1) / (d3-d1);
     items.push_back(it);
     }
   
-  EX void addIntSlider(int d1, int d2, int d3, int key) {
+  EX void addIntSlider(int d1, int d2, int d3, key_type key) {
     item it(diIntSlider);
     it.key = key;
     it.p1 = (d2-d1);
@@ -269,7 +269,7 @@ EX namespace dialog {
     items.push_back(it);
     }
   
-  EX void addSelItem(string body, string value, int key) {
+  EX void addSelItem(string body, string value, key_type key) {
     item it(diItem);
     it.body = body;
     it.value = value;
@@ -279,7 +279,7 @@ EX namespace dialog {
     items.push_back(it);
     }
 
-  EX void addBoolItem(string body, bool value, int key) {
+  EX void addBoolItem(string body, bool value, key_type key) {
     addSelItem(body, ONOFF(value), key);
     }
   
@@ -303,7 +303,7 @@ EX namespace dialog {
     items.push_back(it);
     }
 
-  EX void addColorItem(string body, int value, int key) {
+  EX void addColorItem(string body, int value, key_type key) {
     addSelItem(body, COLORBAR, key);
     auto& it = items.back();
     it.type = diColorItem;
@@ -318,7 +318,7 @@ EX namespace dialog {
      return alpha / degree;
      }
 
-  EX void addMatrixItem(string body, transmatrix& value, int key, int dim IS(GDIM)) {
+  EX void addMatrixItem(string body, transmatrix& value, key_type key, int dim IS(GDIM)) {
     addSelItem(body, COLORBAR, key);
     auto& it = items.back();
     it.type = diMatrixItem;
@@ -360,14 +360,14 @@ EX namespace dialog {
     items.push_back(it);
     }
 
-  EX void addItem(string body, int key) {
+  EX void addItem(string body, key_type key) {
     item it(diItem);
     it.body = body;
     it.key = key;
     items.push_back(it);
     }
 
-  EX void addBigItem(string body, int key) {
+  EX void addBigItem(string body, key_type key) {
     item it(diBigItem);
     it.body = body;
     it.key = key;

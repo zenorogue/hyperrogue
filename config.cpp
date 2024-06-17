@@ -29,6 +29,8 @@ EX void non_editable_post() { if(!delayed_start) start_game(); };
 
 #if HDR
 
+using key_type = int;
+
 struct param_exception : hr_exception {
   struct parameter *which;
   param_exception() : hr_exception("param_exception"), which(nullptr) {}
@@ -57,7 +59,7 @@ struct parameter : public std::enable_shared_from_this<parameter> {
   virtual bool available() { if(restrict) return restrict(); return true; }
   virtual bool affects(void *v) { return false; }
   void show_edit_option() { show_edit_option(default_key); }
-  virtual void show_edit_option(int key) {
+  virtual void show_edit_option(key_type key) {
     println(hlog, "warning: no edit option defined for ", name);
     }
   virtual string search_key() { 
@@ -142,7 +144,7 @@ struct list_parameter : parameter {
     default_key = key;
     return this;
     }
-  void show_edit_option(int key) override;
+  void show_edit_option(key_type key) override;
   };
 
 namespace anims {
@@ -262,7 +264,7 @@ struct float_parameter : public val_parameter<ld> {
     }
   function<void(float_parameter*)> modify_me;
   float_parameter *modif(const function<void(float_parameter*)>& r) { modify_me = r; return this; }
-  void show_edit_option(int key) override;
+  void show_edit_option(key_type key) override;
   void load_from_raw(const string& s) override { *value = parseld(s); }
   cld get_cld() override { return *value; }
   void set_cld_raw(cld x) override { *value = real(x); }
@@ -271,7 +273,7 @@ struct float_parameter : public val_parameter<ld> {
   };
 
 struct float_parameter_dft : public float_parameter {
-  void show_edit_option(int key) override;
+  void show_edit_option(key_type key) override;
   function<ld()> get_hint;
   float_parameter_dft* set_hint(const function<ld()>& f) { get_hint = f; return this; }
   };
@@ -281,7 +283,7 @@ struct int_parameter : public val_parameter<int> {
   ld step;
   function<void(int_parameter*)> modify_me;
   int_parameter *modif(const function<void(int_parameter*)>& r) { modify_me = r; return this; }
-  void show_edit_option(int key) override;
+  void show_edit_option(key_type key) override;
   int_parameter *editable(int min_value, int max_value, ld step, string menu_item_name, string help_text, char key) {
     this->is_editable = true;
     this->min_value = min_value;
@@ -314,7 +316,7 @@ struct string_parameter: public val_parameter<string> {
   reaction_t editor;
   string save() override { return *value; }
   void load_from_raw(const string& s) override { *value = s; }
-  void show_edit_option(int key) override;
+  void show_edit_option(key_type key) override;
   string_parameter* set_standard_editor(bool direct);
   string_parameter* set_file_editor(string ext);
   string_parameter* editable(string cap, string help, char key ) {
@@ -329,7 +331,7 @@ struct string_parameter: public val_parameter<string> {
 
 struct char_parameter : public val_parameter<char> {
   string save() override { return "\\" + its(*value); }
-  void show_edit_option(int key) override;
+  void show_edit_option(key_type key) override;
   void load_from_raw(const string& s) override {
     if(s[0] == '\\' && s.size() > 1) *value = parseint(s.substr(1));
     else sscanf(s.c_str(), "%c", value);
@@ -349,7 +351,7 @@ struct bool_parameter : public val_parameter<bool> {
     help_text = help;
     return this;
     }
-  void show_edit_option(int key) override;
+  void show_edit_option(key_type key) override;
 
   void load_from_raw(const string& s) override {
     if(s == "yes") *value = true;
@@ -363,7 +365,7 @@ struct bool_parameter : public val_parameter<bool> {
 
 struct color_parameter : public val_parameter<color_t> {
   bool has_alpha;
-  void show_edit_option(int key) override;
+  void show_edit_option(key_type key) override;
   color_parameter *editable(string menu_item_name, string help_text, char key) {
     this->is_editable = true;
     this->menu_item_name = menu_item_name;
@@ -402,7 +404,7 @@ struct matrix_parameter : public val_parameter<matrix_eq> {
   bool dosave() override { return !eqmatrix(*value, dft); }
 
   int dim;
-  void show_edit_option(int key) override;
+  void show_edit_option(key_type key) override;
   matrix_parameter *editable(string menu_item_name, string help_text, char key) {
     this->is_editable = true;
     this->menu_item_name = menu_item_name;
@@ -432,7 +434,7 @@ struct matrix_parameter : public val_parameter<matrix_eq> {
 
 struct custom_parameter : public parameter {
   cld last_value, anim_value;
-  function<void(char)> custom_viewer;
+  function<void(key_type)> custom_viewer;
   function<cld()> custom_value;
   function<bool(void*)> custom_affect;
   function<void(const string&)> custom_load;
@@ -446,7 +448,7 @@ struct custom_parameter : public parameter {
     return parameter::clone(lps, value);
     }
 
-  void show_edit_option(int key) override { custom_viewer(key); }
+  void show_edit_option(key_type key) override { custom_viewer(key); }
   bool affects(void *v) override { return custom_affect(v); }
   void check_change() override {
     if(custom_value() != last_value) {
@@ -489,7 +491,7 @@ void non_editable() {
   dialog::addHelp("Warning: editing this value through this menu may not work correctly");
   }
 
-void float_parameter::show_edit_option(int key) {
+void float_parameter::show_edit_option(key_type key) {
   if(modify_me) modify_me(this);
   dialog::addSelItem(XLAT(menu_item_name), fts(*value) + unit, key);
   if(*value == use_the_default_value) dialog::lastItem().value = XLAT("default");
@@ -502,7 +504,7 @@ void float_parameter::show_edit_option(int key) {
     });
   }
 
-void float_parameter_dft::show_edit_option(int key) {
+void float_parameter_dft::show_edit_option(key_type key) {
   if(modify_me) modify_me(this);
   dialog::addSelItem(XLAT(menu_item_name), fts(*value) + unit, key);
   if(*value == use_the_default_value) dialog::lastItem().value = XLAT("default: ") + fts(get_hint());
@@ -522,7 +524,7 @@ void float_parameter_dft::show_edit_option(int key) {
     });
   }
 
-void int_parameter::show_edit_option(int key) {
+void int_parameter::show_edit_option(key_type key) {
   if(modify_me) modify_me(this);
   dialog::addSelItem(XLAT(menu_item_name), its(*value), key);
   dialog::add_action([this] () {
@@ -534,7 +536,7 @@ void int_parameter::show_edit_option(int key) {
     });
   }
 
-void bool_parameter::show_edit_option(int key) {
+void bool_parameter::show_edit_option(key_type key) {
   dialog::addBoolItem(XLAT(menu_item_name), *value, key);
   if(is_highlight(dialog::items.back()) && help_text != menu_item_name) mouseovers = XLAT(help_text);
   dialog::add_action([this] () {
@@ -552,7 +554,7 @@ void bool_parameter::show_edit_option(int key) {
     });
   }
 
-void color_parameter::show_edit_option(int key) {
+void color_parameter::show_edit_option(key_type key) {
   dialog::addColorItem(XLAT(menu_item_name), has_alpha ? *value : addalpha(*value), key);
   dialog::add_action([this] () {
     dialog::openColorDialog(*value);
@@ -561,7 +563,7 @@ void color_parameter::show_edit_option(int key) {
     });
   }
 
-void matrix_parameter::show_edit_option(int key) {
+void matrix_parameter::show_edit_option(key_type key) {
   dialog::addMatrixItem(XLAT(menu_item_name), *value, key, dim);
   dialog::add_action([this] () {
     dialog::editMatrix(*value, XLAT(menu_item_name), help_text, dim);
@@ -570,12 +572,12 @@ void matrix_parameter::show_edit_option(int key) {
     });
   }
 
-void char_parameter::show_edit_option(int key) {
+void char_parameter::show_edit_option(key_type key) {
   string s = s0; s += *(value);
   dialog::addSelItem(XLAT(menu_item_name), s, key);
   }
 
-void string_parameter::show_edit_option(int key) {
+void string_parameter::show_edit_option(key_type key) {
   dialog::addSelItem(XLAT(menu_item_name), *value, key);
   if(!editor) {
     if(is_highlight(dialog::items.back())) mouseovers = XLAT("not editable");
@@ -790,7 +792,7 @@ shared_ptr<parameter> float_parameter::clone(struct local_parameter_set& lps, vo
 
 #if HDR
 template<class T>
-shared_ptr<custom_parameter> param_custom_int(T& val, const parameter_names& n, function<void(char)> menuitem, char key) {
+shared_ptr<custom_parameter> param_custom_int(T& val, const parameter_names& n, function<void(key_type)> menuitem, char key) {
   shared_ptr<custom_parameter> u ( new custom_parameter );
   u->setup(n);
   int dft = (int) val;
@@ -809,7 +811,7 @@ shared_ptr<custom_parameter> param_custom_int(T& val, const parameter_names& n, 
   }
 #endif
 
-EX shared_ptr<custom_parameter> param_custom_ld(ld& val, const parameter_names& n, function<void(char)> menuitem, char key) {
+EX shared_ptr<custom_parameter> param_custom_ld(ld& val, const parameter_names& n, function<void(key_type)> menuitem, char key) {
   shared_ptr<custom_parameter> u ( new custom_parameter );
   u->setup(n);
   ld dft = val;
@@ -1245,8 +1247,8 @@ EX void initConfig() {
   param_b(vid.relative_window_size, "window_relative", true)
   ->editable("specify relative window size", 'g');
 
-  param_custom_int(vid.xres, "xres", [] (char ch) {}, 0)->restrict = return_false;
-  param_custom_int(vid.yres, "yres", [] (char ch) {}, 0)->restrict = return_false;
+  param_custom_int(vid.xres, "xres", [] (key_type ch) {}, 0)->restrict = return_false;
+  param_custom_int(vid.yres, "yres", [] (key_type ch) {}, 0)->restrict = return_false;
   
   param_i(vid.fullscreen_x, "fullscreen_x", 1280)
   -> editable(640, 3840, 640, "fullscreen resolution to use (X)", "", 'x')
@@ -1939,7 +1941,7 @@ string solhelp() {
 #endif
   }
 
-EX void menuitem_sightrange_bonus(char c) {
+EX void menuitem_sightrange_bonus(key_type c) {
   dialog::addSelItem(XLAT("sight range bonus"), its(sightrange_bonus), c);
   dialog::add_action([]{
     dialog::editNumber(sightrange_bonus, -5, allowIncreasedSight() ? 3 : 0, 1, 0, XLAT("sight range"), 
@@ -2041,7 +2043,7 @@ EX void edit_sightrange() {
   dialog::display();
   }
 
-EX void menuitem_sightrange_style(char c IS('c')) {
+EX void menuitem_sightrange_style(key_type c IS('c')) {
   dialog::addSelItem(XLAT("draw range based on"), 
     vid.use_smart_range == 0 ? XLAT("distance") :
     vid.use_smart_range == 1 ? XLAT("size (no gen)") :
@@ -2068,7 +2070,7 @@ EX void menuitem_sightrange_style(char c IS('c')) {
     });
   }
 
-EX void menuitem_sightrange(char c IS('c')) {
+EX void menuitem_sightrange(key_type c IS('c')) {
   #if CAP_SOLV
   if(pmodel == mdGeodesic && sol)
     dialog::addSelItem(XLAT("sight range settings"), fts(sn::solrange_xy) + "x" + fts(sn::solrange_z), c);
@@ -2559,7 +2561,7 @@ EX void projectionDialog() {
     };
   }
 
-EX void menuitem_projection_distance(char key) {
+EX void menuitem_projection_distance(key_type key) {
   dialog::addSelItem(XLAT("projection distance"), fts(vpconf.alpha) + " (" + current_proj_name() + ")", key);
   dialog::add_action(projectionDialog);
   }
@@ -3905,7 +3907,7 @@ EX void edit_all_parameters() {
   dialog::display();
   }
 
-void list_parameter::show_edit_option(int key) {
+void list_parameter::show_edit_option(key_type key) {
   string opt;
   if(get_value() < 0 || get_value() >= isize(options)) opt = its(get_value());
   else opt = options[get_value()].first;

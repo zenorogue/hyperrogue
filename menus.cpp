@@ -724,7 +724,7 @@ EX eLandStructure default_land_structure() {
   return lsNoWalls;
   }
 
-EX void menuitem_land_structure(char key) {
+EX void menuitem_land_structure(key_type key) {
 
   if(default_land_structure() == land_structure && !ineligible_starting_land)
     dialog::addBoolItem(XLAT("land structure"), false, key);

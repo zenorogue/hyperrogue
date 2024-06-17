@@ -680,22 +680,23 @@ void action_change_variation() {
   #endif
   }
 
-EX void menuitem_change_variation(char key) {
+
+EX void menuitem_change_variation(key_type key) {
   dialog::addSelItem(XLAT("variations"), gp::operation_name(), key);    
   dialog::add_action(action_change_variation);
   }
 
-EX void menuitem_change_geometry(char key) {
+EX void menuitem_change_geometry(key_type key) {
   dialog::addSelItem(XLAT("geometry/topology/tiling"), full_geometry_name(), key);
   dialog::add_action_push(current_filter ? ge_select_tiling : ge_select_filter);
   }
 
-EX void menuitem_projection(char key) {
+EX void menuitem_projection(key_type key) {
   dialog::addSelItem(XLAT("projection"), current_proj_name(), key);
   dialog::add_action_push(models::model_menu);
   }
 
-EX void menuitem_binary_width(char key) {
+EX void menuitem_binary_width(key_type key) {
   dialog::addSelItem(XLAT("binary tiling width"), fts(vid.binary_width), key);
   dialog::add_action([] {
     dialog::editNumber(vid.binary_width, 0, 2, 0.1, 1, XLAT("binary tiling width"), "");
@@ -710,7 +711,7 @@ EX void menuitem_binary_width(char key) {
     });
   }
 
-EX void menuitem_nilwidth(char key) {
+EX void menuitem_nilwidth(key_type key) {
   dialog::addSelItem(XLAT("Nil width"), fts(nilv::nilwidth), key);
   dialog::add_action([] {
     dialog::editNumber(nilv::nilwidth, 0.01, 2, 0.1, 1, XLAT("Nil width"), "");
