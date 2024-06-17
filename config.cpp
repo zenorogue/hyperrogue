@@ -3003,7 +3003,7 @@ EX void show3D() {
       });
     }
 
-  if(mproduct || embedded_plane)
+  if(has_fixed_yz())
     dialog::addBoolItem_action(XLAT("fixed Y/Z rotation"), vid.fixed_yz, 'Z');
 
   if(WDIM == 2 && GDIM == 3) {
