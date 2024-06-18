@@ -956,6 +956,13 @@ EX namespace nilv {
 
   EX int nil_structure_index;
 
+  /** this returns nil_structure_index if it is used, otherwise -1 (if not nil) or -2 (if nil but not using nil_structure_index */
+  EX int get_nsi() {
+    if(!nil) return -1;
+    if(mtwisted) return -2;
+    return nil_structure_index;
+    }
+
   nilstructure ns6 = {
     {{ mvec(-1,0,0), mvec(0,-1,0), mvec(0,0,-1), mvec(1,0,0), mvec(0,1,0), mvec(0,0,1) }},
   

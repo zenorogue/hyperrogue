@@ -923,8 +923,8 @@ hyperpoint ray_kleinize_twisted(hyperpoint h, int ks, int id) {
   }
 
 hyperpoint ray_kleinize(hyperpoint h, int id, ld pz) {
-  if(!mtwisted && nil && nilv::nil_structure_index == 0 && among(id, 2, 5)) h[2] = 0;
-  if(!mtwisted && nil && nilv::nil_structure_index == 2 && among(id, 6, 7)) h[2] = 0;
+  if(nilv::get_nsi() == 0 && among(id, 2, 5)) h[2] = 0;
+  if(nilv::get_nsi() == 2 && among(id, 6, 7)) h[2] = 0;
   if(mtwisted) return ray_kleinize_twisted(h, kleinize_sides, id);
   #if CAP_BT
   if(hyperbolic && bt::in()) {

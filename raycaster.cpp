@@ -129,7 +129,7 @@ EX bool available() {
     return true;
   if(sphere && pmodel == mdPerspective)
     return true;
-  if(nil && nilv::nil_structure_index == 1)
+  if(nilv::get_nsi() == 1)
     return false;
   if((sn::in() || nil || sl2) && pmodel == mdGeodesic)
     return true;
@@ -883,12 +883,12 @@ void raygen::move_forward() {
     string hnilw3 = to_glsl(nilv::nilwidth * nilv::nilwidth * sqrt(3) / 8);
     string hsqrt3 = to_glsl(sqrt(3)/2);
 
-    if(!mtwisted && nil && nilv::nil_structure_index == 0) {
+    if(nilv::get_nsi() == 0) {
       fmain +=
       "mediump float rz = (abs(nposition.x) > abs(nposition.y) ? -nposition.x*nposition.y : 0.) + nposition.z;\n";
       fmain += "rz += nposition.x * nposition.y * " + comu + ";";
       }
-    if(!mtwisted && nil && nilv::nil_structure_index == 2) {
+    if(nilv::get_nsi() == 2) {
       fmain += "mediump float x0 = nposition.x; mediump float y0 = nposition.y;\n";
       fmain +=
         "mediump float x1 = nposition.x * .5 + nposition.y * " + hsqrt3 + ";\n"
@@ -934,9 +934,9 @@ void raygen::move_forward() {
         "if(abs(nposition.x) > uBinaryWidth || abs(nposition.y) > uBinaryWidth || abs(nposition.z) > .5) {\n";
     else if(sol) fmain +=
         "if(abs(nposition.x) > uBinaryWidth || abs(nposition.y) > uBinaryWidth || abs(nposition.z) > log(2.)/2.) {\n";
-    else if(nil && nilv::nil_structure_index == 0) fmain +=
+    else if(nilv::get_nsi() == 0) fmain +=
         "if(abs(nposition.x) > "+hnilw+" || abs(nposition.y) > "+hnilw+" || abs(rz) > "+hnilw2+") {\n";
-    else if(nil && nilv::nil_structure_index == 2) fmain +=
+    else if(nilv::get_nsi() == 2) fmain +=
         "if(abs(nposition.x) > "+hnilw+" || abs(nposition.x/2. + nposition.y*"+hsqrt3+") > "+hnilw+" || abs(nposition.x/2. - nposition.y*"+hsqrt3+") > "+hnilw+" || abs(rz) > "+hnilw3+") {\n";
 
     fmain +=
@@ -987,14 +987,14 @@ void raygen::move_forward() {
         "if(nposition.z > log(2.)/2.) which = nposition.x > 0. ? 3 : 2;\n"
         "if(nposition.z <-log(2.)/2.) which = nposition.y > 0. ? 7 : 6;\n";
       }
-    else if(nil && !mtwisted && nilv::nil_structure_index == 0) fmain +=
+    else if(nilv::get_nsi() == 0) fmain +=
         "if(nposition.x > "+hnilw+") which = 3;\n"
         "if(nposition.x <-"+hnilw+") which = 0;\n"
         "if(nposition.y > "+hnilw+") which = 4;\n"
         "if(nposition.y <-"+hnilw+") which = 1;\n"
         "if(rz > "+hnilw2+") which = 5;\n"
         "if(rz <-"+hnilw2+") which = 2;\n";
-    else if(nil && !mtwisted && nilv::nil_structure_index == 2) fmain +=
+    else if(nilv::get_nsi() == 2) fmain +=
         "if(nposition.x > "+hnilw+") which = 0;\n"
         "if(nposition.x <-"+hnilw+") which = 3;\n"
         "if(nposition.x/2.+nposition.y*"+hsqrt3+" > "+hnilw+") which = 5;\n"
@@ -1405,8 +1405,8 @@ void raygen::emit_iterate(int gid1) {
 
   if(!(levellines && disable_texture)) {
     fmain += "  mediump vec4 pos = position;\n";
-    if(!mtwisted && nil && nilv::nil_structure_index == 0) fmain += "if(which == 2 || which == 5) pos.z = 0.;\n";
-    if(!mtwisted && nil && nilv::nil_structure_index == 2) fmain += "if(which == 6 || which == 7) pos.z = 0.;\n";
+    if(nilv::get_nsi() == 0) fmain += "if(which == 2 || which == 5) pos.z = 0.;\n";
+    if(nilv::get_nsi() == 2) fmain += "if(which == 6 || which == 7) pos.z = 0.;\n";
     else if(mtwisted) {
       fmain += "pos = twist_coordinates(pos, sides-2, which);\n";
       string spinner = "h = cspin(0, 1, PI) * h;\n";
@@ -1484,9 +1484,9 @@ void raygen::emit_iterate(int gid1) {
 
   if(mtwisted) fmain +=
     "    if(twist_dark(position, sides-2)) col.xyz /= 2.;\n";
-  else if(nil && nilv::nil_structure_index == 0) fmain +=
+  else if(nilv::get_nsi() == 0) fmain +=
     "    if(abs(abs(position.x)-abs(position.y)) < .005) col.xyz /= 2.;\n";
-  else if(nil && nilv::nil_structure_index == 2) {
+  else if(nilv::get_nsi() == 2) {
     string hsqrt3 = to_glsl(sqrt(3)/2);
     fmain += "mediump float x0 = position.x; mediump float y0 = position.y;\n";
     fmain +=
