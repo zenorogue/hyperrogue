@@ -693,6 +693,27 @@ void geometry_information::prepare_basics() {
   hexhexdist = fake::in() ?
     2 * hdist0(mid(xspinpush0(M_PI/S6, hexvdist), xspinpush0(-M_PI/S6, hexvdist)))
     : hdist(xpush0(crossf), xspinpush0(TAU/S7, crossf));
+
+  if(fake::in() && BITRUNCATED) {
+    vector<pair<ld, ld>> vals;
+    vals.emplace_back(S7, fake::around / 3);
+    vals.emplace_back(S3*2, fake::around * 2 / 3);
+    ld edgelength = euclid ? 1 : arcm::compute_edgelength(vals);
+
+    // circumradius and inradius, for S7 and S6 shapes
+    auto c7 = asin_auto(sin_auto(edgelength/2) / sin(M_PI / S7));
+    auto c6 = asin_auto(sin_auto(edgelength/2) / sin(M_PI / S6));
+    auto i7 = hdist0(mid(xpush0(c7), cspin(0, 1, 2*M_PI/S7) * xpush0(c7)));
+    auto i6 = hdist0(mid(xpush0(c6), cspin(0, 1, 2*M_PI/S6) * xpush0(c6)));
+
+    tessf = tessf; // undefined
+    crossf = i7 + i6;
+    hexf = c7;
+    hcrossf = hcrossf; // undefined: distance from heptagon center to big heptagon vertex
+    hexhexdist = i6 + i6;
+    hexvdist = c6;
+    rhexf = c6;
+    }
   
   DEBB(DF_GEOM | DF_POLY,
     (hr::format("S7=%d S6=%d hexf = " LDF" hcross = " LDF" tessf = " LDF" hexshift = " LDF " hexhex = " LDF " hexv = " LDF "\n", S7, S6, hexf, hcrossf, tessf, hexshift, 

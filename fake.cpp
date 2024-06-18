@@ -571,6 +571,8 @@ EX ld around_orig() {
     return arcm::current.N;
   #endif
   if(hat::in()) return 6;
+  if(WDIM == 2 && BITRUNCATED)
+    return 3;
   if(WDIM == 2)
     return S3;
   if(underlying == gRhombic3)
