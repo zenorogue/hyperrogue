@@ -1354,10 +1354,14 @@ EX namespace hybrid {
         }
       
       if(candidates.size() == 2 && candidates[0] != candidates[1]) {
+        if(!quotient) println(hlog, "two candidates in shift : ", candidates);
         int val = candidates[0] - candidates[1];
+        int old_disc_quotient = disc_quotient;
         if(disc_quotient == 0) disc_quotient = val;
         disc_quotient = gcd(val, disc_quotient);
         if(disc_quotient < 0) disc_quotient = -disc_quotient;
+        if(old_disc_quotient != disc_quotient && !in_underlying([] { return quotient; }))
+          addMessage(XLAT("ERROR: failed to solve the twist values, the map will be incorrect", its(disc_quotient)));
         }
   
       int val = 0;
