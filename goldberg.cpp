@@ -734,7 +734,6 @@ EX namespace gp {
       ld scale = 1 / hypot_d(2, next);
       if(!GOLDBERG) scale = 1;
       cgi.crossf *= scale;
-      cgi.hepvdist *= scale;
       cgi.hexhexdist *= scale;
       cgi.hexvdist *= scale;
       cgi.rhexf *= scale;

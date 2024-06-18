@@ -480,7 +480,6 @@ EX void compute_geometry() {
   if(IRREGULAR) {
     ld scale = sqrt(isize(cells_of_heptagon) * 1. / isize(cells));
     cgi.crossf *= scale;
-    cgi.hepvdist *= scale;
     cgi.rhexf *= scale;
     cgi.hexhexdist *= scale;
     cgi.hexvdist *= scale;

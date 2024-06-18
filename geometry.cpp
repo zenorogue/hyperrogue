@@ -168,8 +168,7 @@ struct geometry_information {
   /** distance between hexagon vertex and hexagon center */
   ld hexvdist;
   
-  /** distance between heptagon vertex and hexagon center (either hcrossf or something else) */
-  ld hepvdist;
+  ld unused_value_1; /* removed */
 
   /** distance from heptagon center to heptagon vertex (either hexf or hcrossf) */
   ld rhexf;
