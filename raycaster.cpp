@@ -1410,7 +1410,7 @@ void raygen::emit_iterate(int gid1) {
     else if(mtwisted) {
       fmain += "pos = twist_coordinates(pos, sides-2, which);\n";
       string spinner = "h = cspin(0, 1, PI) * h;\n";
-      string calc_dxy = nil ? "dx = h.x; dy = h.y;\n" : sl2 ?
+      string calc_dxy = nil ? "dx = h.x; dy = -h.y;\n" : sl2 ?
             "dx = -2. * (h.y*h.z - h.x*h.w);\n"
             "dy = -2. * (h.x*h.z + h.y*h.w);\n" :
             "dx = +2. * (h.x*h.z + h.y*h.w);\n"
