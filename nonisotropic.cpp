@@ -1367,7 +1367,7 @@ EX namespace hybrid {
         if(disc_quotient == 0) disc_quotient = val;
         disc_quotient = gcd(val, disc_quotient);
         if(disc_quotient < 0) disc_quotient = -disc_quotient;
-        if(old_disc_quotient != disc_quotient && !in_underlying([] { return quotient; }))
+        if(old_disc_quotient != disc_quotient && !in_underlying([] { return quotient || sphere; }))
           addMessage(XLAT("ERROR: failed to solve the twist values, the map will be incorrect", its(disc_quotient)));
         }
   
