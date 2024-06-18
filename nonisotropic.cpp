@@ -2683,7 +2683,7 @@ EX namespace stretch {
     }
 
   EX bool applicable() {
-    return mtwisted || (cgflags & qSTRETCHABLE);
+    return (mtwisted && !nil) || (cgflags & qSTRETCHABLE);
     }
 
   EX bool in() {
