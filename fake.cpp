@@ -103,6 +103,10 @@ EX namespace fake {
         return underlying_map->get_corner(c, cid, cf);
         }
 
+      if(standard_tiling() && BITRUNCATED) {
+        return underlying_map->get_corner(c, cid, cf);
+        }
+
       hyperpoint h;
       h = FPIU(currentmap->get_corner(c, cid, cf));
       return befake(h);
@@ -553,6 +557,8 @@ EX ld compute_euclidean() {
   if(arcm::in()) return arcm::current.N * 2 / arcm::current.euclidean_angle_sum;
   #endif
   if(underlying == gAperiodicHat) return 6;
+  if(WDIM == 2 && BITRUNCATED) return 9 / (4.5 - 3. / S7 - 6. / S6);
+
   if(WDIM == 2) return 4 / (S7-2.) + 2;
 
 
