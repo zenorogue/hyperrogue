@@ -1421,7 +1421,7 @@ void raygen::emit_iterate(int gid1) {
             "mediump float vx = asinh(dx / cosh(2.*vy)) / 2.;\n" :
             "mediump float vy = -asin(dy)/2.;\n"
             "mediump float vx = asin(dx / cos(2.*vy)) / 2.;\n";
-      string calc_vz = nil ? "mediump float vz = h.z - h.x * h.y / 2;\n" : "float vz = atan2(h1[2], h1[3]);\n";
+      string calc_vz = nil ? "mediump float vz = h.z - h.x * h.y / 2.;\n" : "float vz = atan2(h1[2], h1[3]);\n";
       string calc_h1 = nil ? "" : sl2 ?
             "vec4 h1 = lorentz(1, 3, -vy) * lorentz(0, 2, -vy) * lorentz(0, 3, -vx) * lorentz(2, 1, vx) * h;\n" :
             "vec4 h1 = cspin(0, 3, vy) * cspin(1, 2, -vy) * cspin(1, 3, -vx) * cspin(0, 2, -vx) * h;\n";
