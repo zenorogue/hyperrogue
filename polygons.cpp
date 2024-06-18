@@ -891,7 +891,7 @@ hyperpoint ray_kleinize_twisted(hyperpoint h, int ks, int id) {
 
   if(id < ks) h = spin(-TAU * id / ks) * h;
 
-  if(nil) return hyperpoint(x, y, z - x * y / 2, 1);
+  if(nil) return id >= ks ? hyperpoint(x, y, 0, 1) : hyperpoint(x, y, (z - x * y / 2) / nilv::nilwidth / nilv::nilwidth, 1);
 
   ld dx, dy;
 
