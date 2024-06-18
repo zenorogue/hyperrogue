@@ -855,7 +855,7 @@ void raygen::move_forward() {
       "  mediump vec4 nposition = v;\n";
       }
 
-    bool reg = hyperbolic || sphere || euclid || sl2 || gproduct;
+    bool reg = hyperbolic || sphere || euclid || sl2 || gproduct || mtwisted;
 
     if(reg) {
       string s = (mtwisted || gproduct) ? "-2" : "";
@@ -883,12 +883,12 @@ void raygen::move_forward() {
     string hnilw3 = to_glsl(nilv::nilwidth * nilv::nilwidth * sqrt(3) / 8);
     string hsqrt3 = to_glsl(sqrt(3)/2);
 
-    if(nil && nilv::nil_structure_index == 0) {
+    if(!mtwisted && nil && nilv::nil_structure_index == 0) {
       fmain +=
       "mediump float rz = (abs(nposition.x) > abs(nposition.y) ? -nposition.x*nposition.y : 0.) + nposition.z;\n";
       fmain += "rz += nposition.x * nposition.y * " + comu + ";";
       }
-    if(nil && nilv::nil_structure_index == 2) {
+    if(!mtwisted && nil && nilv::nil_structure_index == 2) {
       fmain += "mediump float x0 = nposition.x; mediump float y0 = nposition.y;\n";
       fmain +=
         "mediump float x1 = nposition.x * .5 + nposition.y * " + hsqrt3 + ";\n"
@@ -987,14 +987,14 @@ void raygen::move_forward() {
         "if(nposition.z > log(2.)/2.) which = nposition.x > 0. ? 3 : 2;\n"
         "if(nposition.z <-log(2.)/2.) which = nposition.y > 0. ? 7 : 6;\n";
       }
-    else if(nil && nilv::nil_structure_index == 0) fmain +=
+    else if(nil && !mtwisted && nilv::nil_structure_index == 0) fmain +=
         "if(nposition.x > "+hnilw+") which = 3;\n"
         "if(nposition.x <-"+hnilw+") which = 0;\n"
         "if(nposition.y > "+hnilw+") which = 4;\n"
         "if(nposition.y <-"+hnilw+") which = 1;\n"
         "if(rz > "+hnilw2+") which = 5;\n"
         "if(rz <-"+hnilw2+") which = 2;\n";
-    else if(nil && nilv::nil_structure_index == 2) fmain +=
+    else if(nil && !mtwisted && nilv::nil_structure_index == 2) fmain +=
         "if(nposition.x > "+hnilw+") which = 0;\n"
         "if(nposition.x <-"+hnilw+") which = 3;\n"
         "if(nposition.x/2.+nposition.y*"+hsqrt3+" > "+hnilw+") which = 5;\n"
@@ -1484,10 +1484,9 @@ void raygen::emit_iterate(int gid1) {
 
   if(mtwisted) fmain +=
     "    if(twist_dark(position, sides-2)) col.xyz /= 2.;\n";
-  if(nil && nilv::nil_structure_index == 0) fmain +=
+  else if(nil && nilv::nil_structure_index == 0) fmain +=
     "    if(abs(abs(position.x)-abs(position.y)) < .005) col.xyz /= 2.;\n";
-
-  if(nil && nilv::nil_structure_index == 2) {
+  else if(nil && nilv::nil_structure_index == 2) {
     string hsqrt3 = to_glsl(sqrt(3)/2);
     fmain += "mediump float x0 = position.x; mediump float y0 = position.y;\n";
     fmain +=
