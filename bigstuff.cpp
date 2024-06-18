@@ -122,14 +122,28 @@ EX int compassDist(cell *c) {
   return NOCOMPASS;
   }
 
+/** identify the compass target that compassDist is talking about */
+EX const void *whichCompass(cell *c) {
+  if(sphere || quotient) return nullptr;
+  if(eubinary || c->master->alt) return c->master->alt->alt;
+  if(isHaunted(c->land) || c->land == laGraveyard) return &linf[laHaunted];
+  return &NOCOMPASS;
+  }
+
 EX cell *findcompass(cell *c) {
   int d = compassDist(c);
-  if(d == NOCOMPASS) return NULL;
+  if(among(d, NOCOMPASS, ALTDIST_BOUNDARY, ALTDIST_UNKNOWN, ALTDIST_ERROR)) return NULL;
+  auto w = whichCompass(c);
   
   while(inscreenrange(c)) {
     if(!eubinary && !sphere && !quotient)
       currentmap->extend_altmap(c->master);
-    forCellEx(c2, c) if(compassDist(c2) < d) {
+    forCellEx(c2, c) if(w == whichCompass(c2) && compassDist(c2) < d) {
+      c = c2;
+      d = compassDist(c2);
+      goto nextk;
+      }
+    for(int i=0; i<c->master->type; i++) for(int j=0; j<c->master->cmove(i)->type; j++) if(cell *c2 = c->master->cmove(i)->cmove(j)->c7) if(w == whichCompass(c2) && compassDist(c2) < d) {
       c = c2;
       d = compassDist(c2);
       goto nextk;
