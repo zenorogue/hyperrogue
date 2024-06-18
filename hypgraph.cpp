@@ -1678,6 +1678,7 @@ EX bool confusingGeometry() {
   #if MAXMDIM >= 4
   if(reg3::ultra_mirror_in()) return true;
   #endif
+  if(mproduct) return (hybrid::csteps && !PIU(fake::in() && !fake::multiple)) || PIU(confusingGeometry());
   return quotient || elliptic || (fake::in() && fake::multiple);
   }
 
