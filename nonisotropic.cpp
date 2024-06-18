@@ -1328,8 +1328,8 @@ EX namespace hybrid {
         transmatrix lT = twist::lift_matrix(uT);
         transmatrix lU = twist::lift_matrix(uU);
         transmatrix lT1 = twist::lift_matrix(uT1);
-        if(!orig_height.count(cw0.at)) orig_height[cw0.at] = (lT*C0) [2];
-        ld diff = (lT * lU * iso_inverse(lT1) * C0)[2] - orig_height[cw0.at];
+        if(!orig_height.count(cw0.at)) orig_height[cw0.at] = (lT*C0) [2] / nilv::nilwidth / nilv::nilwidth;
+        ld diff = (lT * lU * iso_inverse(lT1) * C0)[2] / nilv::nilwidth / nilv::nilwidth - orig_height[cw0.at];
         if(!orig_height.count(cw0.peek())) orig_height[cw0.peek()] = -diff;
         diff += orig_height[cw0.peek()];
         if(abs(frac(diff / cgi.plevel + 0.5) - 0.5) > 1e-6) throw hr_exception("not an integer in get_shift");
@@ -2352,19 +2352,19 @@ EX namespace twist {
 #if MAXMDIM >= 4
   EX transmatrix uxpush(ld x) { 
     if(sl2) return xpush(x);
-    if(nil) return xpush(x*2);
+    if(nil) return xpush(x*2*nilv::nilwidth);
     return cspin(1, 3, x) * cspin(0, 2, x);
     }
 
   EX transmatrix uypush(ld y) { 
     if(sl2) return ypush(y);
-    if(nil) return ypush(y*2);
+    if(nil) return ypush(y*2*nilv::nilwidth);
     return cspin(0, 3, -y) * cspin(1, 2, y);
     }
      
   EX transmatrix uzpush(ld z) {
     if(sl2) return zpush(z);
-    if(nil) return zpush(z) * spin(-2*z);
+    if(nil) return zpush(z*nilv::nilwidth*nilv::nilwidth) * spin(-2*z);
     return cspin(3, 2, -z) * cspin(0, 1, -z);
     }
   
@@ -2446,6 +2446,15 @@ EX namespace twist {
       return M = lift_matrix(T);
       }
     };
+
+  EX void clear_twisted_matrices() {
+    saved_matrices_ray.clear();
+    for(auto& m: allmaps) {
+      auto m1 = dynamic_cast<hrmap_twisted*> (m);
+      if(m1) m1->saved_matrices.clear();
+      }
+    }
+
 
   /** reinterpret the given point of rotspace as a rotation matrix in the underlying geometry (note: this is the inverse)
    *  note: you should already be in underlying geometry */

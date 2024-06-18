@@ -715,7 +715,10 @@ EX void menuitem_nilwidth(key_type key) {
   dialog::addSelItem(XLAT("Nil width"), fts(nilv::nilwidth), key);
   dialog::add_action([] {
     dialog::editNumber(nilv::nilwidth, 0.01, 2, 0.1, 1, XLAT("Nil width"), "");
-    dialog::get_ne().reaction = ray::reset_raycaster;
+    dialog::get_ne().reaction = [] {
+      ray::reset_raycaster();
+      twist::clear_twisted_matrices();
+      };
     dialog::bound_low(0.01);
     });
   }
@@ -1033,9 +1036,10 @@ EX void showEuclideanMenu() {
       dialog::get_ne().reaction = ray::reset_raycaster;
       });
     }
-  else if(mhybrid) {
+  else if(mtwisted) {
     dialog::addSelItem(XLAT("number of levels"), its(hybrid::csteps / cgi.single_step), 'L');
     dialog::add_action(hybrid::configure_period);
+    if(nil) menuitem_nilwidth('v');
     }
   else if(bt::in()) {
     menuitem_binary_width('v');
