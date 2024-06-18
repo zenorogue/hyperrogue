@@ -1362,19 +1362,19 @@ EX void check_cgi() {
   cgip = &cgis[s];
   cgi.timestamp = ++ntimestamp;
   if(mhybrid) hybrid::underlying_cgip->timestamp = ntimestamp;
-  if(fake::in()) fake::underlying_cgip->timestamp = ntimestamp;
+  if(fake::in() || (mhybrid && PIU(fake::in()))) fake::underlying_cgip->timestamp = ntimestamp;
   #if CAP_ARCM
   if(arcm::alt_cgip[0]) arcm::alt_cgip[0]->timestamp = ntimestamp;
   if(arcm::alt_cgip[1]) arcm::alt_cgip[1]->timestamp = ntimestamp;
   #endif
   
-  int limit = 4;
-  for(auto& t: cgis) if(t.second.use_count) limit++;
+  int limit = 3;
+  for(auto& t: cgis) if(t.second.use_count || t.second.timestamp == ntimestamp) limit++;
   if(isize(cgis) > limit) {
     vector<pair<int, string>> timestamps;
     for(auto& t: cgis) if(!t.second.use_count) timestamps.emplace_back(-t.second.timestamp, t.first);
     sort(timestamps.begin(), timestamps.end());
-    while(isize(timestamps) > 4) {
+    while(isize(timestamps) > limit && timestamps.back().first != -ntimestamp) {
       DEBB(DF_GEOM, ("erasing geometry ", timestamps.back().second));
       cgis.erase(timestamps.back().second);
       timestamps.pop_back();
