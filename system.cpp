@@ -362,6 +362,10 @@ EX void initgame() {
     makeEmpty(cwt.at);
     }
 
+  // make the starting point safe in this setting
+  if(specialland == laPalace && geometry == gNormal && PURE)
+    cwt.at->wall = waOpenPlate;
+
   if(specialland == laMinefield && closed_or_bounded) {
     bfs();
     generate_mines();
