@@ -316,15 +316,15 @@ void set_or_configure_geometry(eGeometry g) {
   else {
     bool quo = false;
     if(among(g, gProduct, gTwistedProduct)) {
-      if(WDIM == 3 || (g == gTwistedProduct && euclid)) {
-        addMessage(
-          g == gTwistedProduct ?
-            XLAT("Only works with 2D non-Euclidean geometries")
-          : XLAT("Only works with 2D geometries")
-            );
+      if(WDIM == 3) {
+        addMessage(XLAT("Only works with 2D geometries"));
         return;
         }
       if(g == gTwistedProduct) {
+        if(nonorientable) {
+          addMessage(XLAT("Only works in orientable spaces"));
+          return;
+          }
         bool ok = true;
         quo = sphere || quotient;
         if(arcm::in()) ok = PURE;
