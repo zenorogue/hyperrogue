@@ -1129,8 +1129,9 @@ EX void show_niltorus3() {
     }
   dialog::addSelItem(XLAT("honeycomb"), XLAT(nil_structures[S7_edit]->name), 'h');
   dialog::add_action([] { S7_edit = (S7_edit+1)%isize(nil_structures);  });
-  
-  bool ok = (!nilperiod_edit[1]) || (nilperiod_edit[2] && nilperiod_edit[1] % nilperiod_edit[2] == 0);
+
+  int hx = nil_structures[S7_edit]->mvec_hex ? 2 : 1;
+  bool ok = !zgmod(nilperiod_edit[0]*hx, nilperiod_edit[2]) && !zgmod(nilperiod_edit[1]*hx, nilperiod_edit[2]);
 
   dialog::addBreak(50);
 
@@ -1145,7 +1146,7 @@ EX void show_niltorus3() {
       start_game();
       });
     }
-  else dialog::addInfo(XLAT("Y period must be divisible by Z period"));
+  else dialog::addInfo(XLAT("Y period and X period must be divisible by Z period"));
     
   dialog::addBreak(50);
   dialog::addBack();
@@ -1260,6 +1261,13 @@ EX namespace hybrid {
     check_cgi(); cgi.require_basics();
     if(!hybrid::csteps || gmod(cgi.psl_steps, hybrid::csteps)) {
       hybrid::csteps = cgi.psl_steps;
+      if(nil) {
+        auto& T = euc::eu_input.user_axes;
+        hybrid::csteps = gcd(gcd(T[0][0], T[1][1]), gcd(T[0][1], T[1][0]));
+        if(S3 == 3) hybrid::csteps *= 2;
+        if(BITRUNCATED) hybrid::csteps *= S3;
+        if(INVERSE) hybrid::csteps *= 2;
+        }
       hybrid::reconfigure();
       }
     }
@@ -3139,7 +3147,9 @@ EX namespace nisot {
       }
     else if(argis("-twisted-product")) {
       PHASEFROM(2);
+      bool quo = sphere || quotient;
       set_geometry(gTwistedProduct);
+      if(quo) hybrid::fixup_csteps();
       return 0;
       }
     else if(argis("-rotspace")) {
