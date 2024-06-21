@@ -8492,7 +8492,7 @@ S("You are currently in a product space.", "Momentálně se nacházíš v produk
 
 S("Nil quotient spaces", "Kvocientové prostory v Nil")
 S("honeycomb", "mřížka")
-S("Y period must be divisible by Z period", "perioda Y musí být dělitelná periodou Z")
+S("Y period * X period (*2 for hex) must be divisible by Z period", "perioda Y * perioda X musí být dělitelná periodou Z")
 S("quotient product spaces", "kvocientové produktové prostory")
 S("Set to 0 to make it non-periodic.", "Pro neperiodičnost nastav na 0.")
 S("Works if the underlying space is symmetric.", "Funguje, je-li základní prostor symetrický.")

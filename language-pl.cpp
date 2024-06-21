@@ -8211,7 +8211,7 @@ S("You are currently in a product space.", "Jesteś w przestrzeni produktowej.")
 
 S("Nil quotient spaces", "Przestrzenie ilorazowe Nil")
 S("honeycomb", "siatka")
-S("Y period must be divisible by Z period", "okres Y musi być podzielny przez okres Z")
+S("Y period * X period (*2 for hex) must be divisible by Z period", "okres Y * okres X (*2 na heksach) musi być podzielny przez okres Z")
 S("quotient product spaces", "ilorazowe przestrzenie produktowe")
 S("Set to 0 to make it non-periodic.", "Ustaw 0, by było nieokresowe.")
 S("Works if the underlying space is symmetric.", "Działa dla symetrycznej przestrzeni bazowej.")

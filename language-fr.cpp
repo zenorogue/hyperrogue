@@ -8101,7 +8101,7 @@ S("You are currently in a product space.", "Vous êtes actuellement dans un espa
 
 S("Nil quotient spaces", "espaces quotients de Nil")
 S("honeycomb", "grille")
-S("Y period must be divisible by Z period", "La période Y doit être divisible par la période Z")
+S("Y period * X period (*2 for hex) must be divisible by Z period", "La période Y * la période X doit être divisible par la période Z")
 S("quotient product spaces", "quotient d'espaces produits")
 S("Set to 0 to make it non-periodic.", "Régler à 0 pour le rendre apériodique.")
 S("Works if the underlying space is symmetric.", "Marche si l'espace sous-jacent est symétrique.")
