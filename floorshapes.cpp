@@ -1257,7 +1257,112 @@ EX void bind_floor_texture(hpcshape& li, int id) {}
 
 EX ld floor_texture_square_size;
 
+struct texture_params {
+  ld escher_strength;
+  ld escher_strength2;
+  ld escher_width;
+  ld grid_strength;
+  int grid_brightness;
+  ld grid_width;
+  int scratches_random, scratches_ortho, scratches_parallel, scratches_radial, scratches_around;
+  int scratch_seed;
+  ld scratch_width, scratch_length;
+  int scratch_alpha, scratch_bright;
+  };
+
+texture_params tparams;
+
+void reset_floor_textures() {
+  if(floor_textures) delete floor_textures;
+  floor_textures = NULL;
+  }
+
+EX void add_texture_params() {
+  auto& tp = tparams;
+  param_f(tp.escher_strength, "texture_escher_strength", 2.4)
+  ->editable(0, 10, 0.1, "strength of the Escher texture (inside)", "", 'i')
+  ->set_reaction(reset_floor_textures);
+  param_f(tp.escher_strength2, "texture_escher_strength2", 1.5)
+  ->editable(0, 10, 0.1, "strength of the Escher texture (boundary)", "", 'b')
+  ->set_reaction(reset_floor_textures);
+  param_f(tp.escher_width, "texture_escher_width", 1)
+  ->editable(0, 10, 0.1, "strength of the Escher texture (boundary width)", "", 'w')
+  ->set_reaction(reset_floor_textures);
+  param_f(tp.grid_strength, "grid_strength", 19.2)
+  ->editable(0, 50, 1, "grid strength", "", 'a')
+  ->set_reaction(reset_floor_textures);
+  param_i(tp.grid_brightness, "grid_brightness", 0x40)
+  ->editable(0, 255, 16, "grid darkness", "", 'd')
+  ->set_reaction(reset_floor_textures);
+  param_f(tp.grid_width, "grid_width", 8)
+  ->editable(0, 16, 1, "grid width", "", 'g')
+  ->set_reaction(reset_floor_textures);
+  param_i(tp.scratches_random, "texture_scratches_random", ISMOBILE ? 10 : 1000)
+  ->editable(0, 10000, 0.1, "the number of random scratches", "", 'n')
+  ->set_sets(dialog::scaleSinh)
+  ->set_reaction(reset_floor_textures);
+  param_i(tp.scratches_ortho, "texture_scratches_ortho", 0)
+  ->editable(0, 10000, 0.1, "the number of orthogonal scratches", "", 'o')
+  ->set_sets(dialog::scaleSinh)
+  ->set_reaction(reset_floor_textures);
+  param_i(tp.scratches_parallel, "texture_scratches_para", 0)
+  ->editable(0, 10000, 0.1, "the number of parallel scratches", "", 'p')
+  ->set_sets(dialog::scaleSinh)
+  ->set_reaction(reset_floor_textures);
+  param_i(tp.scratches_radial, "texture_scratches_radial", 0)
+  ->editable(0, 10000, 0.1, "the number of radial scratches", "", 'r')
+  ->set_sets(dialog::scaleSinh)
+  ->set_reaction(reset_floor_textures);
+  param_i(tp.scratches_around, "texture_scratches_around", 0)
+  ->editable(0, 10000, 0.1, "the number of scratches around", "", 'c')
+  ->set_sets(dialog::scaleSinh)
+  ->set_reaction(reset_floor_textures);
+  param_i(tp.scratch_seed, "texture_scratch_seed", 0)
+  ->editable(0, 1000, 1, "the seed for scratch generation", "", 's')
+  ->set_reaction(reset_floor_textures);
+  param_f(tp.scratch_width, "texture_scratch_width", 1)
+  ->editable(0, 16, 1, "scratch width", "", 'h')
+  ->set_reaction(reset_floor_textures);
+  param_f(tp.scratch_length, "texture_scratch_length", 0.1)
+  ->editable(0, 5, 0.1, "scratch length", "", 'l')
+  ->set_reaction(reset_floor_textures);
+  param_i(tp.scratch_alpha, "texture_scratch_alpha", 16)
+  ->editable(0, 255, 16, "scratch alpha", "", 'c')
+  ->set_reaction(reset_floor_textures);
+  param_i(tp.scratch_bright, "texture_scratch_bright", 16)
+  ->editable(0, 255, 16, "scratch brightness", "", 'f')
+  ->set_reaction(reset_floor_textures);
+  }
+
+EX void edit_texture_params() {
+  cmode = sm::SIDE;
+  gamescreen();
+  dialog::init(XLAT("wall/floor texture settings"));
+  auto& tp = tparams;
+  add_edit(tp.escher_strength);
+  add_edit(tp.escher_strength2);
+  add_edit(tp.escher_width);
+
+  add_edit(tp.grid_strength);
+  add_edit(tp.grid_brightness);
+  add_edit(tp.grid_width);
+
+  add_edit(tp.scratches_random);
+  add_edit(tp.scratches_ortho);
+  add_edit(tp.scratches_parallel);
+  add_edit(tp.scratches_radial);
+  add_edit(tp.scratches_around);
+  add_edit(tp.scratch_seed);
+  add_edit(tp.scratch_width);
+  add_edit(tp.scratch_length);
+  add_edit(tp.scratch_alpha);
+  add_edit(tp.scratch_bright);
+  dialog::display();
+  }
+
 void draw_shape_for_texture(floorshape* sh) {
+
+  auto& tp = tparams;
 
   int id = sh->id;
   
@@ -1268,48 +1373,74 @@ void draw_shape_for_texture(floorshape* sh) {
   ld gx = (id % 8) * s3 - 3.5 * s3;
   ld gy = (id / 8) * s3 - 3.5 * s3;
 
+  auto brightalpha = [] (int bright, int alpha) {
+    if(bright > 255) bright = 255;
+    if(bright < 0) bright = 0;
+    if(alpha > 255) alpha = 255;
+    if(alpha < 0) alpha = 0;
+    return bright * 0x1010100 + alpha;
+    };
+
+  dynamicval<ld> v(vid.linewidth, vid.linewidth);
+
   if(1) {
-    dynamicval<ld> v(vid.linewidth, 8);
     curvepoint(eupush(gx+s1, gy-s1) * C0);
     curvepoint(eupush(gx+s1, gy+s1) * C0);
     curvepoint(eupush(gx-s1, gy+s1) * C0);
     curvepoint(eupush(gx-s1, gy-s1) * C0);
     curvepoint(eupush(gx+s1, gy-s1) * C0);
-    queuecurve(shiftless(Id), 0x000000FF, 0xFFFFFFFF - 0x1010100 * (sh->pstrength * 24/10), PPR::LAKELEV);
+
+    queuecurve(shiftless(Id), 0x000000FF, brightalpha(255 - sh->pstrength * tp.escher_strength, 255), PPR::LAKELEV);
     }
 
-  poly_outline = 0xFFFFFFFF - 0x1010100 * (sh->pstrength * 3/2);
+  vid.linewidth = tp.escher_width;
+  poly_outline = brightalpha(255 - sh->pstrength * tp.escher_strength2, 255);
 
   for(int a=-1; a<=1; a++)
   for(int b=-1; b<=1; b++)
     queuepoly(shiftless(eupush(gx+a, gy+b)), sh->b[0], 0xFFFFFFFF);
 
+  vid.linewidth = 0;
   if(sh == &cgi.shCrossFloor) {
     queuepoly(shiftless(eupush(gx, gy) * spin(45._deg)), cgi.shCross, 0x808080FF);
     }
 
   if(1) {
-    dynamicval<ld> v(vid.linewidth, 8);
+    vid.linewidth = tp.grid_width;
     curvepoint(eupush(gx+sd, gy-sd) * C0);
     curvepoint(eupush(gx+sd, gy+sd) * C0);
     curvepoint(eupush(gx-sd, gy+sd) * C0);
     curvepoint(eupush(gx-sd, gy-sd) * C0);
     curvepoint(eupush(gx+sd, gy-sd) * C0);
-    queuecurve(shiftless(Id), 0x40404000 + sh->fstrength * 192/10, 0, PPR::LINE);
+    queuecurve(shiftless(Id), brightalpha(tp.grid_brightness, sh->fstrength * tp.grid_strength), 0, PPR::LINE);
     }
-  
-  for(int i=0; i<(ISMOBILE ? 10 : 1000); i++) {
-    hyperpoint h1 = hpxy(sd * (6*randd()-3), sd * (6*randd()-3));
-    hyperpoint h2 = hpxy(sd * (6*randd()-3), sd * (6*randd()-3));
-    ld d = hdist(h1, h2);
-    hyperpoint h3 = h1 + (h2-h1) /d * min(d, .1);
-    for(int a=0; a<4; a++) {
-      curvepoint(eupush(gx,gy) * eupush(spin(90._deg*a) * h1) * C0);
-      curvepoint(eupush(gx,gy) * eupush(spin(90._deg*a) * h3) * C0);
-      queuecurve(shiftless(Id), 0x10101010, 0, PPR::LINE);
+
+  std::mt19937 scratchgen(tp.scratch_seed);
+
+  auto srandd = [&] () { return randf_from(scratchgen); };
+
+  vid.linewidth = tp.scratch_width;
+  auto scratcher = [&] (int qty, hr::function<void(hyperpoint&, hyperpoint&)> f) {
+    for(int i=0; i<qty; i++) {
+      hyperpoint h1 = hpxy(sd * (6*srandd()-3), sd * (6*srandd()-3));
+      hyperpoint h2 = hpxy(sd * (6*srandd()-3), sd * (6*srandd()-3));
+      f(h1, h2);
+      ld d = hdist(h1, h2);
+      hyperpoint h3 = h1 + (h2-h1) /d * min(d, tp.scratch_length);
+      for(int a=0; a<4; a++) {
+        curvepoint(eupush(gx,gy) * eupush(spin(90._deg*a) * h1) * C0);
+        curvepoint(eupush(gx,gy) * eupush(spin(90._deg*a) * h3) * C0);
+        queuecurve(shiftless(Id), brightalpha(tp.scratch_bright, tp.scratch_alpha), 0, PPR::LINE);
+        }
       }
-    }
-  
+    };
+
+  scratcher(tp.scratches_random, [] (hyperpoint& h1, hyperpoint& h2) { });
+  scratcher(tp.scratches_ortho, [] (hyperpoint& h1, hyperpoint& h2) { if(abs(h1[0]) > abs(h1[1])) h2[1] = h1[1]; else h2[0] = h1[0]; });
+  scratcher(tp.scratches_parallel, [] (hyperpoint& h1, hyperpoint& h2) { if(abs(h1[0]) < abs(h1[1])) h2[1] = h1[1]; else h2[0] = h1[0]; });
+  scratcher(tp.scratches_radial, [] (hyperpoint& h1, hyperpoint& h2) { h2 = C0; });
+  scratcher(tp.scratches_around, [] (hyperpoint& h1, hyperpoint& h2) { h2 = h1 + hyperpoint(h1[1], -h1[0], 0, 0); });
+
   auto ftv = get_floor_texture_vertices(sh->id);
   if(ftv) {
     ftv->tvertices.clear();

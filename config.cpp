@@ -1569,6 +1569,7 @@ EX void initConfig() {
   ->help("Do not draw if their distance is greater than the sight range (although some points might be closer). This is faster.");
 
   param_i(vid.texture_step, "wall-quality", 4);
+  add_texture_params();
   
   param_b(smooth_scrolling, "smooth-scrolling", false)
   ->editable("smooth scrolling", 'c');
@@ -3061,7 +3062,11 @@ EX void show3D() {
       dialog::get_di().extra_options = [] () { draw_radar(true); };
       });
     }
-  if(GDIM == 3) add_edit_wall_quality('W');
+  if(GDIM == 3) {
+    add_edit_wall_quality('W');
+    dialog::addItem(XLAT("wall/floor texture settings"), 'X');
+    dialog::add_action_push(edit_texture_params);
+    }
   #endif
   
   #if CAP_RUG
