@@ -1342,8 +1342,8 @@ EX namespace hybrid {
       auto& v = get_shift_current(cw0);
       if(v != SHIFT_UNKNOWN) return v;
 
-      if(nil) return in_underlying([&] { return get_shift(cw0); });
-      if(euclid && !quotient) {
+      /** note: will not be done in fix_bounded_cycles because then it is already called in underlying map, but that is fine */
+      if(nil) {
         /** we prevent possible 'two candidate' errors by computing the correct value, we know all the positions in the underlying map, so we can do that */
         transmatrix uT, uU, uT1;
         in_underlying([&] {
