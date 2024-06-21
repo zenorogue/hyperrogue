@@ -877,12 +877,11 @@ void geometry_information::compute_cornerbonus() { }
 
 // Make a wall
 
-EX int kleinize_sides;
+EX subcellshape *rk_shape;
 
-hyperpoint ray_kleinize_twisted(hyperpoint h, int ks, int id) {
+hyperpoint ray_kleinize_twisted(hyperpoint h, int ks, ld angle_of_zero, int id) {
 
-  /* todo: in Archimedean tilings it may be the case that pispin is incorrect, as shown by `angle of zero` -- need to carry it to raycaster */
-  h = pispin * h;
+  h = spin(angle_of_zero) * h;
 
   ld& x = h[0];
   ld& y = h[1];
@@ -925,7 +924,8 @@ hyperpoint ray_kleinize_twisted(hyperpoint h, int ks, int id) {
 hyperpoint ray_kleinize(hyperpoint h, int id, ld pz) {
   if(nilv::get_nsi() == 0 && among(id, 2, 5)) h[2] = 0;
   if(nilv::get_nsi() == 2 && among(id, 6, 7)) h[2] = 0;
-  if(mtwisted) return ray_kleinize_twisted(h, kleinize_sides, id);
+
+  if(mtwisted) return ray_kleinize_twisted(h, isize(rk_shape->faces)-2, rk_shape->angle_of_zero, id);
   #if CAP_BT
   if(hyperbolic && bt::in()) {
     // ld co = vid.binary_width / log(2) / 4;
@@ -945,6 +945,7 @@ void geometry_information::make_wall(int wo, int id, vector<hyperpoint> vertices
   int id1 = wo + id;
 
   wallstart.push_back(isize(raywall));
+  angle_of_zero.push_back(mtwisted ? rk_shape->angle_of_zero : 0);
 
   // orient correctly
   transmatrix T;

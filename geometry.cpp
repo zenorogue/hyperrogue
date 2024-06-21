@@ -132,6 +132,8 @@ struct subcellshape {
   vector<vector<char>> next_dir;
   /** useful in product geometries */
   vector<hyperpoint> walltester;
+  /** needed for twisted */
+  ld angle_of_zero;
 
   /** compute all the properties based on `faces`, for the main heptagon cellshape */
   void compute_hept();
@@ -168,8 +170,6 @@ struct geometry_information {
   /** distance between hexagon vertex and hexagon center */
   ld hexvdist;
   
-  ld unused_value_1; /* removed */
-
   /** distance from heptagon center to heptagon vertex (either hexf or hcrossf) */
   ld rhexf;
 
@@ -371,6 +371,7 @@ hpcshape
   vector<hyperpoint> walltester;
   
   vector<int> wallstart;
+  vector<ld> angle_of_zero; /* needed for twisted, especially Archimedean */
   vector<transmatrix> raywall;
 
   vector<struct plain_floorshape*> all_plain_floorshapes;

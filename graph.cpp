@@ -4355,6 +4355,7 @@ EX subcellshape& generate_subcellshape_if_needed(cell *c, int id) {
   for(int i=0; i<c1->type; i++)
     ss.faces.push_back({hybrid::get_corner(c1, i, 0, -1), hybrid::get_corner(c1, i, 0, +1), hybrid::get_corner(c1, i, 1, +1), hybrid::get_corner(c1, i, 1, -1)});
 
+  ss.angle_of_zero = -PIU(atan2(currentmap->adj(c1, 0)*C0));
   for(int a: {0,1}) {
     vector<hyperpoint> l;
     int z = a ? 1 : -1;
@@ -4395,7 +4396,7 @@ int hrmap::wall_offset(cell *c) {
     if(!cgi.wallstart.empty()) cgi.wallstart.pop_back();
     cgi.reserve_wall3d(wo + isize(ss.faces));
 
-    kleinize_sides = isize(ss.faces) - 2;
+    rk_shape = &ss;
     for(int i=0; i<isize(ss.faces); i++) {
       cgi.make_wall(wo, i, ss.faces[i]);
       cgi.walltester[wo + i] = ss.walltester[i];

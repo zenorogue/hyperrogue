@@ -161,7 +161,7 @@ EX bool requested() {
 #if HDR
 struct raycaster : glhr::GLprogram {
   GLint uStart, uStartid, uM, uLength;
-  GLint uWallstart, uWallX, uWallY;
+  GLint uWallstart, uWallangle, uWallX, uWallY;
   GLint tConnections, tWallcolor, tTextureMap, tVolumetric, tStart;
   GLint uBinaryWidth, uPLevel, uLP, uStraighten, uReflectX, uReflectY;
   GLint uLinearSightRange, uExpStart, uExpDecay;
@@ -204,6 +204,7 @@ raycaster::raycaster(string vsh, string fsh) : GLprogram(vsh, fsh) {
     uProjection = glGetUniformLocation(_program, "uProjection");
 
     uWallstart = glGetUniformLocation(_program, "uWallstart");
+    uWallangle = glGetUniformLocation(_program, "uWallangle");
     uWallX = glGetUniformLocation(_program, "uWallX");
     uWallY = glGetUniformLocation(_program, "uWallY");
     
@@ -332,6 +333,13 @@ struct raygen {
       return "uWallstart[" + s + "]";
     };
   
+  string getWallangle(string s) {
+    if(wall_via_texture)
+      return "getWallangle(" + s + ")";
+    else
+      return "uWallangle[" + s + "]";
+    };
+
   void compute_which_and_dist(int flat1, int flat2);
   void apply_reflect(int flat1, int flat2);
   void move_forward();
@@ -867,7 +875,7 @@ void raygen::move_forward() {
     "      }\n";
       if(mtwisted) fmain +=
     "   if(which == -1) {\n"
-    "     mediump float z = twist_zlevel(nposition, sides-2);\n"
+    "     mediump float z = twist_zlevel(nposition, sides-2, walloffset);\n"
     "     if(z > uPLevel) which = sides-1;\n"
     "     if(z <-uPLevel) which = sides-2;\n"
     "     }\n";
@@ -1408,8 +1416,8 @@ void raygen::emit_iterate(int gid1) {
     if(nilv::get_nsi() == 0) fmain += "if(which == 2 || which == 5) pos.z = 0.;\n";
     if(nilv::get_nsi() == 2) fmain += "if(which == 6 || which == 7) pos.z = 0.;\n";
     else if(mtwisted) {
-      fmain += "pos = twist_coordinates(pos, sides-2, which);\n";
-      string spinner = "h = cspin(0, 1, PI) * h;\n";
+      fmain += "pos = twist_coordinates(pos, sides-2, which, which+walloffset);\n";
+      string spinner = "h = cspin(0, 1, getWallangle(wai)) * h;\n";
       string calc_dxy = nil ? "dx = h.x; dy = -h.y;\n" : sl2 ?
             "dx = -2. * (h.y*h.z - h.x*h.w);\n"
             "dy = -2. * (h.x*h.z + h.y*h.w);\n" :
@@ -1426,7 +1434,7 @@ void raygen::emit_iterate(int gid1) {
             "vec4 h1 = lorentz(1, 3, -vy) * lorentz(0, 2, -vy) * lorentz(0, 3, -vx) * lorentz(2, 1, vx) * h;\n" :
             "vec4 h1 = cspin(0, 3, vy) * cspin(1, 2, -vy) * cspin(1, 3, -vx) * cspin(0, 2, -vx) * h;\n";
       fsh +=
-        "vec4 twist_coordinates(vec4 h, int ks, int id) {\n"
+        "vec4 twist_coordinates(vec4 h, int ks, int id, int wai) {\n"
           +spinner+
           "if(id < ks) h = cspin(0, 1, -TAU * float(id) / float(ks)) * h;\n"
           +dcalc_dxy +
@@ -1439,13 +1447,13 @@ void raygen::emit_iterate(int gid1) {
            "return dx*dx+dy*dy;\n"
            "}\n";
       fsh +=
-        "mediump float twist_zlevel(vec4 h, int ks) {\n" + spinner + dcalc_dxy +
+        "mediump float twist_zlevel(vec4 h, int ks, int wai) {\n" + spinner + dcalc_dxy +
           "float alpha = (floor(atan2(dy, dx) * float(ks) / TAU + 0.5)) * TAU / float(ks);\n"
           "h = cspin(1, 0, alpha) * h;\n" + calc_dxy + calc_vxy + calc_h1 + calc_vz +
           "return vz;\n"
           "}\n\n";
       fsh +=
-        "mediump bool twist_dark(vec4 h, int ks) {\n" + spinner + dcalc_dxy +
+        "mediump bool twist_dark(vec4 h, int ks, int wai) {\n" + spinner + dcalc_dxy +
           "float alpha = atan2(dy, dx) * float(ks);\n"
           "return cos(alpha) < -0.99;\n"
           "}\n\n";
@@ -1458,10 +1466,10 @@ void raygen::emit_iterate(int gid1) {
         "pos /= pos.w;\n";
     else if(gproduct && bt::in()) fmain +=
         "pos.xy = deparabolic12(pos).xy;\n"
-        "pos.z = -pos.w; pos.w = 0.;\n"
-;
+        "pos.z = -pos.w; pos.w = 0.;\n";
     else if(gproduct) fmain +=
       "pos = vec4(pos.x/pos.z, pos.y/pos.z, -pos.w, 0);\n";
+
     fmain +=
     "    mediump vec2 inface = map_texture(pos, which+walloffset);\n"
     "    mediump vec3 tmap = texture2D(tTextureMap, u).rgb;\n"
@@ -1483,7 +1491,7 @@ void raygen::emit_iterate(int gid1) {
     "    col.xyz = col.xyz * d + uFogColor.xyz * (1.-d);\n";
 
   if(mtwisted) fmain +=
-    "    if(twist_dark(position, sides-2)) col.xyz /= 2.;\n";
+    "    if(twist_dark(position, sides-2, walloffset)) col.xyz /= 2.;\n";
   else if(nilv::get_nsi() == 0) fmain +=
     "    if(abs(abs(position.x)-abs(position.y)) < .005) col.xyz /= 2.;\n";
   else if(nilv::get_nsi() == 2) {
@@ -2008,11 +2016,20 @@ void raygen::create() {
         "  mediump vec4 v = texture2D(tWall, vec2((float(x)+.5) * uInvLengthWall, 0.625));\n"
         "  return int(v[0] / uInvLengthWall);\n"
         "  }\n";
+      if(mtwisted) fsh +=
+        "mediump float getWallangle(mediump int x) {\n"
+        "  mediump vec4 v = texture2D(tWall, vec2((float(x)+.5) * uInvLengthWall, 0.625));\n"
+        "  return v[1] * TAU;\n"
+        "  }\n";
       }
-    else fsh +=
+    else {
+      fsh +=
       "uniform mediump vec4 uWallX["+rays+"];\n"
       "uniform mediump vec4 uWallY["+rays+"];\n"
       "uniform mediump int uWallstart["+its(isize(cgi.wallstart))+"];\n";
+     if(mtwisted) fsh +=
+      "uniform mediump int uWallangle["+its(isize(cgi.wallstart))+"];\n";
+     }
 
     if(m_via_texture) {
       fsh +=
@@ -2647,13 +2664,14 @@ EX void reset_raycaster_map() {
   rmap = nullptr;
   }
 
-EX void load_walls(vector<glvertex>& wallx, vector<glvertex>& wally, vector<GLint>& wallstart) {
+EX void load_walls(vector<glvertex>& wallx, vector<glvertex>& wally, vector<GLint>& wallstart, vector<GLfloat>& wallangle) {
   int q = 0;
   if(isize(wallx)) {
     q = isize(wallx);
     wallstart.pop_back();
     }
   for(auto i: cgi.wallstart) wallstart.push_back(q + i);
+  for(auto i: cgi.angle_of_zero) wallangle.push_back(frac(i / TAU));
   dynamicval<eGeometry> g(geometry, gCubeTiling);
   for(auto& m: cgi.raywall) {
     wallx.push_back(glhr::pointtogl(m[0]));
@@ -2794,16 +2812,17 @@ EX void cast() {
 
   vector<glvertex> wallx, wally;
   vector<GLint> wallstart;
+  vector<GLfloat> wallangle;
 
   if(intra::in) {
     intra::resetter ir;
     for(int i=0; i<isize(intra::data); i++) {
       intra::switch_to(i);
-      load_walls(wallx, wally, wallstart);
+      load_walls(wallx, wally, wallstart, wallangle);
       }
     }
   else
-    load_walls(wallx, wally, wallstart);
+    load_walls(wallx, wally, wallstart, wallangle);
 
   if(wall_via_texture) {
     int wlength = next_p2(isize(wallx));
@@ -2821,8 +2840,10 @@ EX void cast() {
         }
       }
     // println(hlog, "wallrange = ", tie(minval, maxval), " wallx = ", isize(wallx), " wallstart = ", isize(cgi.wallstart));
-    for(int i=0; i<isize(wallstart); i++)
+    for(int i=0; i<isize(wallstart); i++) {
       w_map[i+2*wlength][0] = (wallstart[i]+.5) / wlength;
+      w_map[i+2*wlength][1] = wallangle[i];
+      }
     bind_array(w_map, o->tWall, txWall, 8, wlength);
     glUniform1f(o->uInvLengthWall, 1. / wlength);
     }
@@ -2830,6 +2851,7 @@ EX void cast() {
     glUniform1iv(o->uWallstart, isize(wallstart), &wallstart[0]);  
     glUniform4fv(o->uWallX, isize(wallx), &wallx[0][0]);
     glUniform4fv(o->uWallY, isize(wally), &wally[0][0]);
+    if(mtwisted) glUniform1fv(o->uWallangle, isize(wallangle), &wallangle[0]);
     }
 
   if(o->uLevelLines != -1)
