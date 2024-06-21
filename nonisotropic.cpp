@@ -1449,6 +1449,7 @@ EX namespace hybrid {
               cw++;
               }              
             else {
+              get_shift(cw);
               get_shift_current(cw) -= cd;
               get_shift_current(cw+wstep) += cd;
               cw++;
