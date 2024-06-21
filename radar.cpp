@@ -112,7 +112,7 @@ EX void draw_radar(bool cornermode) {
   
   ld cx = dual::state ? (dual::currently_loaded ? vid.xres/2+rad+2 : vid.xres/2-rad-2) :
           subscreens::in ? cd->xtop + cd->xsize - rad - 2 :
-          cornermode ? rad+2 : vid.xres-rad-2;
+          cornermode ? rad+2+vid.fsize : vid.xres-rad-2-vid.fsize;
   ld cy = subscreens::in ? cd->ytop + cd->ysize - rad - 2 - vid.fsize :
           vid.yres-rad-2 - vid.fsize;
   
