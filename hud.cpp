@@ -475,7 +475,9 @@ EX string mode_description1() {
   if(md == "") return "standard";
   return md.substr(1);
   }
-  
+
+EX bool radar_drawn;
+
 EX void drawStats() {
   if(vid.stereo_mode == sLR) return;
   draw_crosshair();
@@ -491,19 +493,25 @@ EX void drawStats() {
 
   bool cornermode = (vid.xres > vid.yres * 85/100 && vid.yres > vid.xres * 85/100);
   
+  bool hyb = mhybrid;
+
   #if MAXMDIM >= 4
   if(mhybrid) hybrid::draw_underlying(!cornermode);
   #endif
   
   {
   
+  radar_drawn = false;
   if(vid.radarsize > 0 && h)
   #if CAP_RACING
     if(!racing::on)
   #endif
     if(!peace::on)
     if(!(cmode & sm::MISSION))
-      draw_radar(cornermode);
+      radar_drawn = true;
+
+  if(radar_drawn)
+    draw_radar(cornermode);
 
   flat_model_enabler fme;
 
@@ -574,10 +582,15 @@ EX void drawStats() {
     }
   
   else {
-  
+    auto& cd = current_display;
+
     bool portrait = vid.xres < vid.yres;
-    int colspace = portrait ? (current_display->ycenter - current_display->scrsize - 3 * vid.fsize) : (vid.xres - vid.yres - 16) / 2;
-    int rowspace = portrait ? vid.xres - 16 : vid.yres - vid.fsize * (vid.msgleft ? 9 : 4);
+    int colspace = portrait ? (cd->ycenter - cd->scrsize - 3 * vid.fsize) : (vid.xres - vid.yres - 16) / 2;
+    int radar_size = 0;
+    if(radar_drawn) radar_size = 2 * vid.radarsize + 10 + 3.5 * vid.fsize;
+    if(hyb && hybrid::underlying_scale) radar_size = max<int>(radar_size, min(cd->xsize, cd->ysize) * hybrid::underlying_scale + 10 + 3.5 * vid.fsize);
+
+    int rowspace = portrait ? vid.xres - 16 : vid.yres - max(radar_size, vid.fsize * (vid.msgleft ? 9 : 4));
     int colid[4], rowid[4];
     int maxbyclass[4];
     for(int z=0; z<4; z++) maxbyclass[z] = 0;
