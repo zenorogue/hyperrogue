@@ -92,6 +92,10 @@ EX namespace fake {
 
     hyperpoint get_corner(cell *c, int cid, ld cf=3) override { 
 
+      if(GOLDBERG && S3 == 4 && gp::param.first == 1 && gp::param.second == 1) {
+        return ddspin(c, cid) * spin(-M_PI / c->type) * lxpush0((c == c->master->c7 ? cgi.hexf : cgi.hexvdist) * 3 / cf);
+        }
+
       if(embedded_plane) {
         geom3::light_flip(true);
         hyperpoint h = get_corner(c, cid, cf);
@@ -113,6 +117,10 @@ EX namespace fake {
       }
 
     transmatrix adj(cell *c, int d) override {
+      if(GOLDBERG && S3 == 4 && gp::param.first == 1 && gp::param.second == 1) {
+        c->cmove(d);
+        return ddspin(c, d) *  lxpush(cgi.crossf) * iddspin(c->move(d), c->c.spin(d), M_PI);
+        }
       if(embedded_plane) {
         geom3::light_flip(true);
         transmatrix T = adj(c, d);

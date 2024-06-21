@@ -733,6 +733,7 @@ EX namespace gp {
       next = point3(x+y/2., -y * sqrt(3) / 2, 0);
       ld scale = 1 / hypot_d(2, next);
       if(!GOLDBERG) scale = 1;
+      if(fake::in() && x == 1 && y == 1) scale = 1;
       cgi.crossf *= scale;
       cgi.hexhexdist *= scale;
       cgi.hexvdist *= scale;

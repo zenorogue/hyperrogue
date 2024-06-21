@@ -694,17 +694,18 @@ void geometry_information::prepare_basics() {
     2 * hdist0(mid(xspinpush0(M_PI/S6, hexvdist), xspinpush0(-M_PI/S6, hexvdist)))
     : hdist(xpush0(crossf), xspinpush0(TAU/S7, crossf));
 
-  if(fake::in() && BITRUNCATED) {
+  if(fake::in() && (BITRUNCATED || (S3 == 4 && gp::param.first == 1 && gp::param.second == 1))) {
     vector<pair<ld, ld>> vals;
-    vals.emplace_back(S7, fake::around / 3);
-    vals.emplace_back(S3*2, fake::around * 2 / 3);
+    int s6 = BITRUNCATED ? S3*2 : S3;
+    vals.emplace_back(S7, BITRUNCATED ? fake::around / 3 : fake::around / 2);
+    vals.emplace_back(s6, BITRUNCATED ? fake::around * 2 / 3 : fake::around / 2);
     ld edgelength = euclid ? 1 : arcm::compute_edgelength(vals);
 
     // circumradius and inradius, for S7 and S6 shapes
     auto c7 = asin_auto(sin_auto(edgelength/2) / sin(M_PI / S7));
-    auto c6 = asin_auto(sin_auto(edgelength/2) / sin(M_PI / S6));
-    auto i7 = hdist0(mid(xpush0(c7), cspin(0, 1, 2*M_PI/S7) * xpush0(c7)));
-    auto i6 = hdist0(mid(xpush0(c6), cspin(0, 1, 2*M_PI/S6) * xpush0(c6)));
+    auto c6 = asin_auto(sin_auto(edgelength/2) / sin(M_PI / s6));
+    auto i7 = hdist0(mid(xpush0(c7), cspin(0, 1, TAU/S7) * xpush0(c7)));
+    auto i6 = hdist0(mid(xpush0(c6), cspin(0, 1, TAU/s6) * xpush0(c6)));
 
     // note: tessf and hcrossf remain undefined
     crossf = i7 + i6;
