@@ -1273,7 +1273,7 @@ EX namespace hybrid {
       hybrid::csteps = cgi.psl_steps;
       if(nil) {
         auto& T = euc::eu_input.user_axes;
-        hybrid::csteps = gcd(gcd(T[0][0], T[1][1]), gcd(T[0][1], T[1][0]));
+        hybrid::csteps = abs(T[0][0] * T[1][1] - T[0][1] * T[1][0]);
         if(S3 == 3) hybrid::csteps *= 2;
         if(BITRUNCATED) hybrid::csteps *= S3;
         if(INVERSE) hybrid::csteps *= 2;
@@ -1341,8 +1341,9 @@ EX namespace hybrid {
       if(S3 >= OINF) return 0;
       auto& v = get_shift_current(cw0);
       if(v != SHIFT_UNKNOWN) return v;
-      
-      if(nil) {
+
+      if(nil) return in_underlying([&] { return get_shift(cw0); });
+      if(euclid && !quotient) {
         /** we prevent possible 'two candidate' errors by computing the correct value, we know all the positions in the underlying map, so we can do that */
         transmatrix uT, uU, uT1;
         in_underlying([&] {
@@ -1430,7 +1431,7 @@ EX namespace hybrid {
         cw++;
         }
       while(cw != cw0);
-      return total + cgi.single_step * (sphere ? -1 : 1);
+      return total + cgi.single_step * ((sphere || euclid) ? -1 : 1);
       }
     
     EX void fix_bounded_cycles() {
