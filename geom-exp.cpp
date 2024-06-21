@@ -617,7 +617,7 @@ EX void select_quotient() {
     euc::prepare_torus3();
     pushScreen(euc::show_torus3);
     }
-  else if(nil) {
+  else if(nil && !mhybrid) {
     nilv::prepare_niltorus3(),  
     pushScreen(nilv::show_niltorus3);
     }

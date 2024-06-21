@@ -1462,7 +1462,12 @@ EX namespace hybrid {
 
         if(debugflags & DF_GEOM) for(cell *c: ac) for(int i=0; i<c->type; i++) {
           cellwalker cw(c, i);
-          if(cycle_discrepancy(cw)) println(hlog, cw, cycle_discrepancy(cw));
+          if(cycle_discrepancy(cw)) println(hlog, cw, " ", cycle_discrepancy(cw));
+          }
+        if(debugflags & DF_GEOM) for(cell *c: ac) for(int i=0; i<c->type; i++) {
+          auto err = get_shift(cellwalker(c, i)) + get_shift(cellwalker(c, i)+wstep);
+          if(err)
+            println(hlog, "two-side error: ", err, " on ", cellwalker(c, i));
           }
         });
       }
