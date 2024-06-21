@@ -62,9 +62,11 @@ EX vector<int> hrandom_permutation(int qty) {
 /** Use \link hrngen \endlink to generate a floating point number between 0 and 1.
  */
 
-EX ld hrandf() { 
-  return (hrngen() - hrngen.min()) / (hrngen.max() + 1.0 - hrngen.min());
+EX ld randf_from(std::mt19937& r) { 
+  return (r() - r.min()) / (r.max() + 1.0 - r.min());
   }
+
+EX ld hrandf() { return randf_from(hrngen); }
 
 /** Returns an integer corresponding to the current state of \link hrngen \endlink.
  */
