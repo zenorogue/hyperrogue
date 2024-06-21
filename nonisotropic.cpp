@@ -1052,7 +1052,17 @@ EX namespace nilv {
     heptagon *create_step(heptagon *parent, int d) override {
       auto p = coords[parent];
       auto q = p * current_ns().movevectors[d];
-      for(int a=0; a<3; a++) q[a] = zgmod(q[a], nilperiod[a]);
+      for(int a=0; a<3; a++) {
+        auto oq = q[a];
+        q[a] = zgmod(q[a], nilperiod[a]);
+        if(mvec_uses_hex()) {
+          if(a == 0) q[2] -= (oq - q[a]) * q[1];
+          if(a == 1) q[2] += (oq - q[a]) * q[0];
+          }
+        else {
+          if(a == 0) q[2] -= (oq - q[a]) * q[1];
+          }
+        }
       auto child = get_at(q);
       parent->c.connect(d, child, current_ns().other_side[d], false);
       return child;
@@ -1131,7 +1141,7 @@ EX void show_niltorus3() {
   dialog::add_action([] { S7_edit = (S7_edit+1)%isize(nil_structures);  });
 
   int hx = nil_structures[S7_edit]->mvec_hex ? 2 : 1;
-  bool ok = !zgmod(nilperiod_edit[0]*hx, nilperiod_edit[2]) && !zgmod(nilperiod_edit[1]*hx, nilperiod_edit[2]);
+  bool ok = !zgmod(nilperiod_edit[0]*nilperiod_edit[1]*hx, nilperiod_edit[2]);
 
   dialog::addBreak(50);
 
@@ -1146,7 +1156,7 @@ EX void show_niltorus3() {
       start_game();
       });
     }
-  else dialog::addInfo(XLAT("Y period and X period must be divisible by Z period"));
+  else dialog::addInfo(XLAT("Y period * X period (*2 for hex) must be divisible by Z period"));
     
   dialog::addBreak(50);
   dialog::addBack();
