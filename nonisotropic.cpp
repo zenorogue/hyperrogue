@@ -1213,7 +1213,7 @@ EX namespace hybrid {
     ginf[g].menu_displayed_name = keep;
     if(g == gTwistedProduct) {
       ginf[g].g = euc ? giNil : sph ? giSphere3 : giSL2;
-      ginf[g].tiling_name = "Iso(" + ginf[g].tiling_name + ")";
+      ginf[g].tiling_name = "twisted " + ginf[g].tiling_name + "xZ";
       string& qn = ginf[g].quotient_name;
       if(csteps && csteps != (sph ? cgi.psl_steps*2 : 0)) {
         string qplus;
