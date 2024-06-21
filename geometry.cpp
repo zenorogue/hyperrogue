@@ -523,6 +523,7 @@ hpcshape
     vector<array<array<array<transmatrix, 6>, GOLDBERG_LIMIT>, GOLDBERG_LIMIT>> Tf;
     transmatrix corners;
     transmatrix corners_for_triangle;
+    transmatrix rotator;
     ld alpha;
     int area;
     int pshid[3][8][GOLDBERG_LIMIT][GOLDBERG_LIMIT][8];

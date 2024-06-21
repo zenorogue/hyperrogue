@@ -576,29 +576,26 @@ EX namespace gp {
     
   EX bool gp_style = true; /** disable for the old implementation which did not support fake */
 
-  hyperpoint atz(const transmatrix& T, const transmatrix& corners, loc at, int cornerid = 6, ld cf = 3) {
+  /** for h in corner cordinates, rotate until it is in the correct triangle, and return the number of rotations needed */
+  int rotate_to_correct(hyperpoint& h) {
     int sp = 0;
-    again:
-    auto corner = corners * (loctoh_ort(at) + (corner_coords[cornerid] / cf));
-    if(corner[1] < -1e-6 || corner[2] < -1e-6) {
-      at = at * eudir(1);
-      if(cornerid < SG6) cornerid = (1 + cornerid) % SG6;
+    while(h[1] < -1e-6 || h[2] < -1e-6) {
+      h = cgi.gpdata->rotator * h;
       sp++;
-      goto again;
       }
     if(sp>SG3) sp -= SG6;
+    return sp;
+    }
+
+  hyperpoint atz(const transmatrix& T, const transmatrix& corners, loc at, int cornerid = 6, ld cf = 3) {
+
+    auto corner = corners * (loctoh_ort(at) + (corner_coords[cornerid] / cf));
+    int sp = rotate_to_correct(corner);
 
     if(gp_style && corner[0] < -1e-6) {
       auto ac = corner; ac[1] = 1 - corner[1]; ac[2] = 1 - corner[2]; ac[0] = -ac[0];
       hyperpoint ctr = normalize(cornmul(T, hyperpoint(0, 0.5, 0.5, 0)));
-      int sp2 = 0;
-      while(ac[1] < -1e-6 || ac[2] < -1e-6) {
-        auto xac = inverse(corners) * ac;
-        xac = xac[0] * loctoh_ort(eudir(1)) + xac[1] * loctoh_ort(eudir(2)); xac[2] = 1; xac[3] = 0;
-        ac = corners * xac;
-        sp2++;
-        }
-      if(sp2>SG3) sp2 -= SG6;
+      int sp2 = rotate_to_correct(ac);
       return spin(TAU*sp/S7) *
         rgpushxto0(ctr) * rgpushxto0(ctr) * spin(M_PI + TAU*sp2/S7) *
         normalize(cornmul(T, ac));
@@ -636,6 +633,15 @@ EX namespace gp {
       S3 == 4 ? (loctoh_ort(param * loc(1,-1)) + C02)/2 : (loctoh_ort(loc(0,0)) + loctoh_ort(param) + loctoh_ort(param * loc(0,1) * loc(0,1) * loc(0,1) * loc(0,1) * loc(0,1))) / 3,
       C03
       ));
+    for(int i=0; i<MDIM; i++) {
+      auto ac = Hypc; ac[i] = 1;
+      auto xac = inverse(cgi.gpdata->corners) * ac;
+      xac = xac[0] * loctoh_ort(eudir(1)) + xac[1] * loctoh_ort(eudir(2)); xac[2] = 1; xac[3] = 0;
+      ac = cgi.gpdata->corners * xac;
+      set_column(cgi.gpdata->rotator, i, ac);
+      }
+
+
     cgi.gpdata->Tf.resize(S7);
 
     /* should work directly without flipping but it does not... flipping for now */
