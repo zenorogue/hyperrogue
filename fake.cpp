@@ -31,6 +31,8 @@ EX namespace fake {
   EX bool available() {
     if(in()) return true;
     if(WDIM == 2 && standard_tiling() && (PURE || BITRUNCATED)) return true;
+    if(WDIM == 2 && standard_tiling() && GOLDBERG && S3 == 4 && ((gp::param.first+gp::param.second) % 2)) return true;
+    if(WDIM == 2 && standard_tiling() && GOLDBERG && S3 == 3 && ((gp::param.first-gp::param.second) % 3)) return true;
     if(WDIM == 2 && standard_tiling() && GOLDBERG && S3 == 4 && gp::param.first == 1 && gp::param.second == 1) return true;
     if(arcm::in() && PURE) return true;
     if(hat::in()) return true;
@@ -97,6 +99,8 @@ EX namespace fake {
         return ddspin(c, cid) * spin(-M_PI / c->type) * lxpush0((c == c->master->c7 ? cgi.hexf : cgi.hexvdist) * 3 / cf);
         }
 
+      if(GOLDBERG) return underlying_map->get_corner(c, cid, cf);
+
       if(embedded_plane) {
         geom3::light_flip(true);
         hyperpoint h = get_corner(c, cid, cf);
@@ -128,6 +132,7 @@ EX namespace fake {
         geom3::light_flip(false);
         return cgi.emb->base_to_actual(T);
         }
+      if(GOLDBERG) return underlying_map->adj(c, d);
       if(hat::in()) return underlying_map->adj(c, d);
       if(variation == eVariation::coxeter) {
         array<int, 3> which;

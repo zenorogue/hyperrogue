@@ -522,6 +522,7 @@ hpcshape
   struct gpdata_t {
     vector<array<array<array<transmatrix, 6>, GOLDBERG_LIMIT>, GOLDBERG_LIMIT>> Tf;
     transmatrix corners;
+    transmatrix corners_for_triangle;
     ld alpha;
     int area;
     int pshid[3][8][GOLDBERG_LIMIT][GOLDBERG_LIMIT][8];
@@ -582,6 +583,10 @@ EX bool is_subcube_based(eVariation var) {
 
 EX bool is_reg3_variation(eVariation var) {
   return var == eVariation::coxeter;
+  }
+
+EX bool special_fake() {
+  return fake::in() && (BITRUNCATED || (S3 == 4 && gp::param.first == 1 && gp::param.second == 1));
   }
 
 void geometry_information::prepare_basics() {
@@ -694,7 +699,7 @@ void geometry_information::prepare_basics() {
     2 * hdist0(mid(xspinpush0(M_PI/S6, hexvdist), xspinpush0(-M_PI/S6, hexvdist)))
     : hdist(xpush0(crossf), xspinpush0(TAU/S7, crossf));
 
-  if(fake::in() && (BITRUNCATED || (S3 == 4 && gp::param.first == 1 && gp::param.second == 1))) {
+  if(special_fake()) {
     vector<pair<ld, ld>> vals;
     int s6 = BITRUNCATED ? S3*2 : S3;
     vals.emplace_back(S7, BITRUNCATED ? fake::around / 3 : fake::around / 2);

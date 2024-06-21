@@ -637,6 +637,8 @@ EX namespace gp {
     else return corners * c;
     }
     
+  EX bool gp_style = true; /** disable for the old implementation which did not support fake */
+
   hyperpoint atz(const transmatrix& T, const transmatrix& corners, loc at, int cornerid = 6, ld cf = 3) {
     int sp = 0;
     again:
@@ -649,17 +651,35 @@ EX namespace gp {
       }
     if(sp>SG3) sp -= SG6;
 
+    if(gp_style && corner[0] < -1e-6) {
+      auto ac = corner; ac[1] = 1 - corner[1]; ac[2] = 1 - corner[2]; ac[0] = -ac[0];
+      hyperpoint ctr = normalize(cornmul(T, hyperpoint(0, 0.5, 0.5, 0)));
+      int sp2 = 0;
+      while(ac[1] < -1e-6 || ac[2] < -1e-6) {
+        auto xac = inverse(corners) * ac;
+        xac = xac[0] * loctoh_ort(eudir(1)) + xac[1] * loctoh_ort(eudir(2)); xac[2] = 1; xac[3] = 0;
+        ac = corners * xac;
+        sp2++;
+        }
+      if(sp2>SG3) sp2 -= SG6;
+      return spin(TAU*sp/S7) *
+        rgpushxto0(ctr) * rgpushxto0(ctr) * spin(M_PI + TAU*sp2/S7) *
+        normalize(cornmul(T, ac));
+      }
+
     return normalize(spin(TAU*sp/S7) * cornmul(T, corner));
     }
-  
-  transmatrix dir_matrix(int i) {
+
+  EX transmatrix dir_matrix(int i) {
+    // println(hlog, "0.8424 = 1.8705 = ", cgi.hcrossf);
     auto ddspin = [] (int d) -> transmatrix { 
       return spin(M_PI - d * TAU / S7 - cgi.hexshift);
       };
+    auto gxpush0 = geom3::flipped ? xpush0 : lxpush0;
     return spin(-cgi.gpdata->alpha) * build_matrix(
       geom3::flipped ? C02 : tile_center(),
-      geom3::flipped ? ddspin(i) * xpush0(cgi.tessf) : ddspin(i) * lxpush0(cgi.tessf),
-      geom3::flipped ? ddspin(i+1) * xpush0(cgi.tessf) : ddspin(i+1) * lxpush0(cgi.tessf),
+      gp_style ? (ddspin(i) * spin(-M_PI/S7) * gxpush0(cgi.hcrossf)) : ddspin(i) * gxpush0(cgi.tessf),
+      gp_style ? (ddspin(i) * spin(M_PI/S7) * gxpush0(cgi.hcrossf)) : ddspin(i+1) * gxpush0(cgi.tessf),
       C03
       );
     }
@@ -667,10 +687,16 @@ EX namespace gp {
   EX void prepare_matrices(bool inv) {
     if(!(GOLDBERG_INV || inv)) return;
     if(embedded_plane) geom3::light_flip(true);
-    cgi.gpdata->corners = inverse(build_matrix(
+    cgi.gpdata->corners_for_triangle = inverse(build_matrix(
       loctoh_ort(loc(0,0)),
       loctoh_ort(param),
       loctoh_ort(param * loc(0,1)),
+      C03
+      ));
+    cgi.gpdata->corners = (!gp_style) ? cgi.gpdata->corners_for_triangle : inverse(build_matrix(
+      loctoh_ort(loc(0,0)),
+      S3 == 4 ? (loctoh_ort(param * loc(1,1)) + C02)/2 : (loctoh_ort(loc(0,0)) + loctoh_ort(param) + loctoh_ort(param * loc(0,1))) / 3,
+      S3 == 4 ? (loctoh_ort(param * loc(1,-1)) + C02)/2 : (loctoh_ort(loc(0,0)) + loctoh_ort(param) + loctoh_ort(param * loc(0,1) * loc(0,1) * loc(0,1) * loc(0,1) * loc(0,1))) / 3,
       C03
       ));
     cgi.gpdata->Tf.resize(S7);
@@ -733,7 +759,7 @@ EX namespace gp {
       next = point3(x+y/2., -y * sqrt(3) / 2, 0);
       ld scale = 1 / hypot_d(2, next);
       if(!GOLDBERG) scale = 1;
-      if(fake::in() && x == 1 && y == 1) scale = 1;
+      if(special_fake()) scale = 1;
       cgi.crossf *= scale;
       cgi.hexhexdist *= scale;
       cgi.hexvdist *= scale;
@@ -1030,7 +1056,7 @@ EX namespace gp {
     int sp = 0;
     auto& at = li.relative;
     again:
-    auto corner = cgi.gpdata->corners * loctoh_ort(at);
+    auto corner = cgi.gpdata->corners_for_triangle * loctoh_ort(at);
     if(corner[1] < -1e-6 || corner[2] < -1e-6) {
       at = at * eudir(1);
       sp++;
