@@ -103,6 +103,7 @@ EX namespace gp {
     signed char mindir;
     loc start;
     transmatrix adjm;
+    signed char rdir1;
     };
 
   EX int fixg6(int x) { return gmod(x, SG6); }
@@ -177,6 +178,7 @@ EX namespace gp {
       goldberg_map[y][x].cw.at = NULL;
       goldberg_map[y][x].rdir = -1;
       goldberg_map[y][x].mindir = 0;
+      goldberg_map[y][x].rdir1 = -1;
       }
     }
   
@@ -459,18 +461,21 @@ EX namespace gp {
       }
 
     // then we set the edges of our big equilateral triangle (in a symmetric way)
+    // rdir describes a loop on the boundary of that triangle, and rdir1 is the same loop in reverse direction
     for(int i=0; i<S3; i++) {
       loc start = vc[i];
       loc end = vc[(i+1)%S3];
       DEBB(DF_GP, ("from ", start, " to ", end); )
       loc rel = param;
       auto build = [&] (loc& at, int dx, bool forward) {
-        int dx1 = dx + SG2*i;
-        DEBB(DF_GP, (at, " .. ", make_pair(at + eudir(dx1), fixg6(dx1+SG3))));
-        conn(at, dx1);        
-        if(forward) get_mapping(at).rdir = fixg6(dx1);
-        else get_mapping(at+eudir(dx1)).rdir = fixg6(dx1+SG3);
-        at = at + eudir(dx1);
+        int dx0 = fixg6(dx + SG2*i);
+        auto at1 = at + eudir(dx0);
+        auto dx1 = fixg6(dx0 + SG3);
+        DEBB(DF_GP, (at, " .. ", make_pair(at1, dx1)));
+        conn(at, dx0);
+        if(forward) { get_mapping(at).rdir = dx0; get_mapping(at1).rdir1 = dx1; }
+        else { get_mapping(at).rdir1 = dx0; get_mapping(at1).rdir = dx1; }
+        at = at + eudir(dx0);
         };
       while(rel.first >= 2 && (S3 == 3 ? rel.first >= 2 - rel.second : true)) {
         build(start, 0, true);
@@ -494,18 +499,10 @@ EX namespace gp {
         rel.first -= 2;
         }
       if(S3 == 4 && rel == loc(1,1)) {
-        if(param == loc(3,1) || param == loc(5,1)) {
-          build(start, 1, true);
-          build(end, 2, false);
-          rel.first--;
-          rel.second--;
-          }
-        else {
-          build(start, 0, true);
-          build(end, 3, false);
-          rel.first--;
-          rel.second--;
-          }
+        build(start, 1, true);
+        build(end, 2, false);
+        rel.first--;
+        rel.second--;
         }
       for(int k=0; k<SG6; k++)
         if(start + eudir(k+SG2*i) == end)
@@ -514,88 +511,28 @@ EX namespace gp {
       }
 
     // now we can fill the interior of our big equilateral triangle
-    loc at = vc[0];
-    int maxstep = 3000;
-    while(true) {
-      maxstep--; if(maxstep < 0) { DEBB(DF_GP | DF_ERROR, ("maxstep exceeded")); exit(1); }
-      auto& wc = get_mapping(at);
-      int dx = wc.rdir;
-      auto at1 = at + eudir(dx);
-      auto& wc1 = get_mapping(at1);
-      DEBB(DF_GP, (make_pair(at, dx), " ", make_pair(at1, wc1.rdir)));
-      int df = wc1.rdir - dx;
-      if(df < 0) df += SG6;
-      if(df == SG3) break;
-      if(S3 == 3) switch(df) {
-        case 0:
-        case 4:
-        case 5:
-          at = at1;
-          continue;
-        case 2: {
-          conn(at, dx+1);
-          wc.rdir = (dx+1) % 6;
-          break;
+    vector<loc> all_locations;
+    set<loc> visited;
+    auto visit = [&] (loc x) {
+      if(visited.count(x)) return;
+      visited.insert(x);
+      all_locations.push_back(x);
+      };
+    for(int i=0; i<S3; i++) visit(vc[i]);
+
+    for(int i=0; i<isize(all_locations); i++) {
+      auto at = all_locations[i];
+      auto& m = get_mapping(at);
+      for(int j=0; j<SG6; j++) {
+        if(m.rdir >= 0) {
+          if(m.rdir1 > m.rdir && !(j >= m.rdir && j <= m.rdir1)) continue;
+          if(m.rdir1 < m.rdir && !(j >= m.rdir || j <= m.rdir1)) continue;
           }
-        case 1: {
-          auto at2 = at + eudir(dx+1);
-          auto& wc2 = get_mapping(at2);
-          if(wc2.cw.at) { at = at1; continue; }
-          wc.rdir = (dx+1) % 6;
-          conn(at, (dx+1) % 6);
-          conn(at1, (dx+2) % 6);
-          conn(at2, (dx+0) % 6);
-          wc1.rdir = -1;
-          wc2.rdir = dx; 
-          break;
-          }
-        default:
-          println(hlog, "case unhandled ", df);
-          exit(1);
-        }
-      else switch(df) {
-        case 0: 
-        case 3:
-          at = at1;
-          continue;
-        case 1:
-          auto at2 = at + eudir(dx+1);
-          auto& wc2 = get_mapping(at2);
-          if(wc2.cw.at) {
-            auto at3 = at1 + eudir(wc1.rdir);
-            auto& wc3 = get_mapping(at3);
-            auto at4 = at3 + eudir(wc3.rdir);
-            if(at4 == at2) {
-              wc.rdir = (dx+1)%4;
-              wc1.rdir = -1;
-              wc3.rdir = -1;
-              conn(at, (dx+1)%4);
-              }
-            else { 
-              at = at1;
-              }
-            }
-          else {
-            wc.rdir = (dx+1)%4;
-            wc1.rdir = -1;
-            wc2.rdir = dx%4;
-            int bdir = -1;
-            int bdist = 100;
-            for(int d=0; d<4; d++) {
-              auto &wcm = get_mapping(at2 + eudir(d));
-              if(wcm.cw.at && length(wcm.start - at2) < bdist)
-                bdist = length(wcm.start - at2), bdir = d;
-              }
-            if(bdir != -1) conn(at2 + eudir(bdir), bdir ^ 2);
-            conn(at, (dx+1)%4);
-            conn(at2, dx%4);
-            
-            at = param * loc(1,0) + at * loc(0, 1);
-            }
-          break;
+        auto at1 = at + eudir(j);
+        conn(at, j);
+        visit(at1);
         }
       }
-
     DEBB(DF_GP, ("DONE"))
     }
   
