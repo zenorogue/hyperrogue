@@ -31,6 +31,7 @@ EX namespace fake {
   EX bool available() {
     if(in()) return true;
     if(WDIM == 2 && standard_tiling() && (PURE || BITRUNCATED)) return true;
+    if(WDIM == 2 && standard_tiling() && GOLDBERG && S3 == 4 && gp::param.first == 1 && gp::param.second == 1) return true;
     if(arcm::in() && PURE) return true;
     if(hat::in()) return true;
     if(WDIM == 2) return false;
