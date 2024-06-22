@@ -150,7 +150,7 @@ color_t dhrg_grid = 0x00FF00A0;
 
 void graph_visuals(presmode mode) {
   if(mode == pmStart) {
-    slide_backup(ccolor::plain.ctab, colortable{{0xFF00}});
+    slide_backup(ccolor::plain.ctab, colortable{0xFF00});
     slide_backup(canvas_default_wall, waInvisibleFloor);
     slide_backup(rogueviz::showlabels, true);
     slide_backup(rogueviz::ggamma, 2);
@@ -327,7 +327,7 @@ slide dhrg_slides[] = {
         return false;
         });
       add_temporary_hook(mode, dialog::hooks_display_dialog, 110, [] () {
-        if((cmode && sm::EXPANSION) && show_distance_lists) {
+        if((cmode & sm::EXPANSION) && show_distance_lists) {
           vector<dialog::item> it = std::move(dialog::items);
           dialog::items.clear();
           dialog::start_list(1600, 1600, 'a');
