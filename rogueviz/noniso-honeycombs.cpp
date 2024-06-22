@@ -57,7 +57,7 @@ auto geoslide(eGeometry g, ccolor::data *canvas, int _jhole, int _jblock) {
         set_geometry(gProduct);
         }
       if(g == gNormal) {
-        set_geometry(gRotSpace);
+        set_geometry(gTwistedProduct);
         }
       tour::slide_backup<ld>(sightranges[gProduct], 12);
       tour::slide_backup<ld>(sightranges[gNil], 7);

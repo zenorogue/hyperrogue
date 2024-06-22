@@ -151,7 +151,7 @@ void pass_time() {
   
   if(true) {
     ld delta = t - last_t;
-    dynamicval<eGeometry> g(geometry, geometry == gRotSpace ? geometry : gCubeTiling);
+    dynamicval<eGeometry> g(geometry, geometry == gTwistedProduct ? geometry : gCubeTiling);
 
     const Uint8 *keystate = SDL12_GetKeyState(NULL);
     if(keystate['a'] || forcekey == 'a') current = apply_lorentz(current, lorentz(0, 2, delta*accel)), ang = 180, acc = true;
@@ -645,7 +645,7 @@ bool view_ads_ca() {
 
       color_t statecolor = 0;
       if(1) {
-        dynamicval<eGeometry> b(geometry, gRotSpace);
+        dynamicval<eGeometry> b(geometry, gTwistedProduct);
         shiftmatrix S = where_matrix[c];
         for(int i=0; i<=c->type; i++) {
           hyperpoint ha = hybrid::get_corner(c, i, 2, 0);

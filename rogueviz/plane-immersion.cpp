@@ -157,7 +157,7 @@ void draw_all() {
             
     draw_colored(gCell120, gNormal, 0x00FF00FF);
     draw_colored(gNil, gNormal, 0xFF0000FF);
-    draw_colored(gNormal, gRotSpace, 0x0000FFFF);
+    draw_colored(gNormal, gTwistedProduct, 0x0000FFFF);
 
     draw_colored(gSphere, gProduct, 0x00FF80FF);
     draw_colored(gNIH, gNormal, 0xFF8000FF);
