@@ -137,7 +137,7 @@ EX void setCanvas(presmode mode, ccolor::data *canv, reaction_t f) {
 EX void setCanvas(presmode mode, ccolor::data *canv) { setCanvas(mode, canv, [] {}); }
 
 EX void setCanvasColor(presmode mode, color_t col, reaction_t f) {
-  setCanvas(mode, &ccolor::plain, [f, col] { slide_backup(ccolor::rwalls, 0); slide_backup(ccolor::plain.ctab, colortable{{col}}); f(); });
+  setCanvas(mode, &ccolor::plain, [f, col] { slide_backup(ccolor::rwalls, 0); slide_backup(ccolor::plain.ctab, colortable{col}); f(); });
   }
 
 EX void setWhiteCanvas(presmode mode, reaction_t f) {
