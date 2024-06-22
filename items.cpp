@@ -513,6 +513,7 @@ EX void updateHi_for_code(eItem it, int v, modecode_t xcode) {
   }
 
 EX void updateHi(eItem it, int v) {
+  LATE ( updateHi(it, v) );
   updateHi_for_code(it, v, modecode());
   }
 
