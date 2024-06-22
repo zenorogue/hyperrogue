@@ -511,6 +511,7 @@ EX void show_custom() {
   auto m = at_or_null(modename, current_modecode);
   dialog::addSelItem("name custom mode", m ? *m : "", 'N');
   dialog::add_action([] {
+    modecode();
     name_to_edit = modename[current_modecode];
     dialog::edit_string(name_to_edit, "name custom mode", "");
     dialog::get_di().reaction_final = [] { update_modename(name_to_edit); };

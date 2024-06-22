@@ -1156,7 +1156,7 @@ EX modecode_t modecode(int mode) {
   
   if(code_for.count(nover)) return code_for[nover];
 
-  if(mode == 1) return UNKNOWN;
+  if(mode == 1) return current_modecode = UNKNOWN;
   
   modecode_t next = FIRST_MODECODE;
   while(meaning.count(next)) next++;
@@ -1211,6 +1211,7 @@ EX void load_modename_line(string s) {
   }
 
 EX void update_modename(string newname) {
+  modecode();
   string old = modename.count(current_modecode) ? modename[current_modecode] : "";
   if(old == newname) return;
   if(newname == "") modename.erase(current_modecode);
@@ -1442,7 +1443,7 @@ void mode_screen_for_current() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen();
 
-  modecode();
+  modecode(1);
   auto& mc = current_modecode;
   dialog::init(XLAT("recorded mode %1", its(mc)), iinf[itOrbYendor].color, 150, 100);
   dialog::addInfo(mode_description1());
@@ -1450,7 +1451,7 @@ void mode_screen_for_current() {
   dialog::addBreak(100);
 
   dialog::addSelItem(XLAT("scores recorded"), its(qty_scores_for[mc]), 's');
-  dialog::add_action([] { scores::load(); scores::which_mode = current_modecode; });
+  dialog::add_action([] { modecode(); scores::load(); scores::which_mode = current_modecode; });
 
   dialog::addSelItem(XLAT("Yendor Challenge"), its(yendor::compute_tscore(mc)), 'y');
   dialog::add_action([] {
@@ -1523,6 +1524,7 @@ EX vector<modecode_t> mode_list;
 EX map<modecode_t, string> modename;
 
 EX void prepare_custom() {
+  modecode();
   scores::load_only();
   gen_mode_list();
   pushScreen(show_custom);

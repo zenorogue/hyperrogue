@@ -171,7 +171,7 @@ EX void initgame() {
   DEBBI(DF_INIT, ("initGame"));
   callhooks(hooks_initgame);
 
-  modecode();
+  modecode(1);
 
   if(!safety) fix_land_structure_choice();
 
