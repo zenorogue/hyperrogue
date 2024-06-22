@@ -5300,3 +5300,23 @@ Modes:
 
 2024-06-06 19:06 Update 13.0o
 Fixed a crash on load.
+
+2024-06-22 09:56 Update 13.0p
+- radar: inventory is no longer drawn over it, fixed not being drawn full, a bit better placement
+- wall/floor textures are now configurable
+- do not generate modecodes without need
+- fixed compass pointers with illegal values or not reaching the target
+- auto-generate waOpenPlate in Palace pure {7,3} starting tile
+- fixed the texture (.txc) loader
+- number parser now reads scientific notation correctly
+- fixed some bugs where 'search for setting' would not accept letters pressed for search (and edit something instead)
+
+Improvements in geometries (mostly twisted product/fake):
+- fake geometry now works (better) with: bitruncated tilings, rectified tilings, GP(a,b) {x,3} if a-b not divisible by 3, GP(a,b) {x,4} if a-b not divisible by 2
+- "rotation space" is now called (more correctly) "twisted product" and works in Euclidean base geometry too
+- raycaster now works better (renders the cells correctly) in twisted geometries
+- Nil quotient space now better (the number of Z-levels = the number of X-levels * the number of Y-level is allowed)
+- fix a possible crash in fake+product
+- 'fixed Y/Z rotation' now works in all geometries where it makes sense (all 3D geometries except some spherical and non-binary hyperbolic)
+- fixed incorrect tiles when unrectifying pure (e.g. {5,4})
+- a new hex-based honeycomb for Nil (well, same as the one obtained by using "twisted product" on hex)
