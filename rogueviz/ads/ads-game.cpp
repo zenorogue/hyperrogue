@@ -94,7 +94,7 @@ void restart() {
 
 void run_ads_game() {
 
-  if(!sl2) set_geometry(gRotSpace);
+  if(!sl2) set_geometry(gTwistedProduct);
   if(hybrid::csteps) {
     stop_game();
     hybrid::csteps = 0;

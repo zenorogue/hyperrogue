@@ -29,7 +29,7 @@ void apply_duality(shiftmatrix& S) {
   }
 
 void draw_game_cell(const cell_to_draw& cd) {
-  bool hv = rotspace;
+  bool hv = mtwisted;
   using cellptr = cell*;
   const cellptr& c = cd.c;
   const ads_matrix& V = cd.V;
@@ -118,7 +118,7 @@ void draw_game_cell(const cell_to_draw& cd) {
       }
     
     hybrid::in_actual([&]{
-      dynamicval<eGeometry> b(geometry, gRotSpace);
+      dynamicval<eGeometry> b(geometry, gTwistedProduct);
       auto h = V * rock.at;
       rock.pt_main = cross0(current * h);
       });
@@ -130,7 +130,7 @@ void draw_game_cell(const cell_to_draw& cd) {
     auto& shape = *rock.shape;
     for(int i=0; i<isize(shape); i += 2) {
       hybrid::in_actual([&]{
-        auto h = V * rock.at * rots::uxpush(shape[i] * ads_scale) * rots::uypush(shape[i+1] * ads_scale);
+        auto h = V * rock.at * twist::uxpush(shape[i] * ads_scale) * twist::uypush(shape[i+1] * ads_scale);
         cross_result f = cross0(current * h);
         rock.pts.push_back(f);
         });
@@ -147,7 +147,7 @@ void draw_game_cell(const cell_to_draw& cd) {
         if((shift+z) < rock.life_start) continue;
         if((shift+z) > rock.life_end) continue;
         for(int i=0; i<isize(shape); i += 2) {
-          auto h = rots::uxpush(shape[i] * ads_scale) * rots::uypush(shape[i+1] * ads_scale) * C0;
+          auto h = twist::uxpush(shape[i] * ads_scale) * twist::uypush(shape[i+1] * ads_scale) * C0;
           curvepoint(h);
           }
         curvepoint_first();
@@ -179,7 +179,7 @@ void draw_game_cell(const cell_to_draw& cd) {
     if(hv) {
       auto& shape = shape_ship;
       for(int i=0; i<isize(shape); i += 2) {
-        auto h = rots::uxpush(shape[i] * ads_scale) * rots::uypush(shape[i+1] * ads_scale) * C0;
+        auto h = twist::uxpush(shape[i] * ads_scale) * twist::uypush(shape[i+1] * ads_scale) * C0;
         curvepoint(h);
         }
       curvepoint_first();
@@ -192,7 +192,7 @@ void draw_game_cell(const cell_to_draw& cd) {
       }
 
     hybrid::in_actual([&]{
-      dynamicval<eGeometry> b(geometry, gRotSpace);
+      dynamicval<eGeometry> b(geometry, gTwistedProduct);
       auto h = V * rock.at;
       cr = cross0(current * h);
       });

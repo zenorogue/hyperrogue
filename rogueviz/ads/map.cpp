@@ -138,7 +138,7 @@ void add_rock(cell *c, cellinfo& ci, const ads_matrix& T) {
   r->resource = rt;
   r->expire = gen_expire();
   r->shape = &(rand() % 2 ? shape_rock2 : shape_rock);
-  if(geometry != gRotSpace) { println(hlog, "wrong geometry detected in gen_rocks 2!");  exit(1); }
+  if(geometry != gTwistedProduct) { println(hlog, "wrong geometry detected in gen_rocks 2!");  exit(1); }
   int q = 0;
 
   auto cleanup = [&] (cell *c, ld t) {
@@ -159,7 +159,7 @@ void add_rock(cell *c, cellinfo& ci, const ads_matrix& T) {
     h[2] = 0;
     h[3] = 1; */
   if(0) for(int i=0; i<4; i++) {
-    hyperpoint h = spin(90*degree*i) * rots::uxpush(0.15) * C0;
+    hyperpoint h = spin(90*degree*i) * twist::uxpush(0.15) * C0;
     compute_life(hybrid::get_at(c, 0), unshift(r->at) * rgpushxto0(h), cleanup);
     }
   ci.rocks.emplace_back(std::move(r));
@@ -189,7 +189,7 @@ void gen_rocks(cell *c, cellinfo& ci, int radius) {
         }
 
       hybrid::in_actual([&] {
-        add_rock(c, ci, ads_matrix(spin(alpha) * rots::uxpush(r/2) * chg_shift(randd() * TAU) * spin(randd() * TAU) * lorentz(0, 3, randd() * rock_max_rapidity)));
+        add_rock(c, ci, ads_matrix(spin(alpha) * twist::uxpush(r/2) * chg_shift(randd() * TAU) * spin(randd() * TAU) * lorentz(0, 3, randd() * rock_max_rapidity)));
         });
       }
     }
@@ -248,7 +248,7 @@ void ads_crash_ship() {
 
 void handle_crashes() {
   if(paused) return;
-  if(rotspace) {
+  if(mtwisted) {
     if(!currentmap) { println(hlog, "no currentmap!"); return; }
     PIU({ handle_crashes(); });
     return;

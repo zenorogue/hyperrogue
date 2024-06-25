@@ -32,7 +32,7 @@ void switch_spacetime_to(bool b) {
   }
 
 bool in_spacetime() {
-  return main_rock ? hyperbolic : rotspace;
+  return main_rock ? hyperbolic : mtwisted;
   }
 
 void switch_spacetime() {
@@ -145,7 +145,7 @@ void replay_animation() {
     centerover->wall = waNone;
     }
   
-  if(!main_rock && rotspace) {
+  if(!main_rock && mtwisted) {
     check_cgi();
 
     ads_matrix CV = current * vctrV;

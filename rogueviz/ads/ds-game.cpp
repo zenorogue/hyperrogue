@@ -367,7 +367,7 @@ bool ds_turn(int idelta) {
     
     if(!paused) {
       pdata.fuel -= dv;
-      ds_gen_particles(rpoisson(dv*fuel_particle_qty), inverse(current.T) * spin(ang*degree+M_PI) * rots::uxpush(0.06 * ds_scale), current.shift, rsrc_color[rtFuel], fuel_particle_rapidity, fuel_particle_life, 0.02);
+      ds_gen_particles(rpoisson(dv*fuel_particle_qty), inverse(current.T) * spin(ang*degree+M_PI) * twist::uxpush(0.06 * ds_scale), current.shift, rsrc_color[rtFuel], fuel_particle_rapidity, fuel_particle_life, 0.02);
       }
 
     ld tc = 0;
