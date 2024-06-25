@@ -1409,16 +1409,22 @@ EX namespace hybrid {
     EX void ensure_shifts(cell *c) {
       if(S3 >= OINF) return;
       if(!make_shift(c)[c->type]) return;
-      forCellEx(c1, c)
+
+      if(geometry == gNormal) {
+        forCellEx(c1, c) if(celldist(c1) < celldist(c)) { ensure_shifts(c1); }
+        }
+
       for(int a=0; a<c->type; a++) {
         cellwalker cw0(c, a);
         cellwalker cw = cw0;
-        while(cw != cw0) {
+        do {
           get_shift(cw);
           cw += wstep;
-          cw += a;
+          cw ++;
           }
+        while(cw != cw0);
         }
+
       make_shift(c)[c->type] = 0;
       }
     
