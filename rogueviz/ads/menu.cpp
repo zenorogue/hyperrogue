@@ -226,13 +226,13 @@ void pick_the_game() {
   dialog::addBreak(200);
 
   dialog::addBigItem("anti-de Sitter space", '1');
-  dialog::add_action([] { popScreen(); run_ads_game_std(); clearMessages(); });
+  dialog::add_action([] { popScreen(); run_ads_game_std(); add_ads_cleanup(); clearMessages(); });
   dialog::addInfo(XLAT("shoot asteroids, mine resources, collect gold"));
 
   dialog::addBreak(100);
 
   dialog::addBigItem("de Sitter space", '2');
-  dialog::add_action([] { popScreen(); run_ds_game_std(); clearMessages(); });
+  dialog::add_action([] { popScreen(); run_ds_game_std(); add_ds_cleanup(); clearMessages(); });
   dialog::addInfo(XLAT("avoid energy balls, but do not let the main star run away!"));
 
   dialog::addBreak(100);

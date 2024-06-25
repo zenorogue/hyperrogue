@@ -125,8 +125,10 @@ void reset_textures();
 
 void ds_restart();
 void run_ads_game_std();
+void add_ads_cleanup();
 void run_ds_game();
 void run_ds_game_std();
+void add_ds_cleanup();
 
 /** in the replay mode */
 bool rev_replay;

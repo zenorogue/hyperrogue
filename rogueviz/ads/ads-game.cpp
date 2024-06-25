@@ -92,6 +92,15 @@ void restart() {
   ship_pt = 0;
   }
 
+void run_ads_game_hooks() {
+  rogueviz::rv_hook(hooks_frame, 100, view_ads_game);
+  rogueviz::rv_hook(hooks_prestats, 100, display_rsrc);
+  rogueviz::rv_hook(hooks_handleKey, 150, handleKey);
+  rogueviz::rv_hook(hooks_drawcell, 0, ads_draw_cell);
+  rogueviz::rv_hook(shmup::hooks_turn, 0, ads_turn);
+  rogueviz::rv_hook(anims::hooks_anim, 100, replay_animation);
+  }
+
 void run_ads_game() {
 
   if(!sl2) set_geometry(gTwistedProduct);
@@ -104,12 +113,7 @@ void run_ads_game() {
 
   starting_point = hybrid::get_where(cwt.at).first;
   
-  rogueviz::rv_hook(hooks_frame, 100, view_ads_game);
-  rogueviz::rv_hook(hooks_prestats, 100, display_rsrc);
-  rogueviz::rv_hook(hooks_handleKey, 0, handleKey);
-  rogueviz::rv_hook(hooks_drawcell, 0, ads_draw_cell);
-  rogueviz::rv_hook(shmup::hooks_turn, 0, ads_turn);
-  rogueviz::rv_hook(anims::hooks_anim, 100, replay_animation);
+  run_ads_game_hooks();
   
   cgi.use_count++;
   hybrid::in_underlying_geometry([] {
@@ -128,7 +132,9 @@ void run_ads_game() {
   cwt.at = centerover = currentmap->gamestart();
 
   restart();
+  }
 
+void add_ads_cleanup() {
   rogueviz::on_cleanup_or_next([] {
     switch_spacetime_to(true);
     });
@@ -176,6 +182,27 @@ void default_settings() {
   lps_add(lps_relhell_ads_spacetime, slr::range_z, 2.);
   }
 
+void gamedata(hr::gamedata* gd) {
+  gd->store(history);
+  gd->store(ci_at);
+  gd->store(rocks);
+  gd->store(main_rock);
+  gd->store(ship_pt);
+  gd->store(view_pt);
+  gd->store(invincibility_pt);
+  gd->store(current);
+  gd->store(current_ship);
+  gd->store(vctr);
+  gd->store(new_vctr);
+  gd->store(vctr_ship);
+  gd->store(vctrV);
+  gd->store(new_vctrV);
+  gd->store(vctrV_ship);
+  gd->store(ang);
+  gd->store(paused);
+  gd->store(pdata);
+  }
+
 void set_config() {
   lps_enable(&lps_relhell);
   enable_canvas();
@@ -210,6 +237,7 @@ auto shot_hooks =
 + arg::add3("-ads-menu", [] { set_config(); pushScreen(pick_the_game); })
 + arg::add3("-ads-scale", [] { arg::shift(); ld s = arg::argf(); change_scale(s); })
 + arg::add3("-ads-restart", restart)
++ addHook(hooks_gamedata, 500, gamedata)
 + addHook(hooks_configfile, 100, [] {
     param_f(ads_how_much_invincibility, "ads_invinc")
     -> editable(0, TAU, TAU/4, "AdS invincibility time", "How long does the period of invincibility after crashing last, in absolute units.", 'i');
