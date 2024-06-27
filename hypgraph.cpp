@@ -1007,6 +1007,8 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
         }
       #endif
       
+      if(pconf.small_hyperboloid) H = mid(H, C0);
+
       ret = H;
 
       if(sphere && pmodel == mdHyperboloidFlat) {
@@ -2673,7 +2675,9 @@ EX void draw_model_elements() {
     case mdHemisphere: {
       if(!pconf.show_hyperboloid_flat) return;
       if(models::is_hyperboloid(pmodel)) {
+
 #if CAP_QUEUE
+        if(pconf.small_hyperboloid) queueaction(PPR::CIRCLE, [] { glflush(); pconf.small_hyperboloid = false; });
         curvepoint(point3(0,0,1));
         curvepoint(point3(0,0,-pconf.alpha));
         queuecurve(shiftless(Id), ringcolor, 0, PPR::CIRCLE);
@@ -2709,6 +2713,7 @@ EX void draw_model_elements() {
         a[0] = -a[0];
         curvepoint(a);
         queuecurve(shiftless(Id), ringcolor, 0, PPR::CIRCLE);
+        if(pconf.small_hyperboloid) queueaction(PPR::CIRCLE, [] { glflush(); pconf.small_hyperboloid = true; });
 #endif
         }
       return;
@@ -3004,8 +3009,9 @@ EX void draw_boundary(int w) {
             queuereset(pmodel, p1);
             }
 
+          int mul = pconf.small_hyperboloid ? 2 : 1;
           for(ld t=0; t<=360; t ++)
-            curvepoint(xspinpush0(t * degree, it ? M_PI - mz : mz));
+            curvepoint(xspinpush0(t * degree, it ? M_PI - mz * mul: mz * mul));
 
           if(p1 == PPR::OUTCIRCLE) { queuecurve_reuse(shiftless(Id), lc, fc1, p1); fc1 = 0; p1 = PPR::CIRCLE; }
           queuecurve(shiftless(Id), lc, fc1, p1);

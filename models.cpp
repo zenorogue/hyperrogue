@@ -140,6 +140,7 @@ projection_configuration::projection_configuration() {
   *ptr_ball = cspin(1, 2, 20._deg);
   ptr_camera = new transmatrix; *ptr_camera = Id;
   offside = 0; offside2 = M_PI;
+  small_hyperboloid = false;
   }
 
 EX namespace models {
@@ -625,8 +626,10 @@ EX namespace models {
       add_edit(vpconf.fisheye_alpha);
       }
 
-    if(is_hyperboloid(vpmodel))
+    if(is_hyperboloid(vpmodel)) {
       add_edit(pconf.show_hyperboloid_flat);
+      add_edit(pconf.small_hyperboloid);
+      }
     
     if(vpmodel == mdCollignon) 
       add_edit(vpconf.collignon_parameter);
@@ -1041,6 +1044,10 @@ EX namespace models {
       param_b(p.show_hyperboloid_flat, sp+"hyperboloid-flat", true)
       -> editable("show flat", 'b');
   
+      param_b(p.small_hyperboloid, sp+"hyperboloid-small", true)
+      -> editable("small hyperboloid model", 't')
+      -> help("as in Clifford algebras");
+
       param_f(p.skiprope, sp+"mobius", 0)
       -> editable(0, 360, 15, "Möbius transformations", "", 'S')->unit = "°";
 

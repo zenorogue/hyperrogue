@@ -258,6 +258,7 @@ struct projection_configuration {
   ld offside, offside2;
   ld aitoff_parameter, miller_parameter, loximuthal_parameter, winkel_parameter;
   bool show_hyperboloid_flat;
+  bool small_hyperboloid;
   bool collignon_reflected;
   string formula;
   eModel basic_model;
