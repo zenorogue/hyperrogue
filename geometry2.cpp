@@ -536,7 +536,7 @@ transmatrix hrmap_standard::adj(cell *c, int i) {
     static bool first = true;
     if(h == h1)
       return T * U;
-    else if(gp::do_adjm) {
+    else if(gp::do_adjm && !fake::in()) {
       if(gp::gp_adj.count(make_pair(c,i))) {
         return T * gp::get_adj(c,i) * U;
         }
