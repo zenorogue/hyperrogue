@@ -137,7 +137,7 @@ projection_configuration::projection_configuration() {
   axial_angle = 90;
   ptr_model_orientation = new trans23;
   ptr_ball = new transmatrix;
-  *ptr_ball = cspin(1, 2, 20._deg);
+  *ptr_ball = cspin(2, 1, 20._deg);
   ptr_camera = new transmatrix; *ptr_camera = Id;
   offside = 0; offside2 = M_PI;
   small_hyperboloid = false;
