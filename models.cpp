@@ -1044,7 +1044,7 @@ EX namespace models {
       param_b(p.show_hyperboloid_flat, sp+"hyperboloid-flat", true)
       -> editable("show flat", 'b');
   
-      param_b(p.small_hyperboloid, sp+"hyperboloid-small", true)
+      param_b(p.small_hyperboloid, sp+"hyperboloid-small", false)
       -> editable("small hyperboloid model", 't')
       -> help("as in Clifford algebras");
 
