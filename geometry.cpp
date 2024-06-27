@@ -587,7 +587,7 @@ EX bool is_reg3_variation(eVariation var) {
   }
 
 EX bool special_fake() {
-  return fake::in() && (BITRUNCATED || (S3 == 4 && gp::param.first == 1 && gp::param.second == 1));
+  return fake::in() && (BITRUNCATED || (GOLDBERG && S3 == 4 && gp::param.first == 1 && gp::param.second == 1) || (UNRECTIFIED && gp::param.first == 1 && gp::param.second == 1));
   }
 
 void geometry_information::prepare_basics() {
@@ -615,6 +615,8 @@ void geometry_information::prepare_basics() {
   
   dynamicval<eVariation> gv(variation, variation);
   bool inv = INVERSE;
+  bool specfake = special_fake();
+  bool unrect = UNRECTIFIED;
   if(INVERSE) {
     variation = gp::variation_for(gp::param);
     println(hlog, "bitruncated = ", BITRUNCATED);
@@ -700,11 +702,11 @@ void geometry_information::prepare_basics() {
     2 * hdist0(mid(xspinpush0(M_PI/S6, hexvdist), xspinpush0(-M_PI/S6, hexvdist)))
     : hdist(xpush0(crossf), xspinpush0(TAU/S7, crossf));
 
-  if(special_fake()) {
+  if(specfake) {
     vector<pair<ld, ld>> vals;
     int s6 = BITRUNCATED ? S3*2 : S3;
-    vals.emplace_back(S7, BITRUNCATED ? fake::around / 3 : fake::around / 2);
-    vals.emplace_back(s6, BITRUNCATED ? fake::around * 2 / 3 : fake::around / 2);
+    vals.emplace_back(S7, unrect ? 0 : BITRUNCATED ? fake::around / 3 : fake::around / 2);
+    vals.emplace_back(s6, unrect ? fake::around : BITRUNCATED ? fake::around * 2 / 3 : fake::around / 2);
     ld edgelength = euclid ? 1 : arcm::compute_edgelength(vals);
 
     // circumradius and inradius, for S7 and S6 shapes
@@ -714,7 +716,7 @@ void geometry_information::prepare_basics() {
     auto i6 = hdist0(mid(xpush0(c6), cspin(0, 1, TAU/s6) * xpush0(c6)));
 
     // note: tessf remains undefined
-    hcrossf = crossf = i7 + i6;
+    hcrossf = crossf = unrect ? i6+i6 : i7 + i6;
     hexf = c7;
     hexhexdist = i6 + i6;
     hexvdist = c6;

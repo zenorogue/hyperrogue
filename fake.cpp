@@ -34,6 +34,7 @@ EX namespace fake {
     if(WDIM == 2 && standard_tiling() && GOLDBERG && S3 == 4 && ((gp::param.first+gp::param.second) % 2)) return true;
     if(WDIM == 2 && standard_tiling() && GOLDBERG && S3 == 3 && ((gp::param.first-gp::param.second) % 3)) return true;
     if(WDIM == 2 && standard_tiling() && GOLDBERG && S3 == 4 && gp::param.first == 1 && gp::param.second == 1) return true;
+    if(WDIM == 2 && standard_tiling() && UNRECTIFIED && S3 == 4 && gp::param.first == 1 && gp::param.second == 1) return true;
     if(arcm::in() && PURE) return true;
     if(hat::in()) return true;
     if(WDIM == 2) return false;
@@ -99,6 +100,10 @@ EX namespace fake {
         return ddspin(c, cid) * spin(-M_PI / c->type) * lxpush0((c == c->master->c7 ? cgi.hexf : cgi.hexvdist) * 3 / cf);
         }
 
+      if(UNRECTIFIED && S3 == 4 && gp::param.first == 1 && gp::param.second == 1) {
+        return spin(90._deg * cid + -M_PI / c->type) * lxpush0(cgi.hexvdist * 3 / cf);
+        }
+
       if(GOLDBERG) return underlying_map->get_corner(c, cid, cf);
 
       if(embedded_plane) {
@@ -125,6 +130,10 @@ EX namespace fake {
       if(GOLDBERG && S3 == 4 && gp::param.first == 1 && gp::param.second == 1) {
         c->cmove(d);
         return ddspin(c, d) *  lxpush(cgi.crossf) * iddspin(c->move(d), c->c.spin(d), M_PI);
+        }
+      if(UNRECTIFIED && S3 == 4 && gp::param.first == 1 && gp::param.second == 1) {
+        c->cmove(d);
+        return spin(90._deg * d) *  lxpush(cgi.crossf) * spin(-90._deg * c->c.spin(d) + M_PI);
         }
       if(embedded_plane) {
         geom3::light_flip(true);
@@ -574,6 +583,8 @@ EX ld compute_euclidean() {
   if(WDIM == 2 && BITRUNCATED) return 9 / (4.5 - 3. / S7 - 6. / S6);
   if(WDIM == 2 && standard_tiling() && GOLDBERG && S3 == 4 && gp::param.first == 1 && gp::param.second == 1)
     return S7 / (0.375 * S7 - 0.5);
+  if(WDIM == 2 && standard_tiling() && UNRECTIFIED && S3 == 4 && gp::param.first == 1 && gp::param.second == 1)
+    return 4;
 
   if(WDIM == 2) return 4 / (S7-2.) + 2;
 
@@ -596,6 +607,8 @@ EX ld around_orig() {
   if(WDIM == 2 && BITRUNCATED)
     return 3;
   if(WDIM == 2 && standard_tiling() && GOLDBERG && S3 == 4 && gp::param.first == 1 && gp::param.second == 1) return 4;
+  if(WDIM == 2 && standard_tiling() && UNRECTIFIED && S3 == 4 && gp::param.first == 1 && gp::param.second == 1)
+    return S7;
   if(WDIM == 2)
     return S3;
   if(underlying == gRhombic3)

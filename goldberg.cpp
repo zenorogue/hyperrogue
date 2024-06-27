@@ -1414,7 +1414,7 @@ EX namespace gp {
 
   EX hrmap* new_inverse() { return new hrmap_inverse; }
   
-  hrmap_inverse* inv_map() { return (hrmap_inverse*)currentmap; }
+  hrmap_inverse* inv_map() { if(fake::in()) return FPIU(inv_map()); return (hrmap_inverse*)currentmap; }
 
   EX bool inverse_pseudohept(cell *c) {
     cell *c1 = inv_map()->mapping[c];

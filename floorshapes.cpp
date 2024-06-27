@@ -1158,7 +1158,7 @@ EX struct dqi_poly *draw_shapevec(cell *c, const shiftmatrix& V, const vector<hp
   else if(currentmap->strict_tree_rules()) return &queuepolyat(V, shv[shvid(c)], col, prio);
 
   #if CAP_GP
-  else if(GOLDBERG) {
+  else if(GOLDBERG || (INVERSE && fake::in())) {
     int id = gp::get_plainshape_id(c);
     if(isize(shv) > id) return &queuepolyat(V, shv[id], col, prio);
     return NULL;
