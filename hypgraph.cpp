@@ -2022,7 +2022,7 @@ void hrmap_standard::draw_at(cell *at, const shiftmatrix& where) {
   }
 
 EX bool has_fixed_yz() {
-  return (embedded_plane || mhybrid || nil || euclid || sol || nih || (cgflags & qSTRETCHABLE) || (hyperbolic && bt::in()));
+  return (embedded_plane || mhybrid || nil || (euclid && WDIM == 3) || sol || nih || (cgflags & qSTRETCHABLE) || (hyperbolic && bt::in()));
   }
 
 EX bool keep_vertical() {
