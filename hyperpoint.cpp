@@ -993,6 +993,8 @@ EX shiftmatrix rgpushxto0(const shiftpoint& H) {
   return shiftless(rgpushxto0(H.h), H.shift);
   }
 
+EX bool dont_fixmatrix;
+
 /** \brief Fix the numerical inaccuracies in the isometry T
  *
  *  The nature of hyperbolic geometry makes the computations numerically unstable.
@@ -1001,7 +1003,8 @@ EX shiftmatrix rgpushxto0(const shiftpoint& H) {
  */
 
 EX void fixmatrix(transmatrix& T) {
-  if(nonisotropic) ; // T may be inverse... do not do that
+  if(dont_fixmatrix) return;
+  else if(nonisotropic) ; // T may be inverse... do not do that
   else if(cgflags & qAFFINE) ; // affine
   else if(gproduct) {
     auto z = zlevel(tC0(T));
