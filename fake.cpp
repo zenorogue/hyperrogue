@@ -572,6 +572,8 @@ EX ld compute_euclidean() {
   #endif
   if(underlying == gAperiodicHat) return 6;
   if(WDIM == 2 && BITRUNCATED) return 9 / (4.5 - 3. / S7 - 6. / S6);
+  if(WDIM == 2 && standard_tiling() && GOLDBERG && S3 == 4 && gp::param.first == 1 && gp::param.second == 1)
+    return S7 / (0.375 * S7 - 0.5);
 
   if(WDIM == 2) return 4 / (S7-2.) + 2;
 
@@ -593,6 +595,7 @@ EX ld around_orig() {
   if(hat::in()) return 6;
   if(WDIM == 2 && BITRUNCATED)
     return 3;
+  if(WDIM == 2 && standard_tiling() && GOLDBERG && S3 == 4 && gp::param.first == 1 && gp::param.second == 1) return 4;
   if(WDIM == 2)
     return S3;
   if(underlying == gRhombic3)
