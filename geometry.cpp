@@ -713,8 +713,8 @@ void geometry_information::prepare_basics() {
     auto i7 = hdist0(mid(xpush0(c7), cspin(0, 1, TAU/S7) * xpush0(c7)));
     auto i6 = hdist0(mid(xpush0(c6), cspin(0, 1, TAU/s6) * xpush0(c6)));
 
-    // note: tessf and hcrossf remain undefined
-    crossf = i7 + i6;
+    // note: tessf remains undefined
+    hcrossf = crossf = i7 + i6;
     hexf = c7;
     hexhexdist = i6 + i6;
     hexvdist = c6;
