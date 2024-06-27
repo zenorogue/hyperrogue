@@ -2689,7 +2689,7 @@ EX void draw_model_elements() {
         ld cb = pconf.ball() [1][1];
         ld sb = pconf.ball() [1][2];
         
-        a[1] = sb * a[2] / -cb;
+        a[1] = sb * a[2] / cb;
         a[0] = sqrt(-1 + a[2] * a[2] - a[1] * a[1]);
     
         curvepoint(point3(0,0,-pconf.alpha));
@@ -2704,7 +2704,7 @@ EX void draw_model_elements() {
         curvepoint(point3(1,0,0));
         queuecurve(shiftless(Id), ringcolor, 0, PPR::CIRCLE);
     
-        a[1] = sb * tz / -cb;
+        a[1] = sb * tz / cb;
         a[0] = sqrt(tz * tz - a[1] * a[1]);
         a[2] = tz - pconf.alpha;
     
