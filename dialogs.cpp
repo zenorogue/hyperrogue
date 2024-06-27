@@ -652,6 +652,54 @@ EX namespace dialog {
     quickqueue();
     }
 
+  EX void draw_side_shade() {
+    int steps = menu_darkening - darken;
+
+    color_t col = (backcolor << 8) | (255 - (255 >> steps));
+
+    if(svg::in || !(auraNOGL || vid.usingGL)) {
+      flat_model_enabler fme;
+      initquickqueue();
+      ld pix = 1 / (2 * cgi.hcrossf / cgi.crossf);
+      curvepoint(hyperpoint(vid.xres-dwidth, -10, 1, 1));
+      curvepoint(hyperpoint(vid.xres + 10, -10, 1, 1));
+      curvepoint(hyperpoint(vid.xres + 10, vid.yres + 10, 1, 1));
+      curvepoint(hyperpoint(vid.xres-dwidth, vid.yres + 10, 1, 1));
+      curvepoint(hyperpoint(vid.xres-dwidth, -10, 1, 1));
+      shiftmatrix V = shiftless(atscreenpos(0, 0, pix));
+      queuecurve(V, 0, col, PPR::LINE);
+      quickqueue();
+      }
+
+    #if CAP_GL
+    else {
+      auto full = part(col, 0);
+      static vector<glhr::colored_vertex> auravertices;
+      auravertices.clear();
+      ld width = vid.xres / 100;
+      for(int i=4; i<steps && i < 8; i++) width /= sqrt(2);
+      for(int x=0; x<16; x++) {
+        for(int c=0; c<6; c++) {
+          int bx = (c == 1 || c == 3 || c == 5) ? x+1 : x;
+          int by = (c == 2 || c == 4 || c == 5) ? vid.yres : 0;
+          int cx = bx == 0 ? 0 : bx == 16 ?vid.xres :
+            vid.xres - dwidth + width * tan((bx-8)/8. * 90._deg);
+          part(col, 0) = lerp(0, full, bx / 16.);
+          auravertices.emplace_back(hyperpoint(cx - current_display->xcenter, by - current_display->ycenter, 0, 1), col);
+          }
+        }
+      glflush();
+      current_display->next_shader_flags = GF_VARCOLOR;
+      dynamicval<eModel> m(pmodel, mdPixel);
+      current_display->set_all(0, 0);
+      glhr::id_modelview();
+      glhr::prepare(auravertices);
+      glhr::set_depthtest(false);
+      glDrawArrays(GL_TRIANGLES, 0, isize(auravertices));
+      }
+    #endif
+    }
+
   EX void display() {
 
     callhooks(hooks_display_dialog);
@@ -698,52 +746,7 @@ EX namespace dialog {
       list_skip = 0;
       }
     
-    if(current_display->sidescreen && darken < menu_darkening) {
-      int steps = menu_darkening - darken;
-      color_t col = (backcolor << 8) | (255 - (255 >> steps));
-
-      if(svg::in || !(auraNOGL || vid.usingGL)) {
-        flat_model_enabler fme;
-        initquickqueue();
-        ld pix = 1 / (2 * cgi.hcrossf / cgi.crossf);
-        curvepoint(hyperpoint(vid.xres-dwidth, -10, 1, 1));
-        curvepoint(hyperpoint(vid.xres + 10, -10, 1, 1));
-        curvepoint(hyperpoint(vid.xres + 10, vid.yres + 10, 1, 1));
-        curvepoint(hyperpoint(vid.xres-dwidth, vid.yres + 10, 1, 1));
-        curvepoint(hyperpoint(vid.xres-dwidth, -10, 1, 1));
-        shiftmatrix V = shiftless(atscreenpos(0, 0, pix));
-        queuecurve(V, 0, col, PPR::LINE);
-        quickqueue();
-        }
-
-      #if CAP_GL
-      else {
-        auto full = part(col, 0);
-        static vector<glhr::colored_vertex> auravertices;
-        auravertices.clear();
-        ld width = vid.xres / 100;
-        for(int i=4; i<steps && i < 8; i++) width /= sqrt(2);
-        for(int x=0; x<16; x++) {
-          for(int c=0; c<6; c++) {
-            int bx = (c == 1 || c == 3 || c == 5) ? x+1 : x;
-            int by = (c == 2 || c == 4 || c == 5) ? vid.yres : 0;
-            int cx = bx == 0 ? 0 : bx == 16 ?vid.xres :
-              vid.xres - dwidth + width * tan((bx-8)/8. * 90._deg);
-            part(col, 0) = lerp(0, full, bx / 16.);
-            auravertices.emplace_back(hyperpoint(cx - current_display->xcenter, by - current_display->ycenter, 0, 1), col);
-            }
-          }
-        glflush();
-        current_display->next_shader_flags = GF_VARCOLOR;
-        dynamicval<eModel> m(pmodel, mdPixel);
-        current_display->set_all(0, 0);
-        glhr::id_modelview();
-        glhr::prepare(auravertices);
-        glhr::set_depthtest(false);
-        glDrawArrays(GL_TRIANGLES, 0, isize(auravertices));
-        }
-      #endif
-      }
+    if(current_display->sidescreen && darken < menu_darkening) draw_side_shade();
 
     bool inlist = false;
     int need_to_skip = 0;
