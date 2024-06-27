@@ -360,7 +360,7 @@ EX int get_side(const hyperpoint& H) {
   if(pmodel == mdHemisphere && !sphere) {
     hyperpoint res;
     applymodel(shiftless(H), res);
-    return res[2] < 0 ? -1 : 1;
+    return res[2] < 0 ? 1 : -1;
     }
   if(pmodel == mdHemisphere && sphere) {
     auto H1 = H;
