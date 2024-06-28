@@ -963,7 +963,7 @@ EX namespace models {
       param_matrix(p.mori().v3, pp+"mori3", 3)
       -> editable("model orientation 3D", "", 'o');
 
-      param_f(p.top_z, sp+"topz", 5)
+      param_f(p.top_z, sp+"topz", 3)
       -> editable(1, 20, .25, "maximum z coordinate to show", "maximum z coordinate to show", 'l');       
 
       param_f(p.model_transition, parameter_names(pp+"mtrans", sp+"model transition"), 1)
