@@ -710,7 +710,6 @@ EX namespace models {
     dialog::addBack();
 
     dialog::display();
-    mouseovers = XLAT("see http://www.roguetemple.com/z/hyper/models.php");
     }
     
   EX void quick_model() {
