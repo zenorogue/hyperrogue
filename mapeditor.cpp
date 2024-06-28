@@ -390,8 +390,6 @@ EX namespace mapeditor {
 #if CAP_EDIT
   EX map<int, cell*> modelcell;
 
-  void handleKeyMap(int sym, int uni);
-
   EX void applyModelcell(cell *c) {
     if(patterns::whichPattern == 'H') return;
     auto si = patterns::getpatterninfo0(c);
@@ -1411,16 +1409,183 @@ EX namespace mapeditor {
 
   void displayFunctionKeys() {
     int fs = editor_fsize();
-    displayButton(8, vid.yres-8-fs*11, XLAT("F1 = help"), SDLK_F1, 0);
-    displayButton(8, vid.yres-8-fs*10, XLAT("F2 = save"), SDLK_F2, 0);
-    displayButton(8, vid.yres-8-fs*9, XLAT("F3 = load"), SDLK_F3, 0);
-    displayButton(8, vid.yres-8-fs*7, drawing_tool ? XLAT("F5 = clear") : XLAT("F5 = restart"), SDLK_F5, 0);
-    #if CAP_SHOT
-    displayButton(8, vid.yres-8-fs*6, XLAT("F6 = HQ shot"), SDLK_F6, 0);
-    #endif
-    displayButton(8, vid.yres-8-fs*5, XLAT("F7 = player on/off"), SDLK_F7, 0);
-    displayButton(8, vid.yres-8-fs*3, XLAT("SPACE = map/graphics"), ' ', 0);
-    displayButton(8, vid.yres-8-fs*2, XLAT("ESC = return to the game"), SDLK_ESCAPE, 0);
+    displayButton(8, vid.yres-8-fs*2, XLAT("ESC = menu"), SDLK_ESCAPE, 0);
+    }
+
+  EX void map_editor_menu() {
+
+    dialog::add_key_action('-', [] {
+      if(!holdmouse) undoLock();
+      if(mouseover) {
+        allInPattern(mouseover_cw(false));
+        if(!(GDIM == 3 && building_mode))
+          holdmouse = true;
+        }
+      });
+
+    if(anyshiftclick) {
+      dialog::addInfo(
+        (painttype == 6 && (GDIM == 3)) ? "wall" :
+        painttype == 3 ? XLATN(winf[paintwhat_alt_wall].name) : "clear");
+      }
+    else
+      dialog::addInfo(paintwhat_str);
+    dialog::addInfo(XLAT("use at your own risk!"), 0x800000);
+
+    dialog::addSelItem(XLAT("radius"), its(radius), '0');
+    dialog::add_action([] {
+      dialog::editNumber(radius, 0, 9, 1, 1, XLAT("radius"), "");
+      });
+    dialog::addBoolItem(XLAT("boundary"), painttype == 5, 'b');
+    dialog::add_action([] { painttype = 5, paintwhat_str = XLAT("boundary"); });
+    dialog::addBoolItem(XLAT("monster"), painttype == 0, 'm');
+    dialog::add_action([] { pushScreen(showList), painttype = 0, dialog::infix = ""; });
+    dialog::addBoolItem(XLAT("item"), painttype == 1, 'i');
+    dialog::add_action([] { pushScreen(showList), painttype = 1, dialog::infix = ""; });
+    dialog::addBoolItem(XLAT("land"), painttype == 2, 'l');
+    dialog::add_action([] { pushScreen(showList), painttype = 2, dialog::infix = ""; });
+    dialog::addBoolItem(XLAT("wall"), painttype == 3, 'w');
+    dialog::add_action([] { pushScreen(showList), painttype = 3, dialog::infix = ""; });
+    dialog::addBoolItem(XLAT("paint"), painttype == 6, 'w');
+    dialog::add_action([] {
+      painttype = 6;
+      paintwhat_str = "paint";
+      dialog::openColorDialog((unsigned&)(paintwhat = (painttype ==6 ? paintwhat : 0x808080)));
+      });
+    dialog::addBoolItem(XLAT("copy"), painttype == 4, 'c');
+    dialog::add_action([] {
+      if(mouseover) { copysource = mouseover_cw(true); painttype = 4; paintwhat_str = XLAT("copying"); }
+      else { painttype = 7; paintwhat_str = XLAT("select area to copy"); }
+      });
+    dialog::addBoolItem(XLAT("teleport player"), painttype == 8, 't');
+    dialog::add_action([] {
+      if(mouseover) {
+        playermoved = true;
+        cwt = mouseover_cw(true);
+        }
+      else { painttype = 8; paintwhat_str = XLAT("teleport where"); }
+      });
+    if(painttype == 4) {
+      dialog::addBoolItem_action(XLAT("flip"), copysource.mirrored, 'f');
+      }
+    else if(painttype == 3) {
+      dialog::addItem(XLAT("set Shift+click"), 'z');
+      dialog::add_action([] { paintwhat_alt_wall = paintwhat; });
+      }
+    else dialog::addInfo(XLAT("press Shift to clear"));
+
+    dialog::addItem(XLAT("undo"), 'u');
+    dialog::add_action(applyUndo);
+    if(WDIM == 3)
+      dialog::addBoolItem_action(XLAT("build on walls"), building_mode, 'B');
+    else dialog::addBreak(100);
+    dialog::addBreak(800);
+    }
+
+  void editor_menu(int i) {
+    cmode |= sm::DIALOG_STRICT_X;
+
+    if(i == 1) dialog::init(XLAT("map editor"));
+    if(i == 2) dialog::init(XLAT("shape editor"));
+    if(i == 3) dialog::init(intexture ? XLAT("texture editor") : XLAT("drawing tool"));
+
+    if(i == 1) map_editor_menu();
+    else draw_editor_menu();
+
+    dialog::addBreak(50);
+
+    dialog::addItem("switch the editor mode", ' ');
+    dialog::add_action([i] {
+      if(i == 2 && !(cheater || autocheat)) {
+        dialog::cheat_if_confirmed([] { cheater++; });
+        return;
+        }
+      if(i == 1) {
+        popScreen();
+        pushScreen(showDrawEditor);
+        initdraw(mouseover ? mouseover : cwt.at);
+        drawing_tool = false;
+        }
+      if(i == 2) drawing_tool = true;
+      if(i == 3) {
+        popScreen();
+        pushScreen(showMapEditor);
+        }
+      });
+
+    dialog::addItem("help", SDLK_F1);
+    dialog::add_action([i] {
+      gotoHelp(i == 1 ? mehelptext() : drawhelptext());
+      });
+
+    if(i == 2) {
+      dialog::addItem(XLAT("save only the shapes"), SDLK_F2);
+      dialog::add_action([] {
+        dialog::openFileDialog(picfile, XLAT("pics to save:"), ".pic",
+          [] () {
+            return savePicFile(picfile);
+            });
+        });
+      dialog::addItem(XLAT("load only the shapes"), SDLK_F3);
+      dialog::add_action([] {
+        dialog::openFileDialog(picfile, XLAT("pics to load:"), ".pic",
+          [] () {
+            return loadPicFile(picfile);
+            });
+        });
+
+      }
+    else {
+      dialog::addItem(XLAT("save the map"), SDLK_F2);
+      dialog::add_action(save_level);
+      dialog::addItem(XLAT("load the map"), SDLK_F3);
+      dialog::add_action(load_level);
+      }
+
+    if(!show_menu) displayFunctionKeys();
+
+    dialog::addItem(XLAT("reset"), SDLK_F5);
+    dialog::add_action([i] {
+      if(i == 1) dialog::push_confirm_dialog([] { restart_game(); }, XLAT("Are you sure you want to clear the map?"));
+      if(i == 3) dialog::push_confirm_dialog([] {
+        stop_game();
+        enable_canvas();
+        canvas_default_wall = waInvisibleFloor;
+        ccolor::set_plain(0xFFFFFF);
+        dtcolor = (forecolor << 8) | 255;
+        drawplayer = false;
+        vid.use_smart_range = 2;
+        start_game();
+        },
+        XLAT("Are you sure you want to restart? This will let you draw on a blank screen.")
+        );
+      if(i == 2) dialog::push_confirm_dialog([] {
+        for(int i=0; i<USERSHAPEGROUPS; i++) {
+          for(auto us: usershapes[i])
+            if(us.second) delete us.second;
+          usershapes[i].clear();
+          }
+        },
+        XLAT("Are you sure you want to restart? This will erase all shapes.")
+        );
+      });
+
+    dialog::addBoolItem_action("draw the player", drawplayer, SDLK_F7);
+
+    dialog::addItem(XLAT("map settings"), SDLK_F8);
+    dialog::add_action_push(map_settings);
+
+    dialog::addItem((i == 2 && drawcellShapeGroup() == sgFloor) ? XLAT("complex tessellations") : XLAT("patterns"), 'r');
+
+    dialog::add_action_push(patterns::showPattern);
+
+    dialog::addItem("hide menu", 'h');
+    dialog::add_action([] { show_menu = !show_menu; });
+
+    dialog::addBack();
+
+    if(show_menu) { dialog::display(); }
+    else dialog::add_key_action(SDLK_ESCAPE, [] { show_menu = true; });
     }
   
   EX set<cell*> affected;
@@ -1428,6 +1593,7 @@ EX namespace mapeditor {
 
   EX void showMapEditor() {
     cmode = sm::MAP | sm::PANNING;
+    if(show_menu) cmode |= sm::SIDE;
     if(building_mode) {
       if(anyshiftclick) cmode |= sm::EDIT_INSIDE_WALLS;
       else cmode |= sm::EDIT_BEFORE_WALLS;
@@ -1445,37 +1611,19 @@ EX namespace mapeditor {
     
     getcstat = '-';
 
-    if(anyshiftclick) {
-      displayfr(8, 8 + fs, 2, vid.fsize,
-        (painttype == 6 && (GDIM == 3)) ? "wall" :
-        painttype == 3 ? XLATN(winf[paintwhat_alt_wall].name) : "clear",
-        forecolor, 0);
+    if(!show_menu) {
+      if(anyshiftclick) {
+        displayfr(8, 8 + fs, 2, vid.fsize,
+          (painttype == 6 && (GDIM == 3)) ? "wall" :
+          painttype == 3 ? XLATN(winf[paintwhat_alt_wall].name) : "clear",
+          forecolor, 0);
+        }
+      else
+        displayfr(8, 8 + fs, 2, vid.fsize, paintwhat_str, forecolor, 0);
       }
-    else
-      displayfr(8, 8 + fs, 2, vid.fsize, paintwhat_str, forecolor, 0);
-    displayfr(8, 8+fs*2, 2, vid.fsize, XLAT("use at your own risk!"), 0x800000, 0);
 
-    displayButton(8, 8+fs*4, XLAT("0-9 = radius (%1)", its(radius)), ('0' + (radius+1)%10), 0);
-    displayButton(8, 8+fs*5, XLAT("b = boundary"), 'b', 0);
-    displayButton(8, 8+fs*6, XLAT("m = monsters"), 'm', 0);
-    displayButton(8, 8+fs*7, XLAT("w = walls"), 'w', 0);
-    displayButton(8, 8+fs*8, XLAT("i = items"), 'i', 0);
-    displayButton(8, 8+fs*9, XLAT("l = lands"), 'l', 0);
-    displayButton(8, 8+fs*10, XLAT("c = copy"), 'c', 0);
-    displayButton(8, 8+fs*11, XLAT("u = undo"), 'u', 0);
-    if(painttype == 4)
-      displayButton(8, 8+fs*12, XLAT("f = flip %1", ONOFF(copysource.mirrored)), 'u', 0);
-    displayButton(8, 8+fs*13, XLAT("r = regular"), 'r', 0);
-    displayButton(8, 8+fs*14, XLAT("p = paint"), 'p', 0);
-    if(painttype == 3)
-      displayButton(8, 8+fs*15, XLAT("z = set Shift+click"), 'z', 0);
-    if(WDIM == 3)
-      displayButton(8, 8+fs*16, XLAT("B = build on walls ") + ONOFF(building_mode), 'B', 0);
-
-    displayFunctionKeys();
-    displayButton(8, vid.yres-8-fs*4, XLAT("F8 = settings"), SDLK_F8, 0);
-    
-    keyhandler = handleKeyMap;
+    editor_menu(1);
+    if(mouseover) forCellCM(c, mouseover) {}
     }
   
   int spillinc() {
@@ -1629,6 +1777,10 @@ EX namespace mapeditor {
           paintwhat_str = XLAT("copying");
           }
         break;
+      case 8:
+        playermoved = true;
+        cwt = c;
+        break;
       }
     checkUndo();
     }
@@ -1674,7 +1826,7 @@ EX namespace mapeditor {
       editCell(st);
     }
   
-  void allInPattern(cellwalker where) {
+  EX void allInPattern(cellwalker where) {
 
     manual_celllister cl;
     bool call_editAt = !patterns::whichPattern;
@@ -1709,13 +1861,13 @@ EX namespace mapeditor {
       }
     }
   
-  cellwalker mouseover_cw(bool fix) {
+  EX cellwalker mouseover_cw(bool fix) {
     int d = neighborId(mouseover, mouseover2);
     if(d == -1 && fix) d = hrand(mouseover->type);
     return cellwalker(mouseover, d);
     }
 
-  void save_level() {
+  EX void save_level() {
     #if ISWEB
     mapstream::saveMap("web.lev");
     offer_download("web.lev", "mime/type");
@@ -1733,7 +1885,7 @@ EX namespace mapeditor {
     #endif
     }
 
-  void load_level() {
+  EX void load_level() {
     #if ISWEB
     offer_choose_file([] {
       mapstream::loadMap("data.txt");
@@ -1752,7 +1904,7 @@ EX namespace mapeditor {
     #endif
     }
   
-  void showList() {
+  EX void showList() {
     string caption;
     dialog::v.clear();
     if(painttype == 4) painttype = 0;
@@ -1825,78 +1977,6 @@ EX namespace mapeditor {
       };    
     }
 
-  void handleKeyMap(int sym, int uni) {
-    handlePanning(sym, uni);
-
-    // left-clicks are coded with '-', and right-clicks are coded with sym F1
-    if(uni == '-' && !holdmouse) undoLock();
-    if(uni == '-' && mouseover) {
-      allInPattern(mouseover_cw(false));
-      if(!(GDIM == 3 && building_mode))
-        holdmouse = true;
-      }
-    
-    if(mouseover) for(int i=0; i<mouseover->type; i++) createMov(mouseover, i);
-    if(uni == 'u') applyUndo();
-    else if(uni == 'v' || sym == SDLK_F10 || sym == SDLK_ESCAPE) popScreen();
-    else if(uni == 'A') popScreen();
-    else if(uni >= '0' && uni <= '9') radius = uni - '0';
-    else if(uni == 'm') pushScreen(showList), painttype = 0, dialog::infix = "";
-    else if(uni == 'i') pushScreen(showList), painttype = 1, dialog::infix = "";
-    else if(uni == 'l') pushScreen(showList), painttype = 2, dialog::infix = "";
-    else if(uni == 'w') pushScreen(showList), painttype = 3, dialog::infix = "";
-    else if(uni == 'z' && painttype == 3) paintwhat_alt_wall = paintwhat;
-    else if(uni == 'B') building_mode = !building_mode;
-    else if(uni == 'r') pushScreen(patterns::showPattern);
-    else if(uni == 't' && mouseover) {
-      playermoved = true;
-      cwt = mouseover_cw(true);
-      }
-    else if(uni == 'b') painttype = 5, paintwhat_str = XLAT("boundary");
-    else if(uni == 'p') {
-      painttype = 6;
-      paintwhat_str = "paint";
-      dialog::openColorDialog((unsigned&)(paintwhat = (painttype ==6 ? paintwhat : 0x808080)));
-      }
-    else if(uni == 'G') 
-      push_debug_screen();
-    else if(sym == SDLK_F5) {
-      dialog::push_confirm_dialog([] { restart_game(); }, XLAT("Are you sure you want to clear the map?"));
-      }
-    else if(sym == SDLK_F2) save_level();
-    else if(sym == SDLK_F3) load_level();
-#if CAP_SHOT
-    else if(sym == SDLK_F6) {
-      pushScreen(shot::menu);
-      }
-#endif
-    else if(sym == SDLK_F7) {
-      drawplayer = !drawplayer;
-      }
-    else if(sym == SDLK_F8) {
-      pushScreen(map_settings);
-      }
-    else if(uni == 'c' && mouseover) {
-      copysource = mouseover_cw(true);
-      painttype = 4;
-      paintwhat_str = XLAT("copying");
-      }
-    else if(uni == 'c') {
-      painttype = 7;
-      paintwhat_str = XLAT("select area to copy");
-      }
-    else if(uni == 'f') {
-      copysource.mirrored = !copysource.mirrored;
-      }
-    else if(uni == 'h' || sym == SDLK_F1) 
-      gotoHelp(mehelptext());
-    else if(uni == ' ') {
-      popScreen();
-      pushScreen(showDrawEditor);
-      initdraw(mouseover ? mouseover : cwt.at);
-      }
-    }
-
 // VECTOR GRAPHICS EDITOR
 
   const char* drawhelp = 
@@ -1908,13 +1988,13 @@ EX namespace mapeditor {
    "be created by using several layers ('l'). See the edges of "
    "the screen for more keys.";
 
-  string drawhelptext() { 
+  EX string drawhelptext() {
     return XLAT(drawhelp);
     }
       
-  int dslayer;
+  EX int dslayer;
   bool coloring;
-  color_t colortouse = 0xC0C0C0FFu;
+  EX color_t colortouse = 0xC0C0C0FFu;
   // fake key sent to change the color
   static constexpr int COLORKEY = (-10000); 
 
@@ -1943,10 +2023,10 @@ EX namespace mapeditor {
     queuecircleat1(c, V, .78, 0x00FFFFFF);
     }
 
-  hyperpoint ccenter = C02;
-  hyperpoint coldcenter = C02;
+  EX hyperpoint ccenter = C02;
+  EX hyperpoint coldcenter = C02;
   
-  unsigned gridcolor = 0xC0C0C040;
+  EX unsigned gridcolor = 0xC0C0C040;
   
   shiftpoint in_front_dist(ld d) {
 
@@ -2066,8 +2146,6 @@ EX namespace mapeditor {
       queuestr(mouse_snap(), 10, "x", 0xC040C0);
     }
 
-  void drawHandleKey(int sym, int uni);
-  
   static ld brush_sizes[10] = {
     0.001, 0.002, 0.005, 0.0075, 0.01, 0.015, 0.02, 0.05, 0.075, 0.1};
   
@@ -2087,7 +2165,7 @@ EX namespace mapeditor {
     0x804000FF
     };
 
-  bool area_in_pi = false;
+  EX bool area_in_pi = false;
 
   ld compute_area(hpcshape& sh) {
     ld area = 0;
@@ -2140,42 +2218,62 @@ EX namespace mapeditor {
     return resh;
     }
 
+  EX bool show_menu = true;
+
   EX void showDrawEditor() {
 #if CAP_POLY
     cmode = sm::DRAW | sm::PANNING;
+    if(show_menu) cmode |= sm::SIDE;
     gamescreen();
     drawGrid();
     if(callhandlers(false, hooks_prestats)) return;
 
     if(!mouseout()) getcstat = '-';
-    
-    int sg;
-    string line1, line2;
-  
-    usershape *us = NULL;
 
+    bool freedraw = drawing_tool || intexture;    
+    
+#if CAP_TEXTURE
+    if(freedraw && !show_menu) for(int i=0; i<10; i++) {
+      int fs = editor_fsize();
+      if(8 + fs * (6+i) < vid.yres - 8 - fs * 7)
+        displayColorButton(vid.xres-8, 8+fs*(6+i), "###", 1000 + i, 16, 1, dialog::displaycolor(texture_colors[i+1]));
+
+      if(displayfr(vid.xres-8 - fs * 3, 8+fs*(6+i), 0, vid.fsize, its(i+1), dtwidth == brush_sizes[i] ? 0xFF8000 : 0xC0C0C0, 16))
+        getcstat = 2000+i;
+      }
+#endif
+
+    editor_menu(drawing_tool ? 3 : 2);
+    keyhandler = handle_key_draw;
+#else
+    popScreen();
+#endif
+    }
+
+  EX void draw_editor_menu() {
+  
 #if CAP_TEXTURE
     if(texture::config.tstate != texture::tsActive && intexture) {
       intexture = false; drawing_tool = true;
       }
 #endif
     
-    bool freedraw = drawing_tool || intexture;    
+    bool freedraw = drawing_tool || intexture;
 
 #if CAP_TEXTURE        
     if(intexture) {
-      sg = 16;
-      line1 = "texture";
-      line2 = "";
       texture::config.data.update();
       freedraw = true;
       drawing_tool = false;
       }
 #endif
 
+    int prec = snapping ? 15 : 4;
+
     if(!freedraw) {
 
-      sg = drawcellShapeGroup();
+      int sg = drawcellShapeGroup();
+      string line1, line2;
       
       switch(sg) {
         case sgPlayer:
@@ -2204,115 +2302,163 @@ EX namespace mapeditor {
           break;        
         }
       
-      us =usershapes[drawcellShapeGroup()][drawcellShapeID()];
-      }
+      usershape *us = usershapes[drawcellShapeGroup()][drawcellShapeID()];
     
-    int fs = editor_fsize();
+      dialog::addInfo(line1 + " : " + line2);
+      string s = GDIM == 3 ? XLAT("color group") : XLAT("layers");
+      dialog::addSelItem(s, its(dslayer), 'l');
+      dialog::add_action([s] {
+        dialog::editNumber(dslayer, 0, USERLAYERS-1, 1, 0, s, "");
+        dialog::bound_low(0);
+        dialog::bound_up(USERLAYERS-1);
+        });
+      dialog::addBoolItem_action("one layer only", onelayeronly, 'l'-96);
 
-    // displayButton(8, 8+fs*9, XLAT("l = lands"), 'l', 0);
-    displayfr(8, 8+fs, 2, vid.fsize, line1, 0xC0C0C0, 0);
-    
-    if(!freedraw) {
-      if(sg == sgFloor)
-        displayButton(8, 8+fs*2, line2 + XLAT(" (r = complex tesselations)"), 'r', 0);
-      else
-        displayfr(8, 8+fs*2, 2, vid.fsize, line2, 0xC0C0C0, 0);
-      displayButton(8, 8+fs*3, GDIM == 3 ? XLAT("l = color group: %1", its(dslayer)) : XLAT("l = layers: %1", its(dslayer)), 'l', 0);
-      }
+      dialog::add_key_action('-', [] { auto act = at_or_null(dialog::key_actions, mousekey); if(act) (*act)(); });
 
-    if(us && isize(us->d[dslayer].list)) {
-      usershapelayer& ds(us->d[dslayer]);
-      if(!EDITING_TRIANGLES) {
-        displayButton(8, 8+fs*4, XLAT("1-9 = rotations: %1", its(ds.rots)), '1' + (ds.rots % 9), 0);
-        displayButton(8, 8+fs*5, ds.sym ? XLAT("0 = symmetry") : XLAT("0 = asymmetry"), '0', 0);
-        }
+      auto auto_to_shape = [] (string text, char ch) { 
+        dialog::addItem_mouse(text, ch);
+        dialog::add_action([ch] { 
+          if(GDIM == 2 && !mouseover) { mousekey = ch; return; }
+          shiftpoint mh = full_mouseh();
+          hyperpoint mh1 = inverse_shift(drawtrans, mh);
+          dslayer %= USERLAYERS;
+          applyToShape(drawcellShapeGroup(), drawcellShapeID(), ch, mh1);
+          });
+        };
 
-      displayfr(8, 8+fs*7, 2, vid.fsize, XLAT("%1 vertices", its(isize(ds.list))), 0xC0C0C0, 0);
-      displaymm('a', 8, 8+fs*8, 2, vid.fsize, XLAT("a = add v"), 0);
-      if(!EDITING_TRIANGLES) {
-        if(autochoose) {
-          displaymm('m', 8, 8+fs*9, 2, vid.fsize, XLAT("m = move v"), 0);
-          displaymm('d', 8, 8+fs*10, 2, vid.fsize, XLAT("d = delete v"), 0);
+      auto_to_shape(XLAT("start new shape"), 'n');
+      auto_to_shape(XLAT("load current"), 'u');
+
+      if(us && isize(us->d[dslayer].list)) {
+
+        usershapelayer& ds(us->d[dslayer]);
+        if(!EDITING_TRIANGLES) {
+          dialog::addSelItem(XLAT("rotations"), its(ds.rots), '1');
+          dialog::add_action([&ds] {
+            auto& ne = dialog::editNumber(ds.rots, 1, 100, 1, 1, XLAT("rotations"), "");
+            dialog::bound_low(1);
+            dialog::bound_up(999);
+            ne.reaction = [] { usershape_changes++; };
+            });
+          dialog::addBoolItem("symmetry", ds.sym, '0');
+          dialog::add_action([&ds] { ds.sym = !ds.sym; usershape_changes++; });
+          }
+        else dialog::addBreak(200);
+        dialog::addItem(XLAT("%1 vertices", its(isize(ds.list))), SDLK_F4);
+        dialog::add_action(export_for_polygon);
+        auto_to_shape(XLAT("add vertex"), 'a');
+        if(!EDITING_TRIANGLES) {
+          auto_to_shape(XLAT("move vertex"), 'm'); // autochoose?
+          auto_to_shape(XLAT("delete vertex"), 'd'); // autochoose?
+          dialog::addItem_mouse(XLAT("choose"), 'c');
+          dialog::add_action([] { if(mouseover) { ew = ewsearch; autochoose = false; } else mousekey = 'c'; });
+          dialog::addBoolItem_action(XLAT("switch auto"), autochoose, 'b');
           }
         else {
-          displayButton(8, 8+fs*9, XLAT("m = move v"), 'm', 0);
-          displayButton(8, 8+fs*10, XLAT("d = delete v"), 'd', 0);
+          auto_to_shape(XLAT("reuse"), 'c'); // autochoose?
+          auto_to_shape(XLAT("delete"), 'd'); // autochoose?
+          dialog::addBreak(200);
           }
-        displaymm('c', 8, 8+fs*11, 2, vid.fsize, autochoose ? XLAT("autochoose") : XLAT("c = choose"), 0);
-        displayButton(8, 8+fs*12, XLAT("b = switch auto"), 'b', 0);
+        if(GDIM == 2) {
+          auto_to_shape(XLAT("shift"), 't');
+          auto_to_shape(XLAT("spin"), 'y');
+          auto_to_shape(XLAT("z-level"), 'z');
+          }
+        else dialog::addBreak(300);
+        cgi.require_usershapes();
+        auto& sh = cgi.ushr[&us->d[dslayer]];
+        if(sh.e >= sh.s + 3)
+        dialog::addSelItem(XLAT("area"), area_in_pi ? fts(compute_area(sh) / M_PI, 4) + "π" : fts(compute_area(sh), prec), 'w');
+        dialog::add_action([] { area_in_pi = !area_in_pi; });
         }
       else {
-        displayfr(8, 8+fs*9, 2, vid.fsize, XLAT("c = reuse"), 0xC0C0C0, 0);
-        displayfr(8, 8+fs*10, 2, vid.fsize, XLAT("d = delete"), 0xC0C0C0, 0);
+        if(among(mousekey, 'a', 'c', 'd', 't', 'y')) mousekey = 'n';
+        dialog::addBreak(1100);
         }
-
-      if(GDIM == 2) {
-        displayfr(8, 8+fs*14, 2, vid.fsize, XLAT("t = shift"), 0xC0C0C0, 0);
-        displayfr(8, 8+fs*15, 2, vid.fsize, XLAT("y = spin"), 0xC0C0C0, 0);
-        }
-      if(mousekey == 'g')
-        displayButton(8, 8+fs*16, XLAT("p = grid color"), 'p', 0);
-      else
-        displayButton(8, 8+fs*16, XLAT("p = paint"), 'p', 0);
-      if(GDIM == 2) 
-        displayfr(8, 8+fs*17, 2, vid.fsize, XLAT("z = z-level"), 0xC0C0C0, 0);
-      if(GDIM == 2)
-        displayButton(8, 8+fs*18, XLAT("S = snap (%1)", ONOFF(snapping)), 'S', 0);
       }
-#if CAP_TEXTURE
+
     else if(freedraw) {
-      displayButton(8, 8+fs*2, texture::texturesym ? XLAT("0 = symmetry") : XLAT("0 = asymmetry"), '0', 0);
-      if(mousekey == 'g')
-        displayButton(8, 8+fs*16, XLAT("p = grid color"), 'p', 0);
-      else
-        displayButton(8, 8+fs*16, XLAT("p = color"), 'p', 0);
-      if(drawing_tool)
-        displayButton(8, 8+fs*17, XLAT("f = fill") + (dtfill ? " (on)" : " (off)"), 'f', 0);
-      displayButton(8, 8+fs*4, XLAT("b = brush size: %1", fts(dtwidth)), 'b', 0);
-      displayButton(8, 8+fs*5, XLAT("u = undo"), 'u', 0);
-      displaymm('d', 8, 8+fs*7, 2, vid.fsize, XLAT("d = draw"), 0);
-      displaymm('l', 8, 8+fs*8, 2, vid.fsize, XLAT("l = line"), 0);
-      displaymm('c', 8, 8+fs*9, 2, vid.fsize, XLAT("c = circle"), 0);
-      if(drawing_tool)
-        displaymm('T', 8, 8+fs*10, 2, vid.fsize, XLAT("T = text"), 0);
-      if(drawing_tool)
-        displaymm('e', 8, 8+fs*11, 2, vid.fsize, XLAT("e = erase"), 0);
+      dialog::addBoolItem_action("symmetry", texture::texturesym, '0');
+      if(drawing_tool) {
+        if(dtfill)
+          dialog::addBoolItem(XLAT("fill"), dtfill, 'f');
+        else
+          dialog::addColorItem(XLAT("fill"), dtcolor, 'f');
+        }
+      dialog::addSelItem(XLAT("brush size"), fts(dtwidth), 'b');
+      dialog::add_action([] { dialog::editNumber(dtwidth, 0, 0.1, 0.005, 0.02, XLAT("brush size"), XLAT("brush size")); });
+      #if CAP_TEXTURE
+      if(intexture) {
+        dialog::addItem(XLAT("undo"), 'u');
+        dialog::add_action([] { texture::config.data.undo(); });
+        }
+      else dialog::addBreak(100);
+      #endif
+      dialog::addItem_mouse("draw", 'd');
+      dialog::add_action([] { mousekey = 'd'; });
+      dialog::addItem_mouse("line", 'l');
+      dialog::add_action([] { mousekey = 'l'; });
+      dialog::addItem_mouse("circle", 'c');
+      dialog::add_action([] { mousekey = 'c'; });
+      if(drawing_tool) dialog::addItem_mouse("text", 'T');
+      dialog::add_action([] { mousekey = 'T'; });
+      if(drawing_tool) dialog::addItem_mouse("erase", 'e');
+      dialog::add_action([] { mousekey = 'e'; });
       int s = isize(texture::config.data.pixels_to_draw);
-      if(s) displaymm(0, 8, 8+fs*12, 2, vid.fsize, its(s), 0);
+      if(s) dialog::addInfo(its(s)); else dialog::addBreak(100);
+      dialog::addBreak(700);
       }
-#endif
+
+    if(GDIM == 2)
+      dialog::addBoolItem_action("snap", snapping, 'S');
+
+    if(GDIM == 3) {
+      if(front_config == eFront::sphere_camera) dialog::addInfo("camera", 'z');
+      if(front_config == eFront::sphere_center) dialog::addInfo("spheres", 'z');
+      if(nonisotropic && front_config == eFront::equidistants) dialog::addSelItem("Z =", fts(front_edit), 'z');
+      if(nonisotropic && front_config == eFront::const_x) dialog::addSelItem("X =", fts(front_edit), 'z');
+      if(nonisotropic && front_config == eFront::const_y) dialog::addSelItem("Y =", fts(front_edit), 'z');
+      dialog::add_action(launch_z_editor);
+      }
+
+    if(mousekey == 'g') {
+      dialog::addColorItem("grid color", gridcolor, 'p');
+      dialog::add_action(edit_grid_color);
+      }
     else {
-      displaymm('n', 8, 8+fs*5, 2, vid.fsize, XLAT("'n' to start"), 0);
-      displaymm('u', 8, 8+fs*6, 2, vid.fsize, XLAT("'u' to load current"), 0);
-      if(mousekey == 'a' || mousekey == 'd' || mousekey == 'd' ||
-        mousekey == 'c') mousekey = 'n';
-      if(GDIM == 2)
-        displayButton(8, 8+fs*7, XLAT("S = snap (%1)", ONOFF(snapping)), 'S', 0);
-      }
-    
-    if(GDIM == 3)
-      displayfr(8, 8+fs*19, 2, vid.fsize, (front_config == eFront::sphere_camera ? XLAT("z = camera") : front_config == eFront::sphere_center ? XLAT("z = spheres") : 
-        nonisotropic && front_config == eFront::equidistants ? XLAT("Z =") :
-        nonisotropic && front_config == eFront::const_x ? XLAT("X =") :
-        nonisotropic && front_config == eFront::const_y ? XLAT("Y =") :
-        XLAT("z = equi")) + " " + fts(front_edit), 0xC0C0C0, 0);
-
-    displaymm('g', vid.xres-8, 8+fs*4, 2, vid.fsize, XLAT("g = grid"), 16);
-
-#if CAP_TEXTURE    
-    if(freedraw) for(int i=0; i<10; i++) {
-      if(8 + fs * (6+i) < vid.yres - 8 - fs * 7)
-        displayColorButton(vid.xres-8, 8+fs*(6+i), "###", 1000 + i, 16, 1, dialog::displaycolor(texture_colors[i+1]));
-
-      if(displayfr(vid.xres-8 - fs * 3, 8+fs*(6+i), 0, vid.fsize, its(i+1), dtwidth == brush_sizes[i] ? 0xFF8000 : 0xC0C0C0, 16))
-        getcstat = 2000+i;
+      dialog::addColorItem("color", freedraw ? dtcolor : colortouse, 'p');
+      dialog::add_action([freedraw] {
+        if(freedraw) {
+          dialog::openColorDialog(dtcolor, texture_colors);
+          return;
+          }
+        dialog::openColorDialog(colortouse);
+        dialog::get_di().reaction = [] () {
+          applyToShape(drawcellShapeGroup(), drawcellShapeID(), COLORKEY, C0);
+          };
+        });
       }
 
-    if(!freedraw)
-      displaymm('e', vid.xres-8, 8+fs, 2, vid.fsize, XLAT("e = edit this"), 16);
-#endif
+    if(GDIM == 2) {
+      dialog::addItem_mouse("grid", 'g');
+      dialog::add_action([] {
+        shiftpoint mh = full_mouseh();
+        hyperpoint mh1 = inverse_shift(drawtrans, mh);
+        if(mouseover && coldcenter == ccenter && ccenter == mh1)
+          edit_grid_color();
+        else if(mouseover) coldcenter = ccenter, ccenter = mh1;
+        else mousekey = 'g';
+        });
+      }
 
-    int prec = snapping ? 15 : 4;
+    if(!freedraw) {
+      dialog::addItem_mouse("select shape to edit", 'e');
+      dialog::add_action([] {
+        if(mouseover) initdraw(mouseover);
+        else mousekey = 'e';
+        });
+      }
 
     if(!mouseout()) {
       shiftpoint h1 = drawtrans * ccenter;
@@ -2323,38 +2469,131 @@ EX namespace mapeditor {
       shiftpoint mh1 = full_mouseh();
       hyperpoint mh = T * unshift(mh1);
 
-      displayfr(vid.xres-8, vid.yres-8-fs*7, 2, vid.fsize, XLAT("x: %1", fts(mh[0],prec)), 0xC0C0C0, 16);
-      displayfr(vid.xres-8, vid.yres-8-fs*6, 2, vid.fsize, XLAT("y: %1", fts(mh[1],prec)), 0xC0C0C0, 16);
-      displayfr(vid.xres-8, vid.yres-8-fs*5, 2, vid.fsize, XLAT("z: %1", fts(mh[2],prec)), 0xC0C0C0, 16);
-      if(MDIM == 4)
-        displayfr(vid.xres-8, vid.yres-8-fs*4, 2, vid.fsize, XLAT("w: %1", fts(mh[3],prec)), 0xC0C0C0, 16);
+      string coord;
+
+      coord = XLAT("x: %1", fts(mh[0],prec));
+      coord += " " + XLAT("y: %1", fts(mh[1],prec));
+      coord += " " + XLAT("z: %1", fts(mh[2],prec));
+      if(MDIM == 4) coord += " " + XLAT("w: %1", fts(mh[3],prec));
+      dialog::addInfo(coord);
+
       mh = inverse_exp(shiftless(mh));
-      displayfr(vid.xres-8, vid.yres-8-fs*3, 2, vid.fsize, XLAT("r: %1", fts(hypot_d(3, mh),prec)), 0xC0C0C0, 16);
+      coord = XLAT("r: %1", fts(hypot_d(3, mh),prec));
       if(GDIM == 3) {
-        displayfr(vid.xres-8, vid.yres-8-fs, 2, vid.fsize, XLAT("ϕ: %1°", fts(-atan2(mh[2], hypot_d(2, mh)) / degree,prec)), 0xC0C0C0, 16);
-        displayfr(vid.xres-8, vid.yres-8-fs*2, 2, vid.fsize, XLAT("λ: %1°", fts(-atan2(mh[1], mh[0]) / degree,prec)), 0xC0C0C0, 16);
+        coord += " " + XLAT("ϕ: %1°", fts(-atan2(mh[2], hypot_d(2, mh)) / degree, prec));
+        coord += " " + XLAT("λ: %1°", fts(-atan2(mh[1], mh[0]) / degree,prec));
         }
       else {
-        displayfr(vid.xres-8, vid.yres-8-fs*2, 2, vid.fsize, XLAT("ϕ: %1°", fts(-atan2(mh[1], mh[0]) / degree,prec)), 0xC0C0C0, 16);
+        coord += " " + XLAT("ϕ: %1°", fts(-atan2(mh[1], mh[0]) / degree,prec));
+        }
+      dialog::addInfo(coord);
+      }
+    else dialog::addBreak(200);
+    }
+
+  EX void launch_z_editor() {
+    dialog::editNumber(front_edit, 0, 5, 0.1, 0.5, XLAT("z-level"), "");
+    dialog::get_di().extra_options = [] () {
+      dialog::addBoolItem(XLAT("The distance from the camera to added points."), front_config == eFront::sphere_camera, 'A');
+      dialog::add_action([] { front_config = eFront::sphere_camera; });
+      dialog::addBoolItem(XLAT("place points at fixed radius"), front_config == eFront::sphere_center, 'B');
+      dialog::add_action([] { front_config = eFront::sphere_center; });
+      dialog::addBoolItem(nonisotropic ? XLAT("place points on surfaces of const Z") : XLAT("place points on equidistant surfaces"), front_config == eFront::equidistants, 'C');
+      dialog::add_action([] { front_config = eFront::equidistants; });
+      if(nonisotropic) {
+        dialog::addBoolItem(XLAT("place points on surfaces of const X"), front_config == eFront::const_x, 'D');
+        dialog::add_action([] { front_config = eFront::const_x; });
+        dialog::addBoolItem(XLAT("place points on surfaces of const Y"), front_config == eFront::const_y, 'E');
+        dialog::add_action([] { front_config = eFront::const_y; });
+        }
+      dialog::addSelItem(XLAT("mousewheel step"), fts(front_step), 'S');
+      dialog::add_action([] {
+        dialog::editNumber(front_step, -10, 10, 0.1, 0.1, XLAT("mousewheel step"), "hint: shift for finer steps");
+        });
+      if(front_config == eFront::sphere_center) {
+        dialog::addSelItem(XLAT("parallels to draw"), its(parallels), 'P');
+        dialog::add_action([] {
+          dialog::editNumber(parallels, 0, 72, 1, 12, XLAT("parallels to draw"), "");
+          });
+        dialog::addSelItem(XLAT("meridians to draw"), its(meridians), 'M');
+        dialog::add_action([] {
+          dialog::editNumber(meridians, 0, 72, 1, 12, XLAT("meridians to draw"), "");
+          });
+        }
+      else if(front_config != eFront::sphere_camera) {
+        dialog::addSelItem(XLAT("range of grid to draw"), fts(equi_range), 'R');
+        dialog::add_action([] {
+          dialog::editNumber(equi_range, 0, 5, 0.1, 1, XLAT("range of grid to draw"), "");
+          });
+        }
+      };
+    }
+
+  EX void edit_grid_color() {
+    static unsigned grid_colors[] = {
+      8,
+      0x00000040,
+      0xFFFFFF40,
+      0xFF000040,
+      0x0000F040,
+      0x00000080,
+      0xFFFFFF80,
+      0xFF000080,
+      0x0000F080,
+      };
+    dialog::openColorDialog(gridcolor, grid_colors);
+    }
+
+  EX void export_for_polygon_to(hstream& hs) {
+    for(int i=0; i<USERSHAPEGROUPS; i++) for(auto usp: usershapes[i]) {
+      auto us = usp.second;
+      if(!us) continue;
+      
+      for(int l=0; l<USERLAYERS; l++) if(isize(us->d[l].list)) {
+        usershapelayer& ds(us->d[l]);
+        println(hs, spaced("//", i, usp.first, l, "[", ds.color, double(ds.zlevel), "]"));
+        print(hs, " ID, ", us->d[l].rots, ", ", us->d[l].sym?2:1, ", ");
+        for(int i=0; i<isize(us->d[l].list); i++) {
+          for(int d=0; d<GDIM; d++) print(hs, fts(us->d[l].list[i][d]), ", ");
+          print(hs, " ");
+          }
+        println(hs);
         }
       }
 
-    if(us) {
-      cgi.require_usershapes();
-      auto& sh = cgi.ushr[&us->d[dslayer]];
-      if(sh.e >= sh.s + 3)
-        displayButton(vid.xres-8, vid.yres-8-fs*8, XLAT("area: %1", area_in_pi ? fts(compute_area(sh) / M_PI, 4) + "π" : fts(compute_area(sh), prec)), 'w', 16);
-      }
+    for(int i=0; i<USERSHAPEGROUPS; i++) for(auto usp: usershapes[i]) {
+      auto us = usp.second;
+      if(!us) continue;
 
-    
-    displayFunctionKeys();
-    
-    keyhandler = drawHandleKey;
-#else
-    popScreen();
-#endif
+      for(int l=0; l<USERLAYERS; l++) if(isize(us->d[l].list)) {
+        usershapelayer& ds(us->d[l]);
+        println(hs, spaced("//", i, usp.first, l, "[", ds.color, double(ds.zlevel), "]"));
+        print(hs, "{");
+
+        for(int r=0; r<us->d[l].rots; r++) {
+          for(int i=0; i<isize(us->d[l].list); i++) {
+            hyperpoint h = us->d[l].list[i];
+            h = spin(TAU * r / us->d[l].rots) * h;
+            for(int d=0; d<GDIM; d++) print(hs, fts(h[d]), ", ");
+            }
+          if(us->d[l].sym) for(int i=isize(us->d[l].list)-1; i>=0; i--) {
+            hyperpoint h = us->d[l].list[i];
+            h[1] = -h[1];
+            h = spin(TAU * r / us->d[l].rots) * h;
+            for(int d=0; d<GDIM; d++) print(hs, fts(h[d]), ", ");
+            }
+          }
+        println(hs, "}, ");
+        }
+      }
     }
-  
+
+  EX void export_for_polygon() {
+    export_for_polygon_to(hlog);
+    fhstream f("shape.txt", "w");
+    export_for_polygon_to(f);
+    }
+
 #if CAP_POLY
   void loadShapes(int sg, int id) {
     delete usershapes[sg][id];
@@ -2415,7 +2654,7 @@ EX namespace mapeditor {
     usershape_changes++;
     }
 
-  void applyToShape(int sg, int id, int uni, hyperpoint mh) {
+  EX void applyToShape(int sg, int id, int uni, hyperpoint mh) {
     bool haveshape = usershapes[sg][id];
     bool xnew = false;
     
@@ -2599,9 +2838,9 @@ EX namespace mapeditor {
     return XLAT("vector graphics editor");
     }
   
-  bool onelayeronly;
+  EX bool onelayeronly;
   
-  bool loadPicFile(const string& s) {
+  EX bool loadPicFile(const string& s) {
     fhstream f(s, "rt");
     if(!f.f) {
       addMessage(XLAT("Failed to load pictures from %1", s));
@@ -2659,7 +2898,7 @@ EX namespace mapeditor {
     return true;
     }
   
-  bool savePicFile(const string& s) {
+  EX bool savePicFile(const string& s) {
     fhstream f(picfile, "wt");
     if(!f.f) {
       addMessage(XLAT("Failed to save pictures to %1", picfile));
@@ -2689,7 +2928,9 @@ EX namespace mapeditor {
     return true;
     }
 
-  void drawHandleKey(int sym, int uni) {
+#endif
+
+  EX void handle_key_draw(int sym, int uni) {
 
     if(uni == PSEUDOKEY_WHEELUP && GDIM == 3 && front_step) {
       front_edit += front_step * shiftmul; return;
@@ -2700,6 +2941,7 @@ EX namespace mapeditor {
       }
 
     handlePanning(sym, uni);
+    dialog::handleNavigation(sym, uni);
   
     if(uni == SETMOUSEKEY) {
        if(mousekey == newmousekey)
@@ -2707,144 +2949,20 @@ EX namespace mapeditor {
        else
          mousekey = newmousekey;
        }
-    
-    if(uni == 'w') area_in_pi = !area_in_pi;
 
-    if(uni == 'r') {
-      pushScreen(patterns::showPattern);
-      if(drawplayer) 
-        addMessage(XLAT("Hint: use F7 to edit floor under the player"));
-      }
-    
     shiftpoint mh = full_mouseh();
-    hyperpoint mh1 = inverse_shift(drawtrans, mh);
 
-    bool clickused = false;
-    
-    if((uni == 'p' && mousekey == 'g') || (uni == 'g' && coldcenter == ccenter && ccenter == mh1)) {
-      static unsigned grid_colors[] = {
-        8,
-        0x00000040,
-        0xFFFFFF40,
-        0xFF000040,
-        0x0000F040,
-        0x00000080,
-        0xFFFFFF80,
-        0xFF000080,
-        0x0000F080,
-        };
-      dialog::openColorDialog(gridcolor, grid_colors);
-      clickused = true;
-      }
-    
-    char mkuni = uni == '-' ? mousekey : uni;
-    
-    if(mkuni == 'g') 
-      coldcenter = ccenter, ccenter = mh1, clickused = true;
-    
-    if(uni == 'd' || uni == 'l' || uni == 'c' || uni == 'e' || uni == 'T')
-      mousekey = uni;
-
-    if(drawing_tool) {
-      if(sym == SDLK_F2) save_level();
-      if(sym == SDLK_F3) load_level();
-      if(sym == SDLK_F5) {
-        dialog::push_confirm_dialog([] {
-          stop_game();
-          enable_canvas();
-          canvas_default_wall = waInvisibleFloor;
-          ccolor::set_plain(0xFFFFFF);
-          dtcolor = (forecolor << 8) | 255;
-          drawplayer = false;
-          vid.use_smart_range = 2;
-          start_game();
-          },
-          XLAT("Are you sure you want to restart? This will let you draw on a blank screen.")
-          );
-        }
-      }
-
-    if(uni == ' ' && (cheater || autocheat)) {
-      drawing_tool = !drawing_tool;
-      if(!drawing_tool) {
-        popScreen();
-        pushScreen(showMapEditor);
-        }
-      }
-
-    if(uni == 'z' && GDIM == 3) {
-      dialog::editNumber(front_edit, 0, 5, 0.1, 0.5, XLAT("z-level"), "");
-      dialog::get_di().extra_options = [] () {
-        dialog::addBoolItem(XLAT("The distance from the camera to added points."), front_config == eFront::sphere_camera, 'A');
-        dialog::add_action([] { front_config = eFront::sphere_camera; });
-        dialog::addBoolItem(XLAT("place points at fixed radius"), front_config == eFront::sphere_center, 'B');
-        dialog::add_action([] { front_config = eFront::sphere_center; });
-        dialog::addBoolItem(nonisotropic ? XLAT("place points on surfaces of const Z") : XLAT("place points on equidistant surfaces"), front_config == eFront::equidistants, 'C');
-        dialog::add_action([] { front_config = eFront::equidistants; });
-        if(nonisotropic) {
-          dialog::addBoolItem(XLAT("place points on surfaces of const X"), front_config == eFront::const_x, 'D');
-          dialog::add_action([] { front_config = eFront::const_x; });
-          dialog::addBoolItem(XLAT("place points on surfaces of const Y"), front_config == eFront::const_y, 'E');
-          dialog::add_action([] { front_config = eFront::const_y; });
-          }
-        dialog::addSelItem(XLAT("mousewheel step"), fts(front_step), 'S');
-        dialog::add_action([] {
-          dialog::editNumber(front_step, -10, 10, 0.1, 0.1, XLAT("mousewheel step"), "hint: shift for finer steps");
-          });
-        if(front_config == eFront::sphere_center) {
-          dialog::addSelItem(XLAT("parallels to draw"), its(parallels), 'P');
-          dialog::add_action([] {
-            dialog::editNumber(parallels, 0, 72, 1, 12, XLAT("parallels to draw"), "");
-            });
-          dialog::addSelItem(XLAT("meridians to draw"), its(meridians), 'M');
-          dialog::add_action([] {
-            dialog::editNumber(meridians, 0, 72, 1, 12, XLAT("meridians to draw"), "");
-            });
-          }
-        else if(front_config != eFront::sphere_camera) {
-          dialog::addSelItem(XLAT("range of grid to draw"), fts(equi_range), 'R');
-          dialog::add_action([] {
-            dialog::editNumber(equi_range, 0, 5, 0.1, 1, XLAT("range of grid to draw"), "");
-            });
-          }
-        };
-      }
-    
-    if(sym == SDLK_F7) {
-      drawplayer = !drawplayer;
-      }
-
-#if CAP_SHOT
-    else if(sym == SDLK_F6) {
-      pushScreen(shot::menu);
-      }
-#endif
-
-    if(sym == SDLK_ESCAPE) popScreen();
-
-    if(sym == SDLK_F1) {
-      gotoHelp(drawhelptext());
-      }
-
-    if(sym == SDLK_F10) popScreen();
-    else if(uni == 'A') popScreen();
-
-    (void)clickused;
-    
-    
     bool freedraw = drawing_tool || intexture;
+    if(!freedraw) return;
 
     if(freedraw) {
       if(lstartcell) lstart = ggmatrix(lstartcell) * lstart_rel;
 
-#if CAP_TEXTURE    
       int tcolor = (dtcolor >> 8) | ((dtcolor & 0xFF) << 24);
-#endif
       
-      if(uni == '-' && !clickused) {
+      if(uni == '-') {
         if(mousekey == 'e') {
           dt_erase(mh);
-          clickused = true;
           }
         else if(mousekey == 'l' || mousekey == 'c' || mousekey == 'T') {
           if(!holdmouse) lstart = mh, lstartcell = mouseover, lstart_rel = inverse_shift(ggmatrix(mouseover), lstart), holdmouse = true;
@@ -2915,119 +3033,14 @@ EX namespace mapeditor {
       if(uni >= 2000 && uni < 2010)
         dtwidth = brush_sizes[uni - 2000];
 
-#if CAP_TEXTURE
-      if(uni == '0')
-        texture::texturesym = !texture::texturesym;
-
-      if(uni == 'u') {
-        texture::config.data.undo();
-        }        
-#endif
-      
-      if(uni == 'p') {
-        if(!clickused)
-          dialog::openColorDialog(dtcolor, texture_colors);
-        }
-
       if(uni == 'f') {
         if(dtfill == dtcolor)
           dtfill = 0;
         else
           dtfill = dtcolor;
         }
-
-      if(uni == 'b') 
-        dialog::editNumber(dtwidth, 0, 0.1, 0.005, 0.02, XLAT("brush size"), XLAT("brush size"));
-      }
-
-    else {
-      dslayer %= USERLAYERS;
-
-      applyToShape(drawcellShapeGroup(), drawcellShapeID(), uni, mh1);
-
-      if(uni == 'e' || (uni == '-' && mousekey == 'e')) {
-        initdraw(mouseover ? mouseover : cwt.at);
-        }
-      if(uni == 'l') { dslayer++; dslayer %= USERLAYERS; }
-      if(uni == 'L') { dslayer--; if(dslayer < 0) dslayer += USERLAYERS; }
-      if(uni == 'l' - 96) onelayeronly = !onelayeronly;
-    
-      if(uni == 'c') ew = ewsearch;
-      if(uni == 'b') autochoose = !autochoose;
-      
-      if(uni == 'S') {
-        for(int i=0; i<USERSHAPEGROUPS; i++) for(auto usp: usershapes[i]) {
-          auto us = usp.second;
-          if(!us) continue;
-          
-          for(int l=0; l<USERLAYERS; l++) if(isize(us->d[l].list)) {
-            usershapelayer& ds(us->d[l]);
-            println(hlog, spaced("//", i, usp.first, l, "[", ds.color, double(ds.zlevel), "]"));
-            print(hlog, " ID, ", us->d[l].rots, ", ", us->d[l].sym?2:1, ", "); 
-            for(int i=0; i<isize(us->d[l].list); i++) {
-              for(int d=0; d<GDIM; d++) print(hlog, fts(us->d[l].list[i][d]), ", ");
-              print(hlog, " ");
-              }
-            println(hlog);
-            }
-          }
-
-        for(int i=0; i<USERSHAPEGROUPS; i++) for(auto usp: usershapes[i]) {
-          auto us = usp.second;
-          if(!us) continue;
-
-          for(int l=0; l<USERLAYERS; l++) if(isize(us->d[l].list)) {
-            usershapelayer& ds(us->d[l]);
-            println(hlog, spaced("//", i, usp.first, l, "[", ds.color, double(ds.zlevel), "]"));
-            print(hlog, "{");
-
-            for(int r=0; r<us->d[l].rots; r++) {
-              for(int i=0; i<isize(us->d[l].list); i++) {
-                hyperpoint h = us->d[l].list[i];
-                h = spin(TAU * r / us->d[l].rots) * h;
-                for(int d=0; d<GDIM; d++) print(hlog, fts(h[d]), ", ");
-                }
-              if(us->d[l].sym) for(int i=isize(us->d[l].list)-1; i>=0; i--) {
-                hyperpoint h = us->d[l].list[i];
-                h[1] = -h[1];
-                h = spin(TAU * r / us->d[l].rots) * h;
-                for(int d=0; d<GDIM; d++) print(hlog, fts(h[d]), ", ");
-                }
-              }
-            println(hlog, "}, ");
-            }
-          }
-        }
-  
-      if(uni == 'p') {
-        dialog::openColorDialog(colortouse);
-        dialog::get_di().reaction = [] () {
-          drawHandleKey(COLORKEY, COLORKEY);
-          };
-        }
-
-      if(sym == SDLK_F2) 
-        dialog::openFileDialog(picfile, XLAT("pics to save:"), ".pic", 
-          [] () {
-            return savePicFile(picfile);
-            });
-      
-      if(sym == SDLK_F3) 
-        dialog::openFileDialog(picfile, XLAT("pics to load:"), ".pic", 
-          [] () {
-            return loadPicFile(picfile);
-            });
-
-      if(sym == SDLK_F5) {
-        for(int i=0; i<USERSHAPEGROUPS; i++) {
-          for(auto us: usershapes[i])
-            if(us.second) delete us.second;
-          usershapes[i].clear();
-          }
-        }
       }
     }
-#endif    
 
   auto hooks = addHook(hooks_clearmemory, 0, [] () {
     if(mapeditor::painttype == 4) 
@@ -3133,7 +3146,7 @@ EX namespace mapeditor {
       drawtrans = V;
 
     usershape *us = usershapes[group][id];
-    if(us) {  
+    if(us) {
       cgi.require_usershapes();
       for(int i=0; i<USERLAYERS; i++) {
         if(i != dslayer && onelayeronly) continue;
