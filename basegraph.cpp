@@ -89,12 +89,19 @@ EX unsigned backcolor = 0;
 EX unsigned bordcolor = 0;
 EX unsigned forecolor = 0xFFFFFF;
 
-int utfsize(char c) {
+EX int utfsize(char c) {
   unsigned char cu = c;
   if(cu < 128) return 1;
   if(cu < 224) return 2;
   if(cu < 0xF0) return 3;
   return 4;
+  }
+
+EX int utfsize_before(const string& s, int pos) {
+  if(!pos) return 0;
+  int npos = pos - 1;
+  while(npos && ((unsigned char)s[npos]) >= 128 && ((unsigned char)s[npos]) < 192) npos--;
+  return pos - npos;
   }
 
 EX int get_sightrange() { return getDistLimit() + sightrange_bonus; }

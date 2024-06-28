@@ -1520,6 +1520,7 @@ EX void show() {
   dialog::addBack();
   dialog::display();
 
+  se.handle_textinput();
   keyhandler = [] (int sym, int uni) {
     if(symbol_editing && sym == SDLK_RETURN) sym = uni = '/';
     dialog::handleNavigation(sym, uni);

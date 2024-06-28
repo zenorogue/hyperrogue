@@ -5925,10 +5925,7 @@ EX void drawscreen() {
   mouseovers = " ";
 
   cmode = 0;
-  keyhandler = [] (int sym, int uni) {};
-  #if CAP_SDL
-  joyhandler = [] (SDL_Event& ev) { return false; };
-  #endif
+  reset_handlers();
   if(!isize(screens)) pushScreen(normalscreen);
   screens.back()();
 
