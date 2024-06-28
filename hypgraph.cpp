@@ -2691,6 +2691,8 @@ EX void draw_model_elements() {
         hyperpoint a = xpush0(z);
         ld cb = pconf.ball() [1][1];
         ld sb = pconf.ball() [1][2];
+
+        if(pmodel == mdHemisphere && sphere) cb = -cb;
         
         a[1] = sb * a[2] / cb;
         a[0] = sqrt(-1 + a[2] * a[2] - a[1] * a[1]);
