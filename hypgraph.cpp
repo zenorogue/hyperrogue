@@ -925,6 +925,7 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
 
       switch(cgclass) {
         case gcHyperbolic: {
+          if(pconf.small_hyperboloid) H = mid(C0, H);
           ld zl = zlevel(H);
           ret = H / H[2];
           ret[2] = sqrt(1 - sqhypot_d(2, ret));
@@ -944,11 +945,13 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
             ret[2] = (1 - y);
             ret[2] *= dir;
             ret = ret * (1 + (H[2]-1) * y * pconf.depth_scaling * dir / pconf.euclid_to_sphere);
+            if(pconf.small_hyperboloid) { ret = ret - C0; ret = ret / hypot_d(3, ret); }
             }
           break;
           }
         
         case gcSphere: {
+          if(pconf.small_hyperboloid) H = mid(C0, H);
           if(vrhr::rendering()) { vr_sphere(ret, H, md); return; }
           ld z = sqhypot_d(3, H);
           int s = H[2] > 0 ? 1 : -1;

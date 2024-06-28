@@ -425,6 +425,7 @@ EX namespace models {
     USING_NATIVE_GEOMETRY_IN_RUG;
     #endif
     dialog::init(XLAT("models & projections"));
+    mouseovers = XLAT("see http://www.roguetemple.com/z/hyper/models.php");
     
     auto vpmodel = vpconf.model;
     
@@ -626,10 +627,11 @@ EX namespace models {
       add_edit(vpconf.fisheye_alpha);
       }
 
-    if(is_hyperboloid(vpmodel)) {
+    if(is_hyperboloid(vpmodel))
       add_edit(pconf.show_hyperboloid_flat);
+
+    if(among(vpmodel, mdHyperboloid, mdHemisphere))
       add_edit(pconf.small_hyperboloid);
-      }
     
     if(vpmodel == mdCollignon) 
       add_edit(vpconf.collignon_parameter);
@@ -1045,8 +1047,8 @@ EX namespace models {
       -> editable("show flat", 'b');
   
       param_b(p.small_hyperboloid, sp+"hyperboloid-small", false)
-      -> editable("small hyperboloid model", 't')
-      -> help("as in Clifford algebras");
+      -> editable("halve distances", 'h')
+      -> help("This option halves the distances of every point from the center. Useful in the Minkowski hyperboloid model, to get a visualization of an alternative hyperboloid model based on Clifford algebras.");
 
       param_f(p.skiprope, sp+"mobius", 0)
       -> editable(0, 360, 15, "Möbius transformations", "", 'S')->unit = "°";
