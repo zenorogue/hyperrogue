@@ -5320,3 +5320,21 @@ Improvements in geometries (mostly twisted product/fake):
 - 'fixed Y/Z rotation' now works in all geometries where it makes sense (all 3D geometries except some spherical and non-binary hyperbolic)
 - fixed incorrect tiles when unrectifying pure (e.g. {5,4})
 - a new hex-based honeycomb for Nil (well, same as the one obtained by using "twisted product" on hex)
+
+2024-06-28 12:32 Update 13.0q
+Fixes to 3D projections (hyperboloid/ball/hemisphere):
+- fixed the default rotation to look nicely
+- smaller default 'maximum Z' so the hyperboloids fit on screen
+- made the angle in hemisphere model be consistent with other models
+- fixed the lines
+- a "halve the distances" projection parameter for hemispheres/hyperboloids (used to visualize a smaller hyperboloid model based on Clifford algebras)
+
+Fixes to fake curvature and twisted products: (some fake+twisted combos still do not work correctly)
+- twisted-product and fake can now be enabled in more variation tilings that happen to be semi-regular (GP(1,1) unrectified and GP(1,1) {x,4})
+- fixed bug with fake curvature in spherical/quotient spaces
+- corrected the floor shapes in bitruncated+fake
+
+Other:
+- fixed the Euclidean 2D modes changing rotation incorrectly
+- correct text handling in SDL2
+- in the Princess challenge, do not generate wandering monsters too close to the Princess's cell
