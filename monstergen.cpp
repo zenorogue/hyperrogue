@@ -750,7 +750,9 @@ EX void wandering() {
       }
     
     else if(c->land == laPalace && wchance(items[itPalace], 50)) {
-      if(princess::dist(c) < OUT_OF_PRISON && !princess::challenge) break;
+      int dist = princess::dist(c);
+      if(dist < 7) break;
+      if(dist < OUT_OF_PRISON && !princess::challenge) break;
       
       if(items[itPalace] >= 15 && hrand(100) < 10)
         c->monst = moVizier;
