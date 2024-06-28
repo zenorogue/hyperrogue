@@ -329,6 +329,8 @@ void set_or_configure_geometry(eGeometry g) {
         quo = sphere || quotient;
         if(arcm::in()) ok = PURE;
         else if(bt::in() || aperiodic) ok = false;
+        else if(GOLDBERRG && S3 == 4 && gp::param == gp::loc{1,1}) ok = true;
+        else if(UNRECTIFIED && gp::param == gp::loc{1,1}) ok = true;
         else ok = PURE || BITRUNCATED;
         if(!ok) {
           addMessage(XLAT("Only works with (semi-)regular tilings"));
