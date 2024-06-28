@@ -849,11 +849,22 @@ void geometry_information::prepare_basics() {
       single_step = S3 * S7 - 2 * S7 - 2 * S3;
       psl_steps = 2 * S7;    
       if(BITRUNCATED) psl_steps *= S3;
+      if(GOLDBERG && S3 == 4 && gp::param == gp::loc{1,1}) psl_steps *= 2;
       if(inv) psl_steps = 2 * S3;
       if(single_step < 0) single_step = -single_step;
       }
     DEBB(DF_GEOM | DF_POLY, ("steps = ", psl_steps, " / ", single_step));
     plevel = M_PI * single_step / psl_steps;
+    if(hybrid::underlying == gFake) {
+      auto s3 = fake::around;
+      ld fake_single_step = s3 * S7 - 2 * S7 - 2 * s3;
+      ld fake_psl_steps = 2 * S7;
+      if(BITRUNCATED) fake_psl_steps *= S3;
+      if(inv) fake_psl_steps = 2 * S3;
+      if(GOLDBERG && S3 == 4 && gp::param == gp::loc{1,1}) psl_steps *= 2;
+      if(fake_single_step < 0) fake_single_step = -fake_single_step;
+      plevel = M_PI * fake_single_step / fake_psl_steps;
+      }
     }
   if(mtwisted && ginf[hybrid::underlying].cclass == gcEuclid) {
     single_step = 1;
@@ -862,6 +873,7 @@ void geometry_information::prepare_basics() {
     if(hybrid::underlying == gEuclidSquare && PURE) plevel = 1;
     if(hybrid::underlying == gEuclidSquare && BITRUNCATED) plevel = 0.25;
     if(hybrid::underlying == gEuclid && BITRUNCATED) plevel = sqrt(3)/12.;
+    if(hybrid::underlying == gFake) { plevel = 1; addMessage("error: not implemented twisted products on Euclidean fakes"); }
     }
   
   set_sibling_limit();
