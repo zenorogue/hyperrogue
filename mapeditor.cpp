@@ -1490,6 +1490,9 @@ EX namespace mapeditor {
   void editor_menu(int i) {
     cmode |= sm::DIALOG_STRICT_X;
 
+    /** the user probably wants to always see the keys */
+    mousing = false;
+
     if(i == 1) dialog::init(XLAT("map editor"));
     if(i == 2) dialog::init(XLAT("shape editor"));
     if(i == 3) dialog::init(intexture ? XLAT("texture editor") : XLAT("drawing tool"));
