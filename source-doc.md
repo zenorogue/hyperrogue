@@ -144,7 +144,7 @@ Adding Wall Types (i.e., any static objects)
 How to add new graphics
 -----------------------
 
-* Draw a picture in the Vector Graphics Editor, and press Shift+S to get the code
+* Draw a picture in the Shape Editor, and F4 to get the code (it will appear in file `shape.txt` and also on the console)
 * Paste the code into polydata[] in polygons.cpp, but replace ID by NEWSHAPE, (number identifier)
 * Add a new shape member (sh*) in hr::geometry_information
 * For floor shapes, add a new member of type escher_floorshape in hr::geometry_information, and init_escher() call in init_floorshapes()
