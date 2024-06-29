@@ -833,7 +833,7 @@ EX bool makeEmpty(cell *c) {
     celllister cl(cwt.at, 100, 1000000, NULL);
     for(cell *c: cl.lst) {
       if(c == cwt.at) continue;
-      if(c->wall != waSaloon) break;
+      if(c->wall != waSaloon && !c->item) break;
       c->wall = waNone;
       }
     }
