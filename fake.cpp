@@ -23,6 +23,8 @@ EX namespace fake {
   
   EX bool in() { return geometry == gFake; }
 
+  EX bool in_ext() { return in() || (mhybrid && PIU(in())); }
+
   EX void on_dim_change() { pmap->on_dim_change(); }
   
   /** like in() but takes slided arb into account */

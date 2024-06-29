@@ -746,7 +746,7 @@ void geometry_information::prepare_basics() {
   #if CAP_ARCM
   if(arcm::in()) {
     auto& ac = arcm::current_or_fake();
-    if(fake::in()) ac = arcm::current;
+    if(fake::in_ext()) ac = arcm::current;
     ac.compute_geometry();
     crossf = hcrossf7 * ac.scale();
     hexvdist = ac.scale() * .5;
@@ -882,7 +882,7 @@ void geometry_information::prepare_basics() {
     }
   if(mtwisted && underlying_euclid) {
     single_step = 1;
-    if(ug == gArchimedean) plevel = arcm::current.dual_tile_area();
+    if(ug == gArchimedean) plevel = arcm::current_or_fake().dual_tile_area();
     if(ug == gEuclid && PURE) plevel = sqrt(3)/4.;
     if(ug == gEuclidSquare && PURE) plevel = 1;
     if(ug == gEuclidSquare && BITRUNCATED) plevel = 0.25;

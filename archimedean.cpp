@@ -111,7 +111,7 @@ EX archimedean_tiling current;
 EX archimedean_tiling fake_current;
 
 EX archimedean_tiling& current_or_fake() {
-  if(fake::in()) return fake_current;
+  if(fake::in_ext()) return fake_current;
   return current;
   }
 
@@ -437,7 +437,7 @@ void archimedean_tiling::compute_geometry() {
 
   DEBB(DF_GEOM, (hr::format("euclidean_angle_sum = %f\n", float(euclidean_angle_sum))));
 
-  bool infake = fake::in();
+  bool infake = fake::in_ext();
   
   dynamicval<eGeometry> dv(geometry, gArchimedean);
   
@@ -1592,8 +1592,16 @@ EX int get_graphical_id(cell *c) {
   }
 
 ld archimedean_tiling::dual_tile_area() {
-  // we need this only in Euclidean for now
-  if(get_geometry().kind != gcEuclid) throw hr_exception("dual_tile_area only implemented in Euclidean");
+  /* this will work both in Euclidean and non-Euclidean cases */
+  /* (note: we cannot just check get_geometry() here because we might be fake) */
+
+  ld total_alpha = 0;
+  for(auto a: alphas) total_alpha += a;
+
+  if(abs(total_alpha - M_PI) > 1e-6) {
+    return 2 * abs(M_PI - total_alpha);
+    }
+
   ld total = 0;
   for(auto r: inradius) total += r;
   return total * edgelength / 2;
