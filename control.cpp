@@ -1039,8 +1039,12 @@ EX void mainloopiter() {
     break;
     }
       
+  if((cmode & (sm::DRAW | sm::MAP)) && holdmouse && anims::ma && mouseover)
+    handlekey(getcstat, getcstat);
+
   while(SDL_PollEvent(&ev)) handle_event(ev);
   fix_mouseh();
+
   #if CAP_SDLJOY
   if(joydir.d != -1) checkjoy();
   if(joystick_done && joythread) { joythread->join(); delete joythread; joystick_done = false; }
