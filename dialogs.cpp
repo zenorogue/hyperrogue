@@ -2015,6 +2015,10 @@ EX namespace dialog {
     dialog::add_action([&b] { b = !b; });
     }
 
+  EX void addItem_mouse(const string& s, key_type c) {
+    dialog::addBoolItem(s, mousekey == c, c);
+    }
+
   EX bool cheat_forbidden() {
     if(tactic::on && !cheater) {
       addMessage(XLAT("Not available in the pure tactics mode!"));
