@@ -2386,7 +2386,7 @@ EX namespace mapeditor {
     else if(freedraw) {
       dialog::addBoolItem_action("symmetry", texture::texturesym, '0');
       if(drawing_tool) {
-        if(dtfill)
+        if(!dtfill)
           dialog::addBoolItem(XLAT("fill"), dtfill, 'f');
         else
           dialog::addColorItem(XLAT("fill"), dtcolor, 'f');
@@ -2947,6 +2947,7 @@ EX namespace mapeditor {
 
     handlePanning(sym, uni);
     dialog::handleNavigation(sym, uni);
+    if(uni == SDLK_ESCAPE) popScreen();
   
     if(uni == SETMOUSEKEY) {
        if(mousekey == newmousekey)
