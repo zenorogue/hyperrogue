@@ -551,6 +551,8 @@ EX string generateHelpForItem(eItem it) {
   if(ac) {
     if(items[itOrbEnergy])
       help += XLAT("\n\nActivation cost: %1 charges (reduced to %2 by %the3)\n", its(ac), its((1+ac)/2), itOrbEnergy);
+    else if(ac == 1)
+      help += XLAT("\n\nActivation cost: 1 charge\n", its(ac));
     else
       help += XLAT("\n\nActivation cost: %1 charges\n", its(ac));
     }
