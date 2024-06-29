@@ -279,9 +279,14 @@ EX namespace mapeditor {
       }
     }
   
+  /** for 'draw' in the drawing tool, cfree is the free shape we are currently drawing */
   dtfree *cfree;
-  cell *cfree_at;
-  shiftmatrix cfree_old;
+  /** which cell does cfree belong to */
+  EX cell *cfree_at;
+  /** essentially ggmatrix(cfree_at), but we need to know to work with tori */
+  EX shiftmatrix cfree_old;
+
+  EX bool dt_in() { return cfree; }
   
   EX void dt_finish() {
     cfree = nullptr;

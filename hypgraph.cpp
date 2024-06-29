@@ -2188,6 +2188,25 @@ EX bool shmup_inverted() {
   return vid.wall_height < 0;
   }
 
+/** create the list of matrices that are affected when we shift/rotate the view. Usually this is not only the View matrix, but also auxiliary ones such as which_copy.
+ *  flag & 1 : spins, so return only NLP if get_view_orientation() is NLP
+ *  flag & 2 : if rugged, only View
+ */
+
+EX vector<transmatrix*> move_affected_matrices(int flag) {
+  if(flag & 1) {
+    if(&get_view_orientation() == &NLP) return { &NLP };
+    }
+
+  if((flag & 2) && rug::rugged) return { &View };
+  vector<transmatrix*> res;
+  res.push_back(&View);
+  res.push_back(&current_display->which_copy);
+  res.push_back(&cwtV.T);
+  if(mapeditor::dt_in()) res.push_back(&mapeditor::cfree_old.T);
+  return res;
+  }
+
 EX void centerpc(ld aspd) {
 
   if(subscreens::split([=] () {centerpc(aspd);})) return;
@@ -2238,15 +2257,15 @@ EX void centerpc(ld aspd) {
   if(vid.sspeed >= 4.99) aspd = 1000;
   DEBBI(DF_GRAPH, ("center pc"));
 
-  auto& W = current_display->which_copy;
-  ors::unrotate(W); ors::unrotate(View); ors::unrotate(cwtV.T);
+  auto mam = move_affected_matrices(0);
+  for(auto pV: mam) ors::unrotate(*pV);
 
   /* what should we center? */
   transmatrix T;
   if(multi::players > 1) 
     T = unshift(cwtV); /* do not even try */
   else {
-    T = W;
+    T = current_display->which_copy;
     if(shmup::on)
       T = T * shmup::pc[0]->at;
     }
@@ -2266,9 +2285,8 @@ EX void centerpc(ld aspd) {
       } */
 
     spinEdge(aspd);
-    fixmatrix(View);
     fix_whichcopy(cwt.at);
-    fixmatrix(current_display->which_copy);
+    for(auto pV: mam) fixmatrix(*pV);
     }
   
   else {
@@ -2281,8 +2299,7 @@ EX void centerpc(ld aspd) {
     else 
       shift_view_towards(shiftless(H), aspd, shift_method(smaAutocenter));
       
-    fixmatrix(View);
-    fixmatrix(current_display->which_copy);
+    for(auto pV: mam) fixmatrix(*pV);
     spinEdge(aspd);
     }
 
@@ -2297,7 +2314,7 @@ EX void centerpc(ld aspd) {
       }
     }
 
-  ors::rerotate(W); ors::rerotate(cwtV.T); ors::rerotate(View);
+  for(auto pV: mam) ors::rerotate(*pV);
   }
 
 EX transmatrix oView;
@@ -3367,9 +3384,7 @@ EX hookset<bool(const hyperpoint&)> hooks_shift_view;
 /** rotate the view using the given rotation matrix */
 EX void rotate_view(transmatrix T) {
   if(callhandlers(false, hooks_rotate_view, T)) return;
-  transmatrix& which = get_view_orientation();
-  which = T * which;
-  if(!gproduct && !rug::rugged) current_display->which_copy = T * current_display->which_copy;
+  for(auto pV: move_affected_matrices(3)) (*pV) = T * (*pV);
   }
 
 EX shiftpoint lie_exp(hyperpoint h1) {
@@ -3595,9 +3610,7 @@ EX void shift_view(hyperpoint H, eShiftMethod sm IS(shift_method(smaManualCamera
     #endif
     return;
     }
-  View = get_shift_view_of(H, View, sm);
-  auto& wc = current_display->which_copy;
-  wc = get_shift_view_of(H, wc, sm);
+  for(auto pV: move_affected_matrices(0)) *pV = get_shift_view_of(H, *pV, sm);
   }
 
 /** works in embedded_plane (except embedded product where shift_view works, and euc_in_sl2) */
@@ -3624,8 +3637,7 @@ EX void shift_v_by_matrix(transmatrix& V, const transmatrix T, eShiftMethod sm) 
   }
 
 EX void shift_view_to(shiftpoint H, eShiftMethod sm IS(shift_method(smaManualCamera))) {
-  shift_v_to(View, H, sm);
-  shift_v_to(current_display->which_copy, H, sm);
+  for(auto pV: move_affected_matrices(0)) shift_v_to(*pV, H, sm);
   }
 
 EX void shift_v_to(transmatrix& V, shiftpoint H, eShiftMethod sm IS(shift_method(smaManualCamera))) {
@@ -3645,8 +3657,7 @@ EX void shift_v_to(transmatrix& V, shiftpoint H, eShiftMethod sm IS(shift_method
   }
 
 EX void shift_view_towards(shiftpoint H, ld l, eShiftMethod sm IS(shift_method(smaManualCamera))) {
-  shift_v_towards(View, H, l, sm);
-  shift_v_towards(current_display->which_copy, H, l, sm);
+  for(auto pV: move_affected_matrices(0)) shift_v_towards(*pV, H, l, sm);
   }
 
 EX void shift_v_towards(transmatrix& V, shiftpoint H, ld l, eShiftMethod sm IS(shift_method(smaManualCamera))) {
