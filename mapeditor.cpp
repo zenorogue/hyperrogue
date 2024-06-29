@@ -2453,7 +2453,7 @@ EX namespace mapeditor {
       dialog::add_action([] {
         shiftpoint mh = full_mouseh();
         hyperpoint mh1 = inverse_shift(drawtrans, mh);
-        if(mouseover && coldcenter == ccenter && ccenter == mh1)
+        if(mouseover && hdist(ccenter, mh1) < 1e-6)
           edit_grid_color();
         else if(mouseover) coldcenter = ccenter, ccenter = mh1;
         else mousekey = 'g';
@@ -2970,7 +2970,12 @@ EX namespace mapeditor {
       int tcolor = (dtcolor >> 8) | ((dtcolor & 0xFF) << 24);
       
       if(uni == '-') {
-        if(mousekey == 'e') {
+        if(mousekey == 'g') {
+          hyperpoint mh1 = inverse_shift(drawtrans, mh);
+          if(hdist(ccenter, mh1) > 1e-6) coldcenter = ccenter, ccenter = mh1;
+          holdmouse = true;
+          }
+        else if(mousekey == 'e') {
           dt_erase(mh);
           }
         else if(mousekey == 'l' || mousekey == 'c' || mousekey == 'T') {
