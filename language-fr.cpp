@@ -2163,30 +2163,16 @@ S("Saved the high quality shot to %1", "Capture d'écran à haute résolution en
 S("Map saved to %1", "Carte sauvegardée dans %1")
 S("Map loaded from %1", "Carte chargée depuis %1")
 S("copying", "copier")
-S("boundary", "frontière")
 S("clear monster", "enlever les monstres")
 S("use at your own risk!", "utiliser à vos risques et périls !")
 
-// Note: in English, these have been arranged from longest to shortest.
-// This gives a somewhat nice effect on the top left corner of the screen.
-// You may want to aim for the same effect when translating
-
-S("0-9 = radius (%1)", "0-9 = rayon (%1)")
-S("b = boundary", "i = frontière")
-S("m = monsters", "m = monstre")
-S("w = walls",    "w = murs")
-S("i = items",    "l = objets")
-S("l = lands",    "c = pays")
-S("c = copy",     "b = copier")
-
-// And this is from shortest to longest (bottom left corner)
-S("F1 = help",                "F1 = aide")
-S("F2 = save",                "F2 = sauvegarder")
-S("F3 = load",                "F3 = charger")
-S("F5 = restart",             "F5 = redémarrer")
-S("F6 = HQ shot",             "F6 = capture HQ")
-S("F7 = player on/off",       "F7 = joueur on/off")
-S("ESC = return to the game", "ESC = retour au jeu")
+S("radius",   "rayon")
+S("boundary", "frontière")
+S("monsters", "monstre")
+S("walls",    "murs")
+S("items",    "objets")
+S("lands",    "pays")
+S("copy",     "copier")
 
 S("This mode allows you to edit the map.\n\n"
   "NOTE: Use at your own risk. Combinations which never "
@@ -2343,8 +2329,8 @@ S("Follow the Mouse and escape with %the1!", "Suivez la Souris et échappez vous
 S("Hardness frozen at %1.", "Difficulté figée : %1.")
 S("Congratulations! Your score is %1.", "Félicitations ! Votre score est de %1.")
 
-S("u = undo",     "u = défaire")
-S("f = flip %1",  "f = renverser %1")
+S("undo", "défaire")
+S("flip", "renverser")
 
 S("Failed to save map to %1", "Échec de la sauvegarde de la carte vers %1")
 S("Failed to load map from %1", "Échec du chargement de la carte depuis %1")
@@ -2463,8 +2449,7 @@ S("eight domains", "huit domaines")
 S("zebra pattern", "motif zébré")
 S("three stripes", "trois bandes")
 S("random black-and-white", "noir et blanc aléatoire")
-S("p = paint", "p = couleurs")
-S("r = regular", "r = régulier")
+S("paint", "couleurs")
 
 S("In this mode you can draw your own player characters, "
   "floors, monsters, and items. Press 'e' while hovering over "
@@ -2503,24 +2488,19 @@ S("hexagonal", "hexagonal")
 S("heptagonal", "heptagonal")
 S("floor/pattern", "sol/motif")
 
-S("l = layers: %1", "l = couches : %1")
-S("1-9 = rotations: %1", "1-9 = rotations : %1")
-S("0 = symmetry", "0 = symétrie")
-S("0 = asymmetry", "0 = asymétrie")
+S("layers", "couches")
+S("rotations", "rotations")
+S("symmetry", "symétrie")
 S("%1 vertices", "sommets : %1")
-S("a = add v", "a = ajouter v")
-S("m = move v", "m = déplacer v")
-S("d = delete v", "d = supprimer v")
-S("c = readd v", "c = réajouter v")
-S("b = reorder", "b = réordonner")
-S("t = shift", "t = décaler")
-S("y = spin", "y = tourner")
+S("add vertex", "ajouter v") // fix
+S("move vertex", "déplacer v") // fix
+S("delete vertex", "supprimer v") // fix
+S("shift", "décaler")
+S("spin", "tourner")
 
-S("'n' to start", "n = démarrer")
-S("z = zoom in", "z = agrandir")
-S("o = zoom out", "o = rétrécir")
-S("g = grid", "g = grille")
-S("e = edit this", "e = éditer")
+S("'n' to start", "n = démarrer") // fix
+S("grid", "grille")
+S("select shape to edit", "éditer") // fix
 
 S("x: %1", "x: %1")
 S("y: %1", "y: %1")
@@ -6966,11 +6946,11 @@ S("This pattern needs x-y divisible by 3", "Ce motif nécessite que x-y soit div
 S("This pattern needs x-y divisible by 2", "Ce motif nécessite que x-y soit divisible par 2")
 
 // missing from the texture editor
-S("p = color", "p = couleur")
-S("b = brush size: %1", "b = taille de brosse : %1")
-S("d = draw", "d = dessiner")
-S("l = line", "l = ligne")
-S("c = circle", "c = cercle")
+S("color", "couleur")
+S("brush size", "taille de brosse")
+S("draw", "dessiner")
+S("line", "ligne")
+S("circle", "cercle")
 
 // new binary tiling
 
@@ -7461,7 +7441,7 @@ S("Welcome to the Heptagonal Mode!", "Bienvenue dans le mode Heptagonal !")
 S("adult Tortoise flags", "drapeaux de Tortues adultes")
 S("baby Tortoise flags", "drapeaux de bébé Tortues")
 
-S("Map settings", "réglages de carte")
+S("map settings", "réglages de carte")
 
 S("disable wandering monsters","désactiver les monstres vagabonds")
 S("disable ghost timer", "désactiver le compteur fantôme")
@@ -9074,13 +9054,13 @@ S("F5 = clear", "F5 = effacer")
 S("Are you sure you want to clear the map?", "Êtes vous sûr de vouloir effacer la carte ?")
 S("select area to copy", "sélectionner la zone à copier")
 S("statue", "statue")
-S("c = reuse", "c = réutiliser")
-S("d = delete", "d = effacer")
-S("p = grid color", "p = couleur de la grille")
-S("f = fill", "f = remplir")
-S("T = text", "T = texte")
-S("e = erase", "e = effacer")
-S("z = spheres", "z = sphère")
+S("reuse", "réutiliser")
+S("delete", "effacer")
+S("grid color", "couleur de la grille")
+S("fill", "remplir")
+S("text", "texte")
+S("erase", "effacer")
+S("spheres", "sphère")
 S("z-level", "niveau z")
 
 S("Failed to load pictures from %1", "Échec du chargement des images depuis %1")

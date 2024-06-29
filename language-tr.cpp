@@ -2146,30 +2146,15 @@ S("Saved the high quality shot to %1", "HQ resim %1 konumuna kaydedildi")
 S("Map saved to %1", "Harita %1 konumuna kaydedildi")
 S("Map loaded from %1", "Harita %1 konumundan yüklendi")
 S("copying", "kopyalıyor")
-S("boundary", "sınır")
 S("clear monster", "canavarı temizle")
 S("use at your own risk!", "sorumluluk sende!")
 
-// Note: in English, these have been arranged from longest to shortest.
-// This gives a somewhat nice effect on the top left corner of the screen.
-// You may want to aim for the same effect when translating
-
-S("0-9 = radius (%1)", "0-9 = promień (%1)")
-S("b = boundary", "i = sınır")
-S("m = monsters", "m = canavar")
-S("w = walls",    "w = duvar")
-S("i = items",    "l = eşya")
-S("l = lands",    "c = diyar")
-S("c = copy",     "b = kopya")
-
-// And this is from shortest to longest (bottom left corner)
-S("F1 = help",                "F1 = yardım")
-S("F2 = save",                "F2 = kaydet")
-S("F3 = load",                "F3 = yükle")
-S("F5 = restart",             "F5 = yeniden başlat")
-S("F6 = HQ shot",             "F6 = HQ resim çek")
-S("F7 = player on/off",       "F7 = oyuncu açık/kapalı")
-S("ESC = return to the game", "ESC = oyuna geri dön")
+S("boundary", "sınır")
+S("monsters", "canavar")
+S("walls",    "duvar")
+S("items",    "eşya")
+S("lands",    "diyar")
+S("copy",     "kopya")
 
 S(
   "This mode allows you to edit the map.\n\n"
@@ -2319,11 +2304,11 @@ S("Follow the Mouse and escape with %the1!", "Fareyi takip et ve %abl1 kaç!")
 S("Hardness frozen at %1.", "Trudność zamrożona: %1.")
 S("Congratulations! Your score is %1.", "Tebrikler! Puanın: %1.")
 
-S("u = undo",     "u = geri al")
+S("undo",     "geri al")
 S("Failed to save map to %1", "Harita %1 konumuna kaydedilemedi.")
 S("Failed to load map from %1", "Harita %1 konumundan yüklenemedi")
 S("other", "diğer") // other keys in the main menu
-S("f = flip %1",     "f = çevir %1")
+S("flip",     "çevir")
 S("save whom", "kim kurtarılacak")
 
 // VERSION 7.4
@@ -2436,8 +2421,7 @@ S("eight domains", "sekiz alan")
 S("zebra pattern", "zebra dokusu")
 S("three stripes", "üç şerit")
 S("random black-and-white", "rastgle siyah-beyaz")
-S("p = paint", "p = boya")
-S("r = regular", "r = düzenli")
+S("paint", "boya")
 
 S(
    "In this mode you can draw your own player characters, "
@@ -2473,24 +2457,21 @@ S("hexagonal", "altıgensel")
 S("heptagonal", "yedigensel")
 S("floor/pattern", "zemin/doku")
 
-S("l = layers: %1", "l = katmanlar: %1")
-S("1-9 = rotations: %1", "1-9 = döndürmeler %1")
-S("0 = symmetry", "0 = simetri")
-S("0 = asymmetry", "0 = asimetri")
+S("layers", "katmanlar")
+S("rotations", "döndürmeler")
+S("symmetry", "simetri")
 S("%1 vertices", "köşeler: %1")
-S("a = add v", "a = ekle v")
-S("m = move v", "m = taşı v")
-S("d = delete v", "d = sil v")
-S("c = readd v", "c = yeniden ekle v")
-S("b = reorder", "b = yeniden sırala")
-S("t = shift", "t = kaydır")
-S("y = spin", "y = döndür")
+S("add vertex", "ekle v") // fix
+S("move vertex", "taşı v") // fix
+S("delete vertex", "sil v") // fix
+S("shift", "kaydır")
+S("spin", "döndür")
 
-S("'n' to start", "n = başlat")
+S("start new shape", "başlat") // fix
 S("z = zoom in", "z = yaklaş")
 S("o = zoom out", "o = uzaklaş")
-S("g = grid", "g = şablon")
-S("e = edit this", "e = bunu düzenle")
+S("grid", "şablon")
+S("select shape to edit", "bunu düzenle") // fix
 
 S("x: %1", "x: %1")
 S("y: %1", "y: %1")

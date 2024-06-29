@@ -2144,30 +2144,16 @@ S("Saved the high quality shot to %1", "HQ Screenshot nach %1 gespeichert")
 S("Map saved to %1", "Karte unter %1 gespeichert")
 S("Map loaded from %1", "Karte von %1 geladen")
 S("copying", "kopieren")
-S("boundary", "Grenze")
 S("clear monster", "Monster entfernen")
 S("use at your own risk!", "Benutzen auf eigene Gefahr!")
 
-// Note: in English, these have been arranged from longest to shortest.
-// This gives a somewhat nice effect on the top left corner of the screen.
-// You may want to aim for the same effect when translating
-
-S("0-9 = radius (%1)", "0-9 = Radius (%1)")
-S("b = boundary", "i = Grenze")
-S("m = monsters", "m = Monster")
-S("w = walls",    "w = Wände")
-S("i = items",    "l = Items")
-S("l = lands",    "c = Länder")
-S("c = copy",     "b = Kopieren")
-
-// And this is from shortest to longest (bottom left corner)
-S("F1 = help",                "F1 = Hilfe")
-S("F2 = save",                "F2 = Speichern")
-S("F3 = load",                "F3 = Laden")
-S("F5 = restart",             "F5 = Neustart")
-S("F6 = HQ shot",             "F6 = HQ Screenshot")
-S("F7 = player on/off",       "F7 = Spieler an/aus")
-S("ESC = return to the game", "ESC = Zurück zum Spiel")
+S("radius", "Radius")
+S("boundary", "Grenze")
+S("monsters", "Monster")
+S("walls",    "Wände")
+S("items",    "Items")
+S("lands",    "Länder")
+S("copy",     "Kopieren")
 
 S("This mode allows you to edit the map.\n\n"
   "NOTE: Use at your own risk. Combinations which never "
@@ -2322,8 +2308,8 @@ S("Follow the Mouse and escape with %the1!", "Folge der Maus und entkomme mit %d
 S("Hardness frozen at %1.", "Festgefroren: %1.")
 S("Congratulations! Your score is %1.", "Glückwunsch! Deine Punktzahl beträgt %1.")
 
-S("u = undo",     "u = rückgängig")
-S("f = flip %1",  "f = kippen %1")
+S("undo", "rückgängig")
+S("flip", "kippen")
 
 S("Failed to save map to %1", "Karte konnte nicht nach %1 gespeichert werden")
 S("Failed to load map from %1", "Karte konnte nicht von %1 geladen werden")
@@ -2442,8 +2428,7 @@ S("eight domains", "Acht Bereiche")
 S("zebra pattern", "Zebramuster")
 S("three stripes", "Drei Streifen")
 S("random black-and-white", "Zufalls Schwarz und Weiß")
-S("p = paint", "p = Farbe")
-S("r = regular", "r = regulär")
+S("paint", "Farbe")
 
 S("In this mode you can draw your own player characters, "
   "floors, monsters, and items. Press 'e' while hovering over "
@@ -2482,24 +2467,19 @@ S("hexagonal", "hexagonal")
 S("heptagonal", "heptagonal")
 S("floor/pattern", "Boden/Muster")
 
-S("l = layers: %1", "l = Ebenen: %1")
-S("1-9 = rotations: %1", "1-9 = Drehungen: %1")
-S("0 = symmetry", "0 = Symmetrie")
-S("0 = asymmetry", "0 = Asymmetrie")
+S("layers", "Ebenen")
+S("rotations", "Drehungen")
+S("symmetry", "Symmetrie")
 S("%1 vertices", "Eckpunkte: %1")
-S("a = add v", "a = hinzufügen v")
-S("m = move v", "m = bewegen v")
-S("d = delete v", "d = entfernen v")
-S("c = readd v", "c = wiederhinzufügen v")
-S("b = reorder", "b = neu anordnen")
-S("t = shift", "t = verlagern")
-S("y = spin", "y = drehen")
+S("add vertex", "hinzufügen v") // fix
+S("move vertx", "bewegen v") // fix
+S("delete vertex", "d = entfernen v") // fix
+S("shift", "verlagern")
+S("spin", "drehen")
 
-S("'n' to start", "n = start")
-S("z = zoom in", "z = reinzoomen")
-S("o = zoom out", "o = rauszoomen")
-S("g = grid", "g = Raster")
-S("e = edit this", "e = editieren")
+S("start new shape", "start") // fix
+S("grid", "Raster")
+S("select shape to edit", "editieren") // fix
 
 S("x: %1", "x: %1")
 S("y: %1", "y: %1")

@@ -2289,30 +2289,16 @@ S("Saved the high quality shot to %1", "HQ snímek uložen do %1")
 S("Map saved to %1", "Mapa uložena do %1")
 S("Map loaded from %1", "Mapa načtena z %1")
 S("copying", "kopíruje")
-S("boundary", "hranice")
 S("clear monster", "vymazat netvore")
 S("use at your own risk!", "použití na vlastní nebezpečí!")
 
-// Note: in English, these have been arranged from longest to shortest.
-// This gives a somewhat nice effect on the top left corner of the screen.
-// You may want to aim for the same effect when translating
-
-S("0-9 = radius (%1)", "0-9 = poloměr (%1)")
-S("b = boundary", "c = kopírování")
-S("m = monsters", "i = předměty")
-S("w = walls",    "b = hranice")
-S("i = items",    "m = netvoři")
-S("l = lands",    "l = kraje")
-S("c = copy",     "w = zdi")
-
-// And this is from shortest to longest (bottom left corner)
-S("F1 = help",                "F1 = nápověda")
-S("F2 = save",                "F2 = uložení")
-S("F3 = load",                "F3 = nahrání")
-S("F5 = restart",             "F5 = restart")
-S("F6 = HQ shot",             "F6 = HQ snímek")
-S("F7 = player on/off",       "F7 = zapnout/vypnout hráče")
-S("ESC = return to the game", "ESC = návrat do hry")
+S("radius",   "poloměr")
+S("boundary", "hranice")
+S("monsters", "netvoři")
+S("walls",    "zdi")
+S("items",    "předměty")
+S("lands",    "kraje")
+S("copy",     "kopírování")
 
 S(
   "This mode allows you to edit the map.\n\n"
@@ -2465,8 +2451,8 @@ S("Follow the Mouse and escape with %the1!", "Následuj Myšku a uteč s %abl1!"
 S("Hardness frozen at %1.", "Obtížnost nastavená na: %1.")
 S("Congratulations! Your score is %1.", "Gratulujeme! Tvé skóre je %1.")
 
-S("u = undo",     "u = zpět")
-S("f = flip %1",     "f = překlopit %1")
+S("undo",     "zpět")
+S("flip",     "překlopit")
 
 S("Failed to save map to %1", "Uložení mapy do %1 se nezdařilo")
 S("Failed to load map from %1", "Nahrání mapy z %1 se nezdařilo")
@@ -2583,8 +2569,7 @@ S("eight domains", "osm domén")
 S("zebra pattern", "vzor 'zebra'")
 S("three stripes", "tři pásy")
 S("random black-and-white", "náhodný černobílý vzor")
-S("p = paint", "p = obarvit")
-S("r = regular", "r = vzory")
+S("paint", "obarvit")
 
 S(
    "In this mode you can draw your own player characters, "
@@ -2626,24 +2611,19 @@ S("hexagonal", "šestiúhelníky")
 S("heptagonal", "sedmiúhelníky")
 S("floor/pattern", "podlaha/vzor")
 
-S("l = layers: %1", "l = vrstvy: %1")
-S("1-9 = rotations: %1", "1-9 = rotace: %1")
-S("0 = symmetry", "0 = symetrie")
-S("0 = asymmetry", "0 = asymetrie")
+S("layers", "vrstvy")
+S("rotations", "rotace")
+S("symmetry", "symetrie")
 S("%1 vertices", "vrcholy: %1")
-S("a = add v", "a = přidej v")
-S("m = move v", "m = přesuň v")
-S("d = delete v", "d = vymaž v")
-S("c = readd v", "c = znovu přidej v")
-S("b = reorder", "b = změň uspořádání")
-S("t = shift", "t = přesuň")
-S("y = spin", "y = otoč")
+S("add vertex", "přidej v") // fix
+S("move vertex", "přesuň v") // fix
+S("delete vertex", "vymaž v") // fix
+S("shift", "přesuň")
+S("spin", "otoč")
 
-S("'n' to start", "n = start")
-S("z = zoom in", "z = přiblížení")
-S("o = zoom out", "o = oddálení")
-S("g = grid", "g = síť")
-S("e = edit this", "e = editace")
+S("start new shape", "start") // fix
+S("grid", "síť")
+S("select shape to edit", "editace") // fix
 
 S("x: %1", "x: %1")
 S("y: %1", "y: %1")
@@ -7324,11 +7304,11 @@ S("This pattern needs x-y divisible by 3", "Tento vzor vyžaduje, aby bylo x-y d
 S("This pattern needs x-y divisible by 2", "Tento vzor vyžaduje, aby bylo x-y dělitelné dvěma")
 
 // missing from the texture editor
-S("p = color", "p = barva")
-S("b = brush size: %1", "b = velikost štětce: %1")
-S("d = draw", "d = kresli")
-S("l = line", "l = čára")
-S("c = circle", "c = kruh")
+S("color", "barva")
+S("brush size", "velikost štětce")
+S("draw", "kresli")
+S("line", "čára")
+S("circle", "kruh")
 
 // new binary tiling
 
@@ -7854,7 +7834,7 @@ S("Welcome to the Heptagonal Mode!", "Vítej v Sedmiúhelníkovém módu!")
 S("adult Tortoise flags", "flagy dospělých Želv")
 S("baby Tortoise flags", "flagy Želviček")
 
-S("Map settings", "Nastavení mapy")
+S("map settings", "nastavení mapy")
 
 S("disable wandering monsters","vypnout bludné netvory")
 S("disable ghost timer", "vypnout časové duchy")
@@ -9459,13 +9439,13 @@ S("F5 = clear", "F5 = vyčistit")
 S("Are you sure you want to clear the map?", "Opravdu chceš vyčistit mapu?")
 S("select area to copy", "vyber oblast pro zkopírování")
 S("statue", "socha")
-S("c = reuse", "c = znovu použít")
-S("d = delete", "d = vymazat")
-S("p = grid color", "p = barva mřížky")
-S("f = fill", "f = vyplnit")
-S("T = text", "t = text")
-S("e = erase", "e = kasuj")
-S("z = spheres", "z = koule")
+S("reuse", "znovu použít")
+S("delete", "vymazat")
+S("grid color", "barva mřížky")
+S("fill", "vyplnit")
+S("text", "text")
+S("erase", "kasuj")
+S("spheres", "koule")
 S("z-level", "z-hladina")
 
 S("Failed to load pictures from %1", "Nahrání obrázků z %1 se nezdařilo")
@@ -9928,9 +9908,9 @@ S("highlight faraway monsters", "zvýrazni vzdálené netvory")
 
 S("hint: shift+A to enter the map editor", "nápověda: stiskem shift+A se dostaneš do mapového editoru")
 
-S("z = set Shift+click", "z = nastav Shift+klik")
-S("B = build on walls ", "B = stavění na zdech")
-S("S = snap (%1)", "S = přicvaknutí (%1)")
+S("set Shift+click", "nastav Shift+klik")
+S("build on walls ", "stavění na zdech")
+S("snap", "přicvaknutí")
 S("Z =", "Z = ")
 S("X =", "X = ")
 S("Y =", "Y = ")

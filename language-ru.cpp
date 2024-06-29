@@ -2255,30 +2255,16 @@ S("Saved the high quality shot to %1", "Скрин высокого качест
 S("Map saved to %1", "Карта сохранена в %1")
 S("Map loaded from %1", "Карта загружена из %1")
 S("copying", "копирование")
-S("boundary", "граница")
 S("clear monster", "удалить монстра")
 S("use at your own risk!", "используйте это на свой риск!")
  
-// Note: in English, these have been arranged from longest to shortest.
-// This gives a somewhat nice effect on the top left corner of the screen.
-// You may want to aim for the same effect when translating
- 
-S("0-9 = radius (%1)", "0-9 = радиус (%1)")
-S("b = boundary", "i = предметы")
-S("m = monsters", "b = граница")
-S("w = walls",    "m = монстры")
-S("i = items",    "l = земли")
-S("l = lands",    "c = копия")
-S("c = copy",     "w = стены")
- 
-// And this is from shortest to longest (bottom left corner)
-S("F1 = help",                "F1 = помощь")
-S("F2 = save",                "F2 = записать")
-S("F3 = load",                "F3 = загрузить")
-S("F5 = restart",             "F5 = перезапуск")
-S("F6 = HQ shot",             "F6 = скриншот HQ")
-S("F7 = player on/off",       "F7 = игрок вкл/выкл")
-S("ESC = return to the game", "ESC = вернуться в игру")
+S("radius",   "радиус")
+S("boundary", "граница")
+S("monsters", "монстры")
+S("walls",    "стены")
+S("items",    "предметы")
+S("lands",    "земли")
+S("copy",     "копия")
  
 S(
   "This mode allows you to edit the map.\n\n"
@@ -2438,8 +2424,8 @@ S("Follow the Mouse and escape with %the1!", "Следуq за Мышкой и �
 S("Hardness frozen at %1.", "Сложность заморожена на %1.")
 S("Congratulations! Your score is %1.", "Поздравляем! Ваш результат: %1.")
 
-S("u = undo",     "u = отмена")
-S("f = flip %1",     "f = перевернуть %1")
+S("undo",     "отмена")
+S("flip",     "перевернуть")
 S("Failed to save map to %1", "Не удалось созранить карту в %1")
 S("Failed to load map from %1", "Не удалось загрузить карту из %1")
 S("save whom", "кого спасти")
@@ -2556,8 +2542,7 @@ S("eight domains", "восемь областей")
 S("zebra pattern", "ущор зебры")
 S("three stripes", "три полосы")
 S("random black-and-white", "случайный чёрно-белый")
-S("p = paint", "p = раскраска")
-S("r = regular", "r = узор")
+S("paint", "раскраска")
  
 S(
    "In this mode you can draw your own player characters, "
@@ -2598,24 +2583,19 @@ S("hexagonal", "шестиугольник")
 S("heptagonal", "семиугольник")
 S("floor/pattern", "пол/узор")
  
-S("l = layers: %1", "l = слой: %1")
-S("1-9 = rotations: %1", "1-9 = поворот: %1")
-S("0 = symmetry", "0 = симметрия")
-S("0 = asymmetry", "0 = асимметрия")
+S("layers", "слой")
+S("rotations", "поворот")
+S("symmetry", "симметрия")
 S("%1 vertices", "вершины: %1")
-S("a = add v", "a = добавить v")
-S("m = move v", "m = передвинуть v")
-S("d = delete v", "d = удалить v")
-S("c = readd v", "c = обновить v")
-S("b = reorder", "b = порядок")
-S("t = shift", "t = сдвиг")
-S("y = spin", "y = поворот")
+S("add vertex", "добавить v") // fix
+S("move vertex", "передвинуть v") // fix
+S("delete vertex", "удалить v") // fix
+S("shift", "сдвиг")
+S("spin", "поворот")
  
-S("'n' to start", "n = начать")
-S("z = zoom in", "z = приблизить")
-S("o = zoom out", "o = отдалить")
-S("g = grid", "g = сетка")
-S("e = edit this", "e = изменить")
+S("start new shape", "начать") // fix
+S("grid", "сетка")
+S("select shape to edit", "изменить") // fix
  
 S("x: %1", "x: %1")
 S("y: %1", "y: %1")

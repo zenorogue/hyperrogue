@@ -1438,13 +1438,13 @@ EX namespace mapeditor {
       });
     dialog::addBoolItem(XLAT("boundary"), painttype == 5, 'b');
     dialog::add_action([] { painttype = 5, paintwhat_str = XLAT("boundary"); });
-    dialog::addBoolItem(XLAT("monster"), painttype == 0, 'm');
+    dialog::addBoolItem(XLAT("monsters"), painttype == 0, 'm');
     dialog::add_action([] { pushScreen(showList), painttype = 0, dialog::infix = ""; });
-    dialog::addBoolItem(XLAT("item"), painttype == 1, 'i');
+    dialog::addBoolItem(XLAT("items"), painttype == 1, 'i');
     dialog::add_action([] { pushScreen(showList), painttype = 1, dialog::infix = ""; });
-    dialog::addBoolItem(XLAT("land"), painttype == 2, 'l');
+    dialog::addBoolItem(XLAT("lands"), painttype == 2, 'l');
     dialog::add_action([] { pushScreen(showList), painttype = 2, dialog::infix = ""; });
-    dialog::addBoolItem(XLAT("wall"), painttype == 3, 'w');
+    dialog::addBoolItem(XLAT("walls"), painttype == 3, 'w');
     dialog::add_action([] { pushScreen(showList), painttype = 3, dialog::infix = ""; });
     dialog::addBoolItem(XLAT("paint"), painttype == 6, 'w');
     dialog::add_action([] {
@@ -2395,15 +2395,15 @@ EX namespace mapeditor {
         }
       else dialog::addBreak(100);
       #endif
-      dialog::addItem_mouse("draw", 'd');
+      dialog::addItem_mouse(XLAT("draw"), 'd');
       dialog::add_action([] { mousekey = 'd'; });
-      dialog::addItem_mouse("line", 'l');
+      dialog::addItem_mouse(XLAT("line"), 'l');
       dialog::add_action([] { mousekey = 'l'; });
-      dialog::addItem_mouse("circle", 'c');
+      dialog::addItem_mouse(XLAT("circle"), 'c');
       dialog::add_action([] { mousekey = 'c'; });
-      if(drawing_tool) dialog::addItem_mouse("text", 'T');
+      if(drawing_tool) dialog::addItem_mouse(XLAT("text"), 'T');
       dialog::add_action([] { mousekey = 'T'; });
-      if(drawing_tool) dialog::addItem_mouse("erase", 'e');
+      if(drawing_tool) dialog::addItem_mouse(XLAT("erase"), 'e');
       dialog::add_action([] { mousekey = 'e'; });
       int s = isize(texture::config.data.pixels_to_draw);
       if(s) dialog::addInfo(its(s)); else dialog::addBreak(100);
@@ -2411,11 +2411,11 @@ EX namespace mapeditor {
       }
 
     if(GDIM == 2)
-      dialog::addBoolItem_action("snap", snapping, 'S');
+      dialog::addBoolItem_action(XLAT("snap"), snapping, 'S');
 
     if(GDIM == 3) {
-      if(front_config == eFront::sphere_camera) dialog::addInfo("camera", 'z');
-      if(front_config == eFront::sphere_center) dialog::addInfo("spheres", 'z');
+      if(front_config == eFront::sphere_camera) dialog::addItem(XLAT("camera"), 'z');
+      if(front_config == eFront::sphere_center) dialog::addItem(XLAT("spheres"), 'z');
       if(nonisotropic && front_config == eFront::equidistants) dialog::addSelItem("Z =", fts(front_edit), 'z');
       if(nonisotropic && front_config == eFront::const_x) dialog::addSelItem("X =", fts(front_edit), 'z');
       if(nonisotropic && front_config == eFront::const_y) dialog::addSelItem("Y =", fts(front_edit), 'z');
@@ -2423,11 +2423,11 @@ EX namespace mapeditor {
       }
 
     if(mousekey == 'g') {
-      dialog::addColorItem("grid color", gridcolor, 'p');
+      dialog::addColorItem(XLAT("grid color"), gridcolor, 'p');
       dialog::add_action(edit_grid_color);
       }
     else {
-      dialog::addColorItem("color", freedraw ? dtcolor : colortouse, 'p');
+      dialog::addColorItem(XLAT("color"), freedraw ? dtcolor : colortouse, 'p');
       dialog::add_action([freedraw] {
         if(freedraw) {
           dialog::openColorDialog(dtcolor, texture_colors);
@@ -2441,7 +2441,7 @@ EX namespace mapeditor {
       }
 
     if(GDIM == 2) {
-      dialog::addItem_mouse("grid", 'g');
+      dialog::addItem_mouse(XLAT("grid"), 'g');
       dialog::add_action([] {
         shiftpoint mh = full_mouseh();
         hyperpoint mh1 = inverse_shift(drawtrans, mh);
@@ -2453,7 +2453,7 @@ EX namespace mapeditor {
       }
 
     if(!freedraw) {
-      dialog::addItem_mouse("select shape to edit", 'e');
+      dialog::addItem_mouse(XLAT("select shape to edit"), 'e');
       dialog::add_action([] {
         if(mouseover) initdraw(mouseover);
         else mousekey = 'e';
