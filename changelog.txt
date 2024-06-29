@@ -5338,3 +5338,14 @@ Other:
 - fixed the Euclidean 2D modes changing rotation incorrectly
 - correct text handling in SDL2
 - in the Princess challenge, do not generate wandering monsters too close to the Princess's cell
+
+2024-06-29 23:49 Update 13.0r
+Improvements to the map/shape/draw editor:
+- changed the UI style of the editor to match the rest of the game
+- the option to export from the shape editor now also saves to a file
+- 'draw' in drawing tool did not draw correctly when you were holding the mouse while rotating by moving the mouse (or by doing this while a movement animation was active)
+
+- fixed grammar on 'activation cost: 1 charge'
+- twisted product + fake curvature should work
+- fixed Wild West Yendor Challenge
+- Orb of Speed now works correctly with even number of players
