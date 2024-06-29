@@ -2049,7 +2049,7 @@ EX hyperpoint vertical_vector() {
   if(((cgflags & qSTRETCHABLE) || (mtwisted && sphere)) && vid.fixed_yz) {
     return stretch::itranslate(View * C0) * View * lztangent(1);
     }
-  if((nil || euclid || sol || nih) && vid.fixed_yz) {
+  if((nil || (euclid && GDIM == 3) || sol || nih) && vid.fixed_yz) {
     return View * lztangent(1);
     }
   if(hyperbolic && bt::in() && vid.fixed_yz) {
