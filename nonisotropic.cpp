@@ -1271,7 +1271,7 @@ EX namespace hybrid {
     check_cgi(); cgi.require_basics();
     if(!hybrid::csteps || gmod(cgi.psl_steps, hybrid::csteps)) {
       hybrid::csteps = cgi.psl_steps;
-      if(nil) {
+      if(PIU(fake::in() ? FPIU(euclid) : euclid)) {
         auto& T = euc::eu_input.user_axes;
         hybrid::csteps = abs(T[0][0] * T[1][1] - T[0][1] * T[1][0]);
         if(S3 == 3) hybrid::csteps *= 2;
@@ -3171,7 +3171,7 @@ EX namespace nisot {
       }
     else if(argis("-twisted-product")) {
       PHASEFROM(2);
-      bool quo = sphere || quotient;
+      bool quo = closed_manifold;
       set_geometry(gTwistedProduct);
       if(quo) hybrid::fixup_csteps();
       return 0;

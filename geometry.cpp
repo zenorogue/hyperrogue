@@ -214,12 +214,14 @@ struct geometry_information {
   ld asteroid_size[8];
   ld wormscale;
   ld tentacle_length;
-  /** level in product geometries */
+  /** level in hybrid geometries */
   ld plevel;
   /** level for a z-step */
   int single_step;
   /** the number of levels in PSL */
   int psl_steps;
+  /** level in twisted geometries -- rarely computed */
+  ld plevel_twisted;
 
   /** for binary tilings */
   transmatrix direct_tmatrix[14];
@@ -721,6 +723,10 @@ void geometry_information::prepare_basics() {
     hexhexdist = i6 + i6;
     hexvdist = c6;
     rhexf = c7;
+
+    ld alpha6 = -atan2(xpush(c6) * cspin(0, 1, M_PI - TAU / s6) * xpush0(c6));
+    ld alpha7 = -atan2(xpush(c7) * cspin(0, 1, M_PI - TAU / S7) * xpush0(c7));
+    if(BITRUNCATED) plevel_twisted = (M_PI - 2 * alpha6 - alpha7) * fake::around * 2;
     }
   
   DEBB(DF_GEOM | DF_POLY,
@@ -838,7 +844,12 @@ void geometry_information::prepare_basics() {
   
   plevel = vid.plevel_factor * scalefactor;
   single_step = 1;
-  if(mtwisted && ginf[hybrid::underlying].cclass != gcEuclid) {
+  auto fak = hybrid::underlying == gFake;
+  auto ug = fak ? fake::underlying : hybrid::underlying;
+  bool underlying_euclid = false;
+  if(mtwisted) { underlying_euclid = ginf[ug].cclass == gcEuclid; }
+
+  if(mtwisted && !underlying_euclid) {
     #if CAP_ARCM
     if(hybrid::underlying == gArchimedean) 
       arcm::current.get_step_values(psl_steps, single_step);
@@ -864,16 +875,21 @@ void geometry_information::prepare_basics() {
       if(GOLDBERG && S3 == 4 && gp::param == gp::loc{1,1}) psl_steps *= 2;
       if(fake_single_step < 0) fake_single_step = -fake_single_step;
       plevel = M_PI * fake_single_step / fake_psl_steps;
+      /** fake Euclidean... */
+      if(abs(fake_single_step) < 1e-6)
+        plevel = 0.25 * s3 / tan(M_PI/s3);
       }
     }
-  if(mtwisted && ginf[hybrid::underlying].cclass == gcEuclid) {
+  if(mtwisted && underlying_euclid) {
     single_step = 1;
-    if(hybrid::underlying == gArchimedean) plevel = arcm::current.dual_tile_area();
-    if(hybrid::underlying == gEuclid && PURE) plevel = sqrt(3)/4.;
-    if(hybrid::underlying == gEuclidSquare && PURE) plevel = 1;
-    if(hybrid::underlying == gEuclidSquare && BITRUNCATED) plevel = 0.25;
-    if(hybrid::underlying == gEuclid && BITRUNCATED) plevel = sqrt(3)/12.;
-    if(hybrid::underlying == gFake) { plevel = 1; addMessage("error: not implemented twisted products on Euclidean fakes"); }
+    if(ug == gArchimedean) plevel = arcm::current.dual_tile_area();
+    if(ug == gEuclid && PURE) plevel = sqrt(3)/4.;
+    if(ug == gEuclidSquare && PURE) plevel = 1;
+    if(ug == gEuclidSquare && BITRUNCATED) plevel = 0.25;
+    if(ug == gEuclid && BITRUNCATED) plevel = sqrt(3)/12.;
+    if(ug == gEuclid && fak) plevel = 120._deg * fake::around - TAU;
+    if(ug == gEuclidSquare && fak && PURE) plevel = 90._deg * fake::around - TAU;
+    if(ug == gEuclidSquare && fak && BITRUNCATED) plevel = hybrid::underlying_cgip->plevel_twisted;
     }
   
   set_sibling_limit();
