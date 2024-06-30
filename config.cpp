@@ -1196,7 +1196,6 @@ EX void initConfig() {
   -> editable("flashing effects", 'h')
   -> help("Disable if you are photosensitive. Replaces flashing effects such as Orb of Storms lightning with slow, adjustable animations.");
 
-  param_f(vid.binary_width, parameter_names("bwidth", "binary-tiling-width"), 1);
   param_custom_ld(vid.binary_width, "binary tiling width", menuitem_binary_width, 'v');
 
   param_b(fake::multiple_special_draw, "fake_multiple", true);

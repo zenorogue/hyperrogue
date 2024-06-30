@@ -756,7 +756,6 @@ EX namespace history {
     history::includeHistory = false;
     }) + addHook(hooks_configfile, 0, [] {
 
-    param_b(autobandhistory, "include history"); // check!
     param_f(lvspeed, parameter_names("lvspeed", "lineview speed"));
     param_f(extra_line_steps, "lineview extension");
       

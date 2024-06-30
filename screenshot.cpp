@@ -1760,7 +1760,6 @@ auto animhook = addHook(hooks_frame, 100, display_animation)
   #endif
   + addHook(hooks_configfile, 100, [] {
     #if CAP_CONFIG
-    param_f(anims::period, parameter_names("aperiod", "animation period"));
     param_i(anims::noframes, "animation frames");
     param_f(anims::cycle_length, parameter_names("acycle", "animation cycle length"));
     param_f(anims::parabolic_length, parameter_names("aparabolic", "animation parabolic length"))
@@ -1776,7 +1775,6 @@ auto animhook = addHook(hooks_frame, 100, display_animation)
     param_f(rug_rotation1, "rug_rotation1");
     param_f(rug_rotation2, "rug_rotation2");
     param_f(rotation_distance, "rotation_distance");
-    param_f(cycle_length, "cycle_length");
     param_f(env_ocean, "env_ocean");
     param_f(env_volcano, "env_volcano");
     param_b(wallopt, "wallopt");
