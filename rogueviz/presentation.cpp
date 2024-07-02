@@ -554,6 +554,8 @@ void uses_game(presmode mode, string name, reaction_t launcher, reaction_t resto
     }
   }
 
+color_t latex_ring = 0x00FF0080;
+
 void latex_slide(presmode mode, string s, flagtype flags, int size) {
   empty_screen(mode);
   add_stat(mode, [=] {
@@ -562,6 +564,7 @@ void latex_slide(presmode mode, string s, flagtype flags, int size) {
       cmode |= sm::SIDE;
       dynamicval<bool> db(nomap, (flags & sm::NOSCR));
       dynamicval<color_t> dc(modelcolor, nomap ? 0 : 0xFF);
+      dynamicval<color_t> dr(ringcolor, nomap ? 0 : latex_ring);
       dynamicval<color_t> dc2(bordcolor, 0);
       gamescreen();
       callhooks(hooks_latex_slide);
