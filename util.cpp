@@ -975,7 +975,9 @@ EX string find_file(string s) {
   if(file_exists(s)) return s;
   char *p = getenv("HYPERPATH");
   if(p && file_exists(s1 = s0 + p + s)) return s1;
+#ifdef HYPERPATH
   if(file_exists(s1 = HYPERPATH + s)) return s1;
+#endif
 #ifdef FHS
   if(file_exists(s1 = "/usr/share/hyperrogue/" + s)) return s1;
 #endif
