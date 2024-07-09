@@ -140,15 +140,20 @@ ld spina(cell *c, int dir) {
   return TAU * dir / c->type;
   }
 
-/** @brief used to alternate colors depending on distance to something. In chessboard-patterned geometries, also use a third step */
-
-EX int flip_dark(int f, int a0, int a1) {
-  if(geosupport_chessboard()) {
+/** @brief used to alternate colors depending on distance to something. In chessboard-patterned geometries, automatically a third step.
+ *  In some cases, we want to avoid a number of colors in the table -- set @param subtract to the number of such colors.
+ */
+EX color_t get_color_auto3(int f, const colortable& ctab, int subtract IS(0)) {
+  int size = ctab.size() - subtract;
+  if(size < 1) return 0;
+  if(geosupport_chessboard() && size == 2) {
     f = gmod(f, 3);
-    return a0 + (a1-a0) * f / 2;
+    if(f == 1)
+      return gradient(ctab[0], ctab[1], 0, 1, 2);
+    return ctab[f/2];
     }
   else
-    return (f&1) ? a1 : a0;
+    return ctab[gmod(f, size)];
   }
 
 color_t fc(int ph, color_t col, int z) {

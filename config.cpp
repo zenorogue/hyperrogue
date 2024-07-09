@@ -1382,7 +1382,15 @@ EX void initConfig() {
   #if CAP_COMPLEX2
   param_colortable(brownian::colors, "color:brown");
   #endif
-  
+
+  param_colortable(prairie_colors, "color:prairie");
+  param_colortable(mountain_colors, "color:mountain");
+  param_colortable(tower_colors, "color:tower");
+  param_colortable(westwall_colors, "color:freefall");
+  param_colortable(endorian_colors, "color:endorian");
+  param_colortable(canopy_colors, "color:canopy");
+  param_colortable(camelot_cheat_colors, "color:camelotcheat");
+
   for(int i=0; i<motypes; i++)
     param_color(minf[i].color, "color:monster:" + its(i), false);
   for(int i=0; i<ittypes; i++)
@@ -3653,6 +3661,7 @@ EX void show_color_dialog() {
         dialog::openColorDialog(minf[c->monst].color);
       else if(c->item) 
         dialog::openColorDialog(iinf[c->item].color);
+      else if(auto tab = special_colortable_for(c)) { pushScreen([tab] { edit_color_table(*tab); }); return; }
       else if(c->wall) 
         dialog::openColorDialog(winf[c->wall == waMineMine ? waMineUnknown : c->wall].color);
       #if CAP_COMPLEX2

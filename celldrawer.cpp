@@ -82,6 +82,26 @@ inline void drawcell(cell *c, const shiftmatrix& V) {
 static constexpr int trapcol[4] = {0x904040, 0xA02020, 0xD00000, 0x303030};
 static constexpr int terracol[8] = {0xD000, 0xE25050, 0xD0D0D0, 0x606060, 0x303030, 0x181818, 0x0080, 0x8080};
 
+EX colortable prairie_colors = { 0x402000, 0x503000 };
+EX colortable mountain_colors = { 0x181008*2, 0x181008*4 };
+EX colortable tower_colors = { 0x202010, 0x404030 };
+EX colortable westwall_colors = { 0x211F6F, 0x413F8F };
+EX colortable endorian_colors = { 0x202010, 0x404030, 0x0000D0 };
+EX colortable canopy_colors = { 0x60C060, 0x489048 };
+EX colortable camelot_cheat_colors = { 0x606060, 0xC0C0C0 };
+
+/** return the special colortable for the given cell -- color menu uses this to know that a colortable should be edited */
+EX colortable* special_colortable_for(cell *c) {
+  if(c->land == laPrairie && prairie::isriver(c)) return &prairie_colors;
+  if(c->land == laMountain && !c->wall && (eubinary || sphere || c->master->alt)) return &mountain_colors;
+  if(c->land == laIvoryTower && !c->wall) return &tower_colors;
+  if(c->land == laWestWall) return &westwall_colors;
+  if(c->land == laEndorian && !c->wall) return &endorian_colors;
+  if(c->land == laEndorian && c->wall == waCanopy) return &canopy_colors;
+  if(c->land == laCamelot && camelotcheat) return &camelot_cheat_colors;
+  return nullptr;
+  }
+
 void celldrawer::addaura() {
   hr::addaura(tC0(V), darkened(aura_color), fd);
   }
@@ -259,7 +279,7 @@ void celldrawer::setcolors() {
       break;    
     case laMountain:
       if(eubinary || sphere || c->master->alt)
-        fcol = 0x181008 * flip_dark(celldistAlt(c), 2, 4);
+        fcol = get_color_auto3(celldistAlt(c), mountain_colors);
       else fcol = 0;
       if(c->wall == waPlatform) wcol = 0xF0F0A0;
       break;
@@ -328,11 +348,11 @@ void celldrawer::setcolors() {
       break;
   
     case laIvoryTower:
-      fcol = 0x10101 * flip_dark(c->landparam, 32, 64) - 0x000010;
+      fcol = get_color_auto3(c->landparam, tower_colors);
       break;
     
     case laWestWall:
-      fcol = 0x10101 * flip_dark(c->landparam, 0, 32) + floorcolors[c->land];
+      fcol = get_color_auto3(c->landparam, westwall_colors);
       break;
     
     case laDungeon: {
@@ -352,23 +372,21 @@ void celldrawer::setcolors() {
     case laEndorian: {
       int clev = pd_from->land == laEndorian ? edgeDepth(pd_from) : 0;
         // xcol = (c->landparam&1) ? 0xD00000 : 0x00D000;
-      fcol = 0x10101 * flip_dark(c->landparam, 32, 64) - 0x000010;
+      fcol = get_color_auto3(c->landparam, endorian_colors, 1);
       int ed = edgeDepth(c);
       int sr = get_sightrange_ambush();
       
       if(clev == UNKNOWN || ed == UNKNOWN)
-        fcol = 0x0000D0;
+        fcol = endorian_colors.back();
       else {
         while(ed > clev + sr) ed -= 2;
         while(ed < clev - sr) ed += 2;
-        fcol = gradient(fcol, 0x0000D0, clev-sr, ed, clev+sr);
+        fcol = gradient(fcol, endorian_colors.back(), clev-sr, ed, clev+sr);
         }
       if(c->wall == waTrunk) fcol = winf[waTrunk].color;
   
       if(c->wall == waCanopy || c->wall == waSolidBranch || c->wall == waWeakBranch) {
-        fcol = winf[waCanopy].color;
-        int f = flip_dark(c->landparam, 0, 2);
-        if(f) fcol = gradient(0, fcol, 8, f, 0);
+        fcol = get_color_auto3(c->landparam, canopy_colors);
         }
       break;
       }
@@ -376,7 +394,7 @@ void celldrawer::setcolors() {
     #if CAP_FIELD
     case laPrairie:
       if(prairie::isriver(c)) {
-        fcol = flip_dark(prairie::get_val(c), 0x402000, 0x503000);
+        fcol = get_color_auto3(prairie::get_val(c), prairie_colors);
         }
       else {
         fcol = 0x004000 + 0x001000 * c->LHU.fi.walldist;
@@ -392,7 +410,7 @@ void celldrawer::setcolors() {
   #if CAP_TOUR
       if(!tour::on) camelotcheat = false;
       if(camelotcheat) 
-          fcol = 0x10101 * flip_dark(d, 0x60, 0xC0);
+        fcol = get_color_auto3(d, camelot_cheat_colors);
       else 
   #endif
       if(d < 0) {
