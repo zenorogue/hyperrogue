@@ -2240,7 +2240,6 @@ EX namespace mapeditor {
 
     bool freedraw = drawing_tool || intexture;    
     
-#if CAP_TEXTURE
     if(freedraw && !show_menu) for(int i=0; i<10; i++) {
       int fs = editor_fsize();
       if(8 + fs * (6+i) < vid.yres - 8 - fs * 7)
@@ -2249,7 +2248,6 @@ EX namespace mapeditor {
       if(displayfr(vid.xres-8 - fs * 3, 8+fs*(6+i), 0, vid.fsize, its(i+1), dtwidth == brush_sizes[i] ? 0xFF8000 : 0xC0C0C0, 16))
         getcstat = 2000+i;
       }
-#endif
 
     editor_menu(drawing_tool ? 3 : 2);
     keyhandler = handle_key_draw;
@@ -2387,7 +2385,11 @@ EX namespace mapeditor {
       }
 
     else if(freedraw) {
-      dialog::addBoolItem_action("symmetry", texture::texturesym, '0');
+      #if CAP_TEXTURE
+      if(intexture) dialog::addBoolItem_action("symmetry", texture::texturesym, '0');
+      else dialog::addBreak(100);
+      #endif
+
       if(drawing_tool) {
         if(!dtfill)
           dialog::addBoolItem(XLAT("fill"), dtfill, 'f');
@@ -2413,9 +2415,11 @@ EX namespace mapeditor {
       dialog::add_action([] { mousekey = 'T'; });
       if(drawing_tool) dialog::addItem_mouse(XLAT("erase"), 'e');
       dialog::add_action([] { mousekey = 'e'; });
+      #if CAP_TEXTURE
       int s = isize(texture::config.data.pixels_to_draw);
       if(s) dialog::addInfo(its(s)); else dialog::addBreak(100);
-      dialog::addBreak(700);
+      #endif
+      dialog::addBreak(CAP_TEXTURE ? 700 : 1000);
       }
 
     if(GDIM == 2)
@@ -2968,6 +2972,7 @@ EX namespace mapeditor {
       if(lstartcell) lstart = ggmatrix(lstartcell) * lstart_rel;
 
       int tcolor = (dtcolor >> 8) | ((dtcolor & 0xFF) << 24);
+      hr::ignore(tcolor);
       
       if(uni == '-') {
         if(mousekey == 'g') {
