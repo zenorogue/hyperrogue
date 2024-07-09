@@ -734,8 +734,18 @@ EX namespace tactic {
     };
   map<modecode_t, vector<scoredata>> scoreboard;
   
+  EX int default_runs(eLand l) {
+    return l == laCamelot ? 1 : 3;
+    }
+
+  EX int default_mult(eLand l) {
+    return l == laCamelot ? 3 : 1;
+    }
+
+  /** also called 'runs' */
   EX int chances(eLand l, modecode_t xc IS(modecode())) {
-    if(xc != 0 && l != laCamelot) return 3;
+    if(use_custom_land_list) return max(min(custom_land_ptm_runs[l], 10), 1);
+    if(xc != 0) return default_runs(l);
     for(auto& ti: land_tac)
       if(ti.l == l) 
         return ti.tries;
@@ -743,8 +753,8 @@ EX namespace tactic {
     }
   
   int tacmultiplier(eLand l) {
-    if(modecode() != 0 && l != laCamelot) return 1;
-    if(modecode() != 0 && l == laCamelot) return 3;
+    if(use_custom_land_list) return custom_land_ptm_mult[l];
+    if(modecode() != 0) return default_mult(l);
     for(auto& ti: land_tac)
       if(ti.l == l)
         return ti.multiplier;
@@ -832,6 +842,7 @@ EX namespace tactic {
     dynamicval<bool> t(tactic::on, true);
     generateLandList([] (eLand l) { 
       if(dialog::infix != "" && !dialog::hasInfix(linf[l].name)) return false;
+      if(use_custom_land_list) return custom_land_list[l] && custom_land_ptm_runs[l] > 0;
       return !!(land_validity(l).flags & lv::appears_in_ptm);
       });
     }
@@ -1026,6 +1037,21 @@ EX void save_mode_data(hstream& f) {
     f.write<char>(7);
     f.write<ld>(vid.creature_scale);
     }
+  if(use_custom_land_list) {
+    bool ptm_modified = false;
+    for(int i=0; i<landtypes; i++) if(custom_land_list[i]) {
+      if(custom_land_ptm_runs[i] != tactic::default_runs(eLand(i))) ptm_modified = true;
+      if(custom_land_ptm_mult[i] != tactic::default_mult(eLand(i))) ptm_modified = true;
+      }
+    if(ptm_modified) {
+      f.write<char>(8);
+      f.write<int>(landtypes);
+      for(int i=0; i<landtypes; i++) {
+        f.write<char>(custom_land_ptm_runs[i]);
+        f.write<char>(custom_land_ptm_mult[i]);
+        }
+      }
+    }
   }
 
 EX eLandStructure get_default_land_structure() {
@@ -1101,6 +1127,8 @@ EX void load_mode_data_with_zero(hstream& f) {
           custom_land_treasure[i] = f.get<int>();
           custom_land_difficulty[i] = f.get<int>();
           custom_land_wandering[i] = f.get<int>();
+          custom_land_ptm_runs[i] = tactic::default_runs(eLand(i));
+          custom_land_ptm_mult[i] = tactic::default_mult(eLand(i));
           }
         break;
         }
@@ -1119,6 +1147,15 @@ EX void load_mode_data_with_zero(hstream& f) {
 
       case 7:
         vid.creature_scale = f.get<ld>();
+
+      case 8: {
+        if(!use_custom_land_list) throw hstream_exception("PTM defined in a non-custom mode");
+        int lt = f.get<int>();
+        for(int i=0; i<lt; i++) {
+          custom_land_ptm_runs[i] = f.get<char>();;
+          }
+        break;
+        }
 
       default:
         throw hstream_exception("wrong option");

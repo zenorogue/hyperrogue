@@ -781,6 +781,7 @@ EX array<bool, landtypes> custom_land_list;
 EX array<int, landtypes> custom_land_treasure;
 EX array<int, landtypes> custom_land_difficulty;
 EX array<int, landtypes> custom_land_wandering;
+EX array<int, landtypes> custom_land_ptm_runs, custom_land_ptm_mult;
 
 EX bool isLandIngame(eLand l) {
   if(isElemental(l)) l = laElementalWall;
@@ -915,6 +916,20 @@ EX void customize_land_in_list(eLand l) {
     dialog::get_ne().reaction = mark_tamper;
     });
 
+  dialog::addSelItem(XLAT("PTM runs"), its(custom_land_ptm_runs[l]), 'r');
+  dialog::add_action([l] {
+    dialog::editNumber(custom_land_ptm_runs[l], 0, 10, 3, 1, XLAT("%the1: number of PTM runs", linf[l].name), "");
+    dialog::get_ne().reaction = mark_tamper;
+    dialog::bound_up(10);
+    dialog::bound_low(0);
+    });
+
+  dialog::addSelItem(XLAT("PTM multiplier"), its(custom_land_ptm_mult[l]), 'm');
+  dialog::add_action([l] {
+    dialog::editNumber(custom_land_ptm_mult[l], 0, 100, 1, 1, XLAT("%the1: PTM multiplier", linf[l].name), "");
+    dialog::get_ne().reaction = mark_tamper;
+    });
+
   gen_landvisited();
   if(landvisited[l]) {
     dialog::addItem(XLAT("test"), 'T');
@@ -938,6 +953,8 @@ EX void customize_land_list() {
       custom_land_treasure[l] = 100;
       custom_land_difficulty[l] = 100;
       custom_land_wandering[l] = 100;
+      custom_land_ptm_runs[l] = tactic::default_runs(l);
+      custom_land_ptm_mult[l] = tactic::default_mult(l);
       }
     if(dialog::infix != "" && !dialog::hasInfix(linf[l].name)) return false;
     if(l == laCanvas) return true;
