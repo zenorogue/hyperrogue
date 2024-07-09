@@ -1013,6 +1013,16 @@ EX purehookset hooks_configfile;
 
 EX ld mapfontscale = 100;
 
+EX void font_reaction() {
+  if(among(font_id, 5, 6)) {
+    int fid = font_id;
+    font_id = last_font_id;
+    dialog::openFileDialog(font_filenames[fid], XLAT("font to use:"), fid == 5 ? ".ttf" : ".otf", [fid] () {
+      font_id = fid; return true;
+      });
+    }
+  }
+
 EX void initConfig() {
   
   // basic config
@@ -1099,6 +1109,11 @@ EX void initConfig() {
   initcs(vid.cs); paramset(vid.cs, "single");
   param_b(vid.samegender, "princess choice", false);
   param_i(vid.language, "language", -1);  
+  param_enum(font_id, "font_id", 0)
+  ->editable(font_names, "select font", 'f')
+  ->manual_reaction = font_reaction;
+  param_str(font_filenames[5], "ttf_font");
+  param_str(font_filenames[6], "otf_font");
   param_b(vid.drawmousecircle, "mouse circle", ISMOBILE || ISPANDORA);
   param_b(vid.revcontrol, "reverse control", false);
   #if CAP_AUDIO
@@ -2423,6 +2438,8 @@ EX void configureInterface() {
   dialog::addSelItem(XLAT("language"), XLAT("EN"), 'l');
   dialog::add_action_push(selectLanguageScreen);
 #endif
+
+  add_edit(font_id);
 
   dialog::addSelItem(XLAT("player character"), numplayers() > 1 ? "" : csname(vid.cs), 'g');
   dialog::add_action_push(showCustomizeChar);

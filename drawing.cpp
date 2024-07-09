@@ -2872,7 +2872,7 @@ EX hyperpoint default_pointfunction(ld x, ld y) {
 #if !CAP_EXTFONT
 EX void write_in_space(const shiftmatrix& V, int fsize, double size, const string& s, color_t col, int frame IS(0), int align IS(8), PPR prio IS(PPR::TEXT), pointfunction pf IS(default_pointfunction)) {
   init_glfont(fsize);
-  glfont_t& f(*(glfont[fsize]));
+  glfont_t& f(*(cfont->glfont[fsize]));
   finf.texture_id = f.texture;
   
   int fstart = isize(finf.tvertices);

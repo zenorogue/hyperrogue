@@ -155,9 +155,6 @@ EX int getnext(const char* s, int& i) {
   }
 
 #if CAP_SDLTTF
-const int max_font_size = 288;
-TTF_Font* font[max_font_size+1];
-
 void fix_font_size(int& size) {
   if(size < 1) size = 1;
   if(size > max_font_size) size = max_font_size;
@@ -227,25 +224,36 @@ EX void present_screen() {
 
 #if CAP_SDLTTF
 
-#define DEFAULT_FONT "DejaVuSans-Bold.ttf"
+EX vector<string> font_filenames = {
+  "DejaVuSans-Bold.ttf",
+  "DejaVuSans.ttf",
+  "cmunss.ttf",
+  "NotoSans-Regular.ttf",
+  "OpenDyslexic3-Regular.ttf",
+  "font.ttf",
+  "font.otf"
+  };
+
+EX vector<pair<string, string>> font_names = {
+  {"DejaVu Sans Bold", ""},
+  {"DejaVu Sans", ""},
+  {"Computer Modern Sans", ""},
+  {"Noto Sans", ""},
+  {"OpenDyslexic3-Regular", ""},
+  {"TTF font", ""},
+  {"OTF font", ""}
+  };
+
+EX int last_font_id = 0;
+EX int font_id = 0;
 
 #ifdef FONTCONFIG
-/** if this is non-empty, find the font using fontconfig */
-EX string font_to_find = DEFAULT_FONT;
-#endif
+TTF_Font* findfont(int siz) {
 
-/** actual font path */
-EX string fontpath = ISWEB ? "sans-serif" : string(HYPERFONTPATH) + DEFAULT_FONT;
-
-const string& findfont() {
-  #ifdef FONTCONFIG
-  if(font_to_find == "") return fontpath;
   FcPattern   *pat;
   FcResult	result;
-  if (!FcInit()) {
-    return fontpath;
-  }
-  pat = FcNameParse((FcChar8 *)font_to_find.c_str());
+  if (!FcInit()) return nullptr;
+  pat = FcNameParse((FcChar8 *)cfont->filename.c_str());
   FcConfigSubstitute(0, pat, FcMatchPattern);
   FcDefaultSubstitute(pat);
 
@@ -254,31 +262,33 @@ const string& findfont() {
   if (match) {
     FcChar8 *file;
     if (FcPatternGetString(match, FC_FILE, 0, &file) == FcResultMatch) {
-      fontpath = (const char *)file;
+      cfont->filename = (const char *)file;
     }
     FcPatternDestroy(match);
   }
   FcPatternDestroy(pat);
   FcFini();
-  font_to_find = "";
-  if(debugflags & DF_INIT) println(hlog, "fontpath is: ", fontpath);
-  #endif
-  return fontpath;
+  cfont->use_fontconfig = false;
+  if(debugflags & DF_INIT) println(hlog, "fontpath is: ", cfont->filename);
+  return TTF_OpenFont(cfont->filename, siz);
   }
+#endif
 
 void loadfont(int siz) {
   fix_font_size(siz);
-  if(!font[siz]) {
-    font[siz] = TTF_OpenFont(findfont().c_str(), siz);
-    // Destination set by ./configure (in the GitHub repository)
-    #ifdef FONTDESTDIR
-    if (font[siz] == NULL) {
-      font[siz] = TTF_OpenFont(FONTDESTDIR, siz);
-      }
+  auto& cf = cfont->font[siz];
+  if(!cf) {
+    if(cf == NULL) cf = TTF_OpenFont(find_file(cfont->filename).c_str(), siz);
+
+    #ifdef FONTCONFIG
+    if(cf == NULL && cfont->use_fontconfig)
+      cf = find_font_using_fontconfig(siz);
     #endif
-    if (font[siz] == NULL) {
-      printf("error: Font file not found: %s\n", fontpath.c_str());
-      exit(1);
+
+    if(cf == NULL) {
+      printf("error: Font file not found: %s\n", cfont->filename.c_str());
+      if(font_id == 0) throw hr_exception("font file not found");
+      font_id = 0; set_cfont(); loadfont(siz);
       }
     }
   }
@@ -293,7 +303,7 @@ int textwidth(int siz, const string &str) {
   loadfont(siz);
   
   int w, h;
-  TTF_SizeUTF8(font[siz], str.c_str(), &w, &h);
+  TTF_SizeUTF8(cfont->font[siz], str.c_str(), &w, &h);
   // printf("width = %d [%d]\n", w, isize(str));
   return w;
 
@@ -435,6 +445,40 @@ EX  int next_p2 (int a ) {
     return rval;
 }
 
+#if HDR
+constexpr int max_glfont_size = 72;
+constexpr int max_font_size = 288;
+
+struct fontdata {
+  string filename;
+  #if FONTCONFIG
+  bool use_fontconfig;
+  #endif
+  struct glfont_t* glfont[max_glfont_size+1];
+  #if CAP_SDLTTF
+  TTF_Font* font[max_font_size+1];
+  #endif
+  ~fontdata();
+  };
+#endif
+
+EX map<string, fontdata> fontdatas;
+
+EX fontdata *cfont;
+
+EX fontdata* font_by_name(string fname) {
+  auto& fd = fontdatas[fname];
+  if(fd.filename == "") {
+    fd.filename = fname;
+    #if FONTCONFIG
+    fd.use_fontconfig = true;
+    #endif
+    for(int i=0; i<=max_glfont_size; i++) fd.glfont[i] = nullptr;
+    for(int i=0; i<=max_font_size; i++) fd.font[i] = nullptr;
+    }
+  return &fd;
+  }
+
 #if CAP_GLFONT
 
 #define CHARS (128+NUMEXTRA)
@@ -450,18 +494,14 @@ struct glfont_t {
 //GLuint list_base;                                   // Holds The First Display List ID  
   vector<charinfo_t> chars; 
   };
-
-const int max_glfont_size = 72;
 #endif
-
-EX glfont_t *glfont[max_glfont_size+1];
 
 typedef Uint16 texturepixel;
 
-#define FONTTEXTURESIZE 2048
+#define FONTTEXTURESIZE 4096
 
 int curx = 0, cury = 0, theight = 0;
-texturepixel fontdata[FONTTEXTURESIZE][FONTTEXTURESIZE];
+texturepixel fontpixels[FONTTEXTURESIZE][FONTTEXTURESIZE];
 
 void sdltogl(SDL_Surface *txt, glfont_t& f, int ch) {
 #if CAP_TABFONT
@@ -480,7 +520,7 @@ void sdltogl(SDL_Surface *txt, glfont_t& f, int ch) {
   theight = max(theight, otheight);
   
   for(int j=0; j<otheight;j++) for(int i=0; i<otwidth; i++) {
-    fontdata[j+cury][i+curx] = 
+    fontpixels[j+cury][i+curx] =
 #if CAP_TABFONT
     (i>=otwidth || j>=otheight) ? 0 : (tpix[tpixindex++] * 0x100) | 0xFF;
 #else
@@ -501,17 +541,17 @@ void sdltogl(SDL_Surface *txt, glfont_t& f, int ch) {
   }
   
 EX void init_glfont(int size) {
-  if(glfont[size]) return;
+  if(cfont->glfont[size]) return;
   DEBBI(DF_GRAPH, ("init GL font: ", size));
   
 #if !CAP_TABFONT
   loadfont(size);
-  if(!font[size]) return;
+  if(!cfont->font[size]) return;
 #endif
   
-  glfont[size] = new glfont_t;
+  cfont->glfont[size] = new glfont_t;
   
-  glfont_t& f(*(glfont[size]));
+  glfont_t& f(*(cfont->glfont[size]));
   
   f.chars.resize(CHARS);
 
@@ -527,7 +567,7 @@ EX void init_glfont(int size) {
 
   for(int y=0; y<FONTTEXTURESIZE; y++)
   for(int x=0; x<FONTTEXTURESIZE; x++)
-    fontdata[y][x] = 0;
+    fontpixels[y][x] = 0;
 
 #if CAP_TABFONT
   resetTabFont();
@@ -550,10 +590,10 @@ EX void init_glfont(int size) {
     fix_font_size(siz);
     if(ch < 128) {
       str[0] = ch;
-      txt = TTF_RenderText_Blended(font[siz], str, white);
+      txt = TTF_RenderText_Blended(cfont->font[siz], str, white);
       }
     else {
-      txt = TTF_RenderUTF8_Blended(font[siz], natchars[ch-128], white);
+      txt = TTF_RenderUTF8_Blended(cfont->font[siz], natchars[ch-128], white);
       }
     if(txt == NULL) continue;
 #if CAP_CREATEFONT
@@ -572,7 +612,7 @@ EX void init_glfont(int size) {
   
   glTexImage2D( GL_TEXTURE_2D, 0, GL_LUMINANCE_ALPHA, FONTTEXTURESIZE, theight, 0,
     GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, 
-    fontdata);
+    fontpixels);
 
   for(int ch=0; ch<CHARS; ch++) f.chars[ch].ty0 /= theight, f.chars[ch].ty1 /= theight;
  
@@ -595,9 +635,9 @@ int gl_width(int size, const char *s) {
 #endif
 
   init_glfont(gsiz);
-  if(!glfont[gsiz]) return 0;
+  if(!cfont->glfont[gsiz]) return 0;
 
-  glfont_t& f(*glfont[gsiz]);
+  glfont_t& f(*cfont->glfont[gsiz]);
 
   int x = 0;
   for(int i=0; s[i];) {
@@ -628,9 +668,9 @@ bool gl_print(int x, int y, int shift, int size, const char *s, color_t color, i
 #endif
   
   init_glfont(gsiz);
-  if(!glfont[gsiz]) return false;
+  if(!cfont->glfont[gsiz]) return false;
 
-  glfont_t& f(*glfont[gsiz]);
+  glfont_t& f(*cfont->glfont[gsiz]);
   
   int tsize = 0;
   
@@ -692,9 +732,10 @@ EX void resetGL() {
   DEBBI(DF_INIT | DF_GRAPH, ("reset GL"))
   callhooks(hooks_resetGL);
 #if CAP_GLFONT
-  for(int i=0; i<=max_glfont_size; i++) if(glfont[i]) {
-    delete glfont[i];
-    glfont[i] = NULL;
+  for(auto& cf: fontdatas)
+  for(int i=0; i<=max_glfont_size; i++) if(cf.second.glfont[i]) {
+    delete cf.second.glfont[i];
+    cf.second.glfont[i] = NULL;
     }
 #endif
 #if MAXMDIM >= 4
@@ -819,7 +860,7 @@ EX bool displaystr(int x, int y, int shift, int size, const char *str, color_t c
   fix_font_size(size);
   loadfont(size);
 
-  SDL_Surface *txt = ((vid.antialias & AA_FONT)?TTF_RenderUTF8_Blended:TTF_RenderUTF8_Solid)(font[size], str, col);
+  SDL_Surface *txt = ((vid.antialias & AA_FONT)?TTF_RenderUTF8_Blended:TTF_RenderUTF8_Solid)(cfont->font[size], str, col);
   
   if(txt == NULL) return false;
 
@@ -1436,22 +1477,26 @@ EX int SDL_Init1(Uint32 flags) {
   }
 #endif
 
+EX void set_cfont() {
+  cfont = font_by_name(font_filenames[last_font_id = font_id]);
+  }
+
 EX void init_font() {
 #if CAP_SDLTTF
   if(TTF_Init() != 0) {
     printf("Failed to initialize TTF.\n");
     exit(2);
     }
+  set_cfont();
 #endif
   }
 
-EX void close_font() {
+fontdata::~fontdata() {
 #if CAP_SDLTTF
   for(int i=0; i<=max_font_size; i++) if(font[i]) {
     TTF_CloseFont(font[i]);
     font[i] = nullptr;
     }
-  TTF_Quit();
 #endif
 #if CAL_GLFONT
   for(int i=0; i<=max_glfont_size; i++) if(glfont[i]) {
@@ -1459,6 +1504,11 @@ EX void close_font() {
     glfont[i] = nullptr;
     }
 #endif
+  }
+
+EX void close_font() {
+  fontdatas.clear();
+  TTF_Quit();
   }
 
 EX void init_graph() {
