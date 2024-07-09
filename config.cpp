@@ -133,6 +133,7 @@ EX void show_edit_option_enum(char* value, const string& name, const vector<pair
 
 #if HDR
 struct list_parameter : parameter {
+  reaction_t manual_reaction;
   virtual int get_value() = 0;
   virtual void set_value(int i) = 0;
   vector<pair<string, string> > options;
@@ -3938,7 +3939,7 @@ void list_parameter::show_edit_option(key_type key) {
     if(need_list >= 2) dialog::start_list(1500, 1500, 'a');
     for(int i=0; i<q; i++) {
       dialog::addBoolItem(XLAT(options[i].first), get_value() == i, need_list >= 2 ? dialog::list_fake_key++ : 'a' + i);
-      auto action = [this, i, need_list] { set_value(i); if(reaction) reaction(); if(need_list == 0) popScreen(); };
+      auto action = [this, i, need_list] { set_value(i); if(need_list == 0) popScreen(); if(manual_reaction) manual_reaction(); if(reaction) reaction(); };
       if(needs_confirm)
         dialog::add_action_confirmed(action);
       else
