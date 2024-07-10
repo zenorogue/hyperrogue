@@ -2,7 +2,6 @@
 
 #include "rogueviz.h"
 
-#define RVPATH HYPERPATH "rogueviz/"
 #if CAP_RVSLIDES
 namespace dhrg {
   void graphv(std::string s);
