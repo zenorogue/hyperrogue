@@ -5349,3 +5349,9 @@ Improvements to the map/shape/draw editor:
 - twisted product + fake curvature should work
 - fixed Wild West Yendor Challenge
 - Orb of Speed now works correctly with even number of players
+
+2024-07-10 6:56 Update 13.0s
+
+- font selection
+- configurable colors in Prairie/Mountain/Ivory/Freefall/Yendorian stripes
+- custom land list mode now can configure PTM runs/multipliers
