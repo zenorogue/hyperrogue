@@ -2,8 +2,6 @@
 
 #define PSHIFT 0
 
-#define RVPATH HYPERPATH "rogueviz/"
-
 namespace rogueviz {
 
 #if CAP_MODELS
