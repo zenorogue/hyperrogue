@@ -1,7 +1,5 @@
 #include "rogueviz.h"
 
-#define RVPATH HYPERPATH "rogueviz/"
-
 #include "dynamic-wfc.cpp"
 
 namespace hr {
