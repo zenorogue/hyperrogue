@@ -4,7 +4,11 @@
 
 #include "../hyper.h"
 
+#ifdef HYPERPATH
+#define RVPATH "rogueviz/"
+#else
 #define RVPATH HYPERPATH "rogueviz/"
+#endif
 
 #ifndef CAP_NCONF
 #define CAP_NCONF 0
