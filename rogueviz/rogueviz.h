@@ -5,9 +5,9 @@
 #include "../hyper.h"
 
 #ifdef HYPERPATH
-#define RVPATH "rogueviz/"
-#else
 #define RVPATH HYPERPATH "rogueviz/"
+#else
+#define RVPATH "rogueviz/"
 #endif
 
 #ifndef CAP_NCONF
