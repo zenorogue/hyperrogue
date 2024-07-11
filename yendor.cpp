@@ -1152,7 +1152,8 @@ EX void load_mode_data_with_zero(hstream& f) {
         if(!use_custom_land_list) throw hstream_exception("PTM defined in a non-custom mode");
         int lt = f.get<int>();
         for(int i=0; i<lt; i++) {
-          custom_land_ptm_runs[i] = f.get<char>();;
+          custom_land_ptm_runs[i] = f.get<char>();
+          custom_land_ptm_mult[i] = f.get<char>();
           }
         break;
         }

@@ -1727,6 +1727,8 @@ EX void initConfig() {
     param_i(custom_land_treasure[i], "customland" + its(i) + "t", 100)->be_non_editable();
     param_i(custom_land_difficulty[i], "customland" + its(i) + "d", 100)->be_non_editable();
     param_i(custom_land_wandering[i], "customland" + its(i) + "w", 100)->be_non_editable();
+    param_i(custom_land_ptm_runs[i], "customland" + its(i) + "r", 100)->be_non_editable();
+    param_i(custom_land_ptm_mult[i], "customland" + its(i) + "m", 100)->be_non_editable();
     }
   }
 
