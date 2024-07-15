@@ -2687,8 +2687,8 @@ EX namespace twist {
   
       ld xy = sr * sinh(k);
       ld zw = cr * sinh(k);
-      
-      return shiftpoint(hyperpoint(K*xy * cos(beta), K*xy * sin(beta), zw, cosh(k)), u);
+
+      return shiftpoint(hyperpoint(K*xy * cos(beta), K*xy * sin(beta), zw, cosh(k)), -u);
       }
   
     else {
@@ -2705,7 +2705,10 @@ EX namespace twist {
       
       ld xy = sr * sin(k);  
       ld zw = cr * sin(k);    
-      
+
+      if(sl2)
+        return shiftpoint(hyperpoint(K*xy * cos(beta), K*xy * sin(beta), zw, cos(k)), -u + get_shift_cycles(k));
+
       return shiftpoint(hyperpoint(K*xy * cos(u+beta), K*xy * sin(u+beta), zw * cos(u) - cos(k) * sin(u), zw * sin(u) + cos(k)*cos(u)), 0);
       }
     }
