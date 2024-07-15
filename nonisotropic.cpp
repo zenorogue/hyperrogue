@@ -2568,6 +2568,60 @@ EX namespace twist {
     return M;
     }
 
+  /** return the nearest multiple of TAU */
+  EX ld get_shift_cycles(ld shift) {
+    return floor(shift / TAU + .5) * TAU;
+    }
+
+  EX transmatrix chg_shift(ld x) {
+    return cspin(2, 3, x) * cspin(0, 1, x);
+    }
+
+  /** multiply a SLR-shiftmatrix by a SLR-shiftpoint */
+  EX shiftpoint nmul(const shiftmatrix& T, shiftpoint h) {
+    optimize_shift(h);
+    ld sh = get_shift_cycles(h.shift);
+    h.shift -= sh;
+    auto res0 = T;
+    optimize_shift(res0);
+    auto res1 = res0 * chg_shift(h.shift);
+    optimize_shift(res1);
+    res1.shift += get_shift_cycles(res0.shift - res1.shift - 1e-9);
+    auto res2 = res1 * h.h;
+    optimize_shift(res2);
+    res2.shift += get_shift_cycles(res1.shift - res2.shift);
+    res2.shift += sh;
+    return res2;
+    }
+
+  /** multiply a SLR-shiftmatrix by a SLR-shiftmatrix */
+  EX shiftmatrix nmul(const shiftmatrix& T, shiftmatrix h) {
+    optimize_shift(h);
+    ld sh = get_shift_cycles(h.shift);
+    h.shift -= sh;
+
+    auto res0 = T;
+    optimize_shift(res0);
+    auto res1 = res0 * chg_shift(h.shift);
+    optimize_shift(res1);
+    res1.shift += get_shift_cycles(res0.shift - res1.shift - 1e-9);
+    auto res2 = res1 * h.T;
+    optimize_shift(res2);
+    res2.shift += sh;
+    return res2;
+    }
+
+  /** invert a SLR-shiftmatrix */
+  EX shiftmatrix ninverse(const shiftmatrix& T) {
+    shiftmatrix res;
+    res.T = inverse(unshift(T));
+    res.shift = 0;
+    shiftmatrix m = nmul(res, T);
+    optimize_shift(m);
+    res.shift -= m.shift;
+    return res;
+    }
+
   /** @brief exponential function for both slr and Berger sphere */
 
   EX shiftpoint formula_exp(hyperpoint vel) {
