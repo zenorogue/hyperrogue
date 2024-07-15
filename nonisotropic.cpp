@@ -2429,6 +2429,22 @@ EX namespace twist {
 
     std::map<int, transmatrix> saved_matrices;
 
+    /** let relative_matrixc work in short distances at least */
+    std::map<cell*, shiftmatrix> recorded_matrices;
+
+    void find_cell_connection(cell *c, int d) override {
+      hybrid::find_cell_connection(c, d);
+      cell *c1 = c->move(d);
+      if(!recorded_matrices.count(c1)) {
+        recorded_matrices[c1] = recorded_matrices[c] * adj(c, d);
+        optimize_shift(recorded_matrices[c1]);
+        }
+      }
+
+    hrmap_twisted() : hybrid::hrmap_hybrid() {
+      recorded_matrices[gamestart()] = shiftless(Id);
+      }
+
     transmatrix adj(cell *c1, int i) override {
       if(i == c1->type-2) return uzpush(-cgi.plevel) * spin(-2*cgi.plevel);
       if(i == c1->type-1) return uzpush(+cgi.plevel) * spin(+2*cgi.plevel);
@@ -2454,7 +2470,11 @@ EX namespace twist {
       if(gmatrix0.count(c2) && gmatrix0.count(c1))
         return inverse_shift(gmatrix0[c1], gmatrix0[c2]);
       for(int i=0; i<c1->type; i++) if(c1->move(i) == c2) return adj(c1, i);
-      return Id; // not implemented yet
+      return inverse_shift(recorded_matrices[c2], recorded_matrices[c1]);
+      }
+
+    ld get_phase_difference(cell *c2, cell *c1) {
+      return recorded_matrices.at(c2).shift - recorded_matrices.at(c1).shift;
       }
 
     transmatrix ray_iadj(cell *c1, int i) override {
@@ -2494,6 +2514,10 @@ EX namespace twist {
       }
     }
 
+  EX ld get_phase_difference(cell *c2, cell *c1) {
+    auto hmap = dynamic_cast<hrmap_twisted*> (currentmap);
+    return hmap->get_phase_difference(c2, c1);
+    }
 
   /** reinterpret the given point of rotspace as a rotation matrix in the underlying geometry (note: this is the inverse)
    *  note: you should already be in underlying geometry */

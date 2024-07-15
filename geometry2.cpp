@@ -205,6 +205,10 @@ EX shiftmatrix &ggmatrix(cell *c) {
   if(t[LDIM][LDIM] == 0) {
     t.T = actual_view_transform * View * calc_relative_matrix(c, centerover, C0);
     t.shift = 0;
+    if(sl2) {
+      ld d = twist::get_phase_difference(c, centerover);
+      t.shift = floor(d / TAU + .5) * TAU;
+      }
     }
   return t;
   }
