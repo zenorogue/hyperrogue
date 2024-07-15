@@ -155,6 +155,8 @@ struct transmatrix {
 struct shiftpoint {
   hyperpoint h;
   ld shift;
+  shiftpoint() {}
+  shiftpoint(hyperpoint _h, ld _shift) : h(_h), shift(_shift) {}
   ld& operator [] (int i) { return h[i]; }
   const ld& operator [] (int i) const { return h[i]; }
   inline friend shiftpoint operator + (const shiftpoint& h, const hyperpoint& h2) {
@@ -1651,7 +1653,7 @@ EX hyperpoint direct_exp(hyperpoint v) {
   #endif
   #if MAXMDIM >= 4
   if(nil) return nilv::formula_exp(v);
-  if(sl2 || stretch::in()) return stretch::mstretch ? nisot::numerical_exp(v) : twist::formula_exp(v);
+  if(sl2 || stretch::in()) return stretch::mstretch ? nisot::numerical_exp(v) : unshift(twist::formula_exp(v));
   #endif
   if(gproduct) return product::direct_exp(v);
   ld d = hypot_d(GDIM, v);

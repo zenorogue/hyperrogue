@@ -2570,11 +2570,11 @@ EX namespace twist {
 
   /** @brief exponential function for both slr and Berger sphere */
 
-  EX hyperpoint formula_exp(hyperpoint vel) {
+  EX shiftpoint formula_exp(hyperpoint vel) {
     bool sp = sphere;
     ld K = sp ? 1 : -1;
 
-    if(vel[0] == 0 && vel[1] == 0 && vel[2] == 0) return C0;
+    if(vel[0] == 0 && vel[1] == 0 && vel[2] == 0) return shiftpoint(C0,0);
   
     ld len = hypot_d(3, vel);
   
@@ -2606,7 +2606,7 @@ EX namespace twist {
       ld xy = sr * sinh(k);
       ld zw = cr * sinh(k);
       
-      return hyperpoint(K*xy * cos(u+beta), K*xy * sin(u+beta), zw * cos(u) - cosh(k) * sin(u), zw * sin(u) + cosh(k)*cos(u));
+      return shiftpoint(hyperpoint(K*xy * cos(beta), K*xy * sin(beta), zw, cosh(k)), u);
       }
   
     else {
@@ -2624,7 +2624,7 @@ EX namespace twist {
       ld xy = sr * sin(k);  
       ld zw = cr * sin(k);    
       
-      return hyperpoint(K*xy * cos(u+beta), K*xy * sin(u+beta), zw * cos(u) - cos(k) * sin(u), zw * sin(u) + cos(k)*cos(u));
+      return shiftpoint(hyperpoint(K*xy * cos(u+beta), K*xy * sin(u+beta), zw * cos(u) - cos(k) * sin(u), zw * sin(u) + cos(k)*cos(u)), 0);
       }
     }
 
