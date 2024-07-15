@@ -174,6 +174,8 @@ inline shiftpoint shiftless(const hyperpoint& h, ld shift = 0) {
 struct shiftmatrix {
   transmatrix T;
   ld shift;
+  shiftmatrix() {}
+  shiftmatrix(const transmatrix& _h, ld _shift) : T(_h), shift(_shift) {}
   hyperpoint& operator [] (int i) { return T[i]; }
   const hyperpoint& operator [] (int i) const { return T[i]; }
   inline friend shiftpoint operator * (const shiftmatrix& T, const hyperpoint& h) {

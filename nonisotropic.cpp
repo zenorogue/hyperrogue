@@ -2622,6 +2622,34 @@ EX namespace twist {
     return res;
     }
 
+  EX void queueline_correct(shiftpoint h1, shiftpoint h2, color_t col, int prec, PPR prio) {
+
+    optimize_shift(h1);
+    optimize_shift(h2);
+
+    shiftmatrix T(rgpushxto0(h1.h), h1.shift);
+
+    shiftpoint h = nmul(rots::ninverse(T), h2);
+
+    hyperpoint z = inverse_exp(h);
+
+    ld bonus = 0;
+
+    int steps = ceil(hypot_d(3, z) * pow(2, prec));
+
+    for(int i=0; i<=steps; i++) {
+      shiftpoint next = formula_exp(z * i / steps);
+      curvepoint(unshift(next, bonus));
+      if(abs(next.shift - bonus) > 1) {
+        queuecurve(T, col, 0, prio);
+        bonus = next.shift; T.shift = h1.shift + bonus;
+        curvepoint(unshift(next, bonus));
+        }
+      }
+
+    queuecurve(T, col, 0, prio);
+    }
+
   /** @brief exponential function for both slr and Berger sphere */
 
   EX shiftpoint formula_exp(hyperpoint vel) {
