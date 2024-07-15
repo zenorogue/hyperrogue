@@ -2629,7 +2629,7 @@ EX namespace twist {
 
     shiftmatrix T(rgpushxto0(h1.h), h1.shift);
 
-    shiftpoint h = nmul(rots::ninverse(T), h2);
+    shiftpoint h = nmul(ninverse(T), h2);
 
     hyperpoint z = inverse_exp(h);
 
