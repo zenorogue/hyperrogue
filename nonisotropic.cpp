@@ -2465,16 +2465,16 @@ EX namespace twist {
       return M = lift_matrix(PIU(currentmap->adj(cw, i)));      
       }
     
+    shiftmatrix relative_shiftmatrix(cell *c2, cell *c1) {
+      return nmul(ninverse(recorded_matrices[c1]), recorded_matrices[c2]);
+      }
+
     transmatrix relative_matrixc(cell *c2, cell *c1, const hyperpoint& hint) override { 
       if(c1 == c2) return Id;
       if(gmatrix0.count(c2) && gmatrix0.count(c1))
         return inverse_shift(gmatrix0[c1], gmatrix0[c2]);
       for(int i=0; i<c1->type; i++) if(c1->move(i) == c2) return adj(c1, i);
-      return inverse_shift(recorded_matrices[c2], recorded_matrices[c1]);
-      }
-
-    ld get_phase_difference(cell *c2, cell *c1) {
-      return recorded_matrices.at(c2).shift - recorded_matrices.at(c1).shift;
+      return inverse_shift(recorded_matrices[c1], recorded_matrices[c2]);
       }
 
     transmatrix ray_iadj(cell *c1, int i) override {
@@ -2514,9 +2514,9 @@ EX namespace twist {
       }
     }
 
-  EX ld get_phase_difference(cell *c2, cell *c1) {
+  EX shiftmatrix relative_shiftmatrix(cell *c2, cell *c1) {
     auto hmap = dynamic_cast<hrmap_twisted*> (currentmap);
-    return hmap->get_phase_difference(c2, c1);
+    return hmap->relative_shiftmatrix(c2, c1);
     }
 
   /** reinterpret the given point of rotspace as a rotation matrix in the underlying geometry (note: this is the inverse)
