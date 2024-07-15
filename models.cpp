@@ -278,6 +278,7 @@ EX namespace models {
     if(m == mdPerspective && gproduct) return XLAT("native perspective");
     if(gproduct) return PIU(get_model_name(m));
     if(nonisotropic) {
+      if(m == mdHorocyclic && sl2) return XLAT("layered equidistant");
       if(m == mdHorocyclic && !sol) return XLAT("simple model: projection");
       if(m == mdPerspective) return XLAT("simple model: perspective");
       if(m == mdGeodesic) return XLAT("native perspective");
