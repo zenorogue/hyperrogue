@@ -201,9 +201,10 @@ transmatrix hrmap_standard::relative_matrixh(heptagon *h2, heptagon *h1, const h
   }
 
 EX shiftmatrix &ggmatrix(cell *c) {
-  shiftmatrix& t = gmatrix[c];
-  if(t[LDIM][LDIM] == 0) {
+  auto& t = gmatrix[c];
+  if(t.is_null) {
     if(sl2) return t = twist::nmul(shiftless(actual_view_transform * View), twist::relative_shiftmatrix(c, centerover));
+    t.is_null = false;
     t.T = actual_view_transform * View * calc_relative_matrix(c, centerover, C0);
     t.shift = 0;
     }

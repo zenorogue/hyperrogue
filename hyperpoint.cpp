@@ -186,6 +186,12 @@ struct shiftmatrix {
     }
   };
 
+struct shiftmatrix_or_null : shiftmatrix {
+  bool is_null;
+  shiftmatrix_or_null& operator = (const shiftmatrix& T) { ((shiftmatrix&) self) = T; is_null = false; return self; }
+  shiftmatrix_or_null() { is_null = true; }
+  };
+
 inline shiftmatrix shiftless(const transmatrix& T, ld shift = 0) {
   shiftmatrix res; res.T = T; res.shift = shift; return res;
   }

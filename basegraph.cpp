@@ -36,7 +36,7 @@ struct display_data {
   /** The view relative to the player character. */
   shiftmatrix player_matrix;
   /** On-screen coordinates for all the visible cells. */
-  map<cell*, shiftmatrix> cellmatrices, old_cellmatrices;
+  map<cell*, shiftmatrix_or_null> cellmatrices, old_cellmatrices;
   /** Position of the current map view, relative to the screen (0 to 1). */
   ld xmin, ymin, xmax, ymax;
   /** Position of the current map view, in pixels. */

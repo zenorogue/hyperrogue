@@ -2040,8 +2040,8 @@ EX int debug_tiles;
 void celldrawer::bookkeeping() {
   bool orig = false;
   if(!inmirrorcount) {
-    shiftmatrix& gm = gmatrix[c];
-    orig = (gm[LDIM][LDIM] == 0) || hdist0(tC0(gm)) >= hdist0(tC0(V));
+    auto& gm = gmatrix[c];
+    orig = gm.is_null || hdist0(tC0(gm)) >= hdist0(tC0(V));
     if(orig) gm = V;
     current_display->all_drawn_copies[c].emplace_back(V);
     }

@@ -2624,8 +2624,8 @@ EX void turn(int delta) {
   if(doall)
     for(cell *c: currentmap->allcells()) activateMonstersAt(c);
   else
-    for(map<cell*, shiftmatrix>::iterator it = gmatrix.begin(); it != gmatrix.end(); it++) 
-      activateMonstersAt(it->first);
+    for(auto& p: gmatrix)
+      activateMonstersAt(p.first);
   
   /* printf("size: gmatrix = %ld, active = %ld, monstersAt = %ld, delta = %d\n", 
     gmatrix.size(), active.size(), monstersAt.size(),
