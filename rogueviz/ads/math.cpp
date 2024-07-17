@@ -51,15 +51,7 @@ void adjust_to_zero(ads_matrix& V, pair<cell*, int>& g, ld plev) {
   g.second = 0;
   }
 
-/** by how many cycles should we shift */
-ld get_shift_cycles(ld shift) {
-  return floor(shift / TAU + .5) * TAU;
-  }
-
-/** this is uzpush(-x) */
-transmatrix chg_shift(ld x) {
-  return cspin(2, 3, x) * cspin(0, 1, x);
-  }
+using twist::chg_shift;
 
 ads_point ads_matrix::operator*(const ads_point& h) const {
   return ads_point(twist::nmul(self, h));
@@ -109,7 +101,7 @@ cross_result cross0_sim(ads_matrix hz) {
   if(uhzt[3] < 0) { t += 180*degree; uhzt = -uhzt; }
 
   tie(uhzt[2], uhzt[3]) = make_pair(uhzt[3], -uhzt[2]);
-  t += get_shift_cycles(-hz.shift-t);
+  t += twist::get_shift_cycles(-hz.shift-t);
   
   return cross_result{uhzt, t};
   }
