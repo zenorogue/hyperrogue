@@ -234,6 +234,13 @@ EX namespace sn {
     return x * d;
     }
 
+  EX void queueline_lie(shiftpoint h1, shiftpoint h2, color_t col, int prec, PPR prio) {
+    hyperpoint h = gpushxto0(h1.h) * h2.h;
+    hyperpoint z = lie_log(shiftless(h));
+    int steps = ceil(hypot_d(3, z) * pow(2, prec));
+    for(int i=0; i<=steps; i++) curvepoint(lie_exp(z * i / steps).h);
+    queuecurve(rgpushxto0(h1), col, 0, prio);
+    }
 
   struct hrmap_solnih : hrmap {
     hrmap *binary_map;
