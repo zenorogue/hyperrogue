@@ -2573,6 +2573,10 @@ EX namespace twist {
     return floor(shift / TAU + .5) * TAU;
     }
 
+  EX ld get_half_shift_cycles(ld shift) {
+    return floor(shift / M_PI + .5) * M_PI;
+    }
+
   EX transmatrix chg_shift(ld x) {
     return cspin(2, 3, x) * cspin(0, 1, x);
     }
@@ -2580,7 +2584,7 @@ EX namespace twist {
   /** multiply a SLR-shiftmatrix by a SLR-shiftpoint */
   EX shiftpoint nmul(const shiftmatrix& T, shiftpoint h) {
     optimize_shift(h);
-    ld sh = get_shift_cycles(h.shift);
+    ld sh = get_half_shift_cycles(h.shift);
     h.shift -= sh;
     auto res0 = T;
     optimize_shift(res0);
@@ -2597,7 +2601,7 @@ EX namespace twist {
   /** multiply a SLR-shiftmatrix by a SLR-shiftmatrix */
   EX shiftmatrix nmul(const shiftmatrix& T, shiftmatrix h) {
     optimize_shift(h);
-    ld sh = get_shift_cycles(h.shift);
+    ld sh = get_half_shift_cycles(h.shift);
     h.shift -= sh;
 
     auto res0 = T;
