@@ -3513,7 +3513,7 @@ EX hyperpoint lie_log(const shiftpoint h1) {
   #if MAXMDIM >= 4
   else if(nil) {
     h[3] = 0;
-    h[2] -= h[0] * h[1] / 2;
+    h[2] -= nilv::model_used * nilv::sym_to_heis_bonus(h);
     }
   else if(sol && !nih) {
     h[3] = 0;
