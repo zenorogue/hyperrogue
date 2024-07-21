@@ -621,11 +621,16 @@ bool drawVertex(const shiftmatrix &V, cell *c, shmup::monster *m) {
       
       if(callhandlers(false, hooks_alt_edges, ei, false)) ;
 
-      else if(pmodel && !fat_edges) {
+      else if(sl2)
+        rots::queueline_correct(h1, h2, col, 2 + vid.linequality, PPR::STRUCT0);
+
+      else if(sol && !fat_edges)
+        sn::queueline_lie(h1, h2, col, 2 + vid.linequality, PPR::STRUCT0);
+
+      else if(pmodel && !fat_edges && !sol) {
         queueline(h1, h2, col, 2 + vid.linequality).prio = PPR::STRUCT0;
         }
       else {
-      
         cell *center = multidraw ? c : centerover;
       
         if(!multidraw && ei->orig && ei->orig != center && celldistance(ei->orig, center) > 3) 
