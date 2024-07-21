@@ -691,7 +691,7 @@ bool drawVertex(const shiftmatrix &V, cell *c, shmup::monster *m) {
       string s;
       ld w = hi_weight;
       if(vizflags & RV_INVERSE_WEIGHT) w = 1/w;
-      if(showlabels && hi_weight) s = vd.name + " : " + fts(w);
+      if(showlabels && show_edges && hi_weight) s = vd.name + " : " + fts(w);
       else if(showlabels) s = vd.name;
       else if(hi_weight) s = fts(w);
       queuestr(V2, labelscale, s, forecolor, (svg::in || ISWEB) ? 0 : 1);
