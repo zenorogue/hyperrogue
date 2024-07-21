@@ -2030,6 +2030,7 @@ void dqi_poly::draw() {
   if(pmodel == mdCentralInversion) can_have_inverse = true;
 
   if(among(pmodel, mdHemisphere, mdHyperboloid) && sphere && pconf.small_hyperboloid) can_have_inverse = true;
+  if(GDIM == 3) can_have_inverse = false;
     
   if(can_have_inverse && !(poly_flags & POLY_ISSIDE)) {
   
