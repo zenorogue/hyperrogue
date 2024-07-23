@@ -766,10 +766,13 @@ EX color_t kind_outline(eItem it) {
     return OUTLINE_OTHER;
   }
 
+/** should objects fly slightly up and down in product/twisted product geometries */
+EX bool bobbing = true;
+
 EX shiftmatrix face_the_player(const shiftmatrix V) {
   if(GDIM == 2) return V;
-  if(mproduct) return orthogonal_move(V, cos(ptick(750)) * cgi.plevel / 16);
-  if(mhybrid) return V * zpush(cos(ptick(750)) * cgi.plevel / 16);
+  if(mproduct) return bobbing ? orthogonal_move(V, cos(ptick(750)) * cgi.plevel / 16) : V;
+  if(mhybrid) return bobbing ? V * zpush(cos(ptick(750)) * cgi.plevel / 16) : V;
   transmatrix dummy; /* used only in prod anyways */
   if(embedded_plane && !cgi.emb->is_same_in_same()) return V;
   if(nonisotropic) return shiftless(spin_towards(unshift(V), dummy, C0, 2, 0));
