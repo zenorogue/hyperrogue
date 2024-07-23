@@ -159,6 +159,8 @@ void menu() {
     optimize_sag_loglik_auto();
     });
 
+  dialog::addBoolItem_action(XLAT("visualize (sub)cells"), visualize_subcells_on, 'v');
+
   dialog::display();
   }
 
@@ -322,6 +324,7 @@ void init() {
 
   rv_hook(rogueviz::hooks_close, 100, clear);
   rv_hook(shmup::hooks_turn, 100, turn);
+  rv_hook(hooks_drawcell, 100, visualize_subcells);
   rv_hook(rogueviz::hooks_rvmenu, 100, [] {
     dialog::addItem("SAG settings", 's');
     dialog::add_action_push(menu);

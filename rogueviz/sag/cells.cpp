@@ -603,6 +603,7 @@ int cell_read_args() {
     dijkstra_tile = true; dijkstra_maxedge = 1;
     }
   else if(argis("-sag_gdist_save")) {
+    init_cells();
     shift();
     sagdist.save(args());
     }

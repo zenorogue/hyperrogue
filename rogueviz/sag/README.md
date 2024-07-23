@@ -41,10 +41,29 @@ The rest of this README details how to use SAG.
 Cells
 -----
 
-Not yet documented
+If nothing is declared, it just uses all the visible cells (or all cells on closed manifolds),
+and the distances are measured in tiles.
+
+You can change this as follows:
+
+* `-sag-creq x` -- use x tiles which are geometrically closest to the center (or a bit more in case of ties)
+
+* `-sag_gdist x` -- take geometric distances instead, 1 absolute units = x units
+  (this will be rounded to integer because of the limited precision of some methods)
+
+* `-sag_gdist_dijkstra m` -- compute actual geometric distances if <= m steps, use Dijkstra to compute larger distances
+  (used in geometries like Solv where the distance computation does not always work for large distances)
+
+* `-sag_gdist_save filename` -- save the distances to a file
+  (loading which might be faster than recomputing)
+
+* `-sag_gdist_load filename` -- load the distances from a file
 
 Graph
 -----
 
-Just use `-sag-weighted` to read a weighted graph (in format `node1;node2;weight`), 
-or `-sag-unweighted` to read an unweighted graph (in format `node1 node2`).
+Just use `-sag-weighted` to read a weighted graph (in format `node1;node2;weight`), or `-sag-unweighted` to read an unweighted graph (in format `node1 node2`).
+
+You can also use `-sag-edgepower a b` to use pow(w, a) * b instead of weight w listed in the file (enter this before -sag-weighted).
+
+	See the cpp files for other options available.
