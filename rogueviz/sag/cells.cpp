@@ -195,6 +195,8 @@ void compute_dists() {
     visited.push_back(id);
     };
 
+  if(N == 0) return;
+
   visit(0, Id);
   for(int i=0; i<isize(visited); i++) {
     cell *c0 = sagcells[visited[i]].first;
@@ -513,7 +515,7 @@ void init_cells() {
 void init_snake_if_needed() {
   if(!(state & SS_NEED_SNAKE)) return;
   state &=~ SS_NEED_SNAKE;
-  init_snake(2 * isize(sagid));
+  init_snake(2 * isize(vdata));
   compute_dists();
   }
 

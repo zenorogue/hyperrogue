@@ -199,7 +199,6 @@ void after_data() {
 /** load all the edges */
 void read_weighted(const char *fname) {
 
-  println(hlog, "read_weighted called");
   if(state & SS_DATA) return;
   state |= SS_WEIGHTED;
   init_cells();

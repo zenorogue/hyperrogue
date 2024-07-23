@@ -351,7 +351,84 @@ void clear() {
   state = 0;
   }
 
-int ah = addHook(hooks_args, 100, readArgs) + addHook(hooks_clearmemory, 100, clear);
+string cname() {
+  if(euclid) return "coord-6.txt";
+  if(PURE) return "coord-7.txt";
+  return "coord-67.txt";
+  }
+
+int ah = addHook(hooks_args, 100, readArgs) + addHook(hooks_clearmemory, 100, clear)
+  + addHook_rvslides(120, [] (string s, vector<tour::slide>& v) {
+    if(s != "data") return;
+    using namespace pres;
+    string sagf = "SAG/";
+    v.push_back(
+      slide{sagf+"Roguelikes", 63, LEGAL::UNLIMITED | QUICKGEO,
+        "A visualization of roguelikes, based on discussion on /r/reddit. "
+        "See: http://www.roguetemple.com/z/hyper/reddit.php",
+        roguevizslide('0', [] () {
+          rogueviz::dftcolor = 0x282828FF;
+
+          rogueviz::showlabels = true;
+          part(rogueviz::default_edgetype.color, 0) = 181;
+          rogueviz::sag::edgepower = 1;
+          rogueviz::sag::edgemul = 1;
+
+          gmatrix.clear();
+          drawthemap();
+          gmatrix0 = gmatrix;
+
+          slide_backup(rogueviz::sag::legacy, true);
+          rogueviz::sag::read_weighted(RVPATH "sag/roguelikes/edges.csv");
+          rogueviz::readcolor(RVPATH "sag/roguelikes/color.csv");
+          rogueviz::sag::load_sag_solution(RVPATH "sag/roguelikes/" + cname());
+          })
+        }
+      );
+    v.push_back(slide  {sagf+"Programming languages of GitHub", 64, LEGAL::UNLIMITED | QUICKGEO,
+    "A visualization of programming languages.",
+    roguevizslide('0', [] () {
+      rogueviz::dftcolor = 0x282828FF;
+
+      rogueviz::showlabels = true;
+      part(rogueviz::default_edgetype.color, 0) = 128;
+      rogueviz::sag::edgepower = .4;
+      rogueviz::sag::edgemul = .02;
+
+      gmatrix.clear();
+      drawthemap();
+      gmatrix0 = gmatrix;
+
+      slide_backup(rogueviz::sag::legacy, true);
+      rogueviz::sag::read_weighted(RVPATH "sag/lang/edges.csv");
+      rogueviz::readcolor(RVPATH "sag/lang/color.csv");
+      rogueviz::sag::load_sag_solution(RVPATH "sag/lang/" + cname());
+      if(euclid) rogueviz::legend.clear();
+      })
+    });
+
+    v.push_back(slide {sagf+"Boardgames", 62, LEGAL::UNLIMITED | QUICKGEO,
+        "A visualization of board games, based on discussions on Reddit.",
+    roguevizslide('0', [] () {
+      rogueviz::dftcolor = 0x282828FF;
+
+      rogueviz::showlabels = true;
+      part(rogueviz::default_edgetype.color, 0) = 157;
+      rogueviz::sag::edgepower = 1;
+      rogueviz::sag::edgemul = 1;
+
+      gmatrix.clear();
+      drawthemap();
+      gmatrix0 = gmatrix;
+
+      slide_backup(rogueviz::sag::legacy, true);
+      rogueviz::sag::read_weighted(RVPATH "sag/boardgames/edges.csv");
+      rogueviz::readcolor(RVPATH "sag/boardgames/color.csv");
+      rogueviz::sag::load_sag_solution(RVPATH "sag/boardgames/" + cname());
+      })
+        });
+
+    });
 
 EX }
 
