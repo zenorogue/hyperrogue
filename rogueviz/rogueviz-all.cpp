@@ -93,6 +93,7 @@
 // hidden dependencies: rogueviz/nilrider/
 // hidden dependencies: rogueviz/dhrg/
 // hidden dependencies: rogueviz/ads/
+// hidden dependencies: rogueviz/sag/
 
 //#endif
 
