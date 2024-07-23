@@ -3,6 +3,8 @@
 /* basics */
 #include "rogueviz.cpp"
 #include "presentation.cpp"
+#include "statshot.cpp"
+
 #if CAP_MODELS
 #include "objmodels.cpp"
 #endif
