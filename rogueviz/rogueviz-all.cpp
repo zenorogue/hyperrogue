@@ -22,7 +22,6 @@
 #include "janko.cpp"
 #include "qtm.cpp"
 #include "rewriting.cpp"
-#include "sag.cpp"
 #include "collatz.cpp"
 #include "tree.cpp"
 #include "fullnet.cpp"
@@ -84,6 +83,9 @@
 #include "som/tests.cpp"
 #include "som/voronoi.cpp"
 #include "som/measures.cpp"
+
+#include "sag/sag.cpp"
+
 
 // the following comments are read by mymake so that it knows that the files include other files there:
 // hidden dependencies: rogueviz/nilrider/
