@@ -421,6 +421,11 @@ void init_cell_request() {
   println(hlog, "generating on cell request");
   find_cells();
 
+  if(isize(subcell_points) == 1) {
+    compute_dists();
+    return;
+    }
+
   int SN = isize(sagcells);
   sagdist.init(SN, 0);
 
@@ -575,7 +580,7 @@ bool visualize_subcells(cell *c, const shiftmatrix& V) {
     if(!p) continue;
     queuepolyat(V * rgpushxto0(subcell_points[i]), cgi.shSnowball, 0x80FF80FF, PPR::FLOORb);
 
-    for(auto nei: neighbors[*p]) if(nei<*p) {
+    if(sagsubcell_inv.size()) for(auto nei: neighbors[*p]) if(nei<*p) {
       queueline(V * subcell_points[i], V * sagsubcell_inv[*p] * sagsubcell_point[nei], 0x8000FF, 3).prio = PPR::FLOORa;
       }
     }
