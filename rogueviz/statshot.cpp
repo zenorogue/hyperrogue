@@ -1,5 +1,6 @@
 #include "rogueviz.h"
 
+#if CAP_ANIMATIONS
 namespace rogueviz {
 
 namespace statshot {
@@ -69,3 +70,4 @@ int a = arg::add3("-label-video", [] {
   });
 
 }}
+#endif
