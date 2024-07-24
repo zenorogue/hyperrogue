@@ -2,8 +2,6 @@
 // Copyright (C) 2011-2024 Zeno Rogue, see 'hyper.cpp' for details
 
 #include "../rogueviz.h"
-#include <sys/mman.h>
-#include <fcntl.h>
 
 namespace rogueviz {
 namespace sag {
