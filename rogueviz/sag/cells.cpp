@@ -127,7 +127,11 @@ struct sagdist_t {
     fd = open(fname.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0666);
     if(write(fd, &N, 8) < 8) throw hr_exception("write error");
     size_t size =  N*N*sizeof(distance);
+    #ifdef LINUX
     println(hlog, "size is ", hr::format("%zd", size));
+    #else
+    println(hlog, "size is ", hr::format("%lld", (long long) size));
+    #endif
     char *p = (char*) tab;
     while(size) {
       size_t written = write(fd, p, size);
