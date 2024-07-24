@@ -273,7 +273,7 @@ void read_unweighted(const char *fname) {
   }
   
 void read_hubs(const string& fname) {
-  if(!(state && SS_DATA)) throw hr_exception("read_hubs with no data");
+  if(!(state & SS_DATA)) throw hr_exception("read_hubs with no data");
   hubval.resize(isize(vdata), -1);
   fhstream f(fname, "rt");
   if(!f.f) { printf("Failed to open hub file: %s\n", fname.c_str()); exit(1); }
