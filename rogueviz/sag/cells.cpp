@@ -79,7 +79,7 @@ struct sagdist_t {
     clear();
     fd = open(fname.c_str(), O_RDONLY | O_LARGEFILE);
     if(fd == -1) throw hr_exception("open failed in map");
-    read(fd, &N, 8);
+    if(read(fd, &N, 8) < 8) throw hr_exception("file error");
     tabmap = (distance*) mmap(nullptr, N*N*sizeof(distance)+8, PROT_READ, MAP_SHARED, fd, 0);
 
 
@@ -117,7 +117,7 @@ struct sagdist_t {
 
   void save(string fname) {
     fd = open(fname.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0666);
-    write(fd, &N, 8);
+    if(write(fd, &N, 8) < 8) throw hr_exception("write error");
     size_t size =  N*N*sizeof(distance);
     println(hlog, "size is ", hr::format("%zd", size));
     char *p = (char*) tab;

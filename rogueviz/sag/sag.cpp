@@ -41,7 +41,7 @@ void iterate() {
   if(t < (sag_ittime+1) / 2) ipturn *= 2;
   else if(t > sag_ittime * 2) ipturn /= 2;
   else ipturn = ipturn * sag_ittime / t;
-  print(hlog, format("it %12Ld temp %6.4f [2:%8.6f,10:%8.6f,50:%8.6f] cost = %f\n",
+  print(hlog, format("it %12lld temp %6.4f [2:%8.6f,10:%8.6f,50:%8.6f] cost = %f\n",
     numiter, double(sag::temperature), 
     (double) exp(-2 * exp(-sag::temperature)),
     (double) exp(-10 * exp(-sag::temperature)),

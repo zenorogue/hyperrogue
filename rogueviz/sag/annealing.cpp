@@ -144,7 +144,7 @@ void dofullsa(ld satime) {
     
     if(t2 - tl > view_each * .98) {
       tl = t2;
-      println(hlog, format("it %12Ld temp %6.4f [1/e at %13.6f] cost = %f ",
+      println(hlog, format("it %12lld temp %6.4f [1/e at %13.6f] cost = %f ",
         numiter, double(sag::temperature), (double) exp(sag::temperature),
         double(sag::cost)));
       }
@@ -205,7 +205,7 @@ void dofullsa_iterations(long long saiter) {
 
     if(cpct > lpct && output_fullsa) {
       lpct = cpct;
-      println(hlog, format("it %12Ld ratio %6.3f temp %8.4f step %9.3g cost %9.2f R=%8.4f T=%8.4f",
+      println(hlog, format("it %12lld ratio %6.3f temp %8.4f step %9.3g cost %9.2f R=%8.4f T=%8.4f",
         numiter, last_ratio, double(sag::temperature), (double) exp(sag::temperature), cost, lgsag.R, lgsag.T));
       }
 

@@ -173,7 +173,7 @@ void load_sag_solution(const string& fname) {
 void load_sag_solution_basic(const string& fname) {
   if(!(state & SS_DATA)) throw hr_exception("load_sag_solution_basic with no data");
   FILE *f = fopen(fname.c_str(), "rt");
-  for(auto& i: sagid) fscanf(f, "%d", &i);
+  for(auto& i: sagid) if(fscanf(f, "%d", &i) < 1) throw hr_exception("read error in load_sag_solution_basic");
   fclose(f);
   println(hlog, "loaded sagid = ", sagid);
 
