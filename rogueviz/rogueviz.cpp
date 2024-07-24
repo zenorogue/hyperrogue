@@ -869,6 +869,7 @@ void init(flagtype _vizflags) {
     }
   #endif
 
+  ccolor::rwalls = 0;
 #if !ISWEB
   mapeditor::drawplayer = false;
   stop_game();
