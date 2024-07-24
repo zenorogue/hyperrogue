@@ -2,7 +2,9 @@
 // Copyright (C) 2011-24 Zeno Rogue, see 'hyper.cpp' for details
 
 #include "../rogueviz.h"
+#ifdef LINUX
 #include <sys/mman.h>
+#endif
 #include <fcntl.h>
 
 namespace rogueviz {
@@ -75,6 +77,7 @@ struct sagdist_t {
     for(size_t i=0; i<N*N; i++) tab[i] = val;
     }
 
+  #ifdef LINUX
   void map(string fname) {
     clear();
     fd = open(fname.c_str(), O_RDONLY | O_LARGEFILE);
@@ -91,6 +94,7 @@ struct sagdist_t {
     tab = (distance*) (((char*)tabmap) + 8);
     println(hlog, "test: ", test());
     }
+  #endif
 
   void load_old(string fname) {
     vector<vector<distance>> old;
@@ -103,8 +107,12 @@ struct sagdist_t {
     }
 
   void load(string fname) {
+    #ifdef LINUX
     if(format == 1) map(fname);
     if(format == 2) load_old(fname);
+    #else
+    load_old(fname);
+    #endif
     throw hr_exception("sagdist format unknown");
     }
 
