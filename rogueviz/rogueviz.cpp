@@ -622,7 +622,7 @@ bool drawVertex(const shiftmatrix &V, cell *c, shmup::monster *m) {
       if(callhandlers(false, hooks_alt_edges, ei, false)) ;
 
       else if(sl2)
-        rots::queueline_correct(h1, h2, col, 2 + vid.linequality, PPR::STRUCT0);
+        twist::queueline_correct(h1, h2, col, 2 + vid.linequality, PPR::STRUCT0);
 
       else if(sol && !fat_edges)
         sn::queueline_lie(h1, h2, col, 2 + vid.linequality, PPR::STRUCT0);
