@@ -1,6 +1,6 @@
 #include "rogueviz.h"
 
-#if CAP_ANIMATIONS
+#if CAP_VIDEO
 namespace rogueviz {
 
 namespace statshot {
