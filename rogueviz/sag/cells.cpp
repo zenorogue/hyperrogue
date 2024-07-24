@@ -66,7 +66,7 @@ struct sagdist_t {
   distance* begin() { return tab; }
   distance* end() { return tab+N*N; }
 
-  sagdist_t() { tab = nullptr; fd = 0; format = 2; }
+  sagdist_t() { tab = nullptr; fd = 0; format = 1; }
 
   distance* operator [] (int y) { return tab + N * y; }
 
@@ -109,11 +109,11 @@ struct sagdist_t {
   void load(string fname) {
     #ifdef LINUX
     if(format == 1) map(fname);
-    if(format == 2) load_old(fname);
+    else if(format == 2) load_old(fname);
+    else throw hr_exception("sagdist format unknown");
     #else
     load_old(fname);
     #endif
-    throw hr_exception("sagdist format unknown");
     }
 
   vector<int> test() {
@@ -139,8 +139,11 @@ struct sagdist_t {
     }
 
   void clear() {
+    #ifdef LINUX
     if(fd) { munmap(tabmap, N*N*sizeof(distance)+8); ::close(fd); }
-    else delete[] tab;
+    else 
+    #endif
+    delete[] tab;
     tab = nullptr; fd = 0;
     }
 
@@ -217,7 +220,7 @@ void compute_dists() {
     }
   
   if(distance_file != "") {
-    sagdist.map(distance_file);
+    sagdist.load(distance_file);
     }
   else if(gdist_prec && dijkstra_maxedge) {
     sagdist.init(N, N);
@@ -498,7 +501,7 @@ void init_cells() {
   if(cell_request) {
     if(distance_file != "") {
       println(hlog, "loading graph ", distance_file);
-      sagdist.map(distance_file);
+      sagdist.load(distance_file);
       if(distance_only) {
         sagcells.resize(sagdist.N, subcell{nullptr, 0});
         }
