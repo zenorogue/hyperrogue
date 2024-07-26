@@ -182,7 +182,7 @@ void optimize_sag_loglik_logistic() {
 
 void optimize_sag_loglik_match() {
   if(state &~ SS_WEIGHTED) return;
-  lsq::leastsquare_solver<2> lsqs;
+  stats::leastsquare_solver<2> lsqs;
 
   for(auto& ei: sagedges) {
     ld y = sagdist[sagid[ei.i]][sagid[ei.j]];

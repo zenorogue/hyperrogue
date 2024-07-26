@@ -1,9 +1,12 @@
+#ifndef _STATISTICS_CPP_
+#define _STATISTICS_CPP_
+
 #include <vector>
 #include <cstdio>
 #include <cmath>
 #include <array>
 
-namespace lsq {
+namespace stats {
 
 using namespace std;
 
@@ -98,4 +101,41 @@ template<size_t N> struct leastsquare_solver {
     }
   };
 
+template<size_t dim1, size_t dim2> double small_kendall(const vector<pair<int, int>>& allp) {
+  int maxo = 0, maxe = 0;
+  for(const auto& a: allp) maxo = max(maxo, a.first), maxe = max(maxe, a.second);
+  maxo++; maxe++;
+
+  if(maxo >= dim1 || maxe >= dim2)
+    throw hr::hr_exception("small_kendall limit exceeded");
+  int cnt[dim1][dim2];
+  for(int a=0; a<maxo; a++)
+  for(int b=0; b<maxe; b++)
+    cnt[a][b] = 0;
+  for(const auto& a: allp) cnt[a.first][a.second]++;
+
+  // int i1 = 0, i2 = 0;
+  int K = hr::isize(allp);
+  // allp.emplace_back(maxo, maxe);
+  vector<int> counts(maxe, 0);
+  vector<int> totals(maxe);
+  double tau = 0;
+  for(int i=0; i<maxo; i++) {
+    totals[0] = 0;
+    for(int ii=1; ii<maxe; ii++)
+      totals[0] -= counts[ii];
+    for(int ii=1; ii<maxe; ii++)
+      totals[ii] = totals[ii-1] + counts[ii] + counts[ii-1];
+
+    for(int b=0; b<maxe; b++) {
+      tau += totals[b] * 1. * cnt[i][b];
+      counts[b] += cnt[i][b];
+      }
+    }
+  double par = (K * (K-1.) / 2);
+  return tau / par;
+  }
+
+
 }
+#endif

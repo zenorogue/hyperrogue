@@ -2,46 +2,10 @@
 // Copyright (C) 2011-2022 Tehora and Zeno Rogue, see 'hyper.cpp' for details
 
 #include "kohonen.h"
+#include "../statistics.cpp"
 
 namespace rogueviz {
 namespace measures {
-
-double kendall(const vector<pair<int, int>>& allp) {
-  int maxo = 0, maxe = 0;
-  for(const auto& a: allp) maxo = max(maxo, a.first), maxe = max(maxe, a.second);
-  maxo++; maxe++;
-  
-  if(maxo >= 256 || maxe >= 256) {
-    println(hlog, "more than 256!\n");
-    exit(1);
-    }
-  int cnt[256][256];
-  for(int a=0; a<maxo; a++)
-  for(int b=0; b<maxe; b++)
-    cnt[a][b] = 0;
-  for(const auto& a: allp) cnt[a.first][a.second]++;
-
-  // int i1 = 0, i2 = 0;
-  int K = isize(allp);
-  // allp.emplace_back(maxo, maxe);
-  vector<int> counts(maxe, 0);
-  vector<int> totals(maxe);
-  double tau = 0;
-  for(int i=0; i<maxo; i++) {
-    totals[0] = 0;
-    for(int ii=1; ii<maxe; ii++)
-      totals[0] -= counts[ii];
-    for(int ii=1; ii<maxe; ii++)
-      totals[ii] = totals[ii-1] + counts[ii] + counts[ii-1];
-    
-    for(int b=0; b<maxe; b++) {
-      tau += totals[b] * 1. * cnt[i][b];
-      counts[b] += cnt[i][b];
-      }
-    }
-  ld par = (K * (K-1.) / 2);
-  return tau / par;
-  }
 
 vector<pair<int, int>> recreate_topology(const vector<int>& mapp, const vector<pair<int, int> >& edges) {
 
@@ -117,7 +81,7 @@ ld evaluate_measure(manidata& emb, manidata& orig, vector<int>& mapp, vector<pai
     for(int i=0; i<No; i++) if(mapp[i] != -1)
     for(int j=0; j<i; j++) if(mapp[j] != -1)
       allp.emplace_back(diso[i][j], dise[mapp[i]][mapp[j]]);
-    energy = kendall(allp);
+    energy = stats::small_kendall<256, 256>(allp);
     }
   else if(k == 3) {
     vector<bool> empty(Ne, true);
