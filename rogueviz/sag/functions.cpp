@@ -4,7 +4,7 @@
 #include "../rogueviz.h"
 
 #include "../dhrg/dhrg.h"
-#include "../leastsquare.cpp"
+#include "../statistics.cpp"
 
 namespace rogueviz {
 namespace sag {
