@@ -852,7 +852,7 @@ EX namespace tactic {
     int nlm = nl;
     int ofs = dialog::infix != "" ? 0 : dialog::handlePage(nl, nlm, (nl+1)/2);
             
-    int vf = nlm ? min((vid.yres-64-vid.fsize) / nlm, vid.xres/40) : vid.xres/40;
+    int vf = nlm ? min((vid.yres-4*vid.fsize) / (nlm+1), vid.xres/40) : vid.xres/40;
     
     int xr = vid.xres / 64;
     
@@ -866,7 +866,7 @@ EX namespace tactic {
       int i1 = i + ofs;
       eLand l = landlist[i1];
 
-      int i0 = 56 + i * vf;
+      int i0 = 2 * vid.fsize + (i+1) * vf;
       color_t col;
       
       int ch = chances(l);
