@@ -220,7 +220,7 @@ void ensure_geometry(eGeometryClass c) {
 
   if(specialland != laCanvas) {   
     canvas_default_wall = waInvisibleFloor;
-    ccolor::set_plain(0xFFFFFF);
+    ccolor::set_plain_nowall(0xFFFFFF);
     enable_canvas();
     }
   start_game();

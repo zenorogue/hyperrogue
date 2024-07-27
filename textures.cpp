@@ -1336,7 +1336,7 @@ EX void showMenu() {
       else {
         stop_game();
         enable_canvas();
-        ccolor::set_plain(0xFFFFFF);
+        ccolor::set_plain_nowall(0xFFFFFF);
         start_game();
         }
       });

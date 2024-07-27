@@ -1570,7 +1570,7 @@ EX namespace mapeditor {
         stop_game();
         enable_canvas();
         canvas_default_wall = waInvisibleFloor;
-        ccolor::set_plain(0xFFFFFF);
+        ccolor::set_plain_nowall(0xFFFFFF);
         dtcolor = (forecolor << 8) | 255;
         drawplayer = false;
         vid.use_smart_range = 2;

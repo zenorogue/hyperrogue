@@ -1030,7 +1030,7 @@ EX void showStartMenu() {
       stop_game();
       enable_canvas();
       cheater = true;
-      ccolor::set_plain(0xFFFFFF);
+      ccolor::set_plain_nowall(0xFFFFFF);
       mapeditor::drawplayer = false;
       start_game();
       clearMessages();
