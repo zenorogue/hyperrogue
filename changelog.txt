@@ -5355,3 +5355,22 @@ Improvements to the map/shape/draw editor:
 - font selection
 - configurable colors in Prairie/Mountain/Ivory/Freefall/Yendorian stripes
 - custom land list mode now can configure PTM runs/multipliers
+
+2024-07-27 23:28 Update 13.0t
+Mostly bug fixes:
+- fixes to custom land list PTM settings saving
+- PTM (etc) scores saved in other modes were incorrectly loaded as standard mode
+- PTM title line no longer obscures the stats of the top land in high resolution
+- do not flip the player when having Orb of the Frog
+- if you have Orb of Safety, your game will be saved (even if you have 0 treasure)
+- setting custom land difficulty to 0 no longer crashes the game
+- improved the map editor with 'centered menu' option and narrower screens
+- improved the performance of map editor (especially with 'snap to the grid' option)
+- pressing 0..9 keys now changes the radius in map editor
+- fixed some cases when 'empty canvas' had random walls
+- binary-like tilings (including Solv) work again
+- some SL2 fixes and improvements
+- saving PNGn should no longer crash the game
+
+- changed the default color in drawing tool to red
+- also the parser accepts e.g. `lands_at(25)` to give the number of lands at 25 treasures
