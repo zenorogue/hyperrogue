@@ -181,7 +181,9 @@ EX int hrand_monster_in(eLand l, int x) {
     if(t > 500) x = int(((long long)(x)) * t / 500);
     }
   if(use_custom_land_list) {
-    x = x * 100 / custom_land_difficulty[l];
+    auto diff = custom_land_difficulty[l];
+    if(!diff) return 1000000000;
+    x = x * 100 / diff;
     if(x == 0) x = 1;
     }
   return hrand(x);
