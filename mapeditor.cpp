@@ -161,15 +161,26 @@ EX namespace mapeditor {
   
   EX void clear_dtshapes() { dtshapes.clear(); }
   
+  /** cache the result of full_mouseh */
+  EX shiftpoint fmh;
+
+  EX bool fmh_known;
+
   EX shiftpoint full_mouseh() {
-    #if CAP_EDIT
-    if(GDIM == 3) return find_mouseh3();
-    if(snapping) return mouse_snap();
-    #endif
-    return mouseh;
+    if(!fmh_known) {
+      fmh_known = true;
+      #if CAP_EDIT
+      if(GDIM == 3) fmh = find_mouseh3();
+      else if(snapping) fmh = mouse_snap();
+      else
+      #endif
+      fmh = mouseh;
+      }
+    return fmh;
     }
 
   EX void draw_dtshapes() {
+    fmh_known = false;
 #if CAP_EDIT
     for(auto& shp: dtshapes) {
       if(shp == nullptr) continue;
@@ -192,7 +203,7 @@ EX namespace mapeditor {
         torus_rug_jump(moh, lstart);
         queueline(lstart, moh, dtcolor, 4 + vid.linequality, PPR::LINE);
         }
-      else if(!holdmouse) {
+      else if(!holdmouse && !mouseout()) {
         shiftmatrix T = rgpushxto0(moh);
         queueline(T * xpush0(-.1), T * xpush0(.1), dtcolor);
         queueline(T * ypush0(-.1), T * ypush0(.1), dtcolor);
@@ -2151,7 +2162,7 @@ EX namespace mapeditor {
     queueline(drawtrans*ccenter, drawtrans*coldcenter, gridcolor, 4 + vid.linequality);
 
     if(snapping && !mouseout())
-      queuestr(mouse_snap(), 10, "x", 0xC040C0);
+      queuestr(fmh, 10, "x", 0xC040C0);
     }
 
   static ld brush_sizes[10] = {
