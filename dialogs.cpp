@@ -719,6 +719,10 @@ EX namespace dialog {
       dwidth = vid.xres - vid.yres;
       dcenter = vid.xres - dwidth / 2;
       }
+    else if(cmode & sm::DIALOG_OFFMAP) {
+      dwidth = vid.xres / 3;
+      dcenter = vid.xres * 5 / 6;
+      }
     
     measure();
     

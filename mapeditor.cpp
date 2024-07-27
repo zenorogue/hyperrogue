@@ -1615,7 +1615,7 @@ EX namespace mapeditor {
 
   EX void showMapEditor() {
     cmode = sm::MAP | sm::PANNING;
-    if(show_menu) cmode |= sm::SIDE;
+    if(show_menu) cmode |= sm::DIALOG_OFFMAP;
     if(building_mode) {
       if(anyshiftclick) cmode |= sm::EDIT_INSIDE_WALLS;
       else cmode |= sm::EDIT_BEFORE_WALLS;

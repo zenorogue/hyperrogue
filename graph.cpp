@@ -5574,6 +5574,8 @@ EX void calcparam() {
     if(tour::on && (tour::slides[tour::currentslide].flags & tour::SIDESCREEN) && ok)
       current_display->sidescreen = true;
 #endif
+    if((cmode & sm::DIALOG_OFFMAP) && !centered_menus && vid.xres > vid.yres * 11/10)
+      current_display->sidescreen = true;
 
     if(current_display->sidescreen) cd->xcenter = vid.yres/2;
     }
@@ -5863,7 +5865,7 @@ namespace sm {
   static constexpr int CENTER = 1024;
   static constexpr int ZOOMABLE = 4096;
   static constexpr int TORUSCONFIG = 8192;
-  static constexpr int MAYDARK = 16384;
+  static constexpr int MAYDARK = 16384; // use together with SIDE; if the screen is not wide or centered_menus is set, it will disable SIDE and instead darken the screen
   static constexpr int DIALOG_STRICT_X = 32768; // do not interpret dialog clicks outside of the X region
   static constexpr int EXPANSION = (1<<16);
   static constexpr int HEXEDIT = (1<<17);
@@ -5878,6 +5880,7 @@ namespace sm {
   static constexpr int EDIT_INSIDE_WALLS = (1<<26); // mouseover targets inside walls
   static constexpr int DIALOG_WIDE = (1<<27); // make dialogs wide
   static constexpr int MOUSEAIM = (1<<28); // mouse aiming active here
+  static constexpr int DIALOG_OFFMAP = (1<<29); // try hard to keep dialogs off the map
   }
 #endif
 
