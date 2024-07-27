@@ -2218,14 +2218,12 @@ EX namespace mapeditor {
 
   EX shiftpoint mouse_snap() {
     ld xdist = HUGE_VAL;
-    shiftpoint resh;
+    shiftpoint resh = mouseh;
     auto snap_to = [&] (shiftpoint h) {
       ld dist = hdist(h, mouseh);
       if(dist < xdist) xdist = dist, resh = h;
       };
-    for(auto& p: gmatrix) {
-      cell *c = p.first;
-      auto& T = p.second;
+    auto snap_to_tile_matrix = [&] (cell *c, const shiftmatrix& T) {
       snap_to(T * C0);
       for(int i=0; i<c->type; i++) {
         hyperpoint h1 = get_corner_position(c, i);
@@ -2233,7 +2231,13 @@ EX namespace mapeditor {
         snap_to(T * h1);
         snap_to(T * mid(h1, h2));
         }
-      }
+      };
+    auto snap_to_tile = [&] (cell *c) {
+      auto p = at_or_null(gmatrix, c);
+      if(!p) return;
+      snap_to_tile_matrix(c, *p);
+      };
+    snap_to_tile(mouseover);
     return resh;
     }
 
