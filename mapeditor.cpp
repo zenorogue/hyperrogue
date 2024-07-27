@@ -24,7 +24,7 @@ EX namespace mapeditor {
   #endif
   
   EX color_t dtfill = 0;
-  EX color_t dtcolor = 0x000000FF;
+  EX color_t dtcolor = 0xFF0000FF;
   EX ld dtwidth = .02;
 
   /* drawing_tool shapes */
