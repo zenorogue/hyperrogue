@@ -1448,7 +1448,7 @@ EX namespace mapeditor {
       dialog::addInfo(paintwhat_str);
     dialog::addInfo(XLAT("use at your own risk!"), 0x800000);
 
-    dialog::addSelItem(XLAT("radius"), its(radius), '0');
+    dialog::addSelItem(XLAT("radius"), its(radius), '=');
     dialog::add_action([] {
       dialog::editNumber(radius, 0, 9, 1, 1, XLAT("radius"), "");
       });
@@ -1496,6 +1496,9 @@ EX namespace mapeditor {
       dialog::addBoolItem_action(XLAT("build on walls"), building_mode, 'B');
     else dialog::addBreak(100);
     dialog::addBreak(800);
+
+    for(int r=0; r<10; r++) if(!dialog::key_actions.count(r))
+      dialog::add_key_action('0' + r, [r] { radius = r; });
     }
 
   void editor_menu(int i) {
