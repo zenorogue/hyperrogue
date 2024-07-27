@@ -367,6 +367,12 @@ cld exp_parser::parse(int prio) {
     res = texture::get_txp(real(val), imag(val), int(real(extra_params["p"]) + .5)-1);
     }
   #endif
+  else if(eat("lands_at(")) {
+    int score = iparse(0);
+    force_eat(")");
+    int i1, i2; count_at_level(i1, i2, score);
+    return i1;
+    }
   else if(next() == '(') at++, res = parsepar(); 
   else {
     string number = next_token();

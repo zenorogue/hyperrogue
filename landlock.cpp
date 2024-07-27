@@ -284,7 +284,7 @@ EX bool required_for_hyperstones(eItem ttype) {
   return true;
   }
 
-EX void countHyperstoneQuest(int& i1, int& i2) {
+EX void count_at_level(int& i1, int& i2, int level) {
   i1 = 0; i2 = 0;
   generateLandList(isLandIngame);
   for(eLand l: landlist) {
@@ -294,8 +294,12 @@ EX void countHyperstoneQuest(int& i1, int& i2) {
     if(l == laMirrorOld && isLandIngame(laMirror)) continue;
     eItem ttype = treasureType(l);
     if(!required_for_hyperstones(ttype)) continue;
-    i2++; if(items[ttype] >= R10) i1++;
+    i2++; if(items[ttype] >= level) i1++;
     }
+  }
+
+EX void countHyperstoneQuest(int& i1, int& i2) {
+  count_at_level(i1, i2, R10);
   }
 
 EX bool hyperstonesUnlocked() {
