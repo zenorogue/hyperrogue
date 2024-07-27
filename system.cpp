@@ -1079,7 +1079,7 @@ EX void saveStats(bool emergency IS(false)) {
   if(peace::on && !save_cheats) return;
   if(experimental) return;
 
-  if(!gold() && !racing::on) return;
+  if(!gold() && !racing::on && !items[itOrbSafety]) return;
 
   remove_emergency_save();
 
