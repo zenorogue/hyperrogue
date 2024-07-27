@@ -46,6 +46,9 @@ EX bool game_active;
 /** \brief God mode */
 EX bool autocheat;
 
+/** \brief is the current game loaded from the save file */
+EX bool loaded_from_save;
+
 /** \brief which wall should we fill the Canvas with */
 EX eWall canvas_default_wall = waNone;
 
@@ -1079,7 +1082,7 @@ EX void saveStats(bool emergency IS(false)) {
   if(peace::on && !save_cheats) return;
   if(experimental) return;
 
-  if(!gold() && !racing::on && !items[itOrbSafety]) return;
+  if(!gold() && !racing::on && !items[itOrbSafety] && !loaded_from_save) return;
 
   remove_emergency_save();
 
@@ -1131,8 +1134,10 @@ EX void saveStats(bool emergency IS(false)) {
         int(xcode),
         buf);
 
-    fclose(f);
-    return;
+    if(!loaded_from_save) {
+      fclose(f);
+      return;
+      }
     }
 
   #if CAP_RACING
@@ -1392,6 +1397,7 @@ EX void load_last_save() {
   yendor::on = false;
   tour::on = false;
   save_turns = turncount;
+  loaded_from_save = true;
   }
 #endif
 
@@ -1667,6 +1673,7 @@ EX void start_game() {
   game_active = true;
   gamegen_failure = false;
   ignored_memory_warning = false;
+  loaded_from_save = false;
   check_cgi();
   cgi.require_basics();
   #if CAP_ARCM
@@ -1800,7 +1807,9 @@ EX void initAll() {
   loadsave();
   if(IRREGULAR && !irr::base) irr::auto_creator();
 #endif
+  bool b = loaded_from_save;
   start_game();
+  if(b) loaded_from_save = b;
   restore_all_golems();
 
   firstland = firstland0;
