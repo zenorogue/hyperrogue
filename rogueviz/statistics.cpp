@@ -101,7 +101,7 @@ template<size_t N> struct leastsquare_solver {
     }
   };
 
-template<size_t dim1, size_t dim2> double small_kendall(const vector<pair<int, int>>& allp) {
+template<int dim1, int dim2> double small_kendall(const vector<pair<int, int>>& allp) {
   int maxo = 0, maxe = 0;
   for(const auto& a: allp) maxo = max(maxo, a.first), maxe = max(maxe, a.second);
   maxo++; maxe++;
