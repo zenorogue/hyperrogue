@@ -136,6 +136,58 @@ template<int dim1, int dim2> double small_kendall(const vector<pair<int, int>>& 
   return tau / par;
   }
 
+template<class T> double kendall(vector<pair<int, T>> allp) {
+  int maxx = 0;
+  for(const auto& a: allp) maxx = max(maxx, a.first);
+  maxx++;
+
+  vector<int> counts(maxx, 0);
+  vector<int> totals(maxx, 0);
+
+  double tau = 0;
+  sort(allp.begin(), allp.end(), [] (auto a, auto b) { return a.second < b.second; });
+
+  auto last = allp[0].second;
+  vector<int> to_add;
+  for(const auto& a: allp) {
+    if(a.second != last) {
+      for(auto ad: to_add) {
+        totals[ad]++;
+        for(int x=ad+1; x<maxx; x++) totals[x] += 2;
+        }
+      to_add.clear();
+      last = a.second;
+      }
+
+    to_add.push_back(a.first);
+    tau += hr::isize(to_add);
+    tau += totals[a.first];
+    }
+  int K = hr::isize(allp);
+  tau -= K;
+
+  double par = K * (K-1.);
+  println(hr::hlog, tau, " / ", par);
+  return tau / par;
+  }
+
+#if TEST
+void test_kendall() {
+  if(1) {
+    vector<pair<int, int>> p = { {1,1}, {2,2}, {3,3}, {4,4} };
+    println(hlog, "p = ", stats::kendall(p));
+
+    vector<pair<int, int>> q = { {1,1}, {2,2}, {3,3}, {4,3} };
+    println(hlog, "q = ", stats::kendall(q));
+
+    vector<pair<int, int>> r = { {1,1}, {2,2}, {3,4}, {4,3} };
+    println(hlog, "r = ", stats::kendall(r));
+
+    vector<pair<int, int>> s = { {1,1}, {2,2}, {3,3}, {3,4} };
+    println(hlog, "s = ", stats::kendall(s));
+    }
+  }
+#endif
 
 }
 #endif
