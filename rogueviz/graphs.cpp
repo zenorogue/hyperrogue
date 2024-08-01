@@ -817,22 +817,18 @@ void readcolor(const string& cfname) {
       int err = fscanf(f, "%08x", &col);
       if(err <= 0) throw hstream_exception("reading dot-color");
       action = [col] (vertexdata &vd) { vd.m->base->landparam = col >> 8; };
-      continue;
       }
     else if(c2 == '/') {
       string s = str_to_eol();
       action = [s] (vertexdata &vd) { vd.urls.push_back(s); };
-      continue;
       }
     else if(c2 == '?') {
       string s = str_to_eol();
       action = [s] (vertexdata &vd) { vd.infos.push_back(s); };
-      continue;
       }
     else if(c2 == '>') {
       string s = str_to_eol();
       action = [s] (vertexdata &vd) { vd.name = s; };
-      continue;
       }
     else {
       ungetc(c2, f);
