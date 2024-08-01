@@ -45,13 +45,11 @@ double costat(int vid, int sid) {
       }
 
     case smMatch: {
-      vertexdata& vd = vdata[vid];
-      for(int j=0; j<isize(vd.edges); j++) {
-        edgeinfo *ei = vd.edges[j].second;
-        int t2 = vd.edges[j].first;
+      for(auto& e: edge_weights[vid]) {
+        auto t2 = e.first;
         if(sagid[t2] != -1) {
           ld cdist = sagdist[sid][sagid[t2]];
-          ld expect = match_a / ei->weight2 + match_b;
+          ld expect = match_a / e.second + match_b;
           ld dist = cdist - expect;
           cost += dist * dist;
           }
@@ -60,11 +58,9 @@ double costat(int vid, int sid) {
       }
 
     case smClosest: {
-      vertexdata& vd = vdata[vid];
-      for(int j=0; j<isize(vd.edges); j++) {
-        edgeinfo *ei = vd.edges[j].second;
-        int t2 = vd.edges[j].first;
-        if(sagid[t2] != -1) cost += sagdist[sid][sagid[t2]] * ei->weight2;
+      for(auto& e: edge_weights[vid]) {
+        auto t2 = e.first;
+        if(sagid[t2] != -1) cost += sagdist[sid][sagid[t2]] * e.second;
         }
       
       if(!hubval.empty()) {

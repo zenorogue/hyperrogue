@@ -26,6 +26,7 @@ vector<int> hubval;
 
 vector<edgeinfo> sagedges;  
 vector<vector<int>> edges_yes, edges_no;
+vector<vector<pair<int, double>>> edge_weights;
 
 ld edgepower=1, edgemul=1;
 
@@ -52,6 +53,14 @@ void prepare_graph() {
     else
       edges_no[i].push_back(j);
     }          
+
+  edge_weights.clear(); edge_weights.resize(DN);
+  for(auto& e: sagedges) {
+    if(e.i == e.j) continue;
+    e.weight2 = pow((double) e.weight, (double) edgepower) * edgemul;
+    edge_weights[e.i].emplace_back(e.j, e.weight2);
+    edge_weights[e.j].emplace_back(e.i, e.weight2);
+    }
 
   sagnode.clear();
   sagnode.resize(isize(sagcells), -1);
@@ -99,13 +108,7 @@ void create_viz() {
   state |= SS_GRAPH;
 
   if(!vact) for(int i=0; i<DN; i++) vdata[i].data = 0;
-  if(!vact) for(int i=0; i<isize(sagedges); i++) {
-    edgeinfo& ei = sagedges[i];
-
-    ei.weight2 = pow((double) ei.weight, (double) edgepower) * edgemul;
-    
-    addedge0(ei.i, ei.j, &ei);
-    }
+  if(!vact) for(auto& e: sagedges) addedge0(e.i, e.j, &e);
 
   if(sagcells[0].first == nullptr) return;
 
