@@ -257,6 +257,7 @@ function<void(presmode)> roguevizslide_action(char c, const T& t, const U& act) 
   void add_stat(presmode mode, const bool_reaction_t& stat);  
   void compare_projections(presmode mode, eModel a, eModel b);
   void no_other_hud(presmode mode);
+  void replace_hud(presmode mode, reaction_t f);
   void non_game_slide(presmode mode);
   void non_game_slide_scroll(presmode mode);
   void white_screen(presmode mode, color_t col = 0xFFFFFFFF);
@@ -274,6 +275,7 @@ function<void(presmode)> roguevizslide_action(char c, const T& t, const U& act) 
   void dialog_may_latex(string latex, string normal, color_t col = dialog::dialogcolor, int size = 100, flagtype flag = 0);
   void uses_game(presmode mode, string name, reaction_t launcher, reaction_t restore);
   void latex_slide(presmode mode, string s, flagtype flags = 0, int size = 100);
+  void latex_in_space(const shiftmatrix& V, ld scale, string s, color_t col, flagtype flags);
   
   inline purehookset hooks_latex_slide;
 

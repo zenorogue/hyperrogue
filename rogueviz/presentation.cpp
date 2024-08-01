@@ -76,6 +76,11 @@ void no_other_hud(presmode mode) {
   clearMessages();
   }
 
+void replace_hud(presmode mode, reaction_t f) {
+  add_temporary_hook(mode, hooks_prestats, 300, [f] { f(); return true; });
+  clearMessages();
+  }
+
 /** disable all the HyperRogue game stuff */
 void non_game_slide(presmode mode) {
   if(mode == pmStart) {
@@ -307,6 +312,47 @@ void dialog_may_latex(string latex, string normal, color_t col, int size, flagty
     dialog::addInfo(normal, col);
     dialog::items.back().scale = size;
     }
+  }
+
+map<string, basic_textureinfo> finf_of;
+void latex_in_space(const shiftmatrix& V, ld scale, string s, color_t col, flagtype flags) {
+  string fn = gen_latex(pmStart, s, 600, flags);
+  if(!textures.count(fn)) {
+    gen_latex(pmStartAll, s, 600, flags);
+    auto& tex = textures[fn];
+    tex.original = true;
+    tex.twidth = 4096;
+    println(hlog, "rt = ", tex.readtexture(fn));
+    if(!(flags & LATEX_COLOR))
+    for(int y=0; y<tex.theight; y++)
+    for(int x=0; x<tex.twidth; x++) {
+      auto& pix = tex.get_texture_pixel(x, y);
+      if(y <= tex.base_y || y >= tex.base_y + tex.stry || x <= tex.base_x || x >= tex.base_x + tex.strx) { pix = 0; continue; }
+      int dark = 255 - part(pix, 1);
+      pix = 0xFFFFFF + (dark << 24);
+      }
+    println(hlog, "gl = ", tex.loadTextureGL());
+    println(hlog, "fn is ", fn);
+    }
+  auto& finf = finf_of[fn];
+  auto& tex = textures[fn];
+  finf.texture_id = tex.textureid;
+  finf.tvertices.clear();
+  static vector<glhr::textured_vertex> rtver(4);
+  ld tx = tex.tx;
+  ld ty = tex.ty;
+  for(int i=0; i<6; i++) {
+    ld cx[6] = {1,0,0,1,1,0};
+    ld cy[6] = {1,1,0,1,0,0};
+    finf.tvertices.push_back(glhr::makevertex((tex.base_x + (cx[i] ? tex.strx : 0.)) / tex.twidth, (tex.base_y + (cy[i] ? tex.stry : 0.)) / tex.theight, 0));
+    curvedata.push_back(glhr::pointtogl(point31((cx[i]*2-1) * tx * scale, (cy[i]*2-1) * ty * scale, 0)));
+    }
+  auto &res = queuetable(V, curvedata, isize(curvedata)-curvestart, col, col, PPR::LINE);
+  res.offset = curvestart;
+  res.offset_texture = 0;
+  res.tinf = &finf;
+  res.flags |= POLY_TRIANGLES;
+  curvestart = isize(curvedata);
   }
 
 int video_start = 0;
