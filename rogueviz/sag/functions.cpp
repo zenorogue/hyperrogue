@@ -245,6 +245,7 @@ pair<ld, ld> compute_mAP() {
 void prepare_method() {
   if(method == smLogistic) compute_loglik_tab();
   optimize_sag_loglik_auto();
+  if(method == smClosest) compute_cost();
   }
 
 bool known_pairs = false;
