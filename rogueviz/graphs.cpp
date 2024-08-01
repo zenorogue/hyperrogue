@@ -407,7 +407,7 @@ void queuedisk(const shiftmatrix& V, const colorpair& cp, bool legend, const str
     poly_outline = (bordcolor << 8) | 0xFF;
   
   #if CAP_TEXTURE
-  if(cp.img) {
+  if(cp.img && !anyshiftclick) {
     for(hyperpoint h: cp.img->vertices)
       curvepoint(h);
     auto V1 = V; V1.T = rgpushxto0(V.T * C0);
