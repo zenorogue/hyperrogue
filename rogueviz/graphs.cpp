@@ -834,7 +834,6 @@ void readcolor(const string& cfname) {
     else {
       ungetc(c2, f);
       auto x = parse(str_to_eol());
-      string s = str_to_eol();
       action = [x] (vertexdata &vd) { vd.cp = x; };
       }
     
