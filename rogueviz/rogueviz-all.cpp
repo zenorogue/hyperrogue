@@ -1,7 +1,7 @@
 // include all RogueViz vizualizations
 
 /* basics */
-#include "rogueviz.cpp"
+#include "graphs.cpp"
 #include "presentation.cpp"
 #include "statshot.cpp"
 
