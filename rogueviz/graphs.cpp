@@ -119,13 +119,8 @@ colorpair parse(string s) {
         y -= 8;
         x /= 16.;
         y /= 16.;
-        ld r = max(abs(x), abs(y)) / hypot(x, y);
-        if(x || y) {
-          x *= r;
-          y *= r;      
-          }
         i.tinf.tvertices.push_back(glhr::makevertex(x + .5, y + .5, 0));
-        i.vertices.push_back(hpxy(x * .4, y * .4));
+        i.vertices.push_back(hpxy(x * .5 * cgi.scalefactor, y * .5 * cgi.scalefactor));
         };
       addv(x, y);
       addv(x, y+1);
