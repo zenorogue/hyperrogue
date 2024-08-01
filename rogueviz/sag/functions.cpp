@@ -242,6 +242,19 @@ pair<ld, ld> compute_mAP() {
   return make_pair(maprank / DN, meanrank / tgood);
   }
 
+ld kendall;
+void compute_kendall() {
+  compute_cost(); println(hlog, "cost = ", cost);
+  vector<vector<ld> > weights;
+  int DN = isize(sagid);
+  weights.resize(DN);
+  for(int i=0; i<DN; i++) weights[i].resize(DN, 0);
+  for(auto& e: sagedges) weights[e.i][e.j] += e.weight2, weights[e.j][e.i] += e.weight2;
+  vector<pair<int, ld>> kdata;
+  for(int i=0; i<DN; i++) for(int j=0; j<i; j++) kdata.emplace_back(sagdist[sagid[i]][sagid[j]], -weights[i][j]);
+  kendall = stats::kendall(kdata);
+  }
+
 void prepare_method() {
   if(method == smLogistic) compute_loglik_tab();
   optimize_sag_loglik_auto();
@@ -270,6 +283,11 @@ int function_read_args() {
 
   else if(argis("-sagrt-auto")) {
     compute_auto_rt();
+    }
+
+  else if(argis("-sag-kendall")) {
+    compute_kendall();
+    println(hlog, "kendall = ", kendall);
     }
 
   else if(argis("-sag-method-closest")) {  
