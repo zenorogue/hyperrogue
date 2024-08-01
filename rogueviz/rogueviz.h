@@ -110,9 +110,10 @@ namespace rogueviz {
     edgeinfo *virt;
     bool special;
     int data;
-    string *info;
+    vector<string> urls;
+    vector<string> infos;
     shmup::monster *m;
-    vertexdata() { virt = NULL; m = NULL; info = NULL; special = false; }
+    vertexdata() { virt = NULL; m = NULL; special = false; }
     };
   
   extern vector<vertexdata> vdata;
@@ -293,7 +294,7 @@ function<void(presmode)> roguevizslide_action(char c, const T& t, const U& act) 
   bool rv_ignore(char c);
 
   colorpair perturb(colorpair cp);
-  void queuedisk(const shiftmatrix& V, const colorpair& cp, bool legend, const string* info, int i);
+  void queuedisk(const shiftmatrix& V, const colorpair& cp, bool legend, const string* url, int i);
 
 /* 3D models */
 
