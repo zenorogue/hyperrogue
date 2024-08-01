@@ -268,16 +268,19 @@ void rogueviz_help(int id, int pagenumber) {
   int noedges = isize(vd.edges);
   help = helptitle(vd.name, vd.cp.color1 >> 8);
 
-  if(vd.info) {
+  for(auto info: vd.infos)
+    help += "\n\n" + info;
+
+  for(auto url: vd.urls) {
     #if CAP_URL
     help_extension hex;
     hex.key = 'L';
     hex.text = "open link";
-    hex.subtext = *vd.info;
-    hex.action = [&vd] () { open_url(*vd.info); };
+    hex.subtext = url;
+    hex.action = [&url] () { open_url(url); };
     help_extensions.push_back(hex);
     #else
-    help += "\n\nlink: " + *vd.info;
+    help += "\n\nlink: " + url;
     #endif
     }
   
@@ -402,7 +405,7 @@ color_t darken_a(color_t c) {
 #define SVG_LINK(x) 
 #endif
 
-void queuedisk(const shiftmatrix& V, const colorpair& cp, bool legend, const string* info, int i) {
+void queuedisk(const shiftmatrix& V, const colorpair& cp, bool legend, const string *url, int i) {
   if(legend && (int) cp.color1 == (int) 0x000000FF && backcolor == 0)
     poly_outline = 0x606060FF;
   else
@@ -412,7 +415,8 @@ void queuedisk(const shiftmatrix& V, const colorpair& cp, bool legend, const str
   if(cp.img) {
     for(hyperpoint h: cp.img->vertices)
       curvepoint(h);
-    auto& qc = queuecurve(V, 0, 0xFFFFFFFF, PPR::MONSTER_HEAD);
+    auto V1 = V; V1.T = rgpushxto0(V.T * C0);
+    auto& qc = queuecurve(V1, 0, 0xFFFFFFFF, PPR::MONSTER_HEAD);
     qc.tinf = &cp.img->tinf;
     qc.flags |= POLY_TRIANGLES;
     return;
@@ -432,23 +436,23 @@ void queuedisk(const shiftmatrix& V, const colorpair& cp, bool legend, const str
     }
   else if(GDIM == 3) {
     V1 = face_the_player(V);
-    if(info) queueaction(PPR::MONSTER_HEAD, [info] () { SVG_LINK(*info); });
+    if(url) queueaction(PPR::MONSTER_HEAD, [url] () { SVG_LINK(*url); });
     queuepolyat(V1, sh, darken_a(cp.color1), PPR::MONSTER_HEAD);
-    if(info) queueaction(PPR::MONSTER_HEAD, [] () { SVG_LINK(""); });
+    if(url) queueaction(PPR::MONSTER_HEAD, [] () { SVG_LINK(""); });
     V1 = V;
     }
   else if(rog3) {
     int p = poly_outline; poly_outline = OUTLINE_TRANS; 
     queuepolyat(V, sh, 0x80, PPR::MONSTER_SHADOW); 
     poly_outline = p; 
-    if(info) queueaction(PPR::MONSTER_HEAD, [info] () { SVG_LINK(*info); });
+    if(url) queueaction(PPR::MONSTER_HEAD, [url] () { SVG_LINK(*url); });
     queuepolyat(V1 = orthogonal_move_fol(V, cgi.BODY), sh, darken_a(cp.color1), PPR::MONSTER_HEAD);
-    if(info) queueaction(PPR::MONSTER_HEAD, [] () { SVG_LINK(""); });
+    if(url) queueaction(PPR::MONSTER_HEAD, [] () { SVG_LINK(""); });
     }
   else {
-    if(info) queueaction(PPR::MONSTER_HEAD, [info] () { SVG_LINK(*info); });
+    if(url) queueaction(PPR::MONSTER_HEAD, [url] () { SVG_LINK(*url); });
     queuepoly(V1 = V, sh, darken_a(cp.color1));
-    if(info) queueaction(PPR::MONSTER_HEAD, [] () { SVG_LINK(""); });
+    if(url) queueaction(PPR::MONSTER_HEAD, [] () { SVG_LINK(""); });
     }
   switch(cp.shade) {
     case 't': queuepoly(V1, cgi.shDiskT, darken_a(cp.color2)); return;
@@ -665,8 +669,10 @@ bool drawVertex(const shiftmatrix &V, cell *c, shmup::monster *m) {
     */
     }
 
+  string *url = nullptr; if(vd.urls.size()) url = &vd.urls[0];
+
   if(!vd.virt) {
-    queuedisk(V * m->at, vd.cp, false, vd.info, i);
+    queuedisk(V * m->at, vd.cp, false, url, i);
     }
   
   
@@ -681,8 +687,7 @@ bool drawVertex(const shiftmatrix &V, cell *c, shmup::monster *m) {
     shiftpoint h = tC0(V * m->at);
     shiftmatrix V2 = GDIM == 3 ? V * m->at : rgpushxto0(h) * ypush(cgi.scalefactor * labelshift); // todo-variation
     if(doshow && !behindsphere(V2)) {
-      auto info = vd.info;
-      if(info) queueaction(PPR::MONSTER_HEAD, [info] () { SVG_LINK(*info); });
+      if(url) queueaction(PPR::MONSTER_HEAD, [url] () { SVG_LINK(*url); });
       string s;
       ld w = hi_weight;
       if(vizflags & RV_INVERSE_WEIGHT) w = 1/w;
@@ -690,7 +695,7 @@ bool drawVertex(const shiftmatrix &V, cell *c, shmup::monster *m) {
       else if(showlabels) s = vd.name;
       else if(hi_weight) s = fts(w);
       queuestr(V2, labelscale, s, forecolor, (svg::in || ISWEB) ? 0 : 1);
-      if(info) queueaction(PPR::MONSTER_HEAD, [] () { SVG_LINK(""); });
+      if(url) queueaction(PPR::MONSTER_HEAD, [] () { SVG_LINK(""); });
       }
     }
 
@@ -764,6 +769,15 @@ bool rv_ignore(char c) {
 void readcolor(const string& cfname) {
   FILE *f = fopen(cfname.c_str(), "rt");
   if(!f) { printf("color file missing\n"); exit(1); }
+  auto str_to_eol = [&] () {
+    string s;
+    while(true) {
+      int c = fgetc(f);
+      if(c == EOF || c == 10 || c == 13) return s;
+      s += c;
+      }
+    };
+
   while(true) {
     string lab = "";
     while(true) {
@@ -774,14 +788,14 @@ void readcolor(const string& cfname) {
       else lab += c;
       }
     
-    colorpair x;
+    hr::function<void(vertexdata&)> action;
     int c2 = fgetc(f);
     int known_id = -1;
     
     if(callhandlers(false, hooks_readcolor, c2, lab, f)) continue;
 
     if(c2 == '#') {
-      while(c2 != 10 && c2 != 13 && c2 != -1) c2 = fgetc(f);
+      str_to_eol();
       continue;
       }
     else if(c2 == '=') {
@@ -791,56 +805,62 @@ void readcolor(const string& cfname) {
         if(rv_ignore(c) || c == ',' || c == ';' || c == EOF) break;
         else lab2 += c;
         }
-      x = vdata[getid(lab2)].cp;
+      auto x = vdata[getid(lab2)].cp;
+      action = [x] (vertexdata &vd) { vd.cp = x; };
       }
     else if(c2 == '@') {
       legend.push_back(known_id == -1 ? getid(lab) : known_id);
       continue;
       }
+    else if(c2 == '.') {
+      color_t col;
+      int err = fscanf(f, "%08x", &col);
+      if(err <= 0) throw hstream_exception("reading dot-color");
+      action = [col] (vertexdata &vd) { vd.m->base->landparam = col >> 8; };
+      continue;
+      }
     else if(c2 == '/') {
-      char buf[600];
-      int err = fscanf(f, "%500s", buf);
-      if(err > 0) 
-        vdata[getid(lab)].info = new string(buf); // replace with std::shared_ptr in C++111
+      string s = str_to_eol();
+      action = [s] (vertexdata &vd) { vd.urls.push_back(s); };
+      continue;
+      }
+    else if(c2 == '?') {
+      string s = str_to_eol();
+      action = [s] (vertexdata &vd) { vd.infos.push_back(s); };
       continue;
       }
     else if(c2 == '>') {
-      char buf[600];
-      int err = fscanf(f, "%500s", buf);
-      if(err > 0) {
-        vdata[getid(lab)].name = buf;
-        for(char& ch: vdata[getid(lab)].name) if(ch == '_') ch = ' ';
-        }
+      string s = str_to_eol();
+      action = [s] (vertexdata &vd) { vd.name = s; };
       continue;
       }
     else {
       ungetc(c2, f);
-      char buf[600];
-      int err = fscanf(f, "%500s", buf);
-      if(err > 0) x = parse(buf);
+      auto x = parse(str_to_eol());
+      string s = str_to_eol();
+      action = [x] (vertexdata &vd) { vd.cp = x; };
       }
     
     if(isize(lab) && lab[0] == '*') {
       lab = lab.substr(1);
-      for(int i=0; i<isize(vdata); i++)
-        if(vdata[i].name.find(lab) != string::npos) {
-          vdata[i].cp = x;
-          }
+      for(auto& vd: vdata)
+        if(vd.name.find(lab) != string::npos)
+          action(vd);
       }
     else if(isize(lab) && lab[0] == '!') {
-      for(int i=0; i<isize(vdata); i++)
-        if(vdata[i].name == lab) {
-          vdata[i].cp = x;
-          }
+      for(auto& vd: vdata)
+        if(vd.name == lab)
+          action(vd);
+      }
+    else if(isize(lab) && lab[0] == '^') {
+      int i = getid(lab);
+      while(i >= 0) {
+        action(vdata[i]);
+        i = vdata[i].data;
+        }
       }
     else {
-      int i = getid(lab);
-      again: vdata[i].cp = x;
-      
-      if(vizflags & RV_COLOR_TREE) {
-        i = vdata[i].data;
-        if(i >= 0) goto again;
-        }
+      action(vdata[getid(lab)]);
       }
     }
   }
@@ -1075,7 +1095,13 @@ void showVertexSearch() {
   dialog::v.clear();
   if(dialog::infix != "") mouseovers = dialog::infix;
 
-  for(int i=0; i<isize(vdata); i++) if(vdata[i].name != "") dialog::vpush(i, vdata[i].name.c_str());
+  for(int i=0; i<isize(vdata); i++) {
+    string n = vdata[i].name;
+    for(auto& u: vdata[i].infos) n += "||" + u;
+    if(n == "") continue;
+    if(n[0] == '|') n = its(i) + n;
+    dialog::vpush2(i, vdata[i].name, n);
+    }
 
   dialog::addBreak(50);
   dialog::start_list(900, 900, '1');
