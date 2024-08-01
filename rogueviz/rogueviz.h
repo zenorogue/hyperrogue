@@ -112,8 +112,9 @@ namespace rogueviz {
     int data;
     vector<string> urls;
     vector<string> infos;
+    color_t spillcolor;
     shmup::monster *m;
-    vertexdata() { virt = NULL; m = NULL; special = false; }
+    vertexdata() { virt = NULL; m = NULL; special = false; spillcolor = DEFAULT_COLOR; }
     };
   
   extern vector<vertexdata> vdata;

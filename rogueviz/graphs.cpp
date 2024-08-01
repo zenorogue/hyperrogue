@@ -510,7 +510,8 @@ bool drawVertex(const shiftmatrix &V, cell *c, shmup::monster *m) {
   if(m->type != moRogueviz) return false;
   int i = m->pid;
   vertexdata& vd = vdata[i];
-  
+
+  if(vd.spillcolor != DEFAULT_COLOR) c->landparam = vd.spillcolor >> 8;
   // bool ghilite = false;
   
   // if(vd.special && specialmark) ghilite = true;
@@ -816,7 +817,7 @@ void readcolor(const string& cfname) {
       color_t col;
       int err = fscanf(f, "%08x", &col);
       if(err <= 0) throw hstream_exception("reading dot-color");
-      action = [col] (vertexdata &vd) { vd.m->base->landparam = col >> 8; };
+      action = [col] (vertexdata &vd) { vd.spillcolor = col; };
       }
     else if(c2 == '/') {
       string s = str_to_eol();
