@@ -26,7 +26,7 @@
 
 template<class T> int isize(const T& x) { return x.size(); }
 
-#define NUMLAN 8
+#define NUMLAN 9
 
 // language generator
 
@@ -290,6 +290,27 @@ void langFR() {
   current_language = "-";
   }
 
+void langZH() {
+  current_language = "ZH";
+  static std::pair<const char *, const char *> ds[] = {
+    #define S(a,b) { a, b },
+    #define N(a,b,c)
+    #include "language-zh.cpp"
+    #undef N
+    #undef S
+    };
+  static std::pair<const char *, noun2> ns[] = {
+    #define S(a,b)
+    #define N(a,b,c) { a, noun2{ b, c, c, c, c } },
+    #include "language-zh.cpp"
+    #undef N
+    #undef S
+    };
+  for(auto&& elt : ds) d[8].add(elt.first, elt.second);
+  for(auto&& elt : ns) nouns[8].add(elt.first, elt.second);
+  current_language = "-";
+  }
+
 int completeness[NUMLAN];
 
 template<class T>
@@ -358,7 +379,7 @@ int main() {
 
   langPL(); langCZ(); langRU();
   langTR(); langDE(); langPT();
-  langFR();
+  langFR(); langZH();
 
   // verify
   compute_completeness(d);
