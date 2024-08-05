@@ -259,7 +259,7 @@ string pushtext(stringpar p) {
     "\n\nNote: when pushing %the1 off a heptagonal cell, you can control the pushing direction "
     "by clicking left or right half of the heptagon.", p);
 #if !ISMOBILE
-  s += XLAT(" With the keyboard, you can rotate the view for a similar effect (Page Up/Down).");
+  s += XLAT(" With the keyboard, you can press Tab to invert the way the pushing direction leans.");
 #endif
   return s;
   }
@@ -678,7 +678,7 @@ EX string generateHelpForMonster(eMonster m) {
     }
 
   s += XLAT(minf[m].help);      
-  if(m == moPalace || m == moSkeleton)
+  if(isStunnable(m))
     s += pushtext(m);  
   if(m == moTroll) s += XLAT(trollhelp2);  
 

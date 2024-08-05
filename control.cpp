@@ -149,6 +149,7 @@ EX void movepckeydir(int d) {
   if(protect_memory()) return;
   
   movedir md = vectodir(move_destination_vec(d));
+  md.subdir = keybd_subdir ? 1 : -1;
     
   if(!canmove) movepcto(md), remission(); else movepcto(md);
   }
@@ -616,6 +617,10 @@ EX void handleKeyNormal(int sym, int uni) {
     if(needConfirmation()) 
       pushScreen(showGameMenu);
     else restart_game();
+    }
+
+  if(sym == SDLK_TAB) {
+    keybd_subdir = !keybd_subdir;
     }
 
   if(sym == SDLK_ESCAPE) {
