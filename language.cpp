@@ -305,6 +305,7 @@ void parrep(string& x, string w, stringpar p) {
     }
   if(l == 8) {
     rep(x, "%"+w, data.nom);
+    rep(x, "%m"+w, data.abl); // Measure word in Chinese
     }
 #endif
   if(true) {
