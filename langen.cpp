@@ -294,14 +294,14 @@ void langZH() {
   current_language = "ZH";
   static std::pair<const char *, const char *> ds[] = {
     #define S(a,b) { a, b },
-    #define N(a,b,c)
+    #define N(a,b,c,d)
     #include "language-zh.cpp"
     #undef N
     #undef S
     };
   static std::pair<const char *, noun2> ns[] = {
     #define S(a,b)
-    #define N(a,b,c) { a, noun2{ b, c, c, c, c } },
+    #define N(a,b,c,d) { a, noun2{ b, c, c, c, d } },
     #include "language-zh.cpp"
     #undef N
     #undef S
