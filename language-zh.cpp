@@ -1,4 +1,4 @@
-// HyperRogue Polish translation, by Zeno and Tehora Rogue
+// HyperRogue Chinese translation, by 我叫超威蓝猫 and 1iuh
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
 // This translation file is encoded with UTF-8
@@ -14,86 +14,83 @@
 // feminine (GEN_F), or
 // neuter (GEN_N).
 
-// 2) all the forms required by HyperRogue. For example, in Polish the following are
-// given:
-// The following forms are given:
+// 2) all the forms required by HyperRogue. The following forms are given:
 // nominative (referred to as %1),
-// nominative plural (%P1),
-// accusative (%a1),
-// ablative (%abl1) (for land names, locative "in/on..." is given instead of ablative).
+// measure words (%m1).
 
 // Feel free to add more or less forms or types if needed. Note that you don't
 // have to provide all the forms in your language, only those used by HyperRogue
 // (in Polish just 4 of 14 forms are used, and this is probably similar in other
-// languages).
+// languages).  The forms being replaced are defined in language.cpp; search for
+// "if(l == 8)".
 
 // MONSTERS
 // ========
 
-N("Yeti", GEN_M, "雪人")
-N("Icewolf", GEN_M, "冰狼")
-N("Ranger",  GEN_M, "游侠")
-N("Rock Troll", GEN_M, "岩石巨魔")
-N("Goblin", GEN_M, "地精")
-N("Sand Worm", GEN_M, "沙虫")
-N("Sand Worm Tail", GEN_M, "沙虫尾")
-N("Sand Worm W", GEN_M, "沙虫 W")
-N("Desert Man", GEN_M, "沙民")
-N("Ivy Root", GEN_M, "常春藤根")
-N("Active Ivy", GEN_M, "活跃常春藤")
-N("Ivy Branch", GEN_F, "常春藤枝")
-N("Dormant Ivy", GEN_M, "休眠常春藤")
-N("Ivy N", GEN_M, "常春藤 N")
-N("Ivy D", GEN_M, "常春藤 D")
-N("Giant Ape", GEN_F, "巨猿")
-N("Slime Beast", GEN_M, "黏液兽")
-N("Mirror Image", GEN_N, "镜像")
-N("Mirage", GEN_M, "幻影")
-N("Golem", GEN_M, "魔像")
-N("Eagle", GEN_M, "雄鹰")
-N("Seep", GEN_M, "渗怪")
-N("Zombie", GEN_M, "僵尸")
-N("Ghost", GEN_M, "鬼魂")
-N("Necromancer", GEN_M, "死灵法师")
-N("Shadow", GEN_M, "阴影")
-N("Tentacle", GEN_F, "触手")
-N("Tentacle Tail", GEN_F, "触手尾")
-N("Tentacle W", GEN_F, "触手 W")
-N("Tentacle (withdrawing)", GEN_F, "触手 （收缩）")
-N("Cultist", GEN_M, "邪教徒")
-N("Fire Cultist", GEN_M, "烈焰邪教徒")
-N("Greater Demon", GEN_M, "高等恶魔")
-N("Lesser Demon", GEN_M, "低等恶魔")
-N("Ice Shark", GEN_M, "冰鲨")
-N("Running Dog", GEN_M, "奔行犬")
-N("Demon Shark", GEN_M, "恶魔鲨")
-N("Fire Fairy", GEN_F, "烈焰仙灵")
-N("Crystal Sage", GEN_M, "水晶智者")
-N("Hedgehog Warrior", GEN_M, "刺猬战士")
+N("Yeti", GEN_N, "雪人","个")
+N("Icewolf", GEN_N, "冰狼","条")
+N("Ranger",  GEN_N, "游侠","名")
+N("Rock Troll", GEN_N, "岩石巨魔","个")
+N("Goblin", GEN_N, "地精","个")
+N("Sand Worm", GEN_N, "沙虫","条")
+N("Sand Worm Tail", GEN_N, "沙虫尾","段")
+N("Sand Worm W", GEN_N, "沙虫 W","段")
+N("Desert Man", GEN_N, "沙民","位")
+N("Ivy Root", GEN_N, "常春藤根","段")
+N("Active Ivy", GEN_N, "活跃常春藤","段")
+N("Ivy Branch", GEN_N, "常春藤枝","段")
+N("Dormant Ivy", GEN_N, "休眠常春藤","段")
+N("Ivy N", GEN_N, "常春藤 N","段")
+N("Ivy D", GEN_N, "常春藤 D","段")
+N("Giant Ape", GEN_N, "巨猿","只")
+N("Slime Beast", GEN_N, "黏液兽","头")
+N("Mirror Image", GEN_N, "镜像","个")
+N("Mirage", GEN_N, "幻影","个")
+N("Golem", GEN_N, "魔像","个")
+N("Eagle", GEN_N, "雄鹰","只")
+N("Seep", GEN_N, "渗怪","头")
+N("Zombie", GEN_N, "僵尸","个")
+N("Ghost", GEN_N, "鬼魂","个")
+N("Necromancer", GEN_N, "死灵法师","位")
+N("Shadow", GEN_N, "阴影","道")
+N("Tentacle", GEN_N, "触手","条")
+N("Tentacle Tail", GEN_N, "触手尾","段")
+N("Tentacle W", GEN_N, "触手 W","段")
+N("Tentacle (withdrawing)", GEN_N, "触手 （收缩）","条")
+N("Cultist", GEN_N, "邪教徒","名")
+N("Fire Cultist", GEN_N, "烈焰邪教徒","名")
+N("Greater Demon", GEN_N, "高等恶魔","个")
+N("Lesser Demon", GEN_N, "低等恶魔","个")
+N("Ice Shark", GEN_N, "冰鲨","条")
+N("Running Dog", GEN_N, "奔行犬","条")
+N("Demon Shark", GEN_N, "恶魔鲨","条")
+N("Fire Fairy", GEN_N, "烈焰仙灵","位")
+N("Crystal Sage", GEN_N, "水晶智者","位")
+N("Hedgehog Warrior", GEN_N, "刺猬战士","位")
 
 // ITEMS
 // =====
 
-N("Ice Diamond", GEN_O, "冰钻")
-N("Gold", GEN_N, "黄金")
-N("Spice", GEN_F, "香料")
-N("Ruby", GEN_O, "红宝石")
-N("Elixir of Life", GEN_O, "万灵药")
-N("Shard", GEN_O, "裂片")
-N("Necromancer's Totem", GEN_O, "死灵图腾")
-N("Demon Daisy", GEN_F, "恶魔雏菊")
-N("Statue of Cthulhu", GEN_F, "克苏鲁雕像")
-N("Phoenix Feather", GEN_N, "凤凰羽毛")
-N("Ice Sapphire", GEN_O, "冰蓝宝石")
-N("Hyperstone", GEN_O, "双曲石")
-N("Key", GEN_O, "钥匙")
-N("Dead Orb", GEN_F, "失效法球")
-N("Fern Flower", GEN_O, "蕨花")
+N("Ice Diamond", GEN_N, "冰钻","枚")
+N("Gold", GEN_N, "黄金","块")
+N("Spice", GEN_N, "香料","捧")
+N("Ruby", GEN_N, "红宝石","枚")
+N("Elixir of Life", GEN_N, "万灵药","个")
+N("Shard", GEN_N, "裂片", "枚")
+N("Necromancer's Totem", GEN_N, "死灵图腾","尊")
+N("Demon Daisy", GEN_N, "恶魔雏菊","朵")
+N("Statue of Cthulhu", GEN_N, "克苏鲁雕像","尊")
+N("Phoenix Feather", GEN_N, "凤凰羽毛","根")
+N("Ice Sapphire", GEN_N, "冰蓝宝石","枚")
+N("Hyperstone", GEN_N, "双曲石","块")
+N("Key", GEN_N, "钥匙","把")
+N("Dead Orb", GEN_N, "失效法球","枚")
+N("Fern Flower", GEN_N, "蕨花","朵")
 
 // ORBS: we are using a macro here
 // ===============================
 
-#define Orb(E, P) N("Orb of " E, GEN_F, P "法球")
+#define Orb(E, P) N("Orb of " E, GEN_N, P "法球","")
 Orb("Yendor", "Yendor")
 Orb("Storms", "风暴")
 Orb("Flash", "闪光")
@@ -108,47 +105,47 @@ Orb("Thorns", "荆棘")
 // TERRAIN FEATURES
 // ================
 
-N("none", GEN_O, "无")
-N("ice wall", GEN_F, "冰墙")
-N("great wall", GEN_F, "长城")
-N("red slime", GEN_F, "红黏液")
-N("blue slime", GEN_F, "蓝黏液")
-N("living wall", GEN_F, "生机墙")
-N("living floor", GEN_F, "生机地板")
-N("dead troll", GEN_M, "死掉的巨魔")
-N("sand dune", GEN_F, "沙丘")
-N("Magic Mirror", GEN_N, "魔镜")
-N("Cloud of Mirage", GEN_F, "幻影云")
-N("Thumper", GEN_O, "振鼓")
-N("Bonfire", GEN_N, "篝火")
-N("ancient grave", GEN_O, "古墓")
-N("fresh grave", GEN_O, "新坟")
-N("column", GEN_F, "石柱")
-N("lake of sulphur", GEN_N, "硫磺湖")
-N("lake", GEN_N, "湖泊")
-N("frozen lake", GEN_N, "冰冻湖")
-N("chasm", GEN_N, "裂缝")
-N("big tree", GEN_N, "大树")
-N("tree", GEN_N, "树")
+N("none", GEN_N, "无","")
+N("ice wall", GEN_N, "冰墙","堵")
+N("great wall", GEN_N, "长城","道")
+N("red slime", GEN_N, "红黏液","滩")
+N("blue slime", GEN_N, "蓝黏液","滩")
+N("living wall", GEN_N, "生机墙","堵")
+N("living floor", GEN_N, "生机地板","块")
+N("dead troll", GEN_N, "死掉的巨魔","只")
+N("sand dune", GEN_N, "沙丘","个")
+N("Magic Mirror", GEN_N, "魔镜","面")
+N("Cloud of Mirage", GEN_N, "幻影云","块")
+N("Thumper", GEN_N, "振鼓","面")
+N("Bonfire", GEN_N, "篝火","道")
+N("ancient grave", GEN_N, "古墓","座")
+N("fresh grave", GEN_N, "新坟","座")
+N("column", GEN_N, "石柱","根")
+N("lake of sulphur", GEN_N, "硫磺湖","片")
+N("lake", GEN_N, "湖泊","片")
+N("frozen lake", GEN_N, "冰冻湖","片")
+N("chasm", GEN_N, "裂缝","条")
+N("big tree", GEN_N, "大树","棵")
+N("tree", GEN_N, "树","棵")
 
 // LANDS
 // =====
 
-N("Great Wall", GEN_N, "长城")
-N("Crossroads", GEN_N, "交叉路口")
-N("Desert", GEN_F, "沙漠")
-N("Icy Land", GEN_F, "冰霜之地")
-N("Living Cave", GEN_F, "生机洞穴")
-N("Jungle", GEN_F, "丛林")
-N("Alchemist Lab", GEN_N, "炼金实验室")
-N("Mirror Land", GEN_F, "镜之地")
-N("Graveyard", GEN_O, "墓地")
-N("R'Lyeh", GEN_N, "拉莱耶")
-N("Hell", GEN_N, "地狱")
-N("Cocytus", GEN_M, "科赛特斯")
-N("Land of Eternal Motion", GEN_N, "永动之地")
-N("Dry Forest", GEN_M, "干燥森林")
-N("Game Board", GEN_F, "棋盘")
+N("Great Wall", GEN_N, "长城","")
+N("Crossroads", GEN_N, "交叉路口","")
+N("Desert", GEN_N, "沙漠","")
+N("Icy Land", GEN_N, "冰霜之地","")
+N("Living Cave", GEN_N, "生机洞穴","")
+N("Jungle", GEN_N, "丛林","")
+N("Alchemist Lab", GEN_N, "炼金实验室","")
+N("Mirror Land", GEN_N, "镜之地","")
+N("Graveyard", GEN_N, "墓地","")
+N("R'Lyeh", GEN_N, "拉莱耶","")
+N("Hell", GEN_N, "地狱","")
+N("Cocytus", GEN_N, "科赛特斯","")
+N("Land of Eternal Motion", GEN_N, "永动之地","")
+N("Dry Forest", GEN_N, "干燥森林","")
+N("Game Board", GEN_N, "棋盘","")
 
 // GAME MESSAGES
 // =============
@@ -226,7 +223,7 @@ S("%The1 would kill you there!", "%1会把你杀死！")
 S("Wow! %1! This trip should be worth it!", "哇哦，%1！真是不虚此行！")
 S("For now, collect as much treasure as possible...", "眼下，尽可能多地收集宝藏吧……")
 S("Prove yourself here, then find new lands, with new quests...", "在此地证明你的价值，然后寻找新的地域，面对新的挑战……")
-S("You collect your first %1!", "你收集到了你的第一个%1！")
+S("You collect your first %1!", "你收集到了你的第一%m1%1！")
 S("You have found the Key! Now unlock this Orb of Yendor!", "你找到了钥匙！解锁这个Yendor法球吧！")
 S("This orb is dead...", "这个法球没有反应……")
 S("Another Dead Orb.", "又一个失效的法球。")
@@ -241,7 +238,7 @@ S("With this Elixir, your life should be long and prosperous...", "有了这灵�
 S("The Necromancer's Totem contains hellish incantations...", "死灵法师的图腾中含有地狱的咒文……")
 S("The inscriptions on the Statue of Cthulhu point you toward your destiny...", "克苏鲁雕像上的铭文将你指引向你的命运……")
 S("Still, even greater treasures lie ahead...", "更多的宝藏依然在前方等待着你……")
-S("You collect %the1.", "你收集到%1。")
+S("You collect %the1.", "你收集到一%m1%1。")
 S("CONGRATULATIONS!", "恭喜！")
 S("Collect treasure to access more different lands...", "收集宝藏才能去往更多地域……")
 S("You feel that you have enough treasure to access new lands!", "你感到你的宝藏足够让你去往新的地域！")
@@ -292,12 +289,12 @@ S("Teleported to %1!", "传送至%1！")
 S("Welcome to HyperRogue", "欢迎来到HyperRogue")
 S(" for Android", " Android版")
 S(" for iOS", " iOS版")
-S("! (version %1)\n\n", "! (wersja %1)\n\n")
+S("! (version %1)\n\n", "! (版本号 %1)\n\n")
 S(" (press ESC for some hints about it).", " （按ESC获取一些提示）。")
 S("Press 'c' for credits.", "按“c”查看鸣谢")
 S("game design, programming, texts and graphics by Zeno Rogue <zeno@attnam.com>\n\n",
   "游戏设计、程序、文本及图像由Zeno Rogue制作 <zeno@attnam.com>\n\n")
-S("add credits for your translation here", "中文翻译：我叫超威蓝猫\n\n")
+S("add credits for your translation here", "中文翻译：我叫超威蓝猫；程序：1iuh 欢迎加群144321649\n\n")
 S(" (touch to activate)", " （点击启动）")
 S(" (expired)", " （已过期）")
 S(" [%1 turns]", " [回合：%1]")
@@ -342,7 +339,7 @@ S("Orbs of Yendor found: %1", "取得的Yendor法球数：%1")
 S("Collect %1 $$$ to access more worlds", "收集%1 $$$以去往更多地域")
 S("Collect at least %1 treasures in each of %2 types to access Hell", "收集%2种宝藏至少各%1个以去往地狱")
 S("Collect at least %1 Demon Daisies to find the Orbs of Yendor", "收集至少%1个恶魔雏菊以取得Yendor法球")
-S("Hyperstone Quest: collect at least %3 %1 in %the2", "双曲石任务：在%2收集至少%3个%1")
+S("Hyperstone Quest: collect at least %3 %1 in %the2", "双曲石任务：在%2收集至少%3%m1%1")
 S("Hyperstone Quest completed!", "双曲石任务完成！")
 S("Look for the Orbs of Yendor in Hell or in the Crossroads!", "在地狱或交叉路口寻找Yendor法球！")
 S("Unlock the Orb of Yendor!", "解锁Yendor法球！")
@@ -927,13 +924,13 @@ S("Collect %1 $$$ to access even more lands", "收集%1 $$$以去往更多地域
 // Emerald Mine
 // ------------
 
-N("Emerald Mine", GEN_F, "绿宝石矿")
-N("Pikeman", GEN_M, "长枪兵")
-N("Flail Guard", GEN_M, "连枷守卫")
-N("Miner", GEN_M, "矿工")
-N("Emerald", GEN_O, "绿宝石")
+N("Emerald Mine", GEN_N, "绿宝石矿","")
+N("Pikeman", GEN_N, "长枪兵","名")
+N("Flail Guard", GEN_N, "连枷守卫","名")
+N("Miner", GEN_N, "矿工","名")
+N("Emerald", GEN_N, "绿宝石","枚")
 
-Orb("the Mind", "Psychiki")
+Orb("the Mind", "心灵")
 
 S(
      "Evil people are mining for emeralds in this living cave. "
@@ -979,12 +976,12 @@ S("You kill %the1 with a mental blast!", "你以灵能冲击杀死了%1！")
 // Vineyard
 // --------
 
-N("Vineyard", GEN_F, "藤蔓园")
-N("Vine Beast", GEN_M, "藤蔓兽")
-N("Vine Spirit", GEN_M, "藤蔓精魂")
-N("vine", GEN_F, "藤蔓")
-N("partial fire", GEN_M, "部分起火")
-N("Wine", GEN_N, "红酒")
+N("Vineyard", GEN_N, "藤蔓园","")
+N("Vine Beast", GEN_N, "藤蔓兽","头")
+N("Vine Spirit", GEN_N, "藤蔓精魂","个")
+N("vine", GEN_N, "藤蔓","条")
+N("partial fire", GEN_N, "部分起火","")
+N("Wine", GEN_N, "红酒","瓶")
 
 S(  "This cell is partially on fire.", "这一格有一部分着火了。")
 
@@ -1025,13 +1022,13 @@ Orb("Aether", "以太")
 // Dead Caves
 // ----------
 
-N("Dead Cave", GEN_F, "死寂洞穴")
-N("Dark Troll", GEN_M, "黑暗巨魔")
-N("Earth Elemental", GEN_M, "土元素")
-N("dead wall", GEN_F, "死寂墙")
-N("dead floor", GEN_F, "死寂地板")
-N("rubble", GEN_O, "碎石")
-N("Silver", GEN_N, "白银")
+N("Dead Cave", GEN_N, "死寂洞穴","")
+N("Dark Troll", GEN_N, "黑暗巨魔","只")
+N("Earth Elemental", GEN_N, "土元素","个")
+N("dead wall", GEN_N, "死寂墙","堵")
+N("dead floor", GEN_N, "死寂地板","块")
+N("rubble", GEN_N, "碎石","堆")
+N("Silver", GEN_N, "白银","块")
 
 S("A precious metal from the Dead Caves.", "来自死寂洞穴的昂贵金属。")
 
@@ -1054,12 +1051,12 @@ S(  "Somehow, this cave has not received the spark of Life yet.",
 // Hive
 // ----
 
-N("Hive", GEN_N, "虫巢")
-N("Red Hyperbug", GEN_M, "红超虫")
-N("Green Hyperbug", GEN_M, "绿超虫")
-N("Blue Hyperbug", GEN_M, "蓝超虫")
-N("Royal Jelly", GEN_N, "蜂王浆")
-N("weird rock", GEN_N, "怪异岩石")
+N("Hive", GEN_N, "虫巢","")
+N("Red Hyperbug", GEN_N, "红超虫","只")
+N("Green Hyperbug", GEN_N, "绿超虫","只")
+N("Blue Hyperbug", GEN_N, "蓝超虫","只")
+N("Royal Jelly", GEN_N, "蜂王浆","团")
+N("weird rock", GEN_N, "怪异岩石","块")
 
 Orb("Invisibility", "隐形")
 
@@ -1091,16 +1088,16 @@ S("This orb lets you go through living walls. It also has powers in some of the 
 // Land of Power
 // -------------
 
-N("Land of Power", GEN_F, "力量之地")
-N("Witch Apprentice", GEN_F, "女巫学徒")
-N("Speed Witch", GEN_F, "速度女巫")
-N("Flash Witch", GEN_F, "闪光女巫")
-N("Fire Witch", GEN_F, "火焰女巫")
-N("Aether Witch", GEN_F, "以太女巫")
-N("Winter Witch", GEN_F, "寒冬女巫")
-N("Evil Golem", GEN_M, "邪恶魔像")
-N("Powerstone", GEN_M, "魔力石")
-N("crystal cabinet", GEN_F, "水晶柜")
+N("Land of Power", GEN_N, "力量之地","")
+N("Witch Apprentice", GEN_N, "女巫学徒","名")
+N("Speed Witch", GEN_N, "速度女巫","名")
+N("Flash Witch", GEN_N, "闪光女巫","名")
+N("Fire Witch", GEN_N, "火焰女巫","名")
+N("Aether Witch", GEN_N, "以太女巫","名")
+N("Winter Witch", GEN_N, "寒冬女巫","名")
+N("Evil Golem", GEN_N, "邪恶魔像","个")
+N("Powerstone", GEN_N, "魔力石","块")
+N("crystal cabinet", GEN_N, "水晶柜","座")
 
 S("When you have this Orb, you will leave a trail of fire behind you.",
   "你拥有这个法球时，移动会在身后留下一道火焰。")
@@ -1185,7 +1182,7 @@ S(  "A Witch with a Flash spell. Very dangerous!\n\nLuckily, she never uses the 
 
 S("Your Aether powers are drained by %the1!", "你的以太能量被%1汲取！")
 S("As you leave, your powers are drained!", "你一离开，法球能量就被吸干了！")
-S("%The1 picks up %the2!", "%1 podniosła %a2!") // currently only Witches, so only female form
+S("%The1 picks up %the2!", "%1捡起%2！") // currently only Witches, so only female form
 
 S("You can right click any element to get more information about it.\n\n",
   "你可以右键单击任意元素来查看关于它的更多信息。\n\n")
@@ -1195,7 +1192,7 @@ S("TRANSLATIONWARNING2", "")
 
 S("The Hyperbugs are fighting!", "超虫开始相互战斗！")
 
-S("","") N("",GEN_N,"")
+S("","") N("",GEN_N,"","")
 
 S("Cheat-changed the display.", "作弊-修改显示")
 S("Dead floor, with some rubble.", "死寂地板，有些碎石。")
@@ -1203,12 +1200,12 @@ S("Dead floor, with some rubble.", "死寂地板，有些碎石。")
 // Camelot
 // -------
 
-N("Camelot", GEN_O, "卡美洛")
-N("wall of Camelot", GEN_F, "卡美洛墙")
-N("moat of Camelot", GEN_F, "卡美洛护城河")
-N("Round Table", GEN_O, "圆桌")
-N("Knight", GEN_M, "骑士")
-N("Holy Grail", GEN_M, "圣杯")
+N("Camelot", GEN_N, "卡美洛","")
+N("wall of Camelot", GEN_N, "卡美洛墙","堵")
+N("moat of Camelot", GEN_N, "卡美洛护城河","条")
+N("Round Table", GEN_N, "圆桌","张")
+N("Knight", GEN_N, "骑士","位")
+N("Holy Grail", GEN_N, "圣杯","个")
 
 S(
   "The Knights of the Round Table are the greatest warriors of these lands. "
@@ -1250,10 +1247,10 @@ S("\"Nice castle, eh?\"", "“这城堡不错吧，嗯？”")
 // Temple
 // ------
 
-N("Temple of Cthulhu", GEN_F, "克苏鲁神殿")
-N("big statue of Cthulhu", GEN_O, "克苏鲁大雕像")
-N("Grimoire", GEN_F, "巨著")
-N("Cult Leader", GEN_M, "邪教首领")
+N("Temple of Cthulhu", GEN_N, "克苏鲁神殿","")
+N("big statue of Cthulhu", GEN_N, "克苏鲁大雕像","尊")
+N("Grimoire", GEN_N, "巨著","本")
+N("Cult Leader", GEN_N, "邪教首领","名")
 
 S("The temple of Cthulhu consists of many concentric circles of columns. "
   "You will surely encounter many Cultists there, who believe that a pilgrimage "
@@ -1315,11 +1312,6 @@ S("You overhear miners talking about a castle...",
 
 S("A castle in the Crossroads...", "交叉路口中的一座城堡……")
 
-/*
-S("You can find Temples of Cthulhu in R'Lyeh once you collect five Statues of Cthulhu.",
-  "Po znalezieniu 5 Statuetek Cthulhu możesz w R'Lyeh trafić na Świątynie Cthulhu.")
-*/
-
 S("You have to escape first!", "你需要先逃出来！")
 S("There is not enough space!", "空间不足！")
 
@@ -1340,7 +1332,7 @@ S("You throw fire!", "你投掷火焰！")
 
 Orb("Trickery", "诡计")
 
-N("Illusion", GEN_F, "幻象")
+N("Illusion", GEN_N, "幻象","个")
 
 S("This Orb allows you to create illusions of yourself. Illusions are targeted "
   "by most monsters, just like yourself, Thumpers, and your friends.\n\n"
@@ -1385,7 +1377,7 @@ S("also hold Alt during the game to toggle high contrast",
 // Crossroads II
 // -------------
 
-N("Crossroads II", GEN_N, "交叉路口 II")
+N("Crossroads II", GEN_N, "交叉路口 II","")
 
 S(
   "An alternate layout of the Crossroads. It is more dense and more regular, "
@@ -1399,18 +1391,18 @@ S(
 // note: in Polish,
 // 'Karaiby' is plural in Polish, should probably fix the grammar for this
 
-N("Caribbean", GEN_N, "加勒比")
+N("Caribbean", GEN_N, "加勒比","")
 
-N("Pirate", GEN_M, "海盗")
-N("Shark", GEN_M, "鲨鱼")
-N("Parrot", GEN_F, "鹦鹉")
-N("Pirate Treasure", GEN_O, "海盗宝藏")
-N("Compass", GEN_O, "指南针")
+N("Pirate", GEN_N, "海盗","名")
+N("Shark", GEN_N, "鲨鱼","条")
+N("Parrot", GEN_N, "鹦鹉","只")
+N("Pirate Treasure", GEN_N, "海盗宝藏","堆")
+N("Compass", GEN_N, "指南针","枚")
 
-N("sea", GEN_F, "海")
-N("boat", GEN_F, "船")
-N("island", GEN_F, "岛屿")
-N("tree", GEN_N, "树")
+N("sea", GEN_N, "海","片")
+N("boat", GEN_N, "船","条")
+N("island", GEN_N, "岛屿","座")
+N("tree", GEN_N, "树","棵")
 
 Orb("Time", "时间")
 
@@ -1482,16 +1474,16 @@ S(
 // Red Rock Valley
 // ---------------
 
-N("Red Rock Valley", GEN_F, "红岩谷")
+N("Red Rock Valley", GEN_N, "红岩谷","")
 
-N("Rock Snake", GEN_M, "岩蛇")
-N("Rock Snake Tail", GEN_O, "岩蛇尾")
-N("Red Troll", GEN_M, "红巨魔")
-N("Red Gem", GEN_O, "赤色宝石")
+N("Rock Snake", GEN_N, "岩蛇","条")
+N("Rock Snake Tail", GEN_N, "岩蛇尾","段")
+N("Red Troll", GEN_N, "红巨魔","只")
+N("Red Gem", GEN_N, "赤色宝石","枚")
 
-N("rock I", GEN_F, "岩石 I")
-N("rock II", GEN_F, "岩石 II")
-N("rock III", GEN_F, "岩石 III")
+N("rock I", GEN_N, "岩石 I","")
+N("rock II", GEN_N, "岩石 II","")
+N("rock III", GEN_N, "岩石 III","")
 
 Orb("Space", "恐惧")
 
@@ -1554,11 +1546,11 @@ S("shoot'em up mode", "射击模式")
 S("Welcome to the Shoot'em Up mode!", "欢迎来到射击模式！")
 S("F/;/Space/Enter/KP5 = fire, WASD/IJKL/Numpad = move", "F/;/空格/回车/KP5 = 射击，WASD/IJKL/小键盘 = 移动")
 
-N("Rogue", GEN_M, "游荡者")
-N("Knife", GEN_O, "小刀")
-N("Flail", GEN_O, "连枷")
-N("Fireball", GEN_F, "火球")
-N("Tongue", GEN_O, "舌头")
+N("Rogue", GEN_N, "游荡者","名")
+N("Knife", GEN_N, "小刀","把")
+N("Flail", GEN_N, "连枷","把")
+N("Fireball", GEN_N, "火球","枚")
+N("Tongue", GEN_N, "舌头","根")
 
 S("In the Shoot'em Up mode, you are armed with thrown Knives.",
   "在射击模式中，你装备着飞刀。")
@@ -1647,7 +1639,7 @@ S("The sandworm explodes!", "沙虫爆炸了！")
 // Amber Albatross: Collect 25 Ambers.
 // Master of the Tides: Collect 50 Ambers.
 
-N("Ocean", GEN_O, "海洋")
+N("Ocean", GEN_N, "海洋","")
 
 S(
     "You can collect some valuable Ambers on the coast, but beware the tides!\n\n"
@@ -1656,14 +1648,14 @@ S(
 
   "你可以在海岸上收集到珍贵的琥珀，但要小心涨潮！\n\n你也可以坐船深入海洋，寻找其他海岸，危险的漩涡，以及海盗居住的岛屿")
 
-N("Albatross", GEN_O, "信天翁")
+N("Albatross", GEN_N, "信天翁","只")
 
 S(
   "Those large seabirds attack you for some reason. At least they are not "
   "as fast as Eagles...",
   "这些大海鸟不知为什么要攻击你。至少它们不像雄鹰一样迅捷……")
 
-N("stranded boat", GEN_F, "搁浅的船")
+N("stranded boat", GEN_N, "搁浅的船","条")
 
 S(
   "This boat cannot go through the sand. But if you sit inside and "
@@ -1672,7 +1664,7 @@ S(
   "这艘船不能穿过沙子，但如果你坐在里面等潮水涨起来，你可以用它在海洋中航行。"
   )
 
-N("Amber", GEN_O, "琥珀")
+N("Amber", GEN_N, "琥珀","枚")
 
 S(
   "When the tide is away, beautiful ambers can be found on the hyperbolic beaches. "
@@ -1687,7 +1679,7 @@ S("This Orb allows you to blow your enemies away.\n\n"
   )
 
 
-N("Sea Border", GEN_O, "海疆")
+N("Sea Border", GEN_N, "海疆","道")
 
 S("Border between seas.", "不同海域之间的边界。")
 
@@ -1700,7 +1692,7 @@ S("Border between seas.", "不同海域之间的边界。")
 // Vortex Pirate: Collect 25 Pearls.
 // Master of the Whirlpool: Collect 50 Pearls.
 
-N("Whirlpool", GEN_O, "漩涡")
+N("Whirlpool", GEN_N, "漩涡","")
 
 S(
   "Many lost boats are spinning in this whirlpool. Some of them contain treasures "
@@ -1712,7 +1704,7 @@ S(
   "无人驾驶的船每回合顺时针移动一格。鲨鱼和有人的船只能顺着水流，也就是向正中前进，或是顺时针移动。"
   )
 
-N("Pearl", GEN_F, "珍珠")
+N("Pearl", GEN_N, "珍珠","颗")
 
 S(
   "You do not know exactly why, but there are valuable pearls on many boats "
@@ -1737,9 +1729,9 @@ S("You cannot go against the current!", "你不能逆水行舟！")
 // Bomberbird: Collect 25 Bomberbird Eggs.
 // Master of the Minefield: Collect 50 Bomberbird Eggs.
 
-N("Minefield", GEN_N, "雷区")
-N("minefield", GEN_N, "雷区")
-N("cell without mine", GEN_N, "没有雷的格子")
+N("Minefield", GEN_N, "雷区","")
+N("minefield", GEN_N, "雷区","处")
+N("cell without mine", GEN_N, "没有雷的格子","块")
 
 S(
   "This minefield has been created by the Bomberbirds to protect their valuable eggs. "
@@ -1750,7 +1742,7 @@ S(
   "这片雷区是炸弹鸟铺设来保护它们宝贵的蛋的。地雷在踩到时爆炸，在周围布满火焰（这些火焰在雷区中永远不会熄灭）。如果你没有踩到地雷，你会感知到周围格子中的地雷总数。这些数字会以颜色的形式标记在你经过的格子上。"
   )
 
-N("Bomberbird", GEN_O, "炸弹鸟")
+N("Bomberbird", GEN_N, "炸弹鸟","只")
 
 S(
     "Dark red birds who have created the minefield.\n\n"
@@ -1761,7 +1753,7 @@ S(
     "铺设雷区的暗红色鸟类。\n\n"
     "只要地形合适，它们就会在死去的位置埋设一枚地雷。要注意，地雷会被掉到其上的死鸟触发。")
 
-N("Tame Bomberbird", GEN_O, "驯服的炸弹鸟")
+N("Tame Bomberbird", GEN_N, "驯服的炸弹鸟","只")
 
 S(
   "This bomberbird will follow you at some distance, and attack your enemies. "
@@ -1769,7 +1761,7 @@ S(
 
   "这只炸弹鸟会跟随你移动，攻击你的敌人。你可以杀掉它来布置地雷。")
 
-N("Bomberbird Egg", GEN_N, "炸弹鸟蛋")
+N("Bomberbird Egg", GEN_N, "炸弹鸟蛋","枚")
 
 S(
   "Bomberbird eggs are big and tasty, and thus valuable. "
@@ -1810,8 +1802,8 @@ S("You have to run away from the water!", "你需要从水边离开！")
 // Palace
 // ------
 
-N("Palace", GEN_O, "宫殿")
-N("palace wall", GEN_F, "宫墙")
+N("Palace", GEN_N, "宫殿","")
+N("palace wall", GEN_N, "宫墙","堵")
 
 S("Apparently a princess is kept locked somewhere, but you won't ever find her in this hyperbolic palace. ",
   "似乎有一位公主被关押在这里某处，但你在这双曲宫殿里永远也找不到她。")
@@ -1825,21 +1817,21 @@ S("So better just to concentrate on collecting treasure. "
   "所以还是专心找宝藏吧。小心陷阱，还有难以击杀的守卫！"
   )
 
-N("trapdoor", GEN_N, "活板门")
+N("trapdoor", GEN_N, "活板门","道")
 S("This floor will fall after someone goes there. Go quickly!",
   "这块地板会在有人走过之后坠落。快走！")
 
-N("closed gate", GEN_F, "关闭的大门")
-N("open gate", GEN_F, "开启的大门")
-N("closing plate", GEN_F, "关闭压力盘")
-N("opening plate", GEN_F, "开启压力盘")
+N("closed gate", GEN_N, "关闭的大门","道")
+N("open gate", GEN_N, "开启的大门","道")
+N("closing plate", GEN_N, "关闭压力盘","块")
+N("opening plate", GEN_N, "开启压力盘","块")
 
 S("Green pressure plates open all gates in radius 3 around them. "
   "Similarly, red pressure plates close all gates in this radius.",
 
   "绿压力盘会开启半径3格范围内的所有大门。与之相反，红压力盘会关闭这一范围内的所有大门。")
 
-N("Hypersian Rug", GEN_O, "超波斯地毯")
+N("Hypersian Rug", GEN_N, "超波斯地毯","块")
 S("Nice, a hyperbolic rug! It will not fit very well on your flat Euclidean floor, but who cares?",
   "不错，一块双曲地毯！它没法安稳铺在你平坦的欧几里得地板上，但谁在乎呢？")
 
@@ -1858,18 +1850,18 @@ S("\n\nNote: when pushing %the1 off a heptagonal cell, you can control the pushi
 S(" With the keyboard, you can rotate the view for a similar effect (Page Up/Down).",
   "使用键盘时，你可以通过旋转视角达到这一效果（Page Up/Down）。")
 
-N("Palace Guard", GEN_M, "宫殿守卫")
+N("Palace Guard", GEN_N, "宫殿守卫","名")
 
 S("You have to hit Palace Guards several times to kill them. After each hit, they "
   "are pushed away and stunned for some time.",
   "你需要击中宫殿守卫多次才能击杀他们。在每次受击之后，他们会被推开，并击晕一段时间。")
 
-N("Fat Guard", GEN_M, "胖守卫")
+N("Fat Guard", GEN_N, "胖守卫","名")
 
 S("Fat guards are too heavy to be pushed away by your hits.",
   "胖守卫重得没法被你的攻击推走。")
 
-N("Skeleton", GEN_M, "骷髅")
+N("Skeleton", GEN_N, "骷髅","具")
 S("Skeletons work similar to Palace Guards, but they won't die no matter how many "
   "times you hit them. Well, you have to be more creative...\n\n"
   "Skeletons attacked outside of their native land, Palace, are stunned for a longer time.",
@@ -1877,7 +1869,7 @@ S("Skeletons work similar to Palace Guards, but they won't die no matter how man
   "在骷髅的原生地宫殿之外，被击中的骷髅会眩晕更久。"
   )
 
-N("Vizier", GEN_M, "维齐尔")
+N("Vizier", GEN_N, "维齐尔","位")
 S("Viziers are neither pushed away nor stunned. However, you attack them automatically when "
   "escaping from them.",
   "维齐尔既不会被打退也不会被打晕。不过，你在从他们身边逃开时会自动攻击他们。")
@@ -1897,7 +1889,7 @@ S("Hmm, he has been training in the Emerald Mine. Interesting...", "嗯，他在
 // Living Fjord
 // ------------
 
-N("Living Fjord", GEN_O, "生机峡湾")
+N("Living Fjord", GEN_N, "生机峡湾","")
 
 S("A coastal area, from where you can get both to the inland worlds and to the Ocean. "
   "Each turn, each cell will become water or earth, based on the majority of cells around it. "
@@ -1907,17 +1899,17 @@ S("A coastal area, from where you can get both to the inland worlds and to the O
   "一片沿海地域，你既可以从这里去往内陆地域，也可以去往海洋。在每回合后，每格都会变为水或土地，取决于周围的哪一种格子较多。与生机洞穴不同，这一过程不受大多数物品与怪物影响，但元素、死巨魔，以及生机峡湾外的格子有非常强的影响。"
   )
 
-N("Fjord Troll", GEN_M, "峡湾巨魔")
+N("Fjord Troll", GEN_N, "峡湾巨魔","只")
 S("Fjord Trolls leave a wall when they die, causing the living fjord to rise around it. "
   "Contrary to Rock Trolls, items around are not destroyed.",
   "峡湾巨魔在死后留下一堵墙，使得生机峡湾在其周围上升。与岩石巨魔不同，周围的物品不会被摧毁。"
   )
 
-N("Viking", GEN_M, "维京人")
+N("Viking", GEN_N, "维京人","名")
 S("Mighty warriors from the Fjord, who can use boats.",
   "来自峡湾的强大战士，会驾驶船只。")
 
-N("Water Elemental", GEN_M, "水元素")
+N("Water Elemental", GEN_N, "水元素","个")
 S("Wherever this powerful being goes, the living fjord "
   "sinks below water, non-magical boats are destroyed, and fires are extinguished.\n\n"
   "As a special case, you can attack the Water Elemental with your blade from the water, without drowning immediately.",
@@ -1925,7 +1917,7 @@ S("Wherever this powerful being goes, the living fjord "
   "作为特例，你可以在水中以你的匕首攻击水元素，而不会立即溺水。")
 
 
-N("Garnet", GEN_O, "石榴石")
+N("Garnet", GEN_N, "石榴石","枚")
 S("Vikings believe that garnets improve their strength.",
   "维京人相信石榴石可以增强他们的力量。")
 
@@ -2040,7 +2032,7 @@ S("\"Have you tried to take a boat and go into the Ocean? Try it!\"", "“你试
 
 // new name for 'Ivy D'
 
-N("Dead Ivy", GEN_M, "死常春藤")
+N("Dead Ivy", GEN_N, "死常春藤","段")
 
 // new messages for living/nonliving monsters
 
@@ -2162,7 +2154,7 @@ S("\"When I visited the Palace, a mouse wanted me to go somewhere.\"",
 
 S("\"I wonder what was there...\"", "“我想知道那是什么地方……”")
 
-N("Mouse", GEN_F, "老鼠")
+N("Mouse", GEN_N, "老鼠","只")
 
 S("You hear a distant squeak!", "你听到远处的吱吱声！")
 S("%The1 squeaks in a confused way.", "%1困惑地吱吱。")
@@ -2174,14 +2166,14 @@ S("%The1 squeaks with hope!", "%1充满希望地吱吱！")
 S("%The1 squeaks happily!", "%1开心地吱吱！")
 S("%The1 squeaks excitedly!", "%1激动地吱吱！")
 
-N("giant rug", GEN_O, "大地毯")
+N("giant rug", GEN_N, "大地毯","块")
 
 S("This is the biggest Hypersian Rug you have ever seen! "
   "Unfortunately, it is too large to take it as a trophy.",
   "这是你见过最大的超波斯地毯！可惜太大了，没法作为纪念品带走。")
 
-N("Prince", GEN_M, "王子")
-N("Princess", GEN_F, "公主")
+N("Prince", GEN_N, "王子","名")
+N("Princess", GEN_N, "公主","名")
 
 S("%1 takes %his1 revenge on %the2!", "%1对%2复仇！")
 S("\"That should teach you to take me seriously!\"",
@@ -2246,11 +2238,11 @@ S("other", "其他") // other keys in the main menu
 
 S("%The1 activates her Flash spell!", "%1启动了闪光咒语！")
 
-N("Fire", GEN_O, "火焰")
+N("Fire", GEN_N, "火焰","团")
 S("This cell is on fire. Most beings and items cannot survive.",
   "这一格起火了。大多数存在与物品无法在其中存留。")
 
-N("Eternal Fire", GEN_O, "永燃之火")
+N("Eternal Fire", GEN_N, "永燃之火","团")
 S("This fire never burns out.", "这一团火焰永远不会熄灭。")
 
 S("Some rubble.", "一些碎石。")
@@ -2260,7 +2252,7 @@ S("The Orb loses its power as it leaves the Land of Power!",
 
 S("%The1 fills the hole!", "%1填住了坑！")
 
-N("Tentacle+Ghost", GEN_F, "触手+鬼魂")
+N("Tentacle+Ghost", GEN_N, "触手+鬼魂","团")
 
 // Land Overview
 // -------------
@@ -2273,17 +2265,17 @@ S("too dangerous to use in %the1", "在%1使用过于危险")
 S("useless in %the1", "在%1无用")
 S("only native Orbs allowed in %the1", "仅有原生法球可在%1使用")
 S("this Orb is never unlocked globally (only hubs)", "该法球无法在全地域解锁（仅中心）")
-S("collect 25 %2 to unlock it in %the1", "收集25个%2以在%1解锁")
-S("collect 3 %2 to unlock it in %the1", "收集3个%2以在%1解锁")
-S("native to %the1 (collect 10 %2)", "原生于%1 （10个%2）")
-S("native to %the1 (collect 1 %2)", "原生于%1 （1个%2）")
-S("secondary in %the1 (collect 10 %3, or 25 %2)", "%1次要法球 （10个%3，或25个%2）")
-S("the native Orb of %the1", "%1原生法球")
+S("collect 25 %2 to unlock it in %the1", "收集25%m2%2以在%1解锁")
+S("collect 3 %2 to unlock it in %the1", "收集3%m2%2以在%1解锁")
+S("native to %the1 (collect 10 %2)", "原生于%1 （10%m2%2）")
+S("native to %the1 (collect 1 %2)", "原生于%1 （1%m2%2）")
+S("secondary in %the1 (collect 10 %3, or 25 %2)", "%1次要法球 （10%m3%3，或25%m2%2）")
+S("the native Orb of %the1", "%1的原生法球")
 S("this Orb appears on floors and is used by witches", "这个法球出现在地上，可被女巫使用")
 S("a prized Orb, it appears only in cabinets", "珍贵的法球，只在柜子中出现")
 S("this Orb never appears in %the1", "这一法球从不在%1出现")
 S("Hub Land: orbs appear here if unlocked in their native land", "中心地域：在其他地域解锁的法球在此出现")
-S("kill a monster, or collect 25 %2", "击杀一个怪物，或收集25个%2")
+S("kill a monster, or collect 25 %2", "击杀一个怪物，或收集25%m2%2")
 
 S("Always available.\n", "总是可用。\n")
 S("Treasure required: %1 $$$.\n", "所需宝藏：%1 $$$。\n")
@@ -2296,9 +2288,9 @@ S("Kills required: %1.\n", "所需击杀数：%1。\n")
 S("Finished lands required: %1 (collect %2 treasure)\n",
   "所需完成地域数：%1（收集%2个宝藏）\n")
 
-S("Treasure required: %1 x %2.\n", "所需宝藏数：%1个%2。\n")
+S("Treasure required: %1 x %2.\n", "所需宝藏数：%1%m2%2。\n")
 
-S("Alternatively: kill a %1.\n", "或者：击杀一个%1。\n")
+S("Alternatively: kill a %1.\n", "或者：击杀一%m1%1。\n")
 
 S("Kills required: any Elemental (Living Fjord/Dead Caves).\n",
   "所需击杀：任意元素（生机峡湾/死寂洞穴）。")
@@ -2308,7 +2300,7 @@ S("Variants of %the1 are always available in the Random Pattern Mode.",
 
 S("Variants of %the1 are available in the Random Pattern Mode after "
   "getting a highscore of at least 10 %2.",
-  "%1的变体在取得10个%2的最高分后可用。")
+  "%1的变体在取得10%m2%2的最高分后可用。")
 
 S(" kills: %1", " 击杀数：%1")
 S(" $$$: %1", " $$$：%1")
@@ -2412,7 +2404,7 @@ S("random pattern mode", "随机图案模式")
 // Ivory Tower
 // -----------
 
-N("Ivory Tower", GEN_F, "象牙塔")
+N("Ivory Tower", GEN_N, "象牙塔","")
 
 S(
   "Powerful wizards claimed this part of the world, to perform their magical "
@@ -2426,32 +2418,32 @@ S(
   "重力以如下规则生效：空且其下方没有相邻墙的格子不稳定。不能从不稳定的格子移动到其他不稳定的格子，除非是向下。"
   )
 
-N("Servant", GEN_M, "仆从")
+N("Servant", GEN_N, "仆从","名")
 S("A simple servant of the master of the Ivory Tower.",
   "象牙塔主人的简单仆从。")
 
-N("Gargoyle", GEN_M, "石像鬼")
-N("stone gargoyle", GEN_M, "岩石石像鬼")
-N("stone gargoyle floor", GEN_F, "岩石石像鬼地板")
-N("stone gargoyle bridge", GEN_O, "岩石石像鬼桥")
+N("Gargoyle", GEN_N, "石像鬼","只")
+N("stone gargoyle", GEN_N, "岩石石像鬼","只")
+N("stone gargoyle floor", GEN_N, "岩石石像鬼地板","块")
+N("stone gargoyle bridge", GEN_N, "岩石石像鬼桥","段")
 
 S(
   "A being made of stone, who likes high buildings. It becomes normal stone when "
   "killed, but only if next to something stable -- otherwise it falls.",
   "石头构成的存在，喜欢高耸的建筑。被杀时变成普通的岩石，但只有与稳定的东西相邻时才会这样——否则就会跌落。")
 
-N("Ivory Figurine", GEN_F, "象牙小雕像")
+N("Ivory Figurine", GEN_N, "象牙小雕像","尊")
 
 S("A beautiful figurine, made of ivory. Figurines close to the base of the Tower "
   "tend to disappear after you have collected many of them.",
   "象牙制成的美丽小雕像。接近塔底的小雕像在你收集很多后会慢慢消失。")
 
-N("Platform", GEN_F, "平台")
-N("platform", GEN_F, "平台")
+N("Platform", GEN_N, "平台","道")
+N("platform", GEN_N, "平台","道")
 
 S("You can stand here.", "你可以站在这里。")
 
-N("ladder", GEN_F, "爬梯")
+N("ladder", GEN_N, "爬梯","截")
 S("You can use this ladder to climb the Tower.",
   "你可以用这节梯子爬上高塔。")
 
@@ -2461,9 +2453,9 @@ S("This Orb allows one to temporarily create impassable matter, either to block 
   "to build bridges across chasms and waters.",
   "这个法球使你能暂时创造无法通过的物质，可用于阻隔道路或是在裂缝与水面上创造桥梁。")
 
-N("temporary wall", GEN_F, "临时墙")
-N("temporary floor", GEN_F, "临时地板")
-N("temporary bridge", GEN_O, "临时桥")
+N("temporary wall", GEN_N, "临时墙","堵")
+N("temporary floor", GEN_N, "临时地板","块")
+N("temporary bridge", GEN_N, "临时桥","段")
 
 S("This structure will disappear after some time.", "这一结构会在一段时间后消失。")
 
@@ -2473,11 +2465,11 @@ S("Gravity does not allow this!", "重力使你不能这样做！")
 // Elemental Planes
 // ----------------
 
-N("Elemental Planes", GEN_F, "元素位面")
-N("Plane of Fire", GEN_F, "火元素位面")
-N("Plane of Earth", GEN_F, "土元素位面")
-N("Plane of Air", GEN_F, "气元素位面")
-N("Plane of Water", GEN_F, "水元素位面")
+N("Elemental Planes", GEN_N, "元素位面","")
+N("Plane of Fire", GEN_N, "火元素位面","")
+N("Plane of Earth", GEN_N, "土元素位面","")
+N("Plane of Air", GEN_N, "气元素位面","")
+N("Plane of Water", GEN_N, "水元素位面","")
 
 S("The Elemental Planes are divided into four subzones: Planes of Fire, Water, Air, and Earth. "
   "You need to collect a Shard from each Plane to construct an Elemental Gem. "
@@ -2486,12 +2478,12 @@ S("The Elemental Planes are divided into four subzones: Planes of Fire, Water, A
   "元素位面被分为四个子区域：火、土、气、水。你需要在每个区域各搜集一块碎片来合成元素宝石。收集太多相同类型的碎片而不合成宝石非常危险。"
   )
 
-N("Fire Elemental", GEN_M, "火元素")
+N("Fire Elemental", GEN_N, "火元素","个")
 
 S("This monster leaves a trail of fire behind.",
   "这个怪物在身后留下一道火焰踪迹。")
 
-N("Air Elemental", GEN_M, "气元素")
+N("Air Elemental", GEN_N, "气元素","个")
 
 S("An Air Elemental looks like a live tornado. Once you are three (or less) cells from it, "
   "it is impossible to move closer, due to strong winds. You can stand and wait, though. "
@@ -2499,11 +2491,11 @@ S("An Air Elemental looks like a live tornado. Once you are three (or less) cell
 
   "气元素看起来像是一道活着的龙卷风。你一旦处于它的三（或更少）格以内，就会因为强风无法靠近。不过你可以原地等待。这个效果也会影响大多数怪物。")
 
-N("Fire Shard", GEN_O, "火焰碎片")
-N("Air Shard", GEN_O, "空气碎片")
-N("Water Shard", GEN_O, "水流碎片")
-N("Earth Shard", GEN_O, "大地碎片")
-N("Elemental Gem", GEN_O, "元素宝石")
+N("Fire Shard", GEN_N, "火焰碎片","块")
+N("Air Shard", GEN_N, "空气碎片","块")
+N("Water Shard", GEN_N, "水流碎片","块")
+N("Earth Shard", GEN_N, "大地碎片","块")
+N("Elemental Gem", GEN_N, "元素宝石","枚")
 
 Orb("Summoning", "召唤")
 
@@ -2515,27 +2507,27 @@ S(
   "这个法球使你能够召唤怪物。通常，召唤出的怪物不是元素就是当前地域的原生生物。"
   )
 
-N("limestone wall", GEN_F, "石灰石墙")
+N("limestone wall", GEN_N, "石灰石墙","堵")
 
 S("Simply a wall. Mostly.", "只是堵墙罢了。")
 
 // Zebra
 // -----
 
-N("Zebra", GEN_F, "斑马")
+N("Zebra", GEN_N, "斑马","")
 S("Everything in this Land has black and white stripes.",
   "这一地域中的一切都是黑白条纹的。")
 
-N("Striped Dog", GEN_M, "条纹狗")
+N("Striped Dog", GEN_N, "条纹犬","条")
 S("A predator native to the Zebra.", "斑马的原生捕食者。")
 
-N("Onyx", GEN_O, "缟玛瑙")
+N("Onyx", GEN_N, "缟玛瑙","枚")
 S("A black gem with white stripes. It is beautiful.", "有白条纹的黑宝石。真漂亮。")
 
 // Crossroads III
 // --------------
 
-N("Crossroads III", GEN_N, "交叉路口 III")
+N("Crossroads III", GEN_N, "交叉路口 III","")
 
 S("An alternate layout of the Crossroads. Great Walls cross here at right angles.",
   "交叉路口的又一种构造。长城在此地以直角交汇。")
@@ -2560,7 +2552,7 @@ S(" Additionally, all items around the killed Troll will be destroyed.",
 
 // 'dead cave troll' and 'dead troll' are separated now
 
-N("dead rock troll", GEN_M, "死岩石巨魔")
+N("dead rock troll", GEN_N, "死岩石巨魔","个")
 
 S("There are several species of trolls living in the hyperbolic world. "
   "Some of them leave this wall behind them when they die.",
@@ -2587,7 +2579,7 @@ S("pure tactics mode", "纯粹战术模式")
 S("Not available in the pure tactics mode!", "在纯粹战术模式不可用。")
 S("\"The Knights of the Horocyclic Table salute you!\"", "“极限圆桌骑士向你致敬！”")
 S("press 0 to leave this mode", "按0离开本模式")
-S("Collect %1x %2 to unlock", "收集%1个%2解锁")
+S("Collect %1x %2 to unlock", "收集%1%m2%2解锁")
 
 S(
         "In the pure tactics mode, you concentrate on a specific land. "
@@ -2685,11 +2677,11 @@ S("Collect 10 treasures in various lands to unlock the challenges there",
 // Wild West
 // ----------
 
-N("Wild West", GEN_O, "狂野西部")
-N("Outlaw", GEN_M, "法外狂徒")
-N("Bounty", GEN_F, "悬赏")
-N("saloon wall", GEN_F, "沙龙墙")
-N("Revolver", GEN_O, "左轮手枪")
+N("Wild West", GEN_N, "狂野西部","")
+N("Outlaw", GEN_N, "法外狂徒","名")
+N("Bounty", GEN_N, "赏金","份")
+N("saloon wall", GEN_N, "沙龙墙","堵")
+N("Revolver", GEN_N, "左轮手枪","把")
 
 S("%The1 shoots you!", "%1对你射击！")
 S("You shoot %the1!", "你射击%1！")
@@ -2729,15 +2721,15 @@ S(
 
   "巨魔在死后留下导体岩石，金属兽只能被电击杀死——你的攻击只会击晕它们，或在已眩晕时将它们击退。")
 
-N("Land of Storms", GEN_F, "风暴之地")
-N("charged wall", GEN_F, "荷电墙")
-N("grounded wall", GEN_F, "接地墙")
-N("metal wall", GEN_F, "金属墙")
-N("sandstone wall", GEN_F, "沙石墙")
-N("Storm Troll", GEN_M, "风暴巨魔")
-N("Metal Beast", GEN_O, "金属兽")
-N("Rich Metal Beast", GEN_O, "富金属兽")
-N("electric discharge", GEN_N, "放电电荷")
+N("Land of Storms", GEN_N, "风暴之地","")
+N("charged wall", GEN_N, "荷电墙","堵")
+N("grounded wall", GEN_N, "接地墙","堵")
+N("metal wall", GEN_N, "金属墙","堵")
+N("sandstone wall", GEN_N, "沙石墙","堵")
+N("Storm Troll", GEN_N, "风暴巨魔","只")
+N("Metal Beast", GEN_N, "金属兽","头")
+N("Rich Metal Beast", GEN_N, "富金属兽","头")
+N("electric discharge", GEN_N, "放电电荷","道")
 
 S("There is a flash of thunder!", "雷霆一闪！")
 
@@ -2766,10 +2758,10 @@ S("This Orb allows you to find new lands more easily. "
   "这个法球使你更容易找到其他地域。你持有这个法球时，收集过较少宝藏的地域及交叉路口尤其容易出现。此外，安全法球更容易在漩涡中出现。"
   )
 
-N("Overgrown Woods", GEN_O, "莽林")
-N("Mutant Ivy", GEN_O, "变异常春藤")
-N("Mutant Sapling", GEN_F, "变异苗")
-N("Forest Troll", GEN_M, "森林巨魔")
+N("Overgrown Woods", GEN_N, "莽林","")
+N("Mutant Ivy", GEN_N, "变异常春藤","段")
+N("Mutant Sapling", GEN_N, "变异苗","株")
+N("Forest Troll", GEN_N, "森林巨魔","只")
 
 S("Forest Trolls create an impassable wall when they die.",
   "森林巨魔在死去时产生一堵无法通过的墙。")
@@ -2800,9 +2792,9 @@ S("Unbalanced shards in your inventory are dangerous.",
   "你物品栏中不平衡的元素碎片会招致危险。")
 S("You construct some Elemental Gems!", "你合成了一些元素宝石！")
 
-N("Fulgurite", GEN_O, "闪电熔岩")
+N("Fulgurite", GEN_N, "闪电熔岩","块")
 
-S("Alternatively: kill a %1 in %the2.\n", "或者：在%2击杀一个%1.\n")
+S("Alternatively: kill a %1 in %the2.\n", "或者：在%2击杀一%m1%1。\n")
 
 // VERSION 8.1
 // ============
@@ -2839,11 +2831,11 @@ S("A clearing in the Overgrown Woods. Obviously, this gives "
   "莽林中的一片空地。显然，这让变异常春藤有无尽的空间可以生长……\n\n"
   "变异果若不在变异常春藤旁则会腐烂。")
 
-N("Clearing", GEN_F, "林间空地")
+N("Clearing", GEN_N, "林间空地","")
 
-N("Mutant Fruit", GEN_O, "变异果")
+N("Mutant Fruit", GEN_N, "变异果","颗")
 
-N("Giant Fox", GEN_O, "巨狐")
+N("Giant Fox", GEN_N, "巨狐","只")
 
 S(
     "What is freedom for you? A situation when you can walk wherever you want? "
@@ -2879,7 +2871,7 @@ S("You become a bit nervous...", "你有些紧张……")
 S("Better not to let your greed make you stray from your path.",
   "最好不要让你的贪婪导致你迷失方向。")
 
-N("Haunted Woods", GEN_O, "闹鬼树林")
+N("Haunted Woods", GEN_N, "闹鬼树林","")
 
 S(
   "A dark forest filled with ghosts and graves. But there is also treasure hidden "
@@ -2891,7 +2883,7 @@ S(
   "闹鬼森林缚于单单一条等距曲线之内。它并非圆或极限圆。\n\n")
 
 
-N("Black Lotus", GEN_O, "黑莲花")
+N("Black Lotus", GEN_N, "黑莲花","朵")
 
 S(
     "This beautiful flower is greatly prized by wizards, as it allows them to cast powerful magical spells "
@@ -2909,7 +2901,7 @@ S(
     "被你近战击杀的敌人会变成友善的鬼魂。对植物与朋友不起作用。"
     )
 
-N("Friendly Ghost", GEN_O, "友善鬼魂")
+N("Friendly Ghost", GEN_N, "友善鬼魂","个")
 
 S("Friendly ghosts are friendly beings who can go through any obstacles. However, "
   "unlike most friends, they tend to fly away from you.",
@@ -2920,9 +2912,9 @@ S("Friendly ghosts are friendly beings who can go through any obstacles. However
 // Windy Plains
 // -------------
 
-N("Windy Plains", GEN_F, "风袭平原")
+N("Windy Plains", GEN_N, "风袭平原","")
 
-N("fan", GEN_O, "风扇")
+N("fan", GEN_N, "风扇","座")
 
 S(
   "Someone has put air fans in these plains, causing strong winds everywhere. "
@@ -2942,11 +2934,11 @@ S(
   "无法沿着逆风强于顺风的方向移动，不过，你可以在一个回合内一次顺风移动2格，鸟儿也可以。"
   )
 
-N("White Dove Feather", GEN_N, "白鸽羽")
+N("White Dove Feather", GEN_N, "白鸽羽","根")
 S("This feather is truly beautiful and strong.",
   "这根羽毛真是又美丽又强韧。")
 
-N("Wind Crow", GEN_F, "风鸦")
+N("Wind Crow", GEN_N, "风鸦","只")
 S("A large bird who likes strong winds. Just as you, it can fly quickly in the wind.",
   "喜爱强风的大鸟。和你一样，它可以快速顺风移动。"
   )
@@ -2962,7 +2954,7 @@ S(  "This Orb lets your allies share your Orb powers.\n\n"
     "这个法球让你的盟友们也能分享你法球的力量。\n\n"
     "以下法球受此影响：")
 
-N("strong wind", GEN_O, "强风")
+N("strong wind", GEN_N, "强风","阵")
 
 S(
     "In the Windy Plains, you can let the wind carry you, "
@@ -3026,7 +3018,7 @@ S("texture size", "纹理大小")
 // Crossroads IV & Chaos Mode
 // ---------------------------
 
-N("Crossroads IV", GEN_O, "交叉路口 IV")
+N("Crossroads IV", GEN_N, "交叉路口 IV","")
 
 S("Chaos mode", "混沌模式")
 
@@ -3042,17 +3034,17 @@ S("In the Chaos mode, lands change very often, and there are no walls between th
 // Rose Garden
 // ------------
 
-N("Rose Garden", GEN_O, "玫瑰园")
-N("False Princess", GEN_F, "假公主")
-N("False Prince", GEN_M, "假王子")
-N("Rose Lady", GEN_F, "玫瑰夫人")
-N("Rose Lord", GEN_M, "玫瑰领主")
-N("Rose Beauty", GEN_F, "玫瑰美人")
-N("Handsome Gardener", GEN_M, "俊俏园丁")
-N("rosebush", GEN_O, "玫瑰丛")
+N("Rose Garden", GEN_N, "玫瑰园","")
+N("False Princess", GEN_N, "假公主","位")
+N("False Prince", GEN_N, "假王子","位")
+N("Rose Lady", GEN_N, "玫瑰夫人","位")
+N("Rose Lord", GEN_N, "玫瑰领主","位")
+N("Rose Beauty", GEN_N, "玫瑰美人","位")
+N("Handsome Gardener", GEN_N, "俊俏园丁","位")
+N("rosebush", GEN_N, "玫瑰丛","片")
 
 Orb("Beauty", "美丽")
-N("Thornless Rose", GEN_F, "无刺玫瑰")
+N("Thornless Rose", GEN_N, "无刺玫瑰","朵")
 
 S("Don't be fooled by this red-haired girl, or you will be stabbed if you come too close!",
   "别被这个红发女孩骗到，否则你走太近就会被捅！")
@@ -3099,10 +3091,10 @@ S("Those roses smell too nicely. You have to come towards them.", "玫瑰实在�
 // Warped Sea/Coast
 // -----------------
 
-N("Warped Coast", GEN_O, "扭曲海岸")
-N("Warped Sea", GEN_F, "扭曲大海")
-N("Ratling", GEN_M, "鼠人")
-N("Coral", GEN_O, "珊瑚")
+N("Warped Coast", GEN_N, "扭曲海岸","")
+N("Warped Sea", GEN_N, "扭曲大海","")
+N("Ratling", GEN_N, "鼠人","只")
+N("Coral", GEN_N, "珊瑚","块")
 Orb("the Warp", "扭曲")
 
 S(
@@ -3140,9 +3132,9 @@ S("hexagonal #1", "六边形 #1")
 S("You cannot move between the triangular cells here!", "你不能在这里的三角形格子间移动！")
 S("display the triheptagonal grid", "显示截半正七边形网格")
 
-N("no wall", GEN_O, "无墙")
-N("no monster", GEN_O, "无怪物")
-N("no item", GEN_O, "无物品")
+N("no wall", GEN_N, "无墙","")
+N("no monster", GEN_N, "无怪物","")
+N("no item", GEN_N, "无物品","")
 
 S("\n\nA Ghost never moves to a cell which is adjacent to another Ghost of the same kind.",
   "\n\n鬼魂从不移动至同类鬼魂的相邻格中。")
@@ -3161,7 +3153,7 @@ S(  "This Orb halves the power usage of orbs which cost some "
 
 // missing....
 
-N("warp gate", GEN_F, "扭曲之门")
+N("warp gate", GEN_N, "扭曲之门","道")
 S("This gate separates the warped area from the normal land.",
   "这道大门分隔正常地域与扭曲区域。")
 S("You cannot move between the cells without dots here!",
@@ -3172,7 +3164,7 @@ S("You need to move to give space to %the1!",
   "你需要移动来给%1空出空间！")
 // this should be genetive, but in Polish it's the same as %a1 for both Golem and Tame Bomberbird
 
-N("Ratling Avenger", GEN_M, "鼠人复仇者")
+N("Ratling Avenger", GEN_N, "鼠人复仇者","名")
 
 S(
   "So, you have killed a Ratling on the unwarped sea? You will be punished for this! "
@@ -3240,7 +3232,7 @@ S("see http://www.roguetemple.com/z/hyper/models.php", "请浏览 http://www.rog
 // Yendorian Forest
 // ----------------
 
-N("Yendorian Forest", GEN_O, "Yendor森林")
+N("Yendorian Forest", GEN_N, "Yendor森林","")
 
 S(
   "This forest was planted by one of the wizards from the Ivory Tower "
@@ -3248,7 +3240,7 @@ S(
 
   "这片森林是由一位象牙塔的法师种植的，用来进行与重力相关的实验。")
 
-N("Yendorian Researcher", GEN_M, "Yendor研究员")
+N("Yendorian Researcher", GEN_N, "Yendor研究员","名")
 
 S(
     "These people study gravity and infinite trees. "
@@ -3256,30 +3248,30 @@ S(
 
   "这些人研究重力与无穷树。他们没什么特别的，除了戴着一顶怪帽子。")
 
-N("Sparrowhawk", GEN_M, "雀鹰")
+N("Sparrowhawk", GEN_N, "雀鹰","只")
 
 S("A bird who hunts in the treetops of the Yendorian Forest.",
   "在Yendor森林树顶捕猎的鸟类。")
 
-N("Apple", GEN_N, "苹果")
+N("Apple", GEN_N, "苹果","颗")
 
 S("A fruit from the Yendorian Forest.", "一种来自Yendor森林的水果。")
 
-N("trunk", GEN_O, "树桩")
+N("trunk", GEN_N, "树桩","个")
 
 S("The skeleton of a tree.", "树的骷髅。")
 
-N("solid branch", GEN_F, "坚实树杈")
+N("solid branch", GEN_N, "坚实树杈","根")
 
 S("Branches here could bear your weight easily.",
   "此地的树杈可以轻易支撑起你的重量。")
 
-N("weak branch", GEN_F, "虚浮树杈")
+N("weak branch", GEN_N, "虚浮树杈","根")
 
 S("Branches here will bear you weight, but if you use them to move (not fall) to an unstable place, they will break.",
   "这里的树杈可以支撑你的重量，但如果你借助它们移动（坠落除外）至不稳定的位置，它就会崩溃。")
 
-N("canopy", GEN_N, "树冠")
+N("canopy", GEN_N, "树冠","处")
 
 S(
   "Only thin twigs and leaves here. They may bear fruits, but for you, these cells count as unstable.",
@@ -3288,11 +3280,11 @@ S(
 // Dragon Chasm
 // ------------
 
-N("Dragon Chasms", GEN_F, "巨龙裂隙")
+N("Dragon Chasms", GEN_N, "巨龙裂隙","")
 
-N("Dragon", GEN_M, "巨龙")
+N("Dragon", GEN_N, "巨龙","条")
 
-N("Dragon Scale", GEN_F, "龙鳞")
+N("Dragon Scale", GEN_N, "龙鳞","片")
 
 S(
     "Dragon Scales are a prized material for armors. "
@@ -3340,9 +3332,6 @@ S(
    "click on a location to order your mount to move or attack there.",
 
    "这个法球使你能够骑乘巨龙等类蠕虫生物。只要移动到这些生物上即可骑乘；在骑乘时，你获得对危险地形的防护，并可以部分抵御攻击（被击中使你失去一半的统御能量），但你无法收集物品。\n\n"
-//   "Kiedy zostanie "
-//   "tylko 1 ładunek, musisz natychmiast zsiąść -- zadbaj o to, by to było "
-//   "możliwe bez zostania zaatakowanym przez Twojego dawnego wierzchowca!\n\n"
    "骑乘时，点击一处来让你的坐骑移动或攻击那里。"
    )
 
@@ -3357,9 +3346,9 @@ S("Different kills required: %1.\n", "所需不同击杀：%1。\n")
 // Galapagos
 // ---------
 
-N("Galápagos", GEN_M, "加拉帕戈斯")
+N("Galápagos", GEN_N, "加拉帕戈斯","")
 
-N("Baby Tortoise", GEN_M, "小陆龟")
+N("Baby Tortoise", GEN_N, "小陆龟","只")
 
 Orb("the Shell", "龟壳")
 
@@ -3399,7 +3388,7 @@ S("\n\nTortoises are not monsters! They are just annoyed. They do not count for 
 
 S("Aww, poor %1... where is your family?", "哦哦，可怜的%1……你的家人呢？")
 S("You are now a tortoise hero!", "你现在是一位陆龟英雄！")
-S("Find a %1 in %the2.", "在%2找到一个%1。")
+S("Find a %1 in %the2.", "在%2找到一%m1%1。")
 
 /*
 		"NEW_ACHIEVEMENT_6_27_NAME"	"Dragon Slayer"
@@ -3632,7 +3621,7 @@ S("Warnings are issued when you try to do something that appears dangerous, "
 // Kraken Depths
 // -------------
 
-N("Kraken Depths", GEN_F, "海妖深洋")
+N("Kraken Depths", GEN_N, "海妖深洋","")
 
 S(
     "A long time ago, this was a trade route. But then, Krakens have risen out of the "
@@ -3675,7 +3664,7 @@ S(
     
     "这个法球赋予你一把以纯粹魔能构成的武器。你不需要握住它，它浮动在你身旁的空中。在你移动时，这把能量剑")
 
-N("Sunken Treasure", GEN_O, "沉没宝藏")
+N("Sunken Treasure", GEN_N, "沉没宝藏","份")
 
 S("Cargo of a ship which was once destroyed by a Kraken.", 
   "曾属于被海妖摧毁的船只的货物。")
@@ -3683,7 +3672,7 @@ S("Cargo of a ship which was once destroyed by a Kraken.",
 // Burial Grounds
 // --------------
 
-N("Burial Grounds", GEN_O, "埋骨地")
+N("Burial Grounds", GEN_N, "埋骨地","")
 
 S(
   "Ancient Viking heroes were buried here. Their graves have barrows raised over "
@@ -3693,7 +3682,7 @@ S(
   
   "远古的维京英雄埋葬于此。他们的坟墓有拱起的坟包，受到尸鬼守护。尸鬼是活化的遗骸，免疫凡俗的武器。你得需要魔法武器咒语才能击败它们，掠夺坟墓中埋藏的远古珠宝。")
 
-N("Draugr", GEN_M, "尸鬼")
+N("Draugr", GEN_N, "尸鬼","个")
 
 S(
   "Animated corpses of ancient Viking warriors. They are immune to mundane weapons, "
@@ -3708,7 +3697,7 @@ S(
   "另一种宝剑法球。如果你两种都有，你就会有两把能量剑，面对相反的方向。"
   )
 
-N("Ancient Jewelry", GEN_F, "远古珠宝")
+N("Ancient Jewelry", GEN_N, "远古珠宝","份")
 
 S(
   "Precious belongings of ancient Viking heroes. Your Orb of the Sword can be "
@@ -3723,12 +3712,12 @@ S("You chop down %the1.", "你砍倒%1。")
 S("Cannot slash another player!", "无法挥砍另一位玩家！")
 S("%The1 suffocates!", "%1窒息了！")
 
-N("barrow wall", GEN_F, "坟包墙")
+N("barrow wall", GEN_N, "坟包墙","堵")
 
 S("This wall is quite strong. You will need another way in.",
   "这堵墙相当坚固。你得找条其他路进去。")
 
-N("barrow", GEN_O, "坟包")
+N("barrow", GEN_N, "坟包","座")
 
 S("Your Orb of the Sword can be used to dig here.", 
   "你的宝剑法球可以用来在此挖掘。")
@@ -3736,7 +3725,7 @@ S("Your Orb of the Sword can be used to dig here.",
 // Trollheim
 // ---------
 
-N("Trollheim", GEN_O, "巨魔乡")
+N("Trollheim", GEN_N, "巨魔乡","")
 
 S(
     "Many clans of Trolls spend their lives in this kingdom. You can find many "
@@ -3747,7 +3736,7 @@ S(
     "许多巨魔部落在这一片王国中生活。你可以在这里找到许多巨魔雕像。你想那些雕像其实不是雕像，而是老死后石化的巨魔。还是说那些是你杀掉的巨魔来着？")
 
 
-N("Golden Egg", GEN_N, "金蛋")
+N("Golden Egg", GEN_N, "金蛋","枚")
 
 S(
     "Trolls of Trollheim are descendants of a bridge Troll, who collected "
@@ -3767,7 +3756,7 @@ S(
     
     "巨魔死后变成石墙。你持有这一法球时，你击败的每个怪物都会变成石头。这个法球产生的雕像与自然石化的巨魔性质略有差异。")
 
-N("stone statue", GEN_O, "石雕像")
+N("stone statue", GEN_N, "石雕像","座")
 
 S("A petrified creature.", "被石化的生物。")
 
@@ -3916,7 +3905,7 @@ S("projection", "投影")
 // VERSION 9.1
 // ===========
 
-N("Familiar", GEN_M, "魔宠")
+N("Familiar", GEN_N, "魔宠","只")
 S("Commanded %the1!", "指挥了%1！")
 S("F8 = SVG shot", "F8 = SVG截图")
 S("Saved the SVG shot to %1 (sightrange %2)", "SVG截图保存至%1（视野范围 %2）")
@@ -3971,9 +3960,9 @@ S("%The1 will be revivable at %2 $$$", "%1在%2 $$$时可以复活")
 S("Halloween mini-game", "万圣节小游戏")
 
 
-N("Vampire Bat", GEN_M, "吸血蝙蝠")
-N("Halloween", GEN_O, "万圣节")
-N("Treat", GEN_O, "糖果")
+N("Vampire Bat", GEN_N, "吸血蝙蝠","只")
+N("Halloween", GEN_N, "万圣节","")
+N("Treat", GEN_N, "糖果","颗")
 
 S(
   "Halloween is a special land, that is available only in the spherical "
@@ -4143,17 +4132,17 @@ S("\n\nFast flying creatures may attack or go against gravity only in their firs
 // Dungeon
 // -------
 
-N("Dungeon", GEN_O, "地牢")
+N("Dungeon", GEN_N, "地牢","")
 
 S("The result of a collaboration of the Great Vizier and the Wizard of the Ivory Tower.",
   "大维齐尔与象牙塔的法师的合作产物。")
 
-N("Slime Mold", GEN_O, "史莱姆霉")
+N("Slime Mold", GEN_N, "史莱姆霉","颗")
 
 S("A very interesting species of slime mold.",
   "某种特别有趣的史莱姆霉。")
 
-N("Bat", GEN_O, "蝙蝠")
+N("Bat", GEN_N, "蝙蝠","只")
 
 S("Someone has told you that one can get battle experience safely by "
   "killing tons of essentially harmless creatures, such as Bats. But "
@@ -4183,21 +4172,7 @@ S("When the charges on this Orb expire, "
 // Lost Mountain
 // -------------
 
-//N("Pyramid", GEN_F, "Piramida", "Piramidy", "Piramidą", "na Piramidzie")
-N("Lost Mountain", GEN_F, "失落山脉")
-
-/*
-S("An ancient civilization has created this pyramid in the Jungle by "
-  "changing the gravity. The gravity is still changed, but "
-  "the pyramid is overgrown with ivies and bushes. "
-  "Will you dare to climb the ivies to get treasures waiting above?",
-  
-  "Starożytna cywilizacja stworzyła tę piramidę w Dżungli, zmieniając "
-  "grawitację. Grawitacja nadal jest zmieniona, ale piramida zarosła "
-  "bluszczem i krzakami. Odważysz się wspiąć po bluszczu, aby zdobyć "
-  "skarby czekające wyżej?"
-  )
-*/
+N("Lost Mountain", GEN_N, "失落山脉","")
   
 S(
   "Gravitational anomalies in the Jungle create mountains "
@@ -4212,7 +4187,7 @@ S(
   "在常春藤旁的格子视为稳定（但常春藤不能攀爬自己或其他常春藤）。"
   )
   
-N("big bush", GEN_O, "大灌丛")
+N("big bush", GEN_N, "大灌丛","片")
 
 S("You can hold this bush to climb the Lost Mountain. "
   "Bushes block the movement of birds.",
@@ -4226,13 +4201,13 @@ S("You can hold this bush to climb the Lost Mountain, "
   
   "你可以抓住这片灌丛来攀爬失落山脉，但它不是特别稳固——如果你借助它爬到不稳定的位置，就会摧毁它。灌丛阻挡鸟的移动。")
 
-N("Amethyst", GEN_O, "紫水晶")
+N("Amethyst", GEN_N, "紫水晶","枚")
 
 S("A beatiful purple gem from the Lost Mountain.",
   "来自失落山脉的紫色宝石。")
 
 Orb("Nature", "自然")
-N("Friendly Ivy", GEN_O, "友善常春藤")
+N("Friendly Ivy", GEN_N, "友善常春藤","段")
 
 S("This Orb allows you to grow like an Ivy. "
   "The Ivy is always rooted in your current location; "
@@ -4249,10 +4224,10 @@ S("This Orb allows you to grow like an Ivy. "
 // Reptiles
 // --------
 
-N("Reptiles", GEN_O, "爬行")
-N("Reptile", GEN_F, "爬行类")
-N("Reptile floor", GEN_F, "爬行类地板")
-N("Reptile bridge", GEN_O, "爬行类桥")
+N("Reptiles", GEN_N, "爬行","")
+N("Reptile", GEN_N, "爬行类","只")
+N("Reptile floor", GEN_N, "爬行类地板","块")
+N("Reptile bridge", GEN_N, "爬行类桥","段")
 
 S("These reptiles are quite strange creatures. They "
   "spend most of their lives sleeping as floors "
@@ -4266,7 +4241,7 @@ S("These reptiles are quite strange creatures. They "
   "这些爬行类是很奇怪的生物。它们大多数时间作为其他生物能够行走的地板休眠。有时它们醒来捕猎，但如果路上掉到坑里，它们又会开心地回到梦乡。你的攻击无法杀死爬行类，但可以将它们推走并击晕。"
   )
 
-N("Dodecahedron", GEN_O, "十二面体")
+N("Dodecahedron", GEN_N, "十二面体","枚")
 S("These dodecahedra made of a mysterious material are the Reptiles' favorite toy.",
   "这些由某种神秘材料制成的十二面体是爬行类最喜欢的玩具。")
 
@@ -4287,7 +4262,7 @@ S("last on bottom", "新 沉底")
 S("by land", "根据地域")
 S("by number", "根据数字")
 
-N("small bush", GEN_O, "小灌丛")
+N("small bush", GEN_N, "小灌丛","片")
 
 /*
 		"NEW_ACHIEVEMENT_7_24_NAME"	"Reached Reptiles"
@@ -4340,18 +4315,18 @@ S("(You can also use right Shift)\n\n", "（你也可以使用右Shift）\n\n")
 // Crossroads V
 // ------------
 
-N("Crossroads V", GEN_O, "交叉路口 V")
+N("Crossroads V", GEN_N, "交叉路口 V","")
 S("Extremely narrow Crossroads layout.\n", "非常狭窄的交叉路口变体。\n")
 
 // Bull Dash/Prairie common
 // ------------------------
 
-N("Sleeping Bull", GEN_M, "沉睡公牛")
+N("Sleeping Bull", GEN_N, "沉睡公牛","头")
 
 S("Sleeping bulls wake up when you get into distance of two cells from them.",
   "沉睡公牛在你进入其两格内时醒来。")
 
-N("Raging Bull", GEN_M, "愤怒公牛")
+N("Raging Bull", GEN_N, "愤怒公牛","头")
 
 S("Raging Bulls charge in a straight line: on heptagons, when they can choose one of two possible directions, "
   "they choose one closer to your current location. In the case of a tie, the cell where more neighbors is "
@@ -4364,13 +4339,13 @@ S("Raging Bulls charge in a straight line: on heptagons, when they can choose on
   "愤怒公牛沿直线冲刺：在七边形上可以选择两个方向之一时，它们会选择距离你当前位置更近的那一边。如果相同，会选择有更多相邻方格与你最近的那一边；如果还是相同，就你考虑之前的位置。它们可以朝任意方向攻击，如果有敌人拦路也会受到攻击。在它们撞到什么东西时，那个拦路的障碍一般会被摧毁，同时公牛被击晕三个回合，随后它们再次朝你冲刺（朝任意方向）。愤怒公牛无法被常规手段击杀或击晕。"
   )
 
-N("Herd Bull", GEN_M, "牛群")
+N("Herd Bull", GEN_N, "牛群","片")
 
 S("Herds of these Bulls are running long distances for some reason. They become Raging Bulls if something stops them.",
   "成群的公牛不知为何在长距离奔跑。如果被阻拦，它们会变成愤怒公牛。"
   )
 
-N("Gadfly", GEN_M, "牛虻")
+N("Gadfly", GEN_N, "牛虻","只")
 S("Annoying insects. They can awaken Sleeping Bulls.", "烦人的昆虫。它们会唤醒沉睡公牛。")
 S("%The1 wakes up %the2.", "%1唤醒了%2。")
 
@@ -4381,8 +4356,8 @@ S("%The1 is filled!", "%1被填满！")
 // Prairie
 // -------
 
-N("Prairie", GEN_F, "大草原")
-N("Green Grass", GEN_F, "绿草")
+N("Prairie", GEN_N, "大草原","")
+N("Green Grass", GEN_N, "绿草","株")
 S("You can find safety in some places in the Prairie, but if you want treasures, "
   "they can be found only on the other side of a giant herd of bulls.",
   "大草原的许多地方都相当安全，但如果你想获得宝藏，那你只能在一大群公牛的另一边找到。"
@@ -4398,9 +4373,9 @@ S("You get the powers of Shield, Horns, and Thorns after you move two moves in a
 // Bull Dash
 // ---------
 
-N("Bull Dash", GEN_F, "奔牛")
-N("Butterfly", GEN_M, "蝴蝶")
-N("Spinel", GEN_O, "尖晶石")
+N("Bull Dash", GEN_N, "奔牛","")
+N("Butterfly", GEN_N, "蝴蝶","只")
+N("Spinel", GEN_N, "尖晶石","枚")
 
 S(
   "Butterflies don't pursue you -- unless you get next to them, they just spin around the obstacles. "
@@ -4465,7 +4440,7 @@ S("Orbs of Safety always appear here, and may be used to escape.\n",
 S("You may be unable to leave %the1 if you are not careful!\n",
   "如果你不当心，你可能会被永远困在%1！")
 
-N("Cellular Automaton", GEN_M, "元胞自动机")
+N("Cellular Automaton", GEN_N, "元胞自动机","组")
 
 S("A land for people wanting to experiment with cellular automata in the HyperRogue grid. "
   "Rules can be given on the command line; the default rules are:\n"
@@ -4505,7 +4480,7 @@ S("field quotient", "域商数")
 // additional texts for 9.4k
 // -------------------------
 
-N("Tortoise", GEN_M, "陆龟")
+N("Tortoise", GEN_N, "陆龟","只")
 S("line patterns", "线条图案")
 S("1 turn", "1回合")
 S("%1 turns", "%1回合")
@@ -4975,7 +4950,7 @@ S(
 S("Uses to gain: %1", "能够获得的次数：%1")
 S("already mirrored", "复制过了")
   
-N("your orbs", GEN_F, "你的法球")
+N("your orbs", GEN_N, "你的法球","")
 S("Click this to see your orbs.", "点击此处查看你的法球。")                                                   
 
 // peaceful mode
@@ -5102,24 +5077,24 @@ S("see how it ended", "观赏你的末日")
 // other missing/new things
 S("Orb unlocked: %1", "解锁的法球：%1")
 S("Secondary orb: %1", "次要法球：%1")
-S(" to submerge", "来下潜")
-S(" to surface", "来上浮")
+S(" to submerge", "后被淹没")
+S(" to surface", "后露出水面")
 S("%The1 says, \"not this place, it looks even worse...\"", 
   "%1说：“这里不行，这里看起来更糟了……”")
 S("torus", "环面")
 S(" (click to use)", "（点击使用）")
-N("Hall of Mirrors", GEN_F, "镜像大厅")
+N("Hall of Mirrors", GEN_N, "镜像大厅","")
 Orb("the Mirror", "镜像")
-N("Reflection", GEN_N, "映像")
-N("mirror wall", GEN_F, "镜墙")
+N("Reflection", GEN_N, "映像", "个")
+N("mirror wall", GEN_N, "镜墙", "堵")
 
 S("This would only move you deeper into the trap!",
   "这只会让你陷得更深！")
 
 S("You swing your sword at the mirror.", "你对镜子挥剑。")
-N("Mimic", GEN_M, "模仿者")
-N("Narcissist", GEN_M, "自恋狂")
-N("Mirror Spirit", GEN_M, "镜像精魂")
+N("Mimic", GEN_N, "模仿者","个")
+N("Narcissist", GEN_N, "自恋狂","个")
+N("Mirror Spirit", GEN_N, "镜像精魂","个")
 
 S("This person loves to look at their own reflection in the mirror. "
   "He believes himself to be one of the most important creatures in this world, "
@@ -5187,7 +5162,7 @@ S(
 S("puzzles and exploration", "谜题与探索")
 
 S("Collect as many Dodecahedra as you can, then return here!",
-  "Zbierz jak najwięcej Dwunastościanów i tu wróć!")
+  "尽可能多地收集十二面体，然后返回这里！")
 
 S("reset all configuration", "重置所有设置")
 S("Are you sure?", "你确认吗？")
@@ -5289,11 +5264,11 @@ S(
   
 // were missing
 
-N("Kraken", GEN_M, "海妖")
-N("Kraken Tentacle", GEN_F, "海妖触手")
+N("Kraken", GEN_N, "海妖","只")
+N("Kraken Tentacle", GEN_N, "海妖触手","条")
 S(" (killing increases treasure spawn)", "（击杀增加宝藏刷新率）")
 
-N("stepping stones", GEN_O, "垫脚石")
+N("stepping stones", GEN_N, "垫脚石","块")
 
 // 10.1
 
@@ -5319,7 +5294,7 @@ S("'u' to load current", "按“u”读取当前")
 // Happy Hunting Ground
 //----------------------
 
-N("Hunting Ground", GEN_F, "猎场")
+N("Hunting Ground", GEN_N, "猎场","")
 
 S("The Happy Hunting Ground is the place where hunting is easy; "
   "the spirits of hunters go here after their death, if their life was deemed worthy. "
@@ -5333,9 +5308,9 @@ S("The Happy Hunting Ground is the place where hunting is easy; "
   "不过，你还是希望能从这一过程中学到一些在开放的双曲空间中战斗的技巧。"
   )
   
-N("Hunting Dog", GEN_M, "狩猎犬")
-N("Hunting Dog (guarding)", GEN_M, "狩猎犬（看守中）")
-N("Turquoise", GEN_O, "绿松石")
+N("Hunting Dog", GEN_N, "狩猎犬","条")
+N("Hunting Dog (guarding)", GEN_N, "狩猎犬（看守中）","只")
+N("Turquoise", GEN_N, "绿松石","枚")
 Orb("Ferocity", "凶残")
 
 S("Hunters believe that wearing a Turquoise amulet will improve their accuracy. "
@@ -5351,8 +5326,8 @@ S("Whenever you attack with this Orb, you also hit the monsters adjacent to you 
 // Volcanic Wasteland
 //--------------------
 
-N("Volcanic Wasteland", GEN_N, "火山荒原")
-N("lava", GEN_F, "熔岩")
+N("Volcanic Wasteland", GEN_N, "火山荒原","")
+N("lava", GEN_N, "熔岩","滩")
 
 S("The volcanic activity in this land is extremely unstable. "
   "Lava is too hot to walk on. It cools quickly, but another "
@@ -5361,7 +5336,7 @@ S("The volcanic activity in this land is extremely unstable. "
   "这一地域的火山活动极其不稳定。岩浆太烫，没法在其上行走。它会很快凉掉，但下一次喷涌又快来了……"
   )
 
-N("Salamander", GEN_F, "火蜥蜴")
+N("Salamander", GEN_N, "火蜥蜴","只")
 
 S("Salamanders are tough lizard-like creatures. Their tough skin protects them "
   "from both physical attacks and heat. Salamanders "
@@ -5370,7 +5345,7 @@ S("Salamanders are tough lizard-like creatures. Their tough skin protects them "
   "火蜥蜴是坚韧的蜥蜴类生物。它们的厚皮能够防护物理攻击以及热量。如果你将火蜥蜴推入岩浆、火焰或坚硬的障碍物，它们会眩晕更久。"
   )
 
-N("Lava Wolf", GEN_M, "岩浆狼")
+N("Lava Wolf", GEN_N, "岩浆狼","条")
 
 S("While Ice Wolves love heat, their instincts usually will not let them leave the Icy Lands -- "
   "they are afraid that they will be unable to get back home, and that they will lose track of their prey. "
@@ -5379,7 +5354,7 @@ S("While Ice Wolves love heat, their instincts usually will not let them leave t
   
   "尽管冰狼喜欢热量，但它们的本能通常不会让它们离开冰霜之地——它们担心无法回到家乡，并且会失去猎物的踪迹。然而，它们发现火山荒原如此炎热而又迷人，以至于它们抛弃了自然的本能……试图用其他感官和智慧去追踪猎物。")
   
-N("Lava Lily", GEN_F, "岩浆百合")
+N("Lava Lily", GEN_N, "岩浆百合","朵")
 
 S("This plant, able to survive in the extreme conditions of the Volcanic Wasteland, "
   "is a valuable alchemical ingredient.",
@@ -5404,7 +5379,7 @@ S("Run away from the lava!", "快从岩浆上跑开！")
 // Terracotta Army
 //-----------------
 
-N("Terracotta Army", GEN_F, "兵马俑")
+N("Terracotta Army", GEN_N, "兵马俑","")
 
 S("The Emperor's mausoleum. The army "
   "of Terracotta Warriors is supposed to protect him in his "
@@ -5420,7 +5395,7 @@ S("Spending 3-5 turns next to the Terracotta Warriors will cause them to awaken.
   "在兵马俑旁呆3-5回合会使它们苏醒。它们有7点生命，每次被击中都会让它们眩晕更久。"
   )
 
-N("arrow trap", GEN_F, "弓箭陷阱")
+N("arrow trap", GEN_N, "弓箭陷阱","处")
 
 S("The arrow traps will automatically launch a deadly arrow when stepped on. They are quite old though, so the arrow will "
   "actually fly at the end of the next turn.",
@@ -5428,12 +5403,12 @@ S("The arrow traps will automatically launch a deadly arrow when stepped on. The
   "这个弓箭陷阱会在被踩中时自动发射致命的箭矢。不过它老化太严重了，箭矢其实在下回合结束时才会射出来。"
   )
 
-N("mercury river", GEN_F, "汞河")
+N("mercury river", GEN_N, "汞河","条")
 S("A river of mercury.", "一条水银河流。")
 
-N("Terracotta Warrior", GEN_M, "兵马俑战士")
+N("Terracotta Warrior", GEN_N, "兵马俑战士","尊")
 
-N("Jiangshi", GEN_M, "僵尸")
+N("Jiangshi", GEN_N, "僵尸","个")
 S("You think this was one of the people who have constructed the Terracotta Warriors and the arrow traps. "
   "They have been locked inside, so that they will never divulge the secrets of the mausoleum. They would like to return their homes and families, though.",
   
@@ -5444,17 +5419,17 @@ Orb("Slashing", "割斩")
 S("Whenever you attack with this Orb, you also hit the monsters adjacent both to you and the monster you originally attacked.",
   "在你持有这个法球攻击时，你同时会攻击到与你及你的目标相邻的怪物。")
 
-N("Ancient Weapon", GEN_F, "远古兵器")
+N("Ancient Weapon", GEN_N, "远古兵器","柄")
 S("This ancient weapon is beautifully encrusted with precious gems, but you prefer your own -- it is much lighter.",
   "这把远古的武器嵌有美丽的宝石，但你还是更愿意用自己的——你的武器要轻得多。")
 
 // Blizzard
 //----------
 
-N("Blizzard", GEN_F, "暴风雪")
-N("Ice Golem", GEN_M, "冰魔像")
-N("Void Beast", GEN_F, "虚空兽")
-N("Forgotten Relic", GEN_F, "遗忘之物")
+N("Blizzard", GEN_N, "暴风雪","")
+N("Ice Golem", GEN_N, "冰魔像","座")
+N("Void Beast", GEN_N, "虚空兽","头")
+N("Forgotten Relic", GEN_N, "遗忘之物","件")
 
 S("The Ice Golems are powered by intense magical coldness. When destroyed in the Blizzard or another icy land, they become "
   "ice walls, and freeze the land around them.",
@@ -5499,7 +5474,7 @@ S("You are ambushed!", "你中埋伏了！")
 S("teleport", "传送")
 S("ambush:", "埋伏：")
 
-N("Hunting Dog (regrouping)", GEN_M, "狩猎犬（撤退）")
+N("Hunting Dog (regrouping)", GEN_N, "狩猎犬（撤退）","条")
 S("When your plan has clearly failed, it is better to abandon it and go to a safe place, to have a chance of succeeding next time. This dog clearly knows this.",
   "在你的计划明显失败后，最好放弃并躲到安全的地方，这样下次还有成功的机会。这条狗显然懂得这个道理。")
 
@@ -5522,8 +5497,8 @@ S("Hint: hold Alt to highlight enemies and other important features.",
   "提示：按住Alt来高亮敌人与其他重要物体。")
 
 // Crystal World
-N("Crystal World", GEN_O, "水晶世界")
-N("Glowing Crystal", GEN_O, "生长水晶")
+N("Crystal World", GEN_N, "水晶世界","")
+N("Glowing Crystal", GEN_N, "生长水晶","块")
 
 S("Yes, this is definitely a crystal. A very regular crystalline structure.\n\n"
   "This land has been designed as a tool to play with various geometries, and it does not appear during a normal gameplay.",
@@ -5626,7 +5601,7 @@ S("Klein-Beltrami model", "克莱因-贝尔特拉米模型")
 S("bestiary of %the1", "%1的图鉴")
 
 // for the map editor
-N("Dragon Head", GEN_F, "巨龙头")
+N("Dragon Head", GEN_N, "巨龙头","颗")
 
 S("score: %1", "得分：%1")
 S("kills: %1", "击杀：%1")
@@ -5817,25 +5792,25 @@ S("coloring", "上色")
 // Docks
 //-------
 
-N("Docks", GEN_O, "港口")
-N("dock", GEN_O, "港口")
+N("Docks", GEN_N, "港口","")
+N("dock", GEN_N, "港口","处")
 S("A dock.", "一处海港。")
-N("burning dock", GEN_O, "燃烧港口")
+N("burning dock", GEN_N, "燃烧港口","处")
 S("A burning dock.", "一处着火的港口。")
 
-N("Sea Glass", GEN_N, "海玻璃")
+N("Sea Glass", GEN_N, "海玻璃","块")
 
 // Snake Nest
 
-N("Snake Nest", GEN_N, "蛇巢")
+N("Snake Nest", GEN_N, "蛇巢","")
 
-N("Snake Oil", GEN_O, "蛇油")
+N("Snake Oil", GEN_N, "蛇油","瓶")
 
 S("Made of actual snakes!", "含有真蛇成分！")
 
 // Ruined City
 
-N("Ruined City", GEN_N, "城市废墟")
+N("Ruined City", GEN_N, "城市废墟", "")
 
 S("Once a beautiful city... but now overrun by the mighty Raiders of unknown origin.\n\n"
  "Raiders cannot be harmed with mundane weapons, but each color has its movement restrictions.",
@@ -5843,29 +5818,29 @@ S("Once a beautiful city... but now overrun by the mighty Raiders of unknown ori
  "曾经是一座美丽的城市……现在被不知从何而来的强大劫掠者侵占。\n\n"
  "劫掠者无法以寻常兵刃伤到，但每种颜色的劫掠者各有移动限制。")
 
-N("ruin wall", GEN_F, "废墟墙")
+N("ruin wall", GEN_N, "废墟墙","堵")
 
-N("Chrysoberyl", GEN_O, "金绿宝石")
+N("Chrysoberyl", GEN_N, "金绿宝石","枚")
 S("Fragment of the past glory.", "Fragment dawnej chwały过去荣耀的碎片。")
 
-N("Red Raider", GEN_M, "红劫掠者")
+N("Red Raider", GEN_N, "红劫掠者","名")
 S("Red Raiders travel in pairs. They have promised to always watch each other's backs. They are able to destroy walls on their way.",
   "红劫掠者成对而行。他们发誓要互相断后。他们可以摧毁前进途中的墙壁。")
 
-N("Gray Raider", GEN_M, "灰劫掠者")
+N("Gray Raider", GEN_N, "灰劫掠者","名")
 S("Gray Raiders never step on gray cells.",
   "灰劫掠者从不踩上灰色格子。")
 
-N("Green Raider", GEN_M, "绿劫掠者")
+N("Green Raider", GEN_N, "绿劫掠者","名")
 S("Green Raiders never step from one green cell to another.",
   "绿劫掠者从不从一处绿色格子走上另一处绿色格子。")
 
-N("Brown Raider", GEN_M, "棕劫掠者")
+N("Brown Raider", GEN_N, "棕劫掠者","名")
 S("Brown Raiders never move adjacent to an item.",
   "棕劫掠者从不移动至物品旁。")
 
 
-N("Blue Raider", GEN_M, "蓝劫掠者")
+N("Blue Raider", GEN_N, "蓝劫掠者","名")
 S("Blue Raiders have a powerful attack which takes two turns to complete, and also makes the Blue Raider stunned "
   "for a long time. This attack can destroy other Raiders if it hits them.",
   "蓝劫掠者会使用需要两个回合才能完成的强力攻击，结束后还会眩晕一段时间。这种攻击如果击中其他劫掠者会将其摧毁。"
@@ -5880,7 +5855,7 @@ S("This Orb lets you defeat Raiders and other tough single-cell monsters in mele
 
 // Jelly Kingdom
 
-N("Jelly Kingdom", GEN_N, "果冻王国")
+N("Jelly Kingdom", GEN_N, "果冻王国","")
 
 S("Some of the Slime Beasts have decided to revolt against the color rules in the "
   "Alchemist Lab. They have changed their shape and consistency, declared independence, and established their own Kingdom.\n\n"
@@ -5890,10 +5865,10 @@ S("Some of the Slime Beasts have decided to revolt against the color rules in th
   "果冻在你收集宝藏后会从墙壁变为怪物，或从怪物变为墙壁。"
   )
 
-N("Red Jelly", GEN_F, "红果冻")
-N("Blue Jelly", GEN_F, "蓝果冻")
+N("Red Jelly", GEN_N, "红果冻","块")
+N("Blue Jelly", GEN_N, "蓝果冻","块")
 
-N("Tasty Jelly", GEN_F, "可口果冻")
+N("Tasty Jelly", GEN_N, "可口果冻","块")
 S("A tasty byproduct of the Jelly Revolution.",
   "果冻起义的美味副产品。")
 
@@ -5950,7 +5925,7 @@ S("level to load:", "要读取的图片：")
 
 // new option
 S("forget faraway cells", "遗忘远处的格子")
-N("Lost Memory", GEN_F, "失落记忆")
+N("Lost Memory", GEN_N, "失落记忆","处")
 S(  "Because of the properties of hyperbolic geometry, it is extremely unlikely to randomly "
     "get back to a faraway place you have been to. However, you have managed to get there "
     "somehow. In the meantime, its memory has been cleared, since the 'forget faraway cells'"
@@ -5960,7 +5935,7 @@ S(  "Because of the properties of hyperbolic geometry, it is extremely unlikely 
     )
 
 // shmup 
-N("Blueball", GEN_F, "蓝色球")
+N("Blueball", GEN_N, "蓝色球","枚")
 S("A powerful missile from a Blue Raider.", "蓝劫掠者发射的强大远程武器。")
 
 // missing
@@ -6395,7 +6370,7 @@ S("polygons match incorrectly", "多边形匹配不正确")
 S("currently no more than %1 edges", "目前不多于%1个边")
 S("currently no more than %1 faces in vertex", "目前每个顶点不多于%1个面")
 
-N("Canvas", GEN_N, "画布")
+N("Canvas", GEN_N, "画布","块")
 S("find the player", "寻找玩家")
 S("press SPACE to find the player", "SPACE = 寻找玩家")
 
@@ -6649,7 +6624,7 @@ S("(these lands are not in game)", "（这些地域并不在游戏中出现）")
 
 // new lands
 
-N("Brown Island", GEN_F, "棕岛")
+N("Brown Island", GEN_N, "棕岛","")
 
 S("The Brown Islands have been generated by ancient underground creatures, who moved randomly and raised lands in their path... "
   "adults spawned larvae in each move, which also moved randomly and also raised lands in their path, and eventually became adults and spawned their own larvae. "
@@ -6660,20 +6635,20 @@ S("The Brown Islands have been generated by ancient underground creatures, who m
   "那些都是很久以前发生的事了。现在，多山的棕岛里居住着奇异的怪物。祝你冒险好运！")
   
 
-N("Bronze Beast", GEN_O, "青铜兽")
+N("Bronze Beast", GEN_N, "青铜兽","头")
 
 S("A large bug native to the Brown Islands. Cannot be killed easily due to their tough armor; still, they can be killed by pushing them into water or from great heights. "
 "Bronze Beasts are very bad at descending slopes -- it takes them extra time to get down, and they are stunned for a longer time if you push them down.",
 
   "一种棕岛原生的大虫子。长有厚重的盔甲，无法轻易杀死；不过还是可以通过把它们推进水里或者从高处丢下去来杀死它们。青铜兽非常不擅长下坡——它们向下移动要多花很多时间，而且如果你把它们推到坡下面，它们会眩晕更久。")
 
-N("Acid Gull", GEN_F, "酸鸥")
+N("Acid Gull", GEN_N, "酸鸥","只")
 
 S("Where did this strange bird come from?...\n\nAcid Gulls dissolve the land on which they fall when they die. ",
 
   "这些怪鸟是从哪来的？……\n\n酸鸥死掉时会溶解它们的尸体落到的格子。")
 
-N("Tiger's Eye", GEN_N, "虎眼石")
+N("Tiger's Eye", GEN_N, "虎眼石","枚")
 S("A brown gem.", "一枚棕色的宝石。")
 
 Orb("Choice", "抉择")
@@ -6686,20 +6661,20 @@ S("Did you know that it is possible to break a magical sphere into finitely many
   "双曲几何使得这样做更加简单了！\n\n"
   "在你捡起另一个法球时，它不会从地上消失——但抉择法球会失去一些充能。")
     
-N("Free Fall", GEN_O, "自由落体")
+N("Free Fall", GEN_N, "自由落体","")
 
 S("What on one side looks to be a normal (well, infinite) horizontal wall, on the other side turns out to be the vertical wall"
   " of an infinitely high tower. Jump from the window, and let the magical gravity carry you...",
 
   "一边看起来是普通的（好吧，无尽的）水平墙壁，另一边却其实是无限高的塔楼的垂直墙壁。从窗户一跃而下，让魔法重力引你前行……")
 
-N("Falling Dog", GEN_O, "坠落犬")
+N("Falling Dog", GEN_N, "坠落犬","条")
 
 S("Distant relatives of the Running Dogs.", "奔行犬的远亲。")
 
-N("Western Hawk", GEN_O, "西域鹰")
+N("Western Hawk", GEN_N, "西域鹰","只")
 
-N("Meteorite", GEN_O, "陨石")
+N("Meteorite", GEN_N, "陨石","颗")
 
 S("These rocks falling from the sky have been captured to fall forever in the artificial gravity. Meteorite iron is believed to be a valuable material for magical weapons.",
   "这些石头从天而降，被人造重力场永远地束缚在下落中。据说陨铁是能用于制作魔法武器的珍贵材料。")
@@ -6715,7 +6690,7 @@ S("This Orb lets you magically control gravity around you. In lands with unusual
   
   "这个法球让你能控制周身的重力。在重力异常的地域中，选项有：常规重力（没有变化，不过也许会干扰鸟类）、反重力（使得重力的方向相反）、悬浮（令你能向非上非下的方向移动，或是在相邻有处于“中立”方向的墙的格子之间移动）。在重力正常的地域中，悬浮使生物能避开陷阱、裂缝，还有水面，而反重力使人只有相邻墙壁时才能移动（在没有相邻墙壁的格子之间无法移动）。对于每次移动而言，重力取决于你做什么，效果范围内的所有敌人也会被影响（比如说，如果你在正常重力的地域移动到一堵墙旁边，反重力会生效，敌人无法移动到开阔空间）。")
 
-N("Irradiated Field", GEN_N, "辐射场")
+N("Irradiated Field", GEN_N, "辐射场","")
 
 S("These fields are ravaged with many kinds of magical radiation, which not only make the ground glow nicely in various colors, "
   "but also cause the inhabitants to protect the treasures of their land in various ways. In some areas of the Irradiated Fields, "
@@ -6725,18 +6700,18 @@ S("These fields are ravaged with many kinds of magical radiation, which not only
   
   "该地域有许多种魔法辐射肆虐，使得不仅地面发出五颜六色的好看的光，地域的原住民还能以各种方式保护他们的宝藏。在辐射场中的一些区域，你会碰到强力的敌人；在另一些区域，你会发现弓箭陷阱、火焰陷阱，或是池子，如果你不当心它们就会把你害死，但如果你了解如何利用它们就能帮到你。你会在辐射场里随机穿行，还是寻找财宝多多、怪物少少的区域，呆在里面？由你决定！\n\n")
 
-N("Mutant", GEN_M, "变种人")
+N("Mutant", GEN_N, "变种人","名")
 
 S("These guys look a bit strange, but they have no special properties.",
   "这些人看起来有点怪，但没有什么特殊能力。")
   
-N("fire trap", GEN_F, "火焰陷阱")
+N("fire trap", GEN_N, "火焰陷阱","处")
 
 S("This trap will explode when stepped on, setting all the adjacent cells on fire. However, this happens on the next turn, "
   "so you can safely escape if you are fast enough.",
   "这陷阱会在被踩到时爆炸，点燃所有相邻的格子。不过，这些到下回合才会发生，所以你可以迅速逃到安全地带。")
 
-N("Explosive Barrel", GEN_F, "爆炸桶")
+N("Explosive Barrel", GEN_N, "爆炸桶","个")
 S("These barrels can be pushed, and they will explode if next to a fire, or under some attacks.",
   "这些桶子可以被推动，如果被攻击或靠近火边时会爆炸。")
 
@@ -6793,7 +6768,7 @@ S(
     
     "有些读者理解错了过去自由落体的地图，觉得它是某一堵墙西边的什么地域。西域鹰这个名字得以保留至今。")
 
-N("Torbernite", GEN_O, "铜铀云母")
+N("Torbernite", GEN_N, "铜铀云母","块")
 
 S("Crystals emitting magical radiation.", "散发魔法辐射的晶体。")
 
@@ -7055,13 +7030,13 @@ S("This land works only in the shmup mode.", "该地域仅在射击模式中起�
 
 // new land
 
-N("Space Rocks", GEN_F, "太空岩区")
-N("Space Rock", GEN_F, "太空岩石")
-N("Fuel", GEN_F, "燃料")
+N("Space Rocks", GEN_N, "太空岩区","")
+N("Space Rock", GEN_N, "太空岩石","块")
+N("Fuel", GEN_N, "燃料","份")
 S("Shoot the Space Rocks for score. Large Rocks will split into two smaller rocks.",
   "射击太空岩石得分。大石头会碎成两块小石头。")
 
-N("editable statue", GEN_O, "可编辑雕像")
+N("editable statue", GEN_N, "可编辑雕像","座")
 S("These statues are designed to have their graphics edited in the Vector Graphics Editor. Each number has its own, separate graphics.",
   "这些雕像是用来在向量图形编辑器中更改图形的。每个数字对应一种图形。")
 S("The Orb of Yendor is locked in with powerful magic.", "Yendor法球被强力的魔法锁住了。")
@@ -7588,19 +7563,19 @@ S("You chop down the shrub.", "你砍倒了灌丛。")
 
 // new lands
 
-N("Wetland", GEN_N, "湿地")
+N("Wetland", GEN_N, "湿地","")
 
 S("Some people have definitely drowned in this treacherous area. Better be careful!",
   "肯定有人在这凶险的区域里淹死过。最好当心！")
 
-N("Water Lily", GEN_N, "睡莲")
+N("Water Lily", GEN_N, "睡莲","株")
 S("A beautiful plant from the Wetland.", "一种湿地的美丽植物。")
 
-N("shallow water", GEN_F, "浅水")
+N("shallow water", GEN_N, "浅水","片")
 S("Shallow water is passable both for land creatures and for water creatures.",
   "不管是陆地生物还是水生生物都可以通过浅水。")
 
-N("deep water", GEN_F, "深水")
+N("deep water", GEN_N, "深水","片")
 
 S("This body of water is calm and beautiful, but too deep to pass.",
   "这片水域宁静而美丽，但太深了无法涉过。")
@@ -7618,11 +7593,11 @@ S("Have you reached the edge of the Poincaré disk? No, it must just be the edge
   "你有抵达过庞加莱碟的边缘吗？不，只不过是这个世界的边缘罢了。这个世界漂浮在一些乌龟的背上。在想为什么这么点大的乌龟能撑起世界吗？哎呀，是因为有很多这样的乌龟！这一只因为你发现它擅离职守而非常恼怒。不过世界仍然屹立，因为还有那么多乌龟。")
 
 // gender-switched
-N("Rusałka", GEN_F, "水仙女")
+N("Rusałka", GEN_N, "水仙女","名")
 S("A malicious water being. When you kill her, she changes the tile you are standing on, from land to shallow water, or from shallow water to deep water.",
   "恶毒的水生生物。你击杀她时，她会改变你站立的格子，将陆地变为浅水，浅水变为深水。")
   
-N("Topielec", GEN_M, "溺水妖")
+N("Topielec", GEN_N, "溺水妖","名")
 S("A malicious water being. When you kill him, he changes the tile you are standing on, from land to shallow water, or from shallow water to deep water.",
   "恶毒的水生生物。你击杀他时，他会改变你站立的格子，将陆地变为浅水，浅水变为深水。")
 
@@ -7636,7 +7611,7 @@ S(
 
 //---
 
-N("Frog Park", GEN_O, "青蛙公园")
+N("Frog Park", GEN_N, "青蛙公园","")
 
 S("This park is a perfect place for frogs to hide from predators. "
   "So perfect that the frogs have grown in size, gained magical abilities, "
@@ -7644,7 +7619,7 @@ S("This park is a perfect place for frogs to hide from predators. "
   "这座公园是青蛙躲避捕食者的完美地点，完美到这些青蛙尺寸变大，获得了魔力，自己都成为了危险的生物。"
   )
 
-N("Gold Ball", GEN_F, "金球")
+N("Gold Ball", GEN_N, "金球","枚")
 S("A toy lost in the Frog Park by a spoiled child.", "被惯坏的孩子留在青蛙公园的玩具。")
 
 Orb("Impact", "冲击")
@@ -7652,12 +7627,12 @@ S("Whenever you use a ranged Orb to achieve an effect, all the single-tile monst
   "location are stunned.",
   "在你使用远程法球完成某种效果时，所有相邻于目标位置的单格怪物均被击晕。")
 
-N("shrub", GEN_O, "灌丛")
+N("shrub", GEN_N, "灌丛","片")
 S("A strange small tree that cannot be attacked with mundane weapons nor phased though. "
   "It can be vaulted over, though.",
   "一颗奇怪的小树，既不能以寻常武器攻击也不能用魔法穿行。不过你可以翻越过去。")
 
-N("Giant Frog", GEN_F, "巨蛙")
+N("Giant Frog", GEN_N, "巨蛙","只")
 
 S(
   "At first, you are shocked by the agility of this frog. Such a large creature "
@@ -7668,13 +7643,13 @@ S(
   "你乍一见到青蛙时被它的敏捷震惊。这么大的东西怎么能跳那么快！\n\n"
   "随后你就注意到它腿部的绿光。这只青蛙必定身怀魔法……它牺牲了自己的游泳能力，换取超蛙级的跳跃。")
 
-N("Yellow Frog", GEN_F, "黄蛙")
+N("Yellow Frog", GEN_N, "黄蛙","只")
 
 S("A slightly transparent yellow frog. It has mastered the magical power of phasing through solid "
   "obstacles such as rock.",
   "有点透明的黄色青蛙。它掌握了穿透岩石等固体障碍物的魔力。")
 
-N("Blue Frog", GEN_F, "蓝蛙")
+N("Blue Frog", GEN_N, "蓝蛙","只")
 
 S(
   "This frog is able to vault over the shrubs in the Frog Park, destroying the shrub in the process. "
@@ -7686,12 +7661,12 @@ S("\n\nThis Frog uses the power of %the1. You get 5 charges yourself for killing
 
 //---
 
-N("Eclectic City", GEN_N, "能源之城")
+N("Eclectic City", GEN_N, "能源之城","")
 
 S("Many kinds of creatures are living here, each with its own architectural style.",
   "各种各样的生物生存在这里，每种都有自己的构造。")
 
-N("Lazurite Figurine", GEN_F, "青金石雕像")
+N("Lazurite Figurine", GEN_N, "青金石雕像","座")
 
 S("A beautiful blue figurine. Every figurine is different.",
   "一座美丽的青金石小雕像。每个小雕像的外观都各不相同。")
@@ -8424,22 +8399,22 @@ S("YASC codes: Sides-Entity-Restrict-Threat-Wall", "YASC代码：Sides-Entity-Re
 
 // Dice Reserve
 
-N("Dice Reserve", GEN_O, "骰子保护区")
+N("Dice Reserve", GEN_N, "骰子保护区","")
 S("This land is full of sentient dice. Do not disturb them!",
   "这片地域充满了智慧骰子。不要打搅它们！")
 
-N("Crystal Die", GEN_F, "水晶骰子")
+N("Crystal Die", GEN_N, "水晶骰子","枚")
 S("A nice souvenir from the Dice Reserve. Make sure to collect the whole set!",
   "来自骰子保护区的小纪念品。要集齐一整套哦！")
 
-N("Unhappy Die", GEN_F, "不快骰子")
+N("Unhappy Die", GEN_N, "不快骰子","枚")
 S("Sentient dice like to be in a position such that their highest number is on top. "
   "Unfortunately, someone has rolled this one into a wrong position, and did not fix this. "
   "It will reward you if you roll it so that the highest number is on top again!",
 
   "智慧骰子喜欢以最大的点数在顶部的姿态休息。可惜有人把这个骰子滚动到了其他位置，而且没有复原。如果你把它最大的点数再滚到顶上，它会奖励你！")
 
-N("Happy Die", GEN_F, "快乐骰子")
+N("Happy Die", GEN_N, "快乐骰子","枚")
 
 S(
   "A happy sentient die. Dice are happy when they are in their correct position "
@@ -8449,7 +8424,7 @@ S(
 
   "一枚快乐的智慧骰子。骰子在所处位置正确时感到开心（最大的点数在顶部）；有时也会发现距离正确位置只差一次滚动的快乐骰子。其他位置对它们来说很难受，会暴露它们的弱点。你可以滚动快乐骰子，但它可能会生气！")
 
-N("Animated Die", GEN_F, "活化骰子")
+N("Animated Die", GEN_N, "活化骰子","枚")
 
 S("When sentient dice are too long in an incorrect position, they start to move on their own, "
   "and attack everyone. You can still convince Animated Dice of your good intentions by "
@@ -8460,7 +8435,7 @@ S("When sentient dice are too long in an incorrect position, they start to move 
   "活化骰子在不正确的位置待太久后会自己开始移动、攻击一切。你还是能通过把活化骰子滚动到最大点数在顶部的位置来劝服它们。如果你成功了，它们会停止移动并（如果在骰子保护区中）奖励你。不能对它们进行其他滚动或攻击。"
   )
 
-N("Angry Die", GEN_F, "愤怒骰子")
+N("Angry Die", GEN_N, "愤怒骰子","枚")
 
 S("You have made a die unhappy. Taste the revenge! This one won't forgive you, no matter what you do.",
   "你把一枚骰子惹怒了。品尝你种下的苦果吧！这一枚不管你做什么都不会原谅你。")
@@ -8475,20 +8450,20 @@ S("The die is now happy, but won't reward you outside of the Dice Reserve!", "�
 // Cursed Canyon
 //===============
 
-N("Cursed Canyon", GEN_O, "诅咒峡谷")
+N("Cursed Canyon", GEN_N, "诅咒峡谷","")
 S("This canyon is full of curses! Curses are like Orbs, but grant negative effects.",
   "这处峡谷中满是诅咒！诅咒和法球类似，但效果是负面的。")
   
-N("Canyon Hag", GEN_F, "峡谷妖婆")
+N("Canyon Hag", GEN_N, "峡谷妖婆","个")
 S("A Canyon Hag can curse you from afar, if standing on top of a Curse and close enough.",
   "如果峡谷妖婆站在诅咒上且离你够近，她就可以隔空诅咒你。")
 S("%The1 curses you with %the2!", "%1以%2诅咒你！")
 
-N("Capon Stone", GEN_O, "鸡内金")
+N("Capon Stone", GEN_N, "鸡内金","块")
 S("A lapis alectorius, alectoria or capon stone is a non-precious stone found in the gizzard of capons (young, castrated roosters). In magic it is believed to be an effective amulet, granting the wearer a heightened sense of courage and boldness. These properties are unproven. [Wikipedia]",
   "鸡内金，中药名。为雉科动物家鸡Gallusgallusdomesticus Brisson的干燥砂囊内壁。杀鸡后，取出鸡肫，立即剥下内壁，洗净，干燥。[百度百科]")
 
-#define Curse(E, P) N("Curse of " E, GEN_F, P"诅咒")
+#define Curse(E, P) N("Curse of " E, GEN_N, P"诅咒","")
 Curse("Weakness", "虚弱")
 S("This Curse weakens your normal attack, which will only stun monsters. For monsters which are normally only stunned anyway, they don't push the victim away. You are also unable to cut trees or fight Ivy.",
   "这一诅咒弱化你的普通攻击，使得攻击只能击晕怪物。对于本来就只会被击晕的怪物，它们改为不会被推走。你同时也无法砍伐树木或常春藤。")
@@ -8507,7 +8482,7 @@ Curse("Fatigue", "疲劳")
 S("With this Curse you cannot move too quickly. Every move increases your fatigue by 1; fatigue cannot go over 10. "
   "Resting reduces your fatigue by 5.",
   "你具有该诅咒时不能移动太快。每次移动都增加你1点疲劳；疲劳不能超过10。休息降低5点疲劳。")
-N("fatigue", GEN_N, "疲劳")
+N("fatigue", GEN_N, "疲劳","")
 S("See the Curse of Fatigue.", "请检视疲劳诅咒。")
 S("You are too fatigued!", "你太疲劳了！")
 
@@ -8559,8 +8534,8 @@ S(
 
 // these were missing somehow
 
-N("Palace Quest", GEN_O, "宫殿任务")
-N("Pike", GEN_F, "梭鱼")
+N("Palace Quest", GEN_N, "宫殿任务","")
+N("Pike", GEN_N, "梭鱼","条")
 
 // crossbow
 
