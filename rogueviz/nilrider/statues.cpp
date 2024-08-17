@@ -71,8 +71,8 @@ void create_castle() {
     tex.twidth = 16;
     tex.theight = 16;
     tex.stretched = false;
-    tex.strx = tex.tx;
-    tex.stry = tex.ty;
+    tex.strx = tex.tx = tex.twidth;
+    tex.stry = tex.ty = tex.theight;
     tex.base_x = 0;
     tex.base_y = 0;
     tex.whitetexture();
