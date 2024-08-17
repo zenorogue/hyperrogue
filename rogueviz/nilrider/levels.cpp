@@ -10,6 +10,8 @@ goalchecker basic_check(ld time_limit, ld rev_limit) {
     };
   }
 
+flagtype LEVEL_SWAP_TRIANGLE_ORDER = 1;
+
 goalchecker get_any(ld time_limit, ld rev_limit) {
   return [=] (checkerparam c) {
     if(c.t->timer > time_limit || c.rev > rev_limit) return grFailed;

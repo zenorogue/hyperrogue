@@ -379,6 +379,9 @@ void level::init() {
         d.colors[6] = d.colors[0];
         triangles.emplace_back(d);
         }
+
+      if(flags & nrlSwapTriangleOrder)
+        sort(triangles.begin(), triangles.end(), [] (triangledata& d1, triangledata& d2) { return tie(d1.x, d1.y) < tie(d2.x, d2.y); });
       }
     cgi.finishshape();
     }
