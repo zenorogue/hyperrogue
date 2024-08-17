@@ -38,6 +38,7 @@ using plan_t = vector<planpoint>;
 
 constexpr flagtype nrlPolar = Flag(1);
 constexpr flagtype nrlOrder = Flag(2);
+constexpr flagtype nrlSwapTriangleOrder = Flag(3);
 
 struct statue {
   transmatrix T;
