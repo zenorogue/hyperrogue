@@ -58,6 +58,32 @@ ld long_x(hyperpoint h) {
   return h[0] * h[1];
   }
 
+ld cycloid(ld x) {
+  // for x from 0 to TAU, returns y from 0 to 2
+  ld alpha = binsearch(0, TAU, [x] (ld a) {
+    ld ax = a - sin(a);
+    return ax >= x;
+    }, 20);
+  return 1 - cos(alpha);
+  }
+
+ld cycloid_wave(ld x) {
+  /* static bool test = true;
+  if(test) {
+    for(ld a=0; a<TAU; a += 0.01) printf("%5.3f : %5.3f\n", a, cycloid(a));
+    exit(1);
+    } */
+  int i = floor(x);
+  ld xf = x - i;
+  return cycloid(xf * TAU) * ((i&1) ? -1 : 1) / TAU;
+  }
+
+ld brachistochrone(hyperpoint h) {
+  ld res = -cycloid_wave(h[0] / 63) * 63 + h[0] * h[1] + h[1] * h[1] / 5;
+  if(h[1] == 0) println(hlog, h, " -> ", res);
+  return res;
+  }
+
 ld geodesics_0(hyperpoint h) {
   ld r = hypot_d(2, h);
   ld phi = atan2(h[1], h[0]);
@@ -808,8 +834,32 @@ level hilbertlev(
   }
   );
 
+level cycloid_slalom(
+  "Cycloid slalom", 'c', nrlSwapTriangleOrder,
+  "The main street is a brachistochrone. If you were not moving north/south, "
+  "it would be the fastest path to get to the goal. Is it still the case "
+  "in these physics? Definitely not if you have to collect on the way!",
+  -0.5*dft_block, 2.5*dft_block, 63.5*dft_block, -5.5*dft_block,
+  {
+  "gggggggG*GggggrgggggG*GgggggrggggggG*GgggggrggggG*Rgggggrggggggo",
+  "gggggggGGGggggggggggGGGggggggggggggGGGggggggggggGGGggggggggggggo",
+  "---------------------------------------------------------------*",
+  "gggggggggggggGGGgggggggggggGGGggggggggggggGGGggggggggggGGGgggggo",
+  "ggggggggrggggG*GgggggrgggggG*GggggggrgggggG*GggggrgggggG*Ggggggo",
+  "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+  "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+  "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+  },
+  0, 2,
+  brachistochrone,
+  {
+    goal{0xFFFFC0, "Collect all triangles in below 1:25, reversing time at most 3 times", basic_check(85, 3)},
+    goal{0xFFD500, "Collect all triangles in below 1:10, reversing time at most 3 times", basic_check(70, 3)},
+    }
+  );
+
 vector<level*> all_levels = {
-  &rotplane, &longtrack, &geodesical, &geodesical4, &heisenberg0, &rotwell, &labyrinth, &obstacle, &spirallev, &hilbertlev
+  &rotplane, &longtrack, &geodesical, &geodesical4, &heisenberg0, &rotwell, &labyrinth, &obstacle, &spirallev, &hilbertlev, &cycloid_slalom
   };
   
 }
