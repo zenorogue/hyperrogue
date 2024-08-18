@@ -212,6 +212,9 @@ inline ld gfx_slope = 0;
 /** default block unit */
 inline double dft_block = 1;
 
+/** default block unit */
+inline double simulation_speed = 2;
+
 extern map<char, color_t> bcols;
 extern map<char, array<string, 16> > submaps;
 

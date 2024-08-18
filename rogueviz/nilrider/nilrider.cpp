@@ -135,7 +135,7 @@ bool turn(int delta) {
     auto t = curlev->current.collected_triangles;
     bool fail = false;
 
-    for(int i=0; i<delta; i++) {
+    for(int i=0; i<delta * simulation_speed; i++) {
       curlev->history.push_back(curlev->current);
       curlev->current.be_consistent();
       bool b = curlev->current.tick(curlev);
