@@ -321,6 +321,8 @@ void pick_game() {
   dialog::addItem("change the track", 't');
   dialog::add_action_push(pick_level);
   dialog::addBreak(100);
+  add_edit(simulation_speed);
+  dialog::addBreak(100);
   add_edit(planning_mode);
   dialog::addItem(XLAT("play this track"), SDLK_ESCAPE);
   dialog::addItem(XLAT("quit Nil Rider"), 'q');
@@ -620,6 +622,11 @@ void initialize() {
 
   param_i(nilrider_tempo, "nilrider_tempo");
   param_i(nilrider_shift, "nilrider_shift");
+
+  param_f(simulation_speed, "nilrider_simulation_speed")
+  -> editable(0.1, 5, 0, "Nil Rider simulation speed",
+      "If you want to go faster, make this higher.", 'z')
+  -> set_sets([] { dialog::bound_low(0); dialog::scaleLog(); });
 
   rv_hook(hooks_frame, 100, frame);
   rv_hook(shmup::hooks_turn, 100, turn);

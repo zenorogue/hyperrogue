@@ -233,7 +233,7 @@ inline ld gfx_slope = 0;
 inline double dft_block = 1;
 
 /** default block unit */
-inline double simulation_speed = 2;
+inline double simulation_speed = 1;
 
 extern map<char, color_t> bcols;
 extern map<char, array<string, 16> > submaps;
