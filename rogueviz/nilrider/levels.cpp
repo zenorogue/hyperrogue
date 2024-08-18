@@ -613,7 +613,7 @@ struct complex_surface {
   hyperpoint cur;
   map<pair<int, int>, surface_fun> blocks;
 
-  static transmatrix flatpush(hyperpoint h) { return rgpushxto0(point31(h[0], h[1], rot_plane(h))); }
+  static transmatrix flatpush(hyperpoint h) { return rgpushxto0(point31(h[0], h[1], 0)); }
   static transmatrix hpush(hyperpoint h) { h[1] = 0; h[2] = 0; return flatpush(h); }
   static transmatrix vpush(hyperpoint h) { h[0] = 0; h[2] = 0; return flatpush(h); }
 
@@ -751,7 +751,7 @@ struct complex_surface {
   ld get(hyperpoint h) {
     int ax = int(floor(h[0] / 4));
     int ay = int(floor(h[1] / 4));
-    if(blocks.count({ax, ay})) return blocks[{ax, ay}] (h);
+    if(blocks.count({ax, ay})) return blocks[{ax, ay}] (h) + h[0] * h[1] / 2;
     return 0;
     }
 
