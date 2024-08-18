@@ -895,69 +895,28 @@ level cycloid_slalom(
     }
   );
 
-level flyoff_sub("", 0, 0, "",
-  -7.5*dft_block, 7.5*dft_block, 8.5*dft_block, -8.5*dft_block,
-  {
-  "ggggggggggggggg!",
-  "ggggggfffgggggg!",
-  "ggggggfffgggggg!",
-  "gggg|ggggg|gggg!",
-  "ggg-*-----*-ggg!",
-  "gggg|ggggf|gggg!",
-  "ggGg|g+ggg|grgG!",
-  "gGgg|g|xgo|gggg!",
-  "ggGg|g|ggg|grgg!",
-  "gggg|!!!gg|gggg!",
-  "gg--*!T!--*--gg!",
-  "gggg|!!!gg|gggg!",
-  "gggggggGGgggggg!",
-  "ggggggggggggggg!",
-  "ggggggggggggggg!",
-  "!!!!!!!!!!!!!!!!"
-  },
-  6, 6, {},
-  [] (hyperpoint h) { return rot_plane(h) - 1.5; }, {}
-  );
-
-level flyoff(
-  "Flyoff", 'r', 0,
-  "Collect all the triangles!\n\n"
-  "All the lines going through the center are horizontal.\n"
-  "However, this is Nil geometry. The other lines are NOT horizontal! Clockwise ones slope upwards, and counterclockwise ones slop edownwards.\n"
-  "Your unicycle is powered only by the gravity. Use that to your advantage!"
+level multifloor(
+  "Multi-floor", 'm', 0,
+  "There are triangles on the floors below. I mean, DIRECTLY below.\n\nHopefully, you can abuse how straight lines work in this geometry to reach them!"
   ,
 
-  -7.5*dft_block, 7.5*dft_block, 8.5*dft_block, -8.5*dft_block,
+  -1.5*dft_block, 1.5*dft_block, 2.5*dft_block, -2.5*dft_block,
   {
-  "ggggggggggggggg!",
-  "ggggggfffgggggg!",
-  "ggggggfffgggggg!",
-  "gggg|ggggg|gggg!",
-  "ggg-*-----*-ggg!",
-  "gggg|ggggf|gggg!",
-  "ggGg|g+ggg|grgG!",
-  "gGgg|g|xgo|gggg!",
-  "ggGg|g|ggg|grgg!",
-  "gggg|!!!gg|gggg!",
-  "gg--*!!!--*--gg!",
-  "gggg|!!!gg|gggg!",
-  "gggggVVVGgggggg!",
-  "ggggggggggggggg!",
-  "ggggggggggggggg!",
-  "!!!!!!!!!!!!!!!!"
-  },
-  6, 6, {&flyoff_sub},
+  "ggg!",
+  "ggg!",
+  "ggg!",
+  "!!!!"},
+  0, 1, {},
   rot_plane,
   {
-    // the solver[0.25] result is 36.92
-    goal{0x40FF40, "Collect all the triangles in below 60 seconds", basic_check(60, 999)},
-    goal{0xFFD500, "Collect all the triangles in below 38 seconds", basic_check(38, 999)}
+    goal{0x40FF40, "Collect all the triangles in below 300 seconds, reversing time at most 3 times", basic_check(300, 3)},
+    goal{0xFFD500, "Collect all the triangles in below 150 seconds, reversing time at most once", basic_check(150, 1)}
     }
   );
 
-
 vector<level*> all_levels = {
-  &rotplane, &longtrack, &geodesical, &geodesical4, &heisenberg0, &rotwell, &labyrinth, &obstacle, &spirallev, &hilbertlev, &cycloid_slalom, &flyoff
+  &rotplane, &longtrack, &geodesical, &geodesical4, &heisenberg0, &rotwell, &labyrinth, &obstacle, &spirallev, &hilbertlev, &cycloid_slalom,
+  &multifloor
   };
   
 }

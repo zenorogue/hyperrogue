@@ -332,7 +332,21 @@ void level::init_shapes() {
 
 void level::init() {
   if(initialized) return;
+
+  if(this == &multifloor) {
+    for(int y=1; y<=4; y++) {
+      auto l = new level(*this);
+      l->name = l->name + "#" + its(y);
+      l->surface_heisenberg = [y] (hyperpoint h) { return rot_plane(h) - 3 * y; };
+      l->map_tiles[1][1] = '*';
+      l->sublevels = {};
+      sublevels.push_back(l);
+      }
+    }
+
   initialized = true;
+
+
   check_cgi();
 
   real_minx = HUGE_VAL;
