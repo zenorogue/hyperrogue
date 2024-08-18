@@ -384,7 +384,7 @@ level rotplane(
   "ggggggggggggggg!",
   "!!!!!!!!!!!!!!!!"
   },
-  6, 6,
+  6, 6, {},
   rot_plane,
   {
     // the solver[0.25] result is 36.92
@@ -407,7 +407,7 @@ level longtrack(
   "--------------------------------------------------------------*G",
   "gggggfffffggggggggggggggggggggggggggggggggggggggggggggggggggggGG"
   },
-  0, 5,
+  0, 5, {},
   long_x,
   {
     // the solver[0.25] result is 1:08.56 (reduced to 1:08.45 by removing some points)
@@ -438,7 +438,7 @@ level geodesical(
   "----------------",
   "bbbbbbbbbbbbbbbb",
   },
-  0, 6,
+  0, 6, {},
   geodesics_0,
   {
     // the solver[0.25] result is 26.10
@@ -461,7 +461,7 @@ level geodesical4(
   "gggGgggggGgggggg",
   "ffffffffffffffff",
   },
-  0, 5,
+  0, 5, {},
   geodesics_at_4,
   {
     // the solver[0.25] result is 32.04
@@ -491,7 +491,7 @@ level heisenberg0(
   "ggggggg|ggggggg!",
   "!!!!!!!!!!!!!!!!"
   },
-  8, 8,
+  8, 8, {},
   f_heisenberg0,
   {
     // the solver[0.25] result is 49:15
@@ -525,7 +525,7 @@ level rotwell(
   "ggggggggggggggg!",
   "!!!!!!!!!!!!!!!!"
   },
-  8, 8,
+  8, 8, {},
   f_rot_well,
   {
     // the solver[0.5] result is 1:19.54 (obtained using get_ordered)
@@ -556,7 +556,7 @@ level labyrinth(
   "offfffffffffffo!",
   "!!!!!!!!!!!!!!!!"
   },
-  8, 8,
+  8, 8, {},
   rot_plane,
   {
     // the solver[0.1] result is 1:03.53
@@ -581,7 +581,7 @@ level obstacle(
   "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
   "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
   },
-  0, 4,
+  0, 4, {},
   long_x,
   {
     goal{0xFFFFC0, "Collect the triangle in below 1:25, reversing time at most 3 times", basic_check(85, 3)},
@@ -813,7 +813,7 @@ level spirallev(
   "ggggggggggggggr!"
   },
 
-  1, 15.4, spiral_level,
+  1, 15.4, {}, spiral_level,
   {
     // the solver result is 55.239
     goal{0xFFD500, "Collect the triangle in below 60 seconds", basic_check(60, 999)},
@@ -845,7 +845,7 @@ level hilbertlev(
   "g|g!rgggGGGgggr!"
   },
 
-  2.4, 15.4, hilbert_level,
+  2.4, 15.4, {}, hilbert_level,
   {
     // the solver result is 50.94
     goal{0xFFD500, "Collect the triangle in below 55 seconds", basic_check(55, 999)},
@@ -869,7 +869,7 @@ level cycloid_slalom(
   "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
   "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
   },
-  0, 2,
+  0, 2, {},
   brachistochrone,
   {
     goal{0xFFFFC0, "Collect all triangles in below 1:25, reversing time at most 3 times", basic_check(85, 3)},
@@ -877,8 +877,69 @@ level cycloid_slalom(
     }
   );
 
+level flyoff_sub("", 0, 0, "",
+  -7.5*dft_block, 7.5*dft_block, 8.5*dft_block, -8.5*dft_block,
+  {
+  "ggggggggggggggg!",
+  "ggggggfffgggggg!",
+  "ggggggfffgggggg!",
+  "gggg|ggggg|gggg!",
+  "ggg-*-----*-ggg!",
+  "gggg|ggggf|gggg!",
+  "ggGg|g+ggg|grgG!",
+  "gGgg|g|xgo|gggg!",
+  "ggGg|g|ggg|grgg!",
+  "gggg|!!!gg|gggg!",
+  "gg--*!T!--*--gg!",
+  "gggg|!!!gg|gggg!",
+  "gggggggGGgggggg!",
+  "ggggggggggggggg!",
+  "ggggggggggggggg!",
+  "!!!!!!!!!!!!!!!!"
+  },
+  6, 6, {},
+  [] (hyperpoint h) { return rot_plane(h) - 1.5; }, {}
+  );
+
+level flyoff(
+  "Flyoff", 'r', 0,
+  "Collect all the triangles!\n\n"
+  "All the lines going through the center are horizontal.\n"
+  "However, this is Nil geometry. The other lines are NOT horizontal! Clockwise ones slope upwards, and counterclockwise ones slop edownwards.\n"
+  "Your unicycle is powered only by the gravity. Use that to your advantage!"
+  ,
+
+  -7.5*dft_block, 7.5*dft_block, 8.5*dft_block, -8.5*dft_block,
+  {
+  "ggggggggggggggg!",
+  "ggggggfffgggggg!",
+  "ggggggfffgggggg!",
+  "gggg|ggggg|gggg!",
+  "ggg-*-----*-ggg!",
+  "gggg|ggggf|gggg!",
+  "ggGg|g+ggg|grgG!",
+  "gGgg|g|xgo|gggg!",
+  "ggGg|g|ggg|grgg!",
+  "gggg|!!!gg|gggg!",
+  "gg--*!!!--*--gg!",
+  "gggg|!!!gg|gggg!",
+  "gggggggGGgggggg!",
+  "ggggggggggggggg!",
+  "ggggggggggggggg!",
+  "!!!!!!!!!!!!!!!!"
+  },
+  6, 6, {&flyoff_sub},
+  rot_plane,
+  {
+    // the solver[0.25] result is 36.92
+    goal{0x40FF40, "Collect all the triangles in below 60 seconds", basic_check(60, 999)},
+    goal{0xFFD500, "Collect all the triangles in below 38 seconds", basic_check(38, 999)}
+    }
+  );
+
+
 vector<level*> all_levels = {
-  &rotplane, &longtrack, &geodesical, &geodesical4, &heisenberg0, &rotwell, &labyrinth, &obstacle, &spirallev, &hilbertlev, &cycloid_slalom
+  &rotplane, &longtrack, &geodesical, &geodesical4, &heisenberg0, &rotwell, &labyrinth, &obstacle, &spirallev, &hilbertlev, &cycloid_slalom, &flyoff
   };
   
 }

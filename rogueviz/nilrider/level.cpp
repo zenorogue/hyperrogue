@@ -418,6 +418,8 @@ void level::init() {
     }
   
   init_plan();
+
+  for(auto s: sublevels) s->init();
   }
 
 xy_float level::get_xy_f(hyperpoint h) {
@@ -482,8 +484,8 @@ int nilrider_shift = 2633;
 void level::draw_level(const shiftmatrix& V) {
   int id = 0;
   init_statues();
-  curlev->init_shapes();
-  curlev->init_textures();
+  init_shapes();
+  init_textures();
 
   for(auto& t: triangles) {
     bool gotit = current.collected_triangles & Flag(id);
@@ -523,6 +525,11 @@ void level::draw_level(const shiftmatrix& V) {
     poly.tinf = &uniltinf_stepped;
     uniltinf_stepped.texture_id = unil_texture_stepped->textureid;
     }
+  }
+
+void level::draw_level_rec(const shiftmatrix& V) {
+  draw_level(V);
+  for(auto sub: sublevels) sub->draw_level_rec(V);
   }
 
 void cleanup_texture(texture::texture_data*& d) {

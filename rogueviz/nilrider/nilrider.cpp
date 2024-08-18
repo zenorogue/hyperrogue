@@ -60,7 +60,7 @@ void frame() {
 
   shiftmatrix V = ggmatrix(cwt.at);  
   
-  curlev->draw_level(V);
+  curlev->draw_level_rec(V);
 
   curlev->current.draw_unilcycle(V);  
   }

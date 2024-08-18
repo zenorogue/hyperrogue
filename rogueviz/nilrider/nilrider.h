@@ -102,14 +102,15 @@ struct level {
   ld minx, miny, maxx, maxy;
   vector<string> map_tiles;
   ld startx, starty;
+  vector<level*> sublevels;
   ld scale;
   surface_fun surface_heisenberg;
   ld surface(hyperpoint h) { return surface_heisenberg(h) + heis_to_used_bonus(h); }
   
   bool initialized;
   
-  level(string name, char hotkey, flagtype flags, string longdesc, ld minx, ld miny, ld maxx, ld maxy, const vector<string>& mt, ld sx, ld sy, const std::function<ld(hyperpoint h)>& surf, vector<goal> g) :
-    name(name), hotkey(hotkey), longdesc(longdesc), flags(flags), minx(minx), miny(miny), maxx(maxx), maxy(maxy), map_tiles(mt), startx(sx), starty(sy), surface_heisenberg(surf), goals(g) { initialized = false; }
+  level(string name, char hotkey, flagtype flags, string longdesc, ld minx, ld miny, ld maxx, ld maxy, const vector<string>& mt, ld sx, ld sy, const vector<level*> subs, const std::function<ld(hyperpoint h)>& surf, vector<goal> g) :
+    name(name), hotkey(hotkey), longdesc(longdesc), flags(flags), minx(minx), miny(miny), maxx(maxx), maxy(maxy), map_tiles(mt), startx(sx), starty(sy), sublevels(subs), surface_heisenberg(surf), goals(g) { initialized = false; }
   
   ld real_minx, real_miny, real_maxx, real_maxy;
 
@@ -180,6 +181,7 @@ struct level {
   bool simulate();
   void draw_planning_screen();
   void draw_level(const shiftmatrix& V);
+  void draw_level_rec(const shiftmatrix& V);
   shiftmatrix plan_transform;
 
   hyperpoint get_spline(ld t);
