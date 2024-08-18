@@ -209,11 +209,8 @@ bool timestamp::tick(level *lev, ld time_left) {
     else {
       while(new_heading_angle < heading_angle - M_PI) new_heading_angle += TAU;
       while(new_heading_angle > heading_angle + M_PI) new_heading_angle -= TAU;
-      auto oh = heading_angle;
       heading_angle = lerp(heading_angle, new_heading_angle, ilerp(timer - time_left, last_tramp + 0.5, timer));
-      println(hlog, oh, " _ ", new_heading_angle, " -> ", heading_angle);
       }
-
 
     flyvel = gpushxto0(where) * flyvel;
     mflyvel = gpushxto0(where) * mflyvel;
@@ -252,7 +249,6 @@ bool timestamp::check_crashes(level* lev, hyperpoint owhere, hyperpoint oflyvel,
       return h[2] < lev->surface(h);
       });
 
-    println(hlog, "CRASHED INTO ", s0, " AT PART = ", part);
     timer -= time_left * (1 - part);
 
     where = lerp(owhere, where, part);
