@@ -132,6 +132,9 @@ bool timestamp::collect(level *lev) {
 constexpr ld h_units = 360 * 60 * 60;
 constexpr ld h_mul = h_units / TAU;
 
+/* set to flyvel[2] in the case of crash from below */
+constexpr ld CRASHED_FROM_BELOW = -147;
+
 int heading_to_int(ld a) {
   a = a * h_mul;
   int ai = floor(a + .5);
@@ -149,6 +152,7 @@ void timestamp::be_consistent() {
 
 bool timestamp::tick(level *lev, ld time_left) {
   
+  if(flyvel[2] == CRASHED_FROM_BELOW) return false;
   if(on_surface && !collect(lev)) return false;
   const ld eps = slope_eps;
   
@@ -228,7 +232,14 @@ bool timestamp::tick(level *lev, ld time_left) {
 bool timestamp::check_crashes(level* lev, hyperpoint owhere, hyperpoint oflyvel, ld time_left) {
   ld oz = lev->surface(owhere);
   ld z = lev->surface(where);
-  if(owhere[2] > oz && where[2] < z) {
+
+  if(owhere[2] < oz && where[2] >= z) {
+    auto xy = lev->get_xy_i(where);
+    char ch = lev->mapchar(xy);
+    if(ch != '!') { flyvel[2] = CRASHED_FROM_BELOW; return true; }
+    }
+
+  if(owhere[2] > oz && where[2] <= z) {
 
     auto xy = lev->get_xy_i(where);
     char ch = lev->mapchar(xy);
@@ -267,6 +278,7 @@ bool timestamp::check_crashes(level* lev, hyperpoint owhere, hyperpoint oflyvel,
     if(ch == 'T') {
       /* reflect off the trampoline */
       flyvel = flyvel - dot_d(3, flyvel, dz) * dz * 2;
+      where[2] = lev->surface(where) + 1e-4;
       last_tramp = timer;
       tramp_head = heading_angle;
       }
@@ -284,9 +296,8 @@ bool timestamp::check_crashes(level* lev, hyperpoint owhere, hyperpoint oflyvel,
       on_surface = lev;
       }
 
-    tick(lev, time_left * (1 - part));
-
-    return true;
+    if(part == 1) return false;
+    return tick(lev, time_left * (1 - part));
     }
   return false;
   }
