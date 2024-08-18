@@ -113,7 +113,9 @@ map<char, color_t> bcols = {
   {'2', 0xFF404040},
   {'4', 0xFF808080},
   {'6', 0xFFC0C0C0},
-  {'!', 0xFF000000}
+  {'!', 0xFF000000},
+  {'Y', 0xFFFFFF80},
+  {'y', 0xFFC0C040},
   };
 
 const int pixel_per_block = 16;
@@ -334,6 +336,24 @@ map<char, array<string, pixel_per_block> > submaps = {
     "hg     WW     hg",
     "gh     WW     gh",
     "hg     WW     hg",
+    }},
+  {'T', {
+    "WWWWWWWWWWWWWWWW",
+    "WYYYYYYYYYYYYYYW",
+    "WYyyyyyyyyyyyyYW",
+    "WYyYYYYYYYYYYyYW",
+    "WYyYyyyyyyyyYyYW",
+    "WYyYyYYYYYYyYyYW",
+    "WYyYyYyyyyYyYyYW",
+    "WYyYyYyYYyYyYyYW",
+    "WYyYyYyYYyYyYyYW",
+    "WYyYyYyyyyYyYyYW",
+    "WYyYyYYYYYYyYyYW",
+    "WYyYyyyyyyyyYyYW",
+    "WYyYYYYYYYYYYyYW",
+    "WYyyyyyyyyyyyyYW",
+    "WYYYYYYYYYYYYYYW",
+    "WWWWWWWWWWWWWWWW",
     }},
   };
 
