@@ -271,6 +271,12 @@ bool timestamp::check_crashes(level* lev, hyperpoint owhere, hyperpoint oflyvel,
       tramp_head = heading_angle;
       }
 
+    else if(ch == 'V') {
+      /* convert velocity on velocity converter */
+      vel = hypot_d(3, flyvel);
+      on_surface = lev;
+      }
+
     else {
       /* waste some energy */
       flyvel = flyvel - dot_d(3, flyvel, dz) * dz;

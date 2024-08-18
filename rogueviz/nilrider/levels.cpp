@@ -337,7 +337,7 @@ map<char, array<string, pixel_per_block> > submaps = {
     "gh     WW     gh",
     "hg     WW     hg",
     }},
-  {'T', {
+  {'T', { /* trampoline */
     "WWWWWWWWWWWWWWWW",
     "WYYYYYYYYYYYYYYW",
     "WYyyyyyyyyyyyyYW",
@@ -353,6 +353,24 @@ map<char, array<string, pixel_per_block> > submaps = {
     "WYyYYYYYYYYYYyYW",
     "WYyyyyyyyyyyyyYW",
     "WYYYYYYYYYYYYYYW",
+    "WWWWWWWWWWWWWWWW",
+    }},
+  {'V', { /* velocity converter */
+    "WWWWWWWWWWWWWWWW",
+    "WrrrrrrrrrrrrrrW",
+    "WrbbrbbrrbbrbbrW",
+    "WrbbrbbrrbbrbbrW",
+    "WrrrrrrrrrrrrrrW",
+    "WrbbrbbrrbbrbbrW",
+    "WrbbrbbrrbbrbbrW",
+    "WrrrrrrrrrrrrrrW",
+    "WrrrrrrrrrrrrrrW",
+    "WrbbrbbrrbbrbbrW",
+    "WrbbrbbrrbbrbbrW",
+    "WrrrrrrrrrrrrrrW",
+    "WrbbrbbrrbbrbbrW",
+    "WrbbrbbrrbbrbbrW",
+    "WrrrrrrrrrrrrrrW",
     "WWWWWWWWWWWWWWWW",
     }},
   };
@@ -923,7 +941,7 @@ level flyoff(
   "gggg|!!!gg|gggg!",
   "gg--*!!!--*--gg!",
   "gggg|!!!gg|gggg!",
-  "gggggggGGgggggg!",
+  "gggggVVVGgggggg!",
   "ggggggggggggggg!",
   "ggggggggggggggg!",
   "!!!!!!!!!!!!!!!!"
