@@ -6,6 +6,9 @@ using namespace rogueviz;
 
 struct level;
 
+/** ticks per second */
+inline const ld tps = 1000;
+
 struct timestamp {
   hyperpoint where; /**< the current position of the unicycle */
   ld heading_angle; /**< the current heading angle */
@@ -22,11 +25,16 @@ struct timestamp {
   hyperpoint flyvel;/**< velocity vector if we are not on any surface */
   ld circvel;       /**< how fast the wheel is rotating if we are not on any surface, per second */
 
+  ld last_draw;     /**< when was gfx_slope computed */
+  ld last_tramp;    /**< time of last trampoline */
+  ld tramp_head;    /**< heading_angle at the moment of last trampoline */
+
+
   flagtype collected_triangles; /**< a bitset which shows which triangles are collected */
   flagtype goals;               /**< a bitset which shows which goals are complete */
   flagtype failed;              /**< a bitset which shows which goals are failed */
 
-  bool tick(level*);/**< one tick of the simulation -- returns false if the unicycle has stopped or crashed */
+  bool tick(level*, ld timeleft = 1. / tps);/**< one tick of the simulation -- returns false if the unicycle has stopped or crashed */
   void centerview(level*);
   void draw_unilcycle(const shiftmatrix&);
   void draw_instruments(level*);
@@ -34,6 +42,9 @@ struct timestamp {
   bool collect(level*);
   bool out_of_surface(level*);
   void be_consistent();
+
+  bool check_crashes_rec(level*, hyperpoint owhere, hyperpoint oflyvel, ld timeleft);
+  bool check_crashes(level*, hyperpoint owhere, hyperpoint oflyvel, ld timeleft);
   };
 
 struct planpoint {
@@ -191,15 +202,14 @@ struct level {
   bool handle_planning(int sym, int uni);
   void solve();
 
+  hyperpoint surface_point(hyperpoint h) { h[2] = surface(h); return h; }
+
   xy_float get_xy_f(hyperpoint h);
   xy_int get_xy_i(hyperpoint h) { return pfloor(get_xy_f(h)); }
   char mapchar(xy_int p);
   char mapchar(xy_float p) { return mapchar(pfloor(p)); }
   char mapchar(hyperpoint h) { return mapchar(pfloor(get_xy_f(h))); }
   };
-
-/** ticks per second */
-inline const ld tps = 1000;
 
 /** wheel radius */
 inline ld whrad = 0.05;

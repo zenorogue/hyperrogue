@@ -391,6 +391,7 @@ void level::init() {
   start.timer = 0;
   start.on_surface = this;
   start.sstime = -100;
+  start.last_tramp = -100;
   current = start;
   println(hlog, "start.where = ", start.where);
   println(hlog, "current.where = ", current.where, " : ", hr::format("%p", &current));
