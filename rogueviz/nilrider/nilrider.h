@@ -11,9 +11,16 @@ struct timestamp {
   ld heading_angle; /**< the current heading angle */
   ld vel;           /**< the current velocity in units per second */
   ld circpos;       /**< controls the wheel graphics */
-  ld slope;         /**< the current slope */
+  ld slope;         /**< the current slope, as angle */
+  ld chg_slope;     /**< slope used at surface state change */
+  ld gfx_slope;     /**< current slope used by graphics */
   ld t;             /**< planning spline parameter */
   ld timer = 0;     /**< the timer, in seconds */
+  level *on_surface;/**< pointer to the sub-level if we are currently on the surface, nullptr otherwise */
+
+  ld sstime;        /**< when did we leave or enter surface? for smoothing gfx_slope */
+  hyperpoint flyvel;/**< velocity vector if we are not on any surface */
+  ld circvel;       /**< how fast the wheel is rotating if we are not on any surface, per second */
 
   flagtype collected_triangles; /**< a bitset which shows which triangles are collected */
   flagtype goals;               /**< a bitset which shows which goals are complete */
@@ -25,6 +32,7 @@ struct timestamp {
   void draw_instruments(level*);
   ld energy_in_squares();
   bool collect(level*);
+  bool out_of_surface(level*);
   void be_consistent();
   };
 

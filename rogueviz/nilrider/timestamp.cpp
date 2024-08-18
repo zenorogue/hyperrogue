@@ -82,10 +82,16 @@ void timestamp::draw_unilcycle(const shiftmatrix& V) {
 
 bool tick_debug = false;
 
+bool timestamp::out_of_surface(level *lev) {
+  auto xy = lev->get_xy_i(where);
+  char ch = lev->mapchar(xy);
+  return ch == '!';
+  }
+
 bool timestamp::collect(level *lev) {
   auto xy = lev->get_xy_i(where);
   char ch = lev->mapchar(xy);
-  if(ch == 'r' || ch == '!') return false;
+  if(ch == 'r') return false;
   if(ch == '*') {
     for(int i=0; i<isize(lev->triangles); i++) {
       auto& t = lev->triangles[i];
@@ -143,31 +149,64 @@ void timestamp::be_consistent() {
 
 bool timestamp::tick(level *lev) {
   
-  if(!collect(lev)) return false;
+  if(on_surface && !collect(lev)) return false;
   const ld eps = slope_eps;
   
-  hyperpoint wnext = where;
-  wnext[0] += cos(heading_angle) * eps;
-  wnext[1] += sin(heading_angle) * eps;
-  wnext[2] = lev->surface(wnext);
-  
-  wnext = gpushxto0(where) * wnext;
-  slope = atan(wnext[2] / eps);
-  
-  auto ovel = vel;
-  
-  vel -= sin(slope) * gravity / tps;
-  if(vel < 0) {
-    vel = 0;
-    if(ovel == 0) return false;
+  if(on_surface) {
+    hyperpoint wnext = where;
+    wnext[0] += cos(heading_angle) * eps;
+    wnext[1] += sin(heading_angle) * eps;
+    wnext[2] = lev->surface(wnext);
+
+    wnext = gpushxto0(where) * wnext;
+    slope = atan(wnext[2] / eps);
+
+    if(out_of_surface(lev)) {
+      on_surface = nullptr;
+      sstime = timer; chg_slope = gfx_slope;
+      flyvel = wnext * vel / hypot_d(3, wnext);
+      flyvel[3] = 0;
+      }
     }
-  
-  auto mvel = (vel + ovel) / 2;
-  where[0] += cos(heading_angle) * mvel * cos(slope) / tps;
-  where[1] += sin(heading_angle) * mvel * cos(slope) / tps;
-  where[2] = lev->surface(where);
-  circpos += mvel / whrad / tps;
-  
+
+  if(on_surface) {
+    auto ovel = vel;
+
+    vel -= sin(slope) * gravity / tps;
+    if(vel < 0) {
+      vel = 0;
+      if(ovel == 0) return false;
+      }
+
+    auto mvel = (vel + ovel) / 2;
+    where[0] += cos(heading_angle) * mvel * cos(slope) / tps;
+    where[1] += sin(heading_angle) * mvel * cos(slope) / tps;
+    where[2] = lev->surface(where);
+    circvel = mvel / whrad;
+    }
+
+  else {
+    auto oflyvel = flyvel;
+    flyvel = rgpushxto0(where) * flyvel;
+    flyvel[2] -= gravity / tps / 2;
+
+    // todo rewrite geodesic_step to take gravity into account into RK4 correctly
+    flyvel /= tps;
+    nisot::geodesic_step(where, flyvel);
+    flyvel *= tps;
+
+    flyvel[2] -= gravity / tps / 2;
+    auto mflyvel = (flyvel + oflyvel) / 2;
+    heading_angle = atan2(mflyvel[1], mflyvel[0]);
+    flyvel = gpushxto0(where) * flyvel;
+    mflyvel = gpushxto0(where) * mflyvel;
+    slope = atan(mflyvel[2] / hypot_d(2, mflyvel));
+
+    vel = hypot_d(3, flyvel);
+    }
+
+  circpos += circvel / tps;
+
   timer += 1. / tps;
   return true;
   }
@@ -195,7 +234,8 @@ void timestamp::centerview(level *lev) {
   
   transmatrix T = View;
   
-  ld gfx_slope = binsearch(-90*degree, min(slope, min_gfx_slope), [&] (ld slope) {
+  gfx_slope = min_gfx_slope;
+  if(on_surface) gfx_slope = binsearch(-90*degree, min(slope, min_gfx_slope), [&] (ld slope) {
     View = T;
     rotate_view(cspin(1, 2, slope));
     for(int i=0; i<8; i++) {
@@ -208,7 +248,12 @@ void timestamp::centerview(level *lev) {
       }
     return false;
     }, 10);
-  
+
+  if(timer < sstime + 1) {
+    ld t = timer - sstime;
+    gfx_slope = lerp(chg_slope, gfx_slope, t * t * (3 - 2*t));
+    }
+
   View = T;
   rotate_view(cspin(1, 2, gfx_slope));
   shift_view(ztangent(whdist * lev->scale));

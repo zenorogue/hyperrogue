@@ -389,6 +389,8 @@ void level::init() {
   start.where = mappt(startx+.5, starty+.5, 1);
   start.t = 0;
   start.timer = 0;
+  start.on_surface = this;
+  start.sstime = -100;
   current = start;
   println(hlog, "start.where = ", start.where);
   println(hlog, "current.where = ", current.where, " : ", hr::format("%p", &current));
