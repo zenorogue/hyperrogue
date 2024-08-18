@@ -80,7 +80,6 @@ ld cycloid_wave(ld x) {
 
 ld brachistochrone(hyperpoint h) {
   ld res = -cycloid_wave(h[0] / 63) * 63 + h[0] * h[1] + h[1] * h[1] / 5;
-  if(h[1] == 0) println(hlog, h, " -> ", res);
   return res;
   }
 
