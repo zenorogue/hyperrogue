@@ -379,7 +379,7 @@ level rotplane(
   "Trying to be horizontal", 'r', 0,
   "Collect all the triangles!\n\n"
   "All the lines going through the center are horizontal.\n"
-  "However, this is Nil geometry. The other lines are NOT horizontal! Clockwise ones slope upwards, and counterclockwise ones slop edownwards.\n"
+  "However, this is Nil geometry. The other lines are NOT horizontal! Clockwise ones slope upwards, and counterclockwise ones slope downwards.\n"
   "Your unicycle is powered only by the gravity. Use that to your advantage!"
   ,
 
