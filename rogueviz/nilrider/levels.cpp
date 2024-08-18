@@ -44,18 +44,16 @@ goalchecker fullstop_check(ld time_limit, ld rev_limit) {
     };
   }
 
-ld f_heisenberg0(hyperpoint h) { return 0; }
+ld f_heisenberg0(hyperpoint h) { return nilv::convert_bonus(h, nilv::nmHeis, nilv::model_used); }
 
-ld rot_plane(hyperpoint h) {
-  return h[0] * h[1] / 2;
-  }
+ld rot_plane(hyperpoint h) { return nilv::convert_bonus(h, nilv::nmSym, nilv::model_used); }
 
 ld f_rot_well(hyperpoint h) {
-  return h[0] * h[1] / 2 + h[0] * h[0] + h[1] * h[1];
+  return rot_plane(h) + h[0] * h[0] + h[1] * h[1];
   }
 
 ld long_x(hyperpoint h) {
-  return h[0] * h[1];
+  return rot_plane(h) + h[0] * h[1] / 2;
   }
 
 ld cycloid(ld x) {
@@ -79,8 +77,7 @@ ld cycloid_wave(ld x) {
   }
 
 ld brachistochrone(hyperpoint h) {
-  ld res = -cycloid_wave(h[0] / 63) * 63 + h[0] * h[1] + h[1] * h[1] / 5;
-  return res;
+  return long_x(h) - cycloid_wave(h[0] / 63) * 63 + h[1] * h[1] / 5;
   }
 
 ld geodesics_0(hyperpoint h) {
@@ -613,7 +610,7 @@ struct complex_surface {
   hyperpoint cur;
   map<pair<int, int>, surface_fun> blocks;
 
-  static transmatrix flatpush(hyperpoint h) { return rgpushxto0(point31(h[0], h[1], 0)); }
+  static transmatrix flatpush(hyperpoint h) { return rgpushxto0(nilv::convert(point31(h[0], h[1], 0), nilv::nmSym, nilv::model_used)); }
   static transmatrix hpush(hyperpoint h) { h[1] = 0; h[2] = 0; return flatpush(h); }
   static transmatrix vpush(hyperpoint h) { h[0] = 0; h[2] = 0; return flatpush(h); }
 
@@ -751,7 +748,7 @@ struct complex_surface {
   ld get(hyperpoint h) {
     int ax = int(floor(h[0] / 4));
     int ay = int(floor(h[1] / 4));
-    if(blocks.count({ax, ay})) return blocks[{ax, ay}] (h) + h[0] * h[1] / 2;
+    if(blocks.count({ax, ay})) return blocks[{ax, ay}] (h);
     return 0;
     }
 

@@ -2,23 +2,9 @@ namespace nilrider {
 
 ld timestamp::energy_in_squares() { return vel * vel / (2 * gravity); }
 
-EX ld sym_to_used_bonus(const hyperpoint& H) {
-  return nilv::sym_to_heis_bonus(H) * (nilv::model_used - nilv::nmSym);
-  }
-
-EX ld heis_to_used_bonus(const hyperpoint& H) {
-  return nilv::sym_to_heis_bonus(H) * (nilv::model_used - nilv::nmHeis);
-  }
-
 /** convert rotationally symmetric to internal model */
 EX hyperpoint sym_to_used(hyperpoint H) {
-  if(nil) H[2] += sym_to_used_bonus(H);
-  return H;
-  }
-
-/** convert Heisenberg to internal model */
-EX hyperpoint heis_to_used(hyperpoint H) {
-  if(nil) H[2] += heis_to_used_bonus(H);
+  if(nil) nilv::convert_ref(H, nilv::nmSym, nilv::model_used);
   return H;
   }
 

@@ -54,7 +54,7 @@ void level::init_textures() {
         col = bcols[c];
         if(levels && new_levellines_for[3]) {
           hyperpoint h = T * mappt(x, y, texture_density);
-          ld z = h[2] - sym_to_used_bonus(h);
+          ld z = h[2] - nilv::convert_bonus(h, nilv::nmSym, nilv::model_used);
           if(z > 0) col = gradient(col, 0xFFFF0000, 0, z - floor(z), 4);
           if(z < 0) col = gradient(col, 0xFF0000FF, 0, -z - floor(-z), 4);
           }
@@ -337,7 +337,7 @@ void level::init() {
     for(int y=1; y<=4; y++) {
       auto l = new level(*this);
       l->name = l->name + "#" + its(y);
-      l->surface_heisenberg = [y] (hyperpoint h) { return rot_plane(h) - 3 * y; };
+      l->surface = [y] (hyperpoint h) { return rot_plane(h) - 3 * y; };
       l->map_tiles[1][1] = '*';
       l->sublevels = {};
       sublevels.push_back(l);

@@ -104,8 +104,6 @@ struct goal {
 
 using surface_fun = std::function<ld(hyperpoint h)>;
 
-ld heis_to_used_bonus(const hyperpoint&);
-
 struct level {
   string name;
   char hotkey;
@@ -116,13 +114,12 @@ struct level {
   ld startx, starty;
   vector<level*> sublevels;
   ld scale;
-  surface_fun surface_heisenberg;
-  ld surface(hyperpoint h) { return surface_heisenberg(h) + heis_to_used_bonus(h); }
+  surface_fun surface;
   
   bool initialized;
   
   level(string name, char hotkey, flagtype flags, string longdesc, ld minx, ld miny, ld maxx, ld maxy, const vector<string>& mt, ld sx, ld sy, const vector<level*> subs, const std::function<ld(hyperpoint h)>& surf, vector<goal> g) :
-    name(name), hotkey(hotkey), longdesc(longdesc), flags(flags), minx(minx), miny(miny), maxx(maxx), maxy(maxy), map_tiles(mt), startx(sx), starty(sy), sublevels(subs), surface_heisenberg(surf), goals(g) { initialized = false; }
+    name(name), hotkey(hotkey), longdesc(longdesc), flags(flags), minx(minx), miny(miny), maxx(maxx), maxy(maxy), map_tiles(mt), startx(sx), starty(sy), sublevels(subs), surface(surf), goals(g) { initialized = false; }
   
   ld real_minx, real_miny, real_maxx, real_maxy;
 
