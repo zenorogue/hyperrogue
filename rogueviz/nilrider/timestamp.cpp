@@ -89,12 +89,13 @@ bool timestamp::out_of_surface(level *lev) {
   }
 
 bool timestamp::collect(level *lev) {
-  auto xy = lev->get_xy_i(where);
-  char ch = lev->mapchar(xy);
+  auto xy = on_surface->get_xy_i(where);
+  char ch = on_surface->mapchar(xy);
   if(ch == 'r') return false;
   if(ch == '*') {
     for(int i=0; i<isize(lev->triangles); i++) {
       auto& t = lev->triangles[i];
+      if(t.which != on_surface) continue;
       if(t.x == xy.first && t.y == xy.second) collected_triangles |= (1<<i);
       }
     }
@@ -160,7 +161,7 @@ bool timestamp::tick(level *lev, ld time_left) {
     hyperpoint wnext = where;
     wnext[0] += cos(heading_angle) * eps;
     wnext[1] += sin(heading_angle) * eps;
-    wnext[2] = lev->surface(wnext);
+    wnext[2] = on_surface->surface(wnext);
 
     wnext = gpushxto0(where) * wnext;
     slope = atan(wnext[2] / eps);
@@ -187,7 +188,7 @@ bool timestamp::tick(level *lev, ld time_left) {
     auto mvel = (vel + ovel) / 2;
     where[0] += cos(heading_angle) * mvel * cos(slope) * time_left;
     where[1] += sin(heading_angle) * mvel * cos(slope) * time_left;
-    where[2] = lev->surface(where);
+    where[2] = on_surface->surface(where);
     circvel = mvel / whrad;
     }
 
@@ -336,7 +337,7 @@ void timestamp::centerview(level *lev) {
     for(int i=0; i<8; i++) {
       shift_view(ztangent(whdist * lev->scale / 8.));
       hyperpoint p = inverse(View) * C0;
-      ld room = p[2] - lev->surface(p);
+      ld room = p[2] - on_surface->surface(p);
       if(room < .1 * lev->scale) return true;
       for(hyperpoint h: {point3(0,0,0), point3(.001,0,0), point3(-.001,0,0), point3(0,-0.001,0), point3(0,0.001,0)})
         if(lev->mapchar(p+h) == 'r') return true;

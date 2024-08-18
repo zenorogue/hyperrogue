@@ -68,6 +68,7 @@ struct statue {
 struct triangledata {
   int x, y;
   hyperpoint where;
+  level *which;
   array<color_t, 7> colors;
   };
 

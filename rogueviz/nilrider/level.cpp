@@ -374,6 +374,7 @@ void level::init() {
         d.where = h;
         d.x = x;
         d.y = y;
+        d.which = this;
         for(int i=0; i<7; i++)
           d.colors[i] = gradient(0xFFD500FF, 0xFF, 0, i, 8);
         d.colors[6] = d.colors[0];
@@ -420,7 +421,11 @@ void level::init() {
   
   init_plan();
 
-  for(auto s: sublevels) s->init();
+  for(auto s: sublevels) {
+    s->init();
+    for(auto& t: s->triangles) triangles.push_back(t);
+    s->triangles.clear();
+    }
   }
 
 xy_float level::get_xy_f(hyperpoint h) {
