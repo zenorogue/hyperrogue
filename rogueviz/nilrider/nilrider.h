@@ -207,6 +207,14 @@ struct level {
   char mapchar(xy_int p);
   char mapchar(xy_float p) { return mapchar(pfloor(p)); }
   char mapchar(hyperpoint h) { return mapchar(pfloor(get_xy_f(h))); }
+
+  void gen_layer_list(vector<level*>& all) {
+    all.push_back(this); for(auto s: sublevels) s->gen_layer_list(all);
+    }
+
+  vector<level*> gen_layer_list() {
+    vector<level*> res; gen_layer_list(res); return res;
+    }
   };
 
 /** wheel radius */
