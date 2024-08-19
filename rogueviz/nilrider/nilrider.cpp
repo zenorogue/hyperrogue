@@ -168,6 +168,7 @@ bool turn(int delta) {
   }
 
 void main_menu();
+void layer_selection_screen();
 
 #define PSEUDOKEY_PAUSE 2511
 #define PSEUDOKEY_SIM 2512
@@ -221,6 +222,9 @@ void run() {
   if(planning_mode && !view_replay) {
     for(auto& b: buttons) show_button(b.first, b.second, planmode == b.first ? 0xFFD500 : dialog::dialogcolor);
     show_button(PSEUDOKEY_SIM, "simulation");
+    if(curlev->sublevels.size() && layer_edited) {
+      show_button('L', "layer: " + layer_edited->name);
+      }
     }
   
   bool pause_av = view_replay || !planning_mode;
@@ -247,6 +251,10 @@ void run() {
     });
   dialog::add_key_action(PSEUDOKEY_SIM, toggle_replay);
   dialog::display();
+
+  if(planning_mode && !view_replay && curlev->sublevels.size()) {
+    dialog::add_key_action('L', [] { pushScreen(layer_selection_screen); });
+    }
 
   int* t = scfg_nilrider.keyaction;
   for(int i=1; i<512; i++) {
@@ -287,6 +295,20 @@ void pick_level() {
       });
     }
   dialog::addBreak(100);
+  dialog::addBack();
+  dialog::display();
+  }
+
+void layer_selection_screen() {
+  poly_outline = 0xFF;
+  dialog::init(XLAT("layer selection"), 0xC0C0FFFF, 150, 100);
+  dialog::addBreak(50);
+  auto layers = curlev->gen_layer_list();
+  char key = 'a';
+  for(auto l: layers) {
+    dialog::addBoolItem(l->name, l == layer_edited, key++);
+    dialog::add_action([l] { layer_edited = l; popScreen(); });
+    }
   dialog::addBack();
   dialog::display();
   }
