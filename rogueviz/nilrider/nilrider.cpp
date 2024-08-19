@@ -421,26 +421,46 @@ void settings() {
   dialog::display();
   }
 
-bool deleting = false;
-
 template<class T, class U> void replays_of_type(vector<T>& v, const U& loader) {
   int i = 0;
   for(auto& r: v) {
     dialog::addItem(r.name, 'a');
     dialog::add_action([&v, i, loader] {
-      if(deleting) {
-        dialog::push_confirm_dialog(
-          [&, i] { v.erase(v.begin() + i); save(); },
-          "Are you sure you want to delete '" + v[i].name + "'?"
-          );
-        }
-      else loader(v[i]);
+      pushScreen([&v, i, loader] {
+        dialog::init(XLAT(planning_mode ? "saved plan" : "replay"), 0xC0C0FFFF, 150, 100);
+        dialog::addInfo(v[i].name);
+
+        dialog::addItem(planning_mode ? "load plan" : "load replay", 'l');
+        dialog::add_action([&v, i, loader] { popScreen(); loader(v[i]); });
+
+        dialog::addItem(planning_mode ? "load plan as ghost" : "load replay as ghost", 'g');
+        dialog::add_action([] { popScreen(); println(hlog, "not implemented"); });
+
+        dialog::addItem("rename", 'r');
+        dialog::add_action([&v, i] {
+          popScreen();
+          dialog::edit_string(v[i].name, planning_mode ? "name plan" : "name replay", "");
+          dialog::get_di().reaction_final = [] { save(); };
+          });
+
+        dialog::addItem("delete", 'd');
+        dialog::add_action([&v, i] {
+          popScreen();
+          dialog::push_confirm_dialog(
+            [&v, i] { v.erase(v.begin() + i); save(); },
+            "Are you sure you want to delete '" + v[i].name + "'?"
+            );
+          });
+
+        dialog::display();
+        });
       });
     i++;
     }
   }
 
 #if CAP_SAVE
+
 void replays() {
   dialog::init(XLAT(planning_mode ? "saved plans" : "replays"), 0xC0C0FFFF, 150, 100);
   if(!planning_mode) replays_of_type(curlev->manual_replays, [] (manual_replay& r) {
@@ -463,13 +483,11 @@ void replays() {
     curlev->plan = r.plan;
     popScreen();
     });
-  dialog::addBoolItem_action("delete", deleting, 'X');
   dialog::addBack();
   dialog::display();
   }
 
 void pop_and_push_replays() {
-  deleting = false;
   popScreen();
   pushScreen(replays);
   }
@@ -508,7 +526,7 @@ void main_menu() {
       save();
       });
 
-    dialog::addItem("load a replay", 'l');
+    dialog::addItem("saved replays", 'l');
     dialog::add_action(pop_and_push_replays);
     #endif
     }
@@ -520,7 +538,7 @@ void main_menu() {
       save();
       });
 
-    dialog::addItem("load a plan", 'l');
+    dialog::addItem("saved plans", 'l');
     dialog::add_action(pop_and_push_replays);
     #endif
     }
