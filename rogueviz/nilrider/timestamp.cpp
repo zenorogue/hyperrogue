@@ -254,10 +254,6 @@ bool timestamp::check_crashes(level* lev, hyperpoint owhere, hyperpoint oflyvel,
     dz = dz - dot_d(3, dy, dz) * dy;
     dz = dz / hypot_d(3, dz); dz[3] = 0;
 
-    println(hlog, "dx = ", dx);
-    println(hlog, "dy = ", dy);
-    println(hlog, "dz = ", dz);
-
     if(ch == 'T') {
       /* reflect off the trampoline */
       flyvel = flyvel - dot_d(3, flyvel, dz) * dz * 2;
@@ -280,7 +276,7 @@ bool timestamp::check_crashes(level* lev, hyperpoint owhere, hyperpoint oflyvel,
       }
 
     if(part == 1) return false;
-    return tick(lev, time_left * (1 - part));
+    return !tick(lev, time_left * (1 - part));
     }
   return false;
   }
