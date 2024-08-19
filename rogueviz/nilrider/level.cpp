@@ -7,6 +7,8 @@ void level::init_textures() {
   create_castle();
   int tY = isize(map_tiles);
   int tX = isize(map_tiles[0]);
+  int ttY = next_p2(tY);
+  int ttX = next_p2(tX);
 
   transmatrix T = gpushxto0(new_levellines_for);
 
@@ -24,8 +26,8 @@ void level::init_textures() {
     auto& tex = *target;
 
     if(regen) {
-      tex.twidth = tex.tx = tX * texture_density;
-      tex.theight = tex.ty = tY * texture_density;
+      tex.twidth = tex.tx = ttX * texture_density;
+      tex.theight = tex.ty = ttY * texture_density;
       tex.stretched = false;
       tex.strx = tex.tx;
       tex.stry = tex.ty;
@@ -99,6 +101,8 @@ void level::init_shapes() {
   
   int tY = isize(map_tiles);
   int tX = isize(map_tiles[0]);
+  int ttY = next_p2(tY);
+  int ttX = next_p2(tX);
   
   for(int s=0; s<3; s++) {
     if(euclid && s != 1) continue;
@@ -116,7 +120,7 @@ void level::init_shapes() {
     bool need_uniltinf = uniltinf.tvertices.empty();
     
     auto pt = [&] (int x, int y, int qx, int qy) {
-      if(need_uniltinf) uniltinf.tvertices.push_back(glhr::makevertex(x * 1. / tX / prec, y * 1. / tY / prec, 0));
+      if(need_uniltinf) uniltinf.tvertices.push_back(glhr::makevertex(x * 1. / ttX / prec, y * 1. / ttY / prec, 0));
       if(s == 2) {
         ld ax = x, ay = y;
         if(qx) {
@@ -135,7 +139,7 @@ void level::init_shapes() {
           ay += .5;
           ay += (y % cdiv) * (cdiv/2-1.) / (cdiv/2);
           }
-        uniltinf_stepped.tvertices.push_back(glhr::makevertex((ax+qx) / tX / prec, (ay+qy) / tY / prec, 0));
+        uniltinf_stepped.tvertices.push_back(glhr::makevertex((ax+qx) / ttX / prec, (ay+qy) / ttY / prec, 0));
         }
       
       hyperpoint h = mappt(x, y, prec);
