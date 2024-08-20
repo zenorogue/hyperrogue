@@ -9,6 +9,21 @@ struct level;
 /** ticks per second */
 inline const ld tps = 1000;
 
+struct colorscheme {
+  color_t wheel1, wheel2, seat, seatpost;
+  colorscheme(int i) {
+    if(i == 1) { wheel1 = 0xFFFF40FF; wheel2 = 0xFF4040FF; seat = 0x303030FF; seatpost = 0x303030FF; }
+    if(i == 2) {
+      wheel1 = 0xFF | ((rand() % 0x1000000) << 8);
+      wheel2 = 0xFF | ((rand() % 0x1000000) << 8);
+      seat = 0xFF | ((rand() % 0x1000000) << 8);
+      seatpost = 0xFF | ((rand() % 0x1000000) << 8);
+      }
+    }
+  };
+
+colorscheme my_scheme(1);
+
 struct timestamp {
   hyperpoint where; /**< the current position of the unicycle */
   ld heading_angle; /**< the current heading angle */
@@ -36,7 +51,7 @@ struct timestamp {
 
   bool tick(level*, ld timeleft = 1. / tps);/**< one tick of the simulation -- returns false if the unicycle has stopped or crashed */
   void centerview(level*);
-  void draw_unilcycle(const shiftmatrix&);
+  void draw_unilcycle(const shiftmatrix&, const colorscheme& cs);
   void draw_instruments(level*);
   ld energy_in_squares();
   bool collect(level*);
@@ -75,11 +90,13 @@ struct triangledata {
 
 struct manual_replay {
   string name;
+  colorscheme cs;
   vector<int> headings;
   };
 
 struct plan_replay {
   string name;
+  colorscheme cs;
   plan_t plan;
   };
 
@@ -106,6 +123,7 @@ struct goal {
 using surface_fun = std::function<ld(hyperpoint h)>;
 
 struct ghost {
+  colorscheme cs;
   vector<timestamp> history;
   };
 

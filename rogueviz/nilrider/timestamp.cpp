@@ -8,7 +8,7 @@ EX hyperpoint sym_to_used(hyperpoint H) {
   return H;
   }
 
-void timestamp::draw_unilcycle(const shiftmatrix& V) {
+void timestamp::draw_unilcycle(const shiftmatrix& V, const colorscheme& cs) {
   const int points = 60 / (1 + reduce_quality);
   const int spoke_each = 5;
   hyperpoint whpoint[points+1];
@@ -36,9 +36,9 @@ void timestamp::draw_unilcycle(const shiftmatrix& V) {
       curvepoint(whpoint[a+b]);
     curvepoint(hub[b]);
     if(a&1)
-      queuecurve(V * rgpushxto0(where), 0xFFFFFFFF, 0xFFFF40FF, PPR::WALL);
+      queuecurve(V * rgpushxto0(where), 0xFFFFFFFF, cs.wheel1, PPR::WALL);
     else
-      queuecurve(V * rgpushxto0(where), 0xFFFFFFFF, 0xFF4040FF, PPR::WALL);
+      queuecurve(V * rgpushxto0(where), 0xFFFFFFFF, cs.wheel2, PPR::WALL);
     }
   
   if(1) {
@@ -46,7 +46,7 @@ void timestamp::draw_unilcycle(const shiftmatrix& V) {
     curvepoint(base + Ta * point3(-hublen, -hublen, whrad+hublen));
     curvepoint(base + Ta * point3(-hublen, +hublen, whrad+hublen));
     curvepoint(base + Ta * point3(hublen, 0, whrad+hublen));
-    queuecurve(V * rgpushxto0(where), 0xFF, 0x303030FF, PPR::WALL);
+    queuecurve(V * rgpushxto0(where), 0xFF, cs.seat, PPR::WALL);
     
     for(auto& y: {hublen, -hublen}) {
       curvepoint(base + Ta * point3(hublen * .1, -y, 0));
@@ -54,14 +54,14 @@ void timestamp::draw_unilcycle(const shiftmatrix& V) {
       curvepoint(base + Ta * point3(hublen * -.1, 0, whrad + hublen / 2));
       curvepoint(base + Ta * point3(hublen * .1, 0, whrad + hublen / 2));
       curvepoint(base + Ta * point3(hublen * .1, -y, 0));
-      queuecurve(V * rgpushxto0(where), 0xFF, 0x303030FF, PPR::WALL);
+      queuecurve(V * rgpushxto0(where), 0xFF, cs.seatpost, PPR::WALL);
 
       curvepoint(base + Ta * point3(hublen * -.1, 0, whrad + hublen / 2));
       curvepoint(base + Ta * point3(hublen * .1, 0, whrad + hublen / 2));
       curvepoint(base + Ta * point3(hublen * .1, 0, whrad + hublen));
       curvepoint(base + Ta * point3(hublen * -.1, 0, whrad + hublen));
       curvepoint(base + Ta * point3(hublen * -.1, 0, whrad + hublen / 2));
-      queuecurve(V * rgpushxto0(where), 0xFF, 0x303030FF, PPR::WALL);
+      queuecurve(V * rgpushxto0(where), 0xFF, cs.seatpost, PPR::WALL);
       }
     }
   }

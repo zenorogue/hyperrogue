@@ -70,7 +70,7 @@ void load() {
       if(size < 0 || size > 1000000) throw hstream_exception();
       for(int i=0; i<size; i++) headings.push_back(scan<int>(f));
       auto l = level_by_name(lev);
-      if(l) l->manual_replays.emplace_back(manual_replay{name, std::move(headings)});
+      if(l) l->manual_replays.emplace_back(manual_replay{name, colorscheme(2), std::move(headings)});
       continue;
       }
     if(s == "*PLANNING") {
@@ -82,7 +82,7 @@ void load() {
       plan.resize(size, {C0, C0});
       for(int i=0; i<size; i++) scan(f, plan[i].at[0], plan[i].at[1], plan[i].vel[0], plan[i].vel[1]);
       auto l = level_by_name(lev);
-      if(l) l->plan_replays.emplace_back(plan_replay{name, std::move(plan)});
+      if(l) l->plan_replays.emplace_back(plan_replay{name, colorscheme(2), std::move(plan)});
       continue;
       }
     if(s == "*RECORD") {
@@ -117,7 +117,7 @@ void level::load_plan_as_ghost(plan_replay& r) {
     if(isize(history) == s) break;
     }
   println(hlog, "a history of length ", isize(history), " becomes a ghost");
-  ghosts.emplace_back();
+  ghosts.emplace_back(ghost{r.cs, {}});
   auto& g = ghosts.back();
   g.history = std::move(history);
   swap(history_backup, history);

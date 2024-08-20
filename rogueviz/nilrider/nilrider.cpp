@@ -62,7 +62,7 @@ void frame() {
   
   curlev->draw_level_rec(V);
 
-  curlev->current.draw_unilcycle(V);
+  curlev->current.draw_unilcycle(V, my_scheme);
 
   for(auto g: curlev->ghosts) {
     ld t = curlev->current.timer;
@@ -72,7 +72,7 @@ void frame() {
       if(g.history[s].timer < t) a = s + 1;
       else b = s;
       }
-    if(b < isize(g.history)) g.history[b].draw_unilcycle(V);
+    if(b < isize(g.history)) g.history[b].draw_unilcycle(V, g.cs);
     }
   }
 
@@ -547,7 +547,7 @@ void main_menu() {
     dialog::add_action([] {
       vector<int> ang;
       for(auto& h: curlev->history) ang.push_back(heading_to_int(h.heading_angle));
-      curlev->manual_replays.emplace_back(manual_replay{new_replay_name(), std::move(ang)});
+      curlev->manual_replays.emplace_back(manual_replay{new_replay_name(), my_scheme, std::move(ang)});
       save();
       });
 
@@ -559,7 +559,7 @@ void main_menu() {
     #if CAP_SAVE
     dialog::addItem("save this plan", 's');
     dialog::add_action([] {
-      curlev->plan_replays.emplace_back(plan_replay{new_replay_name(), curlev->plan});
+      curlev->plan_replays.emplace_back(plan_replay{new_replay_name(), my_scheme, curlev->plan});
       save();
       });
 
