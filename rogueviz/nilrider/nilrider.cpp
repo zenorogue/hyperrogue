@@ -412,12 +412,12 @@ void settings() {
   add_edit(min_gfx_slope);
   add_edit(stepped_display);
   add_edit(simulation_speed);
-  add_break(100);
+  dialog::addBreak(100);
   add_edit(my_scheme.wheel1);
   add_edit(my_scheme.wheel2);
   add_edit(my_scheme.seat);
   add_edit(my_scheme.seatpost);
-  add_break(100);
+  dialog::addBreak(100);
   dialog::addItem("projection", 'P');
   dialog::add_action_push(nil_projection);
   dialog::addItem("configure keys", 'k');
