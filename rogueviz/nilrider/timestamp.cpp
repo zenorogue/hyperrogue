@@ -90,7 +90,7 @@ bool timestamp::collect(level *lev) {
   for(auto& g: lev->goals) {
     bool gfailed = failed & Flag(gid);
     bool gsuccess = goals & Flag(gid);
-    if(gfailed || gsuccess) continue;
+    if(gfailed || gsuccess) { gid++; continue; }
     checkerparam cp {this, lev, reversals};
     auto res = g.check(cp);
     if(res == grFailed) {
