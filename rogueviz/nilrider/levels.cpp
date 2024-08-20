@@ -10,6 +10,11 @@ goalchecker basic_check(ld time_limit, ld rev_limit) {
     };
   }
 
+eGoalResult ski_check(checkerparam c) {
+  if(c.t->on_surface && c.t->where[0] >= 8) return grSuccess;
+  return grNone;
+  }
+
 goalchecker get_any(ld time_limit, ld rev_limit) {
   return [=] (checkerparam c) {
     if(c.t->timer > time_limit || c.rev > rev_limit) return grFailed;
@@ -154,6 +159,25 @@ map<char, array<string, pixel_per_block> > submaps = {
     "W22222222222222W",
     "WWWWWWWWWWWWWWWW"
     }},
+  {'~', {
+    "WWWWWWWWWWWWWWWW",
+    "6WWWWWWWWWWWWWWW",
+    "6WWWWWYWWWWWWWWW",
+    "6WWWWWWWWWWWWWWW",
+    "6WYWWWWWWWYWWWWW",
+    "WWWWWWWWWWWWWWWW",
+    "6WWWWWWWWWWWWWWW",
+    "6WWWWWWWWWWWWWWW",
+    "6WWWWWWYWWWWWWWW",
+    "6WWWWWWWWWWWWYWW",
+    "WWWWWWWWWWWWWWWW",
+    "6WWYWWWWWWWWWWWW",
+    "6WWWWWWWWWWWWWWW",
+    "6WWWWWWWWWYWWWWW",
+    "6WWWWWWWWWWWWWWW",
+    "WWWWWWWWWWWWWWWW"
+    }},
+
   {'b', {
     "                ",
     " rrr rrr rrr rrr",
@@ -910,9 +934,31 @@ level multifloor(
     }
   );
 
+level skijump (
+  "Ski Jumping", 'r', nrlJumping,
+  "Try to jump far away!",
+  -0.5*dft_block, 2.5*dft_block, 15.5*dft_block, -2.5*dft_block,
+  {
+  "!!!!!!!!!~~~~~~~",
+  "!!!!!!!!!~~~~~~~",
+  "-----!!!!~~~~~*~",
+  "!!!!!!!!!~~~~~~~",
+  "!!!!!!!!!~~~~~~~",
+  },
+  0, 2, {},
+  [] (hyperpoint h) {
+    if(h[0] > 4.6) return h[0] * h[1] / 2;
+    return h[0] * h[1] / 2 + 4 * (4.5 - h[0]) + 1 / (5 - h[0]);
+    },
+  {
+    goal{0x40c040, "Jump as far as you can", ski_check}
+    }
+  );
+
+
 vector<level*> all_levels = {
   &rotplane, &longtrack, &geodesical, &geodesical4, &heisenberg0, &rotwell, &labyrinth, &obstacle, &spirallev, &hilbertlev, &cycloid_slalom,
-  &multifloor
+  &multifloor, &skijump
   };
   
 }

@@ -99,6 +99,7 @@ bool timestamp::collect(level *lev) {
     else if(res == grSuccess) {
       goals |= Flag(gid);
       lev->current_score[gid] = timer;
+      if(lev->flags & nrlJumping) lev->current_score[gid] = -where[0];
       if(planning_mode || !loaded_or_planned) {
         auto &res = lev->records[planning_mode][gid];
         if(res == 0 || timer < res) {

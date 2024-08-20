@@ -74,6 +74,7 @@ constexpr flagtype nrlPolar = Flag(1);
 constexpr flagtype nrlOrder = Flag(2);
 constexpr flagtype nrlSwapTriangleOrder = Flag(3);
 constexpr flagtype nrlUserCreated = Flag(4);
+constexpr flagtype nrlJumping = Flag(5);
 
 struct statue {
   transmatrix T;
