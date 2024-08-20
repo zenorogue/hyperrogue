@@ -412,6 +412,8 @@ void level::init() {
   start.sstime = -100;
   start.last_tramp = -100;
   start.collected_triangles = 0;
+  start.goals = 0;
+  start.failed = 0;
   start.vel = 0;
   current = start;
   println(hlog, "start.where = ", start.where);
