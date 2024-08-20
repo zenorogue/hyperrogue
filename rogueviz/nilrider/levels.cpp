@@ -430,6 +430,8 @@ level longtrack(
     goal{0xFF4040, "Stop where the triangle is in below 1:45", fullstop_check(75, 999)},
     // the solver[0.25] result is 1:45.52
     goal{0x303030, "Reach the triangle without going on the right side of the road below 2:00", yplus_check(120, 999)},
+
+    goal{0x40FF40, "Stop where the triangle is without reversing time", basic_check(999, 0)},
     }
   );
 
@@ -456,7 +458,8 @@ level geodesical(
   geodesics_0,
   {
     // the solver[0.25] result is 26.10
-    goal{0xFFD500, "Collect both triangles in below 30 seconds", basic_check(30, 999)}
+    goal{0xFFD500, "Collect both triangles in below 30 seconds", basic_check(30, 999)},
+    goal{0x40FF40, "Collect both triangles without reversing time", basic_check(999, 0)}
     }
   );
 
@@ -479,7 +482,8 @@ level geodesical4(
   geodesics_at_4,
   {
     // the solver[0.25] result is 32.04
-    goal{0xFFD500, "Collect the triangle in below 35 seconds", basic_check(35, 999)}
+    goal{0xFFD500, "Collect the triangle in below 35 seconds", basic_check(35, 999)},
+    goal{0x40FF40, "Collect the triangle without reversing time", basic_check(999, 0)},
     }
   );
 
@@ -508,7 +512,8 @@ level heisenberg0(
   f_heisenberg0,
   {
     // the solver[0.25] result is 49:15
-    goal{0x40FFd0, "Collect all triangles in below 0:55", basic_check(55, 999)}
+    goal{0x40FFd0, "Collect all triangles in below 0:55", basic_check(55, 999)},
+    goal{0x40c040, "Collect all triangle without reversing time", basic_check(999, 0)},
     }
   );
 
@@ -541,7 +546,8 @@ level rotwell(
   f_rot_well,
   {
     // the solver[0.5] result is 1:19.54 (obtained using get_ordered)
-    goal{0xFFD500, "Collect all triangles below 1:25", basic_check(85, 999)}
+    goal{0xFFD500, "Collect all triangles below 1:25", basic_check(85, 999)},
+    goal{0x40c040, "Collect all triangle without reversing time", basic_check(999, 0)}
     }
   );
 
@@ -574,7 +580,8 @@ level labyrinth(
     // the solver[0.15] result is 1:06.58
     // the solver[0.24] result is 1:08.54
     // the solver[0.25] result is 1:22.09 (it goes north for some reason)
-    goal{0xFFD500, "Collect the triangle in below 1:15", basic_check(75, 999)}
+    goal{0xFFD500, "Collect the triangle in below 1:15", basic_check(75, 999)},
+    goal{0x40c040, "Collect all triangle without reversing time", basic_check(999, 0)}
     }
   );
 
@@ -594,6 +601,7 @@ level obstacle(
   {
     goal{0xFFFFC0, "Collect the triangle in below 1:25, reversing time at most 3 times", basic_check(85, 3)},
     goal{0xFFD500, "Collect the triangle in below 1:10, reversing time at most 3 times", basic_check(70, 3)},
+    goal{0x40c040, "Collect the triangle without reversing time", basic_check(999, 0)}
     }
   );
 
@@ -826,6 +834,7 @@ level spirallev(
     // the solver result is 55.239
     goal{0xFFD500, "Collect the triangle in below 60 seconds", basic_check(60, 999)},
     goal{0xFF4040, "Collect the triangle in below 70 seconds", basic_check(70, 999)},
+    goal{0x40c040, "Collect the triangle without reversing time", basic_check(999, 0)}
   }
   );
 
@@ -879,6 +888,7 @@ level cycloid_slalom(
   {
     goal{0xFFFFC0, "Collect all triangles in below 1:25, reversing time at most 3 times", basic_check(85, 3)},
     goal{0xFFD500, "Collect all triangles in below 1:10, reversing time at most 3 times", basic_check(70, 3)},
+    goal{0x40c040, "Collect the triangle without reversing time", basic_check(999, 0)}
     }
   );
 
