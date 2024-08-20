@@ -955,10 +955,35 @@ level skijump (
     }
   );
 
+ld f_bumpy(hyperpoint h) {
+  ld a = h[0] * 2 + h[1];
+  ld b = h[1] * 2 - h[0];
+  return rot_plane(h) + h[0] * h[1] / 2 + sin(a*1.5) * sin(b*1.5) / 3;
+  }
+
+level bumpy(
+  "Bumpy Ride", 'b', 0,
+  "The main street is horizontal, as well as the lines orthogonal to it.",
+  0*dft_block, 2.5*dft_block, 64*dft_block, -2.5*dft_block,
+  {
+  "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~o",
+  "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~o",
+  "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*",
+  "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~o",
+  "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~o",
+  },
+  0, 4, {},
+  f_bumpy,
+  {
+    goal{0xFFFFC0, "Collect the triangle in below 1:25, reversing time at most 3 times", basic_check(85, 3)},
+    }
+  );
+
+
 
 vector<level*> all_levels = {
   &rotplane, &longtrack, &geodesical, &geodesical4, &heisenberg0, &rotwell, &labyrinth, &obstacle, &spirallev, &hilbertlev, &cycloid_slalom,
-  &multifloor, &skijump
+  &multifloor, &skijump, &bumpy
   };
   
 }
