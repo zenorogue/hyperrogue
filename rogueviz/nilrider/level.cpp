@@ -411,6 +411,8 @@ void level::init() {
   start.on_surface = this;
   start.sstime = -100;
   start.last_tramp = -100;
+  start.collected_triangles = 0;
+  start.vel = 0;
   current = start;
   println(hlog, "start.where = ", start.where);
   println(hlog, "current.where = ", current.where, " : ", hr::format("%p", &current));
