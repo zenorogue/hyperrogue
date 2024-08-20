@@ -778,8 +778,9 @@ auto celldemo = arg::add3("-unilcycle", initialize) + arg::add3("-unilplan", [] 
       pmodel = mdPerspective;
       pconf.rotational_nil = 0;
       })
-    + arg::add3("-ghost-replays", [] {
+    + arg::add3("-ghost-all", [] {
       for(auto& g: curlev->plan_replays) curlev->load_plan_as_ghost(g);
+      for(auto& g: curlev->manual_replays) curlev->load_manual_as_ghost(g);
       });
 
 auto hook0= addHook(hooks_configfile, 300, default_settings);
