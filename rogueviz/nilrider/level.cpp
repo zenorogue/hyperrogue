@@ -422,6 +422,8 @@ void level::init() {
   records[1].resize(qgoals, 0);
   current_score.resize(qgoals, 0);
 
+  int steps = 0;
+
   /* start facing slightly to the right from the slope */
   for(auto b: {true, false}) while(true) {
     auto c = start;
@@ -430,7 +432,10 @@ void level::init() {
     dynamicval<bool> lop2(planning_mode, false);
     if(c.tick(this) == b) break;
     start.heading_angle -= degree;
+    steps++; if(steps > 1080) break;
     }
+
+  if(steps > 1080) println(hlog, "warning: could not find a correct start.heading_angle");
 
   if(flags & nrlOrder) {
     sort(triangles.begin(), triangles.end(), [this] (triangledata a, triangledata b) {
