@@ -523,6 +523,19 @@ void replays() {
     dialog::add_action([] { curlev->load_all_ghosts(); });
     }
   else dialog::addBreak(100);
+
+  if(planning_mode) {
+    dialog::addItem("save the current plan", 's');
+    dialog::add_action([] {
+      curlev->plan_replays.emplace_back(plan_replay{new_replay_name(), my_scheme, curlev->plan});
+      save();
+      });
+    }
+  else {
+    dialog::addItem("save the current replay", 's');
+    dialog::add_action(save_manual_replay);
+    }
+
   dialog::addBack();
   dialog::display();
   }
@@ -558,22 +571,13 @@ void main_menu() {
     dialog::add_action(toggle_replay);
   
     #if CAP_SAVE
-    dialog::addItem("save the replay", 's');
-    dialog::add_action(save_manual_replay);
-
-    dialog::addItem("saved replays", 'l');
+    dialog::addItem("saved replays", 's');
     dialog::add_action(pop_and_push_replays);
     #endif
     }
   else {
     #if CAP_SAVE
-    dialog::addItem("save this plan", 's');
-    dialog::add_action([] {
-      curlev->plan_replays.emplace_back(plan_replay{new_replay_name(), my_scheme, curlev->plan});
-      save();
-      });
-
-    dialog::addItem("saved plans", 'l');
+    dialog::addItem("saved plans", 's');
     dialog::add_action(pop_and_push_replays);
     #endif
     }
