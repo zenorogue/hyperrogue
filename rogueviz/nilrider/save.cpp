@@ -196,6 +196,7 @@ void level::load_manual_as_ghost(manual_replay& r) {
 
 void save_manual_replay() {
   vector<int> ang;
+  if(curlev->history.back().timer < 5) { addMessage("too short -- not saving"); return; }
   for(auto& h: curlev->history) ang.push_back(h.on_surface ? heading_to_int(h.heading_angle) : 0);
   curlev->manual_replays.emplace_back(manual_replay{new_replay_name(), my_scheme, apply_rle(ang)});
   save();
