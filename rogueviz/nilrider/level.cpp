@@ -576,4 +576,61 @@ void cleanup_textures() {
   println(hlog, "CLEANUP texture");
   cleanup_texture(castle_texture);
   }
+
+void load_level(const string& fname) {
+  fhstream f(fname, "r");
+  level lev("Untitled", '1', nrlUserCreated, "", -1, 1, 1, -1, {}, 0, 0, {}, rot_plane, { goal{0x40FF40, "Collect all the triangles", basic_check(999, 999)} });
+  level *csub = &lev;
+  string s;
+  while(true) {
+    string s = scanline_noblank(f);
+    if(s == "" && feof(f.f)) break;
+    if(s == "") continue;
+    if(s[0] == '#') continue;
+    auto pos = s.find(' ');
+    if(pos == string::npos)
+      throw hr_exception("incorrect format, a line without space");
+    string cmd = s.substr(0, pos);
+    string param = s.substr(pos + 1);
+    if(cmd == "NAME") { csub->name = param; }
+    else if(cmd == "DESC") { if(csub->longdesc != "") csub->longdesc += "\n\n"; csub->longdesc += param; }
+    else if(cmd == "BOUNDS") { if(sscanf(param.c_str(), "%lf%lf%lf%lf", &csub->minx, &csub->miny, &csub->maxx, &csub->maxy) != 4) throw hr_exception("incorrect BOUNDS line"); }
+    else if(cmd == "START") { if(sscanf(param.c_str(), "%lf%lf", &csub->startx, &csub->starty) != 2) throw hr_exception("incorrect START line"); }
+    else if(cmd == "MAP") csub->map_tiles.push_back(param);
+    else if(cmd == "FUNCTION") {
+      if(param == "zero") csub->surface = rot_plane;
+      else throw hr_exception("incorrect FUNCTION");
+      }
+    else if(cmd == "LAYER") {
+      auto n = new level(lev);
+      n->name = param;
+      lev.sublevels.push_back(n);
+      n->map_tiles = {};
+      }
+    }
+  if(lev.startx < 0 || lev.starty < 0 || lev.starty >= isize(lev.map_tiles) || lev.startx >= isize(lev.map_tiles[0]))
+    throw hr_exception("start position incorrect");
+  auto all = lev.gen_layer_list();
+  for(auto& l: all) {
+    if(l->map_tiles.empty()) throw hr_exception("no map");
+    if(l->map_tiles[0].empty()) throw hr_exception("empty strings in map");
+    for(auto& s: l->map_tiles) if(isize(s) != isize(l->map_tiles[0])) throw hr_exception("map is not rectangular");
+    if(l->minx == l->maxx) throw hr_exception("bad map X dimensions");
+    if(l->miny == l->maxy) throw hr_exception("bad map Y dimensions");
+    }
+  for(auto& l: all_levels) if(l->name == lev.name) {
+    if(l->flags & nrlUserCreated) {
+      swap(*l, lev);
+      curlev = l;
+      if(on) l->init();
+      return;
+      }
+    else throw hr_exception("cannot use the same name as an official level");
+    }
+  curlev = new level(lev);
+  all_levels.emplace_back(curlev);
+  if(on) curlev->init();
+  }
+
 }
+

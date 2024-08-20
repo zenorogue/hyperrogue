@@ -735,6 +735,9 @@ auto celldemo = arg::add3("-unilcycle", initialize) + arg::add3("-unilplan", [] 
       for(auto l: all_levels) if(appears(l->name, arg::args())) curlev = l;
       if(on) curlev->init();
       })
+    + arg::add3("-load-level", [] {
+      arg::shift(); load_level(arg::args());
+      })
     + arg::add3("-simplemodel", [] {
       nisot::geodesic_movement = false;
       pmodel = mdPerspective;
