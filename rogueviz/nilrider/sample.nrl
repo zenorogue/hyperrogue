@@ -60,3 +60,7 @@ FUNCTION exp(-x*x-y*y)
 
 # if you need more layers: enter 'LAYER <name>' then describe the layer, using the same format, except DESC and START are irrelevant.
 # MAP is necessary. FUNCTION and BOUNDS will be copied from the main layer if not provided.
+
+LAYER below
+MAP F
+FUNCTION -1

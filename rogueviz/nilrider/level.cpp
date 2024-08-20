@@ -631,10 +631,10 @@ void load_level(const string& fname) {
         };
       }
     else if(cmd == "LAYER") {
-      auto n = new level(lev);
-      n->name = param;
-      lev.sublevels.push_back(n);
-      n->map_tiles = {};
+      csub = new level(lev);
+      csub->name = param;
+      lev.sublevels.push_back(csub);
+      csub->map_tiles = {};
       }
     }
   if(lev.startx < 0 || lev.starty < 0 || lev.starty >= isize(lev.map_tiles) || lev.startx >= isize(lev.map_tiles[0]))
