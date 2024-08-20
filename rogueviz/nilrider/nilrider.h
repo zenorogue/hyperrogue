@@ -91,7 +91,7 @@ struct triangledata {
 struct manual_replay {
   string name;
   colorscheme cs;
-  vector<int> headings;
+  vector<pair<int, int>> headings;
   };
 
 struct plan_replay {
@@ -245,7 +245,9 @@ struct level {
     vector<level*> res; gen_layer_list(res); return res;
     }
 
+  vector<timestamp> headings_to_history(manual_replay&);
   void load_plan_as_ghost(plan_replay&);
+  void load_manual_as_ghost(manual_replay&);
   };
 
 /** wheel radius */

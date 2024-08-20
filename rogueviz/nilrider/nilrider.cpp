@@ -502,15 +502,8 @@ void replays() {
   dialog::init(XLAT(planning_mode ? "saved plans" : "replays"), 0xC0C0FFFF, 150, 100);
   if(!planning_mode) replays_of_type(curlev->manual_replays, [] (manual_replay& r) {
     view_replay = false;
-    curlev->history.clear();
-    auto& current = curlev->current;
-    current = curlev->start;
     loaded_or_planned = true;
-    for(auto h: r.headings) {
-      current.heading_angle = int_to_heading(h);
-      curlev->history.push_back(current);
-      if(!current.tick(curlev)) break;
-      }
+    curlev->history = curlev->headings_to_history(r);
     toggle_replay();
     popScreen();
     });
@@ -556,12 +549,7 @@ void main_menu() {
   
     #if CAP_SAVE
     dialog::addItem("save the replay", 's');
-    dialog::add_action([] {
-      vector<int> ang;
-      for(auto& h: curlev->history) ang.push_back(heading_to_int(h.heading_angle));
-      curlev->manual_replays.emplace_back(manual_replay{new_replay_name(), my_scheme, std::move(ang)});
-      save();
-      });
+    dialog::add_action(save_manual_replay);
 
     dialog::addItem("saved replays", 'l');
     dialog::add_action(pop_and_push_replays);

@@ -27,6 +27,7 @@ void save() {
       }
     }
   println(f, "*COLORS\n");
+  println(f, "*RLE\n");
   for(auto l: all_levels) {
     for(auto& p: l->manual_replays) {
       println(f, "*MANUAL");
@@ -34,7 +35,7 @@ void save() {
       println(f, p.name);
       fprintf(f.f, "%08x %08x %08x %08x\n", p.cs.wheel1, p.cs.wheel2, p.cs.seat, p.cs.seatpost);
       println(f, isize(p.headings));
-      for(auto t: p.headings) println(f, t);
+      for(auto t: p.headings) println(f, t.first, " ", t.second);
       println(f);
       }
     for(auto& p: l->plan_replays) {
@@ -68,9 +69,22 @@ colorscheme load_colors(fhstream& f, bool have_colors) {
     }
   }
 
+vector<pair<int, int>> apply_rle(const vector<int>& data) {
+  vector<pair<int, int>> rle;
+  if(data.empty()) return rle;
+  int last = data[0], count = 0;
+  for(int v: data) {
+    if(v != last) { rle.emplace_back(count, last); count = 0; last = v; }
+    count++;
+    }
+  rle.emplace_back(count, last);
+  return rle;
+  }
+
 void load() {
   #if CAP_SAVE
   bool have_colors = false;
+  bool have_rle = false;
   println(hlog, "load called");
   fhstream f("nilrider.save", "rt");
   if(!f.f) return;
@@ -78,15 +92,25 @@ void load() {
   while(!feof(f.f)) {
     string s = scanline_noblank(f);
     if(s == "") continue;
-    if(s == "*COLORS") { have_colors = true; }
+    if(s == "*COLORS") { have_colors = true; continue; }
+    if(s == "*RLE") { have_rle = true; continue; }
     if(s == "*MANUAL") {
       string lev = scanline_noblank(f);
       string name = scanline_noblank(f);
       colorscheme cs = load_colors(f, have_colors);
-      vector<int> headings;
+      vector<pair<int, int>> headings;
       int size = scan<int> (f);
       if(size < 0 || size > 1000000) throw hstream_exception();
-      for(int i=0; i<size; i++) headings.push_back(scan<int>(f));
+      if(have_rle) {
+        println(hlog, "reading a RLE replay");
+        for(int i=0; i<size; i++) { int rep = scan<int>(f); headings.emplace_back(rep, scan<int>(f)); }
+        }
+      else {
+        vector<int> h;
+        for(int i=0; i<size; i++) h.emplace_back(scan<int>(f));
+        headings = apply_rle(h);
+        println(hlog, "converted ", isize(h), " to ", isize(headings));
+        }
       auto l = level_by_name(lev);
       if(l) l->manual_replays.emplace_back(manual_replay{name, cs, std::move(headings)});
       continue;
@@ -141,6 +165,31 @@ void level::load_plan_as_ghost(plan_replay& r) {
   g.history = std::move(history);
   swap(history_backup, history);
   swap(r.plan, plan);
+  }
+
+vector<timestamp> level::headings_to_history(manual_replay& r) {
+  vector<timestamp> history;
+  timestamp cur = start;
+  for(auto [qty, h]: r.headings) {
+    println(hlog, "pair: ", tie(qty, h));
+    for(int i=0; i<qty; i++) {
+      cur.heading_angle = int_to_heading(h);
+      history.push_back(cur);
+      if(!cur.tick(this)) return history;
+      }
+    }
+  return history;
+  }
+
+void level::load_manual_as_ghost(manual_replay& r) {
+  ghosts.emplace_back(ghost{r.cs, headings_to_history(r) });
+  }
+
+void save_manual_replay() {
+  vector<int> ang;
+  for(auto& h: curlev->history) ang.push_back(h.on_surface ? heading_to_int(h.heading_angle) : 0);
+  curlev->manual_replays.emplace_back(manual_replay{new_replay_name(), my_scheme, apply_rle(ang)});
+  save();
   }
 
 }
