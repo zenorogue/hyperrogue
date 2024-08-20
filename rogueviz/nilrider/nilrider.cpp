@@ -62,7 +62,18 @@ void frame() {
   
   curlev->draw_level_rec(V);
 
-  curlev->current.draw_unilcycle(V);  
+  curlev->current.draw_unilcycle(V);
+
+  for(auto g: curlev->ghosts) {
+    ld t = curlev->current.timer;
+    int a = 0, b = isize(g.history);
+    while(a != b) {
+      int s = (a + b) / 2;
+      if(g.history[s].timer < t) a = s + 1;
+      else b = s;
+      }
+    if(b < isize(g.history)) g.history[b].draw_unilcycle(V);
+    }
   }
 
 bool crash_sound = true;
@@ -756,6 +767,9 @@ auto celldemo = arg::add3("-unilcycle", initialize) + arg::add3("-unilplan", [] 
       nisot::geodesic_movement = false;
       pmodel = mdPerspective;
       pconf.rotational_nil = 0;
+      })
+    + arg::add3("-ghost-replays", [] {
+      for(auto& g: curlev->plan_replays) curlev->load_plan_as_ghost(g);
       });
 
 auto hook0= addHook(hooks_configfile, 300, default_settings);

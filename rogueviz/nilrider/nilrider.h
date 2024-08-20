@@ -105,6 +105,10 @@ struct goal {
 
 using surface_fun = std::function<ld(hyperpoint h)>;
 
+struct ghost {
+  vector<timestamp> history;
+  };
+
 struct level {
   string name;
   char hotkey;
@@ -180,6 +184,7 @@ struct level {
   void init();
 
   vector<timestamp> history;
+  vector<ghost> ghosts;
   
   vector<manual_replay> manual_replays;
   vector<plan_replay> plan_replays;
@@ -221,6 +226,8 @@ struct level {
   vector<level*> gen_layer_list() {
     vector<level*> res; gen_layer_list(res); return res;
     }
+
+  void load_plan_as_ghost(plan_replay&);
   };
 
 /** wheel radius */

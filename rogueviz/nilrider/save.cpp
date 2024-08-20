@@ -105,4 +105,23 @@ void load() {
   #endif
   }
 
+void level::load_plan_as_ghost(plan_replay& r) {
+  vector<timestamp> history_backup;
+  swap(history_backup, history);
+  swap(r.plan, plan);
+  history.clear();
+  history.push_back(start);
+  while(true) {
+    int s = isize(history);
+    if(!simulate()) break;
+    if(isize(history) == s) break;
+    }
+  println(hlog, "a history of length ", isize(history), " becomes a ghost");
+  ghosts.emplace_back();
+  auto& g = ghosts.back();
+  g.history = std::move(history);
+  swap(history_backup, history);
+  swap(r.plan, plan);
+  }
+
 }
