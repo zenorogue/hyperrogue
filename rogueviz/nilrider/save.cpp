@@ -173,7 +173,7 @@ vector<timestamp> level::headings_to_history(manual_replay& r) {
   for(auto [qty, h]: r.headings) {
     println(hlog, "pair: ", tie(qty, h));
     for(int i=0; i<qty; i++) {
-      if(h.on_surface) cur.heading_angle = int_to_heading(h);
+      if(cur.on_surface) cur.heading_angle = int_to_heading(h);
       history.push_back(cur);
       if(!cur.tick(this)) return history;
       }
