@@ -77,7 +77,7 @@ void frame() {
         if(g.history[s].timer < t) a = s + 1;
         else b = s;
         }
-      if(b < isize(g.history)) g.history[b].draw_unilcycle(V, g.cs);
+      if(b < isize(g.history) && g.history[b].where != curlev->current.where) g.history[b].draw_unilcycle(V, g.cs);
       }
     }
   }
