@@ -601,7 +601,21 @@ void load_level(const string& fname) {
     else if(cmd == "MAP") csub->map_tiles.push_back(param);
     else if(cmd == "FUNCTION") {
       if(param == "zero") csub->surface = rot_plane;
-      else throw hr_exception("incorrect FUNCTION");
+      else if(param == "heisenberg") csub->surface = f_heisenberg0;
+      else if(param == "well") csub->surface = f_rot_well;
+      else if(param == "longtrack") csub->surface = long_x;
+      else csub->surface = [param] (hyperpoint h) -> ld {
+        exp_parser ep;
+        ep.extra_params["x"] = h[0];
+        ep.extra_params["y"] = h[1];
+        ep.s = param;
+        try {
+          return ep.rparse();
+          }
+        catch(hr_parse_exception&) {
+          return 0;
+          }
+        };
       }
     else if(cmd == "LAYER") {
       auto n = new level(lev);
