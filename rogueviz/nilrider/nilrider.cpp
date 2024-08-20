@@ -368,8 +368,6 @@ void pick_game() {
   dialog::addItem("change the track", 't');
   dialog::add_action_push(pick_level);
   dialog::addBreak(100);
-  add_edit(simulation_speed);
-  dialog::addBreak(100);
   add_edit(planning_mode);
   dialog::addItem(XLAT("play this track"), SDLK_ESCAPE);
   dialog::addItem(XLAT("quit Nil Rider"), 'q');
@@ -413,6 +411,8 @@ void settings() {
   add_edit(whdist);
   add_edit(min_gfx_slope);
   add_edit(stepped_display);
+  add_edit(simulation_speed);
+  add_break(100);
   dialog::addItem("projection", 'P');
   dialog::add_action_push(nil_projection);
   dialog::addItem("configure keys", 'k');
