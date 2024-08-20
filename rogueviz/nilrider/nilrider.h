@@ -129,6 +129,7 @@ struct ghost {
 
 struct level {
   string name;
+  string filename;
   char hotkey;
   string longdesc;
   flagtype flags;

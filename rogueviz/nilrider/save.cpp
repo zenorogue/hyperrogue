@@ -29,6 +29,10 @@ void save() {
   println(f, "*COLORS\n");
   println(f, "*RLE\n");
   for(auto l: all_levels) {
+    if(l->flags & nrlUserCreated) {
+      println(f, "*FILE");
+      println(f, l->filename);
+      }
     for(auto& p: l->manual_replays) {
       println(f, "*MANUAL");
       println(f, l->name);
@@ -94,6 +98,11 @@ void load() {
     if(s == "") continue;
     if(s == "*COLORS") { have_colors = true; continue; }
     if(s == "*RLE") { have_rle = true; continue; }
+    if(s == "*FILE") {
+      string s1 = scanline_noblank(f);
+      try { load_level(s1); }
+      catch(hr_exception& e) { println(hlog, "error: could not load level ", s1, ", reason: ", e.what()); }
+      }
     if(s == "*MANUAL") {
       string lev = scanline_noblank(f);
       string name = scanline_noblank(f);
