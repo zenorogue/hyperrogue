@@ -413,6 +413,11 @@ void settings() {
   add_edit(stepped_display);
   add_edit(simulation_speed);
   add_break(100);
+  add_edit(my_scheme.wheel1);
+  add_edit(my_scheme.wheel2);
+  add_edit(my_scheme.seat);
+  add_edit(my_scheme.seatpost);
+  add_break(100);
   dialog::addItem("projection", 'P');
   dialog::add_action_push(nil_projection);
   dialog::addItem("configure keys", 'k');
@@ -692,6 +697,11 @@ void initialize() {
   -> editable(0.1, 5, 0, "Nil Rider simulation speed",
       "If you want to go faster, make this higher.", 'z')
   -> set_sets([] { dialog::bound_low(0); dialog::scaleLog(); });
+
+  param_color(my_scheme.wheel1, "color:wheel1", true, my_scheme.wheel1)->editable("wheel color 1", "", 'w');
+  param_color(my_scheme.wheel2, "color:wheel2", true, my_scheme.wheel2)->editable("wheel color 2", "", 'x');
+  param_color(my_scheme.seat, "color:seat", true, my_scheme.seat)->editable("seat color", "", 'p');
+  param_color(my_scheme.seatpost, "color:seatpost", true, my_scheme.seatpost)->editable("seatpost color", "", 'o');
 
   rv_hook(hooks_frame, 100, frame);
   rv_hook(shmup::hooks_turn, 100, turn);
