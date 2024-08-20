@@ -281,8 +281,9 @@ void clear_path(level *l) {
   crash_sound = true;
   }
 
+string fname = "horizontal.nrl";
+
 void pick_level() {
-  clearMessages();
   dialog::init(XLAT("select the track"), 0xC0C0FFFF, 150, 100);
   for(auto l: all_levels) {
     dialog::addItem(l->name, l->hotkey);
@@ -295,6 +296,19 @@ void pick_level() {
       });
     }
   dialog::addBreak(100);
+  dialog::addItem("load a level from a file", '0');
+  dialog::add_action([] {
+    dialog::openFileDialog(fname, XLAT("level to load:"), ".nrl", [] () {
+      try {
+        load_level(fname);
+        return true;
+        }
+      catch(hr_exception& e) {
+        addMessage(e.what());
+        return false;
+        }
+      });
+    });
   dialog::addBack();
   dialog::display();
   }
