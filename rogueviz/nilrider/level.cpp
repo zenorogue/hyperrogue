@@ -579,7 +579,7 @@ void cleanup_textures() {
   cleanup_texture(castle_texture);
   }
 
-void load_level(const string& fname) {
+void load_level(const string& fname, bool init) {
   fhstream f(fname, "r");
   if(!f.f) throw hr_exception("could not open file ");
   level lev("Untitled", '1', nrlUserCreated, "", -1, 1, 1, -1, {}, 0, 0, {}, rot_plane, { goal{0x40FF40, "Collect all the triangles", basic_check(999, 999)} });
@@ -659,9 +659,11 @@ void load_level(const string& fname) {
       }
     else throw hr_exception("cannot use the same name as an official level");
     }
-  curlev = new level(lev);
-  all_levels.emplace_back(curlev);
-  if(on) curlev->init();
+  if(init) {
+    curlev = new level(lev);
+    all_levels.emplace_back(curlev);
+    if(on) curlev->init();
+    }
   }
 
 }

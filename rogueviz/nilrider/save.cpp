@@ -100,7 +100,7 @@ void load() {
     if(s == "*RLE") { have_rle = true; continue; }
     if(s == "*FILE") {
       string s1 = scanline_noblank(f);
-      try { load_level(s1); }
+      try { load_level(s1, false); }
       catch(hr_exception& e) { println(hlog, "error: could not load level ", s1, ", reason: ", e.what()); }
       }
     if(s == "*MANUAL") {

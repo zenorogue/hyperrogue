@@ -317,7 +317,7 @@ void pick_level() {
   dialog::add_action([] {
     dialog::openFileDialog(fname, XLAT("level to load:"), ".nrl", [] () {
       try {
-        load_level(fname);
+        load_level(fname, true);
         return true;
         }
       catch(hr_exception& e) {
@@ -771,7 +771,7 @@ auto celldemo = arg::add3("-unilcycle", initialize) + arg::add3("-unilplan", [] 
       if(on) curlev->init();
       })
     + arg::add3("-load-level", [] {
-      arg::shift(); load_level(arg::args());
+      arg::shift(); load_level(arg::args(), true);
       })
     + arg::add3("-simplemodel", [] {
       nisot::geodesic_movement = false;
