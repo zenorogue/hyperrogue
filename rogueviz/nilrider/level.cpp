@@ -620,6 +620,7 @@ void load_level(const string& fname) {
     }
   for(auto& l: all_levels) if(l->name == lev.name) {
     if(l->flags & nrlUserCreated) {
+      cgi.ext.erase("nillevel-" + l->name);
       swap(*l, lev);
       curlev = l;
       if(on) l->init();

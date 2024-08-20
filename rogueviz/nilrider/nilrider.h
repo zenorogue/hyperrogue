@@ -120,7 +120,12 @@ struct level {
   bool initialized;
   
   level(string name, char hotkey, flagtype flags, string longdesc, ld minx, ld miny, ld maxx, ld maxy, const vector<string>& mt, ld sx, ld sy, const vector<level*> subs, const std::function<ld(hyperpoint h)>& surf, vector<goal> g) :
-    name(name), hotkey(hotkey), longdesc(longdesc), flags(flags), minx(minx), miny(miny), maxx(maxx), maxy(maxy), map_tiles(mt), startx(sx), starty(sy), sublevels(subs), surface(surf), goals(g) { initialized = false; }
+    name(name), hotkey(hotkey), longdesc(longdesc), flags(flags), minx(minx), miny(miny), maxx(maxx), maxy(maxy), map_tiles(mt), startx(sx), starty(sy), sublevels(subs), surface(surf), goals(g) {
+    initialized = false;
+    unil_texture = nullptr;
+    unil_texture_stepped = nullptr;
+    unil_texture_levels = nullptr;
+    }
   
   ld real_minx, real_miny, real_maxx, real_maxy;
 
