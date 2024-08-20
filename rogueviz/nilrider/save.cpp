@@ -1,6 +1,6 @@
 namespace nilrider {
 
-const string ver = "0.1";
+const string ver = "0.2";
 
 string new_replay_name() {
   time_t timer;
@@ -26,11 +26,13 @@ void save() {
           }
       }
     }
+  println(f, "*COLORS\n");
   for(auto l: all_levels) {
     for(auto& p: l->manual_replays) {
       println(f, "*MANUAL");
       println(f, l->name);
       println(f, p.name);
+      fprintf(f.f, "%08x %08x %08x %08x\n", p.cs.wheel1, p.cs.wheel2, p.cs.seat, p.cs.seatpost);
       println(f, isize(p.headings));
       for(auto t: p.headings) println(f, t);
       println(f);
@@ -39,6 +41,7 @@ void save() {
       println(f, "*PLANNING");
       println(f, l->name);
       println(f, p.name);
+      fprintf(f.f, "%08x %08x %08x %08x\n", p.cs.wheel1, p.cs.wheel2, p.cs.seat, p.cs.seatpost);
       println(f, isize(p.plan));
       for(auto t: p.plan) println(f, hr::format("%.6f %.6f %.6f %.6f", t.at[0], t.at[1], t.vel[0], t.vel[1]));
       println(f);
@@ -53,8 +56,21 @@ level *level_by_name(string s) {
   return nullptr;
   }
 
+colorscheme load_colors(fhstream& f, bool have_colors) {
+  if(have_colors) {
+    colorscheme s(0);
+    fscanf(f.f, "%x%x%x%x", &s.wheel1, &s.wheel2, &s.seat, &s.seatpost);
+    return s;
+    }
+  else {
+    colorscheme s(2);
+    return s;
+    }
+  }
+
 void load() {
   #if CAP_SAVE
+  bool have_colors = false;
   println(hlog, "load called");
   fhstream f("nilrider.save", "rt");
   if(!f.f) return;
@@ -62,27 +78,30 @@ void load() {
   while(!feof(f.f)) {
     string s = scanline_noblank(f);
     if(s == "") continue;
+    if(s == "*COLORS") { have_colors = true; }
     if(s == "*MANUAL") {
       string lev = scanline_noblank(f);
       string name = scanline_noblank(f);
+      colorscheme cs = load_colors(f, have_colors);
       vector<int> headings;
       int size = scan<int> (f);
       if(size < 0 || size > 1000000) throw hstream_exception();
       for(int i=0; i<size; i++) headings.push_back(scan<int>(f));
       auto l = level_by_name(lev);
-      if(l) l->manual_replays.emplace_back(manual_replay{name, colorscheme(2), std::move(headings)});
+      if(l) l->manual_replays.emplace_back(manual_replay{name, cs, std::move(headings)});
       continue;
       }
     if(s == "*PLANNING") {
       string lev = scanline_noblank(f);
       string name = scanline_noblank(f);
+      colorscheme cs = load_colors(f, have_colors);
       plan_t plan;
       int size = scan<int> (f);
       if(size < 0 || size > 1000000) throw hstream_exception();
       plan.resize(size, {C0, C0});
       for(int i=0; i<size; i++) scan(f, plan[i].at[0], plan[i].at[1], plan[i].vel[0], plan[i].vel[1]);
       auto l = level_by_name(lev);
-      if(l) l->plan_replays.emplace_back(plan_replay{name, colorscheme(2), std::move(plan)});
+      if(l) l->plan_replays.emplace_back(plan_replay{name, cs, std::move(plan)});
       continue;
       }
     if(s == "*RECORD") {
