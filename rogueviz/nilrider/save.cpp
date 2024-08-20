@@ -202,4 +202,9 @@ void save_manual_replay() {
   save();
   }
 
+void level::load_all_ghosts() {
+  for(auto& g: plan_replays) load_plan_as_ghost(g);
+  for(auto& g: manual_replays) load_manual_as_ghost(g);
+  }
+
 }

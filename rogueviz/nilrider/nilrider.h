@@ -249,6 +249,7 @@ struct level {
   vector<timestamp> headings_to_history(manual_replay&);
   void load_plan_as_ghost(plan_replay&);
   void load_manual_as_ghost(manual_replay&);
+  void load_all_ghosts();
   };
 
 /** wheel radius */

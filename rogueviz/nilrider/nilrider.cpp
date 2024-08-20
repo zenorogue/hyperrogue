@@ -458,12 +458,12 @@ void settings() {
   dialog::display();
   }
 
-template<class T, class U> void replays_of_type(vector<T>& v, const U& loader) {
+template<class T, class U, class V> void replays_of_type(vector<T>& v, const U& loader, const V& ghost_loader) {
   int i = 0;
   for(auto& r: v) {
     dialog::addItem(r.name, 'a');
-    dialog::add_action([&v, i, loader] {
-      pushScreen([&v, i, loader] {
+    dialog::add_action([&v, i, loader, ghost_loader] {
+      pushScreen([&v, i, loader, ghost_loader] {
         dialog::init(XLAT(planning_mode ? "saved plan" : "replay"), 0xC0C0FFFF, 150, 100);
         dialog::addInfo(v[i].name);
 
@@ -471,7 +471,7 @@ template<class T, class U> void replays_of_type(vector<T>& v, const U& loader) {
         dialog::add_action([&v, i, loader] { popScreen(); loader(v[i]); });
 
         dialog::addItem(planning_mode ? "load plan as ghost" : "load replay as ghost", 'g');
-        dialog::add_action([] { popScreen(); println(hlog, "not implemented"); });
+        dialog::add_action([&v, i, ghost_loader] { popScreen(); ghost_loader(v[i]); });
 
         dialog::addItem("rename", 'r');
         dialog::add_action([&v, i] {
@@ -506,13 +506,23 @@ void replays() {
     curlev->history = curlev->headings_to_history(r);
     toggle_replay();
     popScreen();
-    });
+    }, [] (manual_replay& r) { curlev->load_manual_as_ghost(r); });
   if(planning_mode) replays_of_type(curlev->plan_replays, [] (plan_replay& r) {
     view_replay = false;
     curlev->history.clear();
     curlev->plan = r.plan;
     popScreen();
-    });
+    }, [] (plan_replay& r) { curlev->load_plan_as_ghost(r); });
+  dialog::addBreak(100);
+  if(isize(curlev->ghosts)) {
+    dialog::addSelItem("forget all ghosts", its(isize(curlev->ghosts)), 'G');
+    dialog::add_action([] { curlev->ghosts.clear(); });
+    }
+  else if(isize(curlev->manual_replays) || isize(curlev->plan_replays)) {
+    dialog::addSelItem("load all plans and replays as ghosts", its(isize(curlev->manual_replays) + isize(curlev->plan_replays)), 'G');
+    dialog::add_action([] { curlev->load_all_ghosts(); });
+    }
+  else dialog::addBreak(100);
   dialog::addBack();
   dialog::display();
   }
@@ -779,8 +789,7 @@ auto celldemo = arg::add3("-unilcycle", initialize) + arg::add3("-unilplan", [] 
       pconf.rotational_nil = 0;
       })
     + arg::add3("-ghost-all", [] {
-      for(auto& g: curlev->plan_replays) curlev->load_plan_as_ghost(g);
-      for(auto& g: curlev->manual_replays) curlev->load_manual_as_ghost(g);
+      curlev->load_all_ghosts();
       });
 
 auto hook0= addHook(hooks_configfile, 300, default_settings);
