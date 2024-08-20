@@ -66,13 +66,19 @@ void frame() {
 
   for(auto g: curlev->ghosts) {
     ld t = curlev->current.timer;
-    int a = 0, b = isize(g.history);
-    while(a != b) {
-      int s = (a + b) / 2;
-      if(g.history[s].timer < t) a = s + 1;
-      else b = s;
+    ld maxt = g.history.back().timer;
+    auto gr = ghost_repeat;
+    if(gr <= 0) gr = 1e6;
+    t -= floor(t / gr) * gr;
+    for(; t < maxt; t += gr) {
+      int a = 0, b = isize(g.history);
+      while(a != b) {
+        int s = (a + b) / 2;
+        if(g.history[s].timer < t) a = s + 1;
+        else b = s;
+        }
+      if(b < isize(g.history)) g.history[b].draw_unilcycle(V, g.cs);
       }
-    if(b < isize(g.history)) g.history[b].draw_unilcycle(V, g.cs);
     }
   }
 
@@ -412,6 +418,7 @@ void settings() {
   add_edit(min_gfx_slope);
   add_edit(stepped_display);
   add_edit(simulation_speed);
+  add_edit(ghost_repeat);
   dialog::addBreak(100);
   add_edit(my_scheme.wheel1);
   add_edit(my_scheme.wheel2);
@@ -697,6 +704,11 @@ void initialize() {
   -> editable(0.1, 5, 0, "Nil Rider simulation speed",
       "If you want to go faster, make this higher.", 'z')
   -> set_sets([] { dialog::bound_low(0); dialog::scaleLog(); });
+
+  param_f(ghost_repeat, "ghost_repeat")
+  -> editable(0.01, 999, 0, "ghost repeat period",
+      "will repeat ghosts every time interval (in seconds).", 'z')
+  -> set_sets([] { dialog::bound_low(0.01); dialog::scaleLog(); });
 
   param_color(my_scheme.wheel1, "color:wheel1", true, my_scheme.wheel1)->editable("wheel color 1", "", 'w');
   param_color(my_scheme.wheel2, "color:wheel2", true, my_scheme.wheel2)->editable("wheel color 2", "", 'x');

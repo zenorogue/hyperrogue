@@ -260,6 +260,9 @@ inline ld gravity = 1 / 16.;
 /** the distance of camera from the wheel */
 inline ld whdist = 0.5;
 
+/** ghost repeat period */
+inline ld ghost_repeat = 5;
+
 /** minimum slope for rendering */
 inline ld min_gfx_slope = +90._deg;
 
