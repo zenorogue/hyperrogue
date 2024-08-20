@@ -4,6 +4,10 @@ DESC This is a copy of the 'Trying to be horizontal' level.
 # (x,y) coordinates of the top left corner of the map, and (x,y) coordinates of the bottom right corner of the map
 BOUNDS -7.5 7.5 7.5 -7.5
 
+# the map, as composed from blocks
+# see levels.cpp for predefined color pixels and blocks
+# https://github.com/zenorogue/hyperrogue/blob/master/rogueviz/nilrider/levels.cpp
+
 MAP ggggggggggggggg
 MAP ggggggfffgggggg
 MAP ggggggfffgggggg
@@ -12,13 +16,38 @@ MAP gg*-*-----*-*gg
 MAP gggg|ggggf|gggg
 MAP ggGg|g+ggg|grgG
 MAP gGgg|g|xgo|gggg
-MAP ggGg|g|ggg|grgg
+MAP ggGg|g|gFg|grgg
 MAP gggg|g|ggg|gggg
 MAP gg*-*-+---*-*gg
 MAP gggg|ggggg|gggg
 MAP gggggggGGgggggg
 MAP ggggggggggggggg
 MAP ggggggggggggggg
+
+# you can also define your own colors and blocks -- the 'F' block in the map above is defined like this:
+
+PIXEL y FFFFFF00
+PIXEL g FF404040
+PIXEL b FF000000
+
+BLOCK F
+bbbbbbbbbbbbbbbb
+bbbggggggggggbbb
+bbgyyyyyyyyyygbb
+bgyyyyyyyyyyyygb
+bgyyybyyyybyyygb
+bgyyybyyyybyyygb
+bgyyyyyyyyyyyygb
+bgyyyyyyyyyyyygb
+bgyyyyyyyyyyyygb
+bgyyyyyyyyyyyygb
+bgybyyyyyyyybygb
+bgyybyyyyyybyygb
+bgyyybbbbbbyyygb
+bbgyyyyyyyyyygbb
+bbbggggggggggbbb
+bbbbbbbbbbbbbbbb
+
 
 # (x,y) coordinates, in terms of the map -- top left corner is (0,0)
 START 6 6.0

@@ -599,6 +599,19 @@ void load_level(const string& fname) {
     else if(cmd == "BOUNDS") { if(sscanf(param.c_str(), "%lf%lf%lf%lf", &csub->minx, &csub->miny, &csub->maxx, &csub->maxy) != 4) throw hr_exception("incorrect BOUNDS line"); }
     else if(cmd == "START") { if(sscanf(param.c_str(), "%lf%lf", &csub->startx, &csub->starty) != 2) throw hr_exception("incorrect START line"); }
     else if(cmd == "MAP") csub->map_tiles.push_back(param);
+    else if(cmd == "PIXEL") {
+      char label; color_t col;
+      if(sscanf(param.c_str(), "%c%x", &label, &col) != 2) throw hr_exception("incorrect PIXEL line");
+      bcols[label] = col;
+      }
+    else if(cmd == "BLOCK") {
+      if(param.size() != 1) throw hr_exception("incorrect BLOCK line");
+      auto& submap = submaps[param[0]];
+      for(int y=0; y<pixel_per_block; y++) {
+        submap[y] = scanline_noblank(f);
+        if(isize(submap[y]) != pixel_per_block) throw hr_exception("incorrect length of a BLOCK line");
+        }
+      }
     else if(cmd == "FUNCTION") {
       if(param == "zero") csub->surface = rot_plane;
       else if(param == "heisenberg") csub->surface = f_heisenberg0;
