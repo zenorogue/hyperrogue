@@ -56,7 +56,8 @@ START 6 6.0
 # note: the parser is quite slow, so if you enter a specific function here, the game will take some time to load
 # you can also use (fast) predefined functions: zero, heisenberg, longtrack and well
 
-FUNCTION exp(-x*x-y*y)
+# FUNCTION exp(-x*x-y*y)
+FUNCTION zero
 
 # if you need more layers: enter 'LAYER <name>' then describe the layer, using the same format, except DESC and START are irrelevant.
 # MAP is necessary. FUNCTION and BOUNDS will be copied from the main layer if not provided.
