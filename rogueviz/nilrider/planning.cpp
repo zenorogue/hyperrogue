@@ -88,7 +88,6 @@ hyperpoint level::get_spline(ld t) {
 
 hyperpoint mousept;
 ld box;
-ld closest_t;
 
 char planmode = 'p';
 vector<pair<char, string> > buttons = {
@@ -205,7 +204,6 @@ void level::draw_planning_screen() {
   queuecurve(T, 0xFF8080C0, 0, PPR::LIZEYE);
   vid.linewidth /= 3;
 
-  closest_t = history.back().t;
   ld closest_dist = box * 2;
   current = history.back();
 
@@ -327,12 +325,12 @@ bool level::handle_planning(int sym, int uni) {
     case 'i': {
       if(uni == '-' && !holdmouse) {
         planpoint pt(C0, C0);
-        pt.at = get_spline(closest_t);
+        pt.at = get_spline(current.t);
         pt.vel = hpxy(0, 0);
-        plan.insert(plan.begin() + int(ceil(closest_t)), pt);
-        move_id = int(ceil(closest_t));
+        plan.insert(plan.begin() + int(ceil(current.t)), pt);
+        move_id = int(ceil(current.t));
         holdmouse = true;
-        clean_history_to(int(closest_t));
+        clean_history_to(int(current.t));
         return true;
         }
       else if(uni == '-' && holdmouse) {
