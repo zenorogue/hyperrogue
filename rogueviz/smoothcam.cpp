@@ -515,7 +515,8 @@ void prepare_for_interpolation(hyperpoint& h) {
 
 void after_interpolation(hyperpoint& h) {
   if(gproduct) {
-    ld v = exp(h[3]) / sqrt(abs(intval(h, Hypc)));
+    ld v = exp(h[3]);
+    if(!in_e2xe()) v /= sqrt(abs(intval(h, Hypc)));
     h[0] *= v;
     h[1] *= v;
     h[2] *= v;
