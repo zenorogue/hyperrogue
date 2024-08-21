@@ -766,8 +766,12 @@ EX namespace nilv {
     return H[0] * H[1] / 2;
     }
 
+  EX ld convert_bonus(hyperpoint H, ld from, ld to) {
+    return sym_to_heis_bonus(H) * (to - from);
+    }
+
   EX hyperpoint convert(hyperpoint H, ld from, ld to) {
-    H[2] += sym_to_heis_bonus(H) * (to - from);
+    H[2] += convert_bonus(H, from, to);
     return H;
     }
 
