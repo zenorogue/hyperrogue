@@ -40,6 +40,7 @@ static constexpr int POLY_SHADE_TEXTURE = (1<<27);  // texture has 'z' coordinat
 static constexpr int POLY_ONE_LEVEL = (1<<28);      // only one level of the universal cover in SL(2,R)
 static constexpr int POLY_APEIROGONAL = (1<<29);    // only vertices indexed up to she are drawn as the boundary
 static constexpr int POLY_NO_FOG = (1<<30);         // disable fog for this
+static constexpr int POLY_FORCE_DEPTH = (1<<31);    // always depth test
 
 /** \brief A graphical element that can be drawn. Objects are not drawn immediately but rather queued.
  *
@@ -756,8 +757,14 @@ void dqi_poly::gldraw() {
     if(draw) {
       if(flags & POLY_TRIANGLES) {
         glhr::color2(color, (flags & POLY_INTENSE) ? 2 : 1);
-        glhr::set_depthtest(model_needs_depth() && prio < PPR::SUPERLINE);
-        glhr::set_depthwrite(model_needs_depth() && prio != PPR::TRANSPARENT_SHADOW && prio != PPR::EUCLIDEAN_SKY);
+        if(flags & POLY_FORCE_DEPTH) {
+          glhr::set_depthtest(true);
+          glhr::set_depthwrite(true);
+          }
+        else {
+          glhr::set_depthtest(model_needs_depth() && prio < PPR::SUPERLINE);
+          glhr::set_depthwrite(model_needs_depth() && prio != PPR::TRANSPARENT_SHADOW && prio != PPR::EUCLIDEAN_SKY);
+          }
         glhr::set_fogbase(prio == PPR::SKY ? 1.0 + ((abs(cgi.SKY - cgi.LOWSKY)) / sightranges[geometry]) : 1.0);
         glDrawArrays(GL_TRIANGLES, ioffset, cnt);
         }
