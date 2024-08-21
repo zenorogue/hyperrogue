@@ -5374,3 +5374,11 @@ Mostly bug fixes:
 
 - changed the default color in drawing tool to red
 - also the parser accepts e.g. `lands_at(25)` to give the number of lands at 25 treasures
+
+2024-08-21 20:29 Update 13.0u
+- Chinese translation, thanks to 超威蓝猫
+- fixed linked settings
+- raycaster no longer disables fixed_YZ without being asked
+- fixed 'keep Y' in twisted non-sphere
+- do not exit menus on left/right arrow presses in SDL2
+- fixed Crossroads III unlocking in casual
