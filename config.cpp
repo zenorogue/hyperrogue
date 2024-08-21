@@ -437,6 +437,7 @@ struct custom_parameter : public parameter {
   cld last_value, anim_value;
   function<void(key_type)> custom_viewer;
   function<cld()> custom_value;
+  function<void(cld)> custom_set_value;
   function<bool(void*)> custom_affect;
   function<void(const string&)> custom_load;
   function<string()> custom_save;
@@ -481,6 +482,7 @@ struct custom_parameter : public parameter {
     }
 
   virtual cld get_cld() override { return custom_value(); }
+  virtual void set_cld_raw(cld x) override { if(custom_set_value) return custom_set_value(x); }
   virtual string save() override { if(custom_save) return custom_save(); else return "not saveable"; }
   virtual bool dosave() override { if(custom_do_save) return custom_do_save(); else return false; }
   virtual void reset() override { if(custom_reset) custom_reset(); }
@@ -819,6 +821,7 @@ EX shared_ptr<custom_parameter> param_custom_ld(ld& val, const parameter_names& 
   u->last_value = dft;
   u->custom_viewer = menuitem;
   u->custom_value = [&val] () { return val; };
+  u->custom_set_value = [&val] (cld x) { val = real(x); };
   u->custom_affect = [&val] (void *v) { return &val == v; };
   u->custom_load = [&val] (const string& s) { val = parseld(s); };
   u->custom_save = [&val] { return fts(val, 10); };
