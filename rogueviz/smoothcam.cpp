@@ -460,13 +460,9 @@ void show() {
 
   dialog::addItem("test the animation", 't');
   dialog::add_action([] {
-    animate_on = false;
-    last_time = HUGE_VAL;
-    last_segment = -1;
-    test_t = 0;
     dialog::editNumber(test_t, 0, 100, 0.1, 0, "enter the percentage", "");
     dialog::get_di().reaction = [] {
-      handle_animation(test_t / 100);
+      set_time(test_t / 100);
       };
     dialog::get_di().extra_options = [] {
       dialog::addSelItem("current segment", its(last_segment), 'C');
@@ -671,9 +667,17 @@ void handle_animation(ld t) {
   
   View = T * V;
   fixmatrix(View);
-  
+
   if(invalid_matrix(View)) println(hlog, "invalid_matrix ", View, " at t = ", t);
   last_time = t;
+  }
+
+void set_time(ld t) {
+  last_time = HUGE_VAL;
+  last_segment = -1;
+  test_t = 0;
+  playermoved = false;
+  handle_animation(t);
   }
 
 void handle_animation0() {
@@ -764,6 +768,7 @@ auto hooks = arg::add3("-smoothcam", enable_and_show)
     animate_on = true;
     last_time = HUGE_VAL;
     })
+  + arg::add3("-smoothcam-set", [] { arg::shift(); set_time(arg::argf()); })
   + addHook(dialog::hooks_display_dialog, 100, [] () {
     if(current_screen_cfunction() == anims::show) {
       dialog::addItem(XLAT("smooth camera"), 'C'); 
