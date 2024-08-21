@@ -1478,7 +1478,9 @@ EX int SDL_Init1(Uint32 flags) {
 #endif
 
 EX void set_cfont() {
-  cfont = font_by_name(font_filenames[last_font_id = font_id]);
+  int f = font_id;
+  if(lang() == 8 && among(f, 0, 1, 2)) f = 3;
+  cfont = font_by_name(font_filenames[last_font_id = f]);
   }
 
 EX void init_font() {
