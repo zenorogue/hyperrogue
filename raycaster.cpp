@@ -1319,7 +1319,7 @@ void raygen::emit_iterate(int gid1) {
 
   compute_which_and_dist(flat1, flat2);
 
-  vid.fixed_yz = false;
+  // vid.fixed_yz = false;
 
   // shift d units
   if(use_reflect) fmain +=
