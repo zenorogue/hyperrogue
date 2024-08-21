@@ -238,7 +238,7 @@ EX vector<pair<string, string>> font_names = {
   {"DejaVu Sans Bold", ""},
   {"DejaVu Sans", ""},
   {"Computer Modern Sans", ""},
-  {"Noto Sans", ""},
+  {"Noto Sans", "note: if using the Chinese translation, Noto Sans will override the options above it"},
   {"OpenDyslexic3-Regular", ""},
   {"TTF font", ""},
   {"OTF font", ""}
