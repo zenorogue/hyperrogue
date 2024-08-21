@@ -1891,6 +1891,11 @@ EX namespace dialog {
     if(!hasInfix(s)) return;
     dialog::v.push_back(make_pair(s, color));
     }
+
+  EX void vpush2(color_t color, const string& name, const string& extra) {
+    if(!hasInfix(extra)) return;
+    dialog::v.push_back(make_pair(name, color));
+    }
   
   EX string editchecker(int sym, int uni) {
       if(uni >= 32 && uni < 127) return string("") + char(uni);
