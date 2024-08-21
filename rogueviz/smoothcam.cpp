@@ -640,11 +640,12 @@ void handle_animation(ld t) {
           hyperpoint h;
           if(j == 0)
             h = tC0(f.V);
+          auto sm = (hyperbolic || euclid || sphere) ? smIsotropic : gproduct ? smProduct : smGeodesic;
           if(j == 1) {
-            h = tC0(shift_object(f.V, f.ori, ztangent(f.front_distance), (hyperbolic || euclid || sphere) ? smIsotropic : smGeodesic));
+            h = tC0(shift_object(f.V, f.ori, ztangent(f.front_distance), sm));
             }
           if(j == 2) {
-            h = tC0(shift_object(f.V, f.ori, ctangent(1, -f.up_distance), (hyperbolic || euclid || sphere) ? smIsotropic : smGeodesic));
+            h = tC0(shift_object(f.V, f.ori, ctangent(1, -f.up_distance), sm));
             }
           prepare_for_interpolation(h);
           values.push_back(h[i]);
