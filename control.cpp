@@ -358,7 +358,7 @@ EX bool doexiton(int sym, int uni) {
   if(sym == SDLK_LALT) return false;
   if(sym == SDLK_RALT) return false;
   #endif
-  if(uni != 0) return true;
+  if(uni != 0 && uni < 128) return true;
   return false;
   }
 
