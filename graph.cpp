@@ -4095,8 +4095,11 @@ EX color_t transcolor(cell *c, cell *c2, color_t wcol) {
   return 0;
   }
 
+EX bool no_darken = false;
+
 // how much should be the d-th wall darkened in 3D
 EX int get_darkval(cell *c, int d) {
+  if(no_darken) return 0;
   if(mhybrid) {
     return d >= c->type - 2 ? 4 : 0;
     }
