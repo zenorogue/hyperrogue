@@ -630,6 +630,37 @@ void handle_animation(ld t) {
     rotate_view(inverse(Rot));
     }
 
+  else if(mtwisted || mproduct) {
+    hyperpoint h;
+    for(int j=0; j<4; j++) {
+      vector<ld> values;
+      for(auto& f: anim.frames) {
+        hyperpoint v = f.V*C0;
+        prepare_for_interpolation(v);
+        values.push_back(v[j]);
+        }
+      h[j] = interpolate(values, times, t);
+      }
+    after_interpolation(h);
+    View = gpushxto0(h); NLP = Id;
+
+    transmatrix Rot = Id;
+    for(int j=0; j<3; j++) for(int k=0; k<3; k++) {
+      vector<ld> values;
+      for(auto& f: anim.frames) {
+        transmatrix Rot1 = gpushxto0(f.V*C0) * f.V;
+        auto t = Rot1;
+        if(mproduct) Rot1 = Rot1 * f.ori;
+        println(hlog, kz(t), " -> ", kz(Rot1), " LPU ", nisot::local_perspective_used);
+        values.push_back(Rot1[j][k]);
+        }
+      Rot[j][k] = interpolate(values, times, t);
+      }
+    fix_rotation(Rot);
+
+    rotate_view(inverse(Rot));
+    }
+
   else {
     hyperpoint pts[3];
 
