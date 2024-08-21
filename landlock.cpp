@@ -672,10 +672,10 @@ EX eLand getNewLand(eLand old) {
     tab[cnt++] = randomElementalLandWeighted();    
     }
   
-  if(landUnlocked(laHell)) {
+  if(landUnlocked(laCrossroads3)) {
     if(!generatingEquidistant && old != laPrairie) tab[cnt++] = laCrossroads3;
     }
-  
+
   if(items[itHell] >= U10) {
     if(old == laCrossroads || old == laCrossroads2) tab[cnt++] = laOcean;
     if(old == laOcean) tab[cnt++] = laCrossroads2;
