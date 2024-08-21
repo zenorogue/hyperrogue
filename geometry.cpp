@@ -1011,21 +1011,9 @@ EX namespace geom3 {
     using namespace geom3;
     DEBBI(DF_INIT | DF_POLY | DF_GEOM, ("geom3::compute"));
     // tanh(depth) / tanh(camera) == pconf.alpha
-    invalid = "";
     
     if(GDIM == 3 || flipped || changing_embedded_settings);
-    else if(vid.tc_alpha < vid.tc_depth && vid.tc_alpha < vid.tc_camera)
-      pconf.alpha = tan_auto(vid.depth) / tan_auto(vid.camera);
-    else if(vid.tc_depth < vid.tc_alpha && vid.tc_depth < vid.tc_camera) {
-      ld v = pconf.alpha * tan_auto(vid.camera);
-      if(hyperbolic && (v<1e-6-12 || v>1-1e-12)) invalid = XLAT("cannot adjust depth"), vid.depth = vid.camera;
-      else vid.depth = atan_auto(v);
-      }
-    else {
-      ld v = tan_auto(vid.depth) / pconf.alpha;
-      if(hyperbolic && (v<1e-12-1 || v>1-1e-12)) invalid = XLAT("cannot adjust camera"), vid.camera = vid.depth;
-      else vid.camera = atan_auto(v);
-      }
+    else adjust_linked();
     
     if(fabs(pconf.alpha) < 1e-6) invalid = XLAT("does not work with perfect Klein");
   

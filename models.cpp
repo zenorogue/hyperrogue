@@ -1078,6 +1078,7 @@ EX namespace models {
         p.alpha = 1;
         auto proj = param_custom_ld(p.alpha, sp+"projection", menuitem_projection_distance, 'p');
         proj->help_text = "projection distance|Gans Klein Poincare orthographic stereographic";
+        proj->reaction = [] { update_linked(vid.tc_alpha); };
         }
       else {
         param_f(p.alpha, sp+"projection", 1);
