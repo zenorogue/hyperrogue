@@ -47,6 +47,8 @@ void saiter() {
     for(int ii=0; ii<s; ii++) sid2 = hrand_elt(neighbors[sid2]);
     }
   int t2 = allow_doubles ? -1 : sagnode[sid2];
+
+  if(fixed_position[t1] || (t2 >= 0 && fixed_position[t2])) return;
   
   sagnode[sid1] = -1; sagid[t1] = -1;
   sagnode[sid2] = -1; if(t2 >= 0) sagid[t2] = -1;

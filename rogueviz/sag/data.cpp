@@ -28,6 +28,8 @@ vector<edgeinfo> sagedges;
 vector<vector<int>> edges_yes, edges_no;
 vector<vector<pair<int, double>>> edge_weights;
 
+vector<bool> fixed_position;
+
 ld edgepower=1, edgemul=1;
 
 void init();
@@ -46,6 +48,8 @@ void prepare_graph() {
   
   edges_yes.clear(); edges_yes.resize(DN);
   edges_no.clear(); edges_no.resize(DN);
+
+  fixed_position.clear(); fixed_position.resize(DN);
   
   for(int i=0; i<DN; i++) for(int j=0; j<DN; j++) if(i != j) {
     if(alledges.count({i, j}))
@@ -385,6 +389,26 @@ int data_read_args() {
   else if(argis("-sag-save-sol")) {
     PHASE(3); shift(); sag::save_sag_solution(args());
     }
+
+  else if(argis("-sag-fix")) {
+    shift(); int id = getid(args());
+    if(id >= isize(sagid)) throw hr_exception("bad id in -sag-fix");
+    fixed_position[id] = true;
+    }
+
+  else if(argis("-sag-move-to")) {
+    shift(); int sid1 = getid(args());
+    if(sid1 < 0 || sid1 >= isize(sagid)) throw hr_exception("bad id in -sag-move-to");
+    shift(); int t2 = argi();
+    if(t2 < 0 || t2 >= isize(sagnode)) throw hr_exception("bad id in -sag-move-to");
+    int sid2 = sagid[t2];
+    int t1 = allow_doubles ? -1 : sagnode[sid1];
+    sagnode[sid1] = t2; sagid[t2] = sid1;
+    if(sid2 >= 0) sagnode[sid2] = t1; sagid[t1] = sid2;
+    compute_cost();
+    create_viz();
+    }
+
 
   else return 1;  
 #endif
