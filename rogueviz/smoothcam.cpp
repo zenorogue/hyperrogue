@@ -229,6 +229,18 @@ void edit_segment(int aid) {
     current_segment = nullptr;
     popScreen();
     });
+  if(isize(anims[aid].frames) == 1) {
+    dialog::addItem("move to end", 'm');
+    dialog::add_action([aid] {
+      auto &f = anims[aid].frames[0];
+      View = f.sView; NLP = f.ori; centerover = f.where;
+      ld dist = f.front_distance;
+      while(dist > 0.1) {
+        shift_view(ctangent(2, -0.1)); dist -= 0.1;
+        }
+      shift_view(ctangent(2, -dist));
+      });
+    }
   dialog::addBack();
   dialog::display();
   }
@@ -585,7 +597,19 @@ void handle_animation(ld t) {
     params[pa]->set_cld(val);
     }
 
-  if(embedded_plane && embedded_shift_method_choice != smcNone) {
+  if(isize(anim.frames) == 1) {
+    auto &f = anim.frames[0];
+    View = f.sView; NLP = f.ori;
+    ld ts = t / f.interval;
+    ts = ts * ts * (3 - 2 * ts);
+    ld dist = f.front_distance * ts;
+    while(dist > 0.1) {
+      shift_view(ctangent(2, -0.1)); dist -= 0.1;
+      }
+    shift_view(ctangent(2, -dist));
+    }
+
+  else if(embedded_plane && embedded_shift_method_choice != smcNone) {
     hyperpoint interm = C03;
 
     for(int j=0; j<3; j++) {
