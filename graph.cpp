@@ -5959,7 +5959,7 @@ EX void drawscreen() {
   
   bool normal = cmode & sm::NORMAL;
   
-  if((havewhat&HF_BUG) && darken == 0 && normal) for(int k=0; k<3; k++)
+  if((havewhat&HF_BUG) && darken == 0 && normal) if(hive::bugcount[0] || hive::bugcount[1] || hive::bugcount[2]) for(int k=0; k<3; k++)
     displayfr(vid.xres/2 + vid.fsize * 5 * (k-1), vid.fsize*2,   2, vid.fsize, 
       its(hive::bugcount[k]), minf[moBug0+k].color, 8);
     
