@@ -975,7 +975,7 @@ level bumpy(
   0, 4, {},
   f_bumpy,
   {
-    goal{0xFFFFC0, "Collect the triangle in below 1:25, reversing time at most 3 times", basic_check(85, 3)},
+    goal{0xFFFFC0, "Collect the triangle in below 1:25, reversing time at most 3 times", basic_check(85, 3), "BUMPY", "Bumpy Ride"},
     }
   );
 
