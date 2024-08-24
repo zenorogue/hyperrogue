@@ -680,6 +680,27 @@ bool shape_conflict(cellwalker cw) {
   return false;
   }
 
+bool check_bshift(cellwalker c0, cellwalker c1) {
+  if(c0.at->type != 6) return false;
+  auto shape0 = build_from(piecelist[shape_id].code, c0);
+  auto shape1 = build_from(piecelist[shape_id].code, c1);
+  for(int i=0; i<isize(shape0); i++) {
+    if(isNeighbor(shape0[i].at, c0.at))
+    if(isNeighbor(shape1[i].at, c1.at))
+    if(shape0[i].at != shape1[i].at)
+    if(!isNeighbor(shape0[i].at, shape1[i].at)) {
+      cell *cfound = nullptr;
+      forCellEx(c, shape0[i].at) if(isNeighbor(c, shape1[i].at)) {
+        cfound = c;
+        }
+      if(!cfound) continue;
+      if(!cfound->wall) continue;
+      if(shape1[i].at->cmove(up_dir())->wall) return true;
+      }
+    }
+  return false;
+  }
+
 ld current_move_time_limit() {
   // return 50000 * pow(.9, completed) + 10000. / (1 + completed);
   return 3500 * pow(.995, completed * isize(level));
@@ -1007,6 +1028,7 @@ void shift_block(int dir, bool camera_only) {
   
   if(camera_only || !shape_conflict(at1)) {
     // playSound(cwt.at, "hit-crush1");
+    if(check_bshift(at, at1)) rv_achievement("BSHIFT");
     at = at1;
     if(solnil) {
       pView = pView * currentmap->adj(cwt.at, nilmap(dir));
