@@ -48,6 +48,13 @@
 
 #include "../hyper.h"
 
+#ifdef RVCOL
+namespace hr {
+  void rv_achievement(const string& name);
+  void rv_leaderboard(const string& name, int score);
+  }
+#endif
+
 #define solnil (nil || sol)
 
 namespace hr {
@@ -730,6 +737,8 @@ void new_piece() {
   if(shape_conflict(at)) {
     playSound(cwt.at, "die-bomberbird");
     state = tsGameover;
+    if(pro_game && max_piece == 4)
+      rv_leaderboard(bgeoms[bgeom].name, score);
     }
   else {
     draw_shape();
