@@ -674,7 +674,8 @@ bool shape_conflict(cellwalker cw) {
   }
 
 ld current_move_time_limit() {
-  return 50000 * pow(.9, completed) + 10000. / (1 + completed);
+  // return 50000 * pow(.9, completed) + 10000. / (1 + completed);
+  return 3500 * pow(.995, completed * isize(level));
   }
 
 int turn_animation = 500;
@@ -849,11 +850,15 @@ void drop() {
     at = fall;
     draw_shape();
     }
-  move_at = ticks + current_move_time_limit();
   if(solnil) {
     pView = pView * currentmap->adj(cwt.at, down_dir());
     when_t = ticks + turn_animation;
     }
+  }
+
+void auto_drop() {
+  drop();
+  move_at = ticks + current_move_time_limit();
   }
 
 void fulldrop() {
@@ -871,6 +876,7 @@ void fulldrop() {
   // println(hlog, "dropped by ", no);
   fall = last;
   at = fall;
+  move_at = ticks + current_move_time_limit();
   draw_shape();
   if(!no) fallen();
   }
@@ -1234,7 +1240,7 @@ void draw_screen(int xstart, bool show_next) {
       disappear_lines();
     
     if(ticks >= move_at && state == tsFalling && pro_game) {
-      drop();
+      auto_drop();
       }
 
     View = pView;
