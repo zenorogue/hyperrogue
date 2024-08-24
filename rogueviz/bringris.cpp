@@ -750,8 +750,6 @@ void new_piece() {
 
 vector<int> by_level;
 
-bool expert = true;
-
 void find_lines() {
   by_level.clear();
   // println(hlog, "Removing levels");
@@ -768,7 +766,7 @@ void find_lines() {
   
   int points = 0;
   
-  if(expert) {
+  if(true) {
     for(int z=1; z<=well_size; z++) if(by_level[z-1] >= isize(level)) {
       points++;
       for(auto lev: level) {
