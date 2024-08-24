@@ -37,6 +37,13 @@
 #include "solver.cpp"
 #include "save.cpp"
 
+#ifdef RVCOL
+namespace hr {
+  void rv_achievement(const string& name);
+  void rv_leaderboard(const string& name, int score);
+  }
+#endif
+
 namespace nilrider {
 
 multi::config scfg_nilrider;
@@ -155,6 +162,7 @@ bool turn(int delta) {
     for(int i=0; i<delta * simulation_speed; i++) {
       curlev->history.push_back(curlev->current);
       curlev->current.be_consistent();
+      auto goals = curlev->current.goals;
       bool b = curlev->current.tick(curlev);
       running = b;
       if(!b) {
@@ -162,6 +170,22 @@ bool turn(int delta) {
         fail = true;
         break;
         }
+      #if RVCOL
+      if(b) {
+        goals = curlev->current.goals &~goals;
+        int gid = 0;
+        for(auto& g: curlev->goals) {
+          if(goals & Flag(gid)) {
+            if(g.achievement_name != "") rv_achievement(g.achievement_name);
+            if(g.leaderboard_name != "") {
+              auto res = curlev->current_score[gid];
+              rv_leaderboard(g.leaderboard_name, abs(res) * 1000);
+              }
+            }
+          gid++;
+          }
+        }
+      #endif
       }
 
     if(t != curlev->current.collected_triangles)
