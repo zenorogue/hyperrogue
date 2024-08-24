@@ -1,6 +1,6 @@
 namespace nilrider {
 
-const string ver = "0.2";
+const string ver = "2.0";
 
 string new_replay_name() {
   time_t timer;

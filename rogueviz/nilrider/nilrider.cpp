@@ -1,5 +1,5 @@
 #if NILRIDER
-#define CUSTOM_CAPTION "Nil Rider 1.0"
+#define CUSTOM_CAPTION "Nil Rider 2.0"
 #define MAXMDIM 4
 #define CAP_INV 0
 #define CAP_COMPLEX2 0
