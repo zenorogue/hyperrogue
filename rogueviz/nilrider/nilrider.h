@@ -119,6 +119,8 @@ struct goal {
   color_t color;
   string desc;
   goalchecker check;
+  string achievement_name;
+  string leaderboard_name;
   };
 
 using surface_fun = std::function<ld(hyperpoint h)>;

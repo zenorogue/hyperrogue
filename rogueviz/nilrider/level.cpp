@@ -582,7 +582,7 @@ void cleanup_textures() {
 void load_level(const string& fname, bool init) {
   fhstream f(fname, "r");
   if(!f.f) throw hr_exception("could not open file ");
-  level lev("Untitled", '1', nrlUserCreated, "", -1, 1, 1, -1, {}, 0, 0, {}, rot_plane, { goal{0x40FF40, "Collect all the triangles", basic_check(999, 999)} });
+  level lev("Untitled", '1', nrlUserCreated, "", -1, 1, 1, -1, {}, 0, 0, {}, rot_plane, { goal{0x40FF40, "Collect all the triangles", basic_check(999, 999), "", ""} });
   lev.filename = fname;
   level *csub = &lev;
   string s;
