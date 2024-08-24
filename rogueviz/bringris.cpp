@@ -804,7 +804,7 @@ void find_lines() {
   if(!to_disappear.empty()) {
     move_at = ticks + collect_animation;
     state = tsCollect;
-    score += 10000000. * points * (points+1.) / current_move_time_limit();
+    score += 100000. * points * (points+1.) / current_move_time_limit();
     completed += points;
     playSound(cwt.at, points == 1 ? "pickup-gold" : "orb-mind");
     }
@@ -844,7 +844,7 @@ void fallen() {
   cubes += isize(piecelist[shape_id].code)+1;
   state = tsBetween;
   playSound(cwt.at, "closegate");
-  score += 20000000. / (current_move_time_limit() * 3 + ticks - move_started);
+  score += 200000. / (current_move_time_limit() * 3 + ticks - move_started);
   }
 
 void drop() {
