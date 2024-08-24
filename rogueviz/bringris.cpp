@@ -807,6 +807,7 @@ void find_lines() {
     score += 100000. * points * (points+1.) / current_move_time_limit();
     completed += points;
     playSound(cwt.at, points == 1 ? "pickup-gold" : "orb-mind");
+    if(points == 4 && pro_game && max_piece == 4) rv_achievement("BRINGRISFOUR");
     }
   }
 
