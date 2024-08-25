@@ -275,7 +275,8 @@ EX bool movepcto(int d, int subdir IS(1), bool checkonly IS(false)) {
   checked_move_issue.type = miVALID;
   pcmove pcm;
   pcm.checkonly = checkonly;
-  pcm.d = d; pcm.subdir = subdir;
+  pcm.d = d;
+  pcm.subdir = subdir;
   auto b = pcm.movepcto();
   global_pushto = pcm.mip.t;
   return b;
