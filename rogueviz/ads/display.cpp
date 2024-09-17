@@ -98,7 +98,7 @@ void draw_game_cell(const cell_to_draw& cd) {
 
   if(view_proper_times) {
     string str = hr::format(tformat, cd.center.shift / ads_time_unit);
-    queuestr(shiftless(rgpushxto0(cd.center.h)), .1, str, 0xFF4040, 8);
+    queuestr(shiftless(rgpushxto0(cd.center.h)), time_scale * ads_scale, str, 0xFF4040, 8);
     }
 
   // need i-loop because new rocks can be created in handle_turret
@@ -169,7 +169,7 @@ void draw_game_cell(const cell_to_draw& cd) {
 
     if(view_proper_times && rock.type != oParticle) {
       string str = hr::format(tformat, rock.pt_main.shift / ads_time_unit);
-      queuestr(shiftless(rgpushxto0(rock.pt_main.h)), .1, str, 0xFFFFFF, 8);
+      queuestr(shiftless(rgpushxto0(rock.pt_main.h)), time_scale * ads_scale, str, 0xFFFFFF, 8);
       }
     }
   
@@ -215,7 +215,7 @@ void draw_game_cell(const cell_to_draw& cd) {
 
     if(view_proper_times) {
       string str = hr::format(tformat, (cr.shift + rock.start) / ads_time_unit);
-      queuestr(shiftless(rgpushxto0(cr.h)), .1, str, 0xC0C0C0, 8);
+      queuestr(shiftless(rgpushxto0(cr.h)), time_scale * ads_scale, str, 0xC0C0C0, 8);
       }
     }
   
@@ -354,7 +354,7 @@ void view_ads_game() {
 
       if(view_proper_times) {
         string str = hr::format(tformat, ship_pt / ads_time_unit);
-        queuestr(shiftless(Id), .1, str, 0xFFFFFF, 8);
+        queuestr(shiftless(Id), time_scale * ads_scale, str, 0xFFFFFF, 8);
         }
       }    
     }

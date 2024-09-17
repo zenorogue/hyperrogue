@@ -586,7 +586,7 @@ void view_ds_game() {
         ld t = rock.pt_main.shift;
         if(rock.type == oMainRock) t += current.shift;
         string str = hr::format(tformat, t / ds_time_unit);
-        queuestr(shiftless(sphereflip * rgpushxto0(rock.pt_main.h)), .1, str, 0xFFFF00, 8);
+        queuestr(shiftless(sphereflip * rgpushxto0(rock.pt_main.h)), time_scale * ds_scale, str, 0xFFFF00, 8);
         }
       
       if(rock.pt_main.h[2] > 0.1 && rock.life_end == HUGE_VAL) {
@@ -639,7 +639,7 @@ void view_ds_game() {
 
       if(view_proper_times) {
         string str = hr::format(tformat, (cr.shift + ss.start) / ds_time_unit);
-        queuestr(shiftless(sphereflip * rgpushxto0(cr.h)), .1, str, 0xC0C0C0, 8);
+        queuestr(shiftless(sphereflip * rgpushxto0(cr.h)), time_scale * ds_scale, str, 0xC0C0C0, 8);
         }
       }
 
@@ -665,7 +665,7 @@ void view_ds_game() {
 
       if(view_proper_times) {
         string str = hr::format(tformat, ship_pt / ds_time_unit);
-        queuestr(shiftless(sphereflip), .1, str, 0xFFFFFF, 8);
+        queuestr(shiftless(sphereflip), time_scale * ds_scale, str, 0xFFFFFF, 8);
         }
       }
     

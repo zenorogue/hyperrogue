@@ -69,6 +69,8 @@ vector<struct ads_object*> displayed;
 ld ads_scale = 1;
 ld ds_scale = 1;
 
+ld time_scale = .1;
+
 color_t missile_color = 0xFF0000FF;
 
 bool game_over;
