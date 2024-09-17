@@ -40,6 +40,7 @@ namespace rogueviz { std::vector<hr::reaction_t> cleanup; }
 #include "ds-game.cpp"
 #include "ds-texture.cpp"
 #include "views.cpp"
+#include "tour.cpp"
 
 namespace hr {
 
