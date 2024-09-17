@@ -356,12 +356,7 @@ void view_ads_game() {
         string str = hr::format(tformat, ship_pt / ads_time_unit);
         queuestr(shiftless(Id), .1, str, 0xFFFFFF, 8);
         }
-      }
-    
-    if(paused && view_proper_times) {
-      string str = hr::format(tformat, view_pt / ads_time_unit);
-      queuestr(shiftless(Id), .1, str, 0xFFFF00, 8);
-      }
+      }    
     }
 
   copyright_shown = "";

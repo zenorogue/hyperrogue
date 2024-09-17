@@ -147,6 +147,21 @@ bool display_rsrc() {
   D(5, 4, oxygen, TAU);
   D(2, 5, score, 10);
   #undef D
+
+  int next_y = 6;
+  auto next_ctr = [&] {
+    ld ny = next_y++;
+    if(true) return 20*ny+10;
+    return max<ld>(20*ny+10, current_display->ycenter - current_display->radius + 20 * ny);
+    };
+  ld sta = max<ld>(20, current_display->xcenter - current_display->radius + 20);
+  if(true) sta = 20;
+
+  if(paused) {
+    queuestr(sta, next_ctr(), 0, 20, "PAUSED", 0xFFFFFF, 1, 0);
+    if(view_proper_times)
+      queuestr(sta, next_ctr(), 0, 20, "time shift " + hr::format(tformat, view_pt / ads_time_unit), 0xFFFF80, 1, 0);
+    }
   
   quickqueue();
   return true;

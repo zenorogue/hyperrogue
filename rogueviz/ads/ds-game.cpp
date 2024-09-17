@@ -669,11 +669,6 @@ void view_ds_game() {
         }
       }
     
-    if(paused && view_proper_times) {
-      string str = hr::format(tformat, view_pt / ds_time_unit);
-      queuestr(shiftless(sphereflip), .1, str, 0xFFFF00, 8);
-      }
-
     if(paused && !game_over && !in_replay && !hv && !which_cross) {
       vector<hyperpoint> pts;
       int ok = 0, bad = 0;
