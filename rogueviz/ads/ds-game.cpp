@@ -708,6 +708,7 @@ void ds_restart() {
 
   rocks.clear();
   history.clear();
+  displayed.clear();
   init_ds_game();
   reset_textures();
   pick_textures();
@@ -739,6 +740,7 @@ void run_ds_game() {
 void add_ds_cleanup() {
   rogueviz::on_cleanup_or_next([] {
     main_rock = nullptr;
+    displayed.clear();
     });
   }
 

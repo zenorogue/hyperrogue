@@ -82,6 +82,7 @@ void restart() {
     });
 
   ci_at.clear();
+  displayed.clear();
 
   gen_terrain(vctr, ci_at[vctr], -2);
   forCellEx(c1, vctr) ci_at[c1].type = wtNone;
@@ -137,6 +138,7 @@ void run_ads_game() {
 void add_ads_cleanup() {
   rogueviz::on_cleanup_or_next([] {
     switch_spacetime_to(true);
+    displayed.clear();
     });
   }
 
