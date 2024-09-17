@@ -2,59 +2,11 @@ namespace hr {
 
 namespace ads_game {
 
-enum eObjType { oRock, oMissile, oParticle, oResource, oMainRock };
-
-PPR obj_prio[5] = { PPR::MONSTER_BODY, PPR::ITEMa, PPR::ITEM_BELOW, PPR::ITEM, PPR::MONSTER_HEAD };
-
-struct ads_object {
-  eObjType type;
-  eResourceType resource;
-  cell *owner;
-  ads_matrix at;
-  color_t col;
-  int expire;
-  vector<ld>* shape;
-  
-  ld life_start, life_end;
-  cross_result pt_main;
-  vector<cross_result> pts;
-  
-  ads_object(eObjType t, cell *_owner, const ads_matrix& T, color_t _col) : type(t), owner(_owner), at(T), col(_col) { 
-    life_start = -HUGE_VAL;
-    life_end = HUGE_VAL;
-    }
-  };
-
-enum eWalltype { wtNone, wtDestructible, wtSolid, wtGate };
-
 int gen_expire() {
   return 20 / randd() - 15;
   }
 
-struct shipstate {
-  ads_matrix at;
-  ads_matrix current;
-  ld start;
-  ld duration;
-  ld ang;
-  ads_matrix vctrV;
-  cell *vctr;
-  };
-
 vector<shipstate> history;
-
-struct cellinfo {
-  int mpd_terrain; /* 0 = fully generated terrain */
-  int rock_dist; /* rocks generated in this radius */
-  vector<std::unique_ptr<ads_object>> rocks;
-  vector<shipstate> shipstates;
-  eWalltype type;
-  cellinfo() {
-    mpd_terrain = 4;
-    rock_dist = -1;
-    type = wtNone;
-    }
-  };
 
 std::unordered_map<cell*, cellinfo> ci_at;
 
@@ -165,6 +117,31 @@ void add_rock(cell *c, cellinfo& ci, const ads_matrix& T) {
   ci.rocks.emplace_back(std::move(r));
   }
 
+void add_turret(cell *c, cellinfo& ci, const ads_matrix& T) {
+  auto r = std::make_unique<ads_object> (oTurret, c, T, 0xC0C060FF);
+  r->expire = gen_expire();
+  r->shape = &shape_turret;
+  r->last_shot = -1;
+  r->hlast = 0;
+  if(geometry != gTwistedProduct) { println(hlog, "wrong geometry detected in gen_turret!");  exit(1); }
+  int q = 0;
+
+  auto cleanup = [&] (cell *c, ld t) {
+    auto& ci = ci_at[c];
+    hybrid::in_underlying_geometry([&] { gen_terrain(c, ci); });
+    ci.type = wtNone;
+    q++;
+    return false;
+    };
+
+  if(q == 0) ci.type = wtNone;
+  compute_life(hybrid::get_at(c, 0), unshift(r->at), cleanup);
+
+  ci.rocks.emplace_back(std::move(r));
+  }
+
+int turrets;
+
 void gen_rocks(cell *c, cellinfo& ci, int radius) {
   if(radius <= ci.rock_dist) return;
   if(ci.rock_dist < radius - 1) gen_rocks(c, ci, radius-1);
@@ -190,6 +167,27 @@ void gen_rocks(cell *c, cellinfo& ci, int radius) {
 
       hybrid::in_actual([&] {
         add_rock(c, ci, ads_matrix(spin(alpha) * twist::uxpush(r/2) * chg_shift(randd() * TAU) * spin(randd() * TAU) * lorentz(0, 3, randd() * rock_max_rapidity)));
+        });
+      }
+
+    q = rpoisson(rock_density / 50);
+    if(celldist(c) == 2) q += rpoisson(0.1);
+    for(int i=0; i<q; i++) {
+      ld maxr = cgi.rhexf;
+      cell *c1 = nullptr;
+      ld r, alpha;
+      while(c1 != c) {
+        ld vol = randd() * wvolarea_auto(maxr);
+        r = binsearch(0, maxr, [vol] (ld r) { return wvolarea_auto(r) > vol; });
+        alpha = randd() * TAU;
+        hyperpoint h = spin(alpha) * xpush0(r);
+        c1 = c;
+        virtualRebase(c1, h);
+        }
+
+      hybrid::in_actual([&] {
+        add_turret(c, ci, ads_matrix(spin(alpha) * twist::uxpush(r/2) * chg_shift(randd() * TAU) * spin(randd() * TAU) * lorentz(0, 3, randd() * rock_max_rapidity/10)));
+        turrets++;
         });
       }
     }
@@ -246,6 +244,134 @@ void ads_crash_ship() {
     });
   }
 
+// -1 : T1 is in the past of T2
+// =0 : T1 is elsewhere from T2
+// +1 : T1 is in the future of T2
+
+hyperpoint hcopy;
+
+int spacetime_relation(const ads_matrix& T1, const ads_matrix& T2) {
+  auto h = ads_inverse(T1) * (T2 * C0);
+  if(h.shift > 90._deg) return 1;
+  if(h.shift < -90._deg) return -1;
+  auto h1 = unshift(h);
+  hcopy = h1;
+  if(h1[0] * h1[0] + h1[1] * h1[1] > h1[2] * h1[2]) return 0;
+  return h1[2] > 0 ? 1 : -1;
+  }
+
+bool bad_turret = false;
+
+void handle_turret(ads_object *t, ld& angle_at_time) {
+  ld ctime = t->pt_main.shift;
+
+  auto p = at_or_null(cds_last, t->owner);
+  if(!p) return;
+  auto t1 = p->V * t->at * ads_matrix(Id, ctime);
+
+  auto& ts = t->turret_states;
+  auto it1 = ts.lower_bound(ctime);
+
+  if(it1->first == ctime) {
+    if(it1->second.err < 0.01) angle_at_time = it1->second.angle;
+    return;
+    }
+
+  auto it0 = it1; if(it0 != ts.begin()) it0--;
+
+  int tv0 = (it1 == ts.begin()) ? 0 : it0->second.index;
+  int tv1 = (it1 == ts.end()) ? isize(history) : it1->second.index;
+
+  while(tv0 < tv1) {
+    int tvm = (tv0 + tv1) / 2;
+    auto& hi = history[tvm];
+    auto p1 = at_or_null(cds_last, hi.vctr);
+    if(!p1) { tv0 = tvm+1; continue; }
+    ads_matrix at1 = p1->V * hi.at;
+    auto rel = spacetime_relation(t1, at1);
+    if(rel == -1) tv0 = tvm+1;
+    else tv1 = tvm;
+    }
+
+  // println(hlog, "tv0 search returns ", tv0, "/", isize(history), " for ctime = ", ctime);
+  if(tv0 == 0 || tv0 == isize(history)) { return; }
+
+  auto& hi = history[tv0];
+  auto p1 = at_or_null(cds_last, hi.vctr);
+  if(!p1) return;
+  ads_matrix at1 = p1->V * hi.at;
+
+  turret_state nts;
+  if(bad_turret) {
+    auto h = ads_inverse(t1) * (at1 * C0);
+    auto h1 = unshift(h);
+    nts.angle = -atan2(h1[1], h1[0]);
+    nts.dist = acosh(h1[3]) - turret_length;
+    nts.err = 0;
+    }
+  else {
+
+    auto hitpoint = [&] (ld alph, ld dist) {
+      return ads_inverse(at1) * t1 * spin(alph) * twist::uxpush(turret_length) * lorentz(0, 2, ads_missile_rapidity) * ads_point(C0, dist);
+      };
+
+    auto opt_hitpoint = [&] (ld alph, ld dist) { return unshift(hitpoint(alph, dist)); };
+
+    if(it1 == ts.begin() || it0->first < ctime - 0.1 || it0->second.err > 0.01) {
+      ld best_err = HUGE_VAL;
+      for(int av=0; av<24; av++) for(ld dist=0.01; dist < 2; dist += 0.01) {
+        ld alph = av * TAU / 24;
+        ld err = sqhypot_d(2, hitpoint(alph, dist).h);
+        if(err < best_err) { best_err = err; nts.angle = alph; nts.dist = dist; }
+        }
+      // println(hlog, "the closest hit at alpha = ", nts.angle, " and dist = ", nts.dist, " (err = ", best_err, ")");
+      }
+    else {
+      nts.angle = it0->second.angle;
+      nts.dist = it0->second.dist;
+      }
+
+    /* Newton method */
+    for(int it=0; it<3; it++) {
+      ld eps = 1e-4;
+      hyperpoint h0 = opt_hitpoint(nts.angle, nts.dist);
+      hyperpoint hx = opt_hitpoint(nts.angle + eps, nts.dist);
+      hyperpoint hy = opt_hitpoint(nts.angle, nts.dist + eps);
+      // println(hlog, tie(nts.angle, nts.dist), " : ", h0);
+      transmatrix T = Id;
+      set_column(T, 0, hx-h0);
+      set_column(T, 1, hy-h0);
+      transmatrix T2 = inverse2(T);
+      // f(x) = h0 + T * (x-x0) / eps = 0
+      // -h0 * eps = T * (x-x0)
+      // T2 * (-h0 * eps) = x - x0
+      hyperpoint x = T2 * (-h0 * eps);
+      nts.angle += x[0];
+      nts.dist += x[1];
+      }
+
+    nts.err = sqhypot_d(2, hitpoint(nts.angle, nts.dist).h);
+    }
+
+  // println(hlog, "nts values are: ", tie(nts.angle, nts.dist, nts.err));
+
+  if(nts.err < 0.01 && ctime > t->last_shot + 1 && it0->second.err < 0.01) {
+    t->last_shot = t->last_shot + floor(ctime - t->last_shot);
+    ld angle = lerp(it0->second.angle, nts.angle, ilerp(it0->first, ctime, t->last_shot));
+    // println(hlog, "shooting at angle ", angle, " at time ", t->last_shot);
+    ads_matrix S0 = ads_inverse(p->V) * t1 * spin(angle) * twist::uxpush(turret_length * ads_scale) * lorentz(0, 2, ads_missile_rapidity);
+    auto r = std::make_unique<ads_object> (oTurretMissile, t->owner, S0, rsrc_color[rtAmmo]);
+    r->shape = &shape_missile;
+    r->life_start = 0; r->life_end = M_PI;
+    ci_at[t->owner].rocks.emplace_back(std::move(r));
+    // println(hlog, "OK");
+    }
+
+  nts.index = tv0;
+  t->turret_states[ctime] = nts;
+  if(nts.err < 0.01) angle_at_time = nts.angle;
+  }
+
 void handle_crashes() {
   if(paused) return;
   if(mtwisted) {
@@ -256,11 +382,14 @@ void handle_crashes() {
   vector<ads_object*> missiles;
   vector<ads_object*> rocks;
   vector<ads_object*> resources;
+  vector<ads_object*> turrets;
   for(auto m: displayed) {
     if(m->type == oMissile)
       missiles.push_back(m);
-    if(m->type == oRock)
+    if(m->type == oRock || m->type == oTurret)
       rocks.push_back(m);
+    if(m->type == oTurret)
+      turrets.push_back(m);
     if(m->type == oResource)
       resources.push_back(m);
     }
@@ -274,7 +403,7 @@ void handle_crashes() {
           hybrid::in_actual([&] {
             gen_particles(rpoisson(crash_particle_qty), m->owner, m->at * ads_matrix(Id, m->life_end), missile_color, crash_particle_rapidity, crash_particle_life);
             gen_particles(rpoisson(crash_particle_qty), r->owner, r->at * ads_matrix(Id, r->life_end), r->col, crash_particle_rapidity, crash_particle_life);
-            gen_resource(r->owner, r->at * ads_matrix(Id, r->life_end), r->resource, r->expire);
+            if(r->type != oTurret) gen_resource(r->owner, r->at * ads_matrix(Id, r->life_end), r->resource, r->expire);
             playSound(nullptr, "hit-crush3");
             });
           }

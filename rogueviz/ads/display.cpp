@@ -8,14 +8,6 @@ cross_result findflat(shiftpoint h) {
   return cross0(current * rgpushxto0(h));
   }
 
-struct cell_to_draw {
-  cross_result center;
-  ld d;
-  cell *c;
-  ads_matrix V;
-  bool operator < (const cell_to_draw& c2) const { return d > c2.d; }
-  };
-
 void apply_duality(shiftmatrix& S) {
   if(use_duality == 1) {
     S.T = unshift(S);
@@ -109,18 +101,26 @@ void draw_game_cell(const cell_to_draw& cd) {
     queuestr(shiftless(rgpushxto0(cd.center.h)), .1, str, 0xFF4040, 8);
     }
 
-  for(auto& r: ci.rocks) {
-    auto& rock = *r;
+  // need i-loop because new rocks can be created in handle_turret
+
+  for(int i=0; i<isize(ci.rocks); i++) {
+    auto& rock = *ci.rocks[i];
 
     if(!paused) {
       if(rock.type == oRock && rock.expire < pdata.score) { rock.resource = rtNone; rock.col = rock_color[rtNone]; rock.expire = 999999; }
       if(rock.type == oResource && rock.expire < pdata.score) { rock.resource = rtNone; rock.col = rsrc_color[rtNone]; rock.shape = rsrc_shape[rtNone]; rock.expire = 999999; }
       }
     
+    ld ang = 0;
+
+    ads_matrix M;
+
     hybrid::in_actual([&]{
       dynamicval<eGeometry> b(geometry, gTwistedProduct);
-      auto h = V * rock.at;
-      rock.pt_main = cross0(current * h);
+      M = V * rock.at;
+      rock.pt_main = cross0(current * M);
+      if(rock.type == oTurret) handle_turret(&rock, ang);
+      if(ang) M = M * spin(ang);
       });
     
     if(rock.pt_main.shift < rock.life_start || rock.pt_main.shift > rock.life_end) continue;
@@ -130,7 +130,7 @@ void draw_game_cell(const cell_to_draw& cd) {
     auto& shape = *rock.shape;
     for(int i=0; i<isize(shape); i += 2) {
       hybrid::in_actual([&]{
-        auto h = V * rock.at * twist::uxpush(shape[i] * ads_scale) * twist::uypush(shape[i+1] * ads_scale);
+        auto h = M * twist::uxpush(shape[i] * ads_scale) * twist::uypush(shape[i+1] * ads_scale);
         cross_result f = cross0(current * h);
         rock.pts.push_back(f);
         });
@@ -162,6 +162,7 @@ void draw_game_cell(const cell_to_draw& cd) {
       curvepoint(rock.pts[0].h);
       queuecurve(shiftless(Id),
         rock.type == oMissile ? missile_color :
+        rock.type == oTurretMissile ? missile_color :
         rock.type == oParticle ? rock.col :
         0x000000FF, rock.col, obj_prio[rock.type]);
       }
@@ -255,6 +256,7 @@ void view_footer() {
 
 void view_ads_game() {
   displayed.clear();
+  cds_last = std::move(cds); cds.clear();
   
   bool hv = mhybrid;
 
@@ -319,6 +321,7 @@ void view_ads_game() {
 
       i++; if(i > draw_per_frame) break;
       auto& cd = dq.top();
+      cds[cd.c] = cd;
       draw_game_cell(cd);
 
       cell *c = cd.c;
