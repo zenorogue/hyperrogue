@@ -236,8 +236,8 @@ void init_ds_game() {
   /* also create shape_disk */
   shape_disk.clear();
   for(int d=0; d<=360; d += 15) {
-    shape_disk.push_back(sin(d*degree) * 0.1 * ds_scale);
-    shape_disk.push_back(cos(d*degree) * 0.1 * ds_scale);
+    shape_disk.push_back(sin(d*degree) * 0.1);
+    shape_disk.push_back(cos(d*degree) * 0.1);
     }
 
   rockgen.cshift += 2;
