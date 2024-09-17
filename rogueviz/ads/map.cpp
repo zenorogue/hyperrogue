@@ -59,6 +59,7 @@ map<int, int> genstats;
 int gen_budget;
 
 void gen_terrain(cell *c, cellinfo& ci, int level = 0) {
+  setdist(c, 7, nullptr);
   if(level >= ci.mpd_terrain) return;
   if(!hyperbolic) { println(hlog, "wrong geometry detected in gen_terrain!");  exit(1); }
   if(ci.mpd_terrain > level + 1) gen_terrain(c, ci, level+1);
@@ -82,9 +83,21 @@ void gen_terrain(cell *c, cellinfo& ci, int level = 0) {
       ci_at[c].type = wtGate;
     }
   ci.mpd_terrain = level;
+
+  if(c->land == laBarrier)
+    ci_at[c].type = wtBarrier;
   }
 
 void add_rock(cell *c, cellinfo& ci, const ads_matrix& T) {
+
+  bool fail = false;
+  compute_life(hybrid::get_at(c, 0), unshift(T), [&] (cell *c, ld t) {
+    setdist(c, 7, nullptr);
+    if(c->land == laBarrier) fail = true;
+    return false;
+    });
+  if(fail) return;
+
   eResourceType rt = eResourceType(rand() % 6);
   auto r = std::make_unique<ads_object> (oRock, c, T, rock_color[rt]);
   r->resource = rt;
@@ -102,7 +115,7 @@ void add_rock(cell *c, cellinfo& ci, const ads_matrix& T) {
     };
 
   if(q == 0) ci.type = wtNone;
-  compute_life(hybrid::get_at(c, 0), unshift(r->at), cleanup);
+  compute_life(hybrid::get_at(c, 0), unshift(T), cleanup);
 
   /* for(int i=0; i<isize(r->shape[0]); i += 2) { // exact check is too slow here
     hyperpoint h;

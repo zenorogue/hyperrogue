@@ -89,11 +89,14 @@ void draw_game_cell(const cell_to_draw& cd) {
     color_t col = 
       t == wtSolid ? 0x603000FF :
       t == wtDestructible ? 0x301800FF :
-      0x181818FF;
+      t == wtBarrier ? 0xC0C0C0FF :
+      empty_color(c);
+
+    color_t out = t == wtNone ? empty_outline(c) : 0xFF;
 
     for(auto h: hlist) curvepoint(h.h);
     addaura(shiftless(cd.center.h), col >> 8, 0);
-    queuecurve(shiftless(Id), 0x101010FF, col, PPR::WALL);
+    queuecurve(shiftless(Id), out, col, PPR::WALL);
     }
 
   if(view_proper_times) {

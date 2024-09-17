@@ -32,6 +32,7 @@ namespace rogueviz { std::vector<hr::reaction_t> cleanup; }
 #include "globals.cpp"
 #include "shapes.cpp"
 #include "resources.cpp"
+#include "ads-lands.cpp"
 #include "map.cpp"
 #include "control.cpp"
 #include "display.cpp"
@@ -207,7 +208,7 @@ void gamedata(hr::gamedata* gd) {
 
 void set_config() {
   lps_enable(&lps_relhell);
-  enable_canvas();
+  // enable_canvas();
   }
 
 void run_ads_game_std() {

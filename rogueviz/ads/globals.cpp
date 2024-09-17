@@ -155,7 +155,7 @@ color_t ghost_color = 0x800080FF;
 
 enum eObjType { oRock, oMissile, oParticle, oResource, oMainRock, oTurret, oTurretMissile };
 enum eResourceType { rtNone, rtHull, rtGold, rtAmmo, rtFuel, rtOxygen };
-enum eWalltype { wtNone, wtDestructible, wtSolid, wtGate };
+enum eWalltype { wtNone, wtDestructible, wtSolid, wtGate, wtBarrier };
 
 PPR obj_prio[7] = { PPR::MONSTER_BODY, PPR::ITEMa, PPR::ITEM_BELOW, PPR::ITEM, PPR::MONSTER_HEAD, PPR::MONSTER_BODY, PPR::ITEMa };
 
