@@ -182,8 +182,8 @@ struct placement {
   ld shift;
   ld spinshift;
   ld rapidity;
-  ads_matrix get() {
-    return spin(alpha) * twist::uxpush(r/2) * chg_shift(shift) * spin(spinshift) * lorentz(0, 3, rapidity);
+  ads_matrix get(const ads_matrix& M = Id) {
+    return ads_matrix(Id) * spin(alpha) * twist::uxpush(r/2) * M * chg_shift(shift) * spin(spinshift) * lorentz(0, 3, rapidity);
     };
   };
 
@@ -233,6 +233,8 @@ void gen_rocks(cell *c, cellinfo& ci, int radius) {
       auto p = get_placement(c, cgi.rhexf, rock_max_rapidity / 10);
       hybrid::in_actual([&] {
         add_turret(c, ci, p.get());
+        for(int r=0; r<6; r++)
+          add_rsrc(c, ci, p.get(spin(r * 60._deg) * twist::uxpush(turret_dist * ads_scale)));
         turrets++;
         });
       }
