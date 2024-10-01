@@ -313,6 +313,8 @@ bool bad_turret = false;
 void handle_turret(ads_object *t, ld& angle_at_time) {
   ld ctime = t->pt_main.shift;
 
+  if(t->last_shot >= t->life_end) return;
+
   auto p = at_or_null(cds_last, t->owner);
   if(!p) return;
   auto t1 = p->V * t->at * ads_matrix(Id, ctime);
@@ -405,6 +407,7 @@ void handle_turret(ads_object *t, ld& angle_at_time) {
 
   if(nts.err < 0.01 && ctime > t->last_shot + 1 && it0->second.err < 0.01) {
     t->last_shot = t->last_shot + floor(ctime - t->last_shot);
+    if(t->last_shot >= t->life_end) return;
     ld angle = lerp(it0->second.angle, nts.angle, ilerp(it0->first, ctime, t->last_shot));
     // println(hlog, "shooting at angle ", angle, " at time ", t->last_shot);
     ads_matrix S0 = ads_inverse(p->V) * t1 * spin(angle) * twist::uxpush(turret_length * ads_scale) * lorentz(0, 2, ads_missile_rapidity);
