@@ -165,7 +165,7 @@ void draw_game_cell(const cell_to_draw& cd) {
       curvepoint(rock.pts[0].h);
       queuecurve(shiftless(Id),
         rock.type == oMissile ? missile_color :
-        rock.type == oTurretMissile ? missile_color :
+        rock.type == oTurretMissile ? 0xFF8000FF :
         rock.type == oParticle ? rock.col :
         0x000000FF, rock.col, obj_prio[rock.type]);
       }
