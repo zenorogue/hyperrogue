@@ -320,10 +320,14 @@ void view_ads_game() {
       });
     
     int i = 0;
+    ld lastd = -10;
+
     while(!dq.empty()) {
 
-      i++; if(i > draw_per_frame) break;
+      i++;
       auto& cd = dq.top();
+      if(i > draw_per_frame && cd.d > lastd + 1e-4) break;
+      lastd = cd.d;
       cds[cd.c] = cd;
       draw_game_cell(cd);
 
