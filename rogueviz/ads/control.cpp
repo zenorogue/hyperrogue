@@ -54,7 +54,7 @@ void fire() {
     hybrid::in_underlying_geometry([&] {
       gen_terrain(c1, ci);
       });
-    if(among(ci.type, wtSolid, wtDestructible)) {
+    if(among(ci.type, wtSolid, wtDestructible, wtBarrier)) {
       r->life_end = t;
 
       auto Scell_inv = ads_inverse(Scell);

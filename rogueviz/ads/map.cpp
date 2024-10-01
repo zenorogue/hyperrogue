@@ -468,7 +468,7 @@ void handle_crashes() {
         auto w = hybrid::get_where(c);
         auto& ci = ci_at[w.first];
         ld t = rel.shift + w.second * cgi.plevel;
-        if(ci.type == wtDestructible || ci.type == wtSolid || (ci.type == wtGate && (int(floor(t)) & 3) == 0)) {
+        if(ci.type == wtDestructible || ci.type == wtSolid || (ci.type == wtGate && (int(floor(t)) & 3) == 0) || ci.type == wtBarrier) {
           if(!crashed && ship_pt > invincibility_pt) println(hlog, "crashed at t = ", t / TAU, " shift = ", rel.shift/TAU, " sec = ", w.second*cgi.plevel/TAU);
           crashed = true;
           }
