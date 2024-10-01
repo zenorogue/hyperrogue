@@ -2,8 +2,15 @@ namespace hr {
 
 namespace ads_game {
 
-int gen_expire() {
-  return 20 / randd() - 15;
+expiry_data gen_expire(cell *c) {
+  expiry_data ed;
+  ed.score = 20 / randd() - 15;
+  ed.score_id = treasure_id(treasure_of(c));
+  return ed;
+  }
+
+bool expired(const expiry_data& ed, const player_data& pdata) {
+  return pdata.score[ed.score_id] > ed.score;
   }
 
 vector<shipstate> history;
