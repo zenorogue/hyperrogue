@@ -20,6 +20,7 @@ void fire() {
   auto r = std::make_unique<ads_object> (oMissile, c, S1, rsrc_color[rtAmmo]);
   r->shape = &shape_missile;
   r->life_start = 0;
+  r->life_end = M_PI;
 
   ads_matrix Scell(Id, 0);    
   cell *lcell = hybrid::get_at(vctr, 0);
