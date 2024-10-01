@@ -68,18 +68,20 @@ void gen_terrain(cell *c, cellinfo& ci, int level = 0) {
   
   if(level == 2) {
     int r = hrand(100);
-    if(r < 3) {
-      forCellCM(c1, c) if(hrand(100) < 50)
-        forCellCM(c2, c1)  if(hrand(100) < 50)
-          if(ci_at[c2].type == wtNone) ci_at[c2].type = wtDestructible;
+    if(r < wall_frequency(c)) {
+      int t = hrand(2);
+      if(t == 0)
+        forCellCM(c1, c) if(hrand(100) < 50) if(c1->land == c->land)
+          forCellCM(c2, c1)  if(hrand(100) < 50) if(c2->land == c->land)
+            if(ci_at[c2].type == wtNone) ci_at[c2].type = wtDestructible;
+      if(t == 1)
+        forCellCM(c1, c) if(hrand(100) < 50) if(c1->land == c->land)
+          forCellCM(c2, c1)  if(hrand(100) < 50) if(c1->land == c->land)
+            if(ci_at[c2].type < wtSolid)
+              ci_at[c2].type = wtSolid;
       }
-    else if(r < 6) {
-      forCellCM(c1, c) if(hrand(100) < 50)
-        forCellCM(c2, c1)  if(hrand(100) < 50)
-          if(ci_at[c2].type < wtSolid)
-            ci_at[c2].type = wtSolid;
-      }
-    else if(r < 8)
+    r = hrand(100);
+    if(r < gate_frequency(c))
       ci_at[c].type = wtGate;
     }
   ci.mpd_terrain = level;
@@ -153,7 +155,43 @@ void add_turret(cell *c, cellinfo& ci, const ads_matrix& T) {
   ci.rocks.emplace_back(std::move(r));
   }
 
+void gen_resource(cell *c, shiftmatrix from, eResourceType rsrc, int expire);
+
+void add_rsrc(cell *c, cellinfo& ci, const ads_matrix& T) {
+  eResourceType rt = eResourceType(rand() % 6);
+  gen_resource(c, T, rt, gen_expire());
+  }
+
 int turrets;
+
+struct placement {
+  ld alpha;
+  ld r;
+  ld shift;
+  ld spinshift;
+  ld rapidity;
+  ads_matrix get() {
+    return spin(alpha) * twist::uxpush(r/2) * chg_shift(shift) * spin(spinshift) * lorentz(0, 3, rapidity);
+    };
+  };
+
+/* if maxr equals cgi.rhexf, any point inside the cell equally likely */
+placement get_placement(cell *c, ld maxr, ld max_rapidity) {
+  cell *c1 = nullptr;
+  placement p;
+  while(c1 != c) {
+    ld vol = randd() * wvolarea_auto(maxr);
+    p.r = binsearch(0, maxr, [vol] (ld r) { return wvolarea_auto(r) > vol; });
+    p.alpha = randd() * TAU;
+    hyperpoint h = spin(p.alpha) * xpush0(p.r);
+    c1 = c;
+    virtualRebase(c1, h);
+    }
+  p.shift = randd() * TAU;
+  p.spinshift = randd() * TAU;
+  p.rapidity = randd() * max_rapidity;
+  return p;
+  }
 
 void gen_rocks(cell *c, cellinfo& ci, int radius) {
   if(radius <= ci.rock_dist) return;
@@ -162,44 +200,27 @@ void gen_rocks(cell *c, cellinfo& ci, int radius) {
   if(!hyperbolic) { println(hlog, "wrong geometry detected in gen_rocks 1!");  exit(1); }
 
   if(radius == 0) {
-    int q = rpoisson(rock_density);
+    int q = rpoisson(rock_density * rock_frequency(c));
     for(int i=0; i<q; i++) {
-
-      /* any point inside the cell equally likely */
-      ld maxr = cgi.rhexf;
-      cell *c1 = nullptr;
-      ld r, alpha;
-      while(c1 != c) {
-        ld vol = randd() * wvolarea_auto(maxr);
-        r = binsearch(0, maxr, [vol] (ld r) { return wvolarea_auto(r) > vol; });
-        alpha = randd() * TAU;
-        hyperpoint h = spin(alpha) * xpush0(r);
-        c1 = c;
-        virtualRebase(c1, h);
-        }
-
+      auto p = get_placement(c, cgi.rhexf, rock_max_rapidity);
       hybrid::in_actual([&] {
-        add_rock(c, ci, ads_matrix(spin(alpha) * twist::uxpush(r/2) * chg_shift(randd() * TAU) * spin(randd() * TAU) * lorentz(0, 3, randd() * rock_max_rapidity)));
+        add_rock(c, ci, p.get());
         });
       }
 
-    q = rpoisson(rock_density / 50);
-    if(celldist(c) == 2) q += rpoisson(0.1);
-    for(int i=0; i<q; i++) {
-      ld maxr = cgi.rhexf;
-      cell *c1 = nullptr;
-      ld r, alpha;
-      while(c1 != c) {
-        ld vol = randd() * wvolarea_auto(maxr);
-        r = binsearch(0, maxr, [vol] (ld r) { return wvolarea_auto(r) > vol; });
-        alpha = randd() * TAU;
-        hyperpoint h = spin(alpha) * xpush0(r);
-        c1 = c;
-        virtualRebase(c1, h);
-        }
-
+    if(ci.type == wtGate && hrand(100) < 20) {
+      auto p = get_placement(c, cgi.rhexf / 2, rock_max_rapidity / 100);
       hybrid::in_actual([&] {
-        add_turret(c, ci, ads_matrix(spin(alpha) * twist::uxpush(r/2) * chg_shift(randd() * TAU) * spin(randd() * TAU) * lorentz(0, 3, randd() * rock_max_rapidity/10)));
+        add_rsrc(c, ci, p.get());
+        });
+      }
+
+    q = rpoisson(rock_density * turret_frequency(c));
+    // if(celldist(c) == 2) q += rpoisson(0.1);
+    for(int i=0; i<q; i++) {
+      auto p = get_placement(c, cgi.rhexf, rock_max_rapidity / 10);
+      hybrid::in_actual([&] {
+        add_turret(c, ci, p.get());
         turrets++;
         });
       }

@@ -102,6 +102,7 @@ void run_ads_game_hooks() {
   rogueviz::rv_hook(hooks_drawcell, 0, ads_draw_cell);
   rogueviz::rv_hook(shmup::hooks_turn, 0, ads_turn);
   rogueviz::rv_hook(anims::hooks_anim, 100, replay_animation);
+  rogueviz::rv_hook(hooks_nextland, 0, ads_nextland);
   }
 
 void run_ads_game() {
@@ -112,12 +113,11 @@ void run_ads_game() {
     hybrid::csteps = 0;
     hybrid::reconfigure();
     }
+  run_ads_game_hooks();
   start_game();
 
   starting_point = hybrid::get_where(cwt.at).first;
-  
-  run_ads_game_hooks();
-  
+    
   cgi.use_count++;
   hybrid::in_underlying_geometry([] {
     cgi.use_count++;
@@ -167,6 +167,7 @@ void default_settings() {
   lps_add(lps_relhell, ccolor::which, &ccolor::random);
   lps_add(lps_relhell, ccolor::rwalls, 0);
   lps_add(lps_relhell, vid.fov, 150.);
+  lps_add(lps_relhell, specialland, laCrossroads);
 
   lps_add(lps_relhell_ds_spacetime_klein, pmodel, mdDisk);
 
