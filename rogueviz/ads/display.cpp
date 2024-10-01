@@ -110,8 +110,8 @@ void draw_game_cell(const cell_to_draw& cd) {
     auto& rock = *ci.rocks[i];
 
     if(!paused) {
-      if(rock.type == oRock && rock.expire < pdata.score) { rock.resource = rtNone; rock.col = rock_color[rtNone]; rock.expire = 999999; }
-      if(rock.type == oResource && rock.expire < pdata.score) { rock.resource = rtNone; rock.col = rsrc_color[rtNone]; rock.shape = rsrc_shape[rtNone]; rock.expire = 999999; }
+      if(rock.type == oRock && expired(rock.expire, pdata)) { rock.resource = rtNone; rock.col = rock_color[rtNone]; rock.expire.score = 999999; }
+      if(rock.type == oResource && expired(rock.expire, pdata)) { rock.resource = rtNone; rock.col = rsrc_color[rtNone]; rock.shape = rsrc_shape[rtNone]; rock.expire.score = 999999; }
       }
     
     ld ang = 0;

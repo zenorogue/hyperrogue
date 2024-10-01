@@ -2,33 +2,37 @@ namespace hr {
 
 namespace ads_game {
 
-color_t rock_color[6] = { 0x703800FF, 0xC0A080FF, 0xC08010FF, 0xC04000FF, 0x408000FF, 0x8040A0FF,  };
-color_t rsrc_color[6] = { 0x404040FF, 0x40C0C0FF, 0xFFD500FF, 0xFF0000FF, 0x00FF00FF, 0x0000FFFF };
+color_t rock_color[rtGUARD] = { 0x703800FF, 0xC0A080FF, 0xC04000FF, 0x408000FF, 0x8040A0FF, 0xC08010FF, 0xC08010FF, 0xC08010FF };
+color_t rsrc_color[rtGUARD] = { 0x404040FF, 0x40C0C0FF, 0xFF0000FF, 0x00FF00FF, 0x0000FFFF, 0xFFD500FF, 0x00FFD5FF, 0xD500FFFF };
 
-vector<ld>* rsrc_shape[6] = { &shape_particle, &shape_heart, &shape_gold, &shape_weapon, &shape_fuel, &shape_airtank };
-string rsrc_sound[6] = {"", "pickup-potion", "pickup-gold", "pickup-scroll", "pickup-speed", "seen-air" };
+vector<ld>* rsrc_shape[rtGUARD] = { &shape_particle, &shape_heart, &shape_weapon, &shape_fuel, &shape_airtank, &shape_gold, &shape_gold, &shape_gold };
+string rsrc_sound[rtGUARD] = {"", "pickup-potion", "pickup-scroll", "pickup-speed", "seen-air", "pickup-gold", "pickup-gold", "pickup-gold" };
 
 void rsrc_config() {
   ads_max_pdata.hitpoints = 3;
-  ads_max_pdata.score = 0;
+  for(int i=0; i<score_types; i++)
+    ads_max_pdata.score[i] = 0;
   ads_max_pdata.ammo = 50;
   ads_max_pdata.fuel = 12 * TAU;
   ads_max_pdata.oxygen = 20 * TAU;
   
+  for(int i=0; i<score_types; i++)
+    ads_tank_pdata.score[i] = 1;
   ads_tank_pdata.hitpoints = 1;
-  ads_tank_pdata.score = 1;
   ads_tank_pdata.ammo = 20;
   ads_tank_pdata.fuel = 4 * TAU;
   ads_tank_pdata.oxygen = 5 * TAU;
 
   ds_max_pdata.hitpoints = 5;
-  ds_max_pdata.score = 0;
+  for(int i=0; i<score_types; i++)
+    ds_max_pdata.score[i] = 0;
   ds_max_pdata.ammo = 10;
   ds_max_pdata.fuel = 12 * TAU;
   ds_max_pdata.oxygen = 20 * TAU;
   
   ds_tank_pdata.hitpoints = 1;
-  ds_tank_pdata.score = 1;
+  for(int i=0; i<score_types; i++)
+    ds_tank_pdata.score[i] = 1;
   ds_tank_pdata.ammo = 2;
   ds_tank_pdata.fuel = 8 * TAU;
   ds_tank_pdata.oxygen = 15 * TAU;
@@ -142,10 +146,12 @@ bool display_rsrc() {
 
   #define D(id, y, field, unit) display(id, y, pdata.field, DS_(max_pdata).field, DS_(tank_pdata).field, unit)
   D(1, 1, hitpoints, 1);
-  D(3, 2, ammo, 1);
-  D(4, 3, fuel, TAU);
-  D(5, 4, oxygen, TAU);
-  D(2, 5, score, 10);
+  D(2, 2, ammo, 1);
+  D(3, 3, fuel, TAU);
+  D(4, 4, oxygen, TAU);
+  D(5, 5, score[0], 10);
+  D(6, 6, score[1], 10);
+  D(7, 7, score[2], 10);
   #undef D
 
   int next_y = 6;
@@ -167,16 +173,21 @@ bool display_rsrc() {
   return true;
   }
 
+int treasure_id(eResourceType r);
+eResourceType treasure_of(cell *c);
+
 void gain_resource(eResourceType rsrc) {
   auto& tank_pdata = DS_(tank_pdata);
   auto& max_pdata = DS_(max_pdata);
   #define D(id, field) if(rsrc == id) { pdata.field += tank_pdata.field; if(max_pdata.field && pdata.field > max_pdata.field) pdata.field = max_pdata.field; }
   println(hlog, "gain resource ", int(rsrc));
-  D(1, hitpoints)
-  D(2, score)
-  D(3, ammo)
-  D(4, fuel)
-  D(5, oxygen)
+  D(rtHull, hitpoints)
+  D(rtAmmo, ammo)
+  D(rtFuel, fuel)
+  D(rtOxygen, oxygen)
+  for(auto r: {rtGoldGate, rtGoldRocks, rtGoldTurret}) {
+    D(r, score[treasure_id(r)])
+    }
   playSound(nullptr, rsrc_sound[rsrc]);
   }
 

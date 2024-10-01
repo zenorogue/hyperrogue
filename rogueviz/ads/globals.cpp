@@ -75,12 +75,14 @@ color_t missile_color = 0xFF0000FF;
 
 bool game_over;
 
+constexpr int score_types = 3;
+
 struct player_data {
   int hitpoints;
-  int score;
   int ammo;
   ld fuel;
   ld oxygen;
+  int score[score_types];
   };
 
 ld ads_how_much_invincibility = TAU / 4;
@@ -154,7 +156,7 @@ color_t ghost_color = 0x800080FF;
 /* types */
 
 enum eObjType { oRock, oMissile, oParticle, oResource, oMainRock, oTurret, oTurretMissile };
-enum eResourceType { rtNone, rtHull, rtGold, rtAmmo, rtFuel, rtOxygen };
+enum eResourceType { rtNone, rtHull, rtAmmo, rtFuel, rtOxygen, rtGoldRocks, rtGoldGate, rtGoldTurret, rtGUARD };
 enum eWalltype { wtNone, wtDestructible, wtSolid, wtGate, wtBarrier };
 
 PPR obj_prio[7] = { PPR::MONSTER_BODY, PPR::ITEMa, PPR::ITEM_BELOW, PPR::ITEM, PPR::MONSTER_HEAD, PPR::MONSTER_BODY, PPR::ITEMa };
@@ -176,13 +178,18 @@ struct turret_state {
   ld err;
   };
 
+struct expiry_data {
+  int score;
+  int score_id;
+  };
+
 struct ads_object {
   eObjType type;
   eResourceType resource;
   cell *owner;
   ads_matrix at;
   color_t col;
-  int expire;
+  expiry_data expire;
   vector<ld>* shape;
   ld last_shot;
   int hlast;

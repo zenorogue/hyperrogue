@@ -103,7 +103,7 @@ void add_rock(cell *c, cellinfo& ci, const ads_matrix& T) {
   eResourceType rt = eResourceType(rand() % 6);
   auto r = std::make_unique<ads_object> (oRock, c, T, rock_color[rt]);
   r->resource = rt;
-  r->expire = gen_expire();
+  r->expire = gen_expire(c);
   r->shape = &(rand() % 2 ? shape_rock2 : shape_rock);
   if(geometry != gTwistedProduct) { println(hlog, "wrong geometry detected in gen_rocks 2!");  exit(1); }
   int q = 0;
@@ -134,7 +134,7 @@ void add_rock(cell *c, cellinfo& ci, const ads_matrix& T) {
 
 void add_turret(cell *c, cellinfo& ci, const ads_matrix& T) {
   auto r = std::make_unique<ads_object> (oTurret, c, T, 0xC0C060FF);
-  r->expire = gen_expire();
+  r->expire = gen_expire(c);
   r->shape = &shape_turret;
   r->last_shot = -1;
   r->hlast = 0;
@@ -155,11 +155,13 @@ void add_turret(cell *c, cellinfo& ci, const ads_matrix& T) {
   ci.rocks.emplace_back(std::move(r));
   }
 
-void gen_resource(cell *c, shiftmatrix from, eResourceType rsrc, int expire);
+void gen_resource(cell *c, shiftmatrix from, eResourceType rsrc, const expiry_data& expire);
 
 void add_rsrc(cell *c, cellinfo& ci, const ads_matrix& T) {
   eResourceType rt = eResourceType(rand() % 6);
-  gen_resource(c, T, rt, gen_expire());
+  if(rt == rtGoldRocks && c->land == laJungle) rt = rtGoldGate;
+  if(rt == rtGoldRocks && c->land == laHunting) rt = rtGoldTurret;
+  gen_resource(c, T, rt, gen_expire(c));
   }
 
 int turrets;
@@ -239,7 +241,7 @@ void gen_particles(int qty, cell *c, shiftmatrix from, color_t col, ld spd, ld t
     }
   }
 
-void gen_resource(cell *c, shiftmatrix from, eResourceType rsrc, int expire) {
+void gen_resource(cell *c, shiftmatrix from, eResourceType rsrc, const expiry_data& expire) {
   if(!rsrc) return;
   auto r = std::make_unique<ads_object>(oResource, c, from, rsrc_color[rsrc]);
   r->shape = rsrc_shape[rsrc];

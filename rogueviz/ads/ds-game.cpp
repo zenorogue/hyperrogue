@@ -198,8 +198,7 @@ struct rock_generator {
       ld alpha = rand_range(0, TAU);
       cshift += rand_range(0.5, 1) * (1 + cshift / 10);
       auto r = add(spin(alpha) * cspin(0, 2, step) * spin90() * lorentz(0, 3, rapidity));
-      eResourceType rt = eResourceType(2 + rand() % 4);
-      if(rt == rtGold) rt = rtHull;
+      eResourceType rt = eResourceType(1 + rand() % 4);
       r->type = oResource;
       r->resource = rt;
       r->shape = rsrc_shape[rt];
