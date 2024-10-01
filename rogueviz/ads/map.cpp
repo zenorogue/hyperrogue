@@ -434,9 +434,12 @@ void handle_crashes() {
   vector<ads_object*> rocks;
   vector<ads_object*> resources;
   vector<ads_object*> turrets;
+  vector<ads_object*> enemy_missiles;
   for(auto m: displayed) {
     if(m->type == oMissile)
       missiles.push_back(m);
+    if(m->type == oTurretMissile)
+      enemy_missiles.push_back(m);
     if(m->type == oRock || m->type == oTurret)
       rocks.push_back(m);
     if(m->type == oTurret)
@@ -464,6 +467,12 @@ void handle_crashes() {
       hyperpoint h = spin(ang*degree) * hpxyz(shape_ship[i] * ads_scale, shape_ship[i+1] * ads_scale, 1);
       for(auto r: rocks) {
         if(pointcrash(h, r->pts)) ads_crash_ship();
+        }
+      for(auto r: enemy_missiles) {
+        if(pointcrash(h, r->pts)) {
+          r->life_end = r->pt_main.shift;
+          ads_crash_ship();
+          }
         }
       for(auto r: resources) {
         if(pointcrash(h, r->pts)) {
