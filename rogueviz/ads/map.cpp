@@ -484,7 +484,7 @@ void handle_crashes() {
       hyperpoint h1 = normalize(h);
       bool crashed = false;
       hybrid::in_actual([&] {
-        swap(h1[2], h1[3]);
+        h1[3] = h1[2]; h1[2] = 0;
         ads_point rel = ads_inverse(current * vctrV) * ads_point(h1, 0);
         cell *c = hybrid::get_at(vctr, 0);
         virtualRebase(c, rel.h);
