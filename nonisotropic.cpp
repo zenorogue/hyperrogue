@@ -2551,25 +2551,30 @@ EX namespace twist {
   
     M[0][0] = +xx - yy - zz + ww;
     M[1][1] = -xx + yy - zz + ww;
-    M[2][2] = -xx - yy + zz + ww;
-    
-    M[0][1] = -2 * (xy + zw);
-    M[1][0] = -2 * (xy - zw);
-    
-    M[0][2] = 2 * (xz - yw);
-    M[2][0] = 2 * (xz + yw);
-
-    M[1][2] = -2 * (yz + xw);
-    M[2][1] = -2 * (yz - xw);
   
     if(hyperbolic) {
-      swap(M[0][2], M[1][2]);
-      swap(M[2][0], M[2][1]);
-      M[1][2] *= -1;
-      M[2][0] *= -1;
       M[2][2] = xx + yy + zz + ww;
-      return M;
-      }
+    
+      M[0][1] = -2 * (xy + zw);
+      M[1][0] = -2 * (xy - zw);
+      
+      M[0][2] = -2 * (yz + xw);
+      M[2][0] = 2 * (yz - xw);
+
+      M[1][2] = -2 * (xz - yw);
+      M[2][1] = 2 * (xz + yw);
+    } else {
+      M[2][2] = -xx - yy + zz + ww;
+    
+      M[0][1] = -2 * (xy + zw);
+      M[1][0] = -2 * (xy - zw);
+      
+      M[0][2] = 2 * (xz - yw);
+      M[2][0] = 2 * (xz + yw);
+
+      M[1][2] = -2 * (yz + xw);
+      M[2][1] = -2 * (yz - xw);
+    }
 
 
     return M;
