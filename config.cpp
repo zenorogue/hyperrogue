@@ -2770,10 +2770,10 @@ EX void edit_levellines(char c) {
     });
   }
 
-EX geom3::eSpatialEmbedding shown_spatial_embedding() {
+geom3::eSpatialEmbedding shown_spatial_embedding() {
   if(GDIM == 2) return geom3::seNone;
   return geom3::spatial_embedding;
-  }
+}
 
 EX bool in_tpp() { return pmodel == mdDisk && !models::camera_straight; }
 
