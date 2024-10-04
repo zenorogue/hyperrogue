@@ -1324,7 +1324,16 @@ EX void drawPlayer(eMonster m, cell *where, const shiftmatrix& V, color_t col, d
 
   if(mapeditor::drawplayer && !mapeditor::drawUserShape(V, mapeditor::sgPlayer, cs.charid, cs.skincolor, where)) {
   
-    if(cs.charid >= 8) {
+    if(cs.charid >= 10) {
+      ShadowV(V, cgi.shSpaceship);
+      queuepoly(VBODY, cgi.shSpaceshipBase, fc(150, cs.skincolor, 4));
+      queuepoly(VBODY, cgi.shSpaceshipCockpit, fc(150, cs.eyecolor, 4));
+      queuepoly(VBODY, cgi.shSpaceshipGun, fc(150, cs.dresscolor, 4));
+      queuepoly(VBODY, cgi.shSpaceshipEngine, fc(150, cs.haircolor, 4));
+      queuepoly(VBODY * lmirror(), cgi.shSpaceshipGun, fc(150, cs.dresscolor, 4));
+      queuepoly(VBODY * lmirror(), cgi.shSpaceshipEngine, fc(150, cs.haircolor, 4));
+      }
+    else if(cs.charid >= 8) {
       /* famililar */
       if(!mmspatial && !footphase) {
         if(stop) return;

@@ -362,7 +362,9 @@ hpcshape
 
   hpcshape shCrossbow, shCrossbowBolt, shCrossbowstringLoaded, shCrossbowstringUnloaded, shCrossbowstringSemiloaded, shCrossbowIcon, shCrossbowstringIcon;
 
-  hpcshape shReserved[16];
+  hpcshape shSpaceship, shMissile, shSpaceshipBase, shSpaceshipCockpit, shSpaceshipGun, shSpaceshipEngine;
+
+  hpcshape shReserved[10];
   
   int orb_inner_ring; //< for shDisk* shapes, the number of vertices in the inner ring
   int res1, res2;

@@ -985,6 +985,7 @@ EX string csnameid(int id) {
   if(id == 4 || id == 5) return XLAT("cat");
   if(id == 6 || id == 7) return XLAT("dog");
   if(id == 8 || id == 9) return XLATN("Familiar");
+  if(id == 10 || id == 11) return XLATN("spaceship");
   return XLAT("none");
   }
 
@@ -3557,7 +3558,7 @@ EX void showCustomizeChar() {
     else if(uni == 'g') {
       cs.charid++;
       if(cs.charid == 2 && !princess::everSaved && !autocheat) cs.charid = 4;
-      cs.charid %= 10;
+      cs.charid %= 12;
       }
     else if(uni == 'p') vid.samegender = !vid.samegender;
     else if(uni == 's') switchcolor(cs.skincolor, cat ? haircolors : skincolors);
