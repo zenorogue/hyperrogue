@@ -1045,8 +1045,8 @@ enum eModel : int {
 
 /** list of available models (i.e., projections) */
 EX vector<modelinfo> mdinf = {
-  {"disk/Gans", "general perspective", "general perspective", mf::azimuthal | mf::conformal},
-  {"half-plane", "inversion", "stereographic projection [VR]", mf::conformal | mf::orientation | mf::horocyclic},
+  {"disk/Gans", "general perspective", "general perspective", mf::azimuthal | mf::conformal | mf::product_special},
+  {"half-plane", "inversion", "stereographic projection [VR]", mf::conformal | mf::orientation | mf::horocyclic | mf::product_special},
   {"band", "band", "Mercator", mf::band | mf::conformal | mf::transition},
   {X3("polygonal"), mf::conformal | mf::orientation},
   {X3("formula"), 0},

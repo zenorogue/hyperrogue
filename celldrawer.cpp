@@ -1861,7 +1861,7 @@ void celldrawer::draw_features_and_walls_3d() {
             case 6: case 7: if (pmodel == mdPerspective && V[2][LDIM] <= -l) continue; break;
             }
           }
-        else if(mproduct) {
+        else if(mproduct && !models::conformal_product_model()) {
           if(a < c->type-2 && !in_s2xe()) {
             ld d = in_e2xe() ? sqhypot_d(2, unshift(tC0(V))) : V[2][2];
             hyperpoint h = (unshift(V) * cgi.walltester[ofs + a]);

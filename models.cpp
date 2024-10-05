@@ -267,10 +267,16 @@ EX namespace models {
   
   EX bool product_model(eModel m) {
     if(!gproduct) return false;
-    if(mdinf[m].flags & mf::product_special) return false;
+    if(mdinf[m].flags & mf::product_special && !(pmodel == mdDisk && pconf.alpha != 1)) return false;
     return true;
     }
   
+  EX bool conformal_product_model() {
+    if(!in_h2xe()) return false;
+    if(pmodel == mdDisk && pconf.alpha == 1) return true;
+    return pmodel == mdHalfplane;
+    }
+
   int editpos = 0;
   
   EX string get_model_name(eModel m) {
