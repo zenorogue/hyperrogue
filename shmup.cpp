@@ -257,6 +257,25 @@ bool isMonster(monster *m) { return m->type != moPlayer && m->type != moBullet; 
 
 EX hookset<bool(shmup::monster*)> hooks_kill;
 
+struct collision_info {
+  shiftpoint p1, p2;
+  color_t col;
+  };
+
+vector<collision_info> collisions;
+int collision_debug_level = 2;
+
+ld collision_radius(monster *m) {
+  if(m->type == moAsteroid)
+    return cgi.asteroid_size[m->hitpoints & 7];
+  else
+    return SCALE * 0.15;
+  }
+
+ld collision_distance(monster *bullet, monster *target) {
+  return collision_radius(bullet) + collision_radius(target);
+  }
+
 void killMonster(monster* m, eMonster who_kills, flagtype flags = 0) {
   int tk = tkills();
   if(callhandlers(false, hooks_kill, m)) return;
@@ -452,6 +471,7 @@ monster *playerCrash(monster *who, shiftpoint where) {
     if(pc[j]->isVirtual) continue;
     if(!gmatrix.count(pc[j]->base)) continue;
     double d = sqdist(pc[j]->pat*C0, where);
+    if(collision_debug_level >= 2) collisions.emplace_back(collision_info{pc[j]->pat*C0, where, 0x0000FFFF});
     /* crash into another player -- not taken into account in racing */
     if(d < 0.1 * SCALE2 && !racing::on) return pc[j];
     /* too far away -- irrelevant in split_screen */
@@ -1089,6 +1109,7 @@ void movePlayer(monster *m, int delta) {
       crashintomon = playerCrash(m, nat*C0);
       for(monster *m2: nonvirtual) if(m2!=m && m2->type == passive_switch) {
         double d = sqdist(m2->pat*C0, nat*C0);
+        if(collision_debug_level >= 2) collisions.emplace_back(collision_info{m->pat*C0, m2->pat*C0, 0x00FF00FF});
         if(d < SCALE2 * 0.2) crashintomon = m2;
         }
       }
@@ -1635,12 +1656,6 @@ hyperpoint fronttangent(ld x) {
   else return ztangent(x);
   }
 
-ld collision_distance(monster *bullet, monster *target) {
-  if(target->type == moAsteroid)
-    return SCALE * 0.15 + cgi.asteroid_size[target->hitpoints & 7];
-  return SCALE * 0.3;
-  }
-
 void spawn_asteroids(monster *bullet, monster *target) {
   if(target->hitpoints <= 1) return;
   hyperpoint rnd = random_spin() * point2(SCALE/3000., 0);
@@ -1802,6 +1817,7 @@ void moveBullet(monster *m, int delta) {
     if(m->type == moFireball && m2->type == moFireball) continue;
     if(m->type == moAirball && m2->type == moAirball) continue;
     double d = hdist(m2->pat*C0, m->pat*C0);
+    if(collision_debug_level >= 2) collisions.emplace_back(collision_info{m2->pat*C0, m->pat*C0, 0xFF0000FF});
     
     if(d < collision_distance(m, m2)) {
 
@@ -2021,6 +2037,8 @@ void moveMonster(monster *m, int delta) {
     step *= 1.5;
   else if(m->type == moAltDemon || m->type == moHexDemon || m->type == moCrusher || m->type == moMonk)
     step *= 1.4;
+
+  if(collision_debug_level >= 2) collisions.emplace_back(collision_info{goal*C0, m->pat*C0, 0xC04040FF});
 
   if(m->type == passive_switch) step = 0;
   
@@ -2260,8 +2278,12 @@ void moveMonster(monster *m, int delta) {
     if(d < SCALE2 * 0.1) crashintomon = m2;
     }
   
-  if(inertia_based) for(int i=0; i<players; i++) if(pc[i] && hdist(tC0(pc[i]->pat), tC0(m->pat)) < collision_distance(pc[i], m))
-    crashintomon = pc[i];
+  if(inertia_based) for(int i=0; i<players; i++) {
+    if(!pc[i]) return;
+    if(collision_debug_level >= 2) collisions.emplace_back(collision_info{pc[i]->pat*C0, m->pat*C0, 0x00FFFFFF});
+    if(hdist(tC0(pc[i]->pat), tC0(m->pat)) < collision_distance(pc[i], m))
+      crashintomon = pc[i];
+    }
   
   if(!peace::on) 
   for(int i=0; i<players; i++) 
@@ -2614,6 +2636,8 @@ EX void turn(int delta) {
   
   if(delta > 200) { turn(200); delta -= 200; if(!delta) return; }
 
+  collisions.clear();
+
   curtime += delta;
 
   handleInput(delta);
@@ -2918,6 +2942,7 @@ EX void clearMemory() {
   nextdragon = 0;
   visibleAt = 0;
   for(int i=0; i<MAXPLAYER; i++) pc[i] = NULL;
+  collisions.clear();
   }
 
 void gamedata(hr::gamedata* gd) { 
@@ -3003,6 +3028,11 @@ EX shiftmatrix at_missile_level(const shiftmatrix& T) {
   return at_smart_lof(T, 1.15);
   }
 
+EX void draw_collision_debug() {
+  for(auto& c: collisions)
+    queueline(c.p1, c.p2, c.col, 2);
+  }
+
 EX }
 
 bool celldrawer::draw_shmup_monster() {
@@ -3022,6 +3052,12 @@ bool celldrawer::draw_shmup_monster() {
     if(c != m->base) continue; // may happen in RogueViz Collatz
     m->pat = ggmatrix(m->base) * m->at;
     shiftmatrix view = V * m->at;
+
+    if(collision_debug_level) {
+      ld r = collision_radius(m);
+      for(int i=0; i<=10; i++) curvepoint(xspinpush0(i * 36._deg, r));
+      queuecurve(view, 0xFFFFFFFF, 0, PPR::SUPERLINE);
+      }
 
     bool half_elliptic = elliptic && GDIM == 3 && WDIM == 2;
     bool mirrored = det(view.T) > 0;

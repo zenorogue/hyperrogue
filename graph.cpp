@@ -4784,6 +4784,8 @@ EX bool should_draw_mouse_cursor() {
 
 EX void drawMarkers() {
 
+  shmup::draw_collision_debug();
+
   if(!(cmode & sm::NORMAL)) return;
 
   if(should_draw_mouse_cursor()) {
