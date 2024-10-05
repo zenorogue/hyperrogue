@@ -130,7 +130,7 @@ vector<monster*> active, nonvirtual, additional;
 
 cell *findbaseAround(shiftpoint p, cell *around, int maxsteps) {
 
-  if(fake::split()) {
+  if(quotient || fake::split()) {
     auto p0 = inverse_shift(ggmatrix(around), p);
     virtualRebase(around, p0);
     return around;
