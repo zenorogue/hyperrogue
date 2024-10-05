@@ -1031,9 +1031,9 @@ enum eModel : int {
   mdWerner, mdAitoff, mdHammer, mdLoximuthal, mdMiller, mdGallStereographic, mdWinkelTripel,
   // 39..48
   mdPoorMan, mdPanini, mdRetroCraig, mdRetroLittrow, mdRetroHammer, mdThreePoint, mdLiePerspective, mdLieOrthogonal, mdRelPerspective, mdRelOrthogonal,
-  // 49..50
+  // 49..53
   mdHorocyclicEqa, mdConformalSquare, mdFisheye2, mdPolar,
-  // 51..
+  // 54..
   mdGUARD, mdPixel, mdHyperboloidFlat, mdPolynomial, mdManual
   };
 #endif
