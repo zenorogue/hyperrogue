@@ -3921,7 +3921,7 @@ EX void pushdown(cell *c, int& q, const shiftmatrix &V, double down, bool rezoom
   #if MAXMDIM >= 4
   if(GDIM == 3) {
     for(int i=q; i<isize(ptds); i++) {
-      auto pp = dynamic_cast<dqi_poly*> (&*ptds[q++]);
+      auto pp = ptds[q++]->as_poly();
       if(!pp) continue;
       auto& ptd = *pp;
       ptd.V = ptd.V * lzpush(+down);
@@ -3942,7 +3942,7 @@ EX void pushdown(cell *c, int& q, const shiftmatrix &V, double down, bool rezoom
     }
   
   while(q < isize(ptds)) {
-    auto pp = dynamic_cast<dqi_poly*> (&*ptds[q++]);
+    auto pp = ptds[q++]->as_poly();
     if(!pp) continue;
     auto& ptd = *pp;
 

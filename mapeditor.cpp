@@ -2654,7 +2654,7 @@ EX namespace mapeditor {
     initShape(sg, id);
     
     for(int i=0; i<isize(ptds); i++) { 
-      auto pp = dynamic_cast<dqi_poly*> (&*ptds[i]);
+      auto pp = ptds[i]->as_poly();
       if(!pp) continue;
       auto& ptd = *pp;
       

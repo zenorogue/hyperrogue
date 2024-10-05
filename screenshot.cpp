@@ -502,7 +502,7 @@ EX always_false in;
   EX void render() {
     #if MAXMDIM >= 4
     for(auto& p: ptds) {
-      auto p2 = dynamic_cast<dqi_poly*>(&*p);
+      auto p2 = p->as_poly();
       if(p2)
         prepare(*p2);
       }
@@ -524,7 +524,7 @@ EX always_false in;
     #endif
     
     for(auto& p: ptds) {
-      auto p2 = dynamic_cast<dqi_poly*>(&*p);
+      auto p2 = p->as_poly();
       if(p2)
         polygon(*p2);
       }

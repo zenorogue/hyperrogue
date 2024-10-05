@@ -62,6 +62,7 @@ struct drawqueueitem {
   virtual ~drawqueueitem() = default;
   /** \brief When minimizing OpenGL calls, we need to group items of the same color, etc. together. This value is used as an extra sorting key. */
   virtual color_t outline_group() = 0;
+  virtual dqi_poly* as_poly() { return nullptr; }
   };
 
 /** \brief Drawqueueitem used to draw polygons. The majority of drawqueueitems fall here. */
@@ -96,6 +97,7 @@ struct dqi_poly : drawqueueitem {
   #endif
   void draw_back() override;
   color_t outline_group() override { return outline; }
+  virtual dqi_poly* as_poly() { return this; }
   };
 
 /** \brief Drawqueueitem used to draw lines */
@@ -2476,7 +2478,7 @@ EX void draw_main() {
       }
 
     for(auto& ptd: ptds) if(ptd->prio == PPR::OUTCIRCLE) {
-      auto c = dynamic_cast<dqi_poly*> (&*ptd);
+      auto c = ptd->as_poly();
       if(c) { c->color = 0; c->outline = 0; }
       }
 
@@ -2637,7 +2639,7 @@ EX void drawqueue() {
     int pp = int(p);
     if(qp0[pp] == qp[pp]) continue;
     auto get_z = [&] (const unique_ptr<drawqueueitem>& p) -> ld {
-      auto d = dynamic_cast<dqi_poly*> (&*p);
+      auto d = p->as_poly();
       if(!d) return 0;
       hyperpoint h = Hypc;
 

@@ -2385,7 +2385,7 @@ void celldrawer::draw_wall_full() {
           if(rosedist(c2) < rd)
             placeSidewall(c, i, SIDE_WALL, V, rcol);
         for(int i=t; i<isize(ptds); i++) {
-          auto p = dynamic_cast<dqi_poly*>(&*(ptds[i]));
+          auto p = ptds[i]->as_poly();
           if(p) p->prio = PPR::TRANSPARENT_WALL;
           }
         }
