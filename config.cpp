@@ -1343,6 +1343,7 @@ EX void initConfig() {
 
   param_i(vid.monmode, "monster display mode", DEFAULT_MONMODE);
   param_i(vid.wallmode, "wall display mode", DEFAULT_WALLMODE);
+  param_b(zh_ascii, "chinese_ascii", false)->editable("Chinese ASCII", 'Z');
   param_i(vid.highlightmode, "highlightmode");
 
   param_b(vid.always3, "3D always", false)->switcher = geom3::switch_fpp;
@@ -2513,6 +2514,7 @@ EX void configureInterface() {
 
   add_edit(display_yasc_codes);
   add_edit(vid.orbmode);
+  add_edit(zh_ascii);
 
   dialog::addSelItem(XLAT("draw crosshair"), crosshair_size > 0 ? fts(crosshair_size) : ONOFF(false), 'x');
   dialog::add_action([] () { 

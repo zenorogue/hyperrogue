@@ -261,7 +261,23 @@ bool displayglyph(int cx, int cy, int buttonsize, char glyph, color_t color, int
     sortquickqueue();
     quickqueue();
     }
-  else if(glyph == '*')
+  else if(zh_ascii) {
+    const char* zh;
+
+    if(isMonster) {
+      eMonster m = eMonster(id - ittypes);
+      zh = XLAT1_acc(minf[m].name, 8);
+      }
+    else {
+      eItem it = eItem(id);
+      zh = XLAT1_acc(iinf[it].name, 8);
+      }
+
+    if(!zh) goto non_zh;
+    dynamicval<fontdata*> df(cfont, cfont_chinese);
+    displaystr(cx + buttonsize/2, cy, 0, glsize, zh, darkenedby(color, b?0:1), 0);
+    }
+  else non_zh: if(glyph == '*')
     displaychr(cx + buttonsize/2, cy+buttonsize/4, 0, glsize*3/2, glyph, darkenedby(color, b?0:1));
   else
     displaychr(cx + buttonsize/2, cy, 0, glsize, glyph, darkenedby(color, b?0:1));

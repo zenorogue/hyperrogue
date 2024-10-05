@@ -125,6 +125,8 @@ struct dqi_string : drawqueueitem {
   int frame;
   /** alignment (0-8-16) */
   int align;
+  /** current font */
+  fontdata *font;
   void draw() override;
   color_t outline_group() override { return 1; }
   };
@@ -2246,6 +2248,7 @@ void dqi_line::draw() {
   }
 
 void dqi_string::draw() {
+  dynamicval<fontdata*> df(cfont, font);
   #if CAP_SVG
   if(svg::in) {
     svg::text(x, y, size, str, frame, color, align);
@@ -2284,6 +2287,13 @@ EX void sortquickqueue() {
     else i++;
   }
 
+EX void clear_curvedata() {
+  if(keep_curvedata) return;
+  curvedata.clear();
+  for(auto& d: fontdatas) if(d.second.finf) d.second.finf->tvertices.clear();
+  curvestart = 0;
+  }
+
 EX void quickqueue() {
   current_display->next_shader_flags = 0;
   spherespecial = 0; 
@@ -2291,11 +2301,7 @@ EX void quickqueue() {
   int siz = isize(ptds);
   for(int i=0; i<siz; i++) ptds[i]->draw();
   ptds.clear();
-  if(!keep_curvedata) {
-    curvedata.clear();
-    finf.tvertices.clear();
-    curvestart = 0;
-    }
+  clear_curvedata();
   }
 
 /* todo */
@@ -2713,11 +2719,7 @@ EX void drawqueue() {
     }
 #endif
 
-  if(!keep_curvedata) {
-    curvedata.clear();
-    finf.tvertices.clear();
-    curvestart = 0;
-    }
+  clear_curvedata();
   
   #if CAP_GL
   GLERR("drawqueue");
@@ -2828,6 +2830,7 @@ EX void queuestr(int x, int y, int shift, int size, string str, color_t col, int
   ptd.size = size;
   ptd.color = darkened(col);
   ptd.frame = frame ? ((poly_outline & ~ 255)+frame) : 0;
+  ptd.font = cfont;
   }
 
 EX void queuecircle(int x, int y, int size, color_t color, PPR prio IS(PPR::CIRCLE), color_t fillcolor IS(0)) {
@@ -2866,8 +2869,6 @@ EX void queuestr(const shiftpoint& h, int size, const string& chr, color_t col, 
     queuestr(xc, yc, sc, size, chr, col, frame);
   }
 
-EX basic_textureinfo finf;
-
 #if CAP_GL
 #if HDR
 using pointfunction = function<hyperpoint(ld, ld)>;
@@ -2879,6 +2880,9 @@ EX hyperpoint default_pointfunction(ld x, ld y) {
 
 #if !CAP_EXTFONT
 EX void write_in_space(const shiftmatrix& V, int fsize, double size, const string& s, color_t col, int frame IS(0), int align IS(8), PPR prio IS(PPR::TEXT), pointfunction pf IS(default_pointfunction)) {
+  if(!cfont->finf) cfont->finf = new basic_textureinfo;
+  auto& finf = *cfont->finf;
+
   init_glfont(fsize);
   glfont_t& f(*(cfont->glfont[fsize]));
   finf.texture_id = f.texture;

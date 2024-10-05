@@ -390,6 +390,21 @@ EX string XLAT(string x, stringpar p1, stringpar p2, stringpar p3, stringpar p4,
   return x;
   }
 
+EX const char* XLAT1_to(string x, int language) {
+#if CAP_TRANS
+  const fullnoun *N = findInHashTable(x, all_nouns);
+  if(N) return N->n[7].nom;
+#endif
+  return nullptr;
+  }
+
+EX const char* XLAT1_acc(string x, int language) {
+#if CAP_TRANS
+  const fullnoun *N = findInHashTable(x, all_nouns);
+  if(N) return N->n[7].acc;
+#endif
+  return nullptr;
+  }
 
 EX string XLATN(string x) { 
 #if CAP_TRANS

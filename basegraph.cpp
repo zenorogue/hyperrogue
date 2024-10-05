@@ -458,13 +458,14 @@ struct fontdata {
   #if CAP_SDLTTF
   TTF_Font* font[max_font_size+1];
   #endif
+  struct basic_textureinfo *finf;
   ~fontdata();
   };
 #endif
 
 EX map<string, fontdata> fontdatas;
 
-EX fontdata *cfont;
+EX fontdata *cfont, *cfont_chinese;
 
 EX fontdata* font_by_name(string fname) {
   auto& fd = fontdatas[fname];
@@ -475,6 +476,7 @@ EX fontdata* font_by_name(string fname) {
     #endif
     for(int i=0; i<=max_glfont_size; i++) fd.glfont[i] = nullptr;
     for(int i=0; i<=max_font_size; i++) fd.font[i] = nullptr;
+    fd.finf = nullptr;
     }
   return &fd;
   }
@@ -1479,8 +1481,11 @@ EX int SDL_Init1(Uint32 flags) {
 
 EX void set_cfont() {
   int f = font_id;
-  if(lang() == 8 && among(f, 0, 1, 2)) f = 3;
+  int fch = f;
+  if(among(f, 0, 1, 2)) fch = 3;
+  if(lang() == 8) f = fch;
   cfont = font_by_name(font_filenames[last_font_id = f]);
+  cfont_chinese = font_by_name(font_filenames[fch]);
   }
 
 EX void init_font() {

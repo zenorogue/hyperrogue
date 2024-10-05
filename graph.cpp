@@ -26,6 +26,8 @@ EX int detaillevel = 0;
 
 EX bool first_cell_to_draw = true;
 
+EX bool zh_ascii = false;
+
 EX bool in_perspective() {
   return models::is_perspective(pconf.model);
   }
@@ -852,14 +854,33 @@ EX color_t orb_inner_color(eItem it) {
   return iinf[it].color;
   }
 
-EX void draw_ascii(const shiftmatrix& V, char glyph, color_t col, ld size) {
-  string s = s0 + glyph;
+EX void draw_ascii(const shiftmatrix& V, const string& s, color_t col, ld size, ld size2) {
   int id = isize(ptds);
   if(WDIM == 2 && GDIM == 3)
     queuestrn(V * lzpush(cgi.FLOOR - cgi.scalefactor * size / 4), size * mapfontscale / 100, s, darkenedby(col, darken), 0);
   else 
-    queuestrn(V, mapfontscale / 100, s, darkenedby(col, darken), GDIM == 3 ? 0 : 2);
+    queuestrn(V, size2 * mapfontscale / 100, s, darkenedby(col, darken), GDIM == 3 ? 0 : 2);
   while(id < isize(ptds)) ptds[id++]->prio = PPR::MONSTER_BODY;
+  }
+
+EX void draw_ascii(const shiftmatrix& V, char glyph, color_t col, ld size) {
+  draw_ascii(V, s0 + glyph, col, size, 1);
+  }
+
+EX void draw_ascii_or_zh(const shiftmatrix& V, char glyph, const string& name, color_t col, ld size, ld zh_size) {
+#if CAP_TRANS
+  if(zh_ascii) {
+    auto p = XLAT1_acc(name, 8);
+    if(p) {
+      string chinese = p;
+      chinese.resize(utfsize(chinese[0]));
+      dynamicval<fontdata*> df(cfont, cfont_chinese);
+      draw_ascii(V, chinese, col, size, zh_size);
+      return;
+      }
+    }
+#endif
+  draw_ascii(V, glyph, col, size);
   }
 
 EX void queue_goal_text(shiftpoint P1, ld sizemul, const string& s, color_t color) {
@@ -904,7 +925,7 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
   if(WDIM == 3 && c == centerover && in_perspective() && hdist0(tC0(V)) < cgi.orbsize * 0.25) return false;
 
   if(!mmitem || !CAP_SHAPES) {
-    draw_ascii(V, iinf[it].glyph, icol, 1);
+    draw_ascii_or_zh(V, iinf[it].glyph, iinf[it].name, icol, 1, 0.5);
     return true;
     }  
     
@@ -1273,7 +1294,7 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
     }
 
   else {
-    draw_ascii(V, xch, icol, 1);
+    draw_ascii_or_zh(V, xch, iinf[it].name, icol, 1, 0.5);
     }
 
   return true;
@@ -1292,7 +1313,7 @@ void humanoid_eyes(const shiftmatrix& V, color_t ecol, color_t hcol = skincolor)
 
 EX void drawTerraWarrior(const shiftmatrix& V, int t, int hp, double footphase) {
   if(!mmmon) {
-    draw_ascii(V, 'T', gradient(0x202020, 0xFFFFFF, 0, t, 6), 1.5);
+    draw_ascii_or_zh(V, 'T', minf[moTerraWarrior].name, gradient(0x202020, 0xFFFFFF, 0, t, 6), 1.5, 1);
     return;
     }
   ShadowV(V, cgi.shPBody);
@@ -1652,7 +1673,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
   #endif
 
   if(!mmmon || !CAP_SHAPES) {
-    draw_ascii(V1, xch, asciicol, 1.5);
+    draw_ascii_or_zh(V1, xch, minf[m].name, asciicol, 1.5, 1);
     return true;
     }
 
@@ -2653,7 +2674,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
     }
 
   else
-    draw_ascii(V1, minf[m].glyph, asciicol, 1.5);
+    draw_ascii_or_zh(V1, minf[m].glyph, minf[m].name, asciicol, 1.5, 1);
   
   return true;
 #endif
