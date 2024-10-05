@@ -750,7 +750,7 @@ EX void initConfig() {
   scfg.hataction[1][1][2] = 32 + 5;
   scfg.hataction[1][1][3] = 32 + 6;
 
-  int charidtable[MAXPLAYER] = {0, 1, 4, 6, 2, 3, 0};
+  int charidtable[MAXPLAYER] = {0, 1, 4, 6, 2, 3, 8};
     
   for(int i=0; i<MAXPLAYER; i++) {
     initcs(multi::scs[i]); 
@@ -764,6 +764,12 @@ EX void initConfig() {
   multi::scs[4].uicolor = 0xC000C0FF;
   multi::scs[5].uicolor = 0x00C0C0FF;
   multi::scs[6].uicolor = 0xC0C0C0FF;
+
+  set_char_by_name(multi::scs[2], "rudy");
+  set_char_by_name(multi::scs[5], "princess");
+  set_char_by_name(multi::scs[4], "worker");
+  multi::scs[4].skincolor = 0x303030FF;
+  multi::scs[1].haircolor = 0x40FF40FF;
   
   #if CAP_CONFIG
   param_i(multi::players, "mode-number of players")->be_non_editable();
