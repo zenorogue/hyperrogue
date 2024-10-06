@@ -1524,6 +1524,10 @@ EX void initConfig() {
   
 #if CAP_TEXTURE  
   param_b(texture::texture_aura, "texture-aura", false);
+
+  param_i(texture::raw_texture_opacity, "raw_texture_opacity", 32)
+  ->editable(0, 255, 16, "raw texture opacity", "", 'R')
+  ->set_sets([] { dialog::bound_low(0); dialog::bound_up(255); });
 #endif
 
   param_f(vid.smart_range_detail, "smart-range-detail", 8)

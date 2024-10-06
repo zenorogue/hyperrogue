@@ -686,12 +686,14 @@ bool newmove = false;
 
 vector<glhr::textured_vertex> rtver(4);
 
+EX int raw_texture_opacity = 32;
+
 void texture_config::drawRawTexture() {
   glflush();
   current_display->next_shader_flags = GF_TEXTURE;
   dynamicval<eModel> m(pmodel, mdPixel);
   current_display->set_all(0, 0);
-  glhr::color2(0xFFFFFF20);
+  glhr::color2(0xFFFFFF00 + raw_texture_opacity);
   glBindTexture(GL_TEXTURE_2D, config.data.textureid);
   for(int i=0; i<4; i++) {
     int cx[4] = {2, -2, -2, 2};
@@ -1377,6 +1379,9 @@ EX void showMenu() {
     dialog::add_action([] { dialog::openColorDialog(config.slave_color, NULL); });    
 
     dialog::addBreak(50);
+
+    if(texture::config.tstate == texture::tsAdjusting)
+      add_edit(raw_texture_opacity);
     
 #if CAP_SHOT
     dialog::addItem(XLAT("save the raw texture"), 'S');
