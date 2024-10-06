@@ -451,6 +451,14 @@ EX bool zero_d(int d, hyperpoint h) {
   return true;
   }
 
+/** inner product in the current geometry */
+
+EX ld geo_inner(const hyperpoint &h1, const hyperpoint &h2) {
+  ld res = 0;
+  for(int i=0; i<MDIM; i++) res += h1[i] * h2[i] * sig(i);
+  return res;
+  }
+
 /** this function returns approximate square of distance between two points
  *  (in the spherical analogy, this would be the distance in the 3D space,
  *  through the interior, not on the surface)
