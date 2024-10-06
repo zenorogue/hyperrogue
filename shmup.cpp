@@ -263,7 +263,7 @@ struct collision_info {
   };
 
 vector<collision_info> collisions;
-int collision_debug_level = 2;
+int collision_debug_level = 0;
 
 ld collision_radius(monster *m) {
   if(m->type == moAsteroid)
