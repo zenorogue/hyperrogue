@@ -383,6 +383,8 @@ void snap_to_center() {
     };
   }
 
+void set_time(ld t);
+
 void show() {
   /* might not be changed automatically */
   if(vid.fixed_yz) spinEdge_full();
