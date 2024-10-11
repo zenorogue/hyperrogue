@@ -1554,6 +1554,11 @@ EX namespace hybrid {
       int id = full_shvid(c);
       return generate_subcellshape_if_needed(c, id);      
       }
+
+    int pattern_value(cell *c) override {
+      auto c1 = hybrid::get_where(c).first;
+      return PIU ( currentmap->pattern_value(c1) );
+      }
     };
   
   hrmap_hybrid* hmap() { return (hrmap_hybrid*) currentmap; }

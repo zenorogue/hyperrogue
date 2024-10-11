@@ -418,6 +418,8 @@ EX namespace fake {
       return FPIU( currentmap->shvid(c) );
       }
 
+    int pattern_value(cell *c) override { return FPIU( currentmap->pattern_value(c)); }
+
     subcellshape& get_cellshape(cell *c) override {
       return *FPIU( (cgip = pcgip, &(currentmap->get_cellshape(c))) );
       }

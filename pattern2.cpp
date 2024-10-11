@@ -420,46 +420,7 @@ EX pair<int, bool> fieldval(cell *c) {
   }
 
 EX int fieldval_uniq(cell *c) {
-  if(fake::in()) return FPIU(fieldval_uniq(c));
-  if(experimental) return 0;
-  if(reg3::in() && !PURE) return 0;
-  else if(arb::in()) return arb::id_of(c->master);
-  else if(mhybrid) {
-    auto c1 = hybrid::get_where(c).first; 
-    return PIU ( fieldval_uniq(c1) );
-    }
-  else if(msphere) {
-    if(arcm::in()) return c->master->fiftyval;
-    #if CAP_IRR
-    else if(IRREGULAR) return irr::cellindex[c];
-    #endif
-    #if CAP_GP
-    else if(GOLDBERG_INV) return (get_code(gp::get_local_info(c)) << 8) | (sphere ? c->master->fieldval : c->master->fieldval / S7);
-    #endif
-    if(ctof(c)) return c->master->fieldval;
-    else return createMov(c, 0)->master->fieldval + 256 * createMov(c,2)->master->fieldval + (1<<16) * createMov(c,4)->master->fieldval;
-    }
-  else if(euc::in(2)) {
-    auto p = euc2_coordinates(c);
-    if(closed_manifold) return p.first + p.second * (1 << 16);
-    return gmod(p.first - 22 * p.second, 3*127);
-    }
-  else if(euc::in(3)) {
-    auto co = euc::get_ispacemap()[c->master];
-    if(closed_manifold) return co[0] + (co[1] << 10) + (co[2] << 20);
-    return gmod(co[0] + 3 * co[1] + 9 * co[2], 3*127);
-    }
-  else if(bt::in() || arcm::in() || nil || S3 >= OINF || (cgflags & qIDEAL)) return 0;
-  else if(&currfp == &fp_invalid) return 0;
-  else if(geometry == gSpace535) return 0;
-  else if(WDIM == 3) return c->master->fieldval;
-  else if(ctof(c) || NONSTDVAR) return c->master->fieldval/S7;
-  else {
-    int z = 0;
-    for(int u=0; u<S6; u+=2) 
-      z = max(z, btspin(createMov(c, u)->master->fieldval, c->c.spin(u)));
-    return -1-z;
-    }
+  return currentmap->pattern_value(c);
   }
 
 EX int fieldval_uniq_rand(cell *c, int randval) {

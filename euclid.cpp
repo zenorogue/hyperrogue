@@ -303,6 +303,20 @@ EX namespace euc {
     subcellshape& get_cellshape(cell* c) override {
       return *cgi.heptshape;
       }
+
+    int pattern_value(cell *c) override {
+      if(WDIM == 2) {
+        auto p = euc2_coordinates(c);
+        if(closed_manifold) return p.first + p.second * (1 << 16);
+        return gmod(p.first - 22 * p.second, 3*127);
+        }
+      else {
+        auto co = ispacemap[c->master];
+        if(closed_manifold) return co[0] + (co[1] << 10) + (co[2] << 20);
+        return gmod(co[0] + 3 * co[1] + 9 * co[2], 3*127);
+        }
+      }
+
     };
   
   hrmap_euclidean* cubemap() {

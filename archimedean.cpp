@@ -888,6 +888,11 @@ struct hrmap_archimedean : hrmap {
     return C0;
     }
 
+  int pattern_value(cell *c) override {
+    if(sphere) return c->master->fiftyval;
+    return hrmap::pattern_value(c);
+    }
+
   };
 
 EX hrmap *new_map() { return new hrmap_archimedean; }

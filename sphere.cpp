@@ -183,6 +183,18 @@ struct hrmap_spherical : hrmap_standard {
     if(elliptic) fixelliptic(T);
     return T;
     }
+
+  int pattern_value(cell *c) override {
+    #if CAP_IRR
+    if(IRREGULAR) return irr::cellindex[c];
+    #endif
+    #if CAP_GP
+    if(GOLDBERG_INV) return (get_code(gp::get_local_info(c)) << 8) | c->master->fieldval;
+    #endif
+    if(ctof(c)) return c->master->fieldval;
+    return createMov(c, 0)->master->fieldval + 256 * createMov(c,2)->master->fieldval + (1<<16) * createMov(c,4)->master->fieldval;
+    }
+
   };
 
 EX heptagon *getDodecahedron(int i) {

@@ -13,6 +13,8 @@ namespace hr {
 #if HDR
 extern int default_levs();
 
+constexpr int PATTERN_INVALID = -1;
+
 struct hrmap {
   virtual heptagon *getOrigin() { return NULL; }
   virtual cell *gamestart() { return getOrigin()->c7; }
@@ -82,6 +84,10 @@ public:
   transmatrix adjmod(heptagon *h, int i) { return adj(h, gmod(i, h->type)); }
   transmatrix iadjmod(cell *c, int i) { return iadj(c, gmod(i, c->type)); }
   transmatrix iadjmod(heptagon *h, int i) { return iadj(h, gmod(i, h->type)); }
+
+  /** this takes a large closed manifold M that is a quotient of this, and returns a unique identifier of the cell corresponding to M
+   *  returns PATTERN_INVALID if not implemented or impossible */
+  virtual int pattern_value(cell *c) { return PATTERN_INVALID; }
   };
 
 /** hrmaps which are based on regular non-Euclidean 2D tilings, possibly quotient  
@@ -104,6 +110,7 @@ struct hrmap_standard : hrmap {
   transmatrix master_relative(cell *c, bool get_inverse) override;
   bool link_alt(heptagon *h, heptagon *alt, hstate firststate, int dir) override;
   void on_dim_change() override;
+  int pattern_value(cell *c) override;
   };
 
 void clearfrom(heptagon*);
@@ -123,6 +130,15 @@ struct hrmap_hyperbolic : hrmap_standard {
   void virtualRebase(heptagon*& base, transmatrix& at) override;
   };
 #endif
+
+int hrmap_standard::pattern_value(cell *c) {
+  if(&currfp == &fieldpattern::fp_invalid) return 0;
+  if(ctof(c) || NONSTDVAR) return c->master->fieldval/S7;
+  int z = 0;
+  for(int u=0; u<S6; u+=2)
+    z = max(z, fieldpattern::btspin(createMov(c, u)->master->fieldval, c->c.spin(u)));
+  return -1-z;
+  }
 
 void hrmap_standard::on_dim_change() {
   for(auto& p: gp::gp_swapped) swapmatrix(gp::gp_adj[p]);

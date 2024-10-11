@@ -1625,6 +1625,8 @@ struct hrmap_arbi : hrmap {
     return id_of(c->master);
     }
 
+  int pattern_value(cell *c) override { return id_of(c->master); }
+
   hyperpoint get_corner(cell *c, int cid, ld cf) override {
     auto& sh = arb::current_or_slided().shapes[arb::id_of(c->master)];
     int id = gmod(cid, c->type);

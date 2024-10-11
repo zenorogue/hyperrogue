@@ -793,6 +793,10 @@ EX namespace reg3 {
       int id = local_id.at(c).first;
       return move_sequences[id][i];
       }
+
+    int pattern_value(cell *c) override {
+      return local_id[c].first;
+      }
     };
 
   struct hrmap_quotient3 : hrmap_closed3 { };
@@ -1752,6 +1756,10 @@ EX namespace reg3 {
       extra_origins.push_back(created);
       return get_cell_at(created, fv);
       }
+
+    int pattern_value(cell *c) override {
+      return c->master->fieldval;
+      }
     };
 
   EX int get_aid(cell *c) {
@@ -2037,12 +2045,16 @@ EX namespace reg3 {
   struct emerald_matcher {
     reg3::hrmap_quotient3 *emerald_map;
 
+    int crsize;
     vector<short> evmemo;
     
+    emerald_matcher() { crsize = 1; }
+
     void find_emeraldval(heptagon *target, heptagon *parent, int d, hrmap_quotient3* qmap, int parent_fieldval) {
       generate_cellrotations();
       auto& cr = cgi.cellrotations;
       if(evmemo.empty()) {
+        crsize = isize(cr);
         println(hlog, "starting");
         map<int, int> matrix_hashtable;
         auto matrix_hash = [] (const transmatrix& M) {
@@ -2082,7 +2094,7 @@ EX namespace reg3 {
       memo_id = memo_id * isize(qmap->allh) + parent_fieldval;
       memo_id = memo_id * S7 + d;
       target->emeraldval = evmemo[memo_id];
-      target->zebraval = emerald_map->allh[target->emeraldval / isize(cr)]->zebraval;
+      target->zebraval = emerald_map->allh[target->emeraldval / crsize]->zebraval;
       }
 
     };
@@ -2208,6 +2220,15 @@ EX namespace reg3 {
     
     bool link_alt(heptagon *h, heptagon *alt, hstate firststate, int dir) override {
       return ruleset_link_alt(h, alt, firststate, dir);
+      }
+
+    int pattern_value(cell *c) override {
+      int id = c->master->emeraldval / crsize;
+      if(!PURE) {
+        id <<= 16;
+        id |= cell_id[c];
+        }
+      return id;
       }
     };
 
@@ -2491,6 +2512,15 @@ EX namespace reg3 {
           }
         println(f);
         }
+      }
+
+    int pattern_value(cell *c) override {
+      int id = c->master->emeraldval / crsize;
+      if(!PURE) {
+        id <<= 16;
+        id |= quotient_map->local_id[quotient_map->acells[c->master->fieldval]].second;
+        }
+      return id;
       }
     };
 
