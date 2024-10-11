@@ -502,6 +502,16 @@ struct movei {
   };
 #endif
 
+#if HDR
+struct jumpdata {
+  eMonster dashmon;
+  cell *jumpthru;
+  bool uniq;
+  vector<movei> moves;
+  jumpdata() { dashmon = moNone; jumpthru = nullptr; uniq = false; }
+  };
+#endif
+
 EX movei moveimon(cell *c) { return movei(c, c->mondir); }
 
 EX movei match(cell *f, cell *t) {

@@ -162,15 +162,19 @@ EX namespace whirlwind {
       }
     }
   
-  EX cell *jumpFromWhereTo(cell *c, bool player) {
+  EX cell *jumpFromWhereTo(cell *c, bool player, struct jumpdata& jdata) {
+    jdata.uniq = true;
     for(int i=0; i<2; i++) {
       calcdirs(c);
       if(qdirs != 1) return NULL;
+      auto mi = movei(c, dfrom[0]);
+      jdata.moves.push_back(mi.rev());
       cell *c2 = c->move(dfrom[0]);
       if(!passable(c, c2, P_JUMP1)) return NULL;
       if(player && i == 0 && !passable(c, c2, P_ISPLAYER)) return NULL;
       c = c2;
       }
+    reverse(jdata.moves.begin(), jdata.moves.end());
     calcdirs(c);
     if(qdirs != 1) return NULL;
     return c;

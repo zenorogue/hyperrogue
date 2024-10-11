@@ -1224,7 +1224,8 @@ EX void groupmove(eMonster movtype, flagtype mf) {
       }
       
     if(movtype == moEagle && c->monst == moNone && !isPlayerOn(c) && !bird_disruption(c)) {
-      cell *c2 = whirlwind::jumpFromWhereTo(c, false);
+      jumpdata jdata;
+      cell *c2 = whirlwind::jumpFromWhereTo(c, false, jdata);
       groupmove2(movei(c2, c, STRONGWIND), movtype, mf);
       }
     
