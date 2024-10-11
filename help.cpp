@@ -259,7 +259,7 @@ string pushtext(stringpar p) {
     "\n\nNote: when pushing %the1 off a heptagonal cell, you can control the pushing direction "
     "by clicking left or right half of the heptagon.", p);
 #if !ISMOBILE
-  s += XLAT(" With the keyboard, you can press Tab to invert the way the pushing direction leans.");
+  s += XLAT(" With the keyboard, you can press Tab to invert the way the pushing direction leans, or Shift+Tab to decide based on how the view is rotated.");
 #endif
   return s;
   }

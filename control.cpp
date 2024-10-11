@@ -142,6 +142,9 @@ EX hyperpoint move_destination_vec(int d) {
   else return cspin(0, 2, d * 45._deg) * smalltangent();
   }
 
+EX int keybd_subdir = 1;
+EX bool keybd_subdir_enabled = 0;
+
 EX void movepckeydir(int d) {
   DEBB(DF_GRAPH, ("movepckeydir\n"));
   // EUCLIDEAN
@@ -149,7 +152,7 @@ EX void movepckeydir(int d) {
   if(protect_memory()) return;
   
   movedir md = vectodir(move_destination_vec(d));
-  md.subdir = keybd_subdir ? 1 : -1;
+  if(keybd_subdir_enabled) md.subdir = keybd_subdir;
     
   if(!canmove) movepcto(md), remission(); else movepcto(md);
   }
@@ -620,7 +623,8 @@ EX void handleKeyNormal(int sym, int uni) {
     }
 
   if(sym == SDLK_TAB) {
-    keybd_subdir = !keybd_subdir;
+    keybd_subdir_enabled = !anyshiftclick;
+    keybd_subdir *= -1;
     }
 
   if(sym == SDLK_ESCAPE) {
