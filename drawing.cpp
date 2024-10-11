@@ -97,7 +97,7 @@ struct dqi_poly : drawqueueitem {
   #endif
   void draw_back() override;
   color_t outline_group() override { return outline; }
-  virtual dqi_poly* as_poly() { return this; }
+  virtual dqi_poly* as_poly() override { return this; }
   };
 
 /** \brief Drawqueueitem used to draw lines */
