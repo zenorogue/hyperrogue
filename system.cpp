@@ -63,6 +63,10 @@ EX int savecount;
 EX int save_turns;
 EX bool doCross = false;
 
+EX int loadcount;
+EX int current_loadcount;
+EX int load_branching;
+
 EX bool gamegen_failure;
 
 EX eLand top_land;
@@ -392,6 +396,8 @@ EX void initgame() {
     sagephase = 0; hardcoreAt = 0;
     timerstopped = false;
     savecount = 0; savetime = 0;
+    loadcount = 0; current_loadcount = 0; load_branching = 0;
+
     tortoise::last21tort = 0;
     cheater = 0;
     if(autocheat) cheater = 1;
@@ -459,7 +465,7 @@ EX namespace scores {
 /** \brief the amount of boxes reserved for each hr::score item */
 #define MAXBOX 500
 /** \brief currently used boxes in hr::score */
-#define POSSCORE 418
+#define POSSCORE 421
 /** \brief a struct to keep local score from an earlier game */
 struct score {
   /** \brief version used */
@@ -973,6 +979,10 @@ EX void applyBoxes() {
   applyBoxNum(asteroids_generated);
   applyBoxNum(asteroid_orbs_generated);
 
+  applyBoxNum(loadcount, "load count");
+  applyBoxNum(load_branching, "load branching");
+  applyBoxNum(current_loadcount, "current load count");
+
   if(POSSCORE != boxid) printf("ERROR: %d boxes\n", boxid);
   if(isize(invorb)) { println(hlog, "ERROR: Orbs not taken into account"); exit(1); }
   }
@@ -990,6 +1000,9 @@ void loadBox() {
 
 #if HDR
 constexpr int MODECODE_BOX = 387;
+constexpr int CURRENT_LOADCOUNT_BOX = 420;
+constexpr int LOADCOUNT_BOX = 418;
+constexpr ld BRANCH_SCALE = 100000.0;
 #endif
 
 modecode_t fill_modecode() {
@@ -1263,6 +1276,7 @@ EX void loadsave() {
           using namespace scores;
           for(int i=0; i<boxid; i++) save.box[i] = sc.box[i];
           for(int i=boxid; i<MAXBOX; i++) save.box[i] = 0, sc.box[i] = 0;
+          if(boxid <= LOADCOUNT_BOX) save.box[LOADCOUNT_BOX] = -1;
 
           if(boxid <= MODECODE_BOX) save.box[MODECODE_BOX] = sc.box[MODECODE_BOX] = fill_modecode();
 
@@ -1347,7 +1361,11 @@ EX void loadsave() {
     }
   #endif
 
+    if(buf[0] == 'L' && buf[1] == 'O' && buf[2] == 'A' && buf[3] == 'D') {
+      sc.box[scores::CURRENT_LOADCOUNT_BOX]++;
+      }
     }
+
   fclose(f);
   // this is the index of Orb of Safety
   if(ok && sc.box[65 + 4 + itOrbSafety - itOrbLightning])
@@ -1398,6 +1416,12 @@ EX void load_last_save() {
   tour::on = false;
   save_turns = turncount;
   loaded_from_save = true;
+
+  if(loadcount >= 0) {
+    loadcount += current_loadcount;
+    load_branching += BRANCH_SCALE * log(1 + current_loadcount);
+    current_loadcount = 0;
+    }
   }
 #endif
 
@@ -1406,10 +1430,7 @@ EX void stop_game() {
   if(dual::split(stop_game)) return;
   DEBBI(DF_INIT, ("stop_game"));
   achievement_final(true);
-#if CAP_SAVE
-  if(!casual)
-    saveStats();
-#endif
+  save_if_needed();
   for(int i=0; i<ittypes; i++) items[i] = 0;
   lastkills = 0; for(int i=0; i<motypes; i++) kills[i] = 0;
   for(int i=0; i<10; i++) explore[i] = 0;
@@ -1818,13 +1839,27 @@ EX void initAll() {
 
 EX purehookset hooks_final_cleanup;
 
-EX void finishAll() {
-  achievement_final(!items[itOrbSafety]);
-
+EX void save_if_needed() {
 #if CAP_SAVE
+  if(casual && savecount && !items[itOrbSafety]) {
+    scorebox.box[scores::CURRENT_LOADCOUNT_BOX]++;
+    FILE *f = fopen(scorefile.c_str(), "at");
+    if(f) {
+      string yasc_msg = "quit";
+      if(!canmove && yasc_message != "") yasc_msg = yasc_message;
+      fprintf(f, "LOAD %d %d %s %s\n", int(cwt.at->land), int(turncount - save_turns), formatted_yasc_code().c_str(), yasc_message.c_str());
+      fclose(f);
+      }
+    }
   if(!casual)
     saveStats();
 #endif
+  }
+
+EX void finishAll() {
+  achievement_final(!items[itOrbSafety]);
+
+  save_if_needed();
   clearMemory();
 #if !ISMOBILE
   quit_all();

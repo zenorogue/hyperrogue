@@ -1118,6 +1118,10 @@ EX void initConfig() {
   -> editable("YASC codes", 'Y')
   -> help("YASC codes: Sides-Entity-Restrict-Threat-Wall");
 
+  param_b(display_semicasual, "semicasual", false)
+  -> editable("semicasual", 'S')
+  -> help("display save/load counts in exit screen");
+
   param_b(vid.relative_font, "relative_font", true)
   -> editable("set relative font size", 'r')
   -> help("Font size is set as a relation to screen size.")
@@ -2519,6 +2523,7 @@ EX void configureInterface() {
   add_edit(less_in_portrait);
 
   add_edit(display_yasc_codes);
+  if(casual) add_edit(display_semicasual);
   add_edit(vid.orbmode);
   add_edit(zh_ascii);
 
