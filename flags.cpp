@@ -112,6 +112,7 @@ MONFLAGCHECK(isRatling, flag & CF_RATLING)
 MONFLAGCHECK(isGhostMover, flag & CF_GHOSTMOVER)
 MONFLAGCHECK(isPowerMonster, flag & CF_POWER)
 MONFLAGCHECK(hasFacing, flag & CF_FACING)
+MONFLAGCHECK(isFrog, flag & CF_FROG)
 
 ITEMFLAGCHECK(isElementalShard, flag & IF_SHARD)
 ITEMFLAGCHECK(itemBurns, !(flag & IF_FIREPROOF))

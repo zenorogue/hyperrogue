@@ -103,6 +103,13 @@ EX void moveEffect(const movei& mi, eMonster m) {
     animateMovement(mi.rev(), LAYER_BOAT);
     tortoise::move_baby(cf, ct);
     }
+
+  if(isFrog(m) && !isNeighbor(cf, ct)) {
+    forCellEx(c1, ct) if(c1->monst && !isFrog(c1->monst) && !isFriendly(c1->monst)) {
+      c1->stuntime = min(c1->stuntime + 2, 7);
+      checkStunKill(c1);
+      }
+    }
   
   #if CAP_COMPLEX2
   if(isDie(m) && mi.proper())
@@ -2050,6 +2057,13 @@ EX void movemonsters() {
 
   specialMoves();
 
+  DEBB(DF_TURN, ("jumpers"));
+  if(havewhat & HF_JUMP) {
+    groupmove(moFrog, 0);
+    groupmove(moVaulter, 0);
+    groupmove(moPhaser, 0);
+    }
+
   DEBB(DF_TURN, ("ghosts"));
   moveghosts();
     
@@ -2075,12 +2089,6 @@ EX void movemonsters() {
   if(havewhat & HF_EAGLES) groupmove(moEagle, MF_NOATTACKS | MF_ONLYEAGLE);
   DEBB(DF_TURN, ("eagles"));
   if(havewhat & HF_REPTILE) groupmove(moReptile, 0);
-  DEBB(DF_TURN, ("jumpers"));
-  if(havewhat & HF_JUMP) {
-    groupmove(moFrog, 0);
-    groupmove(moVaulter, 0);
-    groupmove(moPhaser, 0);
-    }
   DEBB(DF_TURN, ("air"));
   if(havewhat & HF_AIR) {
     airmap.clear();

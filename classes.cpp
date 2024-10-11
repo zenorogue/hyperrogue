@@ -479,6 +479,7 @@ static constexpr flagtype CF_FACE_UP = Flag(49);
 static constexpr flagtype CF_FACE_SIDE = Flag(50);
 static constexpr flagtype CF_HIGH_THREAT = Flag(51);
 static constexpr flagtype CF_SPAM = Flag(52);
+static constexpr flagtype CF_FROG = Flag(53);
 
 enum eMonster {
   #define MONSTER(a,b,c,d,e,f,g,h) d,

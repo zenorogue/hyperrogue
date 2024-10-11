@@ -705,8 +705,11 @@ EX string generateHelpForMonster(eMonster m) {
     }
   
   eItem it = frog_power(m);
-  if(it)
+  if(it) {
     s += XLAT("\n\nThis Frog uses the power of %the1. You get 5 charges yourself for killing it.", it);
+
+    s += XLAT("\n\nFrogs move first, and after they use their jumping power, they stun adjacent non-frog monsters which are not friendly to the player for 2 turns.");
+    }
     
   if(m == moBat || m == moEagle)
     s += XLAT("\n\nFast flying creatures may attack or go against gravity only in their first move.", m);
