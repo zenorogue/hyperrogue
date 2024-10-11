@@ -3597,8 +3597,9 @@ EX transmatrix applyDowndir(cell *c, const cellfunction& cf) {
   return ddspin180(c, patterns::downdir(c, cf));
   }
 
-void draw_movement_arrows(cell *c, const transmatrix& V, int df) {
+EX bool keybd_subdir;
 
+void draw_movement_arrows(cell *c, const transmatrix& V, int df) {
   if(viewdists) return;
   
   string keylist = "";
@@ -3628,8 +3629,8 @@ void draw_movement_arrows(cell *c, const transmatrix& V, int df) {
 
       if((c->type & 1) && (isStunnable(c->monst) || isPushable(c->wall))) {
         transmatrix Centered = rgpushxto0(unshift(tC0(cwtV)));
-        int sd = md.subdir;
-        
+        int sd = keybd_subdir ? 1 : -1;
+
         transmatrix T = iso_inverse(Centered) * rgpushxto0(Centered * tC0(V)) * lrspintox(Centered*tC0(V)) * spin(-sd * M_PI/S7) * xpush(0.2);
         
         if(vid.axes >= 5)
