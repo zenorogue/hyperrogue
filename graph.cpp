@@ -1557,7 +1557,16 @@ void drawMimic(eMonster m, cell *where, const shiftmatrix& V, color_t col, doubl
   
   if(mapeditor::drawUserShape(V, mapeditor::sgPlayer, cs.charid, darkena(col, 0, 0x80), where)) return;
   
-  if(cs.charid >= 8) {
+  if(cs.charid >= 10) {
+    ShadowV(V, cgi.shSpaceship);
+    queuepoly(VBODY, cgi.shSpaceshipBase, darkena(col, 0, 0xC0));
+    queuepoly(VBODY, cgi.shSpaceshipCockpit, darkena(col, 0, 0xC0));
+    queuepoly(VBODY, cgi.shSpaceshipGun, darkena(col, 0, 0xC0));
+    queuepoly(VBODY, cgi.shSpaceshipEngine, darkena(col, 0, 0xC0));
+    queuepoly(VBODY * lmirror(), cgi.shSpaceshipGun, darkena(col, 0, 0xC0));
+    queuepoly(VBODY * lmirror(), cgi.shSpaceshipEngine, darkena(col, 0, 0xC0));
+    }
+  else if(cs.charid >= 8) {
     queuepoly(VABODY, cgi.shWolfBody, darkena(col, 0, 0xC0));
     ShadowV(V, cgi.shWolfBody);
 
