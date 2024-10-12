@@ -5382,3 +5382,18 @@ Mostly bug fixes:
 - fixed 'keep Y' in twisted non-sphere
 - do not exit menus on left/right arrow presses in SDL2
 - fixed Crossroads III unlocking in casual
+
+2024-10-12 09:46 Update 13.0v
+- fixed display of the Hell unlock rule in the causal mode
+- an option to display the number of save counts, load counts, and load branching in the casual mode ("semicasual" option)
+- frogs now stun adjacent non-frog enemies for 2 turns
+- Strong Wind and Orb of Vaulting now better with Orb of the Sword
+- Tab now can be used to control pushing direction (thanks to jlm)
+- fixed Emerald Mines in {5,3,4}
+- fixed the "fixed Y/Z rotation" conflict with walking mode
+- texture mode: a parameter for texture opacity
+- half-plane and Poincare disk, when used in H2xR, no longer work in layers, instead they produce conformal models of the 3D geometry
+- "Chinese ASCII" option
+- more diversity in the default players (in multiplayer)
+- fixed collision detections in the shmup mode in quotient spaces (still not perfect but more focusing on being fast than 100% correctness)
+- new player shape: spaceship (mostly for shmup/Space Rocks, and originally designed for Relative Hell, but nothing stops you from using it in HR)
