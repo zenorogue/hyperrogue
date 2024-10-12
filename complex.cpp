@@ -1472,6 +1472,7 @@ EX namespace mirror {
             }
           c->monst = moNone;
           }
+        if(!fwd) animateCorrectAttack(movei(cw2+wstep), LAYER_SMALL, moMimic);
         if(c2->wall == waBigTree)
           c2->wall = waSmallTree;
         else if(c2->wall == waSmallTree)

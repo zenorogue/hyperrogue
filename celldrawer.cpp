@@ -2987,7 +2987,9 @@ void celldrawer::draw() {
       ld footphase;
       applyAnimation(c, Vthrow, footphase, LAYER_THROW);
       eItem it = animations[LAYER_THROW][c].thrown_item;
-      drawItemType(it, c, Vthrow, iinf[it].color, 0, false);
+      if(it) drawItemType(it, c, Vthrow, iinf[it].color, 0, false);
+      eMonster mo = animations[LAYER_THROW][c].thrown_monster;
+      if(mo) drawMonsterType(mo, c, Vthrow, minf[mo].color, 0, minf[mo].color);
       }
     
 #if CAP_TEXTURE    

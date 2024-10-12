@@ -503,7 +503,7 @@ bool pcmove::swing() {
   if(checkonly) return true;
   if(changes.on) changes.commit();
 
-  animateAttack(mi, LAYER_SMALL);
+  animateCorrectAttack(mi, LAYER_SMALL, moPlayer);
   if(survivalist && isHaunted(mi.t->land))
     survivalist = false;
   lastmovetype = lmTree; lastmove = mi.t;
@@ -1233,7 +1233,7 @@ bool pcmove::attack() {
         produceGhost(c2, m, moPlayer);
         }
       if(mip.proper()) pushMonster(mip);
-      animateAttack(mi, LAYER_SMALL);
+      animateCorrectAttack(mi, LAYER_SMALL, moPlayer);
       }
     }
   

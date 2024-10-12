@@ -1710,6 +1710,11 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       return true;
     
     case moBullet:
+      if(getcs().charid >= 10) {
+        ShadowV(V, cgi.shKnife);
+        queuepoly(VBODY, cgi.shMissile, getcs().swordcolor);
+        return true;
+        }
       ShadowV(V, cgi.shKnife);
       queuepoly(VBODY * spin270(), cgi.shKnife, getcs().swordcolor);
       return true;
@@ -6102,6 +6107,7 @@ struct animation {
   transmatrix attackat;
   bool mirrored;
   eItem thrown_item; /** for thrown items */
+  eMonster thrown_monster; /** for thrown monsters */
   };
 
 // we need separate animation layers for Orb of Domination and Tentacle+Ghost,
@@ -6153,7 +6159,7 @@ EX void animateMovement(const movei& m, int layer) {
     a.mirrored = !a.mirrored;
   }
 
-EX void animate_item_throw(cell *from, cell *to, eItem it) {
+EX void animate_item_throw(cell *from, cell *to, eItem it, eMonster mo IS(moNone)) {
 
   bool steps = false;
   again:
@@ -6169,6 +6175,7 @@ EX void animate_item_throw(cell *from, cell *to, eItem it) {
   if(steps) {
     animation& a = animations[LAYER_THROW][to];
     a.thrown_item = it;
+    a.thrown_monster = mo;
     }
   }
 
@@ -6185,6 +6192,14 @@ EX void animateAttackOrHug(const movei& m, int layer, int phase, ld ratio, ld de
   }
 
 EX void animateAttack(const movei& m, int layer) {
+  animateAttackOrHug(m, layer, 1, 1/3., 0);
+  }
+
+EX void animateCorrectAttack(const movei& m, int layer, eMonster who) {
+  if(among(who, moPlayer, moMimic, moIllusion, moShadow) && getcs().charid >= 10) {
+    animate_item_throw(m.s, m.t, itNone, moBullet);
+    return;
+    }
   animateAttackOrHug(m, layer, 1, 1/3., 0);
   }
 

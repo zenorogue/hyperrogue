@@ -742,7 +742,7 @@ EX cell *moveNormal(cell *c, flagtype mf) {
       }
     else if(m2) {
       attackMonster(c2, AF_NORMAL | AF_MSG, m);
-      animateAttack(mi, LAYER_SMALL);
+      animateCorrectAttack(mi, LAYER_SMALL, m);
       if(m == moFlailer && m2 == moIllusion) 
         attackMonster(c, 0, m2);
       return c2;
@@ -1156,7 +1156,7 @@ EX void groupmove2(const movei& mi, eMonster movtype, flagtype mf) {
     if(!(mf & MF_NOATTACKS)) for(int j=0; j<c->type; j++) 
       if(c->move(j) && canAttack(c, c->monst, c->move(j), c->move(j)->monst, af)) {
         attackMonster(c->move(j), AF_NORMAL | AF_GETPLAYER | AF_MSG, c->monst);
-        animateAttack(movei(c, j), LAYER_SMALL);
+        animateCorrectAttack(movei(c, j), LAYER_SMALL, c->monst);
         onpath_mark(c);
         // XLATC eagle
         return;
@@ -1738,7 +1738,7 @@ EX void movegolems(flagtype flags) {
         else if((flags & AF_CRUSH) && !canAttack(c, m, c2, c2->monst, flags ^ AF_CRUSH ^ AF_MUSTKILL))
           markOrb(itOrbEmpathy), markOrb(itOrbSlaying);
         attackMonster(c2, flags | AF_MSG, m);
-        animateAttack(movei(c, dir), LAYER_SMALL);
+        animateCorrectAttack(movei(c, dir), LAYER_SMALL, m);
         spread_plague(c, c2, dir, m);
         produceGhost(c2, m2, m);
         sideAttack(c, dir, m, 0);
