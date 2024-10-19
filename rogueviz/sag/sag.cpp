@@ -286,6 +286,19 @@ void viz_longpath() {
   history::create(sagcells[sagid[get_i]].first, sagcells[sagid[get_j]].first, Id);
   }
 
+void unoptimize() {
+  use_cells_to_draw = true;
+  drawthemap();
+  for(int i=0; i<isize(vdata); i++) {
+    vdata[i].m->at = inverse_shift(ggmatrix(cwt.at), ggmatrix(vdata[i].m->base)) * vdata[i].m->at;
+    vdata[i].m->base = cwt.at;
+    }
+  use_cells_to_draw = false;
+  shmup::fixStorage();
+  rogueviz::rv_change(dont_optimize, true);
+  rogueviz::rv_change(frustum_culling, false);
+  }
+
 int readArgs() {
 #if CAP_COMMANDLINE
   using namespace arg;
@@ -308,6 +321,9 @@ int readArgs() {
     }
   else if(argis("-sagsmooth")) {
     shift(); sag::sag_ittime = argi();
+    }
+  else if(argis("-sag-unoptimize")) {
+    unoptimize();
     }
 
   else return 1;
