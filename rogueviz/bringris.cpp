@@ -1,9 +1,11 @@
 // non-Euclidean falling block game, implemented using the HyperRogue engine
 // Copyright (C) 2011-2021 Zeno Rogue, see 'hyper.cpp' for details
 
+#define BRINGRIS_VER "2.0"
+
 #ifdef BRINGRIS
 
-#define CUSTOM_CAPTION "Bringris 2.0"
+#define CUSTOM_CAPTION "Bringris " BRINGRIS_VER
 
 #define MAXMDIM 4
 
@@ -94,6 +96,8 @@ int lti;
 int bgeom = 0;
 
 int max_piece;
+int default_max_piece;
+
 bool rotate_allowed = false;
 
 bool in_bringris;
@@ -161,6 +165,10 @@ cell *shift_block_target(int dir);
 void shift_block(int dir, bool camera_only = false);
 void rotate_block(int dir, bool camera_only = false);
 
+void start_new_game();
+void save();
+void load();
+
 vector<bgeometry> bgeoms = {
   {"Bring surface", "the original Bringris geometry", HYPERBOLIC, [] {
     using namespace fieldpattern;
@@ -175,7 +183,7 @@ vector<bgeometry> bgeoms = {
     set_variation(eVariation::unrectified);
 
     set_geometry(gProduct);
-    max_piece = 4;
+    default_max_piece = 4;
     rotate_allowed = false;
     }},
 
@@ -189,7 +197,7 @@ vector<bgeometry> bgeoms = {
     set_geometry(gEuclidSquare);
     set_variation(eVariation::pure);
     set_geometry(gProduct);
-    max_piece = 4;
+    default_max_piece = 4;
     rotate_allowed = true;
     }},
 
@@ -197,7 +205,7 @@ vector<bgeometry> bgeoms = {
     set_geometry(gSmallSphere);
     set_variation(eVariation::pure);
     set_geometry(gProduct);
-    max_piece = 3;
+    default_max_piece = 3;
     rotate_allowed = false;
     }},
 
@@ -211,7 +219,7 @@ vector<bgeometry> bgeoms = {
     set_geometry(gEuclidSquare);
     set_variation(eVariation::pure);
     set_geometry(gProduct);
-    max_piece = 4;
+    default_max_piece = 4;
     rotate_allowed = true;
     }},
 
@@ -225,7 +233,7 @@ vector<bgeometry> bgeoms = {
     set_geometry(gFieldQuotient);
     set_variation(eVariation::pure);
     set_geometry(gProduct);
-    max_piece = 4;
+    default_max_piece = 4;
     rotate_allowed = false;
     }},
 
@@ -242,7 +250,7 @@ vector<bgeometry> bgeoms = {
     set_variation(eVariation::unrectified);
 
     set_geometry(gProduct);
-    max_piece = 3;
+    default_max_piece = 3;
     rotate_allowed = true;
     }},
 
@@ -259,7 +267,7 @@ vector<bgeometry> bgeoms = {
     set_variation(eVariation::unrectified);
 
     set_geometry(gProduct);
-    max_piece = 4;
+    default_max_piece = 4;
     rotate_allowed = true;
     }},
 
@@ -276,7 +284,7 @@ vector<bgeometry> bgeoms = {
     set_variation(eVariation::unrectified);
 
     set_geometry(gProduct);
-    max_piece = 4;
+    default_max_piece = 4;
     rotate_allowed = false;
     }},
 
@@ -286,7 +294,7 @@ vector<bgeometry> bgeoms = {
     set_variation(eVariation::unrectified);
     set_geometry(gProduct);
 
-    max_piece = 4;
+    default_max_piece = 4;
     rotate_allowed = false;
     }},
 
@@ -297,7 +305,7 @@ vector<bgeometry> bgeoms = {
     start_game();
     subquotient::create_subquotient(2);
     set_geometry(gProduct);
-    max_piece = 4;
+    default_max_piece = 4;
     rotate_allowed = false;
     }},
 
@@ -315,7 +323,7 @@ vector<bgeometry> bgeoms = {
     subquotient::create_subquotient(2);
 
     set_geometry(gProduct);
-    max_piece = 5;
+    default_max_piece = 5;
     rotate_allowed = false;
     well_size = 6;
     }},
@@ -334,7 +342,7 @@ vector<bgeometry> bgeoms = {
     subquotient::create_subquotient(10);
 
     set_geometry(gProduct);
-    max_piece = 4;
+    default_max_piece = 4;
     rotate_allowed = false;
     }},
 
@@ -342,7 +350,7 @@ vector<bgeometry> bgeoms = {
     nilv::nilperiod = make_array(5, 0, 5);
     // nilv::set_flags();
     set_geometry(gNil);
-    max_piece = 4;
+    default_max_piece = 4;
     rotate_allowed = false;
     }},
 
@@ -352,7 +360,7 @@ vector<bgeometry> bgeoms = {
     asonov::period_z = 0;
     asonov::set_flags();
     set_geometry(gArnoldCat);
-    max_piece = 2;
+    default_max_piece = 2;
     rotate_allowed = false;
     }},
 #endif
@@ -364,6 +372,7 @@ void enable_bgeom() {
   stop_game_and_switch_mode(rg::nothing);
   well_size = 10;
   bgeoms[bgeom].create();
+  max_piece = default_max_piece;
   start_game();
   create_game();
   state = tsPreGame;
@@ -758,8 +767,9 @@ void new_piece() {
   if(shape_conflict(at)) {
     playSound(cwt.at, "die-bomberbird");
     state = tsGameover;
-    if(pro_game && max_piece == 4)
+    if(pro_game && max_piece == default_max_piece)
       rv_leaderboard(bgeoms[bgeom].name, score);
+    save();
     }
   else {
     draw_shape();
@@ -828,7 +838,7 @@ void find_lines() {
     score += 100000. * points * (points+1.) / current_move_time_limit();
     completed += points;
     playSound(cwt.at, points == 1 ? "pickup-gold" : "orb-mind");
-    if(points == 4 && pro_game && max_piece == 4) rv_achievement("BRINGRISFOUR");
+    if(points == 4 && pro_game && max_piece == 4 && default_max_piece == 4) rv_achievement("BRINGRISFOUR");
     }
   }
 
@@ -1173,8 +1183,6 @@ void draw_all_noray(int zlev) {
       }
     }
   }
-
-void start_new_game();
 
 bool use_equidistant;
 
@@ -1866,6 +1874,8 @@ void reset_view() {
   }
   
 void start_new_game() {
+
+  timerstart = time(NULL); 
   
   for(auto& p: piecelist) p.count = 0;
 
@@ -2134,6 +2144,32 @@ auto hook1=
       if(arg::curphase == 2) init_all();      
       });
 #endif
+
+void save() {
+  #if CAP_SAVE
+  fhstream f("bringris.save", "at");
+  println(f, "Bringris ", BRINGRIS_VER);
+  println(f, bgeoms[bgeom].name);
+  time_t timer;
+  timer = time(NULL);
+  char sbuf[128]; strftime(sbuf, 128, "%c", localtime(&timerstart));
+  char buf[128]; strftime(buf, 128, "%c", localtime(&timer));
+  println(f, sbuf);
+  println(f, buf);
+  println(f, max_piece, " ", pro_game ? score : -1, " ", bricks, " ", completed, " ", cubes, " ", well_size, " ", isize(level), " ", int(timer - timerstart));
+  for(int z=0; z<=well_size; z++) {
+    string s;
+    for(auto lev: level) {
+      cell *c = get_at(lev, -z);
+      s += (c->wall ? '#' : '.');
+      }
+    println(f, s);
+    }
+  #endif
+  }
+
+void load() {
+  }
 
 }
 }
