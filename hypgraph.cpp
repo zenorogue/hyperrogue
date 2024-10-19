@@ -2357,10 +2357,13 @@ EX transmatrix oView;
 
 EX purehookset hooks_preoptimize, hooks_postoptimize;
 
+EX bool dont_optimize;
+
 EX void optimizeview() {
 
   if(subscreens::split(optimizeview)) return;
   if(dual::split(optimizeview)) return;
+  if(dont_optimize) return;
   
   cell *c = centerover;
   transmatrix iView = view_inverse(View);
