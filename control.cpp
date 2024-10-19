@@ -1016,7 +1016,11 @@ EX void mainloopiter() {
     ld t = (ticks - lastticks) * shiftmul / 1000.;
     lastticks = ticks;
 
+    #if CAP_SDL2
+    #define dkey(x) keystate[int(x - 'a' + 4)] && DEFAULTNOR(x - 'a' + 4)
+    #else
     #define dkey(x) keystate[int(x)] && DEFAULTNOR(x)
+    #endif
 
     if(dkey('d')) full_rotate_camera(0, -t);
     if(dkey('a')) full_rotate_camera(0, t);
