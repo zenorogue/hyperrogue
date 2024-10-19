@@ -96,6 +96,36 @@ struct sagdist_t {
     }
   #endif
 
+  void load_no_map(string fname) {
+    println(hlog, "clearing old map");
+    clear();
+    #ifdef O_BINARY
+    fd = open(fname.c_str(), O_RDONLY | O_BINARY);
+    #else
+    fd = open(fname.c_str(), O_RDONLY);
+    #endif
+    println(hlog, "fd equals ", fd);
+    if(fd == -1) throw hr_exception("open failed in load_no_map");
+    if(read(fd, &N, 8) < 8) throw hr_exception("file error");
+    println(hlog, "read N = ", (int) N);
+    tab = new distance[N*N];
+    size_t fsize = N * N * sizeof(distance);
+    println(hlog, "allocated memory");
+    size_t offset = 0;
+    while(offset < fsize) {
+      ssize_t block = read(fd, ((char*)tab)+offset, fsize-offset);
+      #ifdef LINUX
+      println(hlog, "read ", hr::format("%zd/%zd", block, fsize-offset), "B");
+      #else
+      println(hlog, "read ", hr::format("%lld/%lld", block, fsize-offset), "B");
+      #endif
+      if(block <= 0) throw hr_exception("file error reading table");
+      offset += block;
+      }
+    println(hlog, "test: ", test());
+    ::close(fd); fd = 0;
+    }
+
   void load_old(string fname) {
     vector<vector<distance>> old;
     clear();
@@ -107,13 +137,15 @@ struct sagdist_t {
     }
 
   void load(string fname) {
-    #ifdef LINUX
-    if(format == 1) map(fname);
+    if(format == 1) {
+      #ifdef LINUXX
+      map(fname);
+      #else
+      load_no_map(fname);
+      #endif
+      }
     else if(format == 2) load_old(fname);
     else throw hr_exception("sagdist format unknown");
-    #else
-    load_old(fname);
-    #endif
     }
 
   vector<int> test() {
