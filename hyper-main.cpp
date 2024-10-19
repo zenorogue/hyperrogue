@@ -77,6 +77,7 @@ EX void hyper_loop() {
   }
 
 EX int hyper_main(int argc, char **argv) {
+  try {
   if(!hyper_init(argc, argv)) return 0;
 #if !ISWEB
   if(showstartmenu && !vid.skipstart) {
@@ -88,7 +89,11 @@ EX int hyper_main(int argc, char **argv) {
 #endif
   progress_warning();
   mainloop();
-  finishAll();  
+  finishAll();
+  } catch(hr_exception& e) {
+    println(hlog, "exception not caught: ", e.what());
+    }
+  fflush(stdout);
   return 0;
   }
 }
