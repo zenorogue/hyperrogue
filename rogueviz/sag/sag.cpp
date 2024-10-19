@@ -346,7 +346,6 @@ void clear() {
   cell_matrix.clear();
   cellpoint.clear();
   sagdist.clear();
-  subcell_points.clear();
   sag_edge = nullptr;
   state = 0;
   }

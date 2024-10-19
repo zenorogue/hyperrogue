@@ -677,6 +677,9 @@ int cell_read_args() {
   else if(argis("-gen-subcellpoints")) {
     generate_subcellpoints();
     }
+  else if(argis("-subcellpoints-off")) {
+    subcell_points.clear();
+    }
   /* to viz only subcellpoints */
   else if(argis("-sag-clear")) {
     shmup::monstersAt.clear();
