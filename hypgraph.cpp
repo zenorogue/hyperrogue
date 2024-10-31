@@ -884,6 +884,8 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
         ret[0] = H_orig.h[0] * z / d;
         ret[1] = H_orig.h[1] * z / d;
         ret[3] = 1;
+        if(!vrhr::rendering()) ret = lp_apply(ret);
+        break;
         }
       find_zlev(H);
 
