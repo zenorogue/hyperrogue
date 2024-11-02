@@ -475,7 +475,9 @@ EX fontdata* font_by_name(string fname) {
     fd.use_fontconfig = true;
     #endif
     for(int i=0; i<=max_glfont_size; i++) fd.glfont[i] = nullptr;
+    #if CAP_SDLTTF
     for(int i=0; i<=max_font_size; i++) fd.font[i] = nullptr;
+    #endif
     fd.finf = nullptr;
     }
   return &fd;
@@ -1479,6 +1481,7 @@ EX int SDL_Init1(Uint32 flags) {
   }
 #endif
 
+#if CAP_SDLTTF
 EX void set_cfont() {
   int f = font_id;
   int fch = f;
@@ -1487,6 +1490,7 @@ EX void set_cfont() {
   cfont = font_by_name(font_filenames[last_font_id = f]);
   cfont_chinese = font_by_name(font_filenames[fch]);
   }
+#endif
 
 EX void init_font() {
 #if CAP_SDLTTF
@@ -1515,7 +1519,9 @@ fontdata::~fontdata() {
 
 EX void close_font() {
   fontdatas.clear();
+#if CAP_SDLTTF
   TTF_Quit();
+#endif
   }
 
 EX void init_graph() {

@@ -5655,7 +5655,9 @@ EX void calcparam() {
   ld fov = vid.fov * degree / 2;
   cd->tanfov = sin(fov) / (cos(fov) + get_stereo_param());
   
+  #if CAP_SDLTTF
   set_cfont();
+  #endif
   callhooks(hooks_calcparam);
   reset_projection();
   }

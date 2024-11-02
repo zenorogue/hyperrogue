@@ -1053,6 +1053,7 @@ EX purehookset hooks_configfile;
 
 EX ld mapfontscale = 100;
 
+#if CAP_SDLTTF
 EX void font_reaction() {
   if(among(font_id, 5, 6)) {
     int fid = font_id;
@@ -1062,6 +1063,7 @@ EX void font_reaction() {
       });
     }
   }
+#endif
 
 EX void initConfig() {
   
@@ -1153,11 +1155,13 @@ EX void initConfig() {
   initcs(vid.cs); paramset(vid.cs, "single");
   param_b(vid.samegender, "princess choice", false);
   param_i(vid.language, "language", -1);  
+  #if CAP_SDLTTF
   param_enum(font_id, "font_id", 0)
   ->editable(font_names, "select font", 'f')
   ->manual_reaction = font_reaction;
   param_str(font_filenames[5], "ttf_font");
   param_str(font_filenames[6], "otf_font");
+  #endif
   param_b(vid.drawmousecircle, "mouse circle", ISMOBILE || ISPANDORA);
   param_b(vid.revcontrol, "reverse control", false);
   #if CAP_AUDIO
@@ -1405,6 +1409,7 @@ EX void initConfig() {
   -> help("Background particle effects, e.g., in the Blizzard.");
   // control
   
+  #if CAP_SDL
   param_enum(joy_init, "joyinit", jiFast)
     ->editable({{"off", "do not use joysticks"}, {"fast", "do not wait until the joysticks are initialized"}, {"wait", "wait until the joysticks are initialized"}}, "joystick initialization", 'j');
   param_i(vid.joyvalue, "vid.joyvalue", 4800);
@@ -1413,6 +1418,7 @@ EX void initConfig() {
   param_i(vid.joypanthreshold, "vid.joypanthreshold", 2500);
   param_f(vid.joypanspeed, "vid.joypanspeed", ISPANDORA ? 0.0001 : 0);
   param_b(autojoy, "autojoy");
+  #endif
     
   vid.killreduction = 0;
   
@@ -2493,7 +2499,9 @@ EX void configureInterface() {
   dialog::add_action_push(selectLanguageScreen);
 #endif
 
+  #if CAP_SDLTTF
   add_edit(font_id);
+  #endif
 
   dialog::addSelItem(XLAT("player character"), numplayers() > 1 ? "" : csname(vid.cs), 'g');
   dialog::add_action_push(showCustomizeChar);
@@ -4365,6 +4373,7 @@ EX int read_config_args() {
   else return 1;
   return 0;
   }
+#endif
 
 EX void set_char_by_name(charstyle& cs, const string& s) {
   if(s == "dodek") {
@@ -4418,6 +4427,7 @@ EX void set_char_by_name(charstyle& cs, const string& s) {
     }
   }
 
+#if CAP_COMMANDLINE
 EX int read_param_args() {
   const string& s = arg::args();
   auto pos = s.find("=");
