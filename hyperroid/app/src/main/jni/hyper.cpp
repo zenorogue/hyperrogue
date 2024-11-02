@@ -428,9 +428,9 @@ void uploadAll(JNIEnv *env, jobject thiz) {
   env->DeleteLocalRef(cls);
   }
 
-void achievement_init() {}
-void achievement_close() {}
-void achievement_gain(const char* s, char flags) {}
+// void achievement_init() {}
+// void achievement_close() {}
+// void achievement_gain(const char* s, char flags) {}
 
 }
 
