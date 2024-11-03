@@ -347,6 +347,7 @@ EX bool fire_on_mouse(cell *c) {
   if(mouse_fire_mode == mfmNone) return false;
   if(!mouseover) return false;
   if(!mouseover->monst) return false;
+  if(isFriendly(mouseover)) return false;
   if(shmup::on) return false;
   if(items[itCrossbow]) {
     if(mouse_fire_mode == mfmAlways) {
