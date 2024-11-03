@@ -82,13 +82,15 @@ EX int qadd(cellwalker a, cellwalker b) {
 
 int best_score_res;
 
+const int BOLT_INVALID = -999999;
+
 EX int bolt_score(cellwalker cw2) {
   int d = cw2.at->cpdist;
   int ntotal = 2;
   if(inmirror(cw2.at)) cw2 = mirror::reflect(cw2);
-  if(blocks(cw2.cpeek())) return -1;
-  if(thruVine(cw2.at, cw2.cpeek())) return -1;
-  if(nonAdjacent(cw2.at, cw2.cpeek())) return -1;
+  if(blocks(cw2.cpeek())) return BOLT_INVALID;
+  if(thruVine(cw2.at, cw2.cpeek())) return BOLT_INVALID;
+  if(nonAdjacent(cw2.at, cw2.cpeek())) return BOLT_INVALID;
 
   if(cw2.at->monst) {
     flagtype attackflags = AF_BOW;
@@ -96,7 +98,9 @@ EX int bolt_score(cellwalker cw2) {
     if(items[itOrbSlaying]) attackflags |= AF_CRUSH;
     if(items[itCurseWeakness]) attackflags |= AF_WEAK;
     if(canAttack(cw2.cpeek(), moPlayer, cw2.at, cw2.at->monst, attackflags)) {
-      ntotal += 10000; ntotal += 1280 >> d;
+      int sco = 10;
+      if(isFriendly(cw2.at)) sco = -50;
+      ntotal += 1000 * sco; ntotal += (128 * sco) >> d;
       }
     }
 
@@ -104,7 +108,9 @@ EX int bolt_score(cellwalker cw2) {
     cell *c1 = cw2.at->cmove(t);
     if(!logical_adjacent(cw2.cpeek(), moPlayer, c1)) continue;
     if(canAttack(cw2.cpeek(),moPlayer,c1,c1->monst,AF_STAB)) {
-      ntotal += 10000; ntotal += 1280 >> d;
+      int sco = 10;
+      if(isFriendly(c1)) sco = -50;
+      ntotal += 1000 * sco; ntotal += (128 * sco) >> d;
       }
     }
 
@@ -115,19 +121,20 @@ EX vector<int> create_dirseq() {
   map<cell*, bowscore> scores;
   scores[cwt.at].total = 0;
 
-  int best_score = -1; cell* best_score_at = cwt.at;
+  int best_score = BOLT_INVALID; cell* best_score_at = cwt.at;
 
   for(cell *c: dcal) {
     cell *c1 = target_at[c->cpdist];
     if(c1 && c != c1) continue;
-    if(c == c1) { best_score = -1; }
+    if(c == c1) { best_score = BOLT_INVALID; }
     bowscore best;
-    best.total = -1;
+    best.total = BOLT_INVALID;
     forCellIdEx(c1, i, c) if(c1->cpdist < c->cpdist && scores.count(c1)) {
       auto& last = scores[c1];
       auto ocw2 = cellwalker(c, i);
       int bonus = bolt_score(ocw2);
-      if(bonus < 0) continue;
+      println(hlog, "at ", ocw2, " bonus is ", bonus);
+      if(bonus == BOLT_INVALID) continue;
       int ntotal = last.total + bonus;
 
       int dir = 0;
@@ -150,10 +157,10 @@ EX vector<int> create_dirseq() {
       best.total = max(best.total, ntotal);
       }
     if(best.total > best_score) { best_score = best.total; best_score_at = c; }
-    if(best.total > -1) scores[c] = best;
+    if(best.total > BOLT_INVALID) scores[c] = best;
     }
 
-  if(best_score == -1) return {};
+  if(best_score == BOLT_INVALID) return {};
 
   vector<int> dirseq = { NODIR };
   while(best_score_at != cwt.at) { 
@@ -197,9 +204,9 @@ EX vector<int> create_dirseq_geometric() {
       }
     at = at + best_i;
     int bonus = bolt_score(at + wstep);
-    best_score_res += bonus;
+    if(bonus != BOLT_INVALID) best_score_res += bonus;
     dirseq.push_back(best_i);
-    if(bonus < 0) break;
+    if(bonus == BOLT_INVALID) break;
     T = T * currentmap->adj(at.at, at.spin);
     at = at + wstep;
     }
