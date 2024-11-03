@@ -16,6 +16,8 @@ EX string rsrcdir = RESOURCEDESTDIR;
 EX string rsrcdir = "";
 #endif
 
+EX bool delayed_start;
+
 #if CAP_COMMANDLINE
 EX string scorefile = "hyperrogue.log";
 
@@ -433,8 +435,6 @@ EX purehookset hooks_config;
 EX hookset<int()> hooks_args;
 
 EX map<string, pair<int, reaction_t>> *added_commands;
-
-EX bool delayed_start;
 
 EX namespace arg {
 
