@@ -541,7 +541,7 @@ EX void shift_view_portal(hyperpoint H) {
   // println(hlog, "maxv = ", maxv);
   shift_view(H * maxv * scale);
   check_portal_movement();
-  shift_view_portal(H * (1 - maxv) * scale);
+  shift_view_portal(H * (1 - maxv));
   }
 
 EX const connection_data* through_portal() {
