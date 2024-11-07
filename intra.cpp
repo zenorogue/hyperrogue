@@ -167,7 +167,7 @@ EX portal_data make_portal(cellwalker cw, int spin) {
       if(cw.spin == cw.at->type - 2)
         fac.pop_back();
       else
-        fac.erase(fac.begin() + 1);
+        fac.erase(fac.begin());
       id.scale = log(2)/2;
       }
     #else
