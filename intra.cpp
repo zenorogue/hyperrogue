@@ -609,7 +609,7 @@ EX void check_portal_movement() {
       analyze_orthonormal(ds, ss);
       }
 
-    set_view(ds[0], ds[1], ds[2]);
+    set_view(ds[0], ds[1], ds[2]); decide_lpu();
 
     if(debug_portal & 8) {
       array<hyperpoint, 4> xds; /* camera, forward, upward */
