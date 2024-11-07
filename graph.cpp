@@ -4416,8 +4416,9 @@ EX subcellshape& generate_subcellshape_if_needed(cell *c, int id) {
     vector<hyperpoint> l;
     int z = a ? 1 : -1;
     hyperpoint ctr = zpush0(z * cgi.plevel/2);
+    int qty = (mproduct || WDIM == 2) ? 1 : 3;
     for(int i=0; i<c1->type; i++)
-      if(mproduct || WDIM == 2)
+      if(qty == 1)
         l.push_back(hybrid::get_corner(c1, i, 0, z));
       else {
         l.push_back(ctr);
@@ -4428,7 +4429,7 @@ EX subcellshape& generate_subcellshape_if_needed(cell *c, int id) {
         l.push_back(hybrid::get_corner(c1, i, 0, z));
         }
     if(a == 0) std::reverse(l.begin()+1, l.end());
-    if(a == 1) std::rotate(l.begin(), l.begin()+3, l.end());
+    if(a == 1) std::rotate(l.begin(), l.begin()+qty, l.end());
     ss.faces.push_back(l);
     }
   
