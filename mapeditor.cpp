@@ -1144,6 +1144,10 @@ EX namespace mapstream {
         auto& cw = (k==1 ? p.cw1 : p.cw2);
         cw.at = cellbyid[id];
         cw.spin = fixspin(relspin[id], spin, cw.at->type, f.vernum);
+        /* compatibility with old portal maps which indexed faces differently */
+        if(mproduct && f.vernum <= 0xAA0F && cw.spin == cw.at->type - 1) {
+          p.spin += (k == 2 ? -1 : 1) * (bt::in() ? -1 : 1);
+          }
         }
       }
     #endif
