@@ -2582,15 +2582,40 @@ EX void show() {
     "tessellations (contrary to the basic implementation of Archimedean, tes, and unrectified/warped/untruncated tessellations).\n\nYou can convert mostly any "
     "non-spherical periodic 2D tessellation to strict tree based.\n\nSwitching the map format erases your map."));
 
-  if(aperiodic) {
+  if(closed_manifold) {
+    dialog::addInfo("not available (and not necessary) in closed manifolds");
+    dialog::addBack();
+    dialog::display();
+    return;
+    }
+  else if(aperiodic) {
     dialog::addInfo("not available in aperiodic tessellations");
     dialog::addBack();
     dialog::display();
+    return;
     }
-  else if(WDIM == 3) {
-    dialog::addInfo("not available in 3D tessellations");
+  else if(bt::in()) {
+    dialog::addInfo("not available in binary-like tilings");
     dialog::addBack();
     dialog::display();
+    return;
+    }
+  else if(WDIM == 3) {
+    if(reg3::in() && reg3::variation_rule_available())
+      dialog::addInfo("precomputed rule used (for specific variation)");
+    else if(reg3::in() && reg3::pure_rule_available())
+      dialog::addInfo("precomputed rule used (for regular honeycomb)");
+    else if(euc::in())
+      dialog::addInfo("no rule needed for Euclidean");
+    else if(reg3::in()) {
+      dialog::addInfo("not available in this regular honeycomb");
+      dialog::addInfo("fallback implementation used");
+      }
+    else
+      dialog::addInfo("not available in this 3D tessellation");
+    dialog::addBack();
+    dialog::display();
+    return;
     }
 
   dialog::addBoolItem(XLAT("in tes internal format"), arb::in(), 't');

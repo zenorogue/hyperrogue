@@ -956,7 +956,7 @@ EX geometry_data compute_geometry_data() {
   }
 
 EX void add_size_action() {
-  if(WDIM == 2 || reg3::exact_rules()) dialog::add_action([] {
+  dialog::add_action([] {
     if(!viewdists) { enable_viewdists(); pushScreen(viewdist_configure_dialog); }
     else if(viewdists) viewdists = false;
     });

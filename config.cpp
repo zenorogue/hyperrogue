@@ -3507,6 +3507,22 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
   -> editable("apply color/pattern changes to canvas automatically", 'l');
   param_str(ccolor::color_formula, "color_formula")
   -> editor = [] { ccolor::config_formula(false); };
+
+  param_i(count_max_cells, "count_max_cells", 100000)->editable(100, 1000000, log(10), "max cells to count",
+    "Counting stops if that many cells are reached.", 'c')
+  ->set_sets([] { dialog::scaleLog(); });
+
+  param_i(count_max_dist, "count_max_dist", 999)->editable(5, 1000, 1, "max distance to check",
+    "Counting stops if this distance is reached.", 'd');
+
+  param_b(use_analyzer, "count_use_analyzer", true)->editable("use analyzer if possible", 'a');
+  param_b(use_sight_range_instead, "count_use_sight", true)->editable("use sight range instead", 's');
+
+/*    dialog::editNumber(vid.cells_drawn_limit, 100, 1000000, log(10), 10000, XLAT("limit on cells drawn"),
+      XLAT("This limit exists to protect the engine from freezing when too many cells would be drawn according to the current options.")
+      );
+    dialog::scaleLog(); */
+
   });
 
 EX void switchcolor(unsigned int& c, unsigned int* cs) {

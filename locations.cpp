@@ -417,11 +417,14 @@ struct manual_celllister {
     for(int i=0; i<isize(lst); i++) lst[i]->listindex = tmps[i];
     }  
   };
-  
+
 /** \brief automatically generate a list of nearby cells */
 struct celllister : manual_celllister {
   vector<int> dists;
-  
+
+  enum stop_reason { srAll, srCount, srCell, srDistance };
+  stop_reason reason;
+
   void add_at(cell *c, int d) {
     if(add(c)) dists.push_back(d);
     }
@@ -439,13 +442,15 @@ struct celllister : manual_celllister {
       cell *c = lst[i];
       if(maxdist) forCellCM(c2, c) {
         add_at(c2, dists[i]+1);
-        if(c2 == breakon) return;
+        if(c2 == breakon) { reason = srCell; return; }
         }
       if(c == last) {
-        if(isize(lst) >= maxcount || dists[i]+1 == maxdist) break;
+        if(isize(lst) >= maxcount) { reason = srCount; return; }
+        if(dists[i]+1 == maxdist) { reason = srDistance; return; }
         last = lst[isize(lst)-1];
         }
       }
+    reason = srAll;
     }
   
   /** \brief for a given cell c on the list, return its distance from orig */

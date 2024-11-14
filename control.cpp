@@ -555,13 +555,13 @@ EX array<int, 8> keys_numpad = {{SDLK_KP6, SDLK_KP3, SDLK_KP2, SDLK_KP1, SDLK_KP
   
 EX void handleKeyNormal(int sym, int uni) {
 
-  if(cheater && sym < 256 && sym > 0) {
+  if(cheater && sym < 256 && sym > 0 && !dialog::key_actions.count(uni)) {
     if(applyCheat(uni))
       uni = sym = 0;
     }
 
   #if CAP_SHOT
-  if(uni == 'A') { pushScreen(shot::menu); uni = sym = 0; }
+  if(uni == 'A' && !dialog::key_actions.count('A')) { pushScreen(shot::menu); uni = sym = 0; }
   #endif
 
   if(DEFAULTNOR(sym)) handlePanning(sym, uni);
