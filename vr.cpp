@@ -1357,12 +1357,16 @@ EX void enable_button() {
     dialog::addInfo(XLAT("VR initialized correctly"), 0x00C000);
   }
 
+EX string refdist() {
+  E4;
+  hyperpoint h = hmd_at * inverse(hmd_ref_at) * C0;
+  return state ? fts(hypot_d(3, h)) + "m" : "";
+  }
+
 EX void reference_button() {
   if(enabled && among(hsm, eHeadset::reference, eHeadset::model_viewing)) {
-    E4;
-    hyperpoint h = hmd_at * inverse(hmd_ref_at) * C0;
       
-    dialog::addSelItem(XLAT("reset the reference point"), state ? fts(hypot_d(3, h)) + "m" : "", 'r');
+    dialog::addSelItem(XLAT("reset the reference point"), refdist(), 'r');
     dialog::add_action([] { hmd_ref_at = hmd_at; });
     }
   else dialog::addBreak(100);
