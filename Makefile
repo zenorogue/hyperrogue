@@ -171,7 +171,7 @@ autohdr.h: makeh$(EXE_EXTENSION) language-data.cpp *.cpp
 	./makeh classes.cpp locations.cpp colors.cpp hyperpoint.cpp geometry.cpp embeddings.cpp goldberg.cpp init.cpp floorshapes.cpp cell.cpp multi.cpp shmup.cpp pattern2.cpp mapeditor.cpp graph.cpp textures.cpp hprint.cpp language.cpp util.cpp complex.cpp multigame.cpp arbitrile.cpp rulegen.cpp *.cpp > autohdr.h
 
 language-data.cpp: langen$(EXE_EXTENSION)
-	./langen > language-data.cpp
+	./langen -o language-data.cpp
 
 savepng$(OBJ_EXTENSION): savepng.cpp
 	$(CXX) -O2 $(CXXFLAGS) -c savepng.cpp -o $@
