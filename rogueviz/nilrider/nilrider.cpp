@@ -705,6 +705,18 @@ void default_settings() {
   #endif
   }
 
+void vrqm_ext() {
+  dialog::addItem("restart Nil Rider", 'r');
+  dialog::add_action([] {
+    println(hlog, "nilrider restart");
+    nilrider::restart();
+    });
+  dialog::addBoolItem("stepped Nil Rider", nilrider::stepped_display, 's');
+  dialog::add_action([] {
+    println(hlog, "nilrider stepped");
+    nilrider::stepped_display = !nilrider::stepped_display;
+    });
+  }
 
 void initialize() {
   load();
@@ -746,6 +758,7 @@ void initialize() {
   rv_hook(hooks_resetGL, 100, cleanup_textures);
   rv_hook(hooks_music, 100, nilrider_music);
   rv_hook(hooks_sync_music, 100, sync_music);
+  rv_hook(vrhr::vr_quickmenu_extensions, 101, vrqm_ext);
   on = true;
   on_cleanup_or_next([] { on = false; });
   pushScreen(run);
