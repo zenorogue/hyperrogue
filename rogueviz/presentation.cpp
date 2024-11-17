@@ -345,7 +345,7 @@ void latex_in_space(const shiftmatrix& V, ld scale, string s, color_t col, flagt
     ld cx[6] = {1,0,0,1,1,0};
     ld cy[6] = {1,1,0,1,0,0};
     finf.tvertices.push_back(glhr::makevertex((tex.base_x + (cx[i] ? tex.strx : 0.)) / tex.twidth, (tex.base_y + (cy[i] ? tex.stry : 0.)) / tex.theight, 0));
-    curvedata.push_back(glhr::pointtogl(point31((cx[i]*2-1) * tx * scale, (cy[i]*2-1) * ty * scale, 0)));
+    curvedata.push_back(glhr::pointtogl(point31((cx[i]*2-1) * tx * scale, (cy[i]*2-1) * ty * scale, MDIM == 3 ? 1 : 0)));
     }
   auto &res = queuetable(V, curvedata, isize(curvedata)-curvestart, col, col, PPR::LINE);
   res.offset = curvestart;
