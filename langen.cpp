@@ -8,6 +8,7 @@
 #include <vector>
 #include <cstdlib>
 #include <set>
+#include <cstring>
 
 #define GEN_M 0
 #define GEN_F 1
@@ -28,6 +29,8 @@ template<class T> int isize(const T& x) { return x.size(); }
 
 #define NUMLAN 9
 
+FILE *f;
+
 // language generator
 
 std::string current_language;
@@ -42,7 +45,7 @@ template<class T> struct dictionary {
       m.emplace(s, std::move(val));
       }
     else if (val != it->second) {
-      printf("// #warning Two translations for %s [%s]\n", escape(s, s), current_language.c_str());
+      fprintf(f, "// #warning Two translations for %s [%s]\n", escape(s, s), current_language.c_str());
       }
     }
   T& operator [] (const std::string& s) { return m[s]; }
@@ -125,7 +128,7 @@ std::map<hashcode, std::string> buildHashTable(std::set<std::string>& s) {
 
 const char *escape(std::string s, const std::string& dft) {
   if(s == "") {
-    printf("/*MISSING*/ ");
+    fprintf(f, "/*MISSING*/ ");
     s = dft;
     }
   static std::string t;
@@ -341,16 +344,23 @@ void compute_completeness(const T& dict)
     if(mis1 != "") mis1.pop_back();
     if(exist_in != "") exist_in.pop_back();
     if(in_important && mis != "")
-      printf("// #warning Missing [%s : %s] from [%s]: %s\n", mis.c_str(), mis1.c_str(), exist_in.c_str(), escape(elt, "?"));
+      fprintf(f, "// #warning Missing [%s : %s] from [%s]: %s\n", mis.c_str(), mis1.c_str(), exist_in.c_str(), escape(elt, "?"));
 
     completeness[0]++;
     for(int i=1; i<NUMLAN; i++) if(dict[i].count(elt)) completeness[i]++;
     }
   }
   
-int main() {
+int main(int argc, char ** argv) {
 
-  printf("// DO NOT EDIT -- this file is generated automatically with langen\n\n");
+  f = stdout;
+  if(argc == 3 && strcmp(argv[1], "-o") == 0) f = fopen(argv[2], "wt");
+  else if(argc != 1) {
+    printf("Usage: langen -o <filename>, or without arguments to output to standard output\n");
+    exit(1);
+    }
+
+  fprintf(f, "// DO NOT EDIT -- this file is generated automatically with langen\n\n");
 
   nothe.insert("R'Lyeh");
   nothe.insert("Camelot");
@@ -395,24 +405,24 @@ int main() {
   for(auto&& elt : allchars) {
     if(isize(elt) >= 2) { javastring += elt; vchars.push_back(elt); }
     }
-  printf("\n");
-  printf("#if HDR\n");
-  printf("#if CAP_TRANS\n");
-  printf("#define NUMEXTRA %d\n", isize(vchars));
-  printf("#define NATCHARS {");
-  for(auto&& elt : vchars) printf("\"%s\",", elt.c_str());
-  printf("}\n");
-  printf("extern const char* natchars[NUMEXTRA];\n");
-  printf("#endif\n");
-  printf("#endif\n");
-  printf("const char* natchars[NUMEXTRA] = NATCHARS;\n");
-  printf("//javastring = \"%s\";\n", javastring.c_str());
+  fprintf(f, "\n");
+  fprintf(f, "#if HDR\n");
+  fprintf(f, "#if CAP_TRANS\n");
+  fprintf(f, "#define NUMEXTRA %d\n", isize(vchars));
+  fprintf(f, "#define NATCHARS {");
+  for(auto&& elt : vchars) fprintf(f, "\"%s\",", elt.c_str());
+  fprintf(f, "}\n");
+  fprintf(f, "extern const char* natchars[NUMEXTRA];\n");
+  fprintf(f, "#endif\n");
+  fprintf(f, "#endif\n");
+  fprintf(f, "const char* natchars[NUMEXTRA] = NATCHARS;\n");
+  fprintf(f, "//javastring = \"%s\";\n", javastring.c_str());
   
-  printf("\nEX int transcompleteness[NUMLAN] = {");
-  for(int i=0; i<NUMLAN; i++) printf("%d, ", completeness[i]);
-  printf("};\n");
+  fprintf(f, "\nEX int transcompleteness[NUMLAN] = {");
+  for(int i=0; i<NUMLAN; i++) fprintf(f, "%d, ", completeness[i]);
+  fprintf(f, "};\n");
 
-  printf("\n//statistics\n");
+  fprintf(f, "\n//statistics\n");
   for(auto&& elt : d[1].m)
     d[0][elt.first] = elt.first;
   for(auto&& elt : nouns[1].m) {
@@ -421,7 +431,7 @@ int main() {
     nouns[0][elt.first] = n;
     }
 
-  printf("// total: %5d nouns, %5d sentences\n", isize(nouns[1].m), isize(d[1].m));
+  fprintf(f, "// total: %5d nouns, %5d sentences\n", isize(nouns[1].m), isize(d[1].m));
 
   for(int i=0; i<NUMLAN; i++) {
     size_t bnouns = 0;
@@ -437,7 +447,7 @@ int main() {
       bnouns += n.abl.size();
       }
 
-    printf("// %s: %5dB nouns, %5dB sentences\n",
+    fprintf(f, "// %s: %5dB nouns, %5dB sentences\n",
       d[i]["EN"].c_str(), int(bnouns), int(bdict));
     }
   
@@ -453,43 +463,44 @@ int main() {
   
   do {
     hashval = rand();
-    printf("// check hash: %x\n", hashval);
+    fprintf(f, "// check hash: %x\n", hashval);
     ms = buildHashTable(allsent);
     mn = buildHashTable(allnouns);
     }
   while(ms.size() != allsent.size() || mn.size() != allnouns.size());
   
-  printf("hashcode hashval = 0x%x;\n\n", hashval);
+  fprintf(f, "hashcode hashval = 0x%x;\n\n", hashval);
   
-  printf("sentence all_sentences[] = {\n");
+  fprintf(f, "sentence all_sentences[] = {\n");
   
   for(auto&& elt : ms) {
     const std::string& s = elt.second;
-    printf("  {0x%x, { // %s\n", elt.first, escape(s, s));
-    for(int i=1; i<NUMLAN; i++) printf("   %s,\n", escape(d[i][s], s));
-    printf("    }},\n");
+    fprintf(f, "  {0x%x, { // %s\n", elt.first, escape(s, s));
+    for(int i=1; i<NUMLAN; i++) fprintf(f, "   %s,\n", escape(d[i][s], s));
+    fprintf(f, "    }},\n");
     }
-  printf("  };\n\n");
+  fprintf(f, "  };\n\n");
 
-  printf("fullnoun all_nouns[] = {\n");
+  fprintf(f, "fullnoun all_nouns[] = {\n");
   
   for(auto&& elt : mn) {
     const std::string& s = elt.second;
-    printf("  {0x%x, %d, { // \"%s\"\n", elt.first,
+    fprintf(f, "  {0x%x, %d, { // \"%s\"\n", elt.first,
       (nothe.count(s) ? 1:0) + (plural.count(s) ? 2:0),
       escape(s, s));
     
     for(int i=1; i<NUMLAN; i++) {
-      printf("    {%d", nouns[i][s].genus);
-      printf(", %s", escape(nouns[i][s].nom, s));
-      printf(", %s", escape(nouns[i][s].nomp, s));
-      printf(", %s", escape(nouns[i][s].acc, s));
-      printf(", %s},\n", escape(nouns[i][s].abl, s));
+      fprintf(f, "    {%d", nouns[i][s].genus);
+      fprintf(f, ", %s", escape(nouns[i][s].nom, s));
+      fprintf(f, ", %s", escape(nouns[i][s].nomp, s));
+      fprintf(f, ", %s", escape(nouns[i][s].acc, s));
+      fprintf(f, ", %s},\n", escape(nouns[i][s].abl, s));
       }
     
-    printf("    }},\n");
+    fprintf(f, "    }},\n");
     }
 
-  printf("  };\n");
+  fprintf(f, "  };\n");
 
+  if(f != stdout) fclose(f);
   }
