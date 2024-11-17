@@ -134,6 +134,7 @@ bool explore;
 
 struct gamedata {
   string bgeom_name;
+  string myname;
   string timerstart, timerend;
   int max_piece;
   bool pro_game;
@@ -1434,7 +1435,7 @@ void hiscore_menu() {
   sort(v.begin(), v.end(), [] (gamedata* g1, gamedata* g2) { return g1->sorter() > g2->sorter(); });
   dialog::start_list(900, 900, '1');
   for(auto ad: v) {
-    dialog::addSelItem(ad->timerstart, hi_pro ? fts(ad->score) : its(ad->completed), dialog::list_fake_key++);
+    dialog::addSelItem(ad->myname, hi_pro ? fts(ad->score) : its(ad->completed), dialog::list_fake_key++);
     dialog::add_action_push([ad] {
       emptyscreen();
       dialog::init();
@@ -2198,6 +2199,7 @@ void fill_gamedata() {
   char buf[128];
   strftime(buf, 128, "%c", localtime(&timerstart)); cur.timerstart = buf;
   strftime(buf, 128, "%c", localtime(&timer)); cur.timerend = buf;
+  cur.myname = cur.timerstart;
   cur.levelsize = isize(level);
   cur.seconds = int(timer - timerstart);
   cur.lmap.clear();
@@ -2239,6 +2241,7 @@ void load() {
     if(s == "Bringris 2.0") {
       gamedata gd;
       gd.bgeom_name = scanline_noblank(f);
+      gd.myname = scanline_noblank(f);
       gd.timerstart = scanline_noblank(f);
       gd.timerend = scanline_noblank(f);
       sscanf(scanline_noblank(f).c_str(), "%d%lf%d%d%d%d%d%d",
