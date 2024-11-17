@@ -400,6 +400,7 @@ int type_in_quick(expansion_analyzer& ea, cell *c, const cellfunction& f) {
 EX bool sizes_known() {
   #if MAXMDIM >= 4
   if(reg3::exact_rules()) return true;
+  if(reg3::in()) return false;
   #endif
   if(closed_manifold) return false;
   // Castle Anthrax is infinite
