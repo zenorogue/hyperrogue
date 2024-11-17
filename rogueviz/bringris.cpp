@@ -1445,7 +1445,26 @@ void hiscore_menu() {
       dialog::addSelItem("bricks", fts(ad->bricks), 'b');
       dialog::addSelItem("cubes", fts(ad->cubes), 'c');
       dialog::addItem("explore", 'e');
-      dialog::add_action([] {
+      dialog::add_action([ad] {
+
+        clear_map();
+
+        for(int z=0; z<=ad->well_size; z++) {
+          println(hlog, "z = ", z);
+          string s = ad->lmap[z];
+          println(hlog, "s = ", s);
+          int index = 0;
+          for(auto lev: level) {
+            cell *c = get_at(lev, -z);
+            char key = s[index++];
+            if(key == '.')  c->wall = waNone;
+            else c->wall = waWaxWall, c->landparam = get_hipso(z);
+            }
+          cur.lmap.push_back(s);
+          }
+
+        state = tsGameover;  explore = true;
+        ray::reset_raycaster_map();
         popScreen();
         popScreen();
         });
