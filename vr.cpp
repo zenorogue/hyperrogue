@@ -1658,18 +1658,40 @@ auto hookvr = addHook(vr_quickmenu_extensions, 100, [] {
   dialog::add_action([] { camera_speed /= 1.2; println(hlog, "camera_speed = ", camera_speed); });
   #if CAP_VR
   if(vr::active()) {
-    dialog::addSelItem(XLAT("increase absolute unit"), 'a', fts(vrhr::absolute_unit_in_meters));
-    dialog::add_action([] {
-      vrhr::absolute_unit_in_meters *= 1.2;
-      walking::eye_level *= 1.2;
-      println(hlog, "vr absolute unit set to ", vrhr::absolute_unit_in_meters);
-      });
-    dialog::addSelItem(XLAT("increase absolute unit"), 'z', fts(vrhr::absolute_unit_in_meters));
-    dialog::add_action([] {
-      vrhr::absolute_unit_in_meters /= 1.2;
-      walking::eye_level /= 1.2;
-      println(hlog, "vr absolute unit set to ", vrhr::absolute_unit_in_meters);
-      });
+    if(in_perspective()) {
+      dialog::addSelItem(XLAT("increase absolute unit"), 'a', fts(vrhr::absolute_unit_in_meters));
+      dialog::add_action([] {
+        vrhr::absolute_unit_in_meters *= 1.2;
+        walking::eye_level *= 1.2;
+        println(hlog, "vr absolute unit set to ", vrhr::absolute_unit_in_meters);
+        });
+      dialog::addSelItem(XLAT("decrease absolute unit"), 'z', fts(vrhr::absolute_unit_in_meters));
+      dialog::add_action([] {
+        vrhr::absolute_unit_in_meters /= 1.2;
+        walking::eye_level /= 1.2;
+        println(hlog, "vr absolute unit set to ", vrhr::absolute_unit_in_meters);
+        });
+      }
+    else {
+      dialog::addSelItem(XLAT("increase model size"), 'a', fts(pconf.vr_scale_factor));
+      dialog::add_action([] {
+        pconf.vr_scale_factor *= 1.2;
+        println(hlog, "vr scale factor set to ", pconf.vr_scale_factor);
+        });
+      dialog::addSelItem(XLAT("decrease model size"), 'z', fts(pconf.vr_scale_factor));
+      dialog::add_action([] {
+        pconf.vr_scale_factor *= 1.2;
+        println(hlog, "vr scale factor set to ", pconf.vr_scale_factor);
+        });
+      dialog::addBoolItem(XLAT("increase Z-shift"), 'c', fts(pconf.vr_zshift));
+      dialog::add_action([] {
+        pconf.vr_zshift += 0.5;
+        });
+      dialog::addBoolItem(XLAT("decrease Z-shift"), 'd', fts(pconf.vr_zshift));
+      dialog::add_action([] {
+        pconf.vr_zshift -= 0.5;
+        });
+      }
     dialog::addBoolItem(XLAT("always show HUD"), 'x', always_show_hud);
     dialog::add_action([] {
       always_show_hud = !always_show_hud;
