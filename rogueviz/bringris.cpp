@@ -95,7 +95,6 @@ int lti;
 
 int bgeom = 0;
 
-int max_piece;
 int default_max_piece;
 
 bool rotate_allowed = false;
@@ -118,9 +117,6 @@ vector<cell*> out_level;
 
 map<cell*, int> center_distance;
 
-bool pro_game;
-
-int well_size = 10;
 int camera = 3;
 
 int facing_mod = 0;
@@ -134,13 +130,20 @@ cellwalker at;
 int move_started;
 int move_at;
 
-int completed;
-int bricks, cubes;
-
-ld score;
-
 bool paused;
 bool explore;
+
+struct gamedata {
+  string bgeom_name;
+  string timerstart, timerend;
+  int max_piece;
+  bool pro_game;
+  ld score;
+  int bricks, completed, cubes, well_size, levelsize, seconds;
+  vector<string> lmap;
+  };
+
+gamedata cur;
 
 enum eState {
   tsPreGame, tsFalling, tsBetween, tsCollect, tsGameover
@@ -325,7 +328,7 @@ vector<bgeometry> bgeoms = {
     set_geometry(gProduct);
     default_max_piece = 5;
     rotate_allowed = false;
-    well_size = 6;
+    cur.well_size = 6;
     }},
 
   {"orbifold", "one fifth of the giant", HYPERBOLIC | NONORIENTABLE | ORBIFOLD, [] {
@@ -370,9 +373,9 @@ void create_game();
 
 void enable_bgeom() {
   stop_game_and_switch_mode(rg::nothing);
-  well_size = 10;
+  cur.well_size = 10;
   bgeoms[bgeom].create();
-  max_piece = default_max_piece;
+  cur.max_piece = default_max_piece;
   start_game();
   create_game();
   state = tsPreGame;
@@ -612,7 +615,7 @@ void generate_shapes_rec(vector<cellwalker>& sofar, code_t& code, int cnt) {
   }
 
 void generate_shapes(int cnt) {
-  vector<cellwalker> cws = { get_at(get_center(), -well_size - 1) };
+  vector<cellwalker> cws = { get_at(get_center(), -cur.well_size - 1) };
   code_t co = {};
   generate_shapes_rec(cws, co, cnt);
   }
@@ -648,7 +651,7 @@ color_t hipso[] = {
 
 color_t get_hipso(ld y) {
   y += 12;
-  if(well_size <= 5) y *= 2;
+  if(cur.well_size <= 5) y *= 2;
   return hipso[gmod(y, 13)];
   }
 
@@ -711,8 +714,8 @@ bool check_bshift(cellwalker c0, cellwalker c1) {
   }
 
 ld current_move_time_limit() {
-  // return 50000 * pow(.9, completed) + 10000. / (1 + completed);
-  return 3500 * pow(.995, completed * isize(level));
+  // return 50000 * pow(.9, cur.completed) + 10000. / (1 + cur.completed);
+  return 3500 * pow(.995, cur.completed * isize(level));
   }
 
 int turn_animation = 500;
@@ -748,7 +751,7 @@ void new_piece() {
   if(well_center && true) {
     again:
     if(get_where(at.at).first != well_center) {
-      at.at = get_at(get_where(at.at).first, -well_size - 1);  
+      at.at = get_at(get_where(at.at).first, -cur.well_size - 1);
       int d = center_distance[get_where(at.at).first];
       for(int i=0; i<4; i++) {
         auto mov = get_where(shift_block_target(i)).first;
@@ -761,14 +764,14 @@ void new_piece() {
       }
     while(at.spin) rotate_block(1, true);
     }  
-  at.at = get_at(get_where(at.at).first, -well_size - 1);  
+  at.at = get_at(get_where(at.at).first, -cur.well_size - 1);
   shape_id = next_shape_id;
   next_shape_id = choose_piece();
   if(shape_conflict(at)) {
     playSound(cwt.at, "die-bomberbird");
     state = tsGameover;
-    if(pro_game && max_piece == default_max_piece)
-      rv_leaderboard(bgeoms[bgeom].name, score);
+    if(cur.pro_game && cur.max_piece == default_max_piece)
+      rv_leaderboard(bgeoms[bgeom].name, cur.score);
     save();
     }
   else {
@@ -785,7 +788,7 @@ void find_lines() {
   by_level.clear();
   // println(hlog, "Removing levels");
   
-  for(int z=1; z<=well_size; z++) {
+  for(int z=1; z<=cur.well_size; z++) {
     int ct = 0;
     for(auto lev: level) {
       cell *c = get_at(lev, -z);
@@ -798,7 +801,7 @@ void find_lines() {
   int points = 0;
   
   if(true) {
-    for(int z=1; z<=well_size; z++) if(by_level[z-1] >= isize(level)) {
+    for(int z=1; z<=cur.well_size; z++) if(by_level[z-1] >= isize(level)) {
       points++;
       for(auto lev: level) {
         cell *c = get_at(lev, -z);
@@ -808,7 +811,7 @@ void find_lines() {
     }
   else {
     // int lines_found = 0;
-    for(int z=1; z<=well_size; z++) {
+    for(int z=1; z<=cur.well_size; z++) {
       for(auto lev: level) for(int d=0; d<lev->type; d++) {
         cellwalker cw(get_at(lev, -z), d);
         cellwalker cw0 = cw;
@@ -835,17 +838,17 @@ void find_lines() {
   if(!to_disappear.empty()) {
     move_at = ticks + collect_animation;
     state = tsCollect;
-    score += 100000. * points * (points+1.) / current_move_time_limit();
-    completed += points;
+    cur.score += 100000. * points * (points+1.) / current_move_time_limit();
+    cur.completed += points;
     playSound(cwt.at, points == 1 ? "pickup-gold" : "orb-mind");
-    if(points == 4 && pro_game && max_piece == 4 && default_max_piece == 4) rv_achievement("BRINGRISFOUR");
+    if(points == 4 && cur.pro_game && cur.max_piece == 4 && default_max_piece == 4) rv_achievement("BRINGRISFOUR");
     }
   }
 
 void disappear_lines() {
   for(auto lev: level) {
     int nz = 1;
-    for(int z=1; z<=well_size; z++) {
+    for(int z=1; z<=cur.well_size; z++) {
       cell *c1 = get_at(lev, -z);
       if(!to_disappear.count(c1)) {
         cell *c0 = get_at(lev, -nz);
@@ -872,11 +875,11 @@ void state_loop() {
     
 void fallen() {
   draw_shape();
-  bricks++;
-  cubes += isize(piecelist[shape_id].code)+1;
+  cur.bricks++;
+  cur.cubes += isize(piecelist[shape_id].code)+1;
   state = tsBetween;
   playSound(cwt.at, "closegate");
-  score += 200000. / (current_move_time_limit() * 3 + ticks - move_started);
+  cur.score += 200000. / (current_move_time_limit() * 3 + ticks - move_started);
   }
 
 void drop() {
@@ -1141,7 +1144,7 @@ void draw_holes(int zlev) {
   if(d) remove_shape();
   for(auto lev: level) {
     bool covered = false;
-    for(int z=well_size; z>=1; z--) {
+    for(int z=cur.well_size; z>=1; z--) {
       cell *c1 = get_at(lev, -z);
       if(c1->wall) covered = true;
       else if(covered) {
@@ -1214,7 +1217,7 @@ renderbuffer *next_buffer;
 
 void draw_screen(int xstart, bool show_next) {
   int steps = camera_level - (-get_z(at.at));
-  if(state != tsFalling) steps = camera_level - (well_size + 1);
+  if(state != tsFalling) steps = camera_level - (cur.well_size + 1);
 
   #if CAP_VR
   if(!explore) {
@@ -1254,7 +1257,7 @@ void draw_screen(int xstart, bool show_next) {
       ld lv = -cgi.plevel * steps;
       shift_view(ztangent(lv));
       rotate_view(cspin(1, 2, cur_ang));
-      shift_view(ztangent(cgi.plevel * (2 + max_piece)));
+      shift_view(ztangent(cgi.plevel * (2 + cur.max_piece)));
       centerover = ncenter;
       anims::moved();
       }
@@ -1277,7 +1280,7 @@ void draw_screen(int xstart, bool show_next) {
     if(state == tsCollect && ticks >= move_at) 
       disappear_lines();
     
-    if(ticks >= move_at && state == tsFalling && pro_game) {
+    if(ticks >= move_at && state == tsFalling && cur.pro_game) {
       auto_drop();
       }
 
@@ -1310,10 +1313,10 @@ void geometry_menu() {
       }
     }
   dialog::addBreak(100);
-  dialog::addSelItem("max piece", its(max_piece), 'M');
+  dialog::addSelItem("max piece", its(cur.max_piece), 'M');
   dialog::add_action([] {
-    max_piece++;
-    if(max_piece == 6) max_piece = 2;
+    cur.max_piece++;
+    if(cur.max_piece == 6) cur.max_piece = 2;
     create_game();
     state = tsPreGame;
     });
@@ -1604,11 +1607,11 @@ void run() {
   displaystr(xstart + vid.fsize, vid.yres - vid.fsize * 1, 0, vid.fsize, its(isize(level)), winf[waBarrier].color, 0);
 
   if(state != tsPreGame) {
-    displaystr(xstart + vid.fsize, vid.yres - vid.fsize * 16, 0, vid.fsize, "LEVELS " + its(completed), winf[waBarrier].color, 0);
-    displaystr(xstart + vid.fsize, vid.yres - vid.fsize * 15, 0, vid.fsize, "BRICKS " + its(bricks), winf[waBarrier].color, 0);
-    displaystr(xstart + vid.fsize, vid.yres - vid.fsize * 14, 0, vid.fsize, "CUBES " + its(cubes), winf[waBarrier].color, 0);
-    if(pro_game)
-      displaystr(xstart + vid.fsize, vid.yres - vid.fsize * 13, 0, vid.fsize, "SCORE " + fts(int(score)), winf[waBarrier].color, 0);
+    displaystr(xstart + vid.fsize, vid.yres - vid.fsize * 16, 0, vid.fsize, "LEVELS " + its(cur.completed), winf[waBarrier].color, 0);
+    displaystr(xstart + vid.fsize, vid.yres - vid.fsize * 15, 0, vid.fsize, "BRICKS " + its(cur.bricks), winf[waBarrier].color, 0);
+    displaystr(xstart + vid.fsize, vid.yres - vid.fsize * 14, 0, vid.fsize, "CUBES " + its(cur.cubes), winf[waBarrier].color, 0);
+    if(cur.pro_game)
+      displaystr(xstart + vid.fsize, vid.yres - vid.fsize * 13, 0, vid.fsize, "SCORE " + fts(int(cur.score)), winf[waBarrier].color, 0);
     }
   
   if(show_next) {
@@ -1743,16 +1746,16 @@ void run() {
         {"😀","😎","👽","🤖","😺","🎩","🎓","👑","💍","🐯","🦁","🐮","🐷","🐽","🐸","🐙","🐵","🐦","🐧","🐔","🐒","🙉","🙈","🐣","🐥","🐺","🐗","🐴","🦄","🐝","🐛","🐢","🦀","🦂","🕷","🐜","🐞","🐌","🐠","🐟","🐡","🐬","🐋","🐊","🐆","🐘","🐫","🐪","🐄","🐂","🐃","🐏","🐑","🐀","🐁","🐓","🦃","🐉","🐾","🐿","🐇","🐈","🐩","🐕","🐲","🌵","🍁","🌻","🌎","⭐️","⚡️","🔥","❄️","☔️","☂️","💧","🍏","🍎","🍐","🍋","🍌","🍉","🍇","🌶","🍅","🍍","🍑","🍈","🍓","🌽","🍠","🍯","🍞","🍗","🧀","🍖","🍤","🌯","🌮","🍝","🍕","🌭","🍟","🍔","⚽️","🎱","🏆","🎪","🎲","🎳","🚗","🚕","🚙","🏎","⛺️","⛩","🕹","💾","☎️","⏱","🔦","💡","💰","💎","🔨","💣","🔑","❤️","🔔"};
 
       string out;
-      if(pro_game) {
-        out = "Got " + its(score) + " points for completing " + its(completed) + " levels in #Bringris!";
+      if(cur.pro_game) {
+        out = "Got " + its(cur.score) + " points for completing " + its(cur.completed) + " levels in #Bringris!";
         }
-      else if(completed) {
-        out = "Used " + its(bricks) + " blocks to complete " + its(completed) + " levels in #Bringris!";
+      else if(cur.completed) {
+        out = "Used " + its(cur.bricks) + " blocks to complete " + its(cur.completed) + " levels in #Bringris!";
         }
       else {
-        out = "Dropped " + its(bricks) + " blocks in #Bringris!";
+        out = "Dropped " + its(cur.bricks) + " blocks in #Bringris!";
         }
-      if(bgeom || max_piece != 4) out += " (" + bgeoms[bgeom].name + "/" + its(max_piece) + ")";
+      if(bgeom || cur.max_piece != 4) out += " (" + bgeoms[bgeom].name + "/" + its(cur.max_piece) + ")";
       unsigned hash = time(NULL) / 600;
       for(char c: out) hash = 171 * hash + c;
       std::mt19937 invr;
@@ -1780,7 +1783,7 @@ void run() {
       start_new_game();
       paused = false;
       explore = false;
-      pro_game = false;
+      cur.pro_game = false;
       playSound(cwt.at, "elementalgem");
       }
     if(in_menu && sym == 's') {
@@ -1790,7 +1793,7 @@ void run() {
       start_new_game();
       paused = false;
       explore = false;
-      pro_game = true;
+      cur.pro_game = true;
       playSound(cwt.at, "elementalgem");
       }
     #if CAP_SHOT
@@ -1900,7 +1903,7 @@ void start_new_game() {
     c->landparam = (get_hipso(z) & 0xFCFCFC) >> 2;
     }
   
-  at = get_at(get_center(), -well_size - 1);
+  at = get_at(get_center(), -cur.well_size - 1);
   next_shape_id = choose_piece();
   
   state = tsBetween;
@@ -1910,10 +1913,10 @@ void start_new_game() {
 
   // reset_view();
 
-  completed = 0;
-  bricks = 0;
-  cubes = 0;
-  score = 0;
+  cur.completed = 0;
+  cur.bricks = 0;
+  cur.cubes = 0;
+  cur.score = 0;
   }
 
 void get_level() {
@@ -2010,12 +2013,12 @@ void create_game() {
   piecelist.clear();
   piecelist.reserve(2000);
   seen_blocks.clear();
-  for(int ps=1; ps<=max_piece; ps++)  
+  for(int ps=1; ps<=cur.max_piece; ps++)
     generate_shapes(ps);
   list_all();
   // println(hlog, "level size = ", isize(level));
   
-  camera_level = well_size + max_piece + camera;
+  camera_level = cur.well_size + cur.max_piece + camera;
   
   playermoved = false;
   ray::max_iter_current() = solnil ? 600 : 200;
@@ -2145,27 +2148,43 @@ auto hook1=
       });
 #endif
 
-void save() {
-  #if CAP_SAVE
-  fhstream f("bringris.save", "at");
-  println(f, "Bringris ", BRINGRIS_VER);
-  println(f, bgeoms[bgeom].name);
+vector<gamedata> allsaves;
+
+void fill_gamedata() {
+  cur.bgeom_name = bgeoms[bgeom].name;
   time_t timer;
   timer = time(NULL);
-  char sbuf[128]; strftime(sbuf, 128, "%c", localtime(&timerstart));
-  char buf[128]; strftime(buf, 128, "%c", localtime(&timer));
-  println(f, sbuf);
-  println(f, buf);
-  println(f, max_piece, " ", pro_game ? score : -1, " ", bricks, " ", completed, " ", cubes, " ", well_size, " ", isize(level), " ", int(timer - timerstart));
-  for(int z=0; z<=well_size; z++) {
+  char buf[128];
+  strftime(buf, 128, "%c", localtime(&timerstart)); cur.timerstart = buf;
+  strftime(buf, 128, "%c", localtime(&timer)); cur.timerend = buf;
+  cur.levelsize = isize(level);
+  cur.seconds = int(timer - timerstart);
+  cur.lmap.clear();
+  for(int z=0; z<=cur.well_size; z++) {
     string s;
     for(auto lev: level) {
       cell *c = get_at(lev, -z);
       s += (c->wall ? '#' : '.');
       }
-    println(f, s);
+    cur.lmap.push_back(s);
     }
+  }
+
+void save(const gamedata& sd) {
+  #if CAP_SAVE
+  fhstream f("bringris.save", "at");
+  println(f, "Bringris ", BRINGRIS_VER);
+  println(f, sd.bgeom_name);
+  println(f, sd.timerstart);
+  println(f, sd.timerend);
+  println(f, sd.max_piece, " ", sd.pro_game ? sd.score : -1, " ", sd.bricks, " ", sd.completed, " ", sd.cubes, " ", sd.well_size, " ", sd.levelsize, " ", sd.seconds);
+  for(auto& s: sd.lmap) println(f, s.c_str());
   #endif
+  }
+
+void save() {
+  fill_gamedata();
+  save(cur);
   }
 
 void load() {
