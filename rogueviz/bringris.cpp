@@ -171,6 +171,7 @@ void shift_block(int dir, bool camera_only = false);
 void rotate_block(int dir, bool camera_only = false);
 
 void start_new_game();
+void clear_map();
 void save();
 void load();
 
@@ -1918,13 +1919,8 @@ void reset_view() {
   set_view();
   pView = tView;
   }
-  
-void start_new_game() {
 
-  timerstart = time(NULL); 
-  
-  for(auto& p: piecelist) p.count = 0;
-
+void clear_map() {
   for(auto lev: level) for(int z=0; z<=camera_level+1; z++) {
     cell *c = get_at(lev, -z);
     setdist(c, 7, nullptr);
@@ -1934,7 +1930,7 @@ void start_new_game() {
       c->wall = waBarrier, c->land = laBarrier;
     else if(z <= camera_level)
       c->wall = waNone;
-    else 
+    else
       c->wall = waWaxWall, c->land = laCanvas, c->landparam = 0xC000C0;
     }
 
@@ -1944,8 +1940,17 @@ void start_new_game() {
     c->land = laCanvas;
     c->wall = waWaxWall;
     c->landparam = (get_hipso(z) & 0xFCFCFC) >> 2;
-    }
+    }  
+  }
   
+void start_new_game() {
+
+  timerstart = time(NULL);
+
+  for(auto& p: piecelist) p.count = 0;
+
+  clear_map();
+
   at = get_at(get_center(), -cur.well_size - 1);
   next_shape_id = choose_piece();
   
