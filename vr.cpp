@@ -1623,5 +1623,70 @@ EX void handoff() {
 
 #endif
 
+EX purehookset vr_quickmenu_extensions;
+
+EX void show_vr_quickmenu() {
+  cmode = sm::SIDE | sm::MAYDARK;
+  dialog::init(XLAT("VR quickmenu"));
+  dialog::addHelp(XLAT("These hotkeys can be activated at any time by pressing Alt+key. They are mostly useful when showing VR to someone. Demos can define extra hotkeys."));
+  callhooks(vr_quickmenu_extensions);
+  dialog::display();
+  }
+
+bool vr_keys(int sym, int uni) {
+  if(!(cmode & sm::NORMAL)) return false;
+  const Uint8 *keystate = SDL12_GetKeyState(NULL);
+  #if CAP_SDL2
+  if(keystate[SDL_SCANCODE_LALT] || keystate[SDL_SCANCODE_RALT])
+  #else
+  if(keystate[SDLK_LALT] || keystate[SDLK_RALT])
+  #endif
+    {
+    dialog::key_actions.clear();
+    callhooks(vr_quickmenu_extensions);
+    println(hlog, "uni = ", int(uni), " sym = ", int(sym), " exists = ", int(dialog::key_actions.count(uni)));
+    println(hlog, "key_actions size = ", isize(dialog::key_actions));
+    if(dialog::key_actions.count(uni)) { dialog::key_actions[uni](); return true; }
+    }
+  return false;
+  }
+
+auto hookvr = addHook(vr_quickmenu_extensions, 100, [] {
+  dialog::addSelItem(XLAT("increase camera speed"), fts(camera_speed), ',');
+  dialog::add_action([] { camera_speed *= 1.2; println(hlog, "camera_speed = ", camera_speed); });
+  dialog::addSelItem(XLAT("decrease camera speed"), fts(camera_speed), '.');
+  dialog::add_action([] { camera_speed /= 1.2; println(hlog, "camera_speed = ", camera_speed); });
+  #if CAP_VR
+  if(vr::active()) {
+    dialog::addSelItem(XLAT("increase absolute unit"), 'a', fts(vrhr::absolute_unit_in_meters));
+    dialog::add_action([] {
+      vrhr::absolute_unit_in_meters *= 1.2;
+      walking::eye_level *= 1.2;
+      println(hlog, "vr absolute unit set to ", vrhr::absolute_unit_in_meters);
+      });
+    dialog::addSelItem(XLAT("increase absolute unit"), 'z', fts(vrhr::absolute_unit_in_meters));
+    dialog::add_action([] {
+      vrhr::absolute_unit_in_meters /= 1.2;
+      walking::eye_level /= 1.2;
+      println(hlog, "vr absolute unit set to ", vrhr::absolute_unit_in_meters);
+      });
+    dialog::addBoolItem(XLAT("always show HUD"), 'x', always_show_hud);
+    dialog::add_action([] {
+      always_show_hud = !always_show_hud;
+      println(hlog, "hud ", onoff(always_show_hud));
+      });
+    dialog::addBoolItem(XLAT("reset VR reference"), 'v', refdist());
+      if(sym == 'v') {
+        println(hlog, "vr reference reset");
+        vrhr::hmd_ref_at = vrhr::hmd_at;
+        return true;
+        }
+    }
+  #endif
+  dialog::addItem(XLAT("VR quickmenu help"), 'h');
+  dialog::add_action_push(show_vr_quickmenu);
+  })
+  + addHook(hooks_handleKey, 101, vr_keys);
+
 EX }
 }
