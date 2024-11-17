@@ -1205,6 +1205,14 @@ auto a = addHook(hooks_configfile, 100, [] {
     floor_dir = -1;
     on_floor_of = nullptr;
     ticks_last = ticks_end = ticks;
+    })
++ addHook(vrhr::vr_quickmenu_extensions, 105, [] {
+    if(!intra::in) return;
+    dialog::addBoolItem("walking mode", 'w', on);
+    dialog::add_action([] {
+      switch_walking();
+      println(hlog, "walking set to ", ONOFF(on));
+      });
     });
 
 EX }
