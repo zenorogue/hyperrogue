@@ -426,12 +426,25 @@ EX namespace dialog {
     else
       xs = vid.xres * 618/1000, xo = vid.xres * 186/1000;
     
+    int last_i = 0;
     for(int i=0; i<=isize(str); i++) {
       int ls = 0;
       int prev = last;
       if(str[i] == ' ') lastspace = i;
+      unsigned char ch = str[i];
+      if(ch >= 128 && ch < 192) continue;
+      if(i < isize(str)) {
+        char *ch = &str[i];
+        if(*ch == ')') continue;
+        if(starts_with(ch, "）")) continue;
+        }
+      if(i > 0) {
+        char *ch = &str[i - utfsize_before(str,i)];
+        if(*ch == '(') continue;
+        if(starts_with(ch, "（")) continue;
+        }
       if(textwidth(siz, str.substr(last, i-last)) > xs) {
-        if(lastspace == last) ls = i-1, last = i-1;
+        if(lastspace == last) ls = last_i, last = last_i;
         else ls = lastspace, last = ls+1;
         }
       if(str[i] == 10 || i == isize(str)) ls = i, last = i+1;
@@ -441,7 +454,7 @@ EX namespace dialog {
         else y += siz;
         lastspace = last;
         }
-      
+      last_i = i;
       }
     
     y += siz/2;
