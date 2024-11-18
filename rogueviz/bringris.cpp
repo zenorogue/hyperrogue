@@ -340,7 +340,7 @@ vector<bgeometry> bgeoms = {
     rotate_allowed = false;
     }},
 
-  {"torus: shear", "Nil geometry: are you sure you want this?", SECRET, 0, 10000, 4, [] {
+  {"torus: shear", "Nil geometry: are you sure you want this?", 0, 0, 10000, 4, [] {
     nilv::nilperiod = make_array(5, 0, 5);
     // nilv::set_flags();
     set_geometry(gNil);
@@ -348,7 +348,7 @@ vector<bgeometry> bgeoms = {
     }},
 
 #if CAP_SOLV
-  {"torus: Arnold's Cat", "Solv geometry: flat shapes are crazy enough", SECRET | FLAT_ONLY, 0, 12000, 2, [] {
+  {"torus: Arnold's Cat", "Solv geometry: flat shapes are crazy enough", FLAT_ONLY, 0, 12000, 2, [] {
     asonov::period_xy = 5;
     asonov::period_z = 0;
     asonov::set_flags();
