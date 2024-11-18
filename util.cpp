@@ -1079,6 +1079,11 @@ EX string eval_programmable_string(const string& fmt) {
     }
   }
 
+EX bool starts_with(const char *c, const char *token) {
+  while(*token && *c == *token) c++, token++;
+  return !*token;
+  }
+
 EX void floyd_warshall(vector<vector<char>>& v) {
   int N = isize(v);
   for(int k=0; k<N; k++)
