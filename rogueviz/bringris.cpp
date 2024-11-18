@@ -84,6 +84,8 @@ struct bgeometry {
   reaction_t create;
   };
 
+bool stars_enabled = true;
+
 enum eBringrisMove { bmDown, bmLeft, bmUp, bmRight, bmTurnLeft, bmTurnRight, bmDrop, bmFullDrop, bmPause, bmNothing, bmLast };
 
 vector<string> move_names = { "move down", "move left", "move up", "move right", "turn left", "turn right", "drop by one", "full drop", "pause", "do nothing" };
@@ -1288,7 +1290,7 @@ void geometry_menu() {
   int total_stars = 0;
   for(int i=0; i<isize(bgeoms); i++) total_stars += bgeoms[i].stars;
   for(int i=0; i<isize(bgeoms); i++) {
-    if(total_stars >= bgeoms[i].stars_needed) {
+    if(total_stars >= bgeoms[i].stars_needed || !stars_enabled) {
       dialog::addTitle(bgeoms[i].name, i == bgeom ? 0xFF00 : 0xFF0000, 150);
       dialog::items.back().key = 'a' + i;
       dialog::add_action([i] {
@@ -1296,7 +1298,8 @@ void geometry_menu() {
         });
       dialog::addInfo(bgeoms[i].cap);
       dialog::items.back().key = 'a' + i;
-      if(bgeoms[i].stars) dialog::addInfo("stars: " + its(bgeoms[i].stars));
+      if(!stars_enabled) ;
+      else if(bgeoms[i].stars) dialog::addInfo("stars: " + its(bgeoms[i].stars));
       else dialog::addBreak(100);
       dialog::addBreak(50);
       if(i == bgeom) bgeoms[i].flags &= ~SECRET;
@@ -1308,8 +1311,8 @@ void geometry_menu() {
       }
     else {
       dialog::addTitle("locked", 0x404040, 150);
-      dialog::addInfo("stars needed: " + its(bgeoms[i].stars_needed));
-      dialog::addBreak(150);
+      if(stars_enabled) dialog::addInfo("stars needed: " + its(bgeoms[i].stars_needed));
+      dialog::addBreak(50);
       }
     }
   dialog::addBreak(100);
@@ -2167,6 +2170,7 @@ void default_config() {
   sconfig_savers(scfg_bringris, "bringris");
 
   param_i(bgeom, "bringris-geometry", 0);
+  param_b(stars_enabled, "bringris_stars", true);
   lps_add(lps_bringris, ray::want_use, ray::want_use);
   #if CAP_VR
   lps_add(lps_bringris, vrhr::hsm, vrhr::hsm);
