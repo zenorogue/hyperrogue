@@ -1331,7 +1331,14 @@ void geometry_menu() {
     dialog::addBreak(100);
 
   dialog::addBreak(100);
-  dialog::addHelp("1 block removed = 1 star (training) or 5 stars (expert), only best score counts\n\ncurrently " + its(total_stars) + " stars");
+  if(stars_enabled) {
+    if(total_stars < 6000)
+    dialog::addHelp("Collect stars to unlock more spaces!\n\n"
+      "training mode: 1 block removed = 1 star\n\n"
+      "expert mode: 1 block removed = 5 stars\n\n"
+      "only best score per space counts");
+    dialog::addInfo("currently " + its(total_stars) + " stars");
+    }
   dialog::addBack();
   dialog::display();
   }
