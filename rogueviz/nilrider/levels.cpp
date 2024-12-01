@@ -396,6 +396,14 @@ map<char, array<string, pixel_per_block> > submaps = {
     }},
   };
 
+auto award_stars(double mul, double t1, double t2) {
+  return [=] (ld t) { t = ilerp(t1, t2, t); t *= t; t += 1; t *= mul; return t; };
+  }
+
+auto award_stars_distance(ld t) {
+  return -100 * t / 8;
+  }
+
 level rotplane(
   "Trying to be horizontal", 'r', 0,
   "Collect all the triangles!\n\n"
@@ -426,8 +434,8 @@ level rotplane(
   rot_plane,
   {
     // the solver[0.25] result is 36.92
-    goal{0x40FF40, "Collect all the triangles in below 60 seconds", basic_check(60, 999), "ROTPLANE", "Trying to be horizontal"},
-    goal{0xFFD500, "Collect all the triangles in below 38 seconds", basic_check(38, 999), "ROTPLANE2", ""}
+    goal{0x40FF40, "Collect all the triangles in below 60 seconds", basic_check(60, 999), "ROTPLANE", "Trying to be horizontal", award_stars(100, 60, 38)},
+    goal{0xFFD500, "Collect all the triangles in below 38 seconds", basic_check(38, 999), "ROTPLANE2", "", award_stars(100, 60, 38)}
     }
   );
 
@@ -449,13 +457,13 @@ level longtrack(
   long_x,
   {
     // the solver[0.25] result is 1:08.56 (reduced to 1:08.45 by removing some points)
-    goal{0xFFD500, "Collect the triangle in below 1:15", basic_check(75, 999), "LONGTRACK", ""},
+    goal{0xFFD500, "Collect the triangle in below 1:15", basic_check(75, 999), "LONGTRACK", "", award_stars(100, 70, 75)},
     // the solver[0.25] + some manual modifications achieves 1:37.44
-    goal{0xFF4040, "Stop where the triangle is in below 1:45", fullstop_check(75, 999), "LONGTRACKSTOP", ""},
+    goal{0xFF4040, "Stop where the triangle is in below 1:45", fullstop_check(75, 999), "LONGTRACKSTOP", "", award_stars(100, 100, 105)},
     // the solver[0.25] result is 1:45.52
-    goal{0x303030, "Reach the triangle without going on the right side of the road below 2:00", yplus_check(120, 999), "LONGTRACKLEFT", ""},
+    goal{0x303030, "Reach the triangle without going on the right side of the road below 2:00", yplus_check(120, 999), "LONGTRACKLEFT", "", award_stars(100, 105, 120)},
 
-    goal{0x40FF40, "Stop where the triangle is without reversing time", basic_check(999, 0), "", "A Long Track"},
+    goal{0x40FF40, "Stop where the triangle is without reversing time", basic_check(999, 0), "", "A Long Track", award_stars(100, 70, 900)},
     }
   );
 
@@ -482,8 +490,8 @@ level geodesical(
   geodesics_0,
   {
     // the solver[0.25] result is 26.10
-    goal{0xFFD500, "Collect both triangles in below 30 seconds", basic_check(30, 999), "GEODESICS", ""},
-    goal{0x40FF40, "Collect both triangles without reversing time", basic_check(999, 0), "", "Roads are Geodesics"}
+    goal{0xFFD500, "Collect both triangles in below 30 seconds", basic_check(30, 999), "GEODESICS", "", award_stars(100, 27, 30)},
+    goal{0x40FF40, "Collect both triangles without reversing time", basic_check(999, 0), "", "Roads are Geodesics", award_stars(100, 27, 30)}
     }
   );
 
@@ -506,8 +514,8 @@ level geodesical4(
   geodesics_at_4,
   {
     // the solver[0.25] result is 32.04
-    goal{0xFFD500, "Collect the triangle in below 35 seconds", basic_check(35, 999), "HELICAL", ""},
-    goal{0x40FF40, "Collect the triangle without reversing time", basic_check(999, 0), "", "Helical Geodesic"},
+    goal{0xFFD500, "Collect the triangle in below 35 seconds", basic_check(35, 999), "HELICAL", "", award_stars(100, 33, 35)},
+    goal{0x40FF40, "Collect the triangle without reversing time", basic_check(999, 0), "", "Helical Geodesic", award_stars(100, 35, 999)},
     }
   );
 
@@ -536,8 +544,8 @@ level heisenberg0(
   f_heisenberg0,
   {
     // the solver[0.25] result is 49:15
-    goal{0x40FFd0, "Collect all triangles in below 0:55", basic_check(55, 999), "HZERO", ""},
-    goal{0x40c040, "Collect all triangle without reversing time", basic_check(999, 0), "", "Heisenberg Zero"},
+    goal{0x40FFd0, "Collect all triangles in below 0:55", basic_check(55, 999), "HZERO", "", award_stars(100, 51, 55)},
+    goal{0x40c040, "Collect all triangle without reversing time", basic_check(999, 0), "", "Heisenberg Zero", award_stars(100, 51, 999)},
     }
   );
 
@@ -570,8 +578,8 @@ level rotwell(
   f_rot_well,
   {
     // the solver[0.5] result is 1:19.54 (obtained using get_ordered)
-    goal{0xFFD500, "Collect all triangles below 1:25", basic_check(85, 999), "ROTWELL", ""},
-    goal{0x40c040, "Collect all triangle without reversing time", basic_check(999, 0), "", "Deep Well"}
+    goal{0xFFD500, "Collect all triangles below 1:25", basic_check(85, 999), "ROTWELL", "", award_stars(100, 80, 85)},
+    goal{0x40c040, "Collect all triangle without reversing time", basic_check(999, 0), "", "Deep Well", award_stars(100, 80, 999)}
     }
   );
 
@@ -604,8 +612,8 @@ level labyrinth(
     // the solver[0.15] result is 1:06.58
     // the solver[0.24] result is 1:08.54
     // the solver[0.25] result is 1:22.09 (it goes north for some reason)
-    goal{0xFFD500, "Collect the triangle in below 1:15", basic_check(75, 999), "LABYRINTH", ""},
-    goal{0x40c040, "Collect all triangle without reversing time", basic_check(999, 0), "", "Labyrinth"}
+    goal{0xFFD500, "Collect the triangle in below 1:15", basic_check(75, 999), "LABYRINTH", "", award_stars(100, 65, 75)},
+    goal{0x40c040, "Collect all triangle without reversing time", basic_check(999, 0), "", "Labyrinth", award_stars(100, 75, 999)}
     }
   );
 
@@ -623,9 +631,9 @@ level obstacle(
   0, 4, {},
   long_x,
   {
-    goal{0xFFFFC0, "Collect the triangle in below 1:25, reversing time at most 3 times", basic_check(85, 3), "OBSTACLE1", ""},
-    goal{0xFFD500, "Collect the triangle in below 1:10, reversing time at most 3 times", basic_check(70, 3), "OBSTACLE2", ""},
-    goal{0x40c040, "Collect the triangle without reversing time", basic_check(999, 0), "", "Obstacle Course"}
+    goal{0xFFFFC0, "Collect the triangle in below 1:25, reversing time at most 3 times", basic_check(85, 3), "OBSTACLE1", "", award_stars(100, 70, 85)},
+    goal{0xFFD500, "Collect the triangle in below 1:10, reversing time at most 3 times", basic_check(70, 3), "OBSTACLE2", "", award_stars(100, 65, 70)},
+    goal{0x40c040, "Collect the triangle without reversing time", basic_check(999, 0), "", "Obstacle Course", award_stars(100, 65, 999)}
     }
   );
 
@@ -856,9 +864,9 @@ level spirallev(
   1, 15.4, {}, spiral_level,
   {
     // the solver result is 55.239
-    goal{0xFFD500, "Collect the triangle in below 60 seconds", basic_check(60, 999), "SPIRAL2", ""},
-    goal{0xFF4040, "Collect the triangle in below 70 seconds", basic_check(70, 999), "SPIRAL1", ""},
-    goal{0x40c040, "Collect the triangle without reversing time", basic_check(999, 0), "", "Square Spiral"}
+    goal{0xFFD500, "Collect the triangle in below 60 seconds", basic_check(60, 999), "SPIRAL2", "", award_stars(100, 56, 60)},
+    goal{0xFF4040, "Collect the triangle in below 70 seconds", basic_check(70, 999), "SPIRAL1", "", award_stars(100, 56, 60)},
+    goal{0x40c040, "Collect the triangle without reversing time", basic_check(999, 0), "", "Square Spiral", award_stars(100, 60, 999)}
   }
   );
 
@@ -889,8 +897,8 @@ level hilbertlev(
   2.4, 15.4, {}, hilbert_level,
   {
     // the solver result is 50.94
-    goal{0xFFD500, "Collect the triangle in below 55 seconds", basic_check(55, 999), "HILBERT", ""},
-    goal{0xFF4040, "Collect the triangle in below 60 seconds", basic_check(60, 999), "", "Hilbert's Curve"},
+    goal{0xFFD500, "Collect the triangle in below 55 seconds", basic_check(55, 999), "HILBERT", "", award_stars(100, 50, 55)},
+    goal{0xFF4040, "Collect the triangle in below 60 seconds", basic_check(60, 999), "", "Hilbert's Curve", award_stars(100, 50, 60)},
   }
   );
 
@@ -910,9 +918,9 @@ level cycloid_slalom(
   0, 2, {},
   brachistochrone,
   {
-    goal{0xFFFFC0, "Collect all triangles in below 1:25, reversing time at most 3 times", basic_check(85, 3), "CYCLOID1", ""},
-    goal{0xFFD500, "Collect all triangles in below 1:10, reversing time at most 3 times", basic_check(70, 3), "CYCLOID2", ""},
-    goal{0x40c040, "Collect the triangle without reversing time", basic_check(999, 0), "", "Cycloid slalom"}
+    goal{0xFFFFC0, "Collect all triangles in below 1:25, reversing time at most 3 times", basic_check(85, 3), "CYCLOID1", "", award_stars(100, 60, 85)},
+    goal{0xFFD500, "Collect all triangles in below 1:10, reversing time at most 3 times", basic_check(70, 3), "CYCLOID2", "", award_stars(100, 60, 70)},
+    goal{0x40c040, "Collect the triangle without reversing time", basic_check(999, 0), "", "Cycloid slalom", award_stars(100, 60, 999)}
     }
   );
 
@@ -929,8 +937,8 @@ level multifloor(
   0, 1, {},
   rot_plane,
   {
-    goal{0x40FF40, "Collect all the triangles in below 300 seconds, reversing time at most 3 times", basic_check(300, 3), "MULTIFLOOR", ""},
-    goal{0xFFD500, "Collect all the triangles in below 150 seconds, reversing time at most once", basic_check(150, 1), "MULTIFLOOR2", ""}
+    goal{0x40FF40, "Collect all the triangles in below 300 seconds, reversing time at most 3 times", basic_check(300, 3), "MULTIFLOOR", "", award_stars(100, 100, 300)},
+    goal{0xFFD500, "Collect all the triangles in below 150 seconds, reversing time at most once", basic_check(150, 1), "MULTIFLOOR2", "", award_stars(100, 100, 150)}
     }
   );
 
@@ -951,7 +959,7 @@ level skijump (
     return h[0] * h[1] / 2 + 4 * (4.5 - h[0]) + 1 / (5 - h[0]);
     },
   {
-    goal{0x40c040, "Jump as far as you can", ski_check, "", "Ski Jumping"}
+    goal{0x40c040, "Jump as far as you can", ski_check, "", "Ski Jumping", award_stars_distance}
     }
   );
 
@@ -975,7 +983,7 @@ level bumpy(
   0, 4, {},
   f_bumpy,
   {
-    goal{0xFFFFC0, "Collect the triangle in below 1:25, reversing time at most 3 times", basic_check(85, 3), "BUMPY", "Bumpy Ride"},
+    goal{0xFFFFC0, "Collect the triangle in below 1:25, reversing time at most 3 times", basic_check(85, 3), "BUMPY", "Bumpy Ride", award_stars(100, 60, 85)},
     }
   );
 

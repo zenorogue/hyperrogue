@@ -346,6 +346,14 @@ string format_timer(ld t) {
   return hr::format("%d:%02d.%02d", int(t / 60), int(t) % 60, int(frac(t) * 100));
   }
 
+string format_timer_goal(ld t, const goal& g, bool plan) {
+  int stars = g.sa(t) * (plan ? 1 : 2);
+  string s;
+  if(t > 0) s = format_timer(t);
+  else s = hr::format("%.02fm", -t);
+  return s + " (" + its(stars) + " stars)";
+  }
+
 void timestamp::draw_instruments(level* l) {
   dynamicval<eGeometry> g(geometry, gEuclid);
   dynamicval<eModel> pm(pmodel, mdDisk);
@@ -482,7 +490,7 @@ void timestamp::draw_instruments(level* l) {
     poly_outline = 0xFF; color_t f = darkena(g.color, 0, 0xFF);
     if(gsuccess) {
       queuepoly(T * spin(90*degree), cgi.shGrail, f);
-      displaystr(cx+rad, cy+(gid-1)*rad/1.2, 0, vid.fsize*.75, format_timer(l->current_score[gid]), 0, 0);
+      displaystr(cx+rad, cy+(gid-1)*rad/1.2, 0, vid.fsize*.75, format_timer_goal(l->current_score[gid], g, planning_mode), 0, 0);
       }
     else {
       poly_outline = f; f = 0x40;

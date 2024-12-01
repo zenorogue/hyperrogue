@@ -324,10 +324,26 @@ void clear_path(level *l) {
 
 string fname = "horizontal.nrl";
 
+ld total_stars = 0;
+
 void pick_level() {
   dialog::init(XLAT("select the track"), 0xC0C0FFFF, 150, 100);
+  ld cur_stars = 0;
   for(auto l: all_levels) {
-    dialog::addItem(l->name, l->hotkey);
+    ld score_here = 0;
+    for(int gid=0; gid<isize(l->goals); gid++) {
+      if(isize(l->records[0])) {
+        auto man = l->records[0][gid];
+        if(man) score_here += l->goals[gid].sa(man) * 2;
+        }
+      if(isize(l->records[1])) {
+        auto plan = l->records[1][gid];
+        if(plan) score_here += l->goals[gid].sa(plan);
+        }
+      cur_stars += score_here;
+      }
+
+    dialog::addSelItem(l->name, its(score_here), l->hotkey);
     dialog::add_action([l] {
       curlev = l;
       recompute_plan_transform = true;
@@ -336,7 +352,9 @@ void pick_level() {
       popScreen();
       });
     }
+  total_stars = cur_stars;
   dialog::addBreak(100);
+  dialog::addSelItem("stars collected", its(total_stars), 0);
   dialog::addItem("load a level from a file", '0');
   dialog::add_action([] {
     dialog::openFileDialog(fname, XLAT("level to load:"), ".nrl", [] () {
@@ -382,11 +400,11 @@ void pick_game() {
     auto man = curlev->records[0][gid];
     auto plan = curlev->records[1][gid];
     if(man && plan)
-      dialog::addInfo("manual: " + format_timer(man) + " planning: " + format_timer(plan), g.color);
+      dialog::addInfo("manual: " + format_timer_goal(man, g, false) + " planning: " + format_timer_goal(plan, g, true), g.color);
     else if(man)
-      dialog::addInfo("manual: " + format_timer(man), g.color);
+      dialog::addInfo("manual: " + format_timer_goal(man, g, false), g.color);
     else if(plan)
-      dialog::addInfo("planning: " + format_timer(plan), g.color);
+      dialog::addInfo("planning: " + format_timer_goal(plan, g, true), g.color);
     else
       dialog::addInfo("goal not obtained:", g.color);
     dialog::addBreak(50);
