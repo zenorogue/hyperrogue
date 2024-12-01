@@ -423,8 +423,10 @@ void pick_game() {
   dialog::addBreak(100);
   add_edit(planning_mode);
   dialog::addItem(XLAT("play this track"), SDLK_ESCAPE);
-  dialog::addItem(XLAT("quit Nil Rider"), 'q');
-  dialog::add_action([] { quitmainloop = true; });
+  dialog::addItem(XLAT("Nil Rider main menu"), 'm');
+  dialog::add_action([] { popScreen(); pushScreen(main_menu); });
+  /* dialog::addItem(XLAT("quit Nil Rider"), 'q');
+  dialog::add_action([] { quitmainloop = true; }); */
   dialog::display();
   }
 
@@ -599,6 +601,48 @@ void restart() {
   clear_path(curlev);
   }
 
+string nilrider_help =
+  "You ride a unicycle and need to reach the goal triangles. The unicycle is powered only by the gravity.\n\n"
+  "The twist is that the game takes place in a world with Nil geometry! You know those impossible staircases and "
+  "waterfalls and triangles; Nil makes these possible. You gain speed simply by going in circles!\n\n"
+
+  "More precisely, every point in Nil has well-defined North, South, East, West, Up, and Down directions. "
+  "However, the up/down direction works different than in the Euclidean geometry: when you make a loop which "
+  "would return you to the same place in the Euclidean geometry, its counterpart in Nil changes your vertical "
+  "coordinate by the value proportional to the signed area of the loop projected on the NESW plane.\n\n"
+
+  "Nil Rider has two modes: manual (control the unicycle manually) and planning (try to construct the best path possible).\n\n"
+
+  "The world is viewed as it would be seen by a camera that was in our simulated world, assuming Fermat's principle (that the "
+  "light travels along geodesics, i.e., locally shortest lines). Most geodesics in Nil are helical.";
+
+string nilrider_instruments_help =
+
+  "The instrument with the blue arrow is the compass. It shows the current compass direction (NESW).\n\n"
+
+  "The instrument with the green arrow is the clinometer. If it points up, you are going up slope (and thus slowing down), if it points down, you are going down (and thus accelerating).\n\n"
+
+  "The gray line is the minimum camera angle (but the camera never goes below the current slope).\n\n"
+
+  "The instrument with the red arrow is the speed meter. It shows the current kinetic energy (proportional to speed squared).\n\n"
+
+  "If you return to the same location, your kinetic energy changes by the signed area of the loop (projected on the NESW plane). In most levels, the unit of energy (as shown on the speed meter) is a square (16x16 pixels).\n\n";
+
+void help_instruments();
+
+void help_main() {
+  gotoHelp(nilrider_help);
+  help_extensions.push_back(help_extension{'v', "video about Nil geometry", [] () {
+    open_url("https://youtu.be/FNX1rZotjjI");
+    }});
+  help_extensions.push_back(help_extension{'i', "what do the instruments do?", [] () { popScreen(); help_instruments(); }});
+  }
+
+void help_instruments() {
+  gotoHelp(nilrider_instruments_help);
+  help_extensions.push_back(help_extension{'r', "return", [] () { popScreen(); help_main(); }});
+  }
+
 void main_menu() {
   clearMessages();
   poly_outline = 0xFF;
@@ -630,7 +674,10 @@ void main_menu() {
     }
 
   dialog::addItem("track / mode / goals", 't');
-  dialog::add_action_push(pick_game);
+  dialog::add_action([] { popScreen(); pushScreen(pick_game); });
+
+  dialog::addItem("help", 'h');
+  dialog::add_action(help_main);
 
   dialog::addItem("change settings", 'o');
   dialog::add_action_push(settings);
