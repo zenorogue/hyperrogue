@@ -197,7 +197,7 @@ EX void ge_land_selection() {
   
     string s = XLAT1(linf[l].name);
 
-    if(landvisited[l]) {
+    if(landvisited[l] || unlock_all) {
       dialog::addBoolItem(s, l == specialland, dialog::list_fake_key++);
       }
     else {

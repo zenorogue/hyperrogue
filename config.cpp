@@ -22,6 +22,8 @@ EX bool return_false() { return false; }
 
 EX bool use_bool_dialog;
 
+EX bool unlock_all;
+
 /** set to true if a parameter was changed as a consequence of changing linked parameters */
 EX bool linked_consequence;
 
@@ -1776,6 +1778,9 @@ EX void initConfig() {
   
   param_i(stamplen, "stamplen");
   param_f(anims::period, "animperiod");
+
+  param_b(unlock_all, "unlock_all")
+  -> editable("allow access to all unlockable contant", 'U');
 
   param_b(use_custom_land_list, "customland_use")->be_non_editable();
   for(int i=0; i<landtypes; i++) {

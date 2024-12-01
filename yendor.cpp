@@ -501,6 +501,7 @@ EX namespace yendor {
     }
   
   bool levelUnlocked(int i) {
+    if(unlock_all) return true;
     yendorlevel& ylev(levels[i]);
 
     eItem t = treasureType(ylev.l);
@@ -763,6 +764,7 @@ EX namespace tactic {
   
   bool tacticUnlocked(eLand l) {
     if(autocheat) return true;
+    if(unlock_all) return true;
     if(l == laWildWest || l == laDual) return true;
     return hiitemsMax(treasureType(l)) * landMultiplier(l) >= 20;
     }
