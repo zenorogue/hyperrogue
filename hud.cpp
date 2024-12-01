@@ -554,6 +554,7 @@ EX void drawStats() {
 #else
     {}
 #endif
+  else if(!hr_hud_enabled) {}
   else if(cornermode) {
     int bycorner[4];
     for(int u=0; u<4; u++) bycorner[u] = 0;

@@ -25,6 +25,8 @@ EX bool use_bool_dialog;
 /** set to true if a parameter was changed as a consequence of changing linked parameters */
 EX bool linked_consequence;
 
+EX bool hr_hud_enabled = true;
+
 EX void adjust_linked() {
   indenter ind(2);
   geom3::invalid = "";
@@ -2525,14 +2527,16 @@ EX void configureInterface() {
   
   add_edit(vid.msgleft);
   
-  add_edit(glyphsortorder);
-  add_edit(vid.graphglyph);
-  add_edit(less_in_landscape);
-  add_edit(less_in_portrait);
+  if(hr_hud_enabled) {
+    add_edit(glyphsortorder);
+    add_edit(vid.graphglyph);
+    add_edit(less_in_landscape);
+    add_edit(less_in_portrait);
+    add_edit(display_yasc_codes);
+    if(casual) add_edit(display_semicasual);
+    add_edit(vid.orbmode);
+    }
 
-  add_edit(display_yasc_codes);
-  if(casual) add_edit(display_semicasual);
-  add_edit(vid.orbmode);
   add_edit(zh_ascii);
 
   dialog::addSelItem(XLAT("draw crosshair"), crosshair_size > 0 ? fts(crosshair_size) : ONOFF(false), 'x');
