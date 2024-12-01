@@ -255,6 +255,10 @@ bool handleKeyTour(int sym, int uni) {
   if(!(cmode & sm::DOTOUR)) return false;
   bool inhelp = cmode & sm::HELP;
   flagtype flags = slides[currentslide].flags;
+  if(dialog::key_actions.count(sym)) {
+    dialog::key_actions[sym]();
+    return true;
+    }
   if((sym == SDLK_RETURN || sym == SDLK_KP_ENTER) && (!inhelp || (flags & QUICKSKIP)))
     return next_slide();
   if(sym == SDLK_BACKSPACE) {
