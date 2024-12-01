@@ -343,14 +343,19 @@ void pick_level() {
       cur_stars += score_here;
       }
 
-    dialog::addSelItem(l->name, its(score_here), l->hotkey);
-    dialog::add_action([l] {
-      curlev = l;
-      recompute_plan_transform = true;
-      l->init();
-      clear_path(l);
-      popScreen();
-      });
+    if(l->stars_needed > total_stars) {
+      dialog::addSelItem(l->name, "stars needed: " + its(l->stars_needed), l->hotkey);
+      }
+    else {
+      dialog::addSelItem(l->name, its(score_here), l->hotkey);
+      dialog::add_action([l] {
+        curlev = l;
+        recompute_plan_transform = true;
+        l->init();
+        clear_path(l);
+        popScreen();
+        });
+      }
     }
   total_stars = cur_stars;
   dialog::addBreak(100);

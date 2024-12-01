@@ -405,7 +405,7 @@ auto award_stars_distance(ld t) {
   }
 
 level rotplane(
-  "Trying to be horizontal", 'r', 0,
+  "Trying to be horizontal", 'r', 0, 0,
   "Collect all the triangles!\n\n"
   "All the lines going through the center are horizontal.\n"
   "However, this is Nil geometry. The other lines are NOT horizontal! Clockwise ones slope upwards, and counterclockwise ones slope downwards.\n"
@@ -440,7 +440,7 @@ level rotplane(
   );
 
 level longtrack(
-  "A Long Track", 'l', 0,
+  "A Long Track", 'l', 0, 100,
   "The main street is horizontal, as well as the lines orthogonal to it.",
   0*dft_block, +6.5*dft_block, 64*dft_block, -1.5*dft_block,
   {
@@ -468,7 +468,7 @@ level longtrack(
   );
 
 level geodesical(
-  "Roads are Geodesics", 'g', nrlPolar,
+  "Roads are Geodesics", 'g', nrlPolar, 300,
   "Geodesics are the lines that are (locally) shortest. In the default settings, "
   "the space in Nil Rider is rendered according to the Fermat's principle, that is, "
   "light rays are assumed to be geodesics.\n\n"
@@ -496,7 +496,7 @@ level geodesical(
   );
 
 level geodesical4(
-  "Helical Geodesic", 's', nrlPolar,
+  "Helical Geodesic", 's', nrlPolar, 500,
   "The main road here is a helical geodesic. Orthogonal lines are horizontal.",  
   -80._deg, 8.5*dft_block, 260._deg, 0.5*dft_block,
   // -8*dft_block, +8*dft_block, +8*dft_block, 0, 
@@ -520,7 +520,7 @@ level geodesical4(
   );
 
 level heisenberg0(
-  "Heisenberg Zero", 'z', 0,
+  "Heisenberg Zero", 'z', 0, 700,
   "This is the plane z=0 in the Heisenberg group model of Nil. The roads are x=0, y=0 axes.",  
   -7.5*dft_block, 7.5*dft_block, 7.5*dft_block, -7.5*dft_block,
   {
@@ -550,7 +550,7 @@ level heisenberg0(
   );
 
 level rotwell(
-  "Deep Well", 'd', nrlOrder,
+  "Deep Well", 'd', nrlOrder, 900,
   "Can you escape this well?\n\n"
   "The sculpture in the center is built around eight helical geodesics which start in a point on the floor, and all cross in a point in the sky. Try to find that point and "
   "look below!\n\n"
@@ -584,7 +584,7 @@ level rotwell(
   );
 
 level labyrinth(
-  "Labyrinth", 'l', 0,
+  "Labyrinth", 'l', 0, 1100,
   "You will have to go clockwise this time!\n\n"
   "The squares of this level have half of their usual length.",
   -7.5*dft_block/2, 7.5*dft_block/2, 7.5*dft_block/2, -7.5*dft_block/2,
@@ -618,7 +618,7 @@ level labyrinth(
   );
 
 level obstacle(
-  "Obstacle Course", 'o', 0,
+  "Obstacle Course", 'o', 0, 1200,
   "The main street is horizontal, as well as the lines orthogonal to it.",
   0*dft_block, 2.5*dft_block, 64*dft_block, -2.5*dft_block,
   {
@@ -838,7 +838,7 @@ ld hilbert_level(hyperpoint h) {
   }
 
 level spirallev(
-  "Square Spiral", 's', 0,
+  "Square Spiral", 's', 0, 1300, 
   "The projection of this track is shaped like a square spiral.",
   0.5*dft_block, 16.5*dft_block, 16.5*dft_block, 0.5*dft_block,
 
@@ -871,7 +871,7 @@ level spirallev(
   );
 
 level hilbertlev(
-  "Hilbert's Curve", 's', 0,
+  "Hilbert's Curve", 's', 0, 1400, 
   "The projection of this track is shaped like the Hilbert curve.",
   0.5*dft_block, 16.5*dft_block, 16.5*dft_block, 0.5*dft_block,
 
@@ -903,7 +903,7 @@ level hilbertlev(
   );
 
 level cycloid_slalom(
-  "Cycloid slalom", 'c', nrlSwapTriangleOrder,
+  "Cycloid slalom", 'c', nrlSwapTriangleOrder, 1500,
   "The main street is a brachistochrone. If you were not moving north/south, "
   "it would be the fastest path to get to the goal. Is it still the case "
   "in these physics? Definitely not if you have to collect on the way!",
@@ -925,7 +925,7 @@ level cycloid_slalom(
   );
 
 level multifloor(
-  "Multi-floor", 'm', 0,
+  "Multi-floor", 'm', 0, 1600,
   "There are triangles on the floors below. I mean, DIRECTLY below.\n\nHopefully, you can abuse how straight lines work in this geometry to reach them!"
   ,
 
@@ -943,7 +943,7 @@ level multifloor(
   );
 
 level skijump (
-  "Ski Jumping", 'r', nrlJumping,
+  "Ski Jumping", 'r', nrlJumping, 1700,
   "Try to jump far away!",
   -0.5*dft_block, 2.5*dft_block, 15.5*dft_block, -2.5*dft_block,
   {
@@ -970,7 +970,7 @@ ld f_bumpy(hyperpoint h) {
   }
 
 level bumpy(
-  "Bumpy Ride", 'b', 0,
+  "Bumpy Ride", 'b', 0, 1800,
   "The main street is horizontal, as well as the lines orthogonal to it.",
   0*dft_block, 2.5*dft_block, 64*dft_block, -2.5*dft_block,
   {
