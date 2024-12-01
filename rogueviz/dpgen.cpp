@@ -57,12 +57,14 @@ void solve(cpos at) {
   }
 
 int last_elimit, last_hlimit;
+int last_seed = 0;
 
 void check();
 
 void launch(int seed, int elimit, int hlimit) {
 
   /* setup */
+  dual::disable();
   dual::enable();
   stop_game();
   dual::switch_to(0);
@@ -173,6 +175,15 @@ struct puzzle {
   int el, hl;
   };
 
+bool restricted;
+void puzzle_restrict();
+
+void launch_puzzle(const puzzle& p) {
+  launch(last_seed = p.seed, last_elimit = p.el, last_hlimit = p.hl);
+  popScreenAll();
+  if(restricted) pushScreen(puzzle_restrict);
+  }
+
 vector<puzzle> puzzles = {
   {"easy 1", 1, 3, 2},
   {"easy 2", 2, 3, 2},
@@ -183,6 +194,10 @@ vector<puzzle> puzzles = {
   {"hard 2", 1, 3, 4},
   {"hard 3", 1, 3, 5},
   };
+
+void launch_sample_puzzle() {
+  launch_puzzle(puzzles[0]);
+  }
 
 EX void check() {
   if(in) {
@@ -196,8 +211,7 @@ EX void check() {
   }
 
 bool hide_random = false;
-int last_seed = 0;
-  
+
 EX void show_menu() {
   cmode = sm::DARKEN;
   gamescreen();
@@ -208,8 +222,7 @@ EX void show_menu() {
   for(auto& p: puzzles) {
     dialog::addItem(p.name, ch++);
     dialog::add_action([p] { 
-      launch(last_seed = p.seed, last_elimit = p.el, last_hlimit = p.hl); 
-      popScreenAll(); 
+      launch_puzzle(p);
       });
     }
   dialog::addBreak(50);
@@ -218,7 +231,6 @@ EX void show_menu() {
     dialog::add_action([] { 
       last_seed = rand() % 1000000;
       launch(last_seed, last_elimit, last_hlimit); 
-      popScreenAll();
       });
 
     dialog::addItem(XLAT("enter seed"), 's');
@@ -226,7 +238,6 @@ EX void show_menu() {
       auto& di = dialog::editNumber(last_seed, 0, 1000000, 1, last_seed, XLAT("seed"), "");
       di.reaction_final = [] {
         launch(last_seed, last_elimit, last_hlimit); 
-        popScreenAll();
         };
       di.extra_options = [] {
         dialog::addSelItem("Euclidean size", its(last_elimit), 'E');
@@ -238,7 +249,29 @@ EX void show_menu() {
     }
   dialog::addBreak(50);
   dialog::addBack();
+
+  if(restricted) {
+    dialog::addItem(XLAT("back to RogueViz menu"), 'm');
+    dialog::add_action([] { quitmainloop = true; });
+    }
+
   dialog::display();
+  }
+
+EX void puzzle_restrict() {
+  cmode = sm::NORMAL | sm::CENTER;
+  gamescreen();
+
+  keyhandler = [] (int sym, int uni) {
+    if(DEFAULTNOR(sym)) handlePanning(sym, uni);
+    handle_movement(sym, uni);
+
+    if(sym == 'v' && DEFAULTNOR(sym))
+      pushScreen(show_menu);
+
+    if(sym == PSEUDOKEY_MENU || sym == SDLK_ESCAPE)
+      pushScreen(show_menu);
+    };
   }
 
 #if CAP_COMMANDLINE
