@@ -66,11 +66,11 @@ void launch(int seed, int elimit, int hlimit) {
   dual::enable();
   stop_game();
   dual::switch_to(0);
-  enable_canvas();
+  enable_canvas(); ccolor::set_random(0);
   canvas_default_wall = waSea;
   pconf.scale = .5;
   dual::switch_to(1);
-  enable_canvas();
+  enable_canvas(); ccolor::set_random(0);
   shrand(seed);
   start_game();
   in = true;
