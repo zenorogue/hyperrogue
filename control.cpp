@@ -553,6 +553,23 @@ EX array<int, 8> keys_vi = {{'l', 'n', 'j', 'b', 'h', 'y', 'k', 'u'}};
 EX array<int, 8> keys_wasd = {{'d', 'c', 'x', 'z', 'a', 'q', 'w', 'e'}};
 EX array<int, 8> keys_numpad = {{SDLK_KP6, SDLK_KP3, SDLK_KP2, SDLK_KP1, SDLK_KP4, SDLK_KP7, SDLK_KP8, SDLK_KP9}};
   
+EX void handle_movement(int sym, int uni) {
+  if(!(uni >= 'A' && uni <= 'Z') && DEFAULTCONTROL && !game_keys_scroll) {
+    for(int i=0; i<8; i++)
+      if(among(sym, keys_vi[i], keys_wasd[i], (uni >= '0' && uni <= '9' && !ISMAC) ? -1 : keys_numpad[i]))
+        movepckeydir(i);
+    }
+
+#if ISPANDORA
+  if(DEFAULTCONTROL) {
+    if(sym == SDLK_RIGHT) movepckeydir(0);
+    if(sym == SDLK_LEFT) movepckeydir(4);
+    if(sym == SDLK_DOWN) movepckeydir(2 + (pandora_leftclick?1:0) - (pandora_rightclick?1:0));
+    if(sym == SDLK_UP) movepckeydir(6 - (pandora_leftclick?1:0) + (pandora_rightclick?1:0));
+    }
+#endif
+  }
+
 EX void handleKeyNormal(int sym, int uni) {
 
   if(cheater && sym < 256 && sym > 0 && !dialog::key_actions.count(uni)) {
@@ -570,20 +587,7 @@ EX void handleKeyNormal(int sym, int uni) {
   if(handleTune(sym, uni)) return;
 #endif
 
-  if(!(uni >= 'A' && uni <= 'Z') && DEFAULTCONTROL && !game_keys_scroll) {
-    for(int i=0; i<8; i++)
-      if(among(sym, keys_vi[i], keys_wasd[i], (uni >= '0' && uni <= '9' && !ISMAC) ? -1 : keys_numpad[i]))
-        movepckeydir(i);
-    }
-
-#if ISPANDORA
-  if(DEFAULTCONTROL) {
-    if(sym == SDLK_RIGHT) movepckeydir(0);
-    if(sym == SDLK_LEFT) movepckeydir(4);
-    if(sym == SDLK_DOWN) movepckeydir(2 + (pandora_leftclick?1:0) - (pandora_rightclick?1:0));
-    if(sym == SDLK_UP) movepckeydir(6 - (pandora_leftclick?1:0) + (pandora_rightclick?1:0));
-    }
-#endif
+  handle_movement(sym, uni);
 
   #if CAP_COMPLEX2
   if(DEFAULTNOR(sym)) {

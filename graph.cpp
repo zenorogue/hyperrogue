@@ -5854,6 +5854,19 @@ EX void emptyscreen() {
 EX int nohelp;
 EX bool no_find_player;
 
+EX void show_menu_button() {
+  if(menu_format != "")
+    displayButton(vid.xres-8, vid.yres-vid.fsize, eval_programmable_string(menu_format), 'v', 16);
+  else if(nomenukey || ISMOBILE)
+    ;
+#if CAP_TOUR
+  else if(tour::on)
+    displayButton(vid.xres-8, vid.yres-vid.fsize, XLAT("(ESC) tour menu"), SDLK_ESCAPE, 16);
+#endif
+  else
+    displayButton(vid.xres-8, vid.yres-vid.fsize, XLAT("(v) menu"), 'v', 16);
+  }
+
 EX void normalscreen() {
   help = "@";
 
@@ -5867,16 +5880,8 @@ EX void normalscreen() {
   cmode = sm::NORMAL | sm::DOTOUR | sm::CENTER;
   if(viewdists && show_distance_lists) cmode |= sm::SIDE | sm::MAYDARK;
   gamescreen(); drawStats();
-  if(menu_format != "")
-    displayButton(vid.xres-8, vid.yres-vid.fsize, eval_programmable_string(menu_format), 'v', 16);
-  else if(nomenukey || ISMOBILE)
-    ;
-#if CAP_TOUR
-  else if(tour::on) 
-    displayButton(vid.xres-8, vid.yres-vid.fsize, XLAT("(ESC) tour menu"), SDLK_ESCAPE, 16);
-#endif
-  else
-    displayButton(vid.xres-8, vid.yres-vid.fsize, XLAT("(v) menu"), 'v', 16);
+
+  show_menu_button();
   keyhandler = handleKeyNormal;
 
   if(!playerfound && !anims::any_on() && !sphere && !no_find_player && mapeditor::drawplayer)
