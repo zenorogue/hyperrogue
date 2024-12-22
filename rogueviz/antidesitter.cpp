@@ -19,7 +19,7 @@
 // [moved the center manually using ijkl, then enter to animate]
 // ./hyper -shothud 1 ads_srange=7 -csc .4 -rotspace -canvas-random 10 -prodperiod 0 -ads-ca-check -ads-ca-view -noscr -ads-keys -run ads_simspeed="2*pi" -zoom .95 -shot-1000 -animvideo 1800 ads-ca-faster.mp4 -exit
 
-// [https://twitter.com/ZenoRogue/status/1539871748950315010] However, we could render the hyperbolic plane using Beltrami-Klein projection (as below, contrary to Poincar‚ in other animations), then Beltrami-Klein stretching counterbalances the Lorentz contraction and we get (rotating) hyperbolic plane in Poincar‚ model.
+// [https://twitter.com/ZenoRogue/status/1539871748950315010] However, we could render the hyperbolic plane using Beltrami-Klein projection (as below, contrary to Poincare in other animations), then Beltrami-Klein stretching counterbalances the Lorentz contraction and we get (rotating) hyperbolic plane in Poincare model.
 // ./hyper ads_srange=7 -shothud 1 -csc .4 -rotspace -canvas-random 10 -prodperiod 0 -ads-ca-check -ads-ca-view -noscr ads_simspeed=3 -ads-keys -ads-keylist xaxwxsxdx -ads-keylist 0 -zoom .95 -shot-1000 -alpha 0 -animvideo 1800 ads-ca-klein.mp4
 
 
