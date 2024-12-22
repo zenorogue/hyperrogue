@@ -1784,7 +1784,7 @@ EX void initConfig() {
   param_f(anims::period, "animperiod");
 
   param_b(unlock_all, "unlock_all")
-  -> editable("allow access to all unlockable contant", 'U');
+  -> editable("allow access to all unlockable content", 'U');
 
   param_b(use_custom_land_list, "customland_use")->be_non_editable();
   for(int i=0; i<landtypes; i++) {
