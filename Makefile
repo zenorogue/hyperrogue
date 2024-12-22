@@ -92,7 +92,7 @@ ifeq (${TOOLCHAIN},clang)
   CXXFLAGS_STD = -std=c++14
   CXXFLAGS_EARLY += -fPIC
   CXXFLAGS_EARLY += -W -Wall -Wextra -Wsuggest-override -pedantic
-  CXXFLAGS_EARLY += -Wno-unused-parameter -Wno-implicit-fallthrough -Wno-maybe-uninitialized -Wno-char-subscripts -Wno-unknown-warning-option
+  CXXFLAGS_EARLY += -Wno-unused-parameter -Wno-implicit-fallthrough -Wno-maybe-uninitialized -Wno-char-subscripts -Wno-unknown-warning-option -Wno-unused-but-set-variable
   CXXFLAGS_EARLY += -Wno-invalid-offsetof
 endif
 
