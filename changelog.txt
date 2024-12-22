@@ -5397,3 +5397,16 @@ Mostly bug fixes:
 - more diversity in the default players (in multiplayer)
 - fixed collision detections in the shmup mode in quotient spaces (still not perfect but more focusing on being fast than 100% correctness)
 - new player shape: spaceship (mostly for shmup/Space Rocks, and originally designed for Relative Hell, but nothing stops you from using it in HR)
+
+2024-12-22 21:43 Update 13.0w
+- a surprise for Dec 24-26 (a graphical effect, can be disabled in graphics -> extra graphical effects)
+- the broken prairie should be fixed
+- fixed the monster placement in product geometries
+- less options in the ESC-menu during tours
+- fixed a crash when approaching a Grail not in Camelot (e.g., placed by the map editor)
+- "unlock_all" setting to unlock all game content
+- fixed linebreaks in Chinese, also do not break close to ( )
+- a system of alt+key options to change settings quickly while in VR, mostly useful when showing VR to someone
+- fixed some bugs with portal maps
+- in the crossbow mode, do not auto-shoot and avoid hitting friends
+- fixed the "layered equidistant" projection in twisted H2xR
