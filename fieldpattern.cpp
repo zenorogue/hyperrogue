@@ -1234,8 +1234,6 @@ void fpattern::findsubpath() {
       }
   }
 
-fpattern *fp43;
-
 EX void info() {
   fpattern fp(0);
   int cases = 0, hard = 0;
@@ -1434,8 +1432,13 @@ EX struct fpattern& getcurrfp() {
     }
   if(sphere || euclid) return fp_invalid;
   if(S7 == 7 && S3 == 3 && !bt::in()) {
-    if(!fp43) fp43 = new fpattern(43);
-    return *fp43;
+    if(PURE) {
+      // we need another static because the prairie values have to be set differently in pure
+      static fpattern fp(43);
+      return fp;
+      }
+    static fpattern fp(43);
+    return fp;
     }
   return fp_invalid;
   }
