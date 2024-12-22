@@ -1304,6 +1304,10 @@ EX void initConfig() {
   -> help("Disable if you do not want particle effects and similar.");
   param_i(vid.framelimit, "frame limit", 999);
 
+  param_b(festive_option, "festive", 1)
+  -> editable("holiday options", 'h')
+  -> help("Special graphical effects on holidays.");
+
   #if !ISMOBWEB
   param_b(vid.want_vsync, "vsync", true)
   -> help("Disable if you want to see the actual framerate rendered by the engine.")
@@ -2220,6 +2224,8 @@ EX void showSpecialEffects() {
   dialog::addBoolItem_action(XLAT("floating bubbles: treasure thresholds"), vid.bubbles_threshold, 't');
   dialog::addBoolItem_action(XLAT("floating bubbles: all treasures"), vid.bubbles_all, 'a');
   dialog::addBoolItem_action(XLAT("background particle effects"), (vid.backeffects), 'b');
+
+  add_edit(festive_option);
 
   dialog::addBreak(50);
   dialog::addBack();
