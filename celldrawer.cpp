@@ -10,6 +10,7 @@ struct celldrawer {
 
   color_t fcol;
   color_t wcol;
+  color_t wcol_star;
   color_t asciicol;
   color_t aura_color;
   int fd;
@@ -630,7 +631,21 @@ void celldrawer::setcolors() {
   
   if(!wmspatial && snakelevel(c) && !realred(c->wall)) fcol = wcol;
   
-  if(c->wall == waGlass && !wmspatial) fcol = wcol;  
+  if(c->wall == waGlass && !wmspatial) fcol = wcol;
+
+  wcol_star = wcol;
+
+  if(festive) {
+    if(auto *at = at_or_null(old_shines, c)) {
+      fcol = darkenedby(fcol, fd);
+      wcol = darkenedby(wcol, fd);
+      fd = 0;
+      for(int p=0; p<3; p++) {
+        part(fcol, p) = min(255, part(fcol, p) + (*at)[p] / 4);
+        part(wcol, p) = min(255, part(wcol, p) + (*at)[p] / 8);
+        }
+      }
+    }
   
   if(neon_mode == eNeon::illustration) {
     fcol = highwall(c) ? w_monochromatize(fcol, 0) : w_monochromatize(fcol, 1);
@@ -707,7 +722,7 @@ void celldrawer::draw_wall() {
   if(GDIM == 3 && WDIM == 2) {
     if(!qfi.fshape) qfi.fshape = &cgi.shFullFloor;
     if(conegraph(c)) {
-      draw_shapevec(c, V, qfi.fshape->cone[0], darkena(wcol, 0, 0xFF), PPR::WALL);
+      draw_shapevec(c, V, qfi.fshape->cone[0], darkena(wcol_star, 0, 0xFF), PPR::WALL);
       draw_wallshadow();
       return;
       }
@@ -718,11 +733,11 @@ void celldrawer::draw_wall() {
       queuepolyat(V * ddspin180(c, hdir), cgi.shPalaceGate, darkena(wcol, 0, 0xFF), wmspatial?PPR::WALL3A:PPR::WALL);
       return;
       }
-    color_t wcol0 = wcol;
+    color_t wcol0 = wcol_star;
     color_t wcol2 = gradient(0, wcol0, 0, .8, 1);
     color_t wcol1 = wcol2;
     if(geometry == gEuclidSquare) wcol1 = gradient(0, wcol0, 0, .9, 1);
-    draw_shapevec(c, V, qfi.fshape->levels[SIDE_WALL], darkena(wcol, 0, 0xFF), PPR::WALL);
+    draw_shapevec(c, V, qfi.fshape->levels[SIDE_WALL], darkena(wcol_star, 0, 0xFF), PPR::WALL);
     forCellIdEx(c2, i, c) 
       if(!highwall(c2) || conegraph(c2) || c2->wall == waClosedGate || fake::split())
         placeSidewall(c, i, SIDE_WALL, V, darkena((i&1)?wcol1:wcol2, fd, 255));
@@ -733,7 +748,7 @@ void celldrawer::draw_wall() {
 
   aura_color = wcol;
   color_t wcol0 = wcol;
-  int starcol = wcol;        
+  int starcol = wcol_star;
   if(c->wall == waWarpGate) starcol = 0;
   if(c->wall == waVinePlant) starcol = 0x60C000;
 
@@ -761,7 +776,7 @@ void celldrawer::draw_wall() {
     for(int z=1; z<layers; z++) {
       double zg = zgrad0(0, geom3::actual_wall_height(), z, layers);
       draw_qfi(c, xyzscale(V, zg*(layers-z)/layers, zg),
-        darkena(gradient(0, wcol, -layers, z, layers), 0, 0xFF), PPR::WALL3+z-layers+2);
+        darkena(gradient(0, wcol_star, -layers, z, layers), 0, 0xFF), PPR::WALL3+z-layers+2);
       }
     floorShadow(c, V, SHADOW_WALL);
     }

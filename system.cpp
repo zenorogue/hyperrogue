@@ -1808,6 +1808,7 @@ EX void initAll() {
   callhooks(hooks_initialize);
   init_floorcolors();
   showstartmenu = true;
+  festive_date = showFestive();
   ca::init();
 #if CAP_COMMANDLINE
   arg::read(1);

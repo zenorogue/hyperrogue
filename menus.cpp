@@ -846,6 +846,15 @@ EX bool showHalloween() {
   return false;
   }
 
+EX bool showFestive() {
+  time_t t = time(NULL);
+  struct tm tm = *localtime(&t);
+  int month = tm.tm_mon + 1;
+  int day = tm.tm_mday;
+  if(month == 12 && day >= 24 && day <= 26) return true;
+  return false;
+  }
+
 int daily_mode;
 
 void announce_random() {

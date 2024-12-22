@@ -1358,6 +1358,13 @@ void geometry_information::prepare_shapes() {
   bshape(shWormHead, PPR::ONTENTACLE, scalefactor * wormscale, 80);
   bshape(shSmallWormHead, PPR::ONTENTACLE, scalefactor * wormscale / 2, 80);
 
+  bshape(shChristmasLight, PPR::ONTENTACLE_EYES);
+  hpcpush(hpxy(.05 * scalefactor, 0));
+  hpcpush(hpxy(0, .03 * scalefactor));
+  hpcpush(hpxy(-.05 * scalefactor, 0));
+  hpcpush(hpxy(0, -.03 * scalefactor));
+  hpcpush(hpxy(.05 * scalefactor, 0));
+
   bshape(shWormSegment, PPR::TENTACLE1);
   auto TC0 = tile_center();
   RING(i)
