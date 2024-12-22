@@ -279,6 +279,8 @@ int main(int argc, char **argv) {
       optimized = 2, compiler += " -O2", obj_dir += "/O2", setdir += "../";
     else if(s == "-O3")
       optimized = 3, compiler += " -O3", obj_dir += "/O3", setdir += "../";
+    else if(s == "-pg")
+      compiler += " -pg", linker += " -pg";
     else if(s == "-Werror")
       compiler += " -Werror", obj_dir += "/Werror", setdir += "../";
     else if(s.substr(0, 4) == "-std")
