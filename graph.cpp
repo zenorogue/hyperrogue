@@ -3261,16 +3261,13 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
       if(cgi.emb->is_euc_in_product()) { }
       else if(WDIM == 2 || mproduct) {
         hyperpoint V0 = inverse_shift(Vs, where * tile_center());
-        ld z = 0;
         if(gproduct) {
           auto d = product_decompose(V0);
-          z = d.first;
           V0 = d.second;
           }
           
         if(hypot_d(2, tC0(unshift(Vs))) > 1e-3) {
           Vs = Vs * lrspintox(V0);
-          if(gproduct) Vs = orthogonal_move(Vs, z);
           }
         }
       else if(!sl2) {
