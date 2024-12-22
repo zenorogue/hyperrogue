@@ -1644,8 +1644,6 @@ bool vr_keys(int sym, int uni) {
     {
     dialog::key_actions.clear();
     callhooks(vr_quickmenu_extensions);
-    println(hlog, "uni = ", int(uni), " sym = ", int(sym), " exists = ", int(dialog::key_actions.count(uni)));
-    println(hlog, "key_actions size = ", isize(dialog::key_actions));
     if(dialog::key_actions.count(uni)) { dialog::key_actions[uni](); return true; }
     }
   return false;
@@ -1657,15 +1655,15 @@ auto hookvr = addHook(vr_quickmenu_extensions, 100, [] {
   dialog::addSelItem(XLAT("decrease camera speed"), fts(camera_speed), '.');
   dialog::add_action([] { camera_speed /= 1.2; println(hlog, "camera_speed = ", camera_speed); });
   #if CAP_VR
-  if(vr::active()) {
+  if(vrhr::active()) {
     if(in_perspective()) {
-      dialog::addSelItem(XLAT("increase absolute unit"), 'a', fts(vrhr::absolute_unit_in_meters));
+      dialog::addSelItem(XLAT("increase absolute unit"), fts(vrhr::absolute_unit_in_meters), 'a');
       dialog::add_action([] {
         vrhr::absolute_unit_in_meters *= 1.2;
         walking::eye_level *= 1.2;
         println(hlog, "vr absolute unit set to ", vrhr::absolute_unit_in_meters);
         });
-      dialog::addSelItem(XLAT("decrease absolute unit"), 'z', fts(vrhr::absolute_unit_in_meters));
+      dialog::addSelItem(XLAT("decrease absolute unit"), fts(vrhr::absolute_unit_in_meters), 'z');
       dialog::add_action([] {
         vrhr::absolute_unit_in_meters /= 1.2;
         walking::eye_level /= 1.2;
@@ -1673,36 +1671,35 @@ auto hookvr = addHook(vr_quickmenu_extensions, 100, [] {
         });
       }
     else {
-      dialog::addSelItem(XLAT("increase model size"), 'a', fts(pconf.vr_scale_factor));
+      dialog::addSelItem(XLAT("increase model size"), fts(pconf.vr_scale_factor), 'a');
       dialog::add_action([] {
         pconf.vr_scale_factor *= 1.2;
         println(hlog, "vr scale factor set to ", pconf.vr_scale_factor);
         });
-      dialog::addSelItem(XLAT("decrease model size"), 'z', fts(pconf.vr_scale_factor));
+      dialog::addSelItem(XLAT("decrease model size"), fts(pconf.vr_scale_factor), 'z');
       dialog::add_action([] {
         pconf.vr_scale_factor *= 1.2;
         println(hlog, "vr scale factor set to ", pconf.vr_scale_factor);
         });
-      dialog::addBoolItem(XLAT("increase Z-shift"), 'c', fts(pconf.vr_zshift));
+      dialog::addSelItem(XLAT("increase Z-shift"), fts(pconf.vr_zshift), 'c');
       dialog::add_action([] {
         pconf.vr_zshift += 0.5;
         });
-      dialog::addBoolItem(XLAT("decrease Z-shift"), 'd', fts(pconf.vr_zshift));
+      dialog::addSelItem(XLAT("decrease Z-shift"), fts(pconf.vr_zshift), 'd');
       dialog::add_action([] {
         pconf.vr_zshift -= 0.5;
         });
       }
-    dialog::addBoolItem(XLAT("always show HUD"), 'x', always_show_hud);
+    dialog::addBoolItem(XLAT("always show HUD"), always_show_hud, 'x');
     dialog::add_action([] {
       always_show_hud = !always_show_hud;
-      println(hlog, "hud ", onoff(always_show_hud));
+      println(hlog, "hud ", ONOFF(always_show_hud));
       });
-    dialog::addBoolItem(XLAT("reset VR reference"), 'v', refdist());
-      if(sym == 'v') {
-        println(hlog, "vr reference reset");
-        vrhr::hmd_ref_at = vrhr::hmd_at;
-        return true;
-        }
+    dialog::addSelItem(XLAT("reset VR reference"), refdist(), 'v');
+    dialog::add_action([] {
+      println(hlog, "vr reference reset");
+      vrhr::hmd_ref_at = vrhr::hmd_at;
+      });
     }
   #endif
   dialog::addItem(XLAT("VR quickmenu help"), 'h');
