@@ -1634,6 +1634,7 @@ EX void show_vr_quickmenu() {
   }
 
 bool vr_keys(int sym, int uni) {
+  #if !ISMOBILE
   if(!(cmode & sm::NORMAL)) return false;
   const Uint8 *keystate = SDL12_GetKeyState(NULL);
   #if CAP_SDL2
@@ -1647,6 +1648,7 @@ bool vr_keys(int sym, int uni) {
     if(dialog::key_actions.count(uni)) { dialog::key_actions[uni](); return true; }
     }
   return false;
+  #endif
   }
 
 auto hookvr = addHook(vr_quickmenu_extensions, 100, [] {
