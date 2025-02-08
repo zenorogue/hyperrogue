@@ -53,11 +53,15 @@ void change_default_key(int key, int val) {
 
 void set_default_keys() {
   clear_config(scfg_ads);
-  change_default_key('s', 16 + 0);
-  change_default_key('a', 16 + 1);
-  change_default_key('w', 16 + 2);
-  change_default_key('d', 16 + 3);
-  change_default_key('f', 16 + 4);
+
+  /* these are shared with the default config */
+  // change_default_key('s', 16 + 0);
+  // change_default_key('a', 16 + 1);
+  // change_default_key('w', 16 + 2);
+  // change_default_key('d', 16 + 3);
+  // change_default_key('f', 16 + 4);
+
+  /* these are ADS-specific */
   change_default_key('p', 16 + 5);
   change_default_key('t', 16 + 6);
   change_default_key('o', 16 + 7);

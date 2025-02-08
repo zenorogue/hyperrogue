@@ -4,7 +4,12 @@ namespace ads_game {
 
 multi::config scfg_ads;
 
-vector<string> move_names = { "acc down", "acc left", "acc up", "acc right", "fire", "pause", "display times", "switch spin", "menu", "[paused] future", "(paused] past", "[paused] move switch" };
+enum pcmds_extra {
+  pcPause=9, pcDisplayTimes=10, pcSwitchSpin=11, pcMenu=12,
+  pcPauseFuture=13, pcPausePast=14, pcPauseMoveSwitch=15
+  };
+
+vector<string> move_names = { "", "", "", "", "acc down", "acc left", "acc up", "acc right", "fire", "pause", "display times", "switch spin", "menu", "[paused] future", "[paused] past", "[paused] move switch" };
 
 void fire() {
   if(!pdata.ammo) return;
@@ -98,8 +103,10 @@ void apply_lorentz(transmatrix lor) {
 
 ld read_movement() {
 
-  ld mdx = multi::axespressed[4]/30000.;
-  ld mdy = multi::axespressed[5]/30000.;
+  auto& axes = multi::axes_for(0);
+
+  ld mdx = axes[0]/30000.;
+  ld mdy = axes[1]/30000.;
   #if CAP_VR
   if(vrhr::active()) {
     mdy -= vrhr::vrgo_y;
@@ -111,11 +118,11 @@ ld read_movement() {
     return hypot(mdx, mdy);
     }
 
-  auto& a = multi::actionspressed;
-  bool left = a[16+1];
-  bool right = a[16+3];
-  bool up = a[16+2];
-  bool down = a[16];
+  auto& act = multi::action_states[1];
+  bool left = act[multi::pcMoveLeft];
+  bool right = act[multi::pcMoveRight];
+  bool up = act[multi::pcMoveUp];
+  bool down = act[multi::pcMoveDown];
 
   int clicks = (left?1:0) + (right?1:0) + (up?1:0) + (down?1:0);
 
@@ -151,14 +158,13 @@ bool ads_turn(int idelta) {
 
   handle_crashes();
 
-  auto& a = multi::actionspressed;
-  auto& la = multi::lactionpressed;
-  
-  if(a[16+4] && !la[16+4] && !paused) fire();
-  if(a[16+5] && !la[16+5]) switch_pause();
-  if(a[16+6] && !la[16+6]) view_proper_times = !view_proper_times;
-  if(a[16+7] && !la[16+7]) auto_rotate = !auto_rotate;
-  if(a[16+8] && !la[16+8]) pushScreen(game_menu);
+  auto& act = multi::action_states[1];
+
+  if(act[multi::pcFire].pressed() && !paused) fire();
+  if(act[pcPause].pressed()) switch_pause();
+  if(act[pcDisplayTimes].pressed()) view_proper_times = !view_proper_times;
+  if(act[pcSwitchSpin].pressed()) auto_rotate = !auto_rotate;
+  if(act[pcMenu].pressed()) pushScreen(game_menu);
 
   if(auto_angle) pconf.mori().get() = spin(ang) * pconf.mori().get();
 
@@ -170,7 +176,8 @@ bool ads_turn(int idelta) {
     ld mul = read_movement();
     ld dv = pt * ads_accel * mul;
 
-    if(paused && a[16+11]) {
+
+    if(paused && act[pcPauseMoveSwitch]) {
       current = ads_matrix(spin(ang*degree) * xpush(mul*delta*-pause_speed) * spin(-ang*degree), 0) * current;
       }
     else
@@ -183,8 +190,8 @@ bool ads_turn(int idelta) {
 
     ld tc = 0;
     if(!paused) tc = pt;
-    else if(a[16+9]) tc = pt;
-    else if(a[16+10]) tc = -pt;
+    else if(act[pcPauseFuture]) tc = pt;
+    else if(act[pcPausePast]) tc = -pt;
 
     if(!paused && !game_over) {
       shipstate ss;

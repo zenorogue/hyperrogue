@@ -341,14 +341,13 @@ bool ds_turn(int idelta) {
 
   ds_handle_crashes();
 
-  auto& a = multi::actionspressed;
-  auto& la = multi::lactionpressed;
+  auto& act = multi::action_states[1];
 
-  if(a[16+4] && !la[16+4] && !paused) ds_fire();
-  if(a[16+5] && !la[16+5]) switch_pause();
-  if(a[16+6] && !la[16+6]) view_proper_times = !view_proper_times;
-  if(a[16+7] && !la[16+7]) auto_rotate = !auto_rotate;
-  if(a[16+8] && !la[16+8]) pushScreen(game_menu);
+  if(act[multi::pcFire].pressed() && !paused) ds_fire();
+  if(act[pcPause].pressed()) switch_pause();
+  if(act[pcDisplayTimes].pressed()) view_proper_times = !view_proper_times;
+  if(act[pcSwitchSpin].pressed()) auto_rotate = !auto_rotate;
+  if(act[pcMenu].pressed()) pushScreen(game_menu);
   
   if(true) {
     dynamicval<eGeometry> g(geometry, gSpace435);
@@ -357,7 +356,7 @@ bool ds_turn(int idelta) {
     ld mul = read_movement();
     ld dv = pt * ds_accel * mul;
 
-    if(paused && a[16+11]) {
+    if(paused && act[pcPauseMoveSwitch]) {
       current.T = spin(ang*degree) * cspin(0, 2, mul*delta*-pause_speed) * spin(-ang*degree) * current.T;
       }
     else {
@@ -371,8 +370,8 @@ bool ds_turn(int idelta) {
 
     ld tc = 0;
     if(!paused) tc = pt;
-    else if(a[16+9]) tc = pt;
-    else if(a[16+10]) tc = -pt;
+    else if(act[pcPauseFuture]) tc = pt;
+    else if(act[pcPausePast]) tc = -pt;
 
     if(!paused && !game_over) {
       shipstate ss;
@@ -410,7 +409,7 @@ bool ds_turn(int idelta) {
       }
     else view_pt += tc;
 
-    if(a[16+4] && !la[16+4] && false) {
+    if(act[multi::pcFire].pressed()&& false) {
       if(history.size())
         history.back().duration = HUGE_VAL;
       current = random_spin3();
