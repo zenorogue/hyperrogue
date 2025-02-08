@@ -334,7 +334,7 @@ void ds_fire() {
   }
 
 bool ds_turn(int idelta) {
-  multi::handleInput(idelta, scfg_ads);
+  multi::handleInput(idelta, multi::scfg_default);
   ld delta = idelta / 1000.;
   
   if(!(cmode & sm::NORMAL)) return false;

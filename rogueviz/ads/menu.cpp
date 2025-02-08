@@ -181,7 +181,7 @@ void game_menu() {
   dialog::add_action([] { current.T = Id; vctrV = Id; });
 
   dialog::addItem("configure keys", 'k');
-  dialog::add_action_push(multi::get_key_configurer(1, move_names, "Relative Hell keys", scfg_ads));
+  dialog::add_action_push(multi::get_key_configurer(1, move_names, "Relative Hell keys", multi::scfg_default));
 
   #if CAP_AUDIO
   add_edit(effvolume);

@@ -46,30 +46,16 @@ namespace hr {
 
 namespace ads_game {
 
-void change_default_key(int key, int val) {
-  int* t = scfg_ads.keyaction;
-  t[key] = val;
-  }
+/* ADS-specific keys */
 
 void set_default_keys() {
-  clear_config(scfg_ads);
-
-  /* these are shared with the default config */
-  // change_default_key('s', 16 + 0);
-  // change_default_key('a', 16 + 1);
-  // change_default_key('w', 16 + 2);
-  // change_default_key('d', 16 + 3);
-  // change_default_key('f', 16 + 4);
-
-  /* these are ADS-specific */
-  change_default_key('p', 16 + 5);
-  change_default_key('t', 16 + 6);
-  change_default_key('o', 16 + 7);
-  change_default_key('m', 16 + 8);
-  change_default_key('i', 16 + 9);
-  change_default_key('k', 16 + 10);
-  change_default_key('l', 16 + 11);
-  sconfig_savers(scfg_ads, "ads");
+  multi::change_default_key(lps_relhell, 'p', 16 + 9);
+  multi::change_default_key(lps_relhell, 't', 16 + 10);
+  multi::change_default_key(lps_relhell, 'o', 16 + 11);
+  multi::change_default_key(lps_relhell, 'm', 16 + 12);
+  multi::change_default_key(lps_relhell, 'i', 16 + 13);
+  multi::change_default_key(lps_relhell, 'k', 16 + 14);
+  multi::change_default_key(lps_relhell, 'l', 16 + 15);
   }
 
 void restart() {

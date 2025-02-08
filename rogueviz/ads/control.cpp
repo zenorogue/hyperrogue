@@ -2,8 +2,6 @@ namespace hr {
 
 namespace ads_game {
 
-multi::config scfg_ads;
-
 enum pcmds_extra {
   pcPause=9, pcDisplayTimes=10, pcSwitchSpin=11, pcMenu=12,
   pcPauseFuture=13, pcPausePast=14, pcPauseMoveSwitch=15
@@ -88,7 +86,7 @@ void fire() {
 
 bool handleKey(int sym, int uni) {
   if(cmode & sm::NORMAL) {
-    int* t = scfg_ads.keyaction;
+    int* t = multi::scfg_default.keyaction;
     if(t[sym] >= 16 && t[sym] < 32) return true;
     if(sym == 'v') pushScreen(game_menu);
     if(sym == SDLK_ESCAPE) pushScreen(game_menu);
@@ -149,7 +147,7 @@ ld read_movement() {
   }
 
 bool ads_turn(int idelta) {
-  multi::handleInput(idelta, scfg_ads);
+  multi::handleInput(idelta, multi::scfg_default);
   ld delta = idelta / 1000.;
   
   if(!(cmode & sm::NORMAL)) return false;
