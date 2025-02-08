@@ -67,8 +67,6 @@ local_parameter_set lps_bringris("bringris:");
 local_parameter_set lps_bringris_explore("bringris:explore:", &lps_bringris);
 local_parameter_set lps_bringris_play("bringris:play:", &lps_bringris);
 
-multi::config scfg_bringris;
-
 struct bgeometry {
   string name;
   string cap;
@@ -79,9 +77,9 @@ struct bgeometry {
 
 bool stars_enabled = true;
 
-enum eBringrisMove { bmDown, bmLeft, bmUp, bmRight, bmTurnLeft, bmTurnRight, bmDrop, bmFullDrop, bmPause, bmNothing, bmLast };
+enum eBringrisMove { bmUp=4, bmRight=5, bmDown=6, bmLeft=7, bmFullDrop=8, bmTurnLeft=9, bmTurnRight=10, bmDrop=11, bmPause=12, bmNothing=13, bmLast=14 };
 
-vector<string> move_names = { "move down", "move left", "move up", "move right", "turn left", "turn right", "drop by one", "full drop", "pause", "do nothing" };
+vector<string> move_names = { "", "", "", "", "move up", "move right", "move down", "move left", "full drop", "turn left", "turn right", "drop by one", "pause", "do nothing" };
 
 int camera_level;
 
@@ -1045,12 +1043,12 @@ void shift_block(int dir, bool camera_only) {
   }
 
 void bringris_action(int k) {
-  if(k < 4) shift_block(k);
-  if(k == 4) rotate_block(1);
-  if(k == 5) rotate_block(-1);
-  if(k == 6) drop();
-  if(k == 7) fulldrop();
-  if(k == 8) paused = true;
+  if(k >= 4 && k < 8) shift_block((k-4)^2);
+  if(k == bmTurnLeft) rotate_block(1);
+  if(k == bmTurnRight) rotate_block(-1);
+  if(k == bmDrop) drop();
+  if(k == bmFullDrop) fulldrop();
+  if(k == bmPause) paused = true;
   }
 
 void create_matrices() {
@@ -1407,7 +1405,7 @@ void settings_menu() {
   dialog::addItem("visuals & Virtual Reality", 'v');
   dialog::add_action_push(visual_menu);
   dialog::addItem("configure keys", 'k');
-  dialog::add_action_push(multi::get_key_configurer(1, move_names, "Bringris keys", scfg_bringris));
+  dialog::add_action_push(multi::get_key_configurer(1, move_names, "Bringris keys", multi::scfg_default));
 
   #if CAP_AUDIO
   add_edit(effvolume);
@@ -1734,7 +1732,7 @@ void run() {
     auto& act = multi::action_states[1];
 
     if(state == tsFalling && !paused) {
-      multi::handleInput(0, scfg_bringris);
+      multi::handleInput(0, multi::scfg_default);
       bool consumed = false;
       for(int i=0; i<bmLast; i++)
         if(act[i].pressed()) {
@@ -2172,23 +2170,12 @@ int args() {
   return 0;
   }
 
-void change_default_key(int key, int val) {
-  int* t = scfg_bringris.keyaction;
-  t[key] = val;
-  }
-
 void default_config() {
-  clear_config(scfg_bringris);
-  change_default_key('s', 16 + 0);
-  change_default_key('a', 16 + 1);
-  change_default_key('w', 16 + 2);
-  change_default_key('d', 16 + 3);
-  change_default_key('q', 16 + 4);
-  change_default_key('e', 16 + 5);
-  change_default_key(' ', 16 + 6);
-  change_default_key('\r',16 + 7);
-  change_default_key('p', 16 + 8);
-  sconfig_savers(scfg_bringris, "bringris");
+  multi::change_default_key(lps_bringris, '\r', 16 + 8);
+  multi::change_default_key(lps_bringris, 'q',  16 + 9);
+  multi::change_default_key(lps_bringris, 'e',  16 + 10);
+  multi::change_default_key(lps_bringris, ' ',  16 + 11);
+  multi::change_default_key(lps_bringris, 'p',  16 + 12);
 
   param_i(bgeom, "bringris-geometry", 0);
   param_b(stars_enabled, "bringris_stars", true);
