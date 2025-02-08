@@ -8,6 +8,10 @@
 #include "hyper.h"
 namespace hr {
 
+#if HDR
+struct local_parameter_set;
+#endif
+
 EX namespace multi {
 
   #if HDR
@@ -654,6 +658,15 @@ EX void sconfig_savers(config& scfg, string prefix) {
 
 EX void clear_config(config& scfg) {
   for(int i=0; i<SCANCODES; i++) scfg.keyaction[i] = 0;
+  }
+
+EX void change_default_key(struct local_parameter_set& lps, int key, int val) {
+  int* t = multi::scfg_default.keyaction;
+
+  for(int i=0; i<multi::SCANCODES; i++)
+    if(t[i] == val) lps_add(lps, t[i], 0);
+
+  lps_add(lps, t[key], val);
   }
 
 EX void initConfig() {
