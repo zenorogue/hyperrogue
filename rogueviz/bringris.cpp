@@ -2139,6 +2139,19 @@ int args() {
     init_all();
     }
 
+  else if(argis("-bringris-drop")) {
+    PHASEFROM(2);
+    start_new_game();
+    paused = false;
+    explore = false;
+    cur.pro_game = false;
+    new_piece(); fulldrop(); fallen(); new_piece(); fulldrop();
+    }
+
+  else if(argis("-bringris-explore")) {
+    explore = true;
+    }
+
   else if(argis("-ray-off"))
     use_raycaster = false;
 
