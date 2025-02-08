@@ -39,8 +39,6 @@
 
 namespace nilrider {
 
-multi::config scfg_nilrider;
-
 /** is the game paused? */
 bool paused = false;
 
@@ -50,7 +48,16 @@ int simulation_start_tick;
 
 ld aimspeed_key_x = 1, aimspeed_key_y = 1, aimspeed_mouse_x = 1, aimspeed_mouse_y = 1;
 
-vector<string> move_names = { "camera down", "move left", "camera up", "move right", "fine control", "pause", "reverse time", "view simulation", "menu" };
+vector<string> move_names = { "", "", "", "", "camera down", "move left", "camera up", "move right", "fine control", "pause", "reverse time", "view simulation", "menu" };
+
+enum nilrider_moves { nrCameraUp=4, nrMoveRight=5, nrCameraDown=6, nrMoveLeft=7, nrFineControl=8, nrPause=9, nrReverseTime=10, nrViewSimulation=11, nrMenu=12 };
+
+enum pcmds {
+  pcForward, pcBackward, pcTurnLeft, pcTurnRight,
+  pcMoveUp, pcMoveRight, pcMoveDown, pcMoveLeft,
+  pcFire, pcFace, pcFaceFire,
+  pcDrop, pcCenter, pcOrbPower, pcOrbKey
+  };
 
 int reversals = 0;
 bool loaded_or_planned = false;
@@ -102,15 +109,15 @@ void sync_music(eLand l) {
 bool turn(int delta) {
   if(planning_mode && !view_replay) return false;
 
-  multi::get_actions(scfg_nilrider);
+  multi::get_actions(multi::scfg_default);
   auto& act = multi::action_states[1];
 
   ld mul = 1;
-  if(act[4]) mul /= 5;
-  if(act[3] && !paused) curlev->current.heading_angle -= aimspeed_key_x * mul * delta / 1000.;
-  if(act[1] && !paused) curlev->current.heading_angle += aimspeed_key_x * mul * delta / 1000.;
-  if(act[2] && !paused) min_gfx_slope -= aimspeed_key_y * mul * delta / 1000.;
-  if(act[0] && !paused) min_gfx_slope += aimspeed_key_y * mul * delta / 1000.;
+  if(act[nrFineControl]) mul /= 5;
+  if(act[nrMoveRight] && !paused) curlev->current.heading_angle -= aimspeed_key_x * mul * delta / 1000.;
+  if(act[nrMoveLeft] && !paused) curlev->current.heading_angle += aimspeed_key_x * mul * delta / 1000.;
+  if(act[nrCameraDown] && !paused) min_gfx_slope -= aimspeed_key_y * mul * delta / 1000.;
+  if(act[nrCameraUp] && !paused) min_gfx_slope += aimspeed_key_y * mul * delta / 1000.;
 
   curlev->current.heading_angle -= aimspeed_mouse_x * mouseaim_x * mul;
   min_gfx_slope += aimspeed_mouse_y * mouseaim_y * mul;
@@ -127,8 +134,8 @@ bool turn(int delta) {
   
   backing = false;
 
-  if(act[6]) {
-    if(!act[6].last) reversals++;
+  if(act[nrReverseTime]) {
+    if(!act[nrReverseTime].last) reversals++;
     if(planning_mode)
       simulation_start_tick += 2*delta;
     else for(int i=0; i<delta; i++) {
@@ -289,12 +296,12 @@ void run() {
     dialog::add_key_action('L', [] { pushScreen(layer_selection_screen); });
     }
 
-  int* t = scfg_nilrider.keyaction;
+  int* t = multi::scfg_default.keyaction;
   for(int i=1; i<512; i++) {
     auto& ka = dialog::key_actions;
-    if(t[i] == 16+5) ka[i] = ka[PSEUDOKEY_PAUSE];
-    if(t[i] == 16+7) ka[i] = ka[PSEUDOKEY_SIM];
-    if(t[i] == 16+8) ka[i] = ka[PSEUDOKEY_MENU];
+    if(t[i] == 16+nrPause) ka[i] = ka[PSEUDOKEY_PAUSE];
+    if(t[i] == 16+nrViewSimulation) ka[i] = ka[PSEUDOKEY_SIM];
+    if(t[i] == 16+nrMenu) ka[i] = ka[PSEUDOKEY_MENU];
     }
   
   keyhandler = [] (int sym, int uni) {
@@ -469,7 +476,7 @@ void settings() {
   dialog::addItem("projection", 'P');
   dialog::add_action_push(nil_projection);
   dialog::addItem("configure keys", 'k');
-  dialog::add_action_push(multi::get_key_configurer(1, move_names, "Nilrider keys", scfg_nilrider));
+  dialog::add_action_push(multi::get_key_configurer(1, move_names, "Nilrider keys", multi::scfg_default));
 
   #if CAP_AUDIO
   add_edit(effvolume);
@@ -710,29 +717,19 @@ void main_menu() {
 
 bool on;
 
-void change_default_key(int key, int val) {
-  int* t = scfg_nilrider.keyaction;
-  t[key] = val;
-  }
+local_parameter_set lps_nilrider("nilrider:");
 
 void nilrider_keys() {
-  clear_config(scfg_nilrider);
-  
-  change_default_key('s', 16 + 0);
-  change_default_key('a', 16 + 1);
-  change_default_key('w', 16 + 2);
-  change_default_key('d', 16 + 3);
   #if CAP_SDL2
-  change_default_key(SDL_SCANCODE_LCTRL, 16 + 4);
+  multi::change_default_key(lps_nilrider, SDL_SCANCODE_LCTRL, 16 + nrFineControl);
   #else
-  change_default_key(SDLK_LCTRL, 16 + 4);
+  multi::change_default_key(lps_nilrider, SDLK_LCTRL, 16 + nrFineControl);
   #endif
-  change_default_key('p', 16 + 5);
-  change_default_key('b', 16 + 6);
-  change_default_key('r', 16 + 7);
-  change_default_key('v', 16 + 8);
 
-  sconfig_savers(scfg_nilrider, "nilrider");
+  multi::change_default_key(lps_nilrider, 'p', 16 + nrPause);
+  multi::change_default_key(lps_nilrider, 'b', 16 + nrReverseTime);
+  multi::change_default_key(lps_nilrider, 'r', 16 + nrViewSimulation);
+  multi::change_default_key(lps_nilrider, 'v', 16 + nrMenu);
   }
 
 bool nilrider_music(eLand& l) {
@@ -748,9 +745,9 @@ bool nilrider_music(eLand& l) {
   return false;
   }
 
-local_parameter_set lps_nilrider("nilrider:");
-
 void default_settings() {
+  nilrider_keys();
+
   lps_add(lps_nilrider, vid.cells_drawn_limit, 1);
   lps_add(lps_nilrider, ccolor::plain.ctab, colortable{0});
   lps_add(lps_nilrider, smooth_scrolling, true);
@@ -782,7 +779,6 @@ void vrqm_ext() {
 
 void initialize() {
   load();
-  nilrider_keys();
 
   check_cgi();
   cgi.prepare_shapes();
