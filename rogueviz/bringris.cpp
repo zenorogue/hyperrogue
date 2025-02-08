@@ -1725,11 +1725,13 @@ void run() {
     if(explore && sym == SDLK_BACKSPACE) 
       explore = false;
 
+    auto& act = multi::action_states[1];
+
     if(state == tsFalling && !paused) {
       multi::handleInput(0, scfg_bringris);
       bool consumed = false;
       for(int i=0; i<bmLast; i++)
-        if(multi::actionspressed[16+i] && !multi::lactionpressed[16+i]) {
+        if(act[i].pressed()) {
           bringris_action(i);
           consumed = true;
           }
