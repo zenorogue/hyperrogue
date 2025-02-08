@@ -258,7 +258,7 @@ struct key_configurer {
   
     getcstat = ' ';
     
-    for(int i=0; i<isize(shmupcmdtable); i++) if(shmupcmdtable[i][0])
+    for(int i=0; i<isize(shmupcmdtable); i++) if(shmupcmdtable[i].size())
       dialog::addSelItem(XLAT(shmupcmdtable[i]), listkeys(*which_config, 16*sc+i),
         setwhat ? (setwhat>1 && i == (setwhat&15) ? '?' : 0) : 'a'+i);
       else dialog::addBreak(100);
