@@ -2217,7 +2217,7 @@ auto hooks =
   + addHook(hooks_frame, 100, bringris_frame)
   + addHook(hooks_configfile, 300, default_config)
   + addHook(dialog::hooks_display_dialog, 100, [] () {
-      if(dialog::items[0].body == "Bringris keys") {
+      if(dialog::items.size() && dialog::items[0].body == "Bringris keys") {
         dialog::addBreak(200);
         if(!rotate_allowed)
           dialog::addHelp("note: rotation keys only available when necessary");
