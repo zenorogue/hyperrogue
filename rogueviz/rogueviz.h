@@ -413,12 +413,9 @@ namespace smoothcam {
   void set_time(ld t);
   }
 
-#ifdef RVCOL
+#if RVCOL
 void rv_achievement(const string& name);
 void rv_leaderboard(const string& name, int score);
-#else
-inline void rv_achievement(const string& name) {}
-inline void rv_leaderboard(const string& name, int score) {}
 #endif
 }
 

@@ -37,13 +37,6 @@
 #include "solver.cpp"
 #include "save.cpp"
 
-#ifdef RVCOL
-namespace hr {
-  void rv_achievement(const string& name);
-  void rv_leaderboard(const string& name, int score);
-  }
-#endif
-
 namespace nilrider {
 
 multi::config scfg_nilrider;
