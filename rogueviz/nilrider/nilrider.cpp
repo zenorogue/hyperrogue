@@ -103,15 +103,14 @@ bool turn(int delta) {
   if(planning_mode && !view_replay) return false;
 
   multi::get_actions(scfg_nilrider);
-  auto& a = multi::actionspressed;
-  auto& la = multi::lactionpressed;
+  auto& act = multi::action_states[1];
 
   ld mul = 1;
-  if(a[16+4]) mul /= 5;
-  if(a[16+3] && !paused) curlev->current.heading_angle -= aimspeed_key_x * mul * delta / 1000.;
-  if(a[16+1] && !paused) curlev->current.heading_angle += aimspeed_key_x * mul * delta / 1000.;
-  if(a[16+2] && !paused) min_gfx_slope -= aimspeed_key_y * mul * delta / 1000.;
-  if(a[16+0] && !paused) min_gfx_slope += aimspeed_key_y * mul * delta / 1000.;
+  if(act[4]) mul /= 5;
+  if(act[3] && !paused) curlev->current.heading_angle -= aimspeed_key_x * mul * delta / 1000.;
+  if(act[1] && !paused) curlev->current.heading_angle += aimspeed_key_x * mul * delta / 1000.;
+  if(act[2] && !paused) min_gfx_slope -= aimspeed_key_y * mul * delta / 1000.;
+  if(act[0] && !paused) min_gfx_slope += aimspeed_key_y * mul * delta / 1000.;
 
   curlev->current.heading_angle -= aimspeed_mouse_x * mouseaim_x * mul;
   min_gfx_slope += aimspeed_mouse_y * mouseaim_y * mul;
@@ -128,8 +127,8 @@ bool turn(int delta) {
   
   backing = false;
 
-  if(a[16+6]) {
-    if(!la[16+6]) reversals++;
+  if(act[6]) {
+    if(!act[6].last) reversals++;
     if(planning_mode)
       simulation_start_tick += 2*delta;
     else for(int i=0; i<delta; i++) {
