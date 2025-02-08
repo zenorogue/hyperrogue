@@ -109,6 +109,15 @@ EX namespace multi {
     "world overview", "review your quest", "inventory", "main menu"
     };
 
+  enum pancmds {
+    // 0..3
+    panUp, panRight, panDown, panLeft,
+    // 4..10
+    panRotateLeft, panRotateRight, panHome, panWorldOverview, panReviewQuest, panInventory, panMenu,
+    // 11..12
+    panScrollForward, panScrollBackward
+    };
+
   vector<string> pancmds3 = {
     "look up", "look right", "look down", "look left",
     "rotate left", "rotate right", "home",
@@ -118,8 +127,9 @@ EX namespace multi {
 
 #if HDR
 #define SHMUPAXES_BASE 4
-#define SHMUPAXES ((SHMUPAXES_BASE) + 4 * (MAXPLAYER))
-#define SHMUPAXES_CUR ((SHMUPAXES_BASE) + 4 * playercfg)
+#define SHMUPAXES_PER_PLAYER 4
+#define SHMUPAXES ((SHMUPAXES_BASE) + SHMUPAXES_PER_PLAYER * (MAXPLAYER))
+#define SHMUPAXES_CUR ((SHMUPAXES_BASE) + SHMUPAXES_PER_PLAYER * playercfg)
 #endif
 
 EX const char* axemodes[SHMUPAXES] = {
@@ -578,12 +588,30 @@ enum pcmds {
   pcDrop, pcCenter, pcOrbPower, pcOrbKey
   };
 #endif
-  
-EX int actionspressed[NUMACT], axespressed[SHMUPAXES], lactionpressed[NUMACT];
+
+EX array<int, SHMUPAXES> axe_states;
+
+EX array<int,SHMUPAXES_PER_PLAYER>& axes_for(int pid) {
+  return * (array<int,SHMUPAXES_PER_PLAYER>*) (&axe_states[SHMUPAXES_BASE + pid*SHMUPAXES_PER_PLAYER]);
+  }
+
+#if HDR
+struct action_state {
+  int held, last;
+  bool pressed() { return held > last; }
+  operator bool() { return held; }
+  operator int() { return held; }
+  };
+#endif
+
+EX array<action_state, NUMACT> action_states_flat;
+
+#if HDR
+static array<array<action_state, 16>, 8>& action_states = reinterpret_cast<array<array<action_state, 16>, 8>&> (action_states_flat);
+#endif
 
 void pressaction(int id) {
-  if(id >= 0 && id < NUMACT)
-    actionspressed[id]++;
+  if(id >= 0 && id < NUMACT) action_states_flat[id].held++;
   }
 
 EX int key_to_scan(int sym) {
@@ -796,11 +824,9 @@ EX void get_actions(config& scfg) {
   #if !ISMOBILE
   const Uint8 *keystate = SDL12_GetKeyState(NULL);
 
-  for(int i=0; i<NUMACT; i++) 
-    lactionpressed[i] = actionspressed[i],
-    actionspressed[i] = 0;
+  for(auto& a: action_states_flat) a.last = a.held, a.held = 0;
 
-  for(int i=0; i<SHMUPAXES; i++) axespressed[i] = 0;
+  for(int i=0; i<SHMUPAXES; i++) axe_states[i] = 0;
   
   for(int i=0; i<KEYSTATES; i++) if(keystate[i]) 
     pressaction(scfg.keyaction[i]);
@@ -825,12 +851,16 @@ EX void get_actions(config& scfg) {
       int dz = scfg.deadzoneval[j][b];
       if(value > dz) value -= dz; else if(value < -dz) value += dz;
       else value = 0;
-      axespressed[scfg.axeaction[j][b] % SHMUPAXES] += value;
+      axe_states[scfg.axeaction[j][b] % SHMUPAXES] += value;
       }
     }
 #endif
 #endif
   }
+
+#if HDR
+static constexpr int pantable = 3;
+#endif
 
 EX void handleInput(int delta, config &scfg) {
 #if CAP_SDL
@@ -842,34 +872,34 @@ EX void handleInput(int delta, config &scfg) {
 
   if(keystate[SDL12(SDLK_LCTRL, SDL_SCANCODE_LCTRL)] || keystate[SDL12(SDLK_RCTRL, SDL_SCANCODE_RCTRL)]) d /= 5;
   
-  double panx = 
-    actionspressed[49] - actionspressed[51] + axespressed[2] / 32000.0;
-  double pany = 
-    actionspressed[50] - actionspressed[48] + axespressed[3] / 32000.0;
+  auto& act = action_states[pantable];
+
+  double panx = act[panRight].held - act[panLeft].held  + axe_states[2] / 32000.0;
+  double pany = act[panDown].held - act[panUp].held + axe_states[3] / 32000.0;
     
-  double panspin = actionspressed[52] - actionspressed[53];
+  double panspin = act[panRotateLeft].held - act[panRotateRight].held;
   
-  double panmove = actionspressed[59] - actionspressed[60];
+  double panmove = act[panScrollForward].held - act[panScrollBackward].held;
   
   if(GDIM == 3)
-    panmove += axespressed[1] / 32000.0;
+    panmove += axe_states[1] / 32000.0;
   else
-    panspin += axespressed[1] / 32000.0;
-  
-  if(actionspressed[54]) { centerplayer = -1, playermoved = true; centerpc(100); }
+    panspin += axe_states[1] / 32000.0;
 
-  if(actionspressed[55] && !lactionpressed[55]) 
+  if(act[panHome]) { centerplayer = -1, playermoved = true; centerpc(100); }
+
+  if(act[panWorldOverview].pressed())
     get_o_key().second();
   
-  if(actionspressed[56] && !lactionpressed[56]) 
+  if(act[panReviewQuest].pressed())
     showMissionScreen();
   
 #if CAP_INV
-  if(actionspressed[57] && !lactionpressed[57] && inv::on) 
+  if(act[panInventory].pressed() && inv::on)
     pushScreen(inv::show);
 #endif
   
-  if(actionspressed[58] && !lactionpressed[58]) 
+  if(act[panMenu].pressed())
     pushScreen(showGameMenu);
     
   panx *= d;
@@ -967,27 +997,30 @@ EX void handleInput(int delta, config &scfg) {
   
       cpid = i;
       
-      int b = 16*tableid[cpid];
-      for(int ik=0; ik<8; ik++) if(actionspressed[b+ik]) playermoved = true;
-      for(int ik=0; ik<16; ik++) if(actionspressed[b+ik] && !lactionpressed[b+ik]) 
+      int id = tableid[cpid];
+      auto& act = action_states[id];
+
+      for(int ik=0; ik<8; ik++) if(act[ik]) playermoved = true;
+      for(int ik=0; ik<16; ik++) if(act[ik].pressed())
         multi::combo[i] = false;
           
       bool anypressed = false;
       
-      int jb = 4*tableid[cpid];
-      for(int ik=0; ik<4; ik++) 
-        if(axespressed[jb+ik]) 
+      auto &axes = axes_for(cpid);
+
+      for(int ik=0; ik<4; ik++)
+        if(axes[ik])
           anypressed = true, playermoved = true, multi::combo[i] = false;
       
       double mdx = 
-        (actionspressed[b+0] + actionspressed[b+2] - actionspressed[b+1] - actionspressed[b+3]) * .7 +
-        actionspressed[b+pcMoveRight] - actionspressed[b+pcMoveLeft] + axespressed[jb]/30000.;
+        (act[0] + act[2] - act[1] - act[3]) * .7 +
+        act[pcMoveRight] - act[pcMoveLeft] + axes[0]/30000.;
       double mdy = 
-        (actionspressed[b+3] + actionspressed[b+2] - actionspressed[b+1] - actionspressed[b+0]) * .7 +
-        actionspressed[b+pcMoveDown] - actionspressed[b+pcMoveUp] + axespressed[jb+1]/30000.;
+        (act[3] + act[2] - act[1] - act[0]) * .7 +
+        act[pcMoveDown] - act[pcMoveUp] + axes[1]/30000.;
       
-      if((actionspressed[b+pcMoveRight] && actionspressed[b+pcMoveLeft]) ||
-        (actionspressed[b+pcMoveUp] && actionspressed[b+pcMoveDown]))
+      if((act[pcMoveRight] && act[pcMoveLeft]) ||
+        (act[pcMoveUp] && act[pcMoveDown]))
           multi::mdx[i] = multi::mdy[i] = 0;
         
       multi::mdx[i] = multi::mdx[i] * (1 - delta / 1000.) + mdx * delta / 2000.;
@@ -1001,11 +1034,10 @@ EX void handleInput(int delta, config &scfg) {
           }
         }
       
-      if(multi::actionspressed[b+pcFire] || 
-        (multi::actionspressed[b+pcMoveLeft] && multi::actionspressed[b+pcMoveRight]))
+      if(act[pcFire] ||(act[pcMoveLeft] && act[pcMoveRight]))
         multi::combo[i] = true, multi::whereto[i].d = MD_WAIT;
   
-      if(multi::actionspressed[b+pcFace])
+      if(act[pcFace])
         multi::whereto[i].d = MD_UNDECIDED;
       
       cwt.at = multi::player[i].at;      
@@ -1014,22 +1046,21 @@ EX void handleInput(int delta, config &scfg) {
         multi::whereto[i].tgt = multi::ccat[i];
         }
 
-      if(multi::actionspressed[b+pcFaceFire] && activePlayers() > 1) {
+      if(act[pcFaceFire] && activePlayers() > 1) {
         addMessage(XLAT("Left the game."));
         multi::leaveGame(i);
         }
   
-      if(actionspressed[b+pcDrop] || 
-        (multi::actionspressed[b+pcMoveUp] && multi::actionspressed[b+pcMoveDown]))
+      if(act[pcDrop] || (act[pcMoveUp] && act[pcMoveDown]))
         multi::combo[i] = true, multi::whereto[i].d = MD_DROP;
   
-      if(actionspressed[b+pcCenter]) {
+      if(act[pcCenter]) {
         centerplayer = cpid; centerpc(100); playermoved = true; 
         }
   
       if(multi::whereto[i].d == MD_UNDECIDED) alldecided = false;
       
-      for(int ik=0; ik<16; ik++) if(actionspressed[b+ik]) anypressed = true;
+      for(int ik=0; ik<16; ik++) if(act[ik]) anypressed = true;
 
       if(anypressed) alldecided = false, needinput = false;
       else multi::mdx[i] = multi::mdy[i] = 0;

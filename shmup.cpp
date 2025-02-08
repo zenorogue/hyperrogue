@@ -764,22 +764,21 @@ void movePlayer(monster *m, int delta) {
     // silence warning that facemouse unused
     }
   
-  int b = 16*tableid[cpid];
+  auto& act = action_states[tableid[cpid]];
+  auto& axes = axes_for(cpid);
 
-    for(int i=(WDIM == 3 ? 4 : 0); i<8; i++) if(actionspressed[b+i]) playermoved = true;
-  
-  int jb = 4*tableid[cpid];
-  for(int i=0; i<4; i++) if(axespressed[jb+i]) playermoved = true;
+  for(int i=(WDIM == 3 ? 4 : 0); i<8; i++) if(act[i]) playermoved = true;
+  for(int i=0; i<4; i++) if(axes[i]) playermoved = true;
   
 #if !ISMOBILE
-  mgo = actionspressed[b+pcForward] - actionspressed[b+pcBackward] + axespressed[jb+2]/30000.;
-  mturn = actionspressed[b+pcTurnLeft] - actionspressed[b+pcTurnRight] + axespressed[jb+3]/30000.;
-  mdx = actionspressed[b+pcMoveRight] - actionspressed[b+pcMoveLeft] + axespressed[jb]/30000.;
-  mdy = actionspressed[b+pcMoveDown] - actionspressed[b+pcMoveUp] + axespressed[jb+1]/30000.;
+  mgo = act[pcForward] - act[pcBackward] + axes[2]/30000.;
+  mturn = act[pcTurnLeft] - act[pcTurnRight] + axes[3]/30000.;
+  mdx = act[pcMoveRight] - act[pcMoveLeft] + axes[0]/30000.;
+  mdy = act[pcMoveDown] - act[pcMoveUp] + axes[1]/30000.;
   
-  shotkey = actionspressed[b+pcFire] || actionspressed[b+pcFaceFire];
-  facemouse = actionspressed[b+pcFace] || actionspressed[b+pcFaceFire];
-  dropgreen = actionspressed[b+pcDrop];
+  shotkey = act[pcFire] || act[pcFaceFire];
+  facemouse = act[pcFace] || act[pcFaceFire];
+  dropgreen = act[pcDrop];
   
 #else
   mdx = mdy = mgo = mturn = 0;
@@ -814,7 +813,7 @@ void movePlayer(monster *m, int delta) {
     }
   #endif
   
-  if(actionspressed[b+pcOrbPower] && !lactionpressed[b+pcOrbPower] && mouseover && !m->dead) {
+  if(act[pcOrbPower].pressed() && mouseover && !m->dead) {
     cwt.at = m->base;
     targetRangedOrb(mouseover, roKeyboard);
     }
@@ -822,7 +821,7 @@ void movePlayer(monster *m, int delta) {
 #if !ISMOBILE
   if(haveRangedOrb() && !m->dead) {
     cwt.at = m->base;
-    if(actionspressed[b+pcOrbKey] && !lactionpressed[b+pcOrbKey])
+    if(act[pcOrbKey].pressed())
       keyresult[cpid] = targetRangedOrbKey(roKeyboard);
     else
       keyresult[cpid] = targetRangedOrbKey(roCheck);
@@ -833,7 +832,7 @@ void movePlayer(monster *m, int delta) {
 
   bool stdracing = racing::on && !inertia_based;
 
-  if(actionspressed[b+pcCenter]) {
+  if(act[pcCenter]) {
     if(!racing::on) {
       centerplayer = cpid; centerpc(100); playermoved = true; 
       }
