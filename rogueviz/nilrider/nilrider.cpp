@@ -154,7 +154,6 @@ bool turn(int delta) {
     for(int i=0; i<delta * simulation_speed; i++) {
       curlev->history.push_back(curlev->current);
       curlev->current.be_consistent();
-      auto goals = curlev->current.goals;
       bool b = curlev->current.tick(curlev);
       running = b;
       if(!b) {
@@ -163,15 +162,16 @@ bool turn(int delta) {
         break;
         }
       #if RVCOL
+      auto goals = curlev->current.goals;
       if(b) {
         goals = curlev->current.goals &~goals;
         int gid = 0;
         for(auto& g: curlev->goals) {
           if(goals & Flag(gid)) {
-            if(g.achievement_name != "") rv_achievement(g.achievement_name);
+            if(g.achievement_name != "") rogueviz::rv_achievement(g.achievement_name);
             if(g.leaderboard_name != "") {
               auto res = curlev->current_score[gid];
-              rv_leaderboard(g.leaderboard_name, abs(res) * 1000);
+              rogueviz::rv_leaderboard(g.leaderboard_name, abs(res) * 1000);
               }
             }
           gid++;
