@@ -410,6 +410,7 @@ namespace smoothcam {
   void enable_and_show();
   void backup();
   void append_backup();
+  void set_time(ld t);
   }
 }
 
