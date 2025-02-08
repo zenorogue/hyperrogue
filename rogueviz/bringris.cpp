@@ -48,14 +48,7 @@
 #define SUBQ
 #endif
 
-#include "../hyper.h"
-
-#ifdef RVCOL
-namespace hr {
-  void rv_achievement(const string& name);
-  void rv_leaderboard(const string& name, int score);
-  }
-#endif
+#include "rogueviz.h"
 
 #define solnil (nil || sol)
 
@@ -762,7 +755,7 @@ void new_piece() {
     playSound(cwt.at, "die-bomberbird");
     state = tsGameover;
     if(cur.pro_game && cur.max_piece == bgeoms[bgeom].default_max_piece)
-      rv_leaderboard(bgeoms[bgeom].name, cur.score);
+      rogueviz::rv_leaderboard(bgeoms[bgeom].name, cur.score);
     save();
     }
   else {
@@ -832,7 +825,7 @@ void find_lines() {
     cur.score += 100000. * points * (points+1.) / current_move_time_limit();
     cur.completed += points;
     playSound(cwt.at, points == 1 ? "pickup-gold" : "orb-mind");
-    if(points == 4 && cur.pro_game && cur.max_piece == 4 && bgeoms[bgeom].default_max_piece == 4) rv_achievement("BRINGRISFOUR");
+    if(points == 4 && cur.pro_game && cur.max_piece == 4 && bgeoms[bgeom].default_max_piece == 4) rogueviz::rv_achievement("BRINGRISFOUR");
     }
   }
 
@@ -1032,7 +1025,7 @@ void shift_block(int dir, bool camera_only) {
   
   if(camera_only || !shape_conflict(at1)) {
     // playSound(cwt.at, "hit-crush1");
-    if(check_bshift(at, at1)) rv_achievement("BSHIFT");
+    if(check_bshift(at, at1)) rogueviz::rv_achievement("BSHIFT");
     at = at1;
     if(solnil) {
       pView = pView * currentmap->adj(cwt.at, nilmap(dir));
