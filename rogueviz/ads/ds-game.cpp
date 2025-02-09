@@ -771,7 +771,8 @@ void run_ds_game_std() {
   }
 
 auto ds_hooks = 
-  arg::add3("-ds-game", run_ds_game);
+  arg::add3("-ds-game1", run_ds_game) +
+  arg::add3("-ds-game", run_ds_game_std);
 
 }
 }
