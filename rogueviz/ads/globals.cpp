@@ -65,10 +65,6 @@ void change_scale(ld s);
 /** all the missiles and objects currently displayed */
 vector<struct ads_object*> displayed;
 
-/** how much should be the objects scaled */
-ld ads_scale = 1;
-ld ds_scale = 1;
-
 ld time_scale = .1;
 
 color_t missile_color = 0xFF0000FF;
@@ -111,6 +107,8 @@ cell *starting_point;
 int max_gen_per_frame = 3;
 int draw_per_frame = 200;
 
+bool simple_ship = false;
+
 /* for DS */
 
 ads_object *main_rock;
@@ -126,6 +124,7 @@ void init_textures();
 void pick_textures();
 void draw_textures();
 void reset_textures();
+void run_size_hooks();
 
 void ds_restart();
 void run_ads_game_std();

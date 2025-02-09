@@ -132,6 +132,7 @@ struct rock_generator {
 
   void rack() {
     report("Rack");
+    ld ds_scale = get_scale();
     int qty = 3 + rand() % 4;
     ld rapidity = rand_range(1, 3);
     ld step = rand_range(.45, .75) * ds_scale;
@@ -147,6 +148,7 @@ struct rock_generator {
 
   void hyperboloid() {
     report("Hyperboloid");
+    ld ds_scale = get_scale();
     ld alpha = randd() * TAU;
     ld range1 = rand_range(0.15, 0.25) * ds_scale;
     ld range2 = rand_range(0.35, 0.45) * ds_scale;
@@ -303,6 +305,7 @@ void ds_handle_crashes() {
     }
 
   if(!game_over) for(int i=0; i<isize(shape_ship); i+=2) {
+    ld ds_scale = get_scale();
     hyperpoint h = spin(ang*degree) * hpxyz(shape_ship[i] * ds_scale, shape_ship[i+1] * ds_scale, 1);
     for(auto r: drocks) {
       if(pointcrash(h, r->pts)) ds_crash_ship();
@@ -364,6 +367,7 @@ bool ds_turn(int idelta) {
       }
     
     if(!paused) {
+      ld ds_scale = get_scale();
       pdata.fuel -= dv;
       ds_gen_particles(rpoisson(dv*fuel_particle_qty), inverse(current.T) * spin(ang*degree+M_PI) * twist::uxpush(0.06 * ds_scale), current.shift, rsrc_color[rtFuel], fuel_particle_rapidity, fuel_particle_life, 0.02);
       }
@@ -477,8 +481,13 @@ cross_result ds_cross0_light(transmatrix T) {
   return res;
   }
 
+transmatrix tpt_scaled(ld x, ld y) {
+  return cspin(0, 2, x) * cspin(1, 2, y);
+  }
+
 transmatrix tpt(ld x, ld y) {
-  return cspin(0, 2, x * ds_scale) * cspin(1, 2, y * ds_scale);
+  ld ds_scale = get_scale();
+  return tpt_scaled(x * ds_scale, y * ds_scale);
   }
 
 // sometimes the result may be incorrect due to numerical precision -- don't show that then in this case
@@ -582,6 +591,7 @@ void view_ds_game() {
 
       if(view_proper_times && rock.type != oParticle) {
         ld t = rock.pt_main.shift;
+        ld ds_scale = get_scale();
         if(rock.type == oMainRock) t += current.shift;
         string str = hr::format(tformat, t / ds_time_unit);
         queuestr(shiftless(sphereflip * rgpushxto0(rock.pt_main.h)), time_scale * ds_scale, str, 0xFFFF00, 8);
@@ -597,46 +607,52 @@ void view_ds_game() {
       if(ss.at.shift < current.shift - 4 * TAU) continue;
       if(ss.at.shift > current.shift + 4 * TAU) continue;
 
-      auto& shape = shape_ship;
-
-      if(hv) {
-        for(int i=0; i<isize(shape); i+=2) {
-          hyperpoint h = hvrel ? tpt(shape[i], shape[i+1]) * pov: hpxy(shape[i], shape[i+1]);
+      if(hv) render_ship_parts([&] (const hpcshape& sh, color_t col, int sym) {
+        int dx = sym ? -1 : 1;        
+        for(int i=sh.s; i<sh.e; i ++) {
+          auto x = cgi.hpc[i][0];
+          auto y = cgi.hpc[i][1]*dx;
+          hyperpoint h = hvrel ? tpt_scaled(x, y) * pov: hpxy(x, y);
           curvepoint(h);
           }
         curvepoint_first();
         shiftmatrix S = shiftless(current.T * lorentz(2, 3, ss.at.shift - current.shift) * ss.at.T);
-        queuecurve(S, shipcolor, 0, PPR::TRANSPARENT_WALL);
-        }
-
+        queuecurve(S, col, 0, PPR::TRANSPARENT_WALL);
+        });
+       
       dynamicval<eGeometry> g(geometry, gSpace435);
       cross_result cr = ds_cross0(current.T * lorentz(2, 3, ss.at.shift - current.shift) * ss.at.T);
       if(cr.shift < delta) continue;
       if(cr.shift > ss.duration + delta) continue;
       transmatrix at = current.T * lorentz(2, 3, cr.shift) * ss.at.T;
       
-      vector<hyperpoint> pts;
-      
-      for(int i=0; i<isize(shape); i += 2) {
-        transmatrix at1 = at * tpt(shape[i], shape[i+1]);
-        pts.push_back(ds_cross0(at1).h);
-        }
-      
-      geometry = g.backup;
+      render_ship_parts([&] (const hpcshape& sh, color_t col, int sym) {
+        geometry = gSpace435;
+        vector<hyperpoint> pts;
+        int dx = sym ? -1 : 1;
+        
+        for(int i=sh.s; i<sh.e; i ++) {
+          transmatrix at1 = at * tpt_scaled(cgi.hpc[i][0], cgi.hpc[i][1]*dx);
+          pts.push_back(ds_cross0(at1).h);
+          }
+        
+        geometry = g.backup;
 
-      if(!hv) {
-        for(auto pt: pts) curvepoint(pt);
-        queuecurve(shiftless(sphereflip), 0xFF, shipcolor, PPR::MONSTER_FOOT);
-        }
+        if(!hv) {
+          for(auto pt: pts) curvepoint(pt);
+          queuecurve(shiftless(sphereflip), 0xFF, col, PPR::MONSTER_FOOT);
+          }
 
-      if(pmodel == mdPerspective) {
-        for(auto pt: pts) curvepoint(pt);
-        curvepoint_first();
-        queuecurve(shiftless(sphereflip), ghost_color, 0, PPR::MONSTER_FOOT).flags |= POLY_NO_FOG | POLY_FORCEWIDE;
-        }
+        if(pmodel == mdPerspective) {
+          if(col == shipcolor) col = ghost_color;
+          for(auto pt: pts) curvepoint(pt);
+          queuecurve(shiftless(sphereflip), col, 0, PPR::MONSTER_FOOT).flags |= POLY_NO_FOG | POLY_FORCEWIDE;
+          }
+        });
 
       if(view_proper_times) {
         string str = hr::format(tformat, (cr.shift + ss.start) / ds_time_unit);
+        ld ds_scale = get_scale();
         queuestr(shiftless(sphereflip * rgpushxto0(cr.h)), time_scale * ds_scale, str, 0xC0C0C0, 8);
         }
       }
@@ -647,21 +663,25 @@ void view_ds_game() {
         ld u = (invincibility_pt-ship_pt) / ds_how_much_invincibility;
         poly_outline = gradient(shipcolor, rsrc_color[rtHull], 0, 0.5 + cos(5*u*TAU), 1);
         }
-      if(hv) {
-        auto& shape = shape_ship;
-        for(int i=0; i<isize(shape); i += 2) {
-          transmatrix at1 = tpt(shape[i], shape[i+1]);
-          curvepoint(ds_cross0(at1).h);
+      render_ship_parts([&] (const hpcshape& sh, color_t col, int sym) {
+        if(hv) {
+          int dx = sym ? -1 : 1;
+          for(int i=sh.s; i<sh.e; i++) {
+            transmatrix at1 = tpt_scaled(cgi.hpc[i][0], cgi.hpc[i][1] * dx);
+            curvepoint(ds_cross0(at1).h);
+            }
+          queuecurve(shiftless(sphereflip * spin(ang*degree)), col, 0, PPR::MONSTER_HAIR).flags |= POLY_NO_FOG | POLY_FORCEWIDE;
           }
-        curvepoint_first();
-        queuecurve(shiftless(sphereflip * spin(ang*degree)), ghost_color, 0, PPR::MONSTER_HAIR).flags |= POLY_NO_FOG | POLY_FORCEWIDE;
-        }
-      else {
-        queuepolyat(shiftless(sphereflip * spin(ang*degree)), make_shape(), shipcolor, PPR::MONSTER_HAIR);
-        }
+        else {
+          shiftmatrix M = shiftless(sphereflip * spin(ang*degree));
+          if(sym) M = M * MirrorY;
+          queuepolyat(M, sh, col, PPR::MONSTER_HAIR);
+          }
+        });
       poly_outline = 0xFF;
 
       if(view_proper_times) {
+        ld ds_scale = get_scale();
         string str = hr::format(tformat, ship_pt / ds_time_unit);
         queuestr(shiftless(sphereflip), time_scale * ds_scale, str, 0xFFFFFF, 8);
         }
@@ -697,6 +717,7 @@ void ds_restart() {
   main_rock = nullptr;
 
   if(true) {
+    ld ds_scale = get_scale();
     dynamicval<eGeometry> g(geometry, gSpace435);
     current = cspin(0, 2, 0.2 * ds_scale);
     invincibility_pt = ds_how_much_invincibility;
@@ -724,6 +745,7 @@ void run_ds_game_hooks() {
 void run_ds_game() {
 
   stop_game();
+  run_size_hooks();
   set_geometry(gSphere);
   start_game();
 

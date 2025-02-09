@@ -95,6 +95,13 @@ void run_ads_game_hooks() {
   rogueviz::rv_hook(hooks_nextland, 0, ads_nextland);
   }
 
+void srun_size_hooks() {
+  rogueviz::rv_hook(hooks_scalefactor, 100, [] (geometry_information *i) {
+    i->scalefactor = vid.creature_scale / 3;
+    });
+  rogueviz::rv_hook(hooks_cgi_string, 100, [] (string& s) { s += " ads"; });
+  }
+
 void run_ads_game() {
 
   if(!sl2) set_geometry(gTwistedProduct);
@@ -103,6 +110,7 @@ void run_ads_game() {
     hybrid::csteps = 0;
     hybrid::reconfigure();
     }
+  run_size_hooks();
   run_ads_game_hooks();
   start_game();
 
@@ -175,6 +183,12 @@ void default_settings() {
   lps_add(lps_relhell_ads_spacetime, vid.grid, false);
   lps_add(lps_relhell_ads_spacetime, slr::range_xy, 2.);
   lps_add(lps_relhell_ads_spacetime, slr::range_z, 2.);
+
+  charstyle& cs = getcs();
+  lps_add(lps_relhell, cs.skincolor, 0xFFFFFFFF);
+  lps_add(lps_relhell, cs.eyecolor, 0x8080FFFF);
+  lps_add(lps_relhell, cs.dresscolor, 0xFFC0C0FF);
+  lps_add(lps_relhell, cs.haircolor, 0xC0FFC0FF);
   }
 
 void gamedata(hr::gamedata* gd) {
@@ -213,7 +227,7 @@ void run_ads_game_std() {
   }
 
 void change_scale(ld s) {
-  ads_scale *= s;
+  vid.creature_scale *= s;
   rock_density /= (s * s);
   rock_max_rapidity *= s;
   ads_simspeed *= s;
@@ -244,10 +258,10 @@ auto shot_hooks =
     -> editable(0, 2*TAU, TAU/4, "AdS game speed", "Controls the speed of the game, in absolute units per second.", 's');
     param_f(ds_simspeed, "ds_game_simspeed")
     -> editable(0, 2*TAU, TAU/4, "dS game speed", "Controls the speed of the game, in absolute units per second.", 's');
-    param_f(ads_scale, "ads_game_scale")
+    /*param_f(ads_scale, "ads_game_scale")
     -> editable(0, 2, 0.1, "AdS game scale", "Controls the scaling of game objects.", 'c');
     param_f(ds_scale, "ds_game_scale")
-    -> editable(0, 2, 0.1, "dS game scale", "Controls the scaling of game objects.", 'c');
+    -> editable(0, 2, 0.1, "dS game scale", "Controls the scaling of game objects.", 'c'); */
     param_f(ads_accel, "ads_game_accel")
     -> editable(0, 30, 1, "AdS acceleration", "Controls your ship's acceleration, in absolute units per second squared.", 'a');
     param_f(ds_accel, "ds_game_accel")

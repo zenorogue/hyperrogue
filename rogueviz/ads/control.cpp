@@ -183,7 +183,7 @@ bool ads_turn(int idelta) {
     
     if(!paused) {
       pdata.fuel -= dv;
-      gen_particles(rpoisson(dv*fuel_particle_qty), vctr, ads_inverse(current * vctrV) * spin(ang*degree+M_PI) * twist::uxpush(0.06 * ads_scale), rsrc_color[rtFuel], fuel_particle_rapidity, fuel_particle_life, 0.02);
+      gen_particles(rpoisson(dv*fuel_particle_qty), vctr, ads_inverse(current * vctrV) * spin(ang*degree+M_PI) * twist::uxpush(0.06 * get_scale()), rsrc_color[rtFuel], fuel_particle_rapidity, fuel_particle_life, 0.02);
       }
 
     ld tc = 0;

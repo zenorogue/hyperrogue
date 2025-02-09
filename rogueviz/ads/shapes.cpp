@@ -21,12 +21,17 @@ struct ship_model: gi_extension {
   map<ld, hpcshape> ship_at_scale;
   };
 
+/** how much should be the objects scaled */
+ld get_scale() {
+  return cgi.scalefactor * 3;
+  }
+
 const hpcshape& make_shape() {
 
   auto& mmd = (unique_ptr<ship_model>&) cgi.ext["ship_model"];
   if(!mmd) mmd = std::make_unique<ship_model> ();
 
-  auto scale = DS_(scale);
+  auto scale = get_scale();
   auto sas = at_or_null(mmd->ship_at_scale, scale);
 
   if(sas) return *sas;  
@@ -44,6 +49,22 @@ const hpcshape& make_shape() {
   cgi.extra_vertices();
 
   return shShip;
+  }
+
+extern color_t shipcolor;
+
+template<class T> void render_ship_parts(const T& render_ship_part) {
+  if(simple_ship) {
+    render_ship_part(make_shape(), shipcolor, 0);
+    return;
+    }
+  charstyle& cs = getcs();
+  render_ship_part(cgi.shSpaceshipBase, cs.skincolor, 0);
+  render_ship_part(cgi.shSpaceshipEngine, cs.haircolor, 0);
+  render_ship_part(cgi.shSpaceshipEngine, cs.haircolor, 1);
+  render_ship_part(cgi.shSpaceshipGun, cs.dresscolor, 0);
+  render_ship_part(cgi.shSpaceshipGun, cs.dresscolor, 1);
+  render_ship_part(cgi.shSpaceshipCockpit, cs.eyecolor, 0);
   }
 
 }}

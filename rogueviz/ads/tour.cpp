@@ -79,6 +79,15 @@ void straight_line_viz(presmode mode) {
     });
   }
 
+void set_spacerocks_ship() {
+  auto& cs = getcs();
+  tour::slide_backup(cs.charid, 10);
+  tour::slide_backup(cs.skincolor, 0xFFFFFFFF);
+  tour::slide_backup(cs.eyecolor, 0x8080FFFF);
+  tour::slide_backup(cs.dresscolor, 0xFFC0C0FF);
+  tour::slide_backup(cs.haircolor, 0xC0FFC0FF);
+  }
+
 slide relhell_tour[] = {
   {"Intro", 10, LEGAL::ANY | QUICKGEO | NOTITLE, 
     "Relative Hell is a game taking place in relativistic analogs of spherical and hyperbolic geometries. "
@@ -86,6 +95,7 @@ slide relhell_tour[] = {
     "if you accelerate, you move forever in that direction, unless you deaccelerate.", 
     [] (presmode mode) {
       setCanvas(mode, &ccolor::plain, [] {
+        set_spacerocks_ship();
         set_geometry(gEuclidSquare);
         set_variation(eVariation::pure);
         tour::slide_backup(land_structure, lsSingle);
@@ -111,7 +121,7 @@ slide relhell_tour[] = {
         const ld sca = 100;
         tour::slide_backup(ds_simspeed, M_PI / 10 / sca * 5);
         tour::slide_backup(ds_missile_rapidity, 0.1);
-        tour::slide_backup(ds_scale, 1 / sca);
+        tour::slide_backup(vid.creature_scale, vid.creature_scale / sca);
         tour::slide_backup(pconf.scale, sca);
         tour::slide_backup(texture_off, true);
         dynamicval<ld> fs(future_shown, -10);
@@ -149,7 +159,7 @@ slide relhell_tour[] = {
         tour::slide_backup(ds_simspeed, M_PI / 10 / sca * 5);
         tour::slide_backup(ds_missile_rapidity, 0.5);
         tour::slide_backup(ds_accel, ds_accel * 10);
-        tour::slide_backup(ds_scale, 1 / sca);
+        tour::slide_backup(vid.creature_scale, vid.creature_scale / sca);
         tour::slide_backup(pconf.scale, sca);
         tour::slide_backup(texture_off, true);
         dynamicval<ld> fs(future_shown, -10);
@@ -190,7 +200,7 @@ slide relhell_tour[] = {
         tour::slide_backup(ds_simspeed, M_PI / 10 / sca * 5);
         tour::slide_backup(ds_missile_rapidity, 0.5);
         tour::slide_backup(ds_accel, ds_accel * 10);
-        tour::slide_backup(ds_scale, 5 / sca);
+        tour::slide_backup(vid.creature_scale, vid.creature_scale * 5 / sca);
         tour::slide_backup(pconf.scale, sca);
         tour::slide_backup(texture_off, true);
         tour::slide_backup(view_proper_times, true);
@@ -212,6 +222,7 @@ slide relhell_tour[] = {
     "stereographic projection so that a big part of the sphere can be seen. (You can press '5' to switch to and from the orthogonal projection.)",
     [] (presmode mode) {
       setCanvas(mode, &ccolor::plain, [] {
+        set_spacerocks_ship();
         set_geometry(gSphere);
         set_variation(eVariation::bitruncated);
         tour::slide_backup(land_structure, lsSingle);
@@ -244,6 +255,7 @@ slide relhell_tour[] = {
 
     [] (presmode mode) {
       setCanvas(mode, &ccolor::plain, [] {
+        set_spacerocks_ship();
         set_geometry(gSphere);
         set_variation(eVariation::bitruncated);
         tour::slide_backup(land_structure, lsSingle);
@@ -271,7 +283,7 @@ slide relhell_tour[] = {
       setCanvas(mode, &ccolor::plain, [] {
         ads_game::run_ds_game_std();
         tour::slide_backup(ds_simspeed, M_PI / 10);
-        tour::slide_backup(ds_scale, 1);
+        // tour::slide_backup(ds_scale, 1);
         tour::slide_backup(pconf.scale, 1);
         dynamicval<ld> fs(future_shown, -10);
         ds_restart();
@@ -309,6 +321,7 @@ slide relhell_tour[] = {
 
     [] (presmode mode) {
       setCanvas(mode, &ccolor::plain, [] {
+        set_spacerocks_ship();
         set_geometry(gKleinQuartic);
         set_variation(eVariation::bitruncated);
         tour::slide_backup(land_structure, lsSingle);
@@ -331,6 +344,7 @@ slide relhell_tour[] = {
 
     [] (presmode mode) {
       setCanvas(mode, &ccolor::plain, [] {
+        set_spacerocks_ship();
         set_geometry(gKleinQuartic);
         set_variation(eVariation::bitruncated);
         tour::slide_backup(land_structure, lsSingle);

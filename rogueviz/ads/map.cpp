@@ -234,7 +234,7 @@ void gen_rocks(cell *c, cellinfo& ci, int radius) {
       hybrid::in_actual([&] {
         add_turret(c, ci, p.get());
         for(int r=0; r<6; r++)
-          add_rsrc(c, ci, p.get(spin(r * 60._deg) * twist::uxpush(turret_dist * ads_scale)));
+          add_rsrc(c, ci, p.get(spin(r * 60._deg) * twist::uxpush(turret_dist * get_scale())));
         turrets++;
         });
       }
@@ -410,7 +410,7 @@ void handle_turret(ads_object *t, ld& angle_at_time) {
     if(t->last_shot >= t->life_end) return;
     ld angle = lerp(it0->second.angle, nts.angle, ilerp(it0->first, ctime, t->last_shot));
     // println(hlog, "shooting at angle ", angle, " at time ", t->last_shot);
-    ads_matrix S0 = ads_inverse(p->V) * t1 * spin(angle) * twist::uxpush(turret_length * ads_scale) * lorentz(0, 2, ads_missile_rapidity);
+    ads_matrix S0 = ads_inverse(p->V) * t1 * spin(angle) * twist::uxpush(turret_length * get_scale()) * lorentz(0, 2, ads_missile_rapidity);
     auto r = std::make_unique<ads_object> (oTurretMissile, t->owner, S0, rsrc_color[rtAmmo]);
     r->shape = &shape_missile;
     r->life_start = 0; r->life_end = M_PI;
@@ -464,6 +464,7 @@ void handle_crashes() {
         }
       }
     if(!game_over) for(int i=0; i<isize(shape_ship); i+=2) {
+      ld ads_scale = get_scale();
       hyperpoint h = spin(ang*degree) * hpxyz(shape_ship[i] * ads_scale, shape_ship[i+1] * ads_scale, 1);
       for(auto r: rocks) {
         if(pointcrash(h, r->pts)) ads_crash_ship();
