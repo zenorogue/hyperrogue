@@ -846,6 +846,8 @@ void geometry_information::prepare_basics() {
       floorrad1 = rhexf * (GDIM == 3 ? 1 : .8);
     }
   
+  callhooks(hooks_scalefactor, this);
+
   plevel = vid.plevel_factor * scalefactor;
   single_step = 1;
   auto fak = hybrid::underlying == gFake;
@@ -931,6 +933,8 @@ void geometry_information::prepare_basics() {
   }
 
 EX purehookset hooks_swapdim;
+
+EX hookset<void(geometry_information*)> hooks_scalefactor;
 
 EX namespace geom3 {
   
