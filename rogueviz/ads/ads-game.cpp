@@ -95,7 +95,7 @@ void run_ads_game_hooks() {
   rogueviz::rv_hook(hooks_nextland, 0, ads_nextland);
   }
 
-void srun_size_hooks() {
+void run_size_hooks() {
   rogueviz::rv_hook(hooks_scalefactor, 100, [] (geometry_information *i) {
     i->scalefactor = vid.creature_scale / 3;
     });
