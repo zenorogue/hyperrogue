@@ -22,7 +22,7 @@ struct rock_generator {
 
   ads_object* add(transmatrix T) {
     auto r = std::make_unique<ads_object> (oRock, nullptr, ads_matrix(T, cshift), 0xFFFFFFFF);
-    r->shape = &shape_disk;
+    r->shape = &shape_disk; r->resource = rtNone;
     auto res = &*r;
     rocks.emplace_back(std::move(r));
     return res;
