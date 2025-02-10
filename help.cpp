@@ -893,6 +893,8 @@ int windtotal;
 
 EX hookset<void(cell*)> hooks_mouseover;
 
+EX hookset<bool()> hooks_global_mouseover;
+
 template<class T> void set_help_to(T t) { 
   help = bygen([t] {
     gotoHelpFor(t);
@@ -902,6 +904,8 @@ template<class T> void set_help_to(T t) {
 
 EX void describeMouseover() {
   DEBBI(DF_GRAPH, ("describeMouseover"));
+
+  if(callhandlers(0, hooks_global_mouseover)) return;
 
   cell *c = mousing ? mouseover : playermoved ? NULL : centerover;
   string& out = mouseovers;
