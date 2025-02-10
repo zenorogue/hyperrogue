@@ -171,9 +171,14 @@ void game_menu() {
 
   dialog::addItem(XLAT("restart game"), 'r');
   dialog::add_action([] {
+    game_over_with_message("restarted");
+    save_to_hiscores();
     if(main_rock) ds_restart();
     else restart();
     popScreen(); });
+
+  dialog::addItem(XLAT("highscores"), 'h');
+  dialog::add_action_push(hiscore_menu);
 
   dialog::addItem(XLAT("refill cheat"), 'R');
   dialog::add_action([] { init_rsrc(); popScreen(); });
@@ -209,6 +214,8 @@ void game_menu() {
 
   dialog::addItem("quit the game", 'q');
   dialog::add_action([] {
+    game_over_with_message("quit");
+    save_to_hiscores();
     quitmainloop = true;
     });
 

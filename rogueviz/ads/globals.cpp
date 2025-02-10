@@ -228,4 +228,23 @@ struct cellinfo {
     }
   };
 
+struct gamedata {
+  int gameid;
+  string myname;
+  string timerstart, timerend;
+  string variant;
+  string deathreason;
+  ld scores[8];
+  int seconds;
+  int turrets_hit, rocks_hit, rsrc_collected;
+  };
+
+extern gamedata cur;
+
+void init_gamedata();
+void game_over_with_message(const string& reason);
+void save_to_hiscores();
+void hiscore_menu();
+void load_hiscores();
+
 }}

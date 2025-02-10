@@ -265,9 +265,9 @@ void ds_gen_particles(int qty, transmatrix from, ld shift, color_t col, ld spd, 
     }
   }
 
-void ds_crash_ship() {
+void ds_crash_ship(const string &reason) {
   if(ship_pt < invincibility_pt) return;
-  common_crash_ship();
+  common_crash_ship(reason);
   dynamicval<eGeometry> g(geometry, gSpace435);
   ds_gen_particles(rpoisson(crash_particle_qty * 2), inverse(current.T) * spin(ang*degree), current.shift, rsrc_color[rtHull], crash_particle_rapidity, crash_particle_life);
   }
@@ -292,6 +292,7 @@ void ds_handle_crashes() {
     for(auto r: drocks) {
       if(pointcrash(h, r->pts)) {
         m->life_end = m->pt_main.shift;
+        cur.rocks_hit++;
         if(r->type != oMainRock)
           r->life_end = r->pt_main.shift;
         dynamicval<eGeometry> g(geometry, gSpace435);
@@ -308,11 +309,12 @@ void ds_handle_crashes() {
     ld ds_scale = get_scale();
     hyperpoint h = spin(ang*degree) * hpxyz(shape_ship[i] * ds_scale, shape_ship[i+1] * ds_scale, 1);
     for(auto r: drocks) {
-      if(pointcrash(h, r->pts)) ds_crash_ship();
+      if(pointcrash(h, r->pts)) ds_crash_ship(r == main_rock ? "crashed into the home star" : "crashed into a star");
       }
     for(auto r: dresources) {
       if(pointcrash(h, r->pts)) {
         r->life_end = r->pt_main.shift;
+        cur.rsrc_collected++;
         gain_resource(r->resource);
         }
       }
@@ -408,7 +410,7 @@ bool ds_turn(int idelta) {
       pdata.oxygen -= pt;
       if(pdata.oxygen < 0) {
         pdata.oxygen = 0;
-        game_over = true;
+        game_over_with_message("suffocated");
         }
       }
     else view_pt += tc;
@@ -732,6 +734,7 @@ void ds_restart() {
   reset_textures();
   pick_textures();
   init_rsrc();
+  init_gamedata();
   }
 
 void run_ds_game_hooks() {

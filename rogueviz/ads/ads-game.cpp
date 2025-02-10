@@ -2,7 +2,7 @@
 /* Compile with mymake -O3 -rv rogueviz/ads/ads-game */
 /* Best run with -ads-menu; more detailed options are available too */
 
-#define VER_RH "0.2"
+#define VER_RH "1.0"
 
 #ifdef RELHELL
 
@@ -42,6 +42,7 @@ namespace rogueviz { std::vector<hr::reaction_t> cleanup; }
 #include "views.cpp"
 #include "tour.cpp"
 #include "help.cpp"
+#include "hiscore.cpp"
 
 namespace hr {
 
@@ -84,6 +85,7 @@ void restart() {
 
   paused = false;
   ship_pt = 0;
+  init_gamedata();
   }
 
 void run_ads_game_hooks() {
@@ -216,6 +218,7 @@ void gamedata(hr::gamedata* gd) {
   }
 
 void set_config() {
+  load_hiscores();
   lps_enable(&lps_relhell);
   // enable_canvas();
   }
@@ -328,6 +331,9 @@ auto shot_hooks =
     -> editable(0, 100, 5, "step quantity in the spacetime display", "", 'q');
 
     param_color(ghost_color, "color:ghost", true);
+
+    param_enum(hi_sort_by, "sort_by", 3)
+     ->editable({{"platinum", ""}, {"plasteel", ""}, {"uranium", ""}, {"total score", ""}}, "sort high scores by", 'h');
 
     rsrc_config();
     });

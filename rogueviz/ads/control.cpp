@@ -223,7 +223,7 @@ bool ads_turn(int idelta) {
       pdata.oxygen -= pt;
       if(pdata.oxygen < 0) {
         pdata.oxygen = 0;
-        game_over = true;
+        game_over_with_message("suffocated");
         }
       }
     else view_pt += tc;
