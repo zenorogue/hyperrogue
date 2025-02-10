@@ -20,6 +20,9 @@ void apply_duality(shiftmatrix& S) {
     }
   }
 
+vector<ads_object*> under_mouse;
+hyperpoint mousetester;
+
 void draw_game_cell(const cell_to_draw& cd) {
   bool hv = mtwisted;
   using cellptr = cell*;
@@ -140,6 +143,8 @@ void draw_game_cell(const cell_to_draw& cd) {
         rock.pts.push_back(f);
         });
       }
+
+    if(rock.type != oParticle && pointcrash(mousetester, rock.pts)) under_mouse.push_back(&rock);
 
     if(hv) {
       ld t = rock.life_start;
@@ -264,6 +269,8 @@ void view_footer() {
 void view_ads_game() {
   displayed.clear();
   cds_last = std::move(cds); cds.clear();
+  mousetester = kleinize(unshift(mouseh));
+  under_mouse.clear();
   
   bool hv = mhybrid;
 

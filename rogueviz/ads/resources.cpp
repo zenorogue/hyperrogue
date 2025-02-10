@@ -70,6 +70,9 @@ void init_rsrc() {
   game_over = false;
   }
 
+string get_resource_name(eResourceType id);
+string get_resource_help(eResourceType id, bool help);
+
 void display(int id, int y, ld val, ld maxv, ld tank, ld unit) {
   auto sId = shiftless(Id);
 
@@ -93,6 +96,14 @@ void display(int id, int y, ld val, ld maxv, ld tank, ld unit) {
   ld fen = sta + siz;
   ld top = ctr-5;
   ld bot = ctr+5;
+
+  if(mousey > top && mousey < bot && mousex < fen && mousex > sta - 20) {
+    mouseovers = get_resource_name(eResourceType(id));
+    if(maxv == 0) mouseovers += ": " + its(val);
+    else if(unit == 1) mouseovers += " (" + its(val) + "/" + its(maxv) + ")";
+    else mouseovers += " (" + fts(val/unit) + "/" + fts(maxv/unit) + ")";
+    help = get_resource_help(eResourceType(id), true);
+    }
   
   if(maxv == 0) {
     string s;

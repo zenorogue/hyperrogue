@@ -90,6 +90,10 @@ bool handleKey(int sym, int uni) {
     if(t[sym] >= 16 && t[sym] < 32) return true;
     if(sym == 'v') pushScreen(game_menu);
     if(sym == SDLK_ESCAPE) pushScreen(game_menu);
+    if(sym == SDLK_F1) {
+      if(help == "@") help = "help not known";
+      gotoHelp(help);
+      }
     return true;
     }
   return false;

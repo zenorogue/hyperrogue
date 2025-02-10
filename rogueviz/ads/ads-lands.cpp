@@ -46,6 +46,30 @@ color_t empty_outline(cell *c) {
     }
   }
 
+color_t help_color(cell *c) {
+  switch(c->land) {
+    case laBarrier:
+      return 0xFFFFFF;
+    default:
+      return empty_outline(c) >> 8;
+    }
+  }
+
+string land_name(cell *c) {
+  switch(c->land) {
+    case laCrossroads:
+      return "Space Roads";
+    case laCaves:
+      return "Asteroid Field";
+    case laHunting:
+      return "War Zone";
+    case laJungle:
+      return "Gate Zone";
+    default:
+      return dnameof(c->land);
+    }
+  }
+
 int wall_frequency(cell *c) {
   switch(c->land) {
     case laCrossroads:
