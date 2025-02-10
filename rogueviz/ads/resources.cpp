@@ -161,11 +161,13 @@ bool display_rsrc() {
   D(3, 3, fuel, TAU);
   D(4, 4, oxygen, TAU);
   D(5, 5, score[0], 10);
-  D(6, 6, score[1], 10);
-  D(7, 7, score[2], 10);
+  if(!main_rock) {
+    D(6, 6, score[1], 10);
+    D(7, 7, score[2], 10);
+    }
   #undef D
 
-  int next_y = 6;
+  int next_y = main_rock ? 6 : 8;
   auto next_ctr = [&] {
     ld ny = next_y++;
     if(true) return 20*ny+10;
