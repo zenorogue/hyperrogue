@@ -108,9 +108,9 @@ void run_ads_game() {
   if(hybrid::csteps) {
     stop_game();
     hybrid::csteps = 0;
-    hybrid::reconfigure();
     }
   run_size_hooks();
+  hybrid::reconfigure(); // we need to reconfigure to take scalefactor change into account
   run_ads_game_hooks();
   start_game();
 
