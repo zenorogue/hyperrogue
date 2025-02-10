@@ -101,7 +101,7 @@ void explain_undermouse() {
     }
   }
 
-int ads_mouseover() {
+int generate_mouseovers() {
   titlecolor = 0xFFFFFF;
 
   if(!paused) {
@@ -115,6 +115,7 @@ int ads_mouseover() {
 
   hyperpoint h1 = normalize(unshift(mouseh));
   hybrid::in_actual([&] {
+    if(main_rock) return;
     h1[3] = h1[2]; h1[2] = 0;
     ads_point rel = ads_inverse(current * vctrV) * ads_point(h1, 0);
     cell *c = hybrid::get_at(vctr, 0);
@@ -140,6 +141,17 @@ int ads_mouseover() {
   explain_undermouse();
 
   return 3;
+  }
+
+string get_main_help() {
+  if(main_rock)
+    return
+      "Keep close to the yellow star! The space is expanding, so if you go too far away from it, you will never be able to get back.\n\n"
+      "You have to avoid (or shoot) the white asteroids which are continuously thrown at you. In longer runs, you also need to catch items to replenish your resources.\n\n"
+      "Good luck!\n\nSee the Guided Tour for more explanation about how de Sitter spacetime used in this game works.";
+  else return
+      "Explore the world, shoot asteroids and enemies, collect treasures and resources. The more treasures you collect, the harder the game becomes. Good luck!\n\n"
+      "See the Guided Tour for more explanation about how anti-de Sitter spacetime used in this game works.";
   }
 
 }

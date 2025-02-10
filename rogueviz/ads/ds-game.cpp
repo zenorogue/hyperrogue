@@ -501,6 +501,8 @@ bool invalid(cross_result& res) {
 
 void view_ds_game() {
   displayed.clear();
+  mousetester = kleinize(unshift(mouseh));
+  under_mouse.clear();
 
   bool hv = hyperbolic;
   bool hvrel = among(pmodel, mdRelPerspective, mdRelOrthogonal);
@@ -509,6 +511,8 @@ void view_ds_game() {
 
   copyright_shown = "";
   if(!hv) draw_textures();
+
+  bool only_main = false;
 
   if(1) {
     for(auto& r: rocks) {
@@ -546,6 +550,12 @@ void view_ds_game() {
       
       vector<hyperpoint> circle_flat;
       for(auto c: rock.pts) circle_flat.push_back(c.h / (1 + c.h[2]));
+
+      if(rock.type != oParticle && pointcrash(mousetester, rock.pts)) {
+        if(only_main) break;
+        if(&rock == main_rock) { under_mouse.clear(); only_main = true; }
+        under_mouse.push_back(&rock);
+        }
       
       ld area = 0;
       for(int i=0; i<isize(circle_flat)-1; i++)
@@ -743,6 +753,8 @@ void run_ds_game_hooks() {
   rogueviz::rv_hook(hooks_prestats, 100, display_rsrc);
   rogueviz::rv_hook(hooks_handleKey, 150, handleKey);
   rogueviz::rv_hook(anims::hooks_anim, 100, replay_animation);
+  rogueviz::rv_hook(hooks_global_mouseover, 100, generate_mouseovers);
+  rogueviz::rv_change<color_t>(titlecolor, 0xFFC000);
   }
 
 void run_ds_game() {

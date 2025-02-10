@@ -91,7 +91,7 @@ bool handleKey(int sym, int uni) {
     if(sym == 'v') pushScreen(game_menu);
     if(sym == SDLK_ESCAPE) pushScreen(game_menu);
     if(sym == SDLK_F1) {
-      if(help == "@") help = "help not known";
+      if(help == "@") help = get_main_help();
       gotoHelp(help);
       }
     return true;

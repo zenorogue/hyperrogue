@@ -247,4 +247,7 @@ void save_to_hiscores();
 void hiscore_menu();
 void load_hiscores();
 
+string get_main_help();
+int generate_mouseovers();
+
 }}
