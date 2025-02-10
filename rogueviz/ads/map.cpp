@@ -90,11 +90,15 @@ void gen_terrain(cell *c, cellinfo& ci, int level = 0) {
             if(ci_at[c2].type < wtSolid)
               ci_at[c2].type = wtSolid;
       }
-    r = hrand(100);
-    if(r < gate_frequency(c))
-      ci_at[c].type = wtGate;
     }
   ci.mpd_terrain = level;
+
+  auto gf = gate_frequency(c);
+  if(gf) {
+    int r = hrand(100);
+    if(r < gf)
+      ci_at[c].type = wtGate;
+    }
 
   if(c->land == laBarrier)
     ci_at[c].type = wtBarrier;
