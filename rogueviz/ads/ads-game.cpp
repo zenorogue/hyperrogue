@@ -156,7 +156,7 @@ local_parameter_set lps_relhell_ds_spacetime_pers("relhell:ads:pers:", &lps_relh
 void default_settings() {
   set_default_keys();
 
-  lps_add(lps_relhell, nohelp, 1);
+  // lps_add(lps_relhell, nohelp, 1);
   lps_add(lps_relhell, nomenukey, true);
   lps_add(lps_relhell, nomap, true);
   lps_add(lps_relhell, no_find_player, true);
