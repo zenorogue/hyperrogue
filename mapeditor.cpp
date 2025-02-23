@@ -3205,7 +3205,7 @@ EX namespace mapeditor {
         }
       }
   
-    if(cmode & sm::DRAW) {
+    if(cmode & sm::DRAW && !drawing_tool) {
 
       if(c == drawcell && EDITING_TRIANGLES && mapeditor::editingShape(group, id)) {
         if(!us) return false;
