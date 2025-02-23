@@ -227,24 +227,32 @@ void fundamental_marker() {
   vid.linewidth /= widthfactor;
   }
 
+void enable_fundamental() {
+  start_game(); starter = cwt.at;
+  rogueviz::rv_hook(hooks_frame, 100, fundamental_marker);
+  rogueviz::rv_hook(hooks_clearmemory, 100, [] { same.clear(); gm.clear(); });
+  }
+
 int readArgs() {
   using namespace arg;
            
   if(0) ;
   else if(argis("-fundamental")) {
-    start_game(); starter = cwt.at;
     shift(); funmode = argi();
     shift(); color1 = arghex();
     shift(); color2 = arghex();
     shift_arg_formula(widthfactor);
     shift_arg_formula(label_scale);
     shift_arg_formula(label_dist);
+    enable_fundamental();
     }
   else return 1;
   return 0;
   }
 
-auto fundamentalhook = addHook(hooks_args, 100, readArgs) + addHook(hooks_frame, 100, fundamental_marker) + addHook(hooks_clearmemory, 100, [] { same.clear(); gm.clear(); });
+auto fundamentalhook = addHook(hooks_args, 100, readArgs);
+
+}
 
 }
 
