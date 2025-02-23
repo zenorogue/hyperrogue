@@ -93,6 +93,10 @@ int group_count(cellwalker cw) {
   return groups;
   }
 
+map<unsigned, color_t> bucket_color;
+
+int lq = 3, alpha = 32;
+
 void fundamental_marker() {
   if(!funmode || !quotient) return;
   same.clear();
@@ -178,56 +182,38 @@ void fundamental_marker() {
 
   if(corners0 != corners) println(hlog, "corners=", tie(corners0, corners));
 
-  vector<pair<shiftmatrix, shiftmatrix>> nearm;
-
-  for(int ci=0; ci<corners; ci++) {
-    auto cw = cornerlist[ci];
-    for(int u=0; u<1; u++) {
-      cellwalker cw1 = cw+u+wstep+(u-1);
-      /* printf("%p/%d %p/%d ", cw.at, cw.spin, cw1.at, cw1.spin);
-      printf("[%d %d %d] ", is_connected(cw), is_connected(cw+1), is_connected(cw+wstep-1));
-      printf("[%d %d %d] ", is_connected(cw1), is_connected(cw1+1), is_connected(cw1+wstep-1));
-      printf("%d %d;\n", !!next_corner.count(cw1), !!next_corner.count(cw1+wmirror-1)); */
-      shiftmatrix T_here = gm[cw.at] * rel(cw+u);
-      shiftmatrix T_there = gm[cw1.at];
-      nearm.emplace_back(T_here, T_there);
-      }
-    }
-  
   vid.linewidth *= widthfactor;
 
   vector<shiftpoint> cornerpos;
-  for(auto c: cornerlist) cornerpos.push_back(corner(c));
+  vector<hyperpoint> abs_cornerpos;
 
-  for(int ci=0; ci<corners; ci++) {
-
-    shiftpoint h = cornerpos[ci];
-    shiftpoint h2 = cornerpos[ci+1];
-    
-    for(auto& n: nearm) queueline(n.first * inverse_shift(n.second, h), n.first * inverse_shift(n.second, h2), color1, 3);
+  for(auto c: cornerlist) {
+    auto co = corner(c);
+    cornerpos.push_back(co);
+    abs_cornerpos.push_back(inverse_shift(gm[starter], co));
     }
-    
-  for(int ci=0; ci<corners; ci++) {
 
-    shiftpoint h = cornerpos[ci];
-    shiftpoint h2 = cornerpos[ci+1];
-    
-    queueline(h, h2, color2, 3);
-    }
-  
-  if(0) for(int k=0; k<isize(cells); k++) {
-    cell *c = cells[k];
-    for(int i=0; i<c->type; i++) {
-      cellwalker cw0(c, i);
-      if(!is_connected(cw0)) continue;
-      int v = 0;
-      for(auto& n: nearm) {
-        queueline(n.first * inverse_shift(n.second, gm[cw0.at]) * xspinpush0(v, .05), n.first * inverse_shift(n.second, gm[cw0.cpeek()]) * xspinpush0(v, .05), 0xFF8000FF, 0);
-        v++;
-        }
-      queueline(gm[cw0.at] * C0, gm[cw0.cpeek()] * C0, 0xFF0000FF, 0);
+  set<unsigned> buckets_used;
+
+  for(int i=0; i<corners; i++) curvepoint_pretty(abs_cornerpos[i], abs_cornerpos[i+1], lq);
+  curvepoint_first();
+
+  for(auto c: cells)
+  for(const shiftmatrix& V : hr::span_at(current_display->all_drawn_copies, c)) {
+    auto V1 = V * inverse_shift(gm[c], gm[starter]);
+    auto bu = bucketer(unshift(V1*C0));
+    if(buckets_used.count(bu)) continue;
+    buckets_used.insert(bu);
+
+    if(alpha && !bucket_color.count(bu)) {
+      if(bucket_color.empty()) bucket_color[bu] = 0;
+      else bucket_color[bu] = hrand(0x1000000);
       }
+
+    queuecurve_reuse(V1, color1, alpha ? ((bucket_color[bu] << 8) | alpha) : 0, PPR::LINE);
     }
+
+  queuecurve(gm[starter], color2, 0, PPR::LINE);
 
   set<cellwalker> visited;
   
@@ -298,6 +284,16 @@ void showMenu() {
   dialog::add_action([] () {
     starter = cwt.at;
     });
+  dialog::addBoolItem_action("remove internal lines", fill_faces, 'r');
+  dialog::addBoolItem_action("all edges be single", single_edges, 'z');
+  dialog::addSelItem("line quality", its(lq), 'w');
+  dialog::add_action([] {
+    dialog::editNumber(lq, 0, 5, 1, 3, "line quality", "line quality");
+    });
+  dialog::addSelItem("shade alpha", its(alpha), 'w');
+  dialog::add_action([] {
+    dialog::editNumber(alpha, 0, 5, 16, 32, "shade alpha", "shade alpha");
+    });
 
   dialog::addBack();
   dialog::display();
@@ -329,6 +325,8 @@ int readArgs() {
   else if(argis("-fundamental-more")) {
     shift(); single_edges = argi();
     shift(); fill_faces = argi();
+    shift(); lq = argi();
+    shift(); alpha = argi();
     }
   else return 1;
   return 0;
