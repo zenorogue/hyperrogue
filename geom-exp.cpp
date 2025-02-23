@@ -1306,14 +1306,17 @@ int read_geom_args() {
     }
   else if(argis("-unrectified")) {
     PHASEFROM(2);
+    gp::param = gp::univ_param();
     set_variation(eVariation::unrectified);
     }
   else if(argis("-untruncated")) {
     PHASEFROM(2);
+    gp::param = gp::univ_param();
     set_variation(eVariation::untruncated);
     }
   else if(argis("-warped")) {
     PHASEFROM(2);
+    gp::param = gp::univ_param();
     set_variation(eVariation::warped);
     }
   #if MAXMDIM >= 4

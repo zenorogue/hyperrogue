@@ -1109,7 +1109,12 @@ int readArgs() {
     shift(); load_symbol(args(), true);
     showstartmenu = false;
     }
-  else if(argis("-dual")) { PHASEFROM(2); set_variation(eVariation::dual); }
+  else if(argis("-dual")) {
+    PHASEFROM(2);
+    if(in())
+      set_variation(eVariation::dual);
+    else gp::dual_of_current();
+    }
   else if(argis("-d:arcm")) 
     launch_dialog(show);
   else return 1;
