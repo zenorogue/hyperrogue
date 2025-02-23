@@ -7,6 +7,16 @@ namespace hr {
 
 namespace fundamental {
 
+transmatrix current_position, last_view;
+
+void analyze_view_pre() {
+  current_position = current_position * last_view * inverse(View);
+  }
+
+void analyze_view_post() {
+  last_view = View;
+  }
+
 color_t color1, color2;
 
 cell *starter;
@@ -198,10 +208,12 @@ void fundamental_marker() {
   for(int i=0; i<corners; i++) curvepoint_pretty(abs_cornerpos[i], abs_cornerpos[i+1], lq);
   curvepoint_first();
 
+  auto pos = current_position * last_view * inverse(View);
+
   for(auto c: cells)
   for(const shiftmatrix& V : hr::span_at(current_display->all_drawn_copies, c)) {
     auto V1 = V * inverse_shift(gm[c], gm[starter]);
-    auto bu = bucketer(unshift(V1*C0));
+    auto bu = bucketer(pos * unshift(V1*C0));
     if(buckets_used.count(bu)) continue;
     buckets_used.insert(bu);
 
@@ -304,6 +316,10 @@ void enable_fundamental() {
   rogueviz::rv_hook(hooks_frame, 100, fundamental_marker);
   rogueviz::rv_hook(hooks_clearmemory, 100, [] { same.clear(); gm.clear(); });
   rogueviz::rv_hook(hooks_o_key, 80, [] (o_funcs& v) { v.push_back(named_dialog("fundamental", showMenu)); });
+
+  current_position = Id; last_view = View;
+  rogueviz::rv_hook(hooks_preoptimize, 75, analyze_view_pre);
+  rogueviz::rv_hook(hooks_postoptimize, 75, analyze_view_post);
   }
 
 int readArgs() {
