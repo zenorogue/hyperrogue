@@ -59,6 +59,21 @@ shiftmatrix labelpos(shiftpoint h1, shiftpoint h2) {
 ld widthfactor = 5;
 ld label_scale = 1;
 
+bool single_edges = false;
+bool fill_faces = true;
+
+int group_count(cellwalker cw) {
+  if(is_connected(cw)) return 0;
+  auto cw1 = cw;
+  int groups = 0;
+  do {
+    if(!is_connected(cw1)) groups++;
+    cw1 = cw1 + wstep - 1;
+    }
+  while(cw1 != cw);
+  return groups;
+  }
+
 void fundamental_marker() {
   if(!funmode || !quotient) return;
   same.clear();
@@ -86,15 +101,15 @@ void fundamental_marker() {
       }
     }
   
-  while(true) {
+  while(fill_faces) {
     int f = face_edges;
     for(int k=0; k<isize(cells); k++) {
       cell *c = cells[k];
       for(int i=0; i<c->type; i++) {
         cellwalker cw(c, i);
-        if(is_connected(cw) && is_connected(cw+1) && !is_connected(cw+wstep-1)) {
+        if(group_count(cw) == 1) {
           face_edges++;
-          be_connected(cw+wstep-1);
+          be_connected(cw);
           }
         }
       }
@@ -109,29 +124,33 @@ void fundamental_marker() {
     cell *c = cells[k];
     for(int i=0; i<c->type; i++) {
       cellwalker cw0(c, i);
-      if(!is_connected(cw0) && !is_connected(cw0+1) && !is_connected(cw0+wstep-1))
-        corners++, cw = cw0;
+      if(single_edges) {
+        if(!is_connected(cw0)) corners++, cw = cw0;
+        }
+      else {
+        if(group_count(cw0) >= 3) corners++, cw = cw0;
+        }
       }
     }
+
+  if(!corners) return;
   
   // printf("tree edges = %d, face edges = %d, corners = %d\n", tree_edges, face_edges, corners);
 
   vector<cellwalker> cornerlist;
   map<cellwalker, int> corner_id;
-  
+    
   for(int ci=0; ci<corners; ci++) {
-    cellwalker cw0 = cw;
-    corner_id[cw0] = cornerlist.size();
-    cornerlist.push_back(cw0);
+    corner_id[cw] = cornerlist.size();
+    cornerlist.push_back(cw);
         
     while(true) {
       cw++;
-      if(is_connected(cw)) {
+      while(is_connected(cw)) {
         cw += wstep;
         cw++;
         }
-      if(!is_connected(cw+1) && !is_connected(cw+wstep-1))
-        break;
+      if(single_edges || group_count(cw) >= 3) break;
       }
     }
   auto corners0 = corners;
@@ -200,6 +219,7 @@ void fundamental_marker() {
     auto cw = cornerlist[ci];
     cellwalker cw1 = (cw+1+wstep);
     bool mirrored = false;
+    while(is_connected(cw1)) cw1 = cw1 + 1 + wstep;
     if(!corner_id.count(cw1)) cw1 = cw1 + wmirror - 1, mirrored = true;
     if(!corner_id.count(cw1)) println(hlog, "still bad");
     auto ci1 = corner_id[cw1];
