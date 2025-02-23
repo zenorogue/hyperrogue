@@ -107,7 +107,10 @@ map<unsigned, color_t> bucket_color;
 
 int lq = 3, alpha = 32;
 
+color_t *current_domain = nullptr;
+
 void fundamental_marker() {
+  current_domain = nullptr;
   if(!funmode || !quotient) return;
   same.clear();
   gm.clear();
@@ -218,11 +221,12 @@ void fundamental_marker() {
     buckets_used.insert(bu);
 
     if(alpha && !bucket_color.count(bu)) {
-      if(bucket_color.empty()) bucket_color[bu] = 0;
-      else bucket_color[bu] = hrand(0x1000000);
+      if(bucket_color.empty()) bucket_color[bu] = alpha;
+      else bucket_color[bu] = (hrand(0x1000000) << 8) | alpha;
       }
 
-    queuecurve_reuse(V1, color1, alpha ? ((bucket_color[bu] << 8) | alpha) : 0, PPR::LINE);
+    if(c == cwt.at && alpha && !current_domain) current_domain = &bucket_color[bu];
+    queuecurve_reuse(V1, color1, alpha ? bucket_color[bu] : 0, PPR::LINE);
     }
 
   queuecurve(gm[starter], color2, 0, PPR::LINE);
@@ -282,12 +286,12 @@ void showMenu() {
   dialog::add_action([] {
     dialog::editNumber(widthfactor, 0, 5, .1, 1, "line width factor", "line width factor");
     });
-  dialog::addColorItem("color of other domains", color1, 'o');
+  dialog::addColorItem("boundary of other domains", color1, 'o');
   dialog::add_action([] () {
     dialog::openColorDialog(color1, NULL);
     dialog::get_di().dialogflags |= sm::MAYDARK | sm::SIDE;
     });
-  dialog::addColorItem("color of primary domain", color2, 'p');
+  dialog::addColorItem("boundary of central domain", color2, 'p');
   dialog::add_action([] () {
     dialog::openColorDialog(color2, NULL);
     dialog::get_di().dialogflags |= sm::MAYDARK | sm::SIDE;
@@ -302,10 +306,21 @@ void showMenu() {
   dialog::add_action([] {
     dialog::editNumber(lq, 0, 5, 1, 3, "line quality", "line quality");
     });
-  dialog::addSelItem("shade alpha", its(alpha), 'w');
+  dialog::addSelItem("opacity of fill colors", its(alpha), 'a');
   dialog::add_action([] {
     dialog::editNumber(alpha, 0, 5, 16, 32, "shade alpha", "shade alpha");
     });
+  if(alpha) {
+    dialog::addItem("reshuffle all fill colors", 'r');
+    dialog::add_action([] { bucket_color.clear(); });
+    if(current_domain) {
+      dialog::addColorItem("current central domain", *current_domain, 'y');
+      dialog::add_action([] () {
+        dialog::openColorDialog(*current_domain, NULL);
+        dialog::get_di().dialogflags |= sm::MAYDARK | sm::SIDE;
+        });
+      }
+    }
 
   dialog::addBack();
   dialog::display();
@@ -314,7 +329,7 @@ void showMenu() {
 void enable_fundamental() {
   start_game(); starter = cwt.at;
   rogueviz::rv_hook(hooks_frame, 100, fundamental_marker);
-  rogueviz::rv_hook(hooks_clearmemory, 100, [] { same.clear(); gm.clear(); });
+  rogueviz::rv_hook(hooks_clearmemory, 100, [] { same.clear(); gm.clear(); bucket_color.clear(); });
   rogueviz::rv_hook(hooks_o_key, 80, [] (o_funcs& v) { v.push_back(named_dialog("fundamental", showMenu)); });
 
   current_position = Id; last_view = View;
