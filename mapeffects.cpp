@@ -641,7 +641,7 @@ EX bool cellEdgeUnstable(cell *c, flagtype flags IS(0)) {
   return true;
   }
 
-EX int tidalphase;
+EX int tidalphase, tidalphase2;
 
 EX int tidalsize, tide[200];
 
@@ -670,11 +670,13 @@ EX void calcTidalPhase() {
     for(int i=0; i<tidalsize; i++) printf("%d ", tide[i]);
     printf("\n"); */
     }
-  tidalphase = tide[
-    (shmup::on ? shmup::curtime/600 : turncount)
-    % tidalsize];
+  int t = shmup::on ? shmup::curtime/600 : turncount;
+  tidalphase = tide[t % tidalsize];
+  tidalphase2 = tidalphase;
+  if(tide[gmod(t-1, tidalsize)] < tidalphase) tidalphase2 = tidalphase-1;
+  if(tide[gmod(t+1, tidalsize)] < tidalphase) tidalphase2 = tidalphase-1;
   if(peace::on)
-    tidalphase = 5 + tidalphase / 6;
+    tidalphase2 = tidalphase = 5 + tidalphase / 6;
   }
 
 EX int tidespeed() {
@@ -722,8 +724,8 @@ EX void checkTide(cell *c) {
     
     if(c->wall == waStrandedBoat || c->wall == waBoat)
       c->wall = t >= tidalphase ? waBoat : waStrandedBoat;
-    if(c->wall == waSea || c->wall == waNone)
-      c->wall = t >= tidalphase ? waSea : waNone;
+    if(c->wall == waSea || c->wall == waNone || c->wall == waShallow)
+      c->wall = t >= tidalphase ? waSea : t >= tidalphase2 ? waShallow : waNone;
     if(isFire(c) && t >= tidalphase)
       c->wall = waSea;
     }
