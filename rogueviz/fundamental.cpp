@@ -9,6 +9,7 @@ namespace fundamental {
 
 color_t color1, color2;
 
+cell *starter;
 map<cell*, int> same;
 map<cell*, shiftmatrix> gm;
 
@@ -63,11 +64,11 @@ void fundamental_marker() {
   same.clear();
   gm.clear();
   
-  same[cwt.at] = 0;
-  gm[cwt.at] = ggmatrix(cwt.at);
+  same[starter] = 0;
+  gm[starter] = ggmatrix(starter);
   
   vector<cell*> cells;
-  cells.push_back(cwt.at);
+  cells.push_back(starter);
   
   int tree_edges = 0;
   int face_edges = 0;
@@ -231,6 +232,7 @@ int readArgs() {
            
   if(0) ;
   else if(argis("-fundamental")) {
+    start_game(); starter = cwt.at;
     shift(); funmode = argi();
     shift(); color1 = arghex();
     shift(); color2 = arghex();
