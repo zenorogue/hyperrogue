@@ -115,12 +115,14 @@ void fundamental_marker() {
     }
   
   // printf("tree edges = %d, face edges = %d, corners = %d\n", tree_edges, face_edges, corners);
-  
-  map<cellwalker, cellwalker> next_corner;
-  map<cellwalker, cellwalker> prev_corner;
+
+  vector<cellwalker> cornerlist;
+  map<cellwalker, int> corner_id;
   
   for(int ci=0; ci<corners; ci++) {
     cellwalker cw0 = cw;
+    corner_id[cw0] = cornerlist.size();
+    cornerlist.push_back(cw0);
         
     while(true) {
       cw++;
@@ -131,14 +133,17 @@ void fundamental_marker() {
       if(!is_connected(cw+1) && !is_connected(cw+wstep-1))
         break;
       }
-    
-    next_corner[cw0] = cw;
-    prev_corner[cw] = cw0;
     }
+  auto corners0 = corners;
+  corners = isize(cornerlist);
+  cornerlist.push_back(cw);
+
+  if(corners0 != corners) println(hlog, "corners=", tie(corners0, corners));
 
   vector<pair<shiftmatrix, shiftmatrix>> nearm;
 
   for(int ci=0; ci<corners; ci++) {
+    auto cw = cornerlist[ci];
     for(int u=0; u<1; u++) {
       cellwalker cw1 = cw+u+wstep+(u-1);
       /* printf("%p/%d %p/%d ", cw.at, cw.spin, cw1.at, cw1.spin);
@@ -149,25 +154,25 @@ void fundamental_marker() {
       shiftmatrix T_there = gm[cw1.at];
       nearm.emplace_back(T_here, T_there);
       }
-    cw = next_corner[cw];
     }
   
   vid.linewidth *= widthfactor;
 
+  vector<shiftpoint> cornerpos;
+  for(auto c: cornerlist) cornerpos.push_back(corner(c));
+
   for(int ci=0; ci<corners; ci++) {
 
-    shiftpoint h = corner(cw);
-    cw = next_corner[cw];
-    shiftpoint h2 = corner(cw);
+    shiftpoint h = cornerpos[ci];
+    shiftpoint h2 = cornerpos[ci+1];
     
     for(auto& n: nearm) queueline(n.first * inverse_shift(n.second, h), n.first * inverse_shift(n.second, h2), color1, 3);
     }
     
   for(int ci=0; ci<corners; ci++) {
 
-    shiftpoint h = corner(cw);
-    cw = next_corner[cw];
-    shiftpoint h2 = corner(cw);
+    shiftpoint h = cornerpos[ci];
+    shiftpoint h2 = cornerpos[ci+1];
     
     queueline(h, h2, color2, 3);
     }
@@ -192,25 +197,30 @@ void fundamental_marker() {
   
   for(int ci=0; ci<corners; ci++) {
     
+    auto cw = cornerlist[ci];
     cellwalker cw1 = (cw+1+wstep);
     bool mirrored = false;
-    if(!next_corner.count(cw1)) cw1 = cw1 + wmirror - 1, mirrored = true;
+    if(!corner_id.count(cw1)) cw1 = cw1 + wmirror - 1, mirrored = true;
+    if(!corner_id.count(cw1)) println(hlog, "still bad");
+    auto ci1 = corner_id[cw1];
+    auto nx = cornerlist[ci+1];
+    auto nx1 = cornerlist[ci1+1];
+    auto pv1 = cornerlist[(ci1+corners-1) % corners];
 
     // visited.insert(next_corner[cw]);
     // cellwalker cw2 = next_corner[cw];
-    if(next_corner[cw] < (mirrored ? next_corner[cw1] : cw1)) {
+    if(nx < (mirrored ? nx1 : cw1)) {
     
       int mc = (mirrored ? color1 : color2) >> 8;
-      if(hdist(corner(cw), corner(next_corner[cw])) > 1e-3) {
-        queuestr(labelpos(corner(cw), corner(next_corner[cw])), label_scale/cgi.scalefactor, its(id), mc);
+      if(hdist(corner(cw), corner(nx)) > 1e-3) {
+        queuestr(labelpos(corner(cw), corner(nx)), label_scale/cgi.scalefactor, its(id), mc);
         if(mirrored)
-          queuestr(labelpos(corner(cw1), corner(next_corner[cw1])), label_scale/cgi.scalefactor, its(id), mc);
+          queuestr(labelpos(corner(cw1), corner(nx1)), label_scale/cgi.scalefactor, its(id), mc);
         else
-          queuestr(labelpos(corner(prev_corner[cw1]), corner(cw1)), label_scale/cgi.scalefactor, its(id), mc);
+          queuestr(labelpos(corner(pv1), corner(cw1)), label_scale/cgi.scalefactor, its(id), mc);
         id++;
         }      
       }
-    cw = next_corner[cw];
     }
 
   vid.linewidth /= widthfactor;
