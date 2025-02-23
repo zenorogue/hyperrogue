@@ -478,11 +478,13 @@ struct shmup_configurer {
   #if CAP_SDLJOY
     if(numsticks > 0) {
       if(shmup::on || multi::alwaysuse || players > 1) 
-        dialog::addItem(XLAT("configure joystick axes"), 'j');
+        dialog::addItem(XLAT("configure joystick axes"), 'x');
       else dialog::addBreak(100);
       }
   #endif
   
+    add_edit(joy_init);
+
     dialog::addBreak(50);
   
     dialog::addHelp();

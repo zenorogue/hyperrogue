@@ -2603,8 +2603,6 @@ EX void showJoyConfig() {
   dialog::addSelItem(XLAT("second joystick: panning speed"), fts(vid.joypanspeed * 1000), 'd');
   dialog::addSelItem(XLAT("smoothen"), its(vid.joysmooth) + " ms", 'e');
 
-  add_edit(joy_init);
-
   dialog::addBreak(50);
   dialog::addBack();
   dialog::display();
