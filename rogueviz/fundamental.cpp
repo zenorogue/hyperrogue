@@ -227,10 +227,44 @@ void fundamental_marker() {
   vid.linewidth /= widthfactor;
   }
 
+void showMenu() {
+  cmode = sm::SIDE | sm::MAYDARK;
+  gamescreen();
+  dialog::init(XLAT("display fundamental domains"), 0xFFFFFFFF, 150, 0);
+  dialog::addSelItem("mode", its(funmode), 'm');
+  dialog::add_action([] { funmode = (1 + funmode) % 3; });
+  dialog::addSelItem("label distance", fts(label_dist), 'd');
+  dialog::add_action([] {
+    dialog::editNumber(label_dist, 0, 10, .1, 0.5, "label fistance", "label distance");
+    });
+  dialog::addSelItem("label scale", fts(label_scale), 's');
+  dialog::add_action([] {
+    dialog::editNumber(label_scale, 0, 10, .1, 0.5, "label scale", "label scale");
+    });
+  dialog::addSelItem("line width factor", fts(widthfactor), 'w');
+  dialog::add_action([] {
+    dialog::editNumber(widthfactor, 0, 5, .1, 1, "line width factor", "line width factor");
+    });
+  dialog::addColorItem("color of other domains", color1, 'o');
+  dialog::add_action([] () {
+    dialog::openColorDialog(color1, NULL);
+    dialog::get_di().dialogflags |= sm::MAYDARK | sm::SIDE;
+    });
+  dialog::addColorItem("color of primary domain", color2, 'p');
+  dialog::add_action([] () {
+    dialog::openColorDialog(color2, NULL);
+    dialog::get_di().dialogflags |= sm::MAYDARK | sm::SIDE;
+    });
+
+  dialog::addBack();
+  dialog::display();
+  }
+
 void enable_fundamental() {
   start_game(); starter = cwt.at;
   rogueviz::rv_hook(hooks_frame, 100, fundamental_marker);
   rogueviz::rv_hook(hooks_clearmemory, 100, [] { same.clear(); gm.clear(); });
+  rogueviz::rv_hook(hooks_o_key, 80, [] (o_funcs& v) { v.push_back(named_dialog("fundamental", showMenu)); });
   }
 
 int readArgs() {
