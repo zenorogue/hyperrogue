@@ -2790,6 +2790,16 @@ EX void curvepoint(const hyperpoint& H1) {
   curvedata.push_back(glhr::pointtogl(H1));
   }
 
+EX void curvepoint_pretty(const hyperpoint& h1, const hyperpoint& h2, int lev) {
+  if(lev >= 0 && pmodel != mdPixel) {
+    hyperpoint h3 = midz(h1, h2);
+    curvepoint_pretty(h1, h3, lev-1);
+    curvepoint_pretty(h3, h2, lev-1);
+    }
+  else curvepoint(h2);
+  }
+
+
 EX void curvepoint_first() {
   curvedata.push_back(curvedata[curvestart]);
   }
