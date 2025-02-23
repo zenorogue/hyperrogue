@@ -801,6 +801,32 @@ EX namespace gp {
       );
     }  
 
+  EX void dual_of_current() {
+    auto p = univ_param();
+    if(S3 == 3 && !UNTRUNCATED) {
+      println(hlog, "set param to ", p * loc(1,1));
+      if(!check_whirl_set(p * loc(1, 1))) return;
+      set_variation(eVariation::untruncated);
+      start_game();
+      config = human_representation(univ_param());
+      }
+    else if(S3 == 4 && !UNRECTIFIED) {
+      if(!check_whirl_set(p * loc(1, 1))) return;
+      set_variation(eVariation::unrectified);
+      start_game();
+      config = human_representation(univ_param());
+      }
+    else if(S3 == 3 && UNTRUNCATED) {
+      println(hlog, "whirl_set to ", (p * loc(1,1)) / 3);
+      if(!check_whirl_set((p * loc(1,1)) / 3)) return;
+      config = human_representation(univ_param());
+      }
+    else if(S3 == 4 && UNRECTIFIED) {
+      if(!check_whirl_set((p * loc(1,1)) / 2)) return;
+      config = human_representation(univ_param());
+      }
+    }
+
   void show() {
     cmode = sm::SIDE | sm::MAYDARK;
     gamescreen();
@@ -948,31 +974,7 @@ EX namespace gp {
     
     if(have_dual) {
       dialog::addItem(XLAT("dual of current"), 'D');
-      dialog::add_action([] { 
-        auto p = univ_param();
-        if(S3 == 3 && !UNTRUNCATED) {
-          println(hlog, "set param to ", p * loc(1,1));
-          if(!check_whirl_set(p * loc(1, 1))) return;
-          set_variation(eVariation::untruncated);
-          start_game();
-          config = human_representation(univ_param());
-          }
-        else if(S3 == 4 && !UNRECTIFIED) {
-          if(!check_whirl_set(p * loc(1, 1))) return;
-          set_variation(eVariation::unrectified);
-          start_game();
-          config = human_representation(univ_param());
-          }
-        else if(S3 == 3 && UNTRUNCATED) {
-          println(hlog, "whirl_set to ", (p * loc(1,1)) / 3);
-          if(!check_whirl_set((p * loc(1,1)) / 3)) return;
-          config = human_representation(univ_param());
-          }
-        else if(S3 == 4 && UNRECTIFIED) {
-          if(!check_whirl_set((p * loc(1,1)) / 2)) return;
-          config = human_representation(univ_param());
-          }
-        });
+      dialog::add_action(dual_of_current);
       }
     
     dialog::addBreak(100);
