@@ -294,6 +294,9 @@ int readArgs() {
   using namespace arg;
            
   if(0) ;
+  else if(argis("-fundamental0")) {
+    enable_fundamental();
+    }
   else if(argis("-fundamental")) {
     shift(); funmode = argi();
     shift(); color1 = arghex();
@@ -302,6 +305,10 @@ int readArgs() {
     shift_arg_formula(label_scale);
     shift_arg_formula(label_dist);
     enable_fundamental();
+    }
+  else if(argis("-fundamental-more")) {
+    shift(); single_edges = argi();
+    shift(); fill_faces = argi();
     }
   else return 1;
   return 0;
