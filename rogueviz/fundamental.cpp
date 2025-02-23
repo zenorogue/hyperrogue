@@ -31,7 +31,26 @@ int funmode = 0;
 
 shiftpoint corner(cellwalker cw) {
   shiftmatrix T = gm[cw.at];
-  if(funmode == 2) {
+
+  if(funmode == 3) switch(geometry) {
+    case gKleinQuartic: {
+      ld a = edge_of_triangle_with_angles(90._deg, M_PI/14, M_PI*2/14);
+      shiftpoint at = gm[cw.at] * get_corner_position(cw.at, cw.spin+(cw.mirrored?0:1), 3);
+      shiftpoint best = at; ld bestdist = 999;
+      for(int i=0; i<14; i++) {
+        shiftmatrix sm = gm[starter];
+        if(variation == eVariation::untruncated)
+          sm = sm * rgpushxto0(get_corner_position(starter, 0, 3));
+        auto s = sm * xspinpush0(i * M_PI/7, a);
+        ld d = hdist(at, s);
+        if(d < bestdist) bestdist = d, best = s;
+        }
+      return best;
+      }
+    default: /* no special */;
+    }
+
+  if(funmode == 2 && BITRUNCATED) {
     while(cw.at->type != S7) { 
       cw++; 
       T = T * currentmap->adj(cw.at, cw.spin);
@@ -250,8 +269,9 @@ void showMenu() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen();
   dialog::init(XLAT("display fundamental domains"), 0xFFFFFFFF, 150, 0);
-  dialog::addSelItem("mode", its(funmode), 'm');
-  dialog::add_action([] { funmode = (1 + funmode) % 3; });
+  vector<string> mode_names = {"no display", "corners", "centers", "special"};
+  dialog::addSelItem("mode", mode_names[funmode], 'm');
+  dialog::add_action([] { funmode = (1 + funmode) % 4; });
   dialog::addSelItem("label distance", fts(label_dist), 'd');
   dialog::add_action([] {
     dialog::editNumber(label_dist, 0, 10, .1, 0.5, "label fistance", "label distance");
@@ -315,9 +335,5 @@ int readArgs() {
   }
 
 auto fundamentalhook = addHook(hooks_args, 100, readArgs);
-
 }
-
-}
-
 }
