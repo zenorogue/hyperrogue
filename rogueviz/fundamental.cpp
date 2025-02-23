@@ -10,18 +10,18 @@ namespace fundamental {
 color_t color1, color2;
 
 cell *starter;
-map<cell*, int> same;
+map<cell*, set<int>> same;
 map<cell*, shiftmatrix> gm;
 
 bool is_connected(cellwalker cw) {
-  return same[cw.at] & (1<<cw.spin);
+  return same[cw.at].count(cw.spin);
   }
 
 void be_connected(cellwalker cw) {
   // transmatrix T = gm[cw.at];
-  same[cw.at] |= (1<<cw.spin);
+  same[cw.at].insert(cw.spin);
   cw += wstep;
-  same[cw.at] |= (1<<cw.spin);
+  same[cw.at].insert(cw.spin);
   /* printf("%s", display(T * C0)); 
   printf(" %s\n", display(gm[cw.at] * C0)); */
   // queueline(T * C0, gm[cw.at] * C0, 0xFF0000FF, 3);
@@ -64,7 +64,6 @@ void fundamental_marker() {
   same.clear();
   gm.clear();
   
-  same[starter] = 0;
   gm[starter] = ggmatrix(starter);
   
   vector<cell*> cells;
