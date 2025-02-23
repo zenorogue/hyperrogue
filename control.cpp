@@ -163,7 +163,6 @@ EX void movevrdir(hyperpoint vec) {
   }
 
 EX void calcMousedest() {
-  if(mouseout()) return;
   if(vid.revcontrol == true) { mouseh[0] = -mouseh[0]; mouseh[1] = -mouseh[1]; }
   ld mousedist = hdist(mouseh, tC0(ggmatrix(cwt.at)));
   mousedest.d = -1;
@@ -219,6 +218,7 @@ EX void mousemovement() {
     }
 
   if(protect_memory()) return;
+  if(mouseout()) return;
 
   calcMousedest();
     if(!canmove) movepcto(mousedest), remission(); else movepcto(mousedest);

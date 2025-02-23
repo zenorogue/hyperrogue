@@ -5575,7 +5575,6 @@ EX void drawthemap() {
   bool useRangedOrb = (!(vid.shifttarget & 1) && haveRangedOrb() && lmouseover && lmouseover->cpdist > 1) || (keystate[SDL12(SDLK_RSHIFT, SDL_SCANCODE_RSHIFT)] | keystate[SDL12(SDLK_LSHIFT, SDL_SCANCODE_LSHIFT)]);
   if(!useRangedOrb && !(cmode & sm::MAP) && !(cmode & sm::DRAW) && DEFAULTCONTROL && !mouseout() && !dual::state) {
     dynamicval<eGravity> gs(gravity_state, gravity_state);
-    void calcMousedest();
     calcMousedest();
     cellwalker cw = cwt; bool f = flipplayer;
     items[itWarning]+=2;

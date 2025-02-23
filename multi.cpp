@@ -1150,7 +1150,7 @@ EX void handleInput(int delta, config &scfg) {
         if(countplayers_undecided > 0 && ! isUndecided) continue;
         if(playerpos(i) == c)
           multi::whereto[i].d = MD_WAIT;
-        else {
+        else if(!mouseout()) {
           for(int d=0; d<playerpos(i)->type; d++) {
             cdir = d;
             if(multi::multiPlayerTarget(i) == c) break;
