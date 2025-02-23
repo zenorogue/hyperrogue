@@ -274,6 +274,10 @@ void showMenu() {
     dialog::openColorDialog(color2, NULL);
     dialog::get_di().dialogflags |= sm::MAYDARK | sm::SIDE;
     });
+  dialog::addSelItem("set the central tile to current position", its(celldistance(starter, cwt.at)), 's');
+  dialog::add_action([] () {
+    starter = cwt.at;
+    });
 
   dialog::addBack();
   dialog::display();
