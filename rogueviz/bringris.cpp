@@ -1018,7 +1018,7 @@ void shift_block(int dir, bool camera_only) {
       at1 = flatspin(flatspin(at, 1) + wstep, 2);
     }
   else {
-    int kspin = (t/2) - dir;     
+    int kspin = (t/2) - dir;
     at1 = flatspin(at, dir);  
     at1 = flatspin(at1 + wstep, kspin);
     }
