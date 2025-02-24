@@ -316,11 +316,13 @@ void fundamental_marker() {
   
   queuecurve(T, color2, 0, PPR::LINE);
 
+  string conlabels = "123456789ABCDEFGHIJKLMNOPQRSTUVWYXZabcdefghijklmnopqrstuvwxyz$%@&+#";
+
   for(int ci=0; ci<corners; ci++) {
     int mc = (mirrored[ci] ? color1 : color2) >> 8;
     int id = connections[ci];
     if(id == -1) continue;
-    queuestr(labelpos(T * abs_cornerpos[ci], T * abs_cornerpos[ci+1]), label_scale/cgi.scalefactor, its(id), mc);
+    queuestr(labelpos(T * abs_cornerpos[ci], T * abs_cornerpos[ci+1]), label_scale/cgi.scalefactor, s0 + conlabels[id % isize(conlabels)], mc);
     }
   }
 
