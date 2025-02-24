@@ -58,6 +58,7 @@ int a = arg::add3("-label-video", [] {
   int i = atoi(scanline_noblank(f).c_str()); if(i) anims::noframes = i;
   anims::videofile = scanline_noblank(f);
   int fade = atoi(scanline_noblank(f).c_str());
+  hr::ignore(fade);
   string s;
   while(true) {
     s = scanline_noblank(f);
