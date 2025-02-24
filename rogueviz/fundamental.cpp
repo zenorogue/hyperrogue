@@ -18,18 +18,22 @@ void analyze_view_post() {
   }
 
 struct settings {
-  color_t color_other = 0xFFFFFF40;
+  int funmode;
+  bool single_edges;
+  bool fill_faces;
+
+  ld widthfactor;
+  color_t color_other;
   color_t color_main;
-  color_t color_mirage = winf[waCloud].color;
-  color_t color_mirror = winf[waMirror].color;
-  int funmode = 0;
-  bool single_edges = false;
-  bool fill_faces = true;
-  ld label_dist = .3;
-  ld widthfactor = 5;
-  ld label_scale = 1;
-  int lq = 3;
-  int alpha = 32;
+  int lq;
+
+  color_t color_mirage;
+  color_t color_mirror;
+  ld label_dist;
+  ld label_scale;
+
+  int alpha;
+
   void show_options();
   } sett;
 
@@ -345,57 +349,22 @@ void clear_data() {
 
 void settings::show_options() {
   dialog::init(XLAT("display fundamental domains"), 0xFFFFFFFF, 150, 0);
-  vector<string> mode_names = {"no display", "corners", "centers", "special"};
-  dialog::addSelItem("how to construct shape", mode_names[funmode], 'm');
-  dialog::add_action([&] { funmode = (1 + funmode) % 4; clear_data(); });
-  dialog::addBoolItem("remove internal lines", fill_faces, 'r');
-  dialog::add_action([&] { fill_faces = !fill_faces; clear_data(); });
-  dialog::addBoolItem("all edges be single", single_edges, 'z');
-  dialog::add_action([&] { single_edges = !single_edges; clear_data(); });
+  add_edit(funmode);
+  add_edit(single_edges);
+  add_edit(fill_faces);
+  add_edit(alpha);
 
   dialog::addBreak(50);
-  dialog::addSelItem("label distance", fts(label_dist), 'd');
-  dialog::add_action([&] {
-    dialog::editNumber(label_dist, 0, 10, .1, 0.5, "label fistance", "label distance");
-    });
-  dialog::addSelItem("label scale", fts(label_scale), 's');
-  dialog::add_action([&] {
-    dialog::editNumber(label_scale, 0, 10, .1, 0.5, "label scale", "label scale");
-    });
-  dialog::addSelItem("line width factor", fts(widthfactor), 'w');
-  dialog::add_action([&] {
-    dialog::editNumber(widthfactor, 0, 5, .1, 1, "line width factor", "line width factor");
-    });
-  dialog::addColorItem("boundary of central domain", color_main, 'c');
-  dialog::add_action([&] () {
-    dialog::openColorDialog(color_main, NULL);
-    dialog::get_di().dialogflags |= sm::MAYDARK | sm::SIDE;
-    });
-  dialog::addColorItem("boundary of other domains", color_other, 'o');
-  dialog::add_action([&] () {
-    dialog::openColorDialog(color_other, NULL);
-    dialog::get_di().dialogflags |= sm::MAYDARK | sm::SIDE;
-    });
-  dialog::addColorItem("label color", color_mirage, 'd');
-  dialog::add_action([&] () {
-    dialog::openColorDialog(color_mirage, NULL);
-    dialog::get_di().dialogflags |= sm::MAYDARK | sm::SIDE;
-    dialog::colorAlpha = false;
-    });
-  dialog::addColorItem("mirrored label color", color_mirror, 'b');
-  dialog::add_action([&] () {
-    dialog::openColorDialog(color_mirror, NULL);
-    dialog::get_di().dialogflags |= sm::MAYDARK | sm::SIDE;
-    dialog::colorAlpha = false;
-    });
-  dialog::addSelItem("line quality", its(lq), 'w');
-  dialog::add_action([&] {
-    dialog::editNumber(lq, 0, 5, 1, 3, "line quality", "line quality");
-    });
-  dialog::addSelItem("opacity of fill colors", its(alpha), 'a');
-  dialog::add_action([&] {
-    dialog::editNumber(alpha, 0, 5, 16, 32, "shade alpha", "shade alpha");
-    });
+  add_edit(widthfactor);
+  add_edit(color_main);
+  add_edit(color_other);
+  add_edit(lq);
+
+  dialog::addBreak(50);
+  add_edit(label_dist);
+  add_edit(label_scale);
+  add_edit(color_mirage);
+  add_edit(color_mirror);
   }
 
 EX void showMenu() {
@@ -435,8 +404,33 @@ int enable_fundamental() {
   addHook(hooks_preoptimize, 75, analyze_view_pre);
   addHook(hooks_postoptimize, 75, analyze_view_post);
   addHook(hooks_configfile, 100, [] {
-    param_i(sett.funmode, "funmode");
-    param_color(sett.color_main, "fundamental_color_main", true, 0xFFFFFFFF);
+    param_enum(sett.funmode, "funmode", 0)
+    ->editable({{"disabled", "do not construct or draw the fundamental domains"}, {"corners", "find the shape automatically"}, {"centers", "may produce less corners"}, {"special", "nice domains for specific quotient shapes"}}, "fundamental domain method", 'm')
+    ->set_reaction(clear_data);
+    param_color(sett.color_main, "fundamental_color_main", true, 0xFFFFFFFF)
+    ->editable("boundary of the central domain", "", 'c');
+    param_color(sett.color_other, "fundamental_color_other", true, 0xFFFFFF40)
+    ->editable("boundary of the other domains", "", 'o');
+    param_color(sett.color_mirage, "fundamental_color_mirage", false, winf[waCloud].color)
+    ->editable("gluing label color", "", 'd');
+    param_color(sett.color_mirror, "fundamental_color_mirror", false, winf[waMirror].color)
+    ->editable("mirrored gluing label color", "", 'b');
+    param_b(sett.single_edges, "fundamental_single_edges", false)
+    ->editable("fundamental: single edges", '1')
+    ->set_reaction(clear_data);
+    param_b(sett.fill_faces, "fundamental_fill_faces", true)
+    ->editable("fundamental: fill faces", '2')
+    ->set_reaction(clear_data);
+    param_f(sett.label_dist, "fundamental_label_dist", .3)
+    ->editable(0, 10, .05, "gluing label distance", "", 'd');
+    param_f(sett.widthfactor, "fundamental_width", 5)
+    ->editable(0, 5, 1, "domain boundary width factor", "", 'w');
+    param_f(sett.label_scale, "fundamental_label_scale", 1)
+    ->editable(0, 10, 0.2, "gluing label scale", "", 's');
+    param_i(sett.lq, "fundamental_lq", 3)
+    ->editable(0, 5, 1, "domain line quality", "", 'w');
+    param_i(sett.alpha, "fundamental_alpha", 32)
+    ->editable(0, 5, 8, "opacity of domain fill colors", "", 'a');
     });
   return 0;
   }
