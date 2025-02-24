@@ -1028,10 +1028,10 @@ EX void handleInput(int delta, config &scfg) {
           anypressed = true, playermoved = true, multi::combo[i] = false;
       
       double mdx = 
-        (act[0] + act[2] - act[1] - act[3]) * .7 +
+        (act[0].held + act[2].held - act[1].held - act[3].held) * .7 +
         act[pcMoveRight] - act[pcMoveLeft] + axes[0]/30000.;
       double mdy = 
-        (act[3] + act[2] - act[1] - act[0]) * .7 +
+        (act[3].held + act[2].held - act[1].held - act[0].held) * .7 +
         act[pcMoveDown] - act[pcMoveUp] + axes[1]/30000.;
       
       if((act[pcMoveRight] && act[pcMoveLeft]) ||

@@ -771,10 +771,10 @@ void movePlayer(monster *m, int delta) {
   for(int i=0; i<4; i++) if(axes[i]) playermoved = true;
   
 #if !ISMOBILE
-  mgo = act[pcForward] - act[pcBackward] + axes[2]/30000.;
-  mturn = act[pcTurnLeft] - act[pcTurnRight] + axes[3]/30000.;
-  mdx = act[pcMoveRight] - act[pcMoveLeft] + axes[0]/30000.;
-  mdy = act[pcMoveDown] - act[pcMoveUp] + axes[1]/30000.;
+  mgo = act[pcForward].held - act[pcBackward].held + axes[2]/30000.;
+  mturn = act[pcTurnLeft].held - act[pcTurnRight].held + axes[3]/30000.;
+  mdx = act[pcMoveRight].held - act[pcMoveLeft].held + axes[0]/30000.;
+  mdy = act[pcMoveDown].held - act[pcMoveUp].held + axes[1]/30000.;
   
   shotkey = act[pcFire] || act[pcFaceFire];
   facemouse = act[pcFace] || act[pcFaceFire];
