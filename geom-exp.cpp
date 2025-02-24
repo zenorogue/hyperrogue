@@ -1169,6 +1169,11 @@ EX void showEuclideanMenu() {
     dialog::addHelp(arb::current.comment);
     }
 
+  if(WDIM == 2 && quotient && closed_manifold) {
+    dialog::addItem(XLAT("fundamental domain"), 'F');
+    dialog::add_action_push(fundamental::showMenu);
+    }
+
   dialog::addSelItem(XLAT("size of the world"), gd.size_str, '3');
   add_size_action();
 
