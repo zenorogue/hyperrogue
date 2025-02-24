@@ -3544,6 +3544,7 @@ auto ccm = addHook(hooks_clearmemory, 0, [] () {
   prairie::beaststogen.clear();
   #endif
   mirror::clearcache();
+  ca::changed.clear();
   }) +
   addHook(hooks_gamedata, 0, [] (gamedata* gd) {
     gd->store(heat::offscreen_heat);
@@ -3563,6 +3564,7 @@ auto ccm = addHook(hooks_clearmemory, 0, [] () {
     gd->store(elec::lightningfast);
     gd->store(elec::havethunder);
     gd->store(elec::afterOrb);
+    gd->store(ca::changed);
     }) +
   addHook(hooks_removecells, 0, [] () {
     for(cell *c: removed_cells) clearing::score.erase(c);
