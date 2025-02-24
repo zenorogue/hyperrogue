@@ -169,6 +169,9 @@ EX hookset<void()> hooks_initgame;
 /** \brief These hooks are called at the end of initgame. */
 EX hookset<void()> hooks_post_initgame;
 
+/** \brief These hooks are called at the end of startgame. */
+EX hookset<void()> hooks_post_startgame;
+
 EX bool ineligible_starting_land;
 
 EX int easy_specialland;
@@ -1729,6 +1732,7 @@ EX void start_game() {
   texture::config.remap();
 #endif
   subscreens::prepare();
+  callhooks(hooks_post_startgame);
   }
 
 // popAllScreens + popAllGames + stop_game + switch_game_mode + start_game
