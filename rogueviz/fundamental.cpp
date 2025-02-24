@@ -109,9 +109,11 @@ void auto_corners() {
 
   abs_cornerpos.clear();
   for(auto c: cornerlist) {
-    auto co = cwcorner(c);
-    abs_cornerpos.push_back(inverse_shift(gm[starter], co));
+    auto co = inverse_shift(gm[starter], cwcorner(c));
+    if(isize(abs_cornerpos) && (hdist(co, abs_cornerpos[0]) < 1e-3 || hdist(co, abs_cornerpos.back()) < 1e-3)) continue;
+    abs_cornerpos.push_back(co);
     }
+  corners = isize(abs_cornerpos); abs_cornerpos.push_back(abs_cornerpos[0]);
   }
 
 void find_corners() {
