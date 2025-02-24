@@ -49,6 +49,9 @@ struct shapedata {
   map<cellwalker, int> corner_id;
   cell *current_starter;
 
+  vector<int> connections;
+  vector<bool> mirrored;
+
   bool is_connected(cellwalker cw);
   void be_connected(cellwalker cw);
   int group_count(cellwalker cw);
@@ -272,6 +275,8 @@ void shapedata::compute_shape() {
     }
 
   find_corners();
+  connections.clear(); connections.resize(corners, -1);
+  mirrored.clear(); mirrored.resize(corners, false);
   }
 
 void shapedata::render() {
@@ -284,8 +289,6 @@ void shapedata::render() {
 
   auto pos = current_position * last_view * inverse(View);
 
-  vector<int> connections(corners, -1);
-  vector<bool> mirrored(corners, false);
   map<unsigned, int> midedge_id;
   auto T = ggmatrix(starter);
   unsigned central_bucket = bucketer(unshift(T*C0));
