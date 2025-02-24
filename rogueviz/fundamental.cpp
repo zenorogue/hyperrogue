@@ -122,19 +122,36 @@ void fundamental_marker() {
   
   int tree_edges = 0;
   int face_edges = 0;
-  
+
+  bool first_zebra_phase = geometry == gZebraQuotient && funmode == 3 && PURE;
+  bool second_zebra_phase = false;
+
+  again:
+
   for(int k=0; k<isize(cells); k++) {
     cell *c = cells[k];
     for(int i=0; i<c->type; i++) {
       cellwalker cw(c, i);
       cell *c2 = cw.cpeek();
       if(gm.count(c2)) continue;
+      if(first_zebra_phase && (zebra40(c) % 4) != (zebra40(c2) % 4))
+        continue;
+      if(second_zebra_phase) {
+        int j = 0;
+        for(; j<c->type; j++) if(zebra40(c->move(j)) == 4 + zebra40(c) % 12) break;
+        int v = gmod(i-j+2, 7); if(v < 5) continue;
+        }
       gm[c2] = gm[c] * rel(cw);
-      // queueline(gm[c2] * C0, gm[c2] * xspinpush0(ticks, 0.2), 0xFFFFFFFF, 3);
       be_connected(cw);
       tree_edges++;
       cells.push_back(c2);
       }
+    }
+
+  if(first_zebra_phase) {
+    first_zebra_phase = false;
+    second_zebra_phase = true;
+    goto again;
     }
   
   while(fill_faces) {
