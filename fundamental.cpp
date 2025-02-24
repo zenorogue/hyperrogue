@@ -1,11 +1,11 @@
 // show the fundamental domain for quotient spaces
-// Copyright (C) 2018 Zeno and Tehora Rogue, see 'hyper.cpp' for details
+// Copyright (C) 2018-2025 Zeno and Tehora Rogue, see 'hyper.cpp' for details
 
-#include "rogueviz.h"
+#include "hyper.h"
 
 namespace hr {
 
-namespace fundamental {
+EX namespace fundamental {
 
 transmatrix current_position, last_view;
 
@@ -342,7 +342,7 @@ void shapedata::render() {
 
 void fundamental_marker() {
   current_domain = nullptr;
-  if(!sett.funmode || !quotient || !closed_manifold || GDIM == 3) return;
+  if(!sett.funmode || !quotient || !closed_manifold || WDIM != 2) return;
   sd.compute_shape();
   sd.render();
   }
