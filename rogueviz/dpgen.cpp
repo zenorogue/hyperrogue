@@ -182,6 +182,8 @@ void launch_puzzle(const puzzle& p) {
   launch(last_seed = p.seed, last_elimit = p.el, last_hlimit = p.hl);
   popScreenAll();
   if(restricted) pushScreen(puzzle_restrict);
+  clearMessages();
+  addMessage("Welcome to Dual Geometry Puzzle!");
   }
 
 vector<puzzle> puzzles = {
@@ -251,6 +253,9 @@ EX void show_menu() {
   dialog::addBack();
 
   if(restricted) {
+    dialog::addItem(XLAT("RogueViz settings"), 'S');
+    dialog::add_action([] { pushScreen(showSettings); });
+
     dialog::addItem(XLAT("back to RogueViz menu"), 'm');
     dialog::add_action([] { quitmainloop = true; });
     }
