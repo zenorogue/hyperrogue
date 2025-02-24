@@ -43,6 +43,9 @@ int z_in_wall(int z) {
     if(among(z, 1, 3, 4)) return 0;
     return 1;
     }
+  if(qmode == 4) {
+    return gmod(z,14) >= 3 ? 0 : 1;
+    }
   return 1;
   }
   
