@@ -1029,10 +1029,10 @@ EX void handleInput(int delta, config &scfg) {
       
       double mdx = 
         (act[0].held + act[2].held - act[1].held - act[3].held) * .7 +
-        act[pcMoveRight] - act[pcMoveLeft] + axes[0]/30000.;
+        act[pcMoveRight].held - act[pcMoveLeft].held + axes[0]/30000.;
       double mdy = 
         (act[3].held + act[2].held - act[1].held - act[0].held) * .7 +
-        act[pcMoveDown] - act[pcMoveUp] + axes[1]/30000.;
+        act[pcMoveDown].held - act[pcMoveUp].held + axes[1]/30000.;
       
       if((act[pcMoveRight] && act[pcMoveLeft]) ||
         (act[pcMoveUp] && act[pcMoveDown]))
