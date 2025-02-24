@@ -19,7 +19,7 @@ void analyze_view_post() {
 
 struct settings {
   color_t color_other = 0xFFFFFF40;
-  color_t color_main = 0xFFFFFFFF;
+  color_t color_main;
   color_t color_mirage = winf[waCloud].color;
   color_t color_mirror = winf[waMirror].color;
   int funmode = 0;
@@ -398,7 +398,7 @@ void settings::show_options() {
     });
   }
 
-void showMenu() {
+EX void showMenu() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen();
   sett.show_options();
@@ -423,29 +423,24 @@ void showMenu() {
   dialog::display();
   }
 
-void enable_fundamental() {
-  start_game(); starter = cwt.at;
-  rogueviz::rv_hook(hooks_frame, 100, fundamental_marker);
-  rogueviz::rv_hook(hooks_clearmemory, 100, clear_data);
-  rogueviz::rv_hook(hooks_o_key, 80, [] (o_funcs& v) { v.push_back(named_dialog("fundamental", showMenu)); });
-
-  current_position = Id; last_view = View;
-  rogueviz::rv_hook(hooks_preoptimize, 75, analyze_view_pre);
-  rogueviz::rv_hook(hooks_postoptimize, 75, analyze_view_post);
-  }
-
-int readArgs() {
-  using namespace arg;
-           
-  if(0) ;
-  else if(argis("-fundamental")) {
-    enable_fundamental();
-    shift(); sett.funmode = argi();
-    }
-  else return 1;
+int enable_fundamental() {
+  addHook(hooks_post_initgame, 100, [] {
+    starter = cwt.at; current_position = Id; last_view = View;
+    });
+  addHook(hooks_frame, 100, fundamental_marker);
+  addHook(hooks_clearmemory, 100, clear_data);
+  addHook(hooks_o_key, 80, [] (o_funcs& v) {
+    if(sett.funmode) v.push_back(named_dialog("fundamental", showMenu));
+    });
+  addHook(hooks_preoptimize, 75, analyze_view_pre);
+  addHook(hooks_postoptimize, 75, analyze_view_post);
+  addHook(hooks_configfile, 100, [] {
+    param_i(sett.funmode, "funmode");
+    param_color(sett.color_main, "fundamental_color_main", true, 0xFFFFFFFF);
+    });
   return 0;
   }
 
-auto fundamentalhook = addHook(hooks_args, 100, readArgs);
+auto fundamentalhook = enable_fundamental();
 }
 }
