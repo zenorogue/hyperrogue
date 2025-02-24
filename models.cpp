@@ -1087,7 +1087,7 @@ EX namespace models {
         proj->reaction = [] { update_linked(vid.tc_alpha); };
         }
       else {
-        param_f(p.alpha, sp+"projection", 1);
+        param_f(p.alpha, sp+"projection", 1)->editable(0, 1000, 1, "rug projection", "", 'p');
         }
 
       param_matrix(p.cam(), pp+"cameraangle", 3)
