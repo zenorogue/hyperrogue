@@ -190,11 +190,13 @@ string latex_packages =
   "\\usepackage{amsfonts}\n"
   "\\usepackage{varwidth}\n"
   "\\usepackage{amsfonts}\n"
+  "\\usepackage{adjustbox}\n"
   "\\usepackage{enumitem}\n"
   "\\usepackage[utf8]{inputenc}\n"
   "\\usepackage[T1]{fontenc}\n"
   "\\usepackage{color}\n"
   "\\usepackage{graphicx}\n"
+  "\\usepackage{url}\n"
   "\\definecolor{remph}{rgb}{0,0.5,0}\n"
   "\\renewcommand{\\labelitemi}{{\\color{remph}$\\blacktriangleright$}}\n";
 
