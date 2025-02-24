@@ -22,6 +22,12 @@ color_t color1, color2;
 cell *starter;
 map<cell*, set<int>> same;
 map<cell*, shiftmatrix> gm;
+int corners;
+vector<hyperpoint> abs_cornerpos;
+vector<cell*> cells;
+
+vector<cellwalker> cornerlist;
+map<cellwalker, int> corner_id;
 
 bool is_connected(cellwalker cw) {
   return same[cw.at].count(cw.spin);
@@ -109,16 +115,17 @@ int lq = 3, alpha = 32;
 
 color_t *current_domain = nullptr;
 
-void fundamental_marker() {
-  current_domain = nullptr;
-  if(!funmode || !quotient) return;
+cell *current_starter;
+
+void compute_shape() {
+  if(current_starter == starter) return;
+  current_starter = starter;
   same.clear();
   gm.clear();
   
   gm[starter] = ggmatrix(starter);
   
-  vector<cell*> cells;
-  cells.push_back(starter);
+  cells = {starter};
   
   int tree_edges = 0;
   int face_edges = 0;
@@ -168,10 +175,10 @@ void fundamental_marker() {
       }
     if(f == face_edges) break;
     }
-  
+
   cellwalker cw;
   
-  int corners = 0;
+  corners = 0;
 
   for(int k=0; k<isize(cells); k++) {
     cell *c = cells[k];
@@ -188,10 +195,8 @@ void fundamental_marker() {
 
   if(!corners) return;
   
-  // printf("tree edges = %d, face edges = %d, corners = %d\n", tree_edges, face_edges, corners);
-
-  vector<cellwalker> cornerlist;
-  map<cellwalker, int> corner_id;
+  cornerlist.clear();
+  corner_id.clear();
     
   for(int ci=0; ci<corners; ci++) {
     corner_id[cw] = cornerlist.size();
@@ -214,14 +219,19 @@ void fundamental_marker() {
 
   vid.linewidth *= widthfactor;
 
-  vector<shiftpoint> cornerpos;
-  vector<hyperpoint> abs_cornerpos;
-
+  abs_cornerpos.clear();
   for(auto c: cornerlist) {
     auto co = corner(c);
-    cornerpos.push_back(co);
     abs_cornerpos.push_back(inverse_shift(gm[starter], co));
     }
+
+  }
+
+void fundamental_marker() {
+  current_domain = nullptr;
+  if(!funmode || !quotient || GDIM == 3) return;
+  compute_shape();
+  if(!corners) return;
 
   set<unsigned> buckets_used;
 
@@ -251,6 +261,8 @@ void fundamental_marker() {
   set<cellwalker> visited;
   
   int id = 0;
+
+  auto T = ggmatrix(starter);
   
   for(int ci=0; ci<corners; ci++) {
     
@@ -261,21 +273,22 @@ void fundamental_marker() {
     if(!corner_id.count(cw1)) cw1 = cw1 + wmirror - 1, mirrored = true;
     if(!corner_id.count(cw1)) println(hlog, "still bad");
     auto ci1 = corner_id[cw1];
-    auto nx = cornerlist[ci+1];
-    auto nx1 = cornerlist[ci1+1];
-    auto pv1 = cornerlist[(ci1+corners-1) % corners];
 
-    // visited.insert(next_corner[cw]);
-    // cellwalker cw2 = next_corner[cw];
-    if(nx < (mirrored ? nx1 : cw1)) {
+    auto pcw  = T * abs_cornerpos[ci];
+    auto pnx  = T * abs_cornerpos[ci+1];
+    auto pcw1 = T * abs_cornerpos[ci1];
+    auto pnx1 = T * abs_cornerpos[ci1+1];
+    auto pv1  = T * abs_cornerpos[(ci1+corners-1) % corners];
+
+    if(ci+1 < (mirrored ? ci1+1 : ci1)) {
     
       int mc = (mirrored ? color1 : color2) >> 8;
-      if(hdist(corner(cw), corner(nx)) > 1e-3) {
-        queuestr(labelpos(corner(cw), corner(nx)), label_scale/cgi.scalefactor, its(id), mc);
+      if(hdist(pcw, pnx) > 1e-3) {
+        queuestr(labelpos(pcw, pnx), label_scale/cgi.scalefactor, its(id), mc);
         if(mirrored)
-          queuestr(labelpos(corner(cw1), corner(nx1)), label_scale/cgi.scalefactor, its(id), mc);
+          queuestr(labelpos(pcw1, pnx1), label_scale/cgi.scalefactor, its(id), mc);
         else
-          queuestr(labelpos(corner(pv1), corner(cw1)), label_scale/cgi.scalefactor, its(id), mc);
+          queuestr(labelpos(pv1, pcw1), label_scale/cgi.scalefactor, its(id), mc);
         id++;
         }      
       }
@@ -346,7 +359,16 @@ void showMenu() {
 void enable_fundamental() {
   start_game(); starter = cwt.at;
   rogueviz::rv_hook(hooks_frame, 100, fundamental_marker);
-  rogueviz::rv_hook(hooks_clearmemory, 100, [] { same.clear(); gm.clear(); bucket_color.clear(); });
+  rogueviz::rv_hook(hooks_clearmemory, 100, [] {
+    same.clear();
+    gm.clear();
+    bucket_color.clear();
+    current_starter = nullptr;
+    cornerlist.clear();
+    corner_id.clear();
+    abs_cornerpos.clear();
+    cells.clear();
+    });
   rogueviz::rv_hook(hooks_o_key, 80, [] (o_funcs& v) { v.push_back(named_dialog("fundamental", showMenu)); });
 
   current_position = Id; last_view = View;
