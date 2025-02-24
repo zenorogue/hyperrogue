@@ -17,41 +17,60 @@ void analyze_view_post() {
   last_view = View;
   }
 
-color_t color1, color2;
+struct settings {
+  color_t color_other = 0xFFFFFF40;
+  color_t color_main = 0xFFFFFFFF;
+  color_t color_mirage = winf[waCloud].color;
+  color_t color_mirror = winf[waMirror].color;
+  int funmode = 0;
+  bool single_edges = false;
+  bool fill_faces = true;
+  ld label_dist = .3;
+  ld widthfactor = 5;
+  ld label_scale = 1;
+  int lq = 3;
+  int alpha = 32;
+  void show_options();
+  } sett;
 
 cell *starter;
-map<cell*, set<int>> same;
-map<cell*, shiftmatrix> gm;
-int corners;
-vector<hyperpoint> abs_cornerpos;
-vector<cell*> cells;
 
-vector<cellwalker> cornerlist;
-map<cellwalker, int> corner_id;
+struct shapedata {
+  map<cell*, set<int>> same;
+  map<cell*, shiftmatrix> gm;
+  int corners, corners0;
+  vector<hyperpoint> abs_cornerpos;
+  vector<cell*> cells;
+  vector<cellwalker> cornerlist;
+  map<cellwalker, int> corner_id;
+  cell *current_starter;
 
-bool is_connected(cellwalker cw) {
+  bool is_connected(cellwalker cw);
+  void be_connected(cellwalker cw);
+  int group_count(cellwalker cw);
+
+  void auto_corners();
+  void find_corners();
+  shiftpoint cwcorner(cellwalker cw);
+  void compute_shape();
+  void render();
+  } sd;
+
+bool shapedata::is_connected(cellwalker cw) {
   return same[cw.at].count(cw.spin);
   }
 
-void be_connected(cellwalker cw) {
-  // transmatrix T = gm[cw.at];
+void shapedata::be_connected(cellwalker cw) {
   same[cw.at].insert(cw.spin);
   cw += wstep;
   same[cw.at].insert(cw.spin);
-  /* printf("%s", display(T * C0)); 
-  printf(" %s\n", display(gm[cw.at] * C0)); */
-  // queueline(T * C0, gm[cw.at] * C0, 0xFF0000FF, 3);
   }
 
-int funmode = 0;
 
-bool single_edges = false;
-bool fill_faces = true;
-
-shiftpoint cwcorner(cellwalker cw) {
+shiftpoint shapedata::cwcorner(cellwalker cw) {
   shiftmatrix T = gm[cw.at];
 
-  if(funmode == 2 && BITRUNCATED) {
+  if(sett.funmode == 2 && BITRUNCATED) {
     while(cw.at->type != S7) { 
       cw++; 
       T = T * currentmap->adj(cw.at, cw.spin);
@@ -63,9 +82,7 @@ shiftpoint cwcorner(cellwalker cw) {
   return gm[cw.at] * get_corner_position(cw.at, cw.spin+(cw.mirrored?0:1), 3);
   }
 
-int group_count(cellwalker cw);
-
-void auto_corners() {
+void shapedata::auto_corners() {
   cellwalker cw;
 
   corners = 0;
@@ -74,7 +91,7 @@ void auto_corners() {
     cell *c = cells[k];
     for(int i=0; i<c->type; i++) {
       cellwalker cw0(c, i);
-      if(single_edges) {
+      if(sett.single_edges) {
         if(!is_connected(cw0)) corners++, cw = cw0;
         }
       else {
@@ -98,10 +115,10 @@ void auto_corners() {
         cw += wstep;
         cw++;
         }
-      if(single_edges || group_count(cw) >= 3) break;
+      if(sett.single_edges || group_count(cw) >= 3) break;
       }
     }
-  auto corners0 = corners;
+  corners0 = corners;
   corners = isize(cornerlist);
   cornerlist.push_back(cw);
 
@@ -116,7 +133,7 @@ void auto_corners() {
   corners = isize(abs_cornerpos); abs_cornerpos.push_back(abs_cornerpos[0]);
   }
 
-void find_corners() {
+void shapedata::find_corners() {
 
   abs_cornerpos.clear();
 
@@ -130,7 +147,7 @@ void find_corners() {
     corners = sides;
     };
 
-  if(funmode == 3) switch(geometry) {
+  if(sett.funmode == 3) switch(geometry) {
     case gKleinQuartic: {
       ld a = edge_of_triangle_with_angles(90._deg, M_PI/14, M_PI*2/14);
       return build(14, a, a, 0);
@@ -167,20 +184,15 @@ transmatrix rel(cellwalker cw) {
   return currentmap->adj(cw.at, cw.spin);
   }
 
-ld label_dist = .3;
-
 shiftmatrix labelpos(shiftpoint h1, shiftpoint h2) {
   shiftpoint h = mid(h1, h2);
   shiftmatrix T = rgpushxto0(h);
   hyperpoint hx = inverse_shift(T, h2);
   ld alpha = atan2(-hx[1], hx[0]);
-  return T * xspinpush(alpha + 90._deg, label_dist);
+  return T * xspinpush(alpha + 90._deg, sett.label_dist);
   }
  
-ld widthfactor = 5;
-ld label_scale = 1;
-
-int group_count(cellwalker cw) {
+int shapedata::group_count(cellwalker cw) {
   if(is_connected(cw)) return 0;
   auto cw1 = cw;
   int groups = 0;
@@ -194,13 +206,9 @@ int group_count(cellwalker cw) {
 
 map<unsigned, color_t> bucket_color;
 
-int lq = 3, alpha = 32;
-
 color_t *current_domain = nullptr;
 
-cell *current_starter;
-
-void compute_shape() {
+void shapedata::compute_shape() {
   if(current_starter == starter) return;
   current_starter = starter;
   same.clear();
@@ -213,7 +221,7 @@ void compute_shape() {
   int tree_edges = 0;
   int face_edges = 0;
 
-  bool first_zebra_phase = geometry == gZebraQuotient && funmode == 3 && PURE;
+  bool first_zebra_phase = geometry == gZebraQuotient && sett.funmode == 3 && PURE;
   bool second_zebra_phase = false;
 
   again:
@@ -244,7 +252,7 @@ void compute_shape() {
     goto again;
     }
   
-  while(fill_faces) {
+  while(sett.fill_faces) {
     int f = face_edges;
     for(int k=0; k<isize(cells); k++) {
       cell *c = cells[k];
@@ -262,15 +270,12 @@ void compute_shape() {
   find_corners();
   }
 
-void fundamental_marker() {
-  current_domain = nullptr;
-  if(!funmode || !quotient || GDIM == 3) return;
-  compute_shape();
-  if(!corners) return;
+void shapedata::render() {
+  if(!sd.corners) return;
 
   set<unsigned> buckets_used;
 
-  for(int i=0; i<corners; i++) curvepoint_pretty(abs_cornerpos[i], abs_cornerpos[i+1], lq);
+  for(int i=0; i<corners; i++) curvepoint_pretty(sd.abs_cornerpos[i], sd.abs_cornerpos[i+1], sett.lq);
   curvepoint_first();
 
   auto pos = current_position * last_view * inverse(View);
@@ -285,7 +290,7 @@ void fundamental_marker() {
 
   int next_connection_id = 0;
 
-  dynamicval<ld> lw(vid.linewidth, vid.linewidth * widthfactor);
+  dynamicval<ld> lw(vid.linewidth, vid.linewidth * sett.widthfactor);
 
   for(auto c: cells)
   for(const shiftmatrix& V : hr::span_at(current_display->all_drawn_copies, c)) {
@@ -294,13 +299,13 @@ void fundamental_marker() {
     if(buckets_used.count(bu)) continue;
     buckets_used.insert(bu);
 
-    if(alpha && !bucket_color.count(bu)) {
-      if(bucket_color.empty()) bucket_color[bu] = alpha;
-      else bucket_color[bu] = (hrand(0x1000000) << 8) | alpha;
+    if(sett.alpha && !bucket_color.count(bu)) {
+      if(bucket_color.empty()) bucket_color[bu] = sett.alpha;
+      else bucket_color[bu] = (hrand(0x1000000) << 8) | sett.alpha;
       }
 
-    if(c == cwt.at && alpha && !current_domain) current_domain = &bucket_color[bu];
-    queuecurve_reuse(V1, color1, alpha ? bucket_color[bu] : 0, PPR::LINE);
+    if(c == cwt.at && sett.alpha && !current_domain) current_domain = &bucket_color[bu];
+    queuecurve_reuse(V1, sett.color_other, sett.alpha ? bucket_color[bu] : 0, PPR::LINE);
 
     if(bu != central_bucket) {
       for(int i=0; i<corners; i++) {
@@ -314,75 +319,95 @@ void fundamental_marker() {
       }
     }
   
-  queuecurve(T, color2, 0, PPR::LINE);
+  queuecurve(T, sett.color_main, 0, PPR::LINE);
 
   string conlabels = "123456789ABCDEFGHIJKLMNOPQRSTUVWYXZabcdefghijklmnopqrstuvwxyz$%@&+#";
 
   for(int ci=0; ci<corners; ci++) {
-    int mc = (mirrored[ci] ? color1 : color2) >> 8;
+    int mc = mirrored[ci] ? sett.color_mirror : sett.color_mirage;
     int id = connections[ci];
     if(id == -1) continue;
-    queuestr(labelpos(T * abs_cornerpos[ci], T * abs_cornerpos[ci+1]), label_scale/cgi.scalefactor, s0 + conlabels[id % isize(conlabels)], mc);
+    queuestr(labelpos(T * abs_cornerpos[ci], T * abs_cornerpos[ci+1]), sett.label_scale/cgi.scalefactor, s0 + conlabels[id % isize(conlabels)], mc);
     }
   }
 
+void fundamental_marker() {
+  current_domain = nullptr;
+  if(!sett.funmode || !quotient || !closed_manifold || GDIM == 3) return;
+  sd.compute_shape();
+  sd.render();
+  }
+
 void clear_data() {
-  same.clear();
-  gm.clear();
+  sd = {};
   bucket_color.clear();
-  current_starter = nullptr;
-  cornerlist.clear();
-  corner_id.clear();
-  abs_cornerpos.clear();
-  cells.clear();
+  }
+
+void settings::show_options() {
+  dialog::init(XLAT("display fundamental domains"), 0xFFFFFFFF, 150, 0);
+  vector<string> mode_names = {"no display", "corners", "centers", "special"};
+  dialog::addSelItem("how to construct shape", mode_names[funmode], 'm');
+  dialog::add_action([&] { funmode = (1 + funmode) % 4; clear_data(); });
+  dialog::addBoolItem("remove internal lines", fill_faces, 'r');
+  dialog::add_action([&] { fill_faces = !fill_faces; clear_data(); });
+  dialog::addBoolItem("all edges be single", single_edges, 'z');
+  dialog::add_action([&] { single_edges = !single_edges; clear_data(); });
+
+  dialog::addBreak(50);
+  dialog::addSelItem("label distance", fts(label_dist), 'd');
+  dialog::add_action([&] {
+    dialog::editNumber(label_dist, 0, 10, .1, 0.5, "label fistance", "label distance");
+    });
+  dialog::addSelItem("label scale", fts(label_scale), 's');
+  dialog::add_action([&] {
+    dialog::editNumber(label_scale, 0, 10, .1, 0.5, "label scale", "label scale");
+    });
+  dialog::addSelItem("line width factor", fts(widthfactor), 'w');
+  dialog::add_action([&] {
+    dialog::editNumber(widthfactor, 0, 5, .1, 1, "line width factor", "line width factor");
+    });
+  dialog::addColorItem("boundary of central domain", color_main, 'c');
+  dialog::add_action([&] () {
+    dialog::openColorDialog(color_main, NULL);
+    dialog::get_di().dialogflags |= sm::MAYDARK | sm::SIDE;
+    });
+  dialog::addColorItem("boundary of other domains", color_other, 'o');
+  dialog::add_action([&] () {
+    dialog::openColorDialog(color_other, NULL);
+    dialog::get_di().dialogflags |= sm::MAYDARK | sm::SIDE;
+    });
+  dialog::addColorItem("label color", color_mirage, 'd');
+  dialog::add_action([&] () {
+    dialog::openColorDialog(color_mirage, NULL);
+    dialog::get_di().dialogflags |= sm::MAYDARK | sm::SIDE;
+    dialog::colorAlpha = false;
+    });
+  dialog::addColorItem("mirrored label color", color_mirror, 'b');
+  dialog::add_action([&] () {
+    dialog::openColorDialog(color_mirror, NULL);
+    dialog::get_di().dialogflags |= sm::MAYDARK | sm::SIDE;
+    dialog::colorAlpha = false;
+    });
+  dialog::addSelItem("line quality", its(lq), 'w');
+  dialog::add_action([&] {
+    dialog::editNumber(lq, 0, 5, 1, 3, "line quality", "line quality");
+    });
+  dialog::addSelItem("opacity of fill colors", its(alpha), 'a');
+  dialog::add_action([&] {
+    dialog::editNumber(alpha, 0, 5, 16, 32, "shade alpha", "shade alpha");
+    });
   }
 
 void showMenu() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen();
-  dialog::init(XLAT("display fundamental domains"), 0xFFFFFFFF, 150, 0);
-  vector<string> mode_names = {"no display", "corners", "centers", "special"};
-  dialog::addSelItem("mode", mode_names[funmode], 'm');
-  dialog::add_action([] { funmode = (1 + funmode) % 4; clear_data(); });
-  dialog::addSelItem("label distance", fts(label_dist), 'd');
-  dialog::add_action([] {
-    dialog::editNumber(label_dist, 0, 10, .1, 0.5, "label fistance", "label distance");
-    });
-  dialog::addSelItem("label scale", fts(label_scale), 's');
-  dialog::add_action([] {
-    dialog::editNumber(label_scale, 0, 10, .1, 0.5, "label scale", "label scale");
-    });
-  dialog::addSelItem("line width factor", fts(widthfactor), 'w');
-  dialog::add_action([] {
-    dialog::editNumber(widthfactor, 0, 5, .1, 1, "line width factor", "line width factor");
-    });
-  dialog::addColorItem("boundary of other domains", color1, 'o');
-  dialog::add_action([] () {
-    dialog::openColorDialog(color1, NULL);
-    dialog::get_di().dialogflags |= sm::MAYDARK | sm::SIDE;
-    });
-  dialog::addColorItem("boundary of central domain", color2, 'p');
-  dialog::add_action([] () {
-    dialog::openColorDialog(color2, NULL);
-    dialog::get_di().dialogflags |= sm::MAYDARK | sm::SIDE;
-    });
+  sett.show_options();
+  dialog::addBreak(100);
   dialog::addSelItem("set the central tile to current position", its(celldistance(starter, cwt.at)), 's');
   dialog::add_action([] () {
     starter = cwt.at;
     });
-  dialog::addBoolItem("remove internal lines", fill_faces, 'r');
-  dialog::add_action([] { fill_faces = !fill_faces; clear_data(); });
-  dialog::addBoolItem("all edges be single", single_edges, 'z');
-  dialog::add_action([] { single_edges = !single_edges; clear_data(); });
-  dialog::addSelItem("line quality", its(lq), 'w');
-  dialog::add_action([] {
-    dialog::editNumber(lq, 0, 5, 1, 3, "line quality", "line quality");
-    });
-  dialog::addSelItem("opacity of fill colors", its(alpha), 'a');
-  dialog::add_action([] {
-    dialog::editNumber(alpha, 0, 5, 16, 32, "shade alpha", "shade alpha");
-    });
-  if(alpha) {
+  if(sett.alpha) {
     dialog::addItem("reshuffle all fill colors", 'r');
     dialog::add_action([] { bucket_color.clear(); });
     if(current_domain) {
@@ -413,23 +438,9 @@ int readArgs() {
   using namespace arg;
            
   if(0) ;
-  else if(argis("-fundamental0")) {
-    enable_fundamental();
-    }
   else if(argis("-fundamental")) {
-    shift(); funmode = argi();
-    shift(); color1 = arghex();
-    shift(); color2 = arghex();
-    shift_arg_formula(widthfactor);
-    shift_arg_formula(label_scale);
-    shift_arg_formula(label_dist);
     enable_fundamental();
-    }
-  else if(argis("-fundamental-more")) {
-    shift(); single_edges = argi();
-    shift(); fill_faces = argi();
-    shift(); lq = argi();
-    shift(); alpha = argi();
+    shift(); sett.funmode = argi();
     }
   else return 1;
   return 0;
