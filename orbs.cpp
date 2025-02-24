@@ -1261,7 +1261,7 @@ EX movei blowoff_destination(cell *c, int& di) {
   }
 
 EX int check_jump(cell *cf, cell *ct, flagtype flags, jumpdata& jdata) {
-  int partial = 1;
+  int partial = 1; jdata.uniq = false;
   forCellCM(c2, cf) {
     if(isNeighbor(c2, ct)) {
       jdata.jumpthru = c2;
@@ -1277,7 +1277,7 @@ EX int check_jump(cell *cf, cell *ct, flagtype flags, jumpdata& jdata) {
   }
 
 EX int check_phase(cell *cf, cell *ct, flagtype flags, jumpdata& jdata) {
-  int partial = 1;
+  int partial = 1; jdata.uniq = false;
   forCellCM(c2, cf) {
     if(isNeighbor(c2, ct) && !nonAdjacent(cf, c2) && !nonAdjacent(c2, ct)) {
       jdata.jumpthru = c2;
