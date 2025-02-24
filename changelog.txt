@@ -5410,3 +5410,15 @@ Mostly bug fixes:
 - fixed some bugs with portal maps
 - in the crossbow mode, do not auto-shoot and avoid hitting friends
 - fixed the "layered equidistant" projection in twisted H2xR
+
+2025-02-24 11:40 Update 13.0x
+New features:
+- in Experiments with Geometry, a new option to display the fundamental domain
+- shallow water now used as the first line of the beach
+- draw OoSpeed swirls smaller on turns without its effect (thanks to jlm)
+
+Bug fixes:
+- a possible crash with Orb of the Frog / Orb of Phasing
+- incorrect scrolling when clicking the mousewheel from outside the Poincare disk
+- 'joystick initialization' moved from 'old-style joystick configuration' to 'keyboards & joysticks'
+- loading a map from the drawing tool sometimes caused a crash
