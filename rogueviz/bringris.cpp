@@ -2254,6 +2254,7 @@ void save(const gamedata& sd) {
   fhstream f("bringris.save", "at");
   println(f, "Bringris ", BRINGRIS_VER);
   println(f, sd.bgeom_name);
+  println(f, "unnamed");
   println(f, sd.timerstart);
   println(f, sd.timerend);
   println(f, sd.max_piece, " ", sd.pro_game ? sd.score : -1, " ", sd.bricks, " ", sd.completed, " ", sd.cubes, " ", sd.well_size, " ", sd.levelsize, " ", sd.seconds);
