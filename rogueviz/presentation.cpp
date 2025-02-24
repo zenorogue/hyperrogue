@@ -92,7 +92,6 @@ void non_game_slide(presmode mode) {
     tour::slide_backup(vid.drawmousecircle, false);
     tour::slide_backup(draw_centerover, false);
     }
-  no_other_hud(mode);
   }
 
 void non_game_slide_scroll(presmode mode) {
