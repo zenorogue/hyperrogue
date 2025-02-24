@@ -1496,7 +1496,7 @@ void adjust_animation(ld part) {
     hyperpoint vec = inverse_exp(shiftless(tC0(T)));
     transmatrix Tspin = gpushxto0(tC0(T)) * T;
     ld alpha = atan2(Tspin*xpush0(1));
-    println(hlog, "vec=", vec, " part = ", part);
+    // println(hlog, "vec=", vec, " part = ", part);
     pView = spin(alpha * part) * gpushxto0(direct_exp(vec*part)) * pView;
     fixmatrix(pView);
     View = tView;
