@@ -334,8 +334,12 @@ void shapedata::render() {
     int mc = mirrored[ci] ? sett.color_mirror : sett.color_mirage;
     int id = connections[ci];
     if(id == -1) continue;
-    string lab = s0 + conlabels[id % isize(conlabels)];
-    for(int i=0; i<id / isize(conlabels); i++) lab += "'";
+    id++;
+    string lab = s0;
+    while(id) {
+      lab += conlabels[(id-1) % isize(conlabels)];
+      id /= isize(conlabels);
+      }
     queuestr(labelpos(T * abs_cornerpos[ci], T * abs_cornerpos[ci+1]), sett.label_scale/cgi.scalefactor, lab, mc);
     }
   }
