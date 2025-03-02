@@ -2563,6 +2563,7 @@ struct flat_model_enabler {
   };
 #endif
 
+/** atscreenpos(x,y) * eupoint(x1,y1) renders at pixel coordinates (x+x1, y+y1) */
 EX shiftmatrix atscreenpos(ld x, ld y) {
   transmatrix V = Id;
   
@@ -2591,6 +2592,7 @@ EX shiftmatrix atscreenpos(ld x, ld y) {
   return shiftless(V);
   }
 
+/** here, size is relative to the 'standard size' */
 EX shiftmatrix atscreenpos(ld x, ld y, ld size) {
   shiftmatrix V = atscreenpos(x, y);
   ld s = size * 2 * cgi.hcrossf / cgi.crossf;
