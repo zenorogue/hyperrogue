@@ -2563,31 +2563,39 @@ struct flat_model_enabler {
   };
 #endif
 
-EX transmatrix atscreenpos(ld x, ld y, ld size) {
+EX transmatrix atscreenpos(ld x, ld y) {
   transmatrix V = Id;
   
   if(pmodel == mdPixel) {
     V[0][3] += (x - current_display->xcenter);
     V[1][3] += (y - current_display->ycenter);
-    V[0][0] = size * 2 * cgi.hcrossf / cgi.crossf;
-    V[1][1] = size * 2 * cgi.hcrossf / cgi.crossf;
+    V[0][0] = 1;
+    V[1][1] = 1;
     if(WDIM == 3) V[2][2] = -1;
     }
   else if(pmodel == mdHorocyclic) {
     V[0][3] += (x - current_display->xcenter) * 2 / current_display->radius;
     V[1][3] += (y - current_display->ycenter) * 2/ current_display->radius;
-    V[0][0] = size * 2 / current_display->radius;
-    V[1][1] = size * 2 / current_display->radius;
+    V[0][0] = 1;
+    V[1][1] = 1;
     }
   else { 
     V[0][2] += (x - current_display->xcenter);
     V[1][2] += (y - current_display->ycenter);
-    V[0][0] = size * 2 * cgi.hcrossf / cgi.crossf;
-    V[1][1] = size * 2 * cgi.hcrossf / cgi.crossf;
+    V[0][0] = 1;
+    V[1][1] = 1;
     V[2][2] = current_display->radius;
     if(S3 >= OINF) V[0][0] /= 5, V[1][1] /= 5;
     }
 
+  return V;
+  }
+
+EX transmatrix atscreenpos(ld x, ld y, ld size) {
+  transmatrix V = atscreenpos(x, y);
+  ld s = size * 2 * cgi.hcrossf / cgi.crossf;
+  V[0][0] *= s;
+  V[1][1] *= s;
   return V;
   }
 
