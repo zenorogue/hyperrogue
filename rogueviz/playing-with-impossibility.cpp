@@ -95,7 +95,7 @@ void nil_screen(presmode mode, int id) {
     slide_backup(pconf.clip_min);
     slide_backup(pconf.clip_max);
     slide_backup(vid.cells_drawn_limit);
-    stop_game(), pmodel = mdHorocyclic, geometry = gCubeTiling, pconf.clip_min = -10000, pconf.clip_max = +100, start_game();
+    stop_game(), pmodel = mdHorocyclic, geometry = gCubeTiling, variation = eVariation::pure, pconf.clip_min = -10000, pconf.clip_max = +100, start_game();
     }
   add_stat(mode, [id] {
     cmode |= sm::SIDE;
@@ -272,8 +272,6 @@ void nil_screen(presmode mode, int id) {
     dialog_may_latex(dirbox("D:") + cbox("(x,y,z+d)"), "D: (x,y,z+d)");
     dialog::display();
     
-    dynamicval<eGeometry> gg(geometry, gNil);
-
     return false;
     });
   }
@@ -291,7 +289,7 @@ void geodesic_screen(presmode mode, int id) {
     slide_backup(pconf.clip_min);
     slide_backup(pconf.clip_max);
     slide_backup(vid.cells_drawn_limit);
-    stop_game(), pmodel = mdHorocyclic, geometry = gCubeTiling, pconf.clip_min = -10000, pconf.clip_max = +100, start_game();
+    stop_game(), pmodel = mdHorocyclic, geometry = gCubeTiling, variation = eVariation::pure, pconf.clip_min = -10000, pconf.clip_max = +100, start_game();
     }
   
   add_stat(mode, [id] {
