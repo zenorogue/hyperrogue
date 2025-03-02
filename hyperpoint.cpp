@@ -719,6 +719,10 @@ EX transmatrix euscale3(ld x, ld y, ld z) {
   return T;
   }
 
+EX hyperpoint eupoint(ld x, ld y) {
+  return hyperpoint(x, y, MDIM == 3 ? 1 : 0, 1);
+  }
+
 EX transmatrix eupush(hyperpoint h, ld co IS(1)) {
   if(nonisotropic) return nisot::translate(h, co);
   if(hyperbolic) { return co ? parabolic13_at(deparabolic13(h)) : inverse(parabolic13_at(deparabolic13(h))); }
