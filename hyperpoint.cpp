@@ -704,6 +704,13 @@ EX transmatrix euclidean_translate(ld x, ld y, ld z) {
   return T;
   }
 
+EX transmatrix euscalexx(ld x) {
+  transmatrix T = Id;
+  T[0][0] = x;
+  T[1][1] = x;
+  return T;
+  }
+
 EX transmatrix euscale(ld x, ld y) {
   transmatrix T = Id;
   T[0][0] = x;
