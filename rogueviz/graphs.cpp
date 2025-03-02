@@ -728,10 +728,10 @@ bool rogueviz_hud() {
     
     ld y = (current_display->radius * (i+.5)) / legit * 2 - current_display->radius + vid.yres/2;
 
-    transmatrix V = atscreenpos(x, y, current_display->radius/4);
+    shiftmatrix V = atscreenpos(x, y, current_display->radius/4);
     
     poly_outline = OUTLINE_NONE;
-    queuedisk(shiftless(V), vd.cp, true, NULL, i);
+    queuedisk(V, vd.cp, true, NULL, i);
     poly_outline = OUTLINE_DEFAULT;
     queuestr(int(x-rad), int(y), 0, rad*(svg::in?5:3)/4, vd.name, legend_color, 0, 16);
     }
@@ -741,10 +741,10 @@ bool rogueviz_hud() {
         
     ld y = (current_display->radius * (i+isize(legend)+.5)) / legit * 2 - current_display->radius + vid.yres/2;
 
-    transmatrix V = atscreenpos(x, y, current_display->radius/8);
+    shiftmatrix V = atscreenpos(x, y, current_display->radius/8);
     
     poly_outline = t->color | 0xFF;
-    queuepolyat(shiftless(V), cgi.shTriangle, 0, PPR::MONSTER_HEAD);
+    queuepolyat(V, cgi.shTriangle, 0, PPR::MONSTER_HEAD);
         
     poly_outline = OUTLINE_DEFAULT;
     queuestr(int(x-rad), int(y), 0, rad*(svg::in?5:3)/4, t->name, legend_color, 0, 16);

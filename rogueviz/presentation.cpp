@@ -20,15 +20,16 @@ grapher::grapher(ld _minx, ld _miny, ld _maxx, ld _maxy) : minx(_minx), miny(_mi
   ld medx = (minx + maxx) / 2;
   ld medy = (miny + maxy) / 2;
 
-  hyperpoint zero = atscreenpos(cd.xcenter - sca * medx, cd.ycenter + sca * medy, 1) * C0;
+  shiftpoint zero = atscreenpos(cd.xcenter - sca * medx, cd.ycenter + sca * medy) * C0;
 
-  hyperpoint zero10 = atscreenpos(cd.xcenter - sca * medx + sca, cd.ycenter + sca * medy, 1) * C0;
-  hyperpoint zero01 = atscreenpos(cd.xcenter - sca * medx, cd.ycenter + sca * medy - sca, 1) * C0;
+  shiftpoint zero10 = atscreenpos(cd.xcenter - sca * medx + sca, cd.ycenter + sca * medy) * C0;
+  shiftpoint zero01 = atscreenpos(cd.xcenter - sca * medx, cd.ycenter + sca * medy - sca) * C0;
   
   T = shiftless(Id);
-  T.T[LDIM] = zero;
-  T.T[0] = zero10 - zero;
-  T.T[1] = zero01 - zero;
+  T.shift = zero.shift;
+  T.T[LDIM] = zero.h;
+  T.T[0] = zero10.h - zero.h;
+  T.T[1] = zero01.h - zero.h;
   
   T.T = transpose(T.T);
   }
@@ -274,7 +275,7 @@ void dialog_add_latex(string s, color_t col, int size, flagtype flags) {
       rtver[i].texture[1] = (tex.base_y + (cy[i] ? tex.stry : 0.)) / tex.theight;
       ld x = dialog::dcenter + (cx[i]*2-1) * scale * tx;
       ld y = (dialog::top + dialog::tothei)/2 + (cy[i]*2-1) * scale * ty;
-      rtver[i].coords = glhr::pointtogl( atscreenpos(x, y, 1) * C0 );
+      rtver[i].coords = glhr::pointtogl( atscreenpos(x, y).T * C0 );
       }
 
     glhr::be_textured();

@@ -102,12 +102,10 @@ void level::compute_plan_transform() {
   dynamicval<bool> ga(vid.always3, false);
   dynamicval<geometryinfo1> gi(ginf[gEuclid].g, giEuclid2);
   auto& cd = current_display;  
-  auto sId = shiftless(Id);
-  ld pix = 1 / (2 * cgi.hcrossf / cgi.crossf);
   ld scale_x = (vid.xres - 2 * vid.fsize) / abs(real_maxx-real_minx);
   ld scale_y = (vid.yres - 2 * vid.fsize) / abs(real_maxy-real_miny);
   ld scale = min(scale_x, scale_y);
-  plan_transform = sId * atscreenpos(cd->xcenter, cd->ycenter, pix * scale) * eupush(-(real_minx+real_maxx)/2, (real_miny+real_maxy)/2) * MirrorY;
+  plan_transform = atscreenpos(cd->xcenter, cd->ycenter) * euscalexx(scale) * eupush(-(real_minx+real_maxx)/2, (real_miny+real_maxy)/2) * MirrorY;
   }
 
 bool restored = false;
@@ -141,7 +139,7 @@ void level::draw_planning_screen() {
   auto& T = plan_transform;
   
   auto scr_to_map = [&] (hyperpoint h) {
-    transmatrix mousef = inverse(unshift(T)) * atscreenpos(h[0], h[1], 1);
+    transmatrix mousef = inverse_shift(T, atscreenpos(h[0], h[1]));
     h = mousef * C0;
     h /= h[2];
     return h;
@@ -246,12 +244,12 @@ int move_id = -1, move_dir = 0;
 bool level::handle_planning(int sym, int uni) {
   if(sym == PSEUDOKEY_WHEELUP || sym == SDLK_PAGEUP) {
     dynamicval<eGeometry> g(geometry, gEuclid);
-    plan_transform.T = atscreenpos(mousex, mousey, 1.2) * inverse(atscreenpos(mousex, mousey, 1)) * plan_transform.T;
+    plan_transform = atscreenpos(mousex, mousey, 1.2) * inverse_shift(atscreenpos(mousex, mousey, 1), plan_transform);
     return true;
     }
   if(sym == PSEUDOKEY_WHEELDOWN || sym == SDLK_PAGEDOWN) {
     dynamicval<eGeometry> g(geometry, gEuclid);
-    plan_transform.T = atscreenpos(mousex, mousey, 1) * inverse(atscreenpos(mousex, mousey, 1.2)) * plan_transform.T;
+    plan_transform = atscreenpos(mousex, mousey, 1) * inverse_shift(atscreenpos(mousex, mousey, 1.2), plan_transform);
     return true;
     }
   for(auto& b: buttons) if(uni == b.first) {

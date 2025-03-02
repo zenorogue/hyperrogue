@@ -368,59 +368,53 @@ void timestamp::draw_instruments(level* l) {
   ld cx = rad * 2;
   ld cy = rad * 2;
   
-  auto sId = shiftless(Id);
-
-  ld pix = 1 / (2 * cgi.hcrossf / cgi.crossf);
-  
   // clinometer
   
   cx += rad * 1.2;
 
+  auto ASP = atscreenpos(0, 0);
+
   for(int i=-90; i<=90; i++)
-    curvepoint(atscreenpos(cx+cos(i * degree)*rad, cy-sin(i*degree)*rad, 1) * C0);
+    curvepoint(eupoint(cx+cos(i * degree)*rad, cy-sin(i*degree)*rad));
 
-  curvepoint(atscreenpos(cx, cy+rad, 1) * C0);
-  queuecurve(sId, 0x000000FF, 0xFFFFFF80, PPR::ZERO);
+  curvepoint(eupoint(cx, cy+rad));
+  queuecurve(ASP, 0x000000FF, 0xFFFFFF80, PPR::ZERO);
   
-  curvepoint(hpxy(0, 0));
-  curvepoint(hpxy(rad, 0));
-  /* curvepoint(hpxy(rad/4, 0));
-  curvepoint(hpxy(0, rad));
-  curvepoint(hpxy(-rad/4, 0));  
-  curvepoint(hpxy(rad/4, 0)); */
-  queuecurve(sId * atscreenpos(cx, cy, pix) * spin(min_gfx_slope), 0x40, 0x40, PPR::ZERO);
+  curvepoint(eupoint(0, 0));
+  curvepoint(eupoint(rad, 0));
+  queuecurve(atscreenpos(cx, cy) * spin(min_gfx_slope), 0x40, 0x40, PPR::ZERO);
 
-  curvepoint(hpxy(rad/4, 0));
-  curvepoint(hpxy(0, rad));
-  curvepoint(hpxy(-rad/4, 0));  
-  curvepoint(hpxy(rad/4, 0));
-  queuecurve(sId * atscreenpos(cx, cy, pix) * spin(90._deg + slope), 0xFF, 0x40C040FF, PPR::ZERO);
+  curvepoint(eupoint(rad/4, 0));
+  curvepoint(eupoint(0, rad));
+  curvepoint(eupoint(-rad/4, 0));
+  curvepoint(eupoint(rad/4, 0));
+  queuecurve(atscreenpos(cx, cy) * spin(90._deg + slope), 0xFF, 0x40C040FF, PPR::ZERO);
 
   // compass
   
   cx -= rad * 1.2;
   
   for(int i=0; i<360; i++)
-    curvepoint(atscreenpos(cx-cos(i * degree)*rad, cy-sin(i*degree)*rad, 1) * C0);
+    curvepoint(eupoint(cx-cos(i * degree)*rad, cy-sin(i*degree)*rad));
   
-  queuecurve(sId, 0x000000FF, 0xFFFFFF80, PPR::ZERO);
+  queuecurve(ASP, 0x000000FF, 0xFFFFFF80, PPR::ZERO);
 
   for(int d: {1}) {
   
     // d == +1: direction arrow
     // d == -1: compass
   
-    curvepoint(hpxy(rad/4, 0));
-    curvepoint(hpxy(0, rad));
-    curvepoint(hpxy(-rad/4, 0));
+    curvepoint(eupoint(rad/4, 0));
+    curvepoint(eupoint(0, rad));
+    curvepoint(eupoint(-rad/4, 0));
     
-    queuecurve(sId * atscreenpos(cx, cy, pix) * spin(d * (90*degree + heading_angle)), 0xFF, d > 0 ? 0x0000FFFF : 0xFF0000FF, PPR::ZERO);
+    queuecurve(atscreenpos(cx, cy) * spin(d * (90*degree + heading_angle)), 0xFF, d > 0 ? 0x0000FFFF : 0xFF0000FF, PPR::ZERO);
   
-    curvepoint(hpxy(rad/4, 0));
-    curvepoint(hpxy(0, -rad));
-    curvepoint(hpxy(-rad/4, 0));
-    curvepoint(hpxy(rad/4, 0));
-    queuecurve(sId * atscreenpos(cx, cy, pix) * spin(d * (90*degree + heading_angle)), 0xFF, 0xFFFFFFFF, PPR::ZERO);
+    curvepoint(eupoint(rad/4, 0));
+    curvepoint(eupoint(0, -rad));
+    curvepoint(eupoint(-rad/4, 0));
+    curvepoint(eupoint(rad/4, 0));
+    queuecurve(atscreenpos(cx, cy) * spin(d * (90*degree + heading_angle)), 0xFF, 0xFFFFFFFF, PPR::ZERO);
     }
   
   // speed meter
@@ -428,8 +422,8 @@ void timestamp::draw_instruments(level* l) {
   cx += rad * 3.4;
   
   for(int i=0; i<360; i++)
-    curvepoint(atscreenpos(cx-cos(i * degree)*rad, cy-sin(i*degree)*rad, 1) * C0);
-  queuecurve(sId, 0x000000FF, 0xFFFFFF80, PPR::ZERO);  
+    curvepoint(eupoint(cx-cos(i * degree)*rad, cy-sin(i*degree)*rad));
+  queuecurve(ASP, 0x000000FF, 0xFFFFFF80, PPR::ZERO);
   
   auto e_to_angle = [] (ld energy) {
     return 135*degree - 3 * atan(energy/10);
@@ -439,26 +433,26 @@ void timestamp::draw_instruments(level* l) {
   
   for(auto h: short_lines) {
     auto a = e_to_angle(h);
-    curvepoint(hpxy(-sin(a)*rad*.95, -cos(a)*rad*.95));
-    curvepoint(hpxy(-sin(a)*rad*.85, -cos(a)*rad*.85));
-    queuecurve(sId * atscreenpos(cx, cy, pix), 0xFF, 0, PPR::ZERO);
+    curvepoint(eupoint(-sin(a)*rad*.95, -cos(a)*rad*.95));
+    curvepoint(eupoint(-sin(a)*rad*.85, -cos(a)*rad*.85));
+    queuecurve(atscreenpos(cx, cy), 0xFF, 0, PPR::ZERO);
     }
 
   vector<ld> long_lines = {0, 1, 5, 10, 20, 50};
   
   for(auto h: long_lines) {
     auto a = e_to_angle(h);
-    curvepoint(hpxy(-sin(a)*rad*.95, -cos(a)*rad*.95));
-    curvepoint(hpxy(-sin(a)*rad*.75, -cos(a)*rad*.75));
-    queuecurve(sId * atscreenpos(cx, cy, pix), 0xFF, 0, PPR::ZERO);
+    curvepoint(eupoint(-sin(a)*rad*.95, -cos(a)*rad*.95));
+    curvepoint(eupoint(-sin(a)*rad*.75, -cos(a)*rad*.75));
+    queuecurve(atscreenpos(cx, cy), 0xFF, 0, PPR::ZERO);
     displaystr(cx -sin(a)*rad*.65, cy -cos(a)*rad*.65, 0, 8, its(h), 0, 8);
     }
 
-  curvepoint(hpxy(rad/4, 0));
-  curvepoint(hpxy(0, -rad));
-  curvepoint(hpxy(-rad/4, 0));
-  curvepoint(hpxy(rad/4, 0));
-  queuecurve(sId * atscreenpos(cx, cy, pix) * spin(e_to_angle(energy_in_squares())), 0xFF, 0xFF8080FF, PPR::ZERO);
+  curvepoint(eupoint(rad/4, 0));
+  curvepoint(eupoint(0, -rad));
+  curvepoint(eupoint(-rad/4, 0));
+  curvepoint(eupoint(rad/4, 0));
+  queuecurve(atscreenpos(cx, cy) * spin(e_to_angle(energy_in_squares())), 0xFF, 0xFF8080FF, PPR::ZERO);
   
   cx += rad;
 
@@ -475,7 +469,7 @@ void timestamp::draw_instruments(level* l) {
       f = 0x40;
       }
 
-    queuepoly(sId * atscreenpos(cx+rad/2, cy+(tid&1?1:-1)*rad/3, pix * rad * 1.2) * spin(90*degree), cgi.shTriangle, f);
+    queuepoly(atscreenpos(cx+rad/2, cy+(tid&1?1:-1)*rad/3) * euscalexx(rad * 1.2) * spin(90*degree), cgi.shTriangle, f);
     tid++;
     if(tid == 2) { tid = 0; cx += rad/1.4; }
     }
@@ -486,7 +480,7 @@ void timestamp::draw_instruments(level* l) {
   for(auto& g: l->goals) {
     bool gfailed = failed & Flag(gid);
     bool gsuccess = goals & Flag(gid);
-    shiftmatrix T = sId * atscreenpos(cx+rad/2, cy+(gid-1)*rad/1.2, pix * rad * 1.2);
+    shiftmatrix T = atscreenpos(cx+rad/2, cy+(gid-1)*rad/1.2) * euscalexx(rad * 1.2);
     poly_outline = 0xFF; color_t f = darkena(g.color, 0, 0xFF);
     if(gsuccess) {
       queuepoly(T * spin(90*degree), cgi.shGrail, f);

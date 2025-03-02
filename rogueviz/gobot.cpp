@@ -228,44 +228,44 @@ void go_screenshot_content() {
   ld rad = vid.fsize;
 
   if(sc.stones[0] > 0) {
-    shiftmatrix V = shiftless(atscreenpos(rad, rad, rad));
+    shiftmatrix V = atscreenpos(rad, rad, rad);
     queuepolyat(V, cgi.shHugeDisk, player_colors[0], PPR::SUPERLINE);
     write_in_space(V, max_glfont_size, .8, its(sc.stones[0]), player_colors[1], 1);
     }
 
   if(current.captures[0] > 0) {
-    shiftmatrix V = shiftless(atscreenpos(rad * 3, rad, rad));
+    shiftmatrix V = atscreenpos(rad * 3, rad, rad);
     write_in_space(V, max_glfont_size, .8, its(current.captures[0]), player_colors[1], 1);
     }
 
   if(sc.owned_by[0] > 0) {
-    shiftmatrix V = shiftless(atscreenpos(rad, rad * 3, rad));
+    shiftmatrix V = atscreenpos(rad, rad * 3, rad);
     write_in_space(V, max_glfont_size, .8, its(sc.owned_by[0]), player_colors[1], 1);
     }
 
   if(sc.stones[1] > 0) {
-    shiftmatrix V = shiftless(atscreenpos(vid.xres-rad, rad, rad));
+    shiftmatrix V = atscreenpos(vid.xres-rad, rad, rad);
     queuepolyat(V, cgi.shHugeDisk, player_colors[1], PPR::SUPERLINE);
     write_in_space(V, max_glfont_size, .8, its(sc.stones[1]), player_colors[0], 1);
     }
 
   if(current.captures[1] > 0) {
-    shiftmatrix V = shiftless(atscreenpos(vid.xres - rad * 3, rad, rad));
+    shiftmatrix V = atscreenpos(vid.xres - rad * 3, rad, rad);
     write_in_space(V, max_glfont_size, .8, its(current.captures[1]), player_colors[0], 1);
     }
 
   if(sc.owned_by[1] > 0) {
-    shiftmatrix V = shiftless(atscreenpos(vid.xres - rad, rad * 3, rad));
+    shiftmatrix V = atscreenpos(vid.xres - rad, rad * 3, rad);
     write_in_space(V, max_glfont_size, .8, its(sc.owned_by[1]), player_colors[1], 1);
     }
 
   if(sc.owned_by[2] > 0) {
-    shiftmatrix V = shiftless(atscreenpos(rad, vid.yres - rad, rad));
+    shiftmatrix V = atscreenpos(rad, vid.yres - rad, rad);
     write_in_space(V, max_glfont_size, .8, its(sc.owned_by[2]), player_colors[2], 1);
     }
 
   if(sc.owned_by[3] > 0) {
-    shiftmatrix V = shiftless(atscreenpos(rad, vid.yres - rad, rad));
+    shiftmatrix V = atscreenpos(rad, vid.yres - rad, rad);
     write_in_space(V, max_glfont_size, .8, its(sc.owned_by[3]), player_colors[3], 1);
     }
 

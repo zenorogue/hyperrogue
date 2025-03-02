@@ -74,8 +74,6 @@ string get_resource_name(eResourceType id);
 string get_resource_help(eResourceType id, bool help);
 
 void display(int id, int y, ld val, ld maxv, ld tank, ld unit) {
-  auto sId = shiftless(Id);
-
 //  ld pix = 1 / (2 * cgi.hcrossf / cgi.crossf);
   
   color_t col = rsrc_color[id];
@@ -87,10 +85,12 @@ void display(int id, int y, ld val, ld maxv, ld tank, ld unit) {
   ld sta = max<ld>(20, current_display->xcenter - current_display->radius + 20);
   
   if(true) ctr = 20*y+10, sta = 20;
+
+  auto ASP = atscreenpos(0,0);
   
-  for(int i=0; i<N; i+=2) curvepoint(atscreenpos(sta - 10 + shape[i+1] * 100, ctr - shape[i] * 100, 1) * C0);
+  for(int i=0; i<N; i+=2) curvepoint(eupoint(sta - 10 + shape[i+1] * 100, ctr - shape[i] * 100));
   curvedata.push_back(curvedata[curvestart]);
-  queuecurve(sId, 0x000000FF, col, PPR::ZERO);
+  queuecurve(ASP, 0x000000FF, col, PPR::ZERO);
   
   ld siz = 150;
   ld fen = sta + siz;
@@ -114,35 +114,35 @@ void display(int id, int y, ld val, ld maxv, ld tank, ld unit) {
     return;
     }
   
-  curvepoint(atscreenpos(sta, top, 1) * C0);
-  curvepoint(atscreenpos(fen, top, 1) * C0);
-  curvepoint(atscreenpos(fen, bot, 1) * C0);
-  curvepoint(atscreenpos(sta, bot, 1) * C0);
-  curvepoint(atscreenpos(sta, top, 1) * C0);
-  queuecurve(sId, col, col - 128, PPR::ZERO);
+  curvepoint(eupoint(sta, top));
+  curvepoint(eupoint(fen, top));
+  curvepoint(eupoint(fen, bot));
+  curvepoint(eupoint(sta, bot));
+  curvepoint(eupoint(sta, top));
+  queuecurve(ASP, col, col - 128, PPR::ZERO);
   
   if(val > 0) {
     ld end = sta + siz * val / maxv;
-    curvepoint(atscreenpos(sta, top, 1) * C0);
-    curvepoint(atscreenpos(end, top, 1) * C0);
-    curvepoint(atscreenpos(end, bot, 1) * C0);
-    curvepoint(atscreenpos(sta, bot, 1) * C0);
-    curvepoint(atscreenpos(sta, top, 1) * C0);
-    queuecurve(sId, col, col, PPR::ZERO);
+    curvepoint(eupoint(sta, top));
+    curvepoint(eupoint(end, top));
+    curvepoint(eupoint(end, bot));
+    curvepoint(eupoint(sta, bot));
+    curvepoint(eupoint(sta, top));
+    queuecurve(ASP, col, col, PPR::ZERO);
     }
   
   if(unit > 0 && maxv / unit <= siz/2 + 1e-6) for(ld u=unit; u<maxv-1e-3; u+=unit) {
     ld at = sta + siz * u / maxv;
-    curvepoint(atscreenpos(at, top, 1) * C0);
-    curvepoint(atscreenpos(at, ctr, 1) * C0);
-    queuecurve(sId, 0x80, 0, PPR::ZERO);
+    curvepoint(eupoint(at, top));
+    curvepoint(eupoint(at, ctr));
+    queuecurve(ASP, 0x80, 0, PPR::ZERO);
     }
 
   if(tank > 0 && maxv / tank <= siz/2 + 1e-6) for(ld u=tank; u<maxv-1e-3; u+=tank) {
     ld at = sta + siz * (1 - u / maxv);
-    curvepoint(atscreenpos(at, ctr, 1) * C0);
-    curvepoint(atscreenpos(at, bot, 1) * C0);
-    queuecurve(sId, 0x80, 0, PPR::ZERO);
+    curvepoint(eupoint(at, ctr));
+    curvepoint(eupoint(at, bot));
+    queuecurve(ASP, 0x80, 0, PPR::ZERO);
     }  
   }
 

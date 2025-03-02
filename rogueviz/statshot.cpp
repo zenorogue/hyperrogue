@@ -7,14 +7,12 @@ namespace statshot {
 void fadeout(ld val) {
   flat_model_enabler fme;
   initquickqueue();
-  ld pix = 1 / (2 * cgi.hcrossf / cgi.crossf);
   curvepoint(hyperpoint(-10, -10, 1, 1));
   curvepoint(hyperpoint(vid.xres + 10, -10, 1, 1));
   curvepoint(hyperpoint(vid.xres + 10, vid.yres + 10, 1, 1));
   curvepoint(hyperpoint(-10, vid.yres + 10, 1, 1));
   curvepoint(hyperpoint(-10, -10, 1, 1));
-  shiftmatrix V = shiftless(atscreenpos(0, 0, pix));
-  queuecurve(V, 0, (backcolor << 8) | int(val * 255), PPR::LINE);
+  queuecurve(atscreenpos(0, 0), 0, (backcolor << 8) | int(val * 255), PPR::LINE);
   quickqueue();
   }
 
