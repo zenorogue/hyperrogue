@@ -3194,8 +3194,16 @@ EX transmatrix inverse_shift(const shiftmatrix& T1, const shiftmatrix& T2) {
   return iso_inverse(T1.T) * unshift(T2, T1.shift);
   }
 
+EX transmatrix inverse_shift_any(const shiftmatrix& T1, const shiftmatrix& T2) {
+  return inverse(T1.T) * unshift(T2, T1.shift);
+  }
+
 EX hyperpoint inverse_shift(const shiftmatrix& T1, const shiftpoint& T2) {
   return iso_inverse(T1.T) * unshift(T2, T1.shift);
+  }
+
+EX hyperpoint inverse_shift_any(const shiftmatrix& T1, const shiftpoint& T2) {
+  return inverse(T1.T) * unshift(T2, T1.shift);
   }
 
 EX void optimize_shift(shiftpoint& h) {
