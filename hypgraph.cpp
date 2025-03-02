@@ -2563,7 +2563,7 @@ struct flat_model_enabler {
   };
 #endif
 
-EX transmatrix atscreenpos(ld x, ld y) {
+EX shiftmatrix atscreenpos(ld x, ld y) {
   transmatrix V = Id;
   
   if(pmodel == mdPixel) {
@@ -2588,14 +2588,14 @@ EX transmatrix atscreenpos(ld x, ld y) {
     if(S3 >= OINF) V[0][0] /= 5, V[1][1] /= 5;
     }
 
-  return V;
+  return shiftless(V);
   }
 
-EX transmatrix atscreenpos(ld x, ld y, ld size) {
-  transmatrix V = atscreenpos(x, y);
+EX shiftmatrix atscreenpos(ld x, ld y, ld size) {
+  shiftmatrix V = atscreenpos(x, y);
   ld s = size * 2 * cgi.hcrossf / cgi.crossf;
-  V[0][0] *= s;
-  V[1][1] *= s;
+  V.T[0][0] *= s;
+  V.T[1][1] *= s;
   return V;
   }
 

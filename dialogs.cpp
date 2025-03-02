@@ -536,8 +536,7 @@ EX namespace dialog {
 
     flat_model_enabler fme;
     initquickqueue();
-    ld pix = 1 / (2 * cgi.hcrossf / cgi.crossf);
-    shiftmatrix V = shiftless(atscreenpos(0, 0, pix));
+    shiftmatrix ASP = atscreenpos(0, 0);
 
     color_t col = 0xFFFFFFFF;
 
@@ -546,22 +545,22 @@ EX namespace dialog {
 
     int yb = yt + list_actual_size;
 
-    curvepoint(hyperpoint(x-si, yt, 1, 1));
+    curvepoint(eupoint(x-si, yt));
     for(int i=0; i<=a/2; i++)
-      curvepoint(hyperpoint(x - si * cos(i*TAU/a), yb + si * sin(i*TAU/a), 1, 1));
+      curvepoint(eupoint(x - si * cos(i*TAU/a), yb + si * sin(i*TAU/a)));
     for(int i=(a+1)/2; i<=a; i++)
-      curvepoint(hyperpoint(x - si * cos(i*TAU/a), yt + si * sin(i*TAU/a), 1, 1));
-    queuecurve(V, col, 0x80, PPR::LINE);
+      curvepoint(eupoint(x - si * cos(i*TAU/a), yt + si * sin(i*TAU/a)));
+    queuecurve(ASP, col, 0x80, PPR::LINE);
 
     int yt1 = yt + (list_actual_size * list_skip) / list_full_size;
     int yb1 = yt + (list_actual_size * (list_skip + list_actual_size)) / list_full_size;
 
-    curvepoint(hyperpoint(x-siz, yt1, 1, 1));
+    curvepoint(eupoint(x-siz, yt1));
     for(int i=0; i<=a/2; i++)
-      curvepoint(hyperpoint(x - siz * cos(i*TAU/a), yb1 + siz * sin(i*TAU/a), 1, 1));
+      curvepoint(eupoint(x - siz * cos(i*TAU/a), yb1 + siz * sin(i*TAU/a)));
     for(int i=(a+1)/2; i<=a; i++)
-      curvepoint(hyperpoint(x - siz * cos(i*TAU/a), yt1 + siz * sin(i*TAU/a), 1, 1));
-    queuecurve(V, col, 0x80, PPR::LINE);
+      curvepoint(eupoint(x - siz * cos(i*TAU/a), yt1 + siz * sin(i*TAU/a)));
+    queuecurve(ASP, col, 0x80, PPR::LINE);
 
     quickqueue();
     }
@@ -575,8 +574,7 @@ EX namespace dialog {
 
       flat_model_enabler fme;
       initquickqueue();
-      ld pix = 1 / (2 * cgi.hcrossf / cgi.crossf);
-      shiftmatrix V = shiftless(atscreenpos(0, 0, pix));
+      shiftmatrix ASP = atscreenpos(0, 0);
 
       color_t col = addalpha(I.color);
 
@@ -585,35 +583,35 @@ EX namespace dialog {
       if(I.type == diIntSlider && I.p2 < sw/4) {
         for(int a=0; a<=I.p2; a++) {
           ld x = sl + sw * a * 1. / I.p2;
-          curvepoint(hyperpoint(x, y-si, 1, 1));
-          curvepoint(hyperpoint(x, y+si, 1, 1));
-          queuecurve(V, col, 0, PPR::LINE);
+          curvepoint(eupoint(x, y-si));
+          curvepoint(eupoint(x, y+si));
+          queuecurve(ASP, col, 0, PPR::LINE);
           }
         }
 
-      curvepoint(hyperpoint(sl, y-si, 1, 1));
+      curvepoint(eupoint(sl, y-si));
       for(int i=0; i<=a/2; i++)
-        curvepoint(hyperpoint(sr + si * sin(i*TAU/a), y - si * cos(i*TAU/a), 1, 1));
+        curvepoint(eupoint(sr + si * sin(i*TAU/a), y - si * cos(i*TAU/a)));
       for(int i=(a+1)/2; i<=a; i++)
-        curvepoint(hyperpoint(sl + si * sin(i*TAU/a), y - si * cos(i*TAU/a), 1, 1));
-      queuecurve(V, col, 0x80, PPR::LINE);
+        curvepoint(eupoint(sl + si * sin(i*TAU/a), y - si * cos(i*TAU/a)));
+      queuecurve(ASP, col, 0x80, PPR::LINE);
       quickqueue();
 
       ld x = sl + sw * (I.type == diIntSlider ? I.p1 * 1. / I.p2 : I.param);
       if(x < sl-si) {
-        curvepoint(hyperpoint(sl-si, y, 1, 1));
-        curvepoint(hyperpoint(x, y, 1, 1));
-        queuecurve(V, col, 0x80, PPR::LINE);
+        curvepoint(eupoint(sl-si, y));
+        curvepoint(eupoint(x, y));
+        queuecurve(ASP, col, 0x80, PPR::LINE);
         quickqueue();
         }
       if(x > sr+si) {
-        curvepoint(hyperpoint(sr+si, y, 1, 1));
-        curvepoint(hyperpoint(x, y, 1, 1));
-        queuecurve(V, col, 0x80, PPR::LINE);
+        curvepoint(eupoint(sr+si, y));
+        curvepoint(eupoint(x, y));
+        queuecurve(ASP, col, 0x80, PPR::LINE);
         quickqueue();
         }
-      for(int i=0; i<=a; i++) curvepoint(hyperpoint(x + siz * sin(i*TAU/a), y - siz * cos(i*TAU/a), 1, 1));
-      queuecurve(V, col, col, PPR::LINE);
+      for(int i=0; i<=a; i++) curvepoint(eupoint(x + siz * sin(i*TAU/a), y - siz * cos(i*TAU/a)));
+      queuecurve(ASP, col, col, PPR::LINE);
       quickqueue();
       }
     else if(I.type == diSlider) {
@@ -639,28 +637,27 @@ EX namespace dialog {
 
     flat_model_enabler fme;
     initquickqueue();
-    ld pix = 1 / (2 * cgi.hcrossf / cgi.crossf);
-    shiftmatrix V = shiftless(atscreenpos(x, y, pix));
+    shiftmatrix ASP = atscreenpos(x, y);
 
     for(int i=0; i<=360; i++)
-      curvepoint(hyperpoint(r * sin(i*degree), r*cos(i*degree), 1, 1));
-    queuecurve(V, 0xFFFFFFFF, 0x202020FF, PPR::LINE);
+      curvepoint(eupoint(r * sin(i*degree), r*cos(i*degree)));
+    queuecurve(ASP, 0xFFFFFFFF, 0x202020FF, PPR::LINE);
 
     color_t cols[3] = {0xFF8080FF, 0x80FF80FF, 0x8080FFFF};
     for(int a=0; a<dim; a++) {
       auto pt = pts[a]; pt[2] = 1; pt[3] = 1;
-      curvepoint(hyperpoint(0,0,1,1));
+      curvepoint(eupoint(0,0));
       curvepoint(pt);
       // queueline(V * hyperpoint(0,0,1,1), V * pt, cols[a], 0);
-      queuecurve(V, cols[a], 0, PPR::LINE);
+      queuecurve(ASP, cols[a], 0, PPR::LINE);
       }
     if(dim == 3) for(int a=0; a<dim; a++) {
       auto pt = pts[a]; ld val = -pt[2] * tsize / r / 5;
-      curvepoint(hyperpoint(pt[0], pt[1]+val, 1, 1));
-      curvepoint(hyperpoint(pt[0]-val, pt[1]-val*sqrt(3)/2, 1, 1));
-      curvepoint(hyperpoint(pt[0]+val, pt[1]-val*sqrt(3)/2, 1, 1));
-      curvepoint(hyperpoint(pt[0], pt[1]+val, 1, 1));
-      queuecurve(V, cols[a], cols[a] & 0xFFFFFF80, PPR::LINE);
+      curvepoint(eupoint(pt[0], pt[1]+val));
+      curvepoint(eupoint(pt[0]-val, pt[1]-val*sqrt(3)/2));
+      curvepoint(eupoint(pt[0]+val, pt[1]-val*sqrt(3)/2));
+      curvepoint(eupoint(pt[0], pt[1]+val));
+      queuecurve(ASP, cols[a], cols[a] & 0xFFFFFF80, PPR::LINE);
       }
     quickqueue();
     }
@@ -673,14 +670,12 @@ EX namespace dialog {
     if(svg::in || !(auraNOGL || vid.usingGL)) {
       flat_model_enabler fme;
       initquickqueue();
-      ld pix = 1 / (2 * cgi.hcrossf / cgi.crossf);
-      curvepoint(hyperpoint(vid.xres-dwidth, -10, 1, 1));
-      curvepoint(hyperpoint(vid.xres + 10, -10, 1, 1));
-      curvepoint(hyperpoint(vid.xres + 10, vid.yres + 10, 1, 1));
-      curvepoint(hyperpoint(vid.xres-dwidth, vid.yres + 10, 1, 1));
-      curvepoint(hyperpoint(vid.xres-dwidth, -10, 1, 1));
-      shiftmatrix V = shiftless(atscreenpos(0, 0, pix));
-      queuecurve(V, 0, col, PPR::LINE);
+      curvepoint(eupoint(vid.xres-dwidth, -10));
+      curvepoint(eupoint(vid.xres + 10, -10));
+      curvepoint(eupoint(vid.xres + 10, vid.yres + 10));
+      curvepoint(eupoint(vid.xres-dwidth, vid.yres + 10));
+      curvepoint(eupoint(vid.xres-dwidth, -10));
+      queuecurve(atscreenpos(0, 0), 0, col, PPR::LINE);
       quickqueue();
       }
 
@@ -869,13 +864,11 @@ EX namespace dialog {
             int a = uishape();
             flat_model_enabler fme;
             initquickqueue();
-            ld pix = 1 / (2 * cgi.hcrossf / cgi.crossf);
             color_t col = addalpha(I.color);
             ld sizf = dfsize * I.scale / 150;
             ld siz = sizf * sqrt(0.15+0.85*I.param/255.);
             for(int i=0; i<=a; i++) curvepoint(hyperpoint(siz * sin(i*TAU/a), -siz * cos(i*TAU/a), 1, 1));
-            shiftmatrix V = shiftless(atscreenpos(valuex + sizf, mid, pix));
-            queuecurve(V, col, (I.colorv << 8) | 0xFF, PPR::LINE);
+            queuecurve(atscreenpos(valuex + sizf, mid), col, (I.colorv << 8) | 0xFF, PPR::LINE);
             quickqueue();
             }
           else {

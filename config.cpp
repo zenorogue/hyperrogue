@@ -3591,11 +3591,10 @@ EX void showCustomizeChar() {
   flat_model_enabler fme;
 
   initquickqueue();
-  transmatrix V = atscreenpos(vid.xres/2, firsty, scale);
-  
+  shiftmatrix V = atscreenpos(vid.xres/2, firsty, scale);
   double alpha = atan2(mousex - vid.xres/2, mousey - firsty) - 90._deg;
   V = V * spin(alpha);
-  drawMonsterType(moPlayer, NULL, shiftless(V), 0, cc_footphase / scale, NOCOLOR);
+  drawMonsterType(moPlayer, NULL, V, 0, cc_footphase / scale, NOCOLOR);
   quickqueue();
   
   keyhandler = [] (int sym, int uni) {

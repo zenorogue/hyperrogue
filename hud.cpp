@@ -210,13 +210,13 @@ bool displayglyph(int cx, int cy, int buttonsize, char glyph, color_t color, int
       if(m == moKrakenH) bsize /= 3;
       if(m == moKrakenT || m == moDragonTail) bsize /= 2;
       if(m == moSlime) bsize = (2*bsize+1)/3;
-      transmatrix V = atscreenpos(cx+buttonsize/2, cy, bsize*zoom);
+      shiftmatrix V = atscreenpos(cx+buttonsize/2, cy, bsize*zoom);
       if(isWorm(m) && cgi.wormscale != 1) 
         for(int i=0; i<GDIM; i++)
           V[i][i] /= cgi.wormscale;
       int mcol = color;
       mcol -= (color & 0xFCFCFC) >> 2;
-      drawMonsterType(m, NULL, shiftless(V), mcol, glyphphase[id]/500.0, NOCOLOR);
+      drawMonsterType(m, NULL, V, mcol, glyphphase[id]/500.0, NOCOLOR);
       }
     else {
       eItem it = eItem(id);
@@ -241,14 +241,14 @@ bool displayglyph(int cx, int cy, int buttonsize, char glyph, color_t color, int
       icol -= (color & 0xFCFCFC) >> 2;
       int ic = itemclass(it);
       bsize = bsize * zoom;
-      transmatrix V = atscreenpos(cx+buttonsize/2, cy, bsize);
+      shiftmatrix V = atscreenpos(cx+buttonsize/2, cy, bsize);
       double t =
         (ic == IC_ORB || ic == IC_NAI) ? ticks*2 : 
         ((glyph == 't' && qty%5) || it == itOrbYendor) ? ticks/2 : 
         it == itTerra ? glyphphase[id] * 3 * M_PI + 900 * M_PI:
         glyphphase[id] * 2;
 
-      drawItemType(it, NULL, shiftless(V), icol, t, false);
+      drawItemType(it, NULL, V, icol, t, false);
       
       int c1 = max(color_diff(color, backcolor), color_diff(color, bordcolor));
       if(c1 < 0x80) {
@@ -426,7 +426,7 @@ void drawMobileArrow(int i) {
   double dx = xmove + rad*(1+SKIPFAC-.2)/2 * cos(alpha);
   double dy = yb + rad*(1+SKIPFAC-.2)/2 * sin(alpha);
   
-  queuepolyat(shiftless(atscreenpos(dx, dy, scale) * spin(-alpha)), cgi.shArrow, col, PPR::MOBILE_ARROW);
+  queuepolyat(atscreenpos(dx, dy, scale) * spin(-alpha), cgi.shArrow, col, PPR::MOBILE_ARROW);
   }
 #endif
 
@@ -455,8 +455,8 @@ EX void draw_crosshair() {
   if(crosshair_color && crosshair_size > 0) {
     initquickqueue();
     vid.linewidth = 1;
-    queueline(shiftless(tC0(atscreenpos(xc - crosshair_size, yc, 1))), shiftless(tC0(atscreenpos(xc + crosshair_size, yc, 1))), crosshair_color).prio = PPR::SUPERLINE;
-    queueline(shiftless(tC0(atscreenpos(xc, yc - crosshair_size, 1))), shiftless(tC0(atscreenpos(xc, yc + crosshair_size, 1))), crosshair_color).prio = PPR::SUPERLINE;
+    queueline(tC0(atscreenpos(xc - crosshair_size, yc)), tC0(atscreenpos(xc + crosshair_size, yc)), crosshair_color).prio = PPR::SUPERLINE;
+    queueline(tC0(atscreenpos(xc, yc - crosshair_size)), tC0(atscreenpos(xc, yc + crosshair_size)), crosshair_color).prio = PPR::SUPERLINE;
     quickqueue();
     }
   return;

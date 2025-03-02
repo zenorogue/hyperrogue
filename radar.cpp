@@ -116,11 +116,11 @@ EX void draw_radar(bool cornermode) {
   ld cy = subscreens::in ? cd->ytop + cd->ysize - rad - 2 - vid.fsize :
           vid.yres-rad-2 - vid.fsize;
   
-  auto sId = shiftless(Id);
+  auto ASP = atscreenpos(0, 0);
 
   for(int i=0; i<=360; i++)
-    curvepoint(atscreenpos(cx-cos(i * degree)*rad, cy-sin(i*degree)*rad, 1) * C0);
-  queuecurve(sId, 0xFFFFFFFF, 0x000000FF, PPR::ZERO);      
+    curvepoint(eupoint(cx-cos(i * degree)*rad, cy-sin(i*degree)*rad));
+  queuecurve(ASP, 0xFFFFFFFF, 0x000000FF, PPR::ZERO);      
 
   ld alpha = 15._deg;
   ld co = cos(alpha);
@@ -128,29 +128,29 @@ EX void draw_radar(bool cornermode) {
   
   if(sph && !d3) {
     for(int i=0; i<=360; i++)
-      curvepoint(atscreenpos(cx-cos(i * degree)*rad, cy-sin(i*degree)*rad*si, 1) * C0);
-    queuecurve(sId, 0, 0x200000FF, PPR::ZERO);
+      curvepoint(eupoint(cx-cos(i * degree)*rad, cy-sin(i*degree)*rad*si));
+    queuecurve(ASP, 0, 0x200000FF, PPR::ZERO);
     }
 
   if(d3) {
     for(int i=0; i<=360; i++)
-      curvepoint(atscreenpos(cx-cos(i * degree)*rad, cy-sin(i*degree)*rad*si, 1) * C0);
-    queuecurve(sId, 0xFF0000FF, 0x200000FF, PPR::ZERO);
+      curvepoint(eupoint(cx-cos(i * degree)*rad, cy-sin(i*degree)*rad*si));
+    queuecurve(ASP, 0xFF0000FF, 0x200000FF, PPR::ZERO);
   
-    curvepoint(atscreenpos(cx-sin(vid.fov*degree/2)*rad, cy-sin(vid.fov*degree/2)*rad*si, 1) * C0);
-    curvepoint(atscreenpos(cx, cy, 1) * C0);
-    curvepoint(atscreenpos(cx+sin(vid.fov*degree/2)*rad, cy-sin(vid.fov*degree/2)*rad*si, 1) * C0);
-    queuecurve(sId, 0xFF8000FF, 0, PPR::ZERO);
+    curvepoint(eupoint(cx-sin(vid.fov*degree/2)*rad, cy-sin(vid.fov*degree/2)*rad*si));
+    curvepoint(eupoint(cx, cy));
+    curvepoint(eupoint(cx+sin(vid.fov*degree/2)*rad, cy-sin(vid.fov*degree/2)*rad*si));
+    queuecurve(ASP, 0xFF8000FF, 0, PPR::ZERO);
     }
   
   if(d3) for(auto& r: cd->radarpoints) {
-    queueline(sId*atscreenpos(cx+rad * r.h[0], cy - rad * r.h[2] * si + rad * r.h[1] * co, 0)*C0, sId*atscreenpos(cx+rad*r.h[0], cy - rad*r.h[2] * si, 0)*C0, r.line, -1);
+    queueline(ASP*eupoint(cx+rad * r.h[0], cy - rad * r.h[2] * si + rad * r.h[1] * co), ASP*eupoint(cx+rad*r.h[0], cy - rad*r.h[2] * si), r.line, -1);
     }
   
   if(scompass) {
     auto compassdir = [&] (char dirname, hyperpoint h) {
       h = NLP * h * .8;
-      queueline(sId*atscreenpos(cx+rad * h[0], cy - rad * h[2] * si + rad * h[1] * co, 0)*C0, sId*atscreenpos(cx+rad*h[0], cy - rad*h[2] * si, 0)*C0, 0xA0401040, -1);
+      queueline(ASP*eupoint(cx+rad * h[0], cy - rad * h[2] * si + rad * h[1] * co), ASP*eupoint(cx+rad*h[0], cy - rad*h[2] * si), 0xA0401040, -1);
       displaychr(int(cx+rad * h[0]), int(cy - rad * h[2] * si + rad * h[1] * co), 0, 8 * mapfontscale / 100, dirname, 0xA04010);
       };
     compassdir('E', point3(+1, 0, 0));
@@ -176,9 +176,7 @@ EX void draw_radar(bool cornermode) {
   for(auto& r: cd->radarlines) {
     hyperpoint h1 = locate(r.h1);
     hyperpoint h2 = locate(r.h2);
-    h1 = tC0(atscreenpos(h1[0], h1[1], 1));
-    h2 = tC0(atscreenpos(h2[0], h2[1], 1));
-    queueline(sId*h1, sId*h2, r.line, -1);
+    queueline(ASP*eupoint(h1[0], h1[1]), ASP*eupoint(h2[0], h2[1]), r.line, -1);
     }
 
   quickqueue();

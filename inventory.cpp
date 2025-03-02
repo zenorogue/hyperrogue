@@ -545,8 +545,8 @@ EX namespace inv {
               if(gg) {
                 initquickqueue();
                 poly_outline = OUTLINE_DEFAULT;
-                transmatrix V = atscreenpos(px, py, rad*2);
-                drawItemType(o, NULL, shiftless(V), icol, ticks/3 + i * 137, false);
+                shiftmatrix V = atscreenpos(px, py, rad*2);
+                drawItemType(o, NULL, V, icol, ticks/3 + i * 137, false);
                 quickqueue();
                 }
 

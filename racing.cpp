@@ -1356,7 +1356,7 @@ void draw_ghost(ghost& ghost) {
 
 shiftmatrix racerel(ld rel) {
   int bsize = vid.fsize * 2;
-  return shiftless(atscreenpos(bsize, vid.yres - bsize - rel * (vid.yres - bsize*2) / 100, bsize) * spin90());
+  return atscreenpos(bsize, vid.yres - bsize - rel * (vid.yres - bsize*2) / 100, bsize) * spin90();
   }
 
 EX int get_percentage(cell *c) {
@@ -1383,12 +1383,12 @@ EX void drawStats() {
   
   int bsize = vid.fsize * 2;
   for(int y: {bsize, vid.yres - bsize}) {
-    curvepoint(atscreenpos(bsize, y, bsize) * C0);
-    curvepoint(atscreenpos(bsize/2, y, bsize) * C0);
-    curvepoint(atscreenpos(bsize*3/2, y, bsize) * C0);
-    curvepoint(atscreenpos(bsize, y, bsize) * C0);
+    curvepoint(eupoint(bsize, y));
+    curvepoint(eupoint(bsize/2, y));
+    curvepoint(eupoint(bsize*3/2, y));
+    curvepoint(eupoint(bsize, y));
     }
-  queuecurve(shiftless(Id), 0xFFFFFFFF, 0, PPR::ZERO);
+  queuecurve(atscreenpos(0,0), 0xFFFFFFFF, 0, PPR::ZERO);
   
   for(auto& ghost: ghostset) draw_ghost_state(ghost);
   
