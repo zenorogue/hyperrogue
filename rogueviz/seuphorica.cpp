@@ -256,14 +256,14 @@ bool draw(cell *c, const shiftmatrix& V) {
 
   int co = get_color(sco);
   if(co == beRed || co == beBlue)
-    queuepoly(V, cgi.shTriangle, co == beRed ? 0xFF0000FF : 0x0000FFFF);
+    queuepoly(V, cgi.shTriangle, darkena(co == beRed ? 0xFF0000 : 0x0000FF, 0, 0xFF));
   if(co == bePower)
-    queuepoly(V, cgi.shStar, 0x408040FF);
+    queuepoly(V, cgi.shStar, darkena(0x408040, 0, 0xFF));
   if(co == beStay)
-    queuepoly(V, cgi.shPirateX, 0x303030FF);
+    queuepoly(V, cgi.shPirateX, darkena(0x303030, 0, 0xFF));
   if(co >= beSpell) {
     spell& sp = spells[co - beSpell];
-    write_in_space(V, 72, 1, sp.greek, darkena(sp.color_value, 0, 0xFF), 0, 8, PPR::ITEM);
+    write_in_space(V, 72, 1, sp.greek, darkena(darkened(sp.color_value), 0, 0xFF), 0, 8, PPR::ITEM);
     }
 
   return false;
