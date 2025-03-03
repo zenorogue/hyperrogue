@@ -77,8 +77,8 @@ string fix(string s) {
   return s;
   }
 
-int hold_mode; /* 1 = from board, 2 = from set, 3 = drag size */
-const tile *tile_moved;
+int hold_mode; /* 1 = from board, 2 = from set, 3 = drag size, 4 = spell drag */
+tile *tile_moved;
 vector<tile>* box_moved;
 int tile_boxid;
 cell *tile_moved_from;
@@ -92,7 +92,7 @@ struct wider {
   };
 
 /** for tiles on the map, only (V,t,c) are defined; for tiles in boxes, (V,t,origbox,boxid) are defined */
-void render_tile(const shiftmatrix& V, const tile& t, cell *c, vector<tile>* origbox, int boxid) {
+void render_tile(const shiftmatrix& V, tile& t, cell *c, vector<tile>* origbox, int boxid) {
 
   auto pt0 = [&] (int id, ld r) {
     if(c) return currentmap->get_corner(c, id+1, r);
@@ -190,6 +190,13 @@ void render_tile(const shiftmatrix& V, const tile& t, cell *c, vector<tile>* ori
         holdmouse = true; hold_mode = 2;
         tile_moved = &t; box_moved = origbox; tile_boxid = boxid;
         });
+      }
+    if(mousex >= h1[0] && mousex <= h2[0] && mousey >= h1[1] && mousey <= h2[1] && holdmouse && hold_mode == 4) {
+      if(origbox == &drawn && hold_mode == 4 && holdmouse) {
+        mouseovers = "cast " + spell_desc(tile_boxid, -1) + " on: " + fix(tile_desc(t));
+        tile_moved = &t;
+        }
+      else mouseovers = "can cast spells only on tiles in hand";
       }
     }
   }
@@ -339,6 +346,11 @@ void seuphorica_screen() {
 
   if(holdmouse && hold_mode == 3) *drag_what = mousey;
 
+  if(holdmouse && hold_mode == 4) {
+    displaystr(mousex, mousey, 0, vid.fsize, spells[tile_boxid].greek, spells[tile_boxid].color_value, 8);
+    tile_moved = nullptr;
+    }
+
   ui.x0 = vid.xres - dialog::dwidth; ui.x2 = vid.xres; ui.x1 = lerp(ui.x0, ui.x2, .5);
   int ymax = vid.yres - 2 * vid.fsize;
   ui.y0 = 2 * vid.fsize;
@@ -383,16 +395,28 @@ void seuphorica_screen() {
     quickqueue();
     }
 
+  int in_row = (isize(spells) + 1) / 2;
+  for(int id=0; id<isize(spells); id++) {
+    auto& sp = spells[id];
+    if((sp.identified && enabled_id) || sp.inventory) {
+      if(displayfr(lerp(ui.x0, ui.x2, (id % in_row+1.)/(1+in_row)), ui.y3 + vid.fsize/2 + (id/in_row * vid.fsize), 1, vid.fsize, sp.greek + ": " + its(sp.inventory), sp.color_value, 8)) {
+        mouseovers = spell_desc(id, sp.inventory);
+        getcstat = 'C';
+        dialog::add_key_action('C', [=] { holdmouse = true; hold_mode = 4; tile_boxid = id; });
+        }
+      }
+    }
+
   stringstream ss;
   seuphorica::gamestats(ss); ss << ev.current_scoring;
   int size = vid.fsize;
   while(true) {
     if(size <= 3) break;
-    auto ny = dialog::displayLong(fix(ss.str()), size, ui.y3, true);
+    auto ny = dialog::displayLong(fix(ss.str()), size, ui.y3 + vid.fsize * 3, true);
     if(ny <= ymax) break;
     size = (size * 9) / 10;
     }
-  dialog::displayLong(fix(ss.str()), size, ui.y3 + vid.fsize, false);
+  dialog::displayLong(fix(ss.str()), size, ui.y3 + vid.fsize * 3, false);
 
   if(ev.valid_move) {
     displayButton(lerp(ui.x0, ui.x2, 1/6.), vid.yres - vid.fsize, just_placed.empty() ? str_skip_turn : str_play, SDLK_RETURN, 8);
@@ -409,6 +433,10 @@ void seuphorica_screen() {
     handlePanning(sym, uni);
     dialog::handleNavigation(sym, uni);
     if(uni == SDLK_ESCAPE) popScreen();
+    if(uni == PSEUDOKEY_RELEASE && hold_mode == 4 && tile_moved) {
+      swap(*tile_moved, drawn[0]);
+      cast_spell(tile_boxid);
+      }
     if(uni == PSEUDOKEY_RELEASE && among(hold_mode, 1, 2)) {
       where_is_tile[tile_moved->id] = eupoint(mousex, mousey);
       if(box_moved == &shop && current_box == &drawn) {
