@@ -382,8 +382,9 @@ void seuphorica_screen() {
         swap(drawn[tile_boxid], drawn[0]);
         back_to_shop();
         }
-      if(box_moved == &drawn && current_box == &drawn && tile_moved_from == mouseover && hold_mode == 1) {
-        /* do nothing, it was already removed from the boaud */
+      if(box_moved == &drawn && current_box == nullptr && tile_moved_from == mouseover && hold_mode == 1) {
+        /* do nothing, it was already removed from the board */
+        return;
         }
       if(box_moved == &drawn && current_box == nullptr) {
         auto at = from(mouseover);
