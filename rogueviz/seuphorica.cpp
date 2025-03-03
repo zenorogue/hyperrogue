@@ -21,7 +21,12 @@ using std::ostream;
 namespace seuphorica {
 
 void compute_score();
-void draw_board() { compute_score(); }
+void draw_board() {
+  minx=15, miny=15, maxx=0, maxy=0;
+  for(auto& b: board) if(!just_placed.count(b.first)) minx = min(minx, b.first.x), maxx = max(maxx, b.first.x), miny = min(miny, b.first.y), maxy = max(maxy, b.first.y);
+  miny -= 6; minx -= 6; maxx += 7; maxy += 7;
+  compute_score();
+  }
 
 void read_dictionary(language& l) {
   fhstream f(find_file("rogueviz/seuphorica/" + l.fname), "rt");
@@ -191,10 +196,28 @@ void render_tile(const shiftmatrix& V, const tile& t, cell *c, vector<tile>* ori
 
 bool draw(cell *c, const shiftmatrix& V) {
   auto sco = from(c);
-  c->wall = waNone; c->landparam = 0x202020;
+  bool inside = (sco.x >= minx && sco.x <= maxx && sco.y >= miny && sco.y <= maxy);
+  if(inside) {
+    c->wall = waNone; c->landparam = 0x202020;
+    }
+  else
+    c->wall = waChasm;
   if(board.count(sco)) {
     auto& t = board.at(sco);
     render_tile(V, t, c, nullptr, -1);
+    }
+  if(!inside) return false;
+
+  int co = get_color(sco);
+  if(co == beRed || co == beBlue)
+    queuepoly(V, cgi.shTriangle, co == beRed ? 0xFF0000FF : 0x0000FFFF);
+  if(co == bePower)
+    queuepoly(V, cgi.shStar, 0x408040FF);
+  if(co == beStay)
+    queuepoly(V, cgi.shPirateX, 0x303030FF);
+  if(co >= beSpell) {
+    spell& sp = spells[co - beSpell];
+    write_in_space(V, 72, 1, sp.greek, darkena(sp.color_value, 0, 0xFF), 0, 8, PPR::ITEM);
     }
 
   return false;
@@ -203,6 +226,15 @@ bool draw(cell *c, const shiftmatrix& V) {
 map<int, hyperpoint> where_is_tile;
 
 vector<tile>* current_box;
+
+string describe_color(int co) {
+  if(co == beRed) return "Red spot";
+  if(co == beBlue) return "Blue spot";
+  if(co == beStay) return "Stay spot";
+  if(co == bePower) return "Power spot";
+  if(co >= beSpell) return spell_desc(co - beSpell);
+  return "?";
+  }
 
 struct uicoords {
   int x0, x1, x2;
@@ -294,8 +326,12 @@ void seuphorica_screen() {
   gamescreen();
   if(mouseover) {
     auto at = from(mouseover);
-    if(board.count(at))
+    auto co = get_color(at);
+    if(board.count(at)) {
       mouseovers = fix(tile_desc(board.at(at)));
+      if(co) mouseovers = mouseovers + ", " + describe_color(co);
+      }
+    else if(co) mouseovers = describe_color(co);
     }
 
   dialog::init();
