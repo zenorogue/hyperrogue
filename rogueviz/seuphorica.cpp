@@ -72,18 +72,6 @@ string fix(string s) {
   return s;
   }
 
-bool draw(cell *c, const shiftmatrix& V) {
-  auto sco = from(c);
-  if(!board.count(sco)) { c->wall = waNone; c->landparam = 0x202020; }
-  else {
-    auto& t = board.at(sco);
-    c->wall = waNone; c->landparam = gsp(t).background;
-    write_in_space(V /* ** ddspin(c,cdir,0)*/, 72, 1, t.letter, darkena(gsp(t).text_color, 0, 0xFF), 0, 8);
-    }
-
-  return false;
-  }
-
 int hold_mode; /* 1 = from board, 2 = from set, 3 = drag size */
 const tile *tile_moved;
 vector<tile>* box_moved;
@@ -91,25 +79,125 @@ int tile_boxid;
 cell *tile_moved_from;
 int *drag_what;
 
-void render_tile(const shiftmatrix& V, const tile& t, vector<tile>* origbox, int boxid) {
-  curvepoint(eupoint(-1, -1));
-  curvepoint(eupoint(-1, +1));
-  curvepoint(eupoint(+1, +1));
-  curvepoint(eupoint(+1, -1));
-  curvepoint(eupoint(-1, -1));
-  queuecurve(V, 0xFF, darkena(gsp(t).background, 0, 0xFF), PPR::ZERO);
-  write_in_space(V, 72, 2, t.letter, darkena(gsp(t).text_color, 0, 0xFF), 0, 8);
- 
-  auto h1 = inverse_shift_any(atscreenpos(0, 0), V * eupoint(-1, -1));
-  auto h2 = inverse_shift_any(atscreenpos(0, 0), V * eupoint(+1, +1));
-  if(mousex >= h1[0] && mousex <= h2[0] && mousey >= h1[1] && mousey <= h2[1] && !holdmouse) {
-    mouseovers = fix(tile_desc(t));
-    getcstat = dialog::list_fake_key++;
-    dialog::add_key_action(getcstat, [&t, origbox, boxid] {
-      holdmouse = true; hold_mode = 2;
-      tile_moved = &t; box_moved = origbox; tile_boxid = boxid;
-      });
+bool tiles3 = true;
+
+struct wider {
+  dynamicval<ld> lw;
+  wider(ld x) : lw(vid.linewidth, vid.linewidth * x) {}
+  };
+
+/** for tiles on the map, only (V,t,c) are defined; for tiles in boxes, (V,t,origbox,boxid) are defined */
+void render_tile(const shiftmatrix& V, const tile& t, cell *c, vector<tile>* origbox, int boxid) {
+
+  auto pt0 = [&] (int id, ld r) {
+    if(c) return currentmap->get_corner(c, id+1, r);
+    return spin(-90._deg * id) * eupoint(-3/r, -3/r);
+    };
+
+  auto pt = [&] (ld id, ld r) {
+    int id0 = int(id);
+    if(id == id0) return pt0(id0, r);
+    auto p1 = pt0(id0, r), p2 = pt0(id0+1, r);
+    return lerp(p1, p2, id-id0);
+    };
+
+  int corners = c ? c->type : 4;
+
+  color_t back = darkena(gsp(t).background, 0, 0xFF);
+
+  auto V1 = V;
+
+  color_t lines = 0x000000FF;
+  int wide = 1;
+  if(t.rarity == 2) lines = 0xFF4040FF, wide = 2;
+  if(t.rarity == 3) lines = 0xFFFF80FF, wide = 2;
+  if(t.rarity >= 4) lines = 0x40FF80FF, wide = 2;
+  if(t.special >= sp::first_artifact) lines = 0xFFD500FF, wide = 2;
+  dynamicval<color_t> co(poly_outline, lines);
+
+  if(c && tiles3) {
+    wider w(wide);
+    set_floor(cgi.shFullFloor);
+    for(int i=0; i<c->type; i++)
+      if(!board.count(from(c->move(i)))) placeSidewall(c, i, SIDE_SLEV, V, back);
+    V1 = orthogonal_move_fol(V, cgi.SLEV[1]);
+    draw_qfi(c, V1, back, PPR::WALL3A);
     }
+  else {
+    wider w(wide);
+    for(int i=0; i<=corners; i++) curvepoint(pt(i, 3));
+    queuecurve(V, lines, back, PPR::ITEM);
+    }
+
+  const ld nearco = 4;
+
+  if(has_power(t, sp::bending)) {
+    wider w(3);
+    queueline(V1 * pt0(0, nearco), V1 * pt0(corners/2, nearco), 0xC0C0FFFF, 2);
+    }
+
+  if(has_power(t, sp::portal)) {
+    wider w(3);
+    queueline(V1 * pt0(1, nearco), V1 * pt0(1+corners/2, nearco), 0xFF8000FF, 2);
+    }
+
+  if(has_power(t, sp::horizontal)) {
+    wider w(3);
+    queueline(V1 * pt0(0, nearco), V1 * pt0(1, nearco), 0xFFFFFFFF, 2);
+    queueline(V1 * pt0(3, nearco), V1 * pt0(2, nearco), 0xFFFFFFFF, 2);
+    }
+
+  if(has_power(t, sp::vertical)) {
+    wider w(3);
+    queueline(V1 * pt0(0, nearco), V1 * pt0(3, nearco), 0xFFFFFFFF, 2);
+    queueline(V1 * pt0(1, nearco), V1 * pt0(2, nearco), 0xFFFFFFFF, 2);
+    }
+
+  if(has_power(t, sp::initial)) {
+    wider w(3);
+    queueline(V1 * pt0(0, nearco), V1 * pt0(1, nearco), 0x000000FF, 2);
+    queueline(V1 * pt0(0, nearco), V1 * pt0(corners-1, nearco), 0x000000FF, 2);
+    }
+
+  if(has_power(t, sp::final)) {
+    int ch = corners/2;
+    wider w(3);
+    queueline(V1 * pt(ch-0.3, nearco), V1 * pt0(ch-1, nearco), 0x000000FF, 2);
+    queueline(V1 * pt(ch+0.3, nearco), V1 * pt0(ch+1, nearco), 0x000000FF, 2);
+    }
+
+  if(has_power(t, sp::symmetric)) {
+    wider w(2);
+    for(int i=0; i<corners; i++)
+      queueline(V1 * pt(i+0.3, nearco), V1 * pt(i+0.7, nearco), 0xC0C0C0FF, 2);
+    }
+
+  write_in_space(V1, 72, c ? 1 : 3, t.letter, darkena(gsp(t).text_color, 0, 0xFF), 0, 8);
+  write_in_space(V1 * eupush(pt0(2, 4.5)), 72, c ? 0.4 : 1.2, its(t.value), darkena(gsp(t).text_color, 0, 0xFF), 0, 8);
+
+  if(!c) {
+    auto h1 = inverse_shift_any(atscreenpos(0, 0), V * eupoint(-1, -1));
+    auto h2 = inverse_shift_any(atscreenpos(0, 0), V * eupoint(+1, +1));
+    if(mousex >= h1[0] && mousex <= h2[0] && mousey >= h1[1] && mousey <= h2[1] && !holdmouse) {
+      mouseovers = fix(tile_desc(t));
+      getcstat = dialog::list_fake_key++;
+      dialog::add_key_action(getcstat, [&t, origbox, boxid] {
+        holdmouse = true; hold_mode = 2;
+        tile_moved = &t; box_moved = origbox; tile_boxid = boxid;
+        });
+      }
+    }
+  }
+
+bool draw(cell *c, const shiftmatrix& V) {
+  auto sco = from(c);
+  c->wall = waNone; c->landparam = 0x202020;
+  if(board.count(sco)) {
+    auto& t = board.at(sco);
+    render_tile(V, t, c, nullptr, -1);
+    }
+
+  return false;
   }
 
 map<int, hyperpoint> where_is_tile;
@@ -177,18 +265,17 @@ struct tilebox {
       }
 
     if(1) {
-      dynamicval lw(vid.linewidth, vid.linewidth * 5);
+      wider wid(5);
       queuecurve(ASP, darkena(col, 0, 0xFF), darkena(col, 0, 0x80), PPR::ZERO);
       write_in_space(ASP * eupush(*x2 - 10, *y1 + 20), 72, 50, title, darkena(col, 0, 0xFF), 16, 16);
       }
 
     int idx = 0;
     for(auto& t: *ptset) {
-      dynamicval lw(vid.linewidth, vid.linewidth * 3);
       dynamicval<ld> cs(cgi.scalefactor, 1);
       auto lt = locate_tile(t);
       if(&t == tile_moved && holdmouse) { idx++; continue; }
-      render_tile(ASP * eupush(lt) * euscalexx(20), t, ptset, idx++);
+      render_tile(ASP * eupush(lt) * euscalexx(20), t, nullptr, ptset, idx++);
       }
     }
   };
@@ -255,7 +342,7 @@ void seuphorica_screen() {
         }
       }
 
-    if(holdmouse && among(hold_mode, 1, 2)) render_tile(atscreenpos(mousex, mousey) * euscalexx(20), *tile_moved, nullptr, 0);
+    if(holdmouse && among(hold_mode, 1, 2)) render_tile(atscreenpos(mousex, mousey) * euscalexx(20), *tile_moved, nullptr, nullptr, 0);
 
     quickqueue();
     }
