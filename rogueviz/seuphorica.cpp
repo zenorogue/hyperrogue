@@ -314,6 +314,13 @@ struct tilebox {
       dynamicval<ld> cs(cgi.scalefactor, 1);
       auto lt = locate_tile(t);
       if(&t == tile_moved && holdmouse) { idx++; continue; }
+
+      if(ptset == &drawn && idx < ev.retain_count) {
+        auto T = ASP * eupush(lt) * euscalexx(20) * spin(45._deg);
+        for(int i=0; i<=4; i++) curvepoint(spin(90._deg*i) * eupoint(1,1));
+        queuecurve(T, darkena(col, 0, 0xFF), darkena(col, 0, 0x80), PPR::ZERO);
+        }
+
       render_tile(ASP * eupush(lt) * euscalexx(20), t, nullptr, ptset, idx++);
       }
     }
@@ -323,6 +330,15 @@ tilebox tb_deck(ui.x0, ui.y0, ui.x1, ui.y1, deck, 0xFF8000);
 tilebox tb_discard(ui.x1, ui.y0, ui.x2, ui.y1, discard, 0xFF0000);
 tilebox tb_hand(ui.x0, ui.y1, ui.x2, ui.y2, drawn, 0x00FF00);
 tilebox tb_shop(ui.x0, ui.y2, ui.x2, ui.y3, shop, 0xFFD500);
+
+void sort_hand() {
+  sort(drawn.begin(), drawn.end(), [] (tile &t1, tile &t2) {
+    auto h1 = tb_hand.locate_tile(t1);
+    auto h2 = tb_hand.locate_tile(t2);
+    if(h1[1] != h2[1]) return h1[1] < h2[1];
+    return h1[0] < h2[0];
+    });
+  }
 
 void seuphorica_screen() {
 
@@ -441,13 +457,20 @@ void seuphorica_screen() {
       where_is_tile[tile_moved->id] = eupoint(mousex, mousey);
       if(box_moved == &shop && current_box == &drawn) {
         buy(tile_boxid);
+        sort_hand();
+        }
+      if(box_moved == &drawn && current_box == &drawn) {
+        sort_hand();
+        return;
         }
       if(box_moved == &drawn && current_box == &shop) {
         swap(drawn[tile_boxid], drawn[0]);
         back_to_shop();
+        sort_hand();
         }
       if(box_moved == &drawn && current_box == nullptr && tile_moved_from == mouseover && hold_mode == 1) {
         /* do nothing, it was already removed from the board */
+        sort_hand();
         return;
         }
       if(box_moved == &drawn && current_box == nullptr) {
@@ -455,6 +478,7 @@ void seuphorica_screen() {
         if(!board.count(at)) {
           swap(drawn[tile_boxid], drawn[0]);
           drop_hand_on(at.x, at.y);
+          sort_hand();
           }
         }
       if(box_moved == &shop && current_box == nullptr && tile_moved->price <= cash) {
