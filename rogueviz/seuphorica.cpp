@@ -307,6 +307,10 @@ struct tilebox {
       wider wid(5);
       queuecurve(ASP, darkena(col, 0, 0xFF), darkena(col, 0, 0x80), PPR::ZERO);
       write_in_space(ASP * eupush(*x2 - 10, *y1 + 20), 72, 50, title, darkena(col, 0, 0xFF), 16, 16);
+      if(isize(*ptset))
+        write_in_space(ASP * eupush(*x2 - 10, *y1 + 40), 72, 25, its(isize(*ptset)), darkena(col, 0, 0xFF), 16, 16);
+      if(ptset == &shop)
+        write_in_space(ASP * eupush(*x2 - 10, *y2 - 10), 72, 50, its(cash) + "$", darkena(col, 0, 0xFF), 16, 16);
       }
 
     int idx = 0;
