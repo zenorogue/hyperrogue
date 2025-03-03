@@ -459,6 +459,7 @@ void launch() {
 
   showstartmenu = false;
   mapeditor::drawplayer = false;
+  color_descs = false;
   }
 
 void enable() {
