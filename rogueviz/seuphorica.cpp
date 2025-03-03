@@ -91,6 +91,42 @@ struct wider {
   wider(ld x) : lw(vid.linewidth, vid.linewidth * x) {}
   };
 
+string describe_color(int co) {
+  if(co == beRed) return "Red spot";
+  if(co == beBlue) return "Blue spot";
+  if(co == beStay) return "Stay spot";
+  if(co == bePower) return "Power spot";
+  if(co >= beSpell) return spell_desc(co - beSpell);
+  return "?";
+  }
+
+void push_tile_info_screen(tile &t, cell *c, vector<tile>* origbox, int boxid) {
+  if(&t == &empty_tile) {
+     int co = get_color(from(c));
+     gotoHelp(helptitle("map spot", 0xC000C0) + "Map spots have special powers. Try placing a tile here and see the description for the effects.\n\nThis is: " + describe_color(co));
+     return;
+     }
+  string s;
+  s = helptitle(short_desc(t), gsp(t).background);
+  s = s + fix(tile_desc(t));
+  if(c) {
+    int co = get_color(from(c));
+    if(co) s += "\n\nMap spot: " + describe_color(co);
+    }
+  gotoHelp(s);
+  if(has_power(t, sp::wild) && origbox == &drawn) {
+    auto lang = get_language(t);
+    if(!lang) lang = current;
+    char next_letter = 'A';
+    for(auto letter: lang->alphabet) {
+      char this_letter = 0;
+      if(letter.size() == 1) this_letter = letter[0];
+      else this_letter = next_letter++;
+      help_extensions.push_back(help_extension{this_letter, "become " + letter, [letter, boxid] () { wild_become(boxid, letter.c_str()); popScreen(); }});
+      }
+    }
+  }
+
 /** for tiles on the map, only (V,t,c) are defined; for tiles in boxes, (V,t,origbox,boxid) are defined */
 void render_tile(const shiftmatrix& V, tile& t, cell *c, vector<tile>* origbox, int boxid) {
 
@@ -190,6 +226,9 @@ void render_tile(const shiftmatrix& V, tile& t, cell *c, vector<tile>* origbox, 
         holdmouse = true; hold_mode = 2;
         tile_moved = &t; box_moved = origbox; tile_boxid = boxid;
         });
+      dialog::add_key_action(SDLK_F1, [&t, c, origbox, boxid] {
+        push_tile_info_screen(t, c, origbox, boxid);
+        });
       }
     if(mousex >= h1[0] && mousex <= h2[0] && mousey >= h1[1] && mousey <= h2[1] && holdmouse && hold_mode == 4) {
       if(origbox == &drawn && hold_mode == 4 && holdmouse) {
@@ -233,15 +272,6 @@ bool draw(cell *c, const shiftmatrix& V) {
 map<int, hyperpoint> where_is_tile;
 
 vector<tile>* current_box;
-
-string describe_color(int co) {
-  if(co == beRed) return "Red spot";
-  if(co == beBlue) return "Blue spot";
-  if(co == beStay) return "Stay spot";
-  if(co == bePower) return "Power spot";
-  if(co >= beSpell) return spell_desc(co - beSpell);
-  return "?";
-  }
 
 struct uicoords {
   int x0, x1, x2;
@@ -301,6 +331,13 @@ struct tilebox {
     auto h2 = inverse_shift_any(atscreenpos(0, 0), ASP * eupoint(*x2-10, *y2-10));
     if(mousex >= h1[0] + 10 && mousex <= h2[0] - 10 && mousey >= h1[1] + 10 && mousey <= h2[1] + 10) {
       current_box = ptset;
+      mouseovers = "";
+      dialog::add_key_action(SDLK_F1, [this] {
+        if(ptset == &drawn) gotoHelp("This is your hand. You can play these tiles.");
+        if(ptset == &deck) gotoHelp("This is your bag of tiles. Every turn, you drawn a number of random tiles from the bag.");
+        if(ptset == &discard) gotoHelp("This is your discard pile. After every turn, all tiles (used or unused) go to the discard pile. They return to your bag when the bag is empty.");
+        if(ptset == &shop) gotoHelp("This is the shop. You can buy tiles for your cash, by dragging them to the board or your hand.\n\nYou cannot sell tiles, except to cancel your purchase on the same turn.");
+        });
       }
 
     if(1) {
@@ -351,6 +388,10 @@ void seuphorica_screen() {
   cmode = sm::SIDE | sm::DIALOG_STRICT_X | sm::MAYDARK;
 
   gamescreen();
+  dialog::init();
+  dialog::display();
+  dialog::add_key_action(SDLK_F1, [] { gotoHelp(fix(seuphorica::rules)); });
+
   if(mouseover) {
     auto at = from(mouseover);
     auto co = get_color(at);
@@ -359,10 +400,12 @@ void seuphorica_screen() {
       if(co) mouseovers = mouseovers + ", " + describe_color(co);
       }
     else if(co) mouseovers = describe_color(co);
+    if(board.count(at) || co) {
+      dialog::add_key_action(SDLK_F1, [at] {
+        push_tile_info_screen(board.count(at) ? board.at(at) : empty_tile, mouseover, nullptr, -1);
+        });
+     }
     }
-
-  dialog::init();
-  dialog::display();
 
   if(holdmouse && hold_mode == 3) *drag_what = mousey;
 
@@ -422,7 +465,15 @@ void seuphorica_screen() {
       if(displayfr(lerp(ui.x0, ui.x2, (id % in_row+1.)/(1+in_row)), ui.y3 + vid.fsize/2 + (id/in_row * vid.fsize), 1, vid.fsize, sp.greek + ": " + its(sp.inventory), sp.color_value, 8)) {
         mouseovers = spell_desc(id, sp.inventory);
         getcstat = 'C';
-        dialog::add_key_action('C', [=] { holdmouse = true; hold_mode = 4; tile_boxid = id; });
+        dialog::add_key_action('C', [=] {
+          holdmouse = true; hold_mode = 4; tile_boxid = id;
+          });
+        dialog::add_key_action(SDLK_F1, [id] { gotoHelp(
+          helptitle("spellcasting", 0xC000C0) +
+            "This is a spell. You can cast spells by dragging them to one of the tiles in your hand.\n\n"
+            "(Some spells affect tiles, some do not; usually spells need to be identified before you know what they actually do. You need to drag all spells, just in case.)\n\n"
+            "This spell is:\n\n" + fix(spell_desc(id))
+          ); });
         }
       }
     }
@@ -443,8 +494,9 @@ void seuphorica_screen() {
     dialog::add_key_action(SDLK_RETURN, play);
     }
 
-  displayButton(lerp(ui.x0, ui.x2, 3/6.), vid.yres - vid.fsize, str_view_help, 'H', 8);
-  dialog::add_key_action('H', [] { gotoHelp(fix(seuphorica::rules)); });
+  displayButton(lerp(ui.x0, ui.x2, 3/6.), vid.yres - vid.fsize, str_view_help, SDLK_F1, 8);
+  if(getcstat == SDLK_F1)
+    dialog::add_key_action(SDLK_F1, [] { gotoHelp(fix(seuphorica::rules)); });
 
   displayButton(lerp(ui.x0, ui.x2, 5/6.), vid.yres - vid.fsize, "menu", 'Q', 8);
   dialog::add_key_action('Q', [] { quitmainloop = true; });
@@ -493,7 +545,7 @@ void seuphorica_screen() {
           }
         }
       }
-    if(uni == '-' && mouseover && !holdmouse) {
+    if(uni == '-' && mouseover && !current_box && !holdmouse) {
       auto at = from(mouseover);
       if(board.count(at)) {
         back_from_board(at.x, at.y); hold_mode = 1; tile_moved_from = mouseover;
