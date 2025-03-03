@@ -371,21 +371,17 @@ int main(int argc, char ** argv) {
   plural.insert("Elemental Planes");
   plural.insert("Crossroads IV");
   plural.insert("Kraken Depths");
-  allchars.insert("ᵈ");
-  allchars.insert("δ");
-  allchars.insert("∞");
-  allchars.insert("½");
-  allchars.insert("²");
-  allchars.insert("π");
-  allchars.insert("Θ");
-  allchars.insert("λ");
-  allchars.insert("⌫");
-  allchars.insert("⏎");
-  allchars.insert("←");
-  allchars.insert("→");
-  allchars.insert("⁻");
-  allchars.insert("ᶻ");
-  allchars.insert("√");
+  for(auto s: {
+    // superscripts
+    "¹", "²", "³", "⁻", "ᵈ", "ᶻ",
+    // other math symbols
+    "∞", "½", "√",
+    // Greek letters
+    "α", "β", "γ", "δ", "ε", "ζ", "η", "θ", "ι", "κ", "λ", "μ", "ν", "ξ", "ο", "π", "ρ", "σ", "τ", "υ", "φ", "χ", "ψ", "ω",
+    // other symbols
+    "⌫", "⏎", "←", "→"
+    })
+    allchars.insert(s);
 
   langPL(); langCZ(); langRU();
   langTR(); langDE(); langPT();
