@@ -579,6 +579,8 @@ void launch() {
   mapeditor::drawplayer = false;
   color_descs = false;
 
+  rogueviz::rv_hook(hooks_build_help, 100, [] { help = fix(seuphorica::rules); return true; });
+
   clearMessages();
   addMessage("Welcome to Seuphorica!");
   }
