@@ -794,6 +794,8 @@ void seuphorica_menu() {
     });
   dialog::addItem("quit", 'q');
   dialog::add_action([] { quitmainloop = true; });
+  dialog::addItem("cheat", 'c');
+  dialog::add_action(cheat);
   dialog::addBack();
   dialog::display();
   }
