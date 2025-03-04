@@ -642,10 +642,132 @@ void seuphorica_dictionary() {
   dialog::display();
   }
 
+language **lang_to_edit;
+
+void pick_language() {
+  dialog::init("pick language", 0xFFFF80);
+  char key = 'a';
+  for(auto l: languages) {
+    dialog::addItem(l->name, key++);
+    dialog::add_action([l] { *lang_to_edit = l; popScreen(); });
+    }
+  dialog::addBack();
+  dialog::display();
+  }
+
+enum class ss { technical, disabled, random, enabled };
+
+vector<ss> special_setting;
+
+int pick_qty = 8;
+
+void init_special_setting() {
+  int qty = int(sp::first_artifact);
+  special_setting.resize(qty);
+  for(int i=0; i<qty; i++)
+    special_setting[i] =
+      (i < 2) ? ss::technical :
+      (sp(i) == sp::naughty) ? ss::disabled :
+      (i > int(sp::naughty)) ? ss::disabled :
+      ss::random;
+  }
+
+bool want_spells = true, want_stay = true, want_power = true, want_id = true;
+int want_seed;
+
 void seuphorica_newgame() {
   cmode = sm::DARKEN;
   gamescreen();
   dialog::init("Seuphorica: new game", 0xFFFF80);
+  dialog::addSelItem("language", next_language->name, 'l');
+  lang_to_edit = &next_language; dialog::add_action_push(pick_language);
+  dialog::addItem("start new standard game", 's');
+  dialog::add_action([] {
+    View = Id; where_is_tile.clear(); current = next_language;
+    restart("", "", "");
+    popScreen(); popScreen();
+    });
+  if(!is_daily) {
+    check_daily_time();
+    dialog::addSelItem("start new daily game", its(daily), 'd');
+    dialog::add_action([] {
+      View = Id; where_is_tile.clear(); current = next_language;
+      restart((its(daily) + "9").c_str(), "D", "8");
+      popScreen(); popScreen();
+      });
+    }
+  dialog::addBreak(100);
+  dialog::start_list(900, 900, 'A');
+  int randoms = 0;
+  for(int i=0; i<isize(special_setting); i++) {
+    if(special_setting[i] == ss::technical) continue;
+    if(get_language(sp(i)) == next_language) continue;
+    dialog::addBoolItem(specials[i].caption, special_setting[i] != ss::disabled, dialog::list_fake_key++);
+    dialog::add_action([i] {
+      auto& v = special_setting[i];
+      if(v == ss::disabled) v = ss::random;
+      else if(v == ss::random) v = ss::enabled;
+      else v = ss::disabled;
+      });
+    if(special_setting[i] == ss::random) dialog::lastItem().value = "?", randoms++;
+    }
+  dialog::end_list();
+  dialog::addSelItem("random powers to pick", its(pick_qty) + "/" + its(randoms), '/');
+  dialog::add_action([randoms] {
+    dialog::editNumber(pick_qty, 0, randoms, 1, 8, "random powers to pick", "");
+    });
+  dialog::addBoolItem_action("spell spots", want_spells, 's');
+  dialog::addBoolItem_action("identification", want_id, 'i');
+  dialog::addBoolItem_action("power spots", want_power, 'p');
+  dialog::addBoolItem_action("stay spots", want_stay, 't');
+  dialog::addSelItem("seed", want_seed ? its(want_seed) : "?", 'z');
+  dialog::add_action([] {
+    dialog::editNumber(want_seed, 0, 999999, 1, rand() % 1000000, "seed", "set to 0 for random");
+    });
+  dialog::addItem("start custom game", 'c');
+  dialog::add_action([] {
+    if(!want_seed) gameseed = time(NULL);
+    else gameseed = want_seed;
+    enabled_spells = want_spells;
+    enabled_id = want_id;
+    enabled_power = want_power;
+    enabled_stay = want_stay;
+    println(hlog, "gameseed is ", gameseed);
+    std::mt19937 restrict_rng(gameseed);
+
+    auto sc = special_setting;
+    int qty = isize(sc);
+
+    for(int i=0; i<qty; i++) {
+      auto lang = get_language(sp(i));
+      if(lang == next_language) sc[i] = ss::disabled;
+      }
+
+    for(int i=0; i < pick_qty; i++) {
+      for(int j=0; j<1000; j++) {
+        int r = hrand((int) sp::first_artifact, restrict_rng);
+        println(hlog, r, tie(i, j));
+        if(sc[r] == ss::random) { sc[r] = ss::enabled; break; }
+        }
+      }
+
+    for(int i=0; i < qty; i++)
+      special_allowed[i] = sc[i] == ss::enabled;
+
+    polyglot_languages.clear();
+    for(int i=0; i<qty; i++) if(special_allowed[i]) {
+      auto lang = get_language(sp(i));
+      if(!lang) continue;
+      polyglot_languages.insert(lang);
+      }
+
+    View = Id; where_is_tile.clear(); current = next_language;
+    is_daily = false; game_restricted = false;
+    for(int i=0; i<qty; i++) if(!special_allowed[i]) game_restricted = true;
+    new_game();
+    popScreen(); popScreen();
+    });
+
   dialog::addBack();
   dialog::display();
   }
@@ -682,6 +804,7 @@ void launch() {
   ccolor::set_plain_nowall(0x202020);
   start_game();
   View = Id;
+  init_special_setting();
   restart("", "", "");
 
   showstartmenu = false;
