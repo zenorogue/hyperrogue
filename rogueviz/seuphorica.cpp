@@ -820,6 +820,10 @@ void init_special_setting() {
 bool want_spells = true, want_stay = true, want_power = true, want_id = true;
 int want_seed;
 
+void reset_rv() {
+  View = Id; where_is_tile.clear(); current = next_language;
+  }
+
 void seuphorica_newgame() {
   cmode = sm::DARKEN;
   gamescreen();
@@ -828,7 +832,7 @@ void seuphorica_newgame() {
   lang_to_edit = &next_language; dialog::add_action_push(pick_language);
   dialog::addItem("start new standard game", 's');
   dialog::add_action([] {
-    View = Id; where_is_tile.clear(); current = next_language;
+    reset_rv();
     restart("", "", "");
     popScreen(); popScreen();
     });
@@ -836,7 +840,7 @@ void seuphorica_newgame() {
     check_daily_time();
     dialog::addSelItem("start new daily game", its(daily), 'd');
     dialog::add_action([] {
-      View = Id; where_is_tile.clear(); current = next_language;
+      reset_rv();
       restart((its(daily) + "9").c_str(), "D", "8");
       popScreen(); popScreen();
       });
@@ -906,7 +910,7 @@ void seuphorica_newgame() {
       polyglot_languages.insert(lang);
       }
 
-    View = Id; where_is_tile.clear(); current = next_language;
+    reset_rv();
     is_daily = false; game_restricted = false;
     for(int i=0; i<qty; i++) if(!special_allowed[i]) game_restricted = true;
     new_game();
@@ -950,7 +954,7 @@ void launch() {
   enable_canvas();
   ccolor::set_plain_nowall(0x202020);
   start_game();
-  View = Id;
+  reset_rv();
   init_special_setting();
   restart("", "", "");
   menu_darkening = 3; /* needs more darkening than HyperRogue due to higher contrast */
