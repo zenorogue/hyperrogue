@@ -119,7 +119,7 @@ void push_tile_info_screen(tile &t, cell *c, vector<tile>* origbox, int boxid) {
     char next_letter = 'A';
     for(auto letter: lang->alphabet) {
       char this_letter = 0;
-      if(letter.size() == 1) this_letter = letter[0];
+      if(letter.size() == 1 && letter[0] >= 'A' && letter[0] <= 'Z') this_letter = letter[0] + 32;
       else this_letter = next_letter++;
       help_extensions.push_back(help_extension{this_letter, "become " + letter, [letter, boxid] () { wild_become(boxid, letter.c_str()); popScreen(); }});
       }
