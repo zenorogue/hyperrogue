@@ -356,9 +356,8 @@ void render_tile(shiftmatrix V, tile& t, cell *c, vector<tile>* origbox, int box
   auto V2 = V1;
   if(c) V2 = V2 * ddspin(c,cw.spin,0);
 
-  ld sc = c ? 1 : 3;
-  write_in_space(V2, 72, sc * gigscale, t.letter, darkena(gsp(t).text_color, 0, 0xFF), 0, 8);
-  write_in_space(V2 * xpush(cgi.scalefactor*.2*sc*gigscale) * ypush(cgi.scalefactor*.2*sc*gigscale), 72, 0.4 * sc * gigscale, its(t.value), darkena(gsp(t).text_color, 0, 0xFF), 0, 8);
+  write_in_space(V2, 72, gigscale, t.letter, darkena(gsp(t).text_color, 0, 0xFF), 0, 8);
+  write_in_space(V2 * xpush(cgi.scalefactor*.2*gigscale) * ypush(cgi.scalefactor*.2*gigscale), 72, 0.4 * gigscale, its(t.value), darkena(gsp(t).text_color, 0, 0xFF), 0, 8);
 
   if(!c && origbox) {
     auto h1 = inverse_shift_any(atscreenpos(0, 0), V * eupoint(-gigscale, -gigscale));
@@ -518,18 +517,17 @@ struct tilebox {
     if(1) {
       wider wid(5);
       queuecurve(ASP, darkena(col, 0, 0xFF), darkena(col, 0, 0x80), PPR::ZERO);
-      write_in_space(ASP * eupush(*x2 - 10, *y1 + 20), 72, 50, title, darkena(col, 0, 0xFF), 16, 16);
+      write_in_space(ASP * eupush(*x2 - 10, *y1 + 20), 72, 50/3, title, darkena(col, 0, 0xFF), 16, 16);
       if(isize(*ptset))
-        write_in_space(ASP * eupush(*x2 - 10, *y1 + 40), 72, 25, its(isize(*ptset)), darkena(col, 0, 0xFF), 16, 16);
+        write_in_space(ASP * eupush(*x2 - 10, *y1 + 40), 72, 25/3, its(isize(*ptset)), darkena(col, 0, 0xFF), 16, 16);
       if(ptset == &shop)
-        write_in_space(ASP * eupush(*x2 - 10, *y2 - 10), 72, 50, its(cash) + "$", darkena(col, 0, 0xFF), 16, 16);
+        write_in_space(ASP * eupush(*x2 - 10, *y2 - 10), 72, 50/3, its(cash) + "$", darkena(col, 0, 0xFF), 16, 16);
       }
 
     if(hr::isize(snapshots)) return;
 
     int idx = 0;
     for(auto& t: *ptset) {
-      dynamicval<ld> cs(cgi.scalefactor, 1);
       auto lt = locate_tile(t);
       if(&t == tile_moved && holdmouse) { idx++; continue; }
 
@@ -655,6 +653,7 @@ void seuphorica_screen() {
     flat_model_enabler fme;
     initquickqueue();
     dynamicval<eGeometry> g(geometry, gEuclid);
+    dynamicval<ld> gs(cgi.scalefactor, 3);
 
     current_box = nullptr;
 
