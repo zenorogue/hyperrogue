@@ -15,17 +15,84 @@ using std::stringstream;
 using std::to_string;
 using std::ostream;
 
+using coord = cell*;
+using vect2 = cellwalker;
+
+bool in_board(coord co) { return true; }
+
+vector<cell*> gigacover(cell *c) {
+  vector<cell*> res;
+  res.push_back(c->cmove(0)->cmove(1));
+  res.push_back(res.back()->cmove(2));
+  res.push_back(res.back()->cmove(2));
+  for(int i=0; i<6; i++)
+    res.push_back(res[i]->cmove(3));
+  return res;
+  }
+
+vector<cell*> orthoneighbors(cell* base) {
+  vector<coord> res;
+  forCellCM(c1, base) res.push_back(c1);
+  return res;
+  }
+
+cellwalker get_mirror(cellwalker cw) {
+  cw.spin ^= 1;
+  // cw.mirrored = !cw.mirrored;
+  return cw;
+  }
+
+vector<vect2> forward_steps(coord c) { return {cellwalker(c, 2), cellwalker(c, 3)}; }
+
+struct xy { int x; int y; };
+
+xy to_xy(cellwalker c) {
+  auto co = euc2_coordinates(c.at);
+  auto co1 = euc2_coordinates(c.peek());
+  auto co2 = co1 - co;
+  return xy{co2.first, co2.second};
+  }
+
+int dist(coord a, coord b) {
+  return celldistance(a, b);
+  }
+
+void advance(cell*& c, cellwalker& cw) {
+  cw += wstep; cw += rev; c = cw.at;
+  }
+
+cell *get_advance(cell* c, cellwalker cw) {
+  advance(c, cw); return c;
+  }
+
+cell *origin() { return currentmap->gamestart(); }
+cell *nocoord() { return nullptr; }
+
+string spotname(cell *c) { return "[TODO]"; }
+
+cellwalker getback(cellwalker& cw) {
+  return cw + rev;
+  }
+
+vector<int> get_path(coord c) {
+  auto co = euc2_coordinates(c);
+  return {0,0,0,co.first,0,0,0,co.second,0,0,0};
+  }
+
 void snapshot();
-void from_map(struct coord co, struct tile& t);
+void from_map(coord co, struct tile& t);
 void is_clone(struct tile& orig, struct tile& clone);
 }
 
 #define NONJS
+#define ALTGEOM
 #include "seuphorica/seuphorica.cpp"
 
 namespace seuphorica {
 
 void compute_score();
+
+void compute_size() {}
 
 void draw_board() {
   compute_size();
@@ -52,16 +119,6 @@ void read_naughty_dictionary(language& l) {
     l.naughty.insert(s);
   l.state = language_state::fetch_success;
   compute_score();
-  }
-
-coord from(cell *c) {
-  auto co = euc2_coordinates(c);
-  return coord(7-co.first, 7-co.second);
-  }
-
-cell* to(coord co) {
-  auto& m = euc::get_spacemap();
-  return m[euc::coord(7-co.x, 7-co.y, 0)]->c7;
   }
 
 string fix(string s) {
@@ -112,7 +169,7 @@ string describe_color(int co) {
 
 void push_tile_info_screen(tile &t, cell *c, vector<tile>* origbox, int boxid) {
   if(&t == &empty_tile) {
-     int co = get_color(from(c));
+     int co = get_color(c);
      gotoHelp(helptitle("map spot", 0xC000C0) + "Map spots have special powers. Try placing a tile here and see the description for the effects.\n\nThis is: " + describe_color(co));
      return;
      }
@@ -120,7 +177,7 @@ void push_tile_info_screen(tile &t, cell *c, vector<tile>* origbox, int boxid) {
   s = helptitle(short_desc(t), gsp(t).background);
   s = s + fix(tile_desc(t));
   if(c) {
-    int co = get_color(from(c));
+    int co = get_color(c);
     if(co) s += "\n\nMap spot: " + describe_color(co);
     }
   gotoHelp(s);
@@ -173,7 +230,7 @@ void render_tile(shiftmatrix V, tile& t, cell *c, vector<tile>* origbox, int box
     wider w(wide);
     set_floor(cgi.shFullFloor);
     for(int i=0; i<c->type; i++)
-      if(!board.count(from(c->move(i)))) placeSidewall(c, i, SIDE_SLEV, V, back);
+      if(!board.count(c->move(i))) placeSidewall(c, i, SIDE_SLEV, V, back);
     V1 = orthogonal_move_fol(V, cgi.SLEV[1]);
     if(!gig) draw_qfi(c, V1, back, PPR::WALL3A);
     }
@@ -184,7 +241,7 @@ void render_tile(shiftmatrix V, tile& t, cell *c, vector<tile>* origbox, int box
     }
 
   if(c && gig) {
-    if(gigants.at(from(c)) != from(c) - coord{1,1}) return;
+    if(gigants.at(c) != c) return;
     draw_qfi(c, V1 * euscalexx(3), back, PPR::WALL3A);
     }
 
@@ -261,22 +318,20 @@ void render_tile(shiftmatrix V, tile& t, cell *c, vector<tile>* origbox, int box
   }
 
 bool draw(cell *c, const shiftmatrix& V) {
-  auto sco = from(c);
-  bool inside = (sco.x >= minx && sco.x <= maxx && sco.y >= miny && sco.y <= maxy);
+  bool inside = in_board(c);
   if(inside) {
     c->wall = waNone; c->landparam = 0x202020;
     }
   else
     c->wall = waChasm;
-  if(board.count(sco)) {
-    auto& t = board.at(sco);
+  if(board.count(c)) {
+    auto& t = board.at(c);
     render_tile(V, t, c, nullptr, -1);
     }
   if(!inside) return false;
 
-  if(portals.count(sco)) {
-    auto sco1 = portals.at(sco);
-    auto c1 = to(sco1);
+  if(portals.count(c)) {
+    auto c1 = portals.at(c);
     for(const shiftmatrix& V1: hr::span_at(current_display->all_drawn_copies, c1)) {
       queueline(V * currentmap->get_corner(c, 2, 4), V1 * currentmap->get_corner(c1, 2, 4), 0xFF800080);
       queueline(V * currentmap->get_corner(c, 2+c->type/2, 4), V1 * currentmap->get_corner(c1, 2+c->type/2, 4), 0x0000FF80);
@@ -290,7 +345,7 @@ bool draw(cell *c, const shiftmatrix& V) {
       }
     }
 
-  int co = get_color(sco);
+  int co = get_color(c);
   if(co == beRed || co == beBlue)
     queuepoly(V, cgi.shTriangle, darkena(co == beRed ? 0xFF0000 : 0x0000FF, 0, 0xFF));
   if(co == bePower)
@@ -435,7 +490,7 @@ void snapshot() {
     }
   }
 
-void from_map(struct coord co, struct tile& t) {
+void from_map(coord co, struct tile& t) {
   snapshots.back().emplace(t.id, snaptile{t, eupoint(vid.xres/2, vid.yres/2)});
   }
 
@@ -492,7 +547,7 @@ void seuphorica_screen() {
   if(placing_portal) mouseovers = "Click another tile to connect a portal";
 
   if(mouseover) {
-    auto at = from(mouseover);
+    auto at = mouseover;
     auto co = get_color(at);
     if(board.count(at)) {
       mouseovers = fix(tile_desc(board.at(at)));
@@ -647,29 +702,29 @@ void seuphorica_screen() {
         return;
         }
       if(box_moved == &drawn && current_box == nullptr) {
-        auto at = from(mouseover);
+        auto at = mouseover;
         if(!board.count(at)) {
           swap(drawn[tile_boxid], drawn[0]);
-          drop_hand_on(at.x, at.y);
+          drop_hand_on(at);
           sort_hand();
           }
         }
       if(box_moved == &shop && current_box == nullptr && tile_moved->price <= cash) {
-        auto at = from(mouseover);
+        auto at = mouseover;
         if(!board.count(at)) {
           buy(tile_boxid);
-          drop_hand_on(at.x, at.y);
+          drop_hand_on(at);
           }
         }
       }
     if(uni == '-' && mouseover && !current_box && !holdmouse) {
-      auto at = from(mouseover);
+      auto at = mouseover;
       if(board.count(at)) {
-        back_from_board(at.x, at.y); hold_mode = 1; tile_moved_from = mouseover;
+        back_from_board(at); hold_mode = 1; tile_moved_from = mouseover;
         holdmouse = true; tile_moved = &(drawn[0]); tile_boxid = 0; box_moved = &drawn;
         }
       else
-        drop_hand_on(at.x, at.y);
+        drop_hand_on(at);
       }
     };
   }
