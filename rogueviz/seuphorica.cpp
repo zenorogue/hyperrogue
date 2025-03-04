@@ -768,7 +768,7 @@ void seuphorica_screen() {
         sort_hand();
         return;
         }
-      if(box_moved == &drawn && current_box == nullptr) {
+      if(box_moved == &drawn && current_box == nullptr && mouseover) {
         auto at = mouseover;
         if(!board.count(at)) {
           swap(drawn[tile_boxid], drawn[0]);
@@ -776,7 +776,7 @@ void seuphorica_screen() {
           sort_hand();
           }
         }
-      if(box_moved == &shop && current_box == nullptr && tile_moved->price <= cash) {
+      if(box_moved == &shop && current_box == nullptr && mouseover && tile_moved->price <= cash) {
         auto at = mouseover;
         if(!board.count(at)) {
           buy(tile_boxid);
@@ -784,7 +784,7 @@ void seuphorica_screen() {
           }
         }
       }
-    if(uni == '-' && mouseover && !current_box && !holdmouse) {
+    if(uni == '-' && mouseover && !current_box && !holdmouse && mouseover) {
       auto at = mouseover;
       if(board.count(at)) {
         back_from_board(at); hold_mode = 1; tile_moved_from = mouseover;
