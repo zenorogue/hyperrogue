@@ -23,9 +23,7 @@ namespace seuphorica {
 
 void compute_score();
 void draw_board() {
-  minx=15, miny=15, maxx=0, maxy=0;
-  for(auto& b: board) if(!just_placed.count(b.first)) minx = min(minx, b.first.x), maxx = max(maxx, b.first.x), miny = min(miny, b.first.y), maxy = max(maxy, b.first.y);
-  miny -= 6; minx -= 6; maxx += 7; maxy += 7;
+  compute_size();
   compute_score();
   }
 
