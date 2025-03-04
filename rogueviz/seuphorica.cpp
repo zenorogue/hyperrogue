@@ -462,7 +462,7 @@ struct tilebox {
   bool good_location(hyperpoint h, tile &t1) {
     for(auto& t: *ptset) if(where_is_tile.count(t.id)) {
       auto d = h - where_is_tile[t.id];
-      if(max(abs(d[0]), abs(d[1])) < get_space() + (has_power(t1, sp::gigantic) ? 20:0) + (has_power(t, sp::gigantic) ? 20:0)) return false;
+      if(max(abs(d[0]), abs(d[1])) < get_space() + (has_power(t1, sp::gigantic) ? 30:0) + (has_power(t, sp::gigantic) ? 30:0)) return false;
       }
     return true;
     }
