@@ -79,6 +79,9 @@ vector<int> get_path(coord c) {
   return {0,0,0,co.first,0,0,0,co.second,0,0,0};
   }
 
+coord get_portal(coord x);
+void mirror(coord& at, vect2& prev);
+
 void snapshot();
 void from_map(coord co, struct tile& t);
 void is_clone(struct tile& orig, struct tile& clone);
@@ -89,6 +92,26 @@ void is_clone(struct tile& orig, struct tile& clone);
 #include "seuphorica/seuphorica.cpp"
 
 namespace seuphorica {
+
+coord get_portal(coord x) {
+  if(get_gigantic(x) != x) {
+    auto x1 = get_gigantic(x);
+    auto v = gigacover(x1);
+    for(int i=0; i<seuphorica::isize(v); i++) if(v[i] == x)
+      return gigacover(get_portal(x1))[i];
+    }
+  return portals.at(x);
+  }
+
+void mirror(coord& at, vect2& prev) {
+  if(get_gigantic(at) != at) {
+    auto at1 = get_gigantic(at);
+    auto v = gigacover(at1);
+    vector<int> reindex = {0,3,6,1,4,7,2,5,8};
+    for(int i=0; i<9; i++) if(v[i] == at) { at = v[reindex[i]]; prev.at = at; break; }
+    }
+  prev = get_mirror(prev);
+  }
 
 void compute_score();
 
