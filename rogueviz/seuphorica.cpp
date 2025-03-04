@@ -22,9 +22,11 @@ using std::ostream;
 namespace seuphorica {
 
 void compute_score();
+
 void draw_board() {
   compute_size();
   compute_score();
+  turncount++; // to clean messages
   }
 
 void read_dictionary(language& l) {
@@ -386,6 +388,11 @@ void sort_hand() {
 
 void seuphorica_screen() {
 
+  if(last_spell_effect != "") {
+    addMessage(last_spell_effect);
+    last_spell_effect = "";
+    }
+
   getcstat = '-';
   cmode = 0;
   cmode = sm::SIDE | sm::DIALOG_STRICT_X | sm::MAYDARK;
@@ -571,6 +578,9 @@ void launch() {
   showstartmenu = false;
   mapeditor::drawplayer = false;
   color_descs = false;
+
+  clearMessages();
+  addMessage("Welcome to Seuphorica!");
   }
 
 void enable() {
