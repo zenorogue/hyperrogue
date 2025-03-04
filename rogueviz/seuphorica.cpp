@@ -10,6 +10,7 @@ namespace hr {
 namespace seuphorica {
 void read_dictionary(struct language& l);
 void read_naughty_dictionary(language& l);
+void activate_scry();
 using std::stringstream;
 using std::to_string;
 using std::ostream;
@@ -270,6 +271,10 @@ bool draw(cell *c, const shiftmatrix& V) {
   }
 
 map<int, hyperpoint> where_is_tile;
+
+void activate_scry() {
+  for(auto& t: deck) where_is_tile.erase(t.id);
+  }
 
 vector<tile>* current_box;
 
