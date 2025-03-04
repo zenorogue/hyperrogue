@@ -85,7 +85,10 @@ vector<string> extra_keys_3d = {
   "move mouse = rotate camera (in rug, only with lctrl)",
   };
 
+EX hookset<bool()> hooks_build_help;
+
 EX void buildHelpText() {
+  if(callhandlers(0, hooks_build_help)) return;
   DEBBI(DF_GRAPH, ("buildHelpText"));
 
   help = XLAT("Welcome to HyperRogue");
