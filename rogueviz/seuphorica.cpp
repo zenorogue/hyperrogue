@@ -423,6 +423,8 @@ void sort_hand() {
     });
   }
 
+void seuphorica_menu();
+
 void seuphorica_screen() {
 
   if(last_spell_effect != "") {
@@ -431,7 +433,6 @@ void seuphorica_screen() {
     }
 
   getcstat = '-';
-  cmode = 0;
   cmode = sm::SIDE | sm::DIALOG_STRICT_X | sm::MAYDARK;
 
   gamescreen();
@@ -547,8 +548,8 @@ void seuphorica_screen() {
   if(getcstat == SDLK_F1)
     dialog::add_key_action(SDLK_F1, [] { gotoHelp(fix(seuphorica::rules)); });
 
-  displayButton(lerp(ui.x0, ui.x2, 5/6.), vid.yres - vid.fsize, "menu", 'Q', 8);
-  dialog::add_key_action('Q', [] { quitmainloop = true; });
+  displayButton(lerp(ui.x0, ui.x2, 5/6.), vid.yres - vid.fsize, "menu", 'v', 8);
+  dialog::add_key_action('v', [] { pushScreen(seuphorica_menu); });
 
   keyhandler = [] (int sym, int uni) {
     handlePanning(sym, uni);
@@ -604,6 +605,75 @@ void seuphorica_screen() {
         drop_hand_on(at.x, at.y);
       }
     };
+  }
+
+string logfile = "seuphorica-log.txt";
+
+void seuphorica_dictionary() {
+  cmode = sm::DARKEN;
+  gamescreen();
+  dialog::init("Seuphorica dictionary", 0xFFFF80);
+  dialog::addBack();
+  if(dialog::infix != "") mouseovers = dialog::infix;
+
+  dialog::start_list(900, 900, '1');
+  if(dictionary_checked != dialog::infix) {
+    dictionary_checked = dialog::infix;
+    for(char& ch: dictionary_checked) if(ch >= 'a' && ch <= 'z') ch -= 32;
+    find_words(dictionary_checked);
+    }
+  for(auto& wo: words_found) dialog::addItem(wo, dialog::list_fake_key++);
+  dialog::end_list();
+
+  if(utf8_length(dictionary_checked) < 2) dialog::addInfo(str_least2);
+  else if(words_found.empty()) dialog::addInfo(str_no_matching);
+  else dialog::addInfo("(" + its(isize(words_found)) + str_matching->get() + ")");
+
+  dialog::addBreak(100);
+  dialog::addHelp(fix(str_dict_help));
+
+  keyhandler = [] (int sym, int uni) {
+    if(among(uni, '$', '?')) { dialog::infix += uni; return; }
+    dialog::handleNavigation(sym, uni);
+    if(dialog::editInfix(uni)) dialog::list_skip = 0;
+    else if(doexiton(sym, uni)) popScreen();
+    };
+
+  dialog::display();
+  }
+
+void seuphorica_newgame() {
+  cmode = sm::DARKEN;
+  gamescreen();
+  dialog::init("Seuphorica: new game", 0xFFFF80);
+  dialog::addBack();
+  dialog::display();
+  }
+
+void seuphorica_menu() {
+  cmode = sm::DARKEN;
+  dictionary_checked = "";
+
+  gamescreen();
+  dialog::init("Seuphorica", 0xFFFF80);
+  dialog::addItem("dictionary", 'd');
+  dialog::add_action_push(seuphorica_dictionary);
+  dialog::addItem("new game", 'n');
+  dialog::add_action_push(seuphorica_newgame);
+  dialog::addItem("save log", 'l');
+  dialog::add_action([] {
+    dialog::openFileDialog(logfile, XLAT("where to save the log:"), ".txt",
+      [] {
+        fhstream f(logfile, "wt");
+        if(!f.f) { addMessage("failed to open file"); return false; }
+        print(f, fix(game_log.str()));
+        return true;
+        });
+    });
+  dialog::addItem("quit", 'q');
+  dialog::add_action([] { quitmainloop = true; });
+  dialog::addBack();
+  dialog::display();
   }
 
 void launch() {  
