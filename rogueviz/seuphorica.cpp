@@ -134,9 +134,12 @@ void push_tile_info_screen(tile &t, cell *c, vector<tile>* origbox, int boxid) {
   }
 
 /** for tiles on the map, only (V,t,c) are defined; for tiles in boxes, (V,t,origbox,boxid) are defined */
-void render_tile(const shiftmatrix& V, tile& t, cell *c, vector<tile>* origbox, int boxid) {
+void render_tile(shiftmatrix V, tile& t, cell *c, vector<tile>* origbox, int boxid) {
+
+  bool gig = has_power(t, sp::gigantic);
 
   auto pt0 = [&] (int id, ld r) {
+    if(gig) r /= 3;
     if(c) return currentmap->get_corner(c, id+1, r);
     return spin(-90._deg * id) * eupoint(-3/r, -3/r);
     };
@@ -168,12 +171,17 @@ void render_tile(const shiftmatrix& V, tile& t, cell *c, vector<tile>* origbox, 
     for(int i=0; i<c->type; i++)
       if(!board.count(from(c->move(i)))) placeSidewall(c, i, SIDE_SLEV, V, back);
     V1 = orthogonal_move_fol(V, cgi.SLEV[1]);
-    draw_qfi(c, V1, back, PPR::WALL3A);
+    if(!gig) draw_qfi(c, V1, back, PPR::WALL3A);
     }
   else {
     wider w(wide);
     for(int i=0; i<=corners; i++) curvepoint(pt(i, 3));
     queuecurve(V, lines, back, PPR::ITEM);
+    }
+
+  if(c && gig) {
+    if(gigants.at(from(c)) != from(c) - coord{1,1}) return;
+    draw_qfi(c, V1 * euscalexx(3), back, PPR::WALL3A);
     }
 
   const ld nearco = 4;
@@ -219,12 +227,14 @@ void render_tile(const shiftmatrix& V, tile& t, cell *c, vector<tile>* origbox, 
       queueline(V1 * pt(i+0.3, nearco), V1 * pt(i+0.7, nearco), 0xC0C0C0FF, 2);
     }
 
-  write_in_space(V1, 72, c ? 1 : 3, t.letter, darkena(gsp(t).text_color, 0, 0xFF), 0, 8);
-  write_in_space(V1 * eupush(pt0(2, 4.5)), 72, c ? 0.4 : 1.2, its(t.value), darkena(gsp(t).text_color, 0, 0xFF), 0, 8);
+  int gigscale = gig ? 3 : 1;
+
+  write_in_space(V1, 72, (c ? 1 : 3) * gigscale, t.letter, darkena(gsp(t).text_color, 0, 0xFF), 0, 8);
+  write_in_space(V1 * eupush(pt0(2, 4.5)), 72, (c ? 0.4 : 1.2) * gigscale, its(t.value), darkena(gsp(t).text_color, 0, 0xFF), 0, 8);
 
   if(!c) {
-    auto h1 = inverse_shift_any(atscreenpos(0, 0), V * eupoint(-1, -1));
-    auto h2 = inverse_shift_any(atscreenpos(0, 0), V * eupoint(+1, +1));
+    auto h1 = inverse_shift_any(atscreenpos(0, 0), V * eupoint(-gigscale, -gigscale));
+    auto h2 = inverse_shift_any(atscreenpos(0, 0), V * eupoint(+gigscale, +gigscale));
     if(mousex >= h1[0] && mousex <= h2[0] && mousey >= h1[1] && mousey <= h2[1] && !holdmouse) {
       mouseovers = fix(tile_desc(t));
       getcstat = dialog::list_fake_key++;
@@ -312,23 +322,29 @@ struct tilebox {
 
   int get_margin() { return 40; }
   int get_space() { return 50; }
+  int get_margin_for(tile &t) { return 40 + (has_power(t, sp::gigantic) ? 50 : 0); }
 
-  bool good_location(hyperpoint h) {
+  bool in_bounds(hyperpoint h, tile &t1, bool req_down) {
+    int ex = get_margin_for(t1);
+    return h[0] >= *x1 + ex && h[0] <= *x2 - ex && h[1] >= *y1 + ex && (!req_down || h[1] <= *y2 + ex);
+    }
+
+  bool good_location(hyperpoint h, tile &t1) {
     for(auto& t: *ptset) if(where_is_tile.count(t.id)) {
       auto d = h - where_is_tile[t.id];
-      if(max(abs(d[0]), abs(d[1])) < get_space()) return false;
+      if(max(abs(d[0]), abs(d[1])) < get_space() + (has_power(t1, sp::gigantic) ? 20:0) + (has_power(t, sp::gigantic) ? 20:0)) return false;
       }
     return true;
     }
 
   hyperpoint locate_tile(tile& t) {
     if(where_is_tile.count(t.id)) return where_is_tile[t.id];
-    int margin = 40, space = 50;
+    int margin = get_margin_for(t), space = get_space();
     int px = *x1 + margin, py = *y1 + margin;
     while(true) {
       hyperpoint h = eupoint(px, py);
-      if(good_location(h)) {
-        if(h[1] > *y2 - get_margin()) *y2 = h[1] + get_margin();
+      if(good_location(h, t)) {
+        if(h[1] > *y2 - margin) *y2 = h[1] + margin;
         return where_is_tile[t.id] = h;
         }
       px += space;
@@ -341,7 +357,7 @@ struct tilebox {
 
     for(auto& t: *ptset) {
       auto lt = locate_tile(t);
-      if(lt[0] < *x1 + get_margin() || lt[0] > *x2 - get_margin() || lt[1] < *y1 + get_margin() || lt[1] > *y2 - get_margin()) {
+      if(!in_bounds(lt, t, true)) {
         where_is_tile.erase(t.id);
         lt = locate_tile(t);
         }
