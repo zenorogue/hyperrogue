@@ -52,7 +52,12 @@ void read_naughty_dictionary(language& l) {
 
 coord from(cell *c) {
   auto co = euc2_coordinates(c);
-  return coord(-co.first+7, -co.second+7);
+  return coord(7-co.first, 7-co.second);
+  }
+
+cell* to(coord co) {
+  auto& m = euc::get_spacemap();
+  return m[euc::coord(7-co.x, 7-co.y, 0)]->c7;
   }
 
 string fix(string s) {
@@ -255,6 +260,22 @@ bool draw(cell *c, const shiftmatrix& V) {
     }
   if(!inside) return false;
 
+  if(portals.count(sco)) {
+    auto sco1 = portals.at(sco);
+    auto c1 = to(sco1);
+    for(const shiftmatrix& V1: hr::span_at(current_display->all_drawn_copies, c1)) {
+      queueline(V * currentmap->get_corner(c, 2, 4), V1 * currentmap->get_corner(c1, 2, 4), 0xFF800080);
+      queueline(V * currentmap->get_corner(c, 2+c->type/2, 4), V1 * currentmap->get_corner(c1, 2+c->type/2, 4), 0x0000FF80);
+
+      if(tiles3) {
+        auto high_V = orthogonal_move_fol(V, cgi.SLEV[1]);
+        auto high_V1 = orthogonal_move_fol(V1, cgi.SLEV[1]);
+        queueline(high_V * currentmap->get_corner(c, 2, 4), high_V1 * currentmap->get_corner(c1, 2, 4), 0xFF800080);
+        queueline(high_V * currentmap->get_corner(c, 2+c->type/2, 4), high_V1 * currentmap->get_corner(c1, 2+c->type/2, 4), 0x0000FF80);
+        }
+      }
+    }
+
   int co = get_color(sco);
   if(co == beRed || co == beBlue)
     queuepoly(V, cgi.shTriangle, darkena(co == beRed ? 0xFF0000 : 0x0000FF, 0, 0xFF));
@@ -401,6 +422,8 @@ void seuphorica_screen() {
   dialog::init();
   dialog::display();
   dialog::add_key_action(SDLK_F1, [] { gotoHelp(fix(seuphorica::rules)); });
+
+  if(placing_portal) mouseovers = "Click another tile to connect a portal";
 
   if(mouseover) {
     auto at = from(mouseover);
