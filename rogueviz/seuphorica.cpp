@@ -875,6 +875,7 @@ void launch() {
   View = Id;
   init_special_setting();
   restart("", "", "");
+  menu_darkening = 3; /* needs more darkening than HyperRogue due to higher contrast */
 
   showstartmenu = false;
   mapeditor::drawplayer = false;
