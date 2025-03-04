@@ -14,6 +14,10 @@ void activate_scry();
 using std::stringstream;
 using std::to_string;
 using std::ostream;
+
+void snapshot();
+void from_map(struct coord co, struct tile& t);
+void is_clone(struct tile& orig, struct tile& clone);
 }
 
 #define NONJS
@@ -232,7 +236,7 @@ void render_tile(shiftmatrix V, tile& t, cell *c, vector<tile>* origbox, int box
   write_in_space(V1, 72, (c ? 1 : 3) * gigscale, t.letter, darkena(gsp(t).text_color, 0, 0xFF), 0, 8);
   write_in_space(V1 * eupush(pt0(2, 4.5)), 72, (c ? 0.4 : 1.2) * gigscale, its(t.value), darkena(gsp(t).text_color, 0, 0xFF), 0, 8);
 
-  if(!c) {
+  if(!c && origbox) {
     auto h1 = inverse_shift_any(atscreenpos(0, 0), V * eupoint(-gigscale, -gigscale));
     auto h2 = inverse_shift_any(atscreenpos(0, 0), V * eupoint(+gigscale, +gigscale));
     if(mousex >= h1[0] && mousex <= h2[0] && mousey >= h1[1] && mousey <= h2[1] && !holdmouse) {
@@ -314,6 +318,10 @@ struct uicoords {
   int y0, y1, y2, y3;
   } ui;
 
+using snaptile = pair<tile, hyperpoint>;
+
+vector<map<int, snaptile>> snapshots;
+
 struct tilebox {
   int *x1, *y1, *x2, *y2;
   vector<tile> *ptset;
@@ -352,9 +360,7 @@ struct tilebox {
       }
     }
 
-  void render(const string& title) {
-    shiftmatrix ASP = atscreenpos(0, 0);
-
+  void locate_all() {
     for(auto& t: *ptset) {
       auto lt = locate_tile(t);
       if(!in_bounds(lt, t, true)) {
@@ -362,7 +368,12 @@ struct tilebox {
         lt = locate_tile(t);
         }
       }
+    }
 
+  void render(const string& title) {
+    locate_all();
+
+    shiftmatrix ASP = atscreenpos(0, 0);
     curvepoint(eupoint(*x1+10, *y1+10));
     curvepoint(eupoint(*x1+10, *y2-10));
     curvepoint(eupoint(*x2-10, *y2-10));
@@ -392,6 +403,8 @@ struct tilebox {
         write_in_space(ASP * eupush(*x2 - 10, *y2 - 10), 72, 50, its(cash) + "$", darkena(col, 0, 0xFF), 16, 16);
       }
 
+    if(hr::isize(snapshots)) return;
+
     int idx = 0;
     for(auto& t: *ptset) {
       dynamicval<ld> cs(cgi.scalefactor, 1);
@@ -414,6 +427,22 @@ tilebox tb_discard(ui.x1, ui.y0, ui.x2, ui.y1, discard, 0xFF0000);
 tilebox tb_hand(ui.x0, ui.y1, ui.x2, ui.y2, drawn, 0x00FF00);
 tilebox tb_shop(ui.x0, ui.y2, ui.x2, ui.y3, shop, 0xFFD500);
 
+void snapshot() {
+  auto& b = snapshots.emplace_back();
+  for(auto tb: {&tb_deck, &tb_shop, &tb_discard, &tb_hand}) {
+    tb->locate_all();
+    for(auto& t: *(tb->ptset)) b.emplace(t.id, snaptile{t, tb->locate_tile(t)});
+    }
+  }
+
+void from_map(struct coord co, struct tile& t) {
+  snapshots.back().emplace(t.id, snaptile{t, eupoint(vid.xres/2, vid.yres/2)});
+  }
+
+void is_clone(struct tile& orig, struct tile& clone) {
+  snapshots.back().emplace(clone.id, snaptile{orig, snapshots.back().at(orig.id).second});
+  }
+
 void sort_hand() {
   sort(drawn.begin(), drawn.end(), [] (tile &t1, tile &t2) {
     auto h1 = tb_hand.locate_tile(t1);
@@ -425,7 +454,27 @@ void sort_hand() {
 
 void seuphorica_menu();
 
+int start_tick;
+int frametime = 500;
+
 void seuphorica_screen() {
+
+  if(snapshots.empty())
+    start_tick = 0;
+
+  if(start_tick && ticks - start_tick > frametime) {
+    println(hlog, "frame ended");
+    start_tick = 0;
+    snapshots.erase(snapshots.begin());
+    }
+
+  if(snapshots.size() == 1)
+    snapshots.clear();
+
+  if(snapshots.size() && !start_tick) {
+    println(hlog, "frame started");
+    start_tick = ticks;
+    }
 
   if(last_spell_effect != "") {
     addMessage(last_spell_effect);
@@ -504,6 +553,24 @@ void seuphorica_screen() {
       }
 
     if(holdmouse && among(hold_mode, 1, 2)) render_tile(atscreenpos(mousex, mousey) * euscalexx(20), *tile_moved, nullptr, nullptr, 0);
+
+    if(start_tick) {
+      ld t = (ticks - start_tick) * 1. / frametime;
+      t = t * t * (3 - 2 * t);
+      auto& fst = snapshots[0];
+      auto& snd = snapshots[1];
+      for(auto& [id, p]: fst) if(snd.count(id) == 0) {
+        snd.emplace(id, snaptile{p.first, eupoint(lerp(ui.x0, ui.x2, randd()), vid.yres * 2)});
+        }
+      for(auto& [id, p]: snd) if(fst.count(id) == 0) {
+        fst.emplace(id, snaptile{p.first, eupoint(vid.xres * 2, lerp(ui.y0, ui.y2, randd()))});
+        }
+      for(auto& [id, p]: fst) {
+        auto& p1 = snd.at(id);
+        hyperpoint at = p.second + (p1.second - p.second) * t;
+        render_tile(atscreenpos(at[0], at[1]) * euscalexx(20), t < .5 ? p.first : p1.first, nullptr, nullptr, 0);
+        }
+      }
 
     quickqueue();
     }
