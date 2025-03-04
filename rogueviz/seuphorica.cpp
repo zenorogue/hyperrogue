@@ -20,14 +20,24 @@ using vect2 = cellwalker;
 
 bool in_board(coord co) { return true; }
 
+bool euclid_only() {
+  return geometry == gEuclidSquare && variation == eVariation::pure && !quotient; /* to do: accept standard tori */
+  }
+
 vector<cell*> gigacover(cell *c) {
-  vector<cell*> res;
-  res.push_back(c->cmove(0)->cmove(1));
-  res.push_back(res.back()->cmove(2));
-  res.push_back(res.back()->cmove(2));
-  for(int i=0; i<6; i++)
-    res.push_back(res[i]->cmove(3));
-  return res;
+  if(euclid_only()) {
+    /* cannot do the default case because of mirror(...) */
+    vector<cell*> res;
+    res.push_back(c->cmove(0)->cmove(1));
+    res.push_back(res.back()->cmove(2));
+    res.push_back(res.back()->cmove(2));
+    for(int i=0; i<6; i++)
+      res.push_back(res[i]->cmove(3));
+    return res;
+    }
+  auto ac = adj_minefield_cells(c);
+  ac.push_back(c);
+  return ac;
   }
 
 vector<cell*> orthoneighbors(cell* base) {
@@ -36,10 +46,9 @@ vector<cell*> orthoneighbors(cell* base) {
   return res;
   }
 
-cellwalker get_mirror(cellwalker cw) {
-  cw.spin ^= 1;
-  // cw.mirrored = !cw.mirrored;
-  return cw;
+map<cell*, cellwalker> tile_orientation;
+void set_orientation(cell *c, cellwalker cw) {
+  tile_orientation[c] = cw;
   }
 
 vector<vect2> forward_steps(coord c) { return {cellwalker(c, 2), cellwalker(c, 3)}; }
@@ -54,6 +63,13 @@ xy to_xy(cellwalker c) {
   }
 
 int dist(coord a, coord b) {
+  if(euclid_only()) {
+    auto co = euc2_coordinates(a);
+    auto co1 = euc2_coordinates(b);
+    auto co2 = co1 - co;
+    return max(abs(co2.first), abs(co2.second));
+    }
+  if(a->type != b->type) return 999;
   return celldistance(a, b);
   }
 
@@ -79,12 +95,19 @@ vector<int> get_path(coord c) {
   return {0,0,0,co.first,0,0,0,co.second,0,0,0};
   }
 
-coord get_portal(coord x);
+void thru_portal(coord& x, vect2& v);
 void mirror(coord& at, vect2& prev);
 
 void snapshot();
 void from_map(coord co, struct tile& t);
 void is_clone(struct tile& orig, struct tile& clone);
+
+bool gok_hv() { return euclid_only(); }
+/* geometry supports default orientation */
+bool gok_rev() { return euclid_only(); }
+/* geometry supports gigantic mirrors and gigantic portals */
+bool gok_gigacombo() { return euclid_only(); }
+
 }
 
 #define NONJS
@@ -93,14 +116,21 @@ void is_clone(struct tile& orig, struct tile& clone);
 
 namespace seuphorica {
 
-coord get_portal(coord x) {
+void thru_portal(coord& x, vect2& v) {
   if(get_gigantic(x) != x) {
     auto x1 = get_gigantic(x);
-    auto v = gigacover(x1);
-    for(int i=0; i<seuphorica::isize(v); i++) if(v[i] == x)
-      return gigacover(get_portal(x1))[i];
+    auto gc = gigacover(x1);
+    for(int i=0; i<seuphorica::isize(gc); i++) if(gc[i] == x) {
+      x = gigacover(portals.at(x1))[i];
+      v.at = x;
+      return;
+      }
     }
-  return portals.at(x);
+  auto x1 = portals.at(x);
+  v.spin -= tile_orientation[x].spin;
+  v.spin += tile_orientation[x1].spin;
+  v.at = x1;
+  x = x1;
   }
 
 void mirror(coord& at, vect2& prev) {
@@ -110,7 +140,8 @@ void mirror(coord& at, vect2& prev) {
     vector<int> reindex = {0,3,6,1,4,7,2,5,8};
     for(int i=0; i<9; i++) if(v[i] == at) { at = v[reindex[i]]; prev.at = at; break; }
     }
-  prev = get_mirror(prev);
+  prev.spin = tile_orientation[at].spin + 1 - prev.spin;
+  prev += 0;
   }
 
 void compute_score();
@@ -215,16 +246,24 @@ void push_tile_info_screen(tile &t, cell *c, vector<tile>* origbox, int boxid) {
       help_extensions.push_back(help_extension{this_letter, "become " + letter, [letter, boxid] () { wild_become(boxid, letter.c_str()); popScreen(); }});
       }
     }
+  c = get_gigantic(c);
+  if(c && just_placed.count(c)) {
+    for(int i=1; i<c->type; i++)
+      help_extensions.push_back(help_extension{char('0'+i), "rotate " + its(i), [c,i] () { tile_orientation[c]+=i; popScreen(); }});
+    }
   }
 
 /** for tiles on the map, only (V,t,c) are defined; for tiles in boxes, (V,t,origbox,boxid) are defined */
 void render_tile(shiftmatrix V, tile& t, cell *c, vector<tile>* origbox, int boxid) {
 
+  cellwalker cw;
+  if(c) cw = tile_orientation[c];
+
   bool gig = has_power(t, sp::gigantic);
 
   auto pt0 = [&] (int id, ld r) {
     if(gig) r /= 3;
-    if(c) return currentmap->get_corner(c, id+1, r);
+    if(c) return currentmap->get_corner(c, cw.spin+id+1+c->type/2, r);
     return spin(-90._deg * id) * eupoint(-3/r, -3/r);
     };
 
@@ -255,7 +294,7 @@ void render_tile(shiftmatrix V, tile& t, cell *c, vector<tile>* origbox, int box
     for(int i=0; i<c->type; i++)
       if(!board.count(c->move(i))) placeSidewall(c, i, SIDE_SLEV, V, back);
     V1 = orthogonal_move_fol(V, cgi.SLEV[1]);
-    if(!gig) draw_qfi(c, V1, back, PPR::WALL3A);
+    if(!gig || !euclid_only()) draw_qfi(c, V1, back, PPR::WALL3A);
     }
   else {
     wider w(wide);
@@ -265,7 +304,8 @@ void render_tile(shiftmatrix V, tile& t, cell *c, vector<tile>* origbox, int box
 
   if(c && gig) {
     if(gigants.at(c) != c) return;
-    draw_qfi(c, V1 * euscalexx(3), back, PPR::WALL3A);
+    if(euclid_only())
+      draw_qfi(c, V1 * euscalexx(3), back, PPR::WALL3A);
     }
 
   const ld nearco = 4;
@@ -313,8 +353,12 @@ void render_tile(shiftmatrix V, tile& t, cell *c, vector<tile>* origbox, int box
 
   int gigscale = gig ? 3 : 1;
 
-  write_in_space(V1, 72, (c ? 1 : 3) * gigscale, t.letter, darkena(gsp(t).text_color, 0, 0xFF), 0, 8);
-  write_in_space(V1 * eupush(pt0(2, 4.5)), 72, (c ? 0.4 : 1.2) * gigscale, its(t.value), darkena(gsp(t).text_color, 0, 0xFF), 0, 8);
+  auto V2 = V1;
+  if(c) V2 = V2 * ddspin(c,cw.spin,0);
+
+  ld sc = c ? 1 : 3;
+  write_in_space(V2, 72, sc * gigscale, t.letter, darkena(gsp(t).text_color, 0, 0xFF), 0, 8);
+  write_in_space(V2 * xpush(cgi.scalefactor*.2*sc*gigscale) * ypush(cgi.scalefactor*.2*sc*gigscale), 72, 0.4 * sc * gigscale, its(t.value), darkena(gsp(t).text_color, 0, 0xFF), 0, 8);
 
   if(!c && origbox) {
     auto h1 = inverse_shift_any(atscreenpos(0, 0), V * eupoint(-gigscale, -gigscale));
@@ -822,6 +866,7 @@ int want_seed;
 
 void reset_rv() {
   View = Id; where_is_tile.clear(); current = next_language;
+  tile_orientation.clear();
   }
 
 void seuphorica_newgame() {
@@ -850,6 +895,7 @@ void seuphorica_newgame() {
   int randoms = 0;
   for(int i=0; i<isize(special_setting); i++) {
     if(special_setting[i] == ss::technical) continue;
+    if(!geom_allows(sp(i))) continue;
     if(get_language(sp(i)) == next_language) continue;
     dialog::addBoolItem(specials[i].caption, special_setting[i] != ss::disabled, dialog::list_fake_key++);
     dialog::add_action([i] {
@@ -890,6 +936,7 @@ void seuphorica_newgame() {
     for(int i=0; i<qty; i++) {
       auto lang = get_language(sp(i));
       if(lang == next_language) sc[i] = ss::disabled;
+      if(!geom_allows(sp(i))) sc[i] = ss::disabled;
       }
 
     for(int i=0; i < pick_qty; i++) {
@@ -958,6 +1005,7 @@ void launch() {
   init_special_setting();
   restart("", "", "");
   menu_darkening = 3; /* needs more darkening than HyperRogue due to higher contrast */
+  mine_adjacency_rule = true;
 
   showstartmenu = false;
   mapeditor::drawplayer = false;
