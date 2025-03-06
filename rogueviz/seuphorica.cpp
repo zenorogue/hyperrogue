@@ -406,8 +406,8 @@ void render_tile(shiftmatrix V, tile& t, cell *c, vector<tile>* origbox, int box
   auto V2 = V1;
   if(c) V2 = V2 * ddspin(c,cw.spin,0);
 
-  write_in_space(V2, 72, gigscale, t.letter, darkena(gsp(t).text_color, 0, 0xFF), 0, 8);
-  write_in_space(V2 * xpush(cgi.scalefactor*.2*gigscale) * ypush(cgi.scalefactor*.2*gigscale), 72, 0.4 * gigscale, its(t.value), darkena(gsp(t).text_color, 0, 0xFF), 0, 8);
+  write_in_space(V2, 72, gigscale, t.letter, darkena(darkened(gsp(t).text_color), 0, 0xFF), 0, 8);
+  write_in_space(V2 * xpush(cgi.scalefactor*.2*gigscale) * ypush(cgi.scalefactor*.2*gigscale), 72, 0.4 * gigscale, its(t.value), darkena(darkened(gsp(t).text_color), 0, 0xFF), 0, 8);
 
   if(!c && origbox) {
     auto h1 = inverse_shift_any(atscreenpos(0, 0), V * eupoint(-gigscale, -gigscale));
