@@ -482,6 +482,12 @@ void activate_scry() {
   for(auto& t: deck) where_is_tile.erase(t.id);
   }
 
+void animate_sort(vector<tile>& which) {
+  snapshot();
+  for(auto& t: which) where_is_tile.erase(t.id);
+  snapshot();
+  }
+
 vector<tile>* current_box;
 
 struct uicoords {
@@ -574,7 +580,7 @@ struct tilebox {
         write_in_space(ASP * eupush(*x2 - 10, *y2 - 10), 72, 50/3, its(cash) + "$", darkena(col, 0, 0xFF), 16, 16);
       }
 
-    if(hr::isize(snapshots)) return;
+    if(hr::isize(snapshots) || (ptset == &deck && scry_active)) return;
 
     int idx = 0;
     for(auto& t: *ptset) {
@@ -589,6 +595,34 @@ struct tilebox {
 
       render_tile(ASP * eupush(lt) * euscalexx(20), t, nullptr, ptset, idx++);
       }
+
+    int cx = 0;
+    auto sortbutton = [&] (string title, string desc, auto action) {
+      if(displayfr(*x1 + 12 + vid.fsize * (++cx)/2 - vid.fsize/4, *y2 - 12 - vid.fsize/2 + vid.fsize/4, 1, vid.fsize/2, title, col, 8)) {
+        getcstat = 'X'; mouseovers = desc;
+        dialog::add_key_action('X', [this, action] {
+          action();
+          animate_sort(*ptset);
+          });
+        }
+      };
+    auto rar = [] (const tile& t) { return t.rarity + (t.special >= sp::first_artifact ? 100 : 0); };
+    auto spc = [] (const tile& t) {
+      int i = int(t.special);
+      if(t.special == sp::gigantic) i -= 100;
+      if(among(t.special, sp::initial, sp::final, sp::symmetric)) i += 100;
+      if(among(t.special, sp::trasher, sp::multitrasher, sp::duplicator)) i += 300;
+      if(among(t.special, sp::reversing)) i += 400;
+      if(among(t.special, sp::bending, sp::portal)) i += 500;
+      if(get_language(t)) i += 600;
+      return i;
+      };
+    sortbutton("A", "sort alphabetically", [this] { stable_sort(ptset->begin(), ptset->end(), [] (const tile& a, const tile& b) { return a.letter < b.letter; }); });
+    sortbutton("1", "sort by value", [this] { stable_sort(ptset->begin(), ptset->end(), [] (const tile& a, const tile& b) { return a.value > b.value; }); });
+    sortbutton("X", "sort by power", [&] { stable_sort(ptset->begin(), ptset->end(), [&] (const tile& a, const tile& b) { return spc(a) < spc(b); }); });
+    sortbutton("R", "sort by rarity", [&] { stable_sort(ptset->begin(), ptset->end(), [&] (const tile& a, const tile& b) { return rar(a) > rar(b); }); });
+    sortbutton("←", "reverse order", [this] { reverse(ptset->begin(), ptset->end()); });
+    sortbutton("?", "shuffle", [this] { for(int i=1; i<isize(*ptset); i++) swap((*ptset)[i], (*ptset)[rand() % (i+1)]); });
     }
   };
 
