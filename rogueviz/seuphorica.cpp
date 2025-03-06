@@ -319,6 +319,47 @@ void render_tile(shiftmatrix V, tile& t, cell *c, vector<tile>* origbox, int box
 
   const ld nearco = 4;
 
+  auto semitile = [&] (ld a, ld b, color_t col) {
+    a *= corners / 4.; b *= corners / 4.;
+    curvepoint(pt(a, 3));
+    a = floor(a) + 1;
+    while(a < b) curvepoint(pt(a++, 3));
+    curvepoint(pt(b, 3));
+    queuecurve(V1, 0, darkena(col, 0, 0xFF), PPR::WALL3A);
+    };
+
+  if(has_power(t, sp::polski)) {
+    semitile(1.5, 3.5, 0xDD143C);
+    semitile(3.5, 5.5, 0xFFFFFF);
+    }
+
+  if(has_power(t, sp::deutsch)) {
+    semitile(4-1/3., 4+4/3., 0x000000);
+    semitile(5/3., 10/3., 0xFFCC00);
+    }
+
+  if(has_power(t, sp::francais)) {
+    semitile(2/3., 7/3., 0xE1000F);
+    semitile(8/3., 13/3., 0x000091);
+    }
+
+  if(has_power(t, sp::espanol)) {
+    semitile(4-1/4., 4+5/4., 0xAA151B);
+    semitile(7/4., 13/4., 0xAA151B);
+    }
+
+  if(has_power(t, sp::english)) {
+    vid.linewidth *= 3;
+    for(int i=0; i<corners; i++) queueline(V1 * pt(i/2., 3), V1 * pt((i+corners)/2., 3), darkena(0xFFFFFF, 0, 0xFF), 2, PPR::WALL3A);
+    vid.linewidth /= 3;
+    // for simplicity, and less confusion with the letter, we do not add the red cross on top
+    }
+
+  if(has_power(t, sp::portugues_br)) {
+    for(int i=0; i<=corners; i++) curvepoint(pt(i+.5, 3));
+    queuecurve(V1, 0, darkena(0xFEDD00, 0, 0xFF), PPR::WALL3A);
+    }
+
   if(has_power(t, sp::bending)) {
     wider w(3);
     queueline(V1 * pt0(0, nearco), V1 * pt0(corners/2, nearco), 0xC0C0FFFF, 2);
@@ -1008,6 +1049,7 @@ void launch() {
   stop_game();
   enable_canvas();
   ccolor::set_plain_nowall(0x202020);
+  specials[int(sp::english)].text_color = 0xFFC8102E; /* looks better in RV Seuphorica */
   start_game();
   reset_rv();
   init_special_setting();
