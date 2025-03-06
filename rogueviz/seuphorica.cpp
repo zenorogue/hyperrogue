@@ -18,6 +18,8 @@ using std::ostream;
 using coord = cell*;
 using vect2 = cellwalker;
 
+bool bidirectional;
+
 bool in_board(coord co) { return true; }
 
 bool euclid_only() {
@@ -51,7 +53,15 @@ void set_orientation(cell *c, cellwalker cw) {
   tile_orientation[c] = cw;
   }
 
-vector<vect2> forward_steps(coord c) { return {cellwalker(c, 2), cellwalker(c, 3)}; }
+vector<vect2> forward_steps(coord c) {
+  if(euclid_only() && !bidirectional)
+    return {cellwalker(c, 2), cellwalker(c, 3)};
+  else {
+    vector<vect2> vs;
+    for(int i=0; i<c->type; i++) vs.push_back(cellwalker(c, i));
+    return vs;
+    }
+  }
 
 struct xy { int x; int y; };
 
@@ -103,10 +113,9 @@ void from_map(coord co, struct tile& t);
 void is_clone(struct tile& orig, struct tile& clone);
 
 bool gok_hv() { return euclid_only(); }
-/* geometry supports default orientation */
-bool gok_rev() { return euclid_only(); }
-/* geometry supports gigantic mirrors and gigantic portals */
 bool gok_gigacombo() { return euclid_only(); }
+
+bool gok_rev() { return euclid_only() || bidirectional; }
 
 }
 
