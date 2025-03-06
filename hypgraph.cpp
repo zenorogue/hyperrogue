@@ -1788,6 +1788,15 @@ EX bool invalid_point(const hyperpoint h) {
 
 EX bool invalid_point(const shiftpoint h) { return invalid_point(h.h); }
 
+/** convert the result of applymodel to on-screen coordinates */
+EX hyperpoint toscrcoord(hyperpoint h1) {
+  hyperpoint h2;
+  h2[0] = current_display->xcenter + current_display->radius * h1[0];
+  h2[1] = current_display->ycenter + current_display->radius * h1[1] * pconf.stretch;
+  h2[2] = h1[2];
+  return h2;
+  }
+
 EX bool in_smart_range(const shiftmatrix& T) {
   shiftpoint h = tC0(T);
   if(invalid_point(h)) return false;
@@ -1798,8 +1807,8 @@ EX bool in_smart_range(const shiftmatrix& T) {
   hyperpoint h1;
   applymodel(h, h1);
   if(invalid_point(h1)) return false;
-  ld x = current_display->xcenter + current_display->radius * h1[0];
-  ld y = current_display->ycenter + current_display->radius * h1[1] * pconf.stretch;
+  auto hscr = toscrcoord(h1);
+  auto& x = hscr[0], y = hscr[1];
 
   bool inp = in_perspective();
 
