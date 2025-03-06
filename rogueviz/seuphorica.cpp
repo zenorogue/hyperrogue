@@ -640,7 +640,11 @@ void snapshot() {
   }
 
 void from_map(coord co, struct tile& t) {
-  snapshots.back().emplace(t.id, snaptile{t, eupoint(vid.xres/2, vid.yres/2)});
+  shiftpoint h = ggmatrix(co) * tile_center();
+  hyperpoint h1;
+  applymodel(h, h1);
+  h1 = toscrcoord(h1);
+  snapshots.back().emplace(t.id, snaptile{t, eupoint(h1[0], h1[1])});
   }
 
 void is_clone(struct tile& orig, struct tile& clone) {
