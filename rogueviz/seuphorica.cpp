@@ -940,12 +940,19 @@ void seuphorica_screen() {
         }
       if(box_moved == &drawn && current_box == nullptr && tile_moved_from == mouseover && hold_mode == 1) {
         /* do nothing, it was already removed from the board */
-        sort_hand();
+        /* ... but assume we want the default interface */
+        if(snapshots.empty()) snapshot();
+        for(auto& s: snapshots) {
+          s.erase(drawn[0].id);
+          s.emplace(drawn[0].id, snaptile{ drawn[0], eupoint(mousex, mousey) });
+          }
+        for(auto& d: drawn) where_is_tile.erase(d.id);
+        snapshot();
         return;
         }
       if(box_moved == &drawn && current_box == nullptr && mouseover) {
         auto at = mouseover;
-        if(!board.count(at)) {
+        if(in_board(at) && !board.count(at)) {
           swap(drawn[tile_boxid], drawn[0]);
           drop_hand_on(at);
           sort_hand();
@@ -953,7 +960,7 @@ void seuphorica_screen() {
         }
       if(box_moved == &shop && current_box == nullptr && mouseover && tile_moved->price <= cash) {
         auto at = mouseover;
-        if(!board.count(at)) {
+        if(in_board(at) && !board.count(at)) {
           buy(tile_boxid);
           drop_hand_on(at);
           }
@@ -965,8 +972,13 @@ void seuphorica_screen() {
         back_from_board(at); hold_mode = 1; tile_moved_from = mouseover;
         holdmouse = true; tile_moved = &(drawn[0]); tile_boxid = 0; box_moved = &drawn;
         }
-      else
+      else if(in_board(at)) {
+        for(auto& s: snapshots) s.erase(drawn[0].id);
         drop_hand_on(at);
+        if(snapshots.empty()) snapshot();
+        for(auto& d: drawn) where_is_tile.erase(d.id);
+        snapshot();
+        }
       }
     };
   }
