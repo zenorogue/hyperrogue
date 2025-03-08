@@ -341,15 +341,17 @@ void render_tile(shiftmatrix V, tile& t, cell *c, vector<tile>* origbox, int box
   int corners = c ? c->type : 4;
 
   color_t back = darkena(gsp(t).background, 0, 0xFF);
+  color_t backd = darkena(darkened(gsp(t).background), 0, 0xFF);
 
   auto V1 = V;
 
-  color_t lines = 0x000000FF;
+  color_t lines = 0x000000;
   int wide = 1;
-  if(t.rarity == 2) lines = 0xFF4040FF, wide = 2;
-  if(t.rarity == 3) lines = 0xFFFF80FF, wide = 2;
-  if(t.rarity >= 4) lines = 0x40FF80FF, wide = 2;
-  if(t.special >= sp::first_artifact) lines = 0xFFD500FF, wide = 2;
+  if(t.rarity == 2) lines = 0xFF4040, wide = 2;
+  if(t.rarity == 3) lines = 0xFFFF80, wide = 2;
+  if(t.rarity >= 4) lines = 0x40FF80, wide = 2;
+  if(t.special >= sp::first_artifact) lines = 0xFFD500, wide = 2;
+  lines = darkena(darkened(lines), 0, 0xFF);
   dynamicval<color_t> co(poly_outline, lines);
 
   if(c && tiles3) {
@@ -361,10 +363,10 @@ void render_tile(shiftmatrix V, tile& t, cell *c, vector<tile>* origbox, int box
     V1 = orthogonal_move_fol(V, cgi.SLEV[1]);
     if(!gig || !euclid_only()) draw_qfi(c, V1, back, PPR::WALL3A);
     }
-  else {
+  else if(get_gigantic(c) == c) {
     wider w(wide);
     for(int i=0; i<=corners; i++) curvepoint(pt(i, 3));
-    queuecurve(V, lines, back, PPR::ITEM);
+    queuecurve(V, lines, backd, PPR::WALL3A);
     }
 
   if(c && gig) {
