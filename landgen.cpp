@@ -2990,6 +2990,7 @@ EX void set_land_for_geometry(cell *c) {
   #endif
   else if(mhybrid) setLandHybrid(c);
   else if(sphere || (euclid && closed_or_bounded)) setLandSphere(c);
+  else if((cgflags & qFRACTAL)) setland(c, specialland);
   else if(euclid) setLandEuclid(c);
   else if(quotient) { setland(c, specialland); setLandQuotient(c); }
   else if(sol) setLandSol(c);
