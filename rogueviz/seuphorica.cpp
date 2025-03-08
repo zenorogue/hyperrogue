@@ -657,7 +657,7 @@ struct tilebox {
       if(&t == tile_moved && holdmouse) { idx++; continue; }
 
       if(ptset == &drawn && idx < ev.retain_count) {
-        auto T = ASP * eupush(lt) * euscalexx(tilesize) * spin(45._deg);
+        auto T = ASP * eupush(lt) * euscalexx(tilesize * (has_power(t, sp::gigantic) ? 3 : 1)) * spin(45._deg);
         for(int i=0; i<=4; i++) curvepoint(spin(90._deg*i) * eupoint(1,1));
         queuecurve(T, darkena(col, 0, 0xFF), darkena(col, 0, 0x80), PPR::ZERO);
         }
