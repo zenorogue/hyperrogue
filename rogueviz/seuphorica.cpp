@@ -300,6 +300,7 @@ void render_tile(shiftmatrix V, tile& t, cell *c, vector<tile>* origbox, int box
   if(c && tiles3) {
     wider w(wide);
     set_floor(cgi.shFullFloor);
+    ensure_floorshape_generated(shvid(c), c);
     for(int i=0; i<c->type; i++)
       if(!board.count(c->move(i))) placeSidewall(c, i, SIDE_SLEV, V, back);
     V1 = orthogonal_move_fol(V, cgi.SLEV[1]);
