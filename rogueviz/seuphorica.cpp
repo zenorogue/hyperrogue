@@ -1359,13 +1359,13 @@ void enable() {
     });
   rogueviz::rv_change(showstartmenu, false);
   rogueviz::rv_change(mapeditor::drawplayer, false);
+  rogueviz::rv_change(mine_adjacency_rule, 1);
   }
 
 local_parameter_set lps_seuphorica("seuphorica:");
 
 void default_config() {
   lps_add(lps_seuphorica, menu_darkening, 3);
-  lps_add(lps_seuphorica, mine_adjacency_rule, true);
 
   param_i(tilesize, "seuphorica_tilesize", 20)
   -> editable(10, 50, 0.1, "Seuphorica tile size", "", 't')
