@@ -1295,6 +1295,23 @@ void seuphorica_newgame() {
   dialog::display();
   }
 
+void seuphorica_settings() {
+  cmode = sm::DARKEN;
+  dictionary_checked = "";
+  stillscreen = !anims::any_on();
+
+  gamescreen();
+  dialog::init("settings", 0xFFFF80);
+  add_edit(tilesize);
+  add_edit(tiles3);
+  dialog::addItem("RogueViz settings", 'r');
+  dialog::add_key_action('r', [] {
+    pushScreen(showSettings);
+    });
+  dialog::addBack();
+  dialog::display();
+  }
+
 void seuphorica_menu() {
   cmode = sm::DARKEN;
   dictionary_checked = "";
@@ -1318,6 +1335,8 @@ void seuphorica_menu() {
     });
   dialog::addItem("quit", 'q');
   dialog::add_action([] { quitmainloop = true; });
+  dialog::addItem("settings", 's');
+  dialog::add_action_push(seuphorica_settings);
   dialog::addItem("cheat", 'c');
   dialog::add_action(cheat);
   dialog::addBack();
@@ -1344,6 +1363,13 @@ local_parameter_set lps_seuphorica("seuphorica:");
 void default_config() {
   lps_add(lps_seuphorica, menu_darkening, 3);
   lps_add(lps_seuphorica, mine_adjacency_rule, true);
+
+  param_i(tilesize, "seuphorica_tilesize", 20)
+  -> editable(10, 50, 0.1, "Seuphorica tile size", "", 't')
+  -> set_reaction([] { where_is_tile.clear(); })
+  -> set_sets([] { dialog::scaleLog(); });
+  param_b(tiles3, "seuphorica_tiles3", true)
+  -> editable("3D tile effects", '3');
   }
 
 void launch() {  
