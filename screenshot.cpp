@@ -1220,7 +1220,7 @@ EX void animate_parameter(parameter *par, string f) {
   aps.emplace_back(animated_parameter{par, f});
   }
 
-int ap_changes;
+EX int ap_changes;
 
 void apply_animated_parameters() {
   ap_changes = 0;
