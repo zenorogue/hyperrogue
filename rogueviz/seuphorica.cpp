@@ -107,6 +107,9 @@ string spotname(cell *c) {
   else if(disksize || closed_manifold) {
     return "#" + its(list_order[c]);
     }
+  else if(currentmap->strict_tree_rules()) {
+    return lalign(0, rulegen::canonical_path_to(c->master));
+    }
   else {
     hyperpoint h = calc_relative_matrix(c, currentmap->gamestart(), C0) * C0;
     return lalign(0, kz(h));
@@ -115,20 +118,6 @@ string spotname(cell *c) {
 
 cellwalker getback(cellwalker& cw) {
   return cw + rev;
-  }
-
-vector<int> get_path(coord c) {
-  if(euc::in()) {
-    auto co = euc2_coordinates(c);
-    return {0,0,0,-co.first,0,0,0,-co.second,0,0,0};
-    }
-  else if(closed_manifold) {
-    return {0,0,0,list_order[c],0,0,0};
-    }
-  else {
-    hyperpoint h = calc_relative_matrix(c, currentmap->gamestart(), C0) * C0;
-    return {0,0,0,int(h[0]*1000),0,0,0,int(h[1]*1000),0,0,0,int(h[2]*1000),0,0,0};
-    }
   }
 
 void thru_portal(coord& x, vect2& v);
@@ -1041,6 +1030,9 @@ vector<seuphgeom> seuphgeoms = {
     pconf.scale = 0.9;
     vid.creature_scale = 1.5;
     req_disksize = 0;
+    arb::convert::convert();
+    rulegen::prepare_rules();
+    arb::convert::activate();
     }},
 
   {"Spherical Board", []{
@@ -1067,6 +1059,9 @@ vector<seuphgeom> seuphgeoms = {
     pconf.scale = 0.9;
     vid.creature_scale = 0.8;
     req_disksize = 0;
+    arb::convert::convert();
+    rulegen::prepare_rules();
+    arb::convert::activate();
     }},
 
   {"Dodecagons", []{
