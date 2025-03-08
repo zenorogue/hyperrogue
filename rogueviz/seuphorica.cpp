@@ -24,6 +24,7 @@ map<cell*, int> distance_from_board;
 
 extern map<cell*, struct tile> board;
 extern set<cell*> just_placed;
+extern cell *dist_for;
 
 bool in_board(coord co) {
   if(co->land == laMemory) return false;
@@ -37,7 +38,7 @@ bool in_board(coord co) {
     else if(dfb1 == maximum) qty++;
     }
   if(maximum && qty < co->type / 2) maximum--;
-  if(dfb != maximum) currently_scrolling = true;
+  if(dfb != maximum) currently_scrolling = true, dist_for = nullptr;
   dfb = maximum;
   return dfb > 0;
   }
@@ -92,6 +93,9 @@ xy to_xy(cellwalker c) {
   return xy{co2.first, co2.second};
   }
 
+cell *dist_for = nullptr;
+map<cell*, int> distance_to;
+
 int dist(coord a, coord b) {
   if(euclid_only()) {
     auto co = euc2_coordinates(a);
@@ -100,7 +104,26 @@ int dist(coord a, coord b) {
     return max(abs(co2.first), abs(co2.second));
     }
   if(a->type != b->type) return 999;
-  return celldistance(a, b);
+
+  if(a != dist_for) {
+    distance_to.clear();
+    dist_for = a;
+    vector<pair<cell*, int>> v;
+    v.emplace_back(a, 0);
+    for(int i=0; i<isize(v); i++) {
+      auto [c, d] = v[i];
+      if(distance_to.count(c)) continue;
+      distance_to[c] = d;
+      auto ac = adj_minefield_cells(c);
+      for(cell *c1: ac) {
+        if(c1->land == laMemory) continue;
+        if(!disksize && !closed_manifold && !distance_from_board[c1]) continue;
+        v.emplace_back(c1, d+1);
+        }
+      }
+    }
+
+  return distance_to[b];
   }
 
 void advance(cell*& c, cellwalker& cw) {
@@ -471,6 +494,10 @@ bool draw(cell *c, const shiftmatrix& V) {
   bool inside = in_board(c);
   if(inside) {
     c->wall = waNone; c->landparam = 0x202020;
+    if(placing_portal) {
+      int val; has_power(board.at(portal_from), sp::portal, val);
+      if(dist(portal_from, c) <= val) c->landparam = 0x0000C0;
+      }
     }
   else
     c->wall = waChasm;
@@ -483,14 +510,14 @@ bool draw(cell *c, const shiftmatrix& V) {
   if(portals.count(c)) {
     auto c1 = portals.at(c);
     for(const shiftmatrix& V1: hr::span_at(current_display->all_drawn_copies, c1)) {
-      queueline(V * currentmap->get_corner(c, 2, 4), V1 * currentmap->get_corner(c1, 2, 4), 0xFF800080);
-      queueline(V * currentmap->get_corner(c, 2+c->type/2, 4), V1 * currentmap->get_corner(c1, 2+c->type/2, 4), 0x0000FF80);
+      queueline(V * currentmap->get_corner(c, 2, 4), V1 * currentmap->get_corner(c1, 2, 4), 0xFF800080, 5);
+      queueline(V * currentmap->get_corner(c, 2+c->type/2, 4), V1 * currentmap->get_corner(c1, 2+c->type/2, 4), 0x0000FF80, 5);
 
       if(tiles3) {
         auto high_V = orthogonal_move_fol(V, cgi.SLEV[1]);
         auto high_V1 = orthogonal_move_fol(V1, cgi.SLEV[1]);
-        queueline(high_V * currentmap->get_corner(c, 2, 4), high_V1 * currentmap->get_corner(c1, 2, 4), 0xFF800080);
-        queueline(high_V * currentmap->get_corner(c, 2+c->type/2, 4), high_V1 * currentmap->get_corner(c1, 2+c->type/2, 4), 0x0000FF80);
+        queueline(high_V * currentmap->get_corner(c, 2, 4), high_V1 * currentmap->get_corner(c1, 2, 4), 0xFF800080, 5);
+        queueline(high_V * currentmap->get_corner(c, 2+c->type/2, 4), high_V1 * currentmap->get_corner(c1, 2+c->type/2, 4), 0x0000FF80, 5);
         }
       }
     }
@@ -1002,6 +1029,7 @@ void reset_rv() {
   tile_orientation.clear();
   list_order.clear();
   distance_from_board.clear();
+  dist_for = nullptr; distance_to.clear();
   if(disksize || closed_manifold) {
     auto v = currentmap->allcells();
     for(int i=0; i<hr::isize(v); i++) list_order[v[i]] = i;
