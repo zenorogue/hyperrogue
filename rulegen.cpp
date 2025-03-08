@@ -2408,6 +2408,16 @@ struct hrmap_rulegen : hrmap {
     }
   };
 
+EX vector<int> canonical_path_to(heptagon *h) {
+  vector<int> res;
+  while(h != currentmap->getOrigin()) {
+    res.push_back(h->c.spin(0));
+    h = h->cmove(0);
+    }
+  reverse(res.begin(), res.end());
+  return res;
+  }
+
 EX vector<treestate> alt_treestates;
 
 EX void swap_treestates() {
