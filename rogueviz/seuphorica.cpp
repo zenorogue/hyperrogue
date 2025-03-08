@@ -977,6 +977,8 @@ struct seuphgeom {
   reaction_t launcher;
   };
 
+int current_seuphgeom = -1;
+
 vector<seuphgeom> seuphgeoms = {
   {"Infinite Board", []{
     set_geometry(gEuclidSquare);
@@ -1070,6 +1072,44 @@ vector<seuphgeom> seuphgeoms = {
     }},
   };
 
+void reset_seuphorica_screen() {
+  popScreenAll();
+  pushScreen(seuphorica_screen);
+  centermap();
+  clearMessages();
+  addMessage("Welcome to Seuphorica!");
+  }
+
+void enable();
+
+void seuphorica_setgeom() {
+  cmode = sm::DARKEN;
+  gamescreen();
+  stillscreen = !anims::any_on();
+  dialog::init("Seuphorica geometries", 0xFFFF80);
+  char let = 'a';
+  for(int i=0; i<isize(seuphgeoms); i++) {
+    dialog::addBoolItem(seuphgeoms[i].name, i == current_seuphgeom, let++);
+    dialog::add_action([i] {
+      current_seuphgeom = i;
+      stop_game();
+      seuphgeoms[i].launcher();
+      start_game();
+      reset_rv();
+      new_game();
+      enable();
+      reset_seuphorica_screen();
+      });
+    }
+  dialog::addBreak(100);
+  dialog::addBoolItem("words both ways", bidirectional, 'w');
+  dialog::add_action([] {
+    bidirectional = !bidirectional;
+    reset_rv(); new_game(); reset_seuphorica_screen();
+    });
+  dialog::addBack();
+  dialog::display();
+  }
 
 void seuphorica_newgame() {
   cmode = sm::DARKEN;
@@ -1078,11 +1118,15 @@ void seuphorica_newgame() {
   dialog::init("Seuphorica: new game", 0xFFFF80);
   dialog::addSelItem("language", next_language->name, 'l');
   lang_to_edit = &next_language; dialog::add_action_push(pick_language);
+
+  dialog::addSelItem("geometry", current_seuphgeom == -1 ? "custom" : seuphgeoms[current_seuphgeom].name, 'g');
+  dialog::add_action_push(seuphorica_setgeom);
+
   dialog::addItem("start new standard game", 's');
   dialog::add_action([] {
     reset_rv();
     restart("", "", "");
-    popScreen(); popScreen();
+    reset_seuphorica_screen();
     });
   if(!is_daily) {
     check_daily_time();
@@ -1090,7 +1134,7 @@ void seuphorica_newgame() {
     dialog::add_action([] {
       reset_rv();
       restart((its(daily) + "9").c_str(), "D", "8");
-      popScreen(); popScreen();
+      reset_seuphorica_screen();
       });
     }
   dialog::addBreak(100);
@@ -1164,7 +1208,7 @@ void seuphorica_newgame() {
     is_daily = false; game_restricted = false;
     for(int i=0; i<qty; i++) if(!special_allowed[i]) game_restricted = true;
     new_game();
-    popScreen(); popScreen();
+    reset_seuphorica_screen();
     });
 
   dialog::addBack();
@@ -1200,34 +1244,41 @@ void seuphorica_menu() {
   dialog::display();
   }
 
+void enable() {
+  rogueviz::rv_hook(hooks_build_help, 100, [] { help = fix(seuphorica::rules); return true; });
+  rogueviz::rv_hook(hooks_drawcell, 100, draw);
+  rogueviz::rv_change(showstartmenu, false);
+  rogueviz::rv_change(mapeditor::drawplayer, false);
+  }
+
+local_parameter_set lps_seuphorica("seuphorica:");
+
+void default_config() {
+  lps_add(lps_seuphorica, menu_darkening, 3);
+  lps_add(lps_seuphorica, mine_adjacency_rule, true);
+  }
+
 void launch() {  
+  // change the settings from JS Seuphorica
+  specials[int(sp::english)].text_color = 0xFFC8102E;
+  color_descs = false;
+  init_special_setting();
+
   stop_game();
   enable_canvas();
   ccolor::set_plain_nowall(0x202020);
-  specials[int(sp::english)].text_color = 0xFFC8102E; /* looks better in RV Seuphorica */
+  lps_enable(&lps_seuphorica);
   start_game();
+
   reset_rv();
-  init_special_setting();
   restart("", "", "");
-  menu_darkening = 3; /* needs more darkening than HyperRogue due to higher contrast */
-  mine_adjacency_rule = true;
-
-  showstartmenu = false;
-  mapeditor::drawplayer = false;
-  color_descs = false;
-
-  rogueviz::rv_hook(hooks_build_help, 100, [] { help = fix(seuphorica::rules); return true; });
-
-  clearMessages();
-  addMessage("Welcome to Seuphorica!");
-  }
-
-void enable() {
-  rogueviz::rv_hook(hooks_drawcell, 100, draw);
+  enable();
+  reset_seuphorica_screen();
   }
 
 auto seuphorica_hook =
-  arg::add3("-seuphorica", [] { launch(); enable(); pushScreen(seuphorica_screen); })
+  arg::add3("-seuphorica", [] { launch(); pushScreen(seuphorica_screen); })
++ addHook(hooks_configfile, 300, default_config)
 + arg::add3("-seuphorica-geo", [] {
     arg::shift();
     int which = -1;
@@ -1235,8 +1286,9 @@ auto seuphorica_hook =
     for(int i=0; i<isize(seuphgeoms); i++) if(appears(seuphgeoms[i].name, s)) which = i;
     if(which == -1 && s[0] >= '0' && s[0] <= '9') which = atoi(s.c_str());
     if(which == -1) throw hr_exception("unknown seuphorica-geo geometry");
+    current_seuphgeom = which;
     seuphgeoms[which].launcher();
-    launch(); enable(); pushScreen(seuphorica_screen);
+    launch();
     });
 
 }
