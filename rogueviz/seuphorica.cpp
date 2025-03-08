@@ -670,6 +670,11 @@ void seuphorica_menu();
 int start_tick;
 int frametime = 500;
 
+void centermap() {
+  centerover = currentmap->gamestart();
+  View = iddspin(centerover,tile_orientation[centerover].spin,0);
+  }
+
 void seuphorica_screen() {
 
   if(snapshots.empty())
@@ -823,15 +828,18 @@ void seuphorica_screen() {
   dialog::displayLong(fix(ss.str()), size, ui.y3 + vid.fsize * 3, false);
 
   if(ev.valid_move) {
-    displayButton(lerp(ui.x0, ui.x2, 1/6.), vid.yres - vid.fsize, just_placed.empty() ? str_skip_turn : str_play, SDLK_RETURN, 8);
+    displayButton(lerp(ui.x0, ui.x2, 1/8.), vid.yres - vid.fsize, just_placed.empty() ? str_skip_turn : str_play, SDLK_RETURN, 8);
     dialog::add_key_action(SDLK_RETURN, play);
     }
 
-  displayButton(lerp(ui.x0, ui.x2, 3/6.), vid.yres - vid.fsize, str_view_help, SDLK_F1, 8);
+  displayButton(lerp(ui.x0, ui.x2, 3/8.), vid.yres - vid.fsize, "center", ' ', 8);
+  dialog::add_key_action(' ', centermap);
+
+  displayButton(lerp(ui.x0, ui.x2, 5/8.), vid.yres - vid.fsize, str_view_help, SDLK_F1, 8);
   if(getcstat == SDLK_F1)
     dialog::add_key_action(SDLK_F1, [] { gotoHelp(fix(seuphorica::rules)); });
 
-  displayButton(lerp(ui.x0, ui.x2, 5/6.), vid.yres - vid.fsize, "menu", 'v', 8);
+  displayButton(lerp(ui.x0, ui.x2, 7/8.), vid.yres - vid.fsize, "menu", 'v', 8);
   dialog::add_key_action('v', [] { pushScreen(seuphorica_menu); });
 
   keyhandler = [] (int sym, int uni) {
