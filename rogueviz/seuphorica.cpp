@@ -20,9 +20,26 @@ using vect2 = cellwalker;
 
 bool bidirectional;
 
+map<cell*, int> distance_from_board;
+
+extern map<cell*, struct tile> board;
+extern set<cell*> just_placed;
+
 bool in_board(coord co) {
   if(co->land == laMemory) return false;
-  return true;
+  if(disksize || closed_manifold) return true;
+  auto& dfb = distance_from_board[co];
+  int maximum = 0, qty = 0;
+  if(board.count(co) && !just_placed.count(co)) { dfb = 7; return true; }
+  forCellCM(c1, co) {
+    auto dfb1 =	distance_from_board[c1];
+    if(dfb1 > maximum) maximum = dfb1, qty = 1;
+    else if(dfb1 == maximum) qty++;
+    }
+  if(maximum && qty < co->type / 2) maximum--;
+  if(dfb != maximum) currently_scrolling = true;
+  dfb = maximum;
+  return dfb > 0;
   }
 
 bool euclid_only() {
@@ -984,6 +1001,7 @@ void reset_rv() {
   View = Id; where_is_tile.clear(); current = next_language;
   tile_orientation.clear();
   list_order.clear();
+  distance_from_board.clear();
   if(disksize || closed_manifold) {
     auto v = currentmap->allcells();
     for(int i=0; i<hr::isize(v); i++) list_order[v[i]] = i;
