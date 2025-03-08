@@ -562,15 +562,17 @@ using snaptile = pair<tile, hyperpoint>;
 
 vector<map<int, snaptile>> snapshots;
 
+int tilesize = 20;
+int marginsize = 10;
+
 struct tilebox {
   int *x1, *y1, *x2, *y2;
   vector<tile> *ptset;
   color_t col;
   tilebox(int& x1, int& y1, int& x2, int& y2, vector<tile>& tset, color_t col) : x1(&x1), y1(&y1), x2(&x2), y2(&y2), ptset(&tset), col(col) {}
 
-  int get_margin() { return 40; }
-  int get_space() { return 50; }
-  int get_margin_for(tile &t) { return 40 + (has_power(t, sp::gigantic) ? 50 : 0); }
+  int get_space() { return tilesize * 2 + marginsize; }
+  int get_margin_for(tile &t) { return tilesize + marginsize * 2 + (has_power(t, sp::gigantic) ? get_space() : 0); }
 
   bool in_bounds(hyperpoint h, tile &t1, bool req_down) {
     int ex = get_margin_for(t1);
@@ -580,7 +582,7 @@ struct tilebox {
   bool good_location(hyperpoint h, tile &t1) {
     for(auto& t: *ptset) if(where_is_tile.count(t.id)) {
       auto d = h - where_is_tile[t.id];
-      if(max(abs(d[0]), abs(d[1])) < get_space() + (has_power(t1, sp::gigantic) ? 30:0) + (has_power(t, sp::gigantic) ? 30:0)) return false;
+      if(max(abs(d[0]), abs(d[1])) < get_space() + (has_power(t1, sp::gigantic) ? tilesize*2:0) + (has_power(t, sp::gigantic) ? tilesize*2:0)) return false;
       }
     return true;
     }
@@ -614,15 +616,15 @@ struct tilebox {
     locate_all();
 
     shiftmatrix ASP = atscreenpos(0, 0);
-    curvepoint(eupoint(*x1+10, *y1+10));
-    curvepoint(eupoint(*x1+10, *y2-10));
-    curvepoint(eupoint(*x2-10, *y2-10));
-    curvepoint(eupoint(*x2-10, *y1+10));
-    curvepoint(eupoint(*x1+10, *y1+10));
+    curvepoint(eupoint(*x1+marginsize, *y1+marginsize));
+    curvepoint(eupoint(*x1+marginsize, *y2-marginsize));
+    curvepoint(eupoint(*x2-marginsize, *y2-marginsize));
+    curvepoint(eupoint(*x2-marginsize, *y1+marginsize));
+    curvepoint(eupoint(*x1+marginsize, *y1+marginsize));
 
-    auto h1 = inverse_shift_any(atscreenpos(0, 0), ASP * eupoint(*x1+10, *y1+10));
-    auto h2 = inverse_shift_any(atscreenpos(0, 0), ASP * eupoint(*x2-10, *y2-10));
-    if(mousex >= h1[0] + 10 && mousex <= h2[0] - 10 && mousey >= h1[1] + 10 && mousey <= h2[1] + 10) {
+    auto h1 = inverse_shift_any(atscreenpos(0, 0), ASP * eupoint(*x1+marginsize, *y1+marginsize));
+    auto h2 = inverse_shift_any(atscreenpos(0, 0), ASP * eupoint(*x2-marginsize, *y2-marginsize));
+    if(mousex >= h1[0] + marginsize && mousex <= h2[0] - marginsize && mousey >= h1[1] + marginsize && mousey <= h2[1] + marginsize) {
       current_box = ptset;
       mouseovers = "";
       dialog::add_key_action(SDLK_F1, [this] {
@@ -636,11 +638,11 @@ struct tilebox {
     if(1) {
       wider wid(5);
       queuecurve(ASP, darkena(col, 0, 0xFF), darkena(col, 0, 0x80), PPR::ZERO);
-      write_in_space(ASP * eupush(*x2 - 10, *y1 + 20), 72, 50/3, title, darkena(col, 0, 0xFF), 16, 16);
+      write_in_space(ASP * eupush(*x2 - marginsize, *y1 + marginsize + 10), 72, 50/3, title, darkena(col, 0, 0xFF), 16, 16);
       if(isize(*ptset))
-        write_in_space(ASP * eupush(*x2 - 10, *y1 + 40), 72, 25/3, its(isize(*ptset)), darkena(col, 0, 0xFF), 16, 16);
+        write_in_space(ASP * eupush(*x2 - marginsize, *y1 + marginsize + 30), 72, 25/3, its(isize(*ptset)), darkena(col, 0, 0xFF), 16, 16);
       if(ptset == &shop)
-        write_in_space(ASP * eupush(*x2 - 10, *y2 - 10), 72, 50/3, its(cash) + "$", darkena(col, 0, 0xFF), 16, 16);
+        write_in_space(ASP * eupush(*x2 - marginsize, *y2 - marginsize), 72, 50/3, its(cash) + "$", darkena(col, 0, 0xFF), 16, 16);
       }
 
     if(hr::isize(snapshots) || (ptset == &deck && scry_active)) return;
@@ -651,12 +653,12 @@ struct tilebox {
       if(&t == tile_moved && holdmouse) { idx++; continue; }
 
       if(ptset == &drawn && idx < ev.retain_count) {
-        auto T = ASP * eupush(lt) * euscalexx(20) * spin(45._deg);
+        auto T = ASP * eupush(lt) * euscalexx(tilesize) * spin(45._deg);
         for(int i=0; i<=4; i++) curvepoint(spin(90._deg*i) * eupoint(1,1));
         queuecurve(T, darkena(col, 0, 0xFF), darkena(col, 0, 0x80), PPR::ZERO);
         }
 
-      render_tile(ASP * eupush(lt) * euscalexx(20), t, nullptr, ptset, idx++);
+      render_tile(ASP * eupush(lt) * euscalexx(tilesize), t, nullptr, ptset, idx++);
       }
 
     int cx = 0;
@@ -832,7 +834,7 @@ void seuphorica_screen() {
         }
       }
 
-    if(holdmouse && among(hold_mode, 1, 2)) render_tile(atscreenpos(mousex, mousey) * euscalexx(20), *tile_moved, nullptr, nullptr, 0);
+    if(holdmouse && among(hold_mode, 1, 2)) render_tile(atscreenpos(mousex, mousey) * euscalexx(tilesize), *tile_moved, nullptr, nullptr, 0);
 
     if(start_tick) {
       ld t = (ticks - start_tick) * 1. / frametime;
@@ -848,11 +850,17 @@ void seuphorica_screen() {
       for(auto& [id, p]: fst) {
         auto& p1 = snd.at(id);
         hyperpoint at = p.second + (p1.second - p.second) * t;
-        render_tile(atscreenpos(at[0], at[1]) * euscalexx(20), t < .5 ? p.first : p1.first, nullptr, nullptr, 0);
+        render_tile(atscreenpos(at[0], at[1]) * euscalexx(tilesize), t < .5 ? p.first : p1.first, nullptr, nullptr, 0);
         }
       }
 
     quickqueue();
+    }
+
+  if(ui.y3 >= vid.yres * .75 && !holdmouse) {
+    ui.y1 = ui.y2 = ui.y3 = 0;
+    tilesize--;
+    where_is_tile.clear();
     }
 
   int in_row = (isize(spells) + 1) / 2;
