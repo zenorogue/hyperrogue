@@ -97,15 +97,38 @@ cell *get_advance(cell* c, cellwalker cw) {
 cell *origin() { return currentmap->gamestart(); }
 cell *nocoord() { return nullptr; }
 
-string spotname(cell *c) { return "[TODO]"; }
+map<cell*, int> list_order;
+
+string spotname(cell *c) {
+  if(euc::in()) {
+    auto co = euc2_coordinates(c);
+    return lalign(0, "(", -co.first, ",", -co.second, ")");
+    }
+  else if(disksize || closed_manifold) {
+    return "#" + its(list_order[c]);
+    }
+  else {
+    hyperpoint h = calc_relative_matrix(c, currentmap->gamestart(), C0) * C0;
+    return lalign(0, kz(h));
+    }
+  }
 
 cellwalker getback(cellwalker& cw) {
   return cw + rev;
   }
 
 vector<int> get_path(coord c) {
-  auto co = euc2_coordinates(c);
-  return {0,0,0,co.first,0,0,0,co.second,0,0,0};
+  if(euc::in()) {
+    auto co = euc2_coordinates(c);
+    return {0,0,0,-co.first,0,0,0,-co.second,0,0,0};
+    }
+  else if(closed_manifold) {
+    return {0,0,0,list_order[c],0,0,0};
+    }
+  else {
+    hyperpoint h = calc_relative_matrix(c, currentmap->gamestart(), C0) * C0;
+    return {0,0,0,int(h[0]*1000),0,0,0,int(h[1]*1000),0,0,0,int(h[2]*1000),0,0,0};
+    }
   }
 
 void thru_portal(coord& x, vect2& v);
@@ -719,6 +742,7 @@ void seuphorica_screen() {
       if(co) mouseovers = mouseovers + ", " + describe_color(co);
       }
     else if(co) mouseovers = describe_color(co);
+    else mouseovers = spotname(at);
     if(board.count(at) || co) {
       dialog::add_key_action(SDLK_F1, [at] {
         push_tile_info_screen(board.count(at) ? board.at(at) : empty_tile, mouseover, nullptr, -1);
@@ -970,6 +994,11 @@ int want_seed;
 void reset_rv() {
   View = Id; where_is_tile.clear(); current = next_language;
   tile_orientation.clear();
+  list_order.clear();
+  if(disksize || closed_manifold) {
+    auto v = currentmap->allcells();
+    for(int i=0; i<hr::isize(v); i++) list_order[v[i]] = i;
+    }
   }
 
 struct seuphgeom {
