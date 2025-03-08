@@ -1317,6 +1317,14 @@ void seuphorica_menu() {
 void enable() {
   rogueviz::rv_hook(hooks_build_help, 100, [] { help = fix(seuphorica::rules); return true; });
   rogueviz::rv_hook(hooks_drawcell, 100, draw);
+  rogueviz::rv_hook(hooks_clearmemory, 100, [] {
+    board.clear();
+    just_placed.clear();
+    tile_orientation.clear();
+    list_order.clear();
+    distance_from_board.clear();
+    distance_to.clear();
+    });
   rogueviz::rv_change(showstartmenu, false);
   rogueviz::rv_change(mapeditor::drawplayer, false);
   }
