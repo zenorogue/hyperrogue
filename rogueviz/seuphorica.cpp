@@ -648,7 +648,7 @@ struct tilebox {
         write_in_space(ASP * eupush(*x2 - marginsize, *y2 - marginsize), 72, 50/3, its(cash) + "$", darkena(col, 0, 0xFF), 16, 16);
       }
 
-    if(hr::isize(snapshots) || (ptset == &deck && scry_active)) return;
+    if(hr::isize(snapshots)) return;
 
     int idx = 0;
     for(auto& t: *ptset) {
@@ -663,6 +663,8 @@ struct tilebox {
 
       render_tile(ASP * eupush(lt) * euscalexx(tilesize), t, nullptr, ptset, idx++);
       }
+
+    if(ptset == &deck && scry_active) return;
 
     int cx = 0;
     auto sortbutton = [&] (string title, string desc, auto action) {
