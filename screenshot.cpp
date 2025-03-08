@@ -1803,7 +1803,7 @@ EX bool any_animation() {
   }
 
 EX bool any_on() {
-  return any_animation() || history::includeHistory;
+  return any_animation() || history::includeHistory || currently_scrolling;
   }
 
 EX bool center_music() {

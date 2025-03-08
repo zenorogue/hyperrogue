@@ -5816,6 +5816,7 @@ EX string menu_format = "";
 EX void gamescreen() {
 
   if(cmode & sm::NOSCR) {
+    stillscreen = true;
     emptyscreen();
     return;
     }
@@ -5837,6 +5838,8 @@ EX void gamescreen() {
     return;
     }
   
+  stillscreen = false;
+
   auto gx = vid.xres;
   auto gy = vid.yres;
 
