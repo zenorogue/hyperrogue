@@ -698,6 +698,8 @@ void seuphorica_screen() {
   dialog::display();
   dialog::add_key_action(SDLK_F1, [] { gotoHelp(fix(seuphorica::rules)); });
 
+  stillscreen = !anims::any_on() && !holdmouse && !hr::isize(snapshots);
+
   if(placing_portal) mouseovers = "Click another tile to connect a portal";
 
   if(mouseover) {
@@ -889,6 +891,7 @@ string logfile = "seuphorica-log.txt";
 void seuphorica_dictionary() {
   cmode = sm::DARKEN;
   gamescreen();
+  stillscreen = !anims::any_on();
   dialog::init("Seuphorica dictionary", 0xFFFF80);
   dialog::addBack();
   if(dialog::infix != "") mouseovers = dialog::infix;
@@ -960,6 +963,7 @@ void reset_rv() {
 void seuphorica_newgame() {
   cmode = sm::DARKEN;
   gamescreen();
+  stillscreen = !anims::any_on();
   dialog::init("Seuphorica: new game", 0xFFFF80);
   dialog::addSelItem("language", next_language->name, 'l');
   lang_to_edit = &next_language; dialog::add_action_push(pick_language);
@@ -1059,6 +1063,7 @@ void seuphorica_newgame() {
 void seuphorica_menu() {
   cmode = sm::DARKEN;
   dictionary_checked = "";
+  stillscreen = !anims::any_on();
 
   gamescreen();
   dialog::init("Seuphorica", 0xFFFF80);
