@@ -20,7 +20,10 @@ using vect2 = cellwalker;
 
 bool bidirectional;
 
-bool in_board(coord co) { return true; }
+bool in_board(coord co) {
+  if(co->land == laMemory) return false;
+  return true;
+  }
 
 bool euclid_only() {
   return geometry == gEuclidSquare && variation == eVariation::pure && !quotient; /* to do: accept standard tori */
@@ -435,6 +438,7 @@ void render_tile(shiftmatrix V, tile& t, cell *c, vector<tile>* origbox, int box
   }
 
 bool draw(cell *c, const shiftmatrix& V) {
+  if(c->land == laMemory) return false;
   bool inside = in_board(c);
   if(inside) {
     c->wall = waNone; c->landparam = 0x202020;
@@ -960,6 +964,105 @@ void reset_rv() {
   tile_orientation.clear();
   }
 
+struct seuphgeom {
+  string name;
+  reaction_t launcher;
+  };
+
+vector<seuphgeom> seuphgeoms = {
+  {"Infinite Board", []{
+    set_geometry(gEuclidSquare);
+    set_variation(eVariation::pure);
+    pconf.scale = 0.2;
+    vid.use_smart_range = 2;
+    vid.creature_scale = 1;
+    auto& T0 = euc::eu_input.user_axes; T0[0][0] = T0[0][1] = T0[1][0] = T0[1][1] = euc::eu_input.twisted = 0;
+    euc::build_torus3();
+    req_disksize = 0;
+    }},
+
+  {"Claustrophobia", []{
+    set_geometry(gEuclidSquare);
+    set_variation(eVariation::pure);
+    pconf.scale = 0.2;
+    vid.use_smart_range = 2;
+    vid.creature_scale = 1;
+    auto& T0 = euc::eu_input.user_axes; T0[0][0] = T0[0][1] = T0[1][0] = T0[1][1] = euc::eu_input.twisted = 0;
+    euc::build_torus3();
+    req_disksize = 15 * 15;
+    diskshape = dshVertices;
+    }},
+
+  {"Hyperbolic Board", []{
+    set_geometry(g45);
+    gp::param = {3, 1};
+    set_variation(eVariation::goldberg);
+    gp::dual_of_current();
+    vid.use_smart_range = 2;
+    pconf.scale = 0.9;
+    vid.creature_scale = 1.5;
+    req_disksize = 0;
+    }},
+
+  {"Spherical Board", []{
+    set_geometry(gOctahedron);
+    gp::param = {6, 1};
+    set_variation(eVariation::goldberg);
+    gp::dual_of_current();
+    pconf.scale = 0.9;
+    req_disksize = 0;
+    }},
+
+  {"Kite and Dart", []{
+    set_geometry(gKiteDart2);
+    pconf.scale = 0.5;
+    vid.use_smart_range = 2;
+    req_disksize = 0;
+    }},
+
+  {"Hyperbolic Board II", []{
+    set_geometry(g46);
+    gp::param = {5, 0};
+    set_variation(eVariation::goldberg);
+    vid.use_smart_range = 2;
+    pconf.scale = 0.9;
+    vid.creature_scale = 0.8;
+    req_disksize = 0;
+    }},
+
+  {"Dodecagons", []{
+    set_variation(eVariation::pure);
+    arcm::load_symbol("4,6,12", true);
+    vid.use_smart_range = 2;
+    pconf.scale = 0.25;
+    vid.creature_scale = 4;
+    req_disksize = 0;
+    }},
+
+  {"Torus", []{
+    set_geometry(gEuclidSquare);
+    set_variation(eVariation::pure);
+    pconf.scale = 0.2;
+    vid.use_smart_range = 2;
+    vid.creature_scale = 1;
+    auto& T0 = euc::eu_input.user_axes; T0[0][0] = 20; T0[1][1] = 20; T0[0][1] = 11; T0[1][0] = -11; euc::eu_input.twisted = 0;
+    euc::build_torus3();
+    req_disksize = 0;
+    }},
+
+  {"Bring Surface", []{
+    set_geometry(gBring);
+    gp::param = {3, 1};
+    set_variation(eVariation::goldberg);
+    gp::dual_of_current();
+    vid.use_smart_range = 2;
+    pconf.scale = 0.9;
+    vid.creature_scale = 1.5;
+    req_disksize = 0;
+    }},
+  };
+
+
 void seuphorica_newgame() {
   cmode = sm::DARKEN;
   gamescreen();
@@ -1115,7 +1218,18 @@ void enable() {
   rogueviz::rv_hook(hooks_drawcell, 100, draw);
   }
 
-auto seuphorica_hook = arg::add3("-seuphorica", [] { launch(); enable(); pushScreen(seuphorica_screen); });
+auto seuphorica_hook =
+  arg::add3("-seuphorica", [] { launch(); enable(); pushScreen(seuphorica_screen); })
++ arg::add3("-seuphorica-geo", [] {
+    arg::shift();
+    int which = -1;
+    string s = arg::args();
+    for(int i=0; i<isize(seuphgeoms); i++) if(appears(seuphgeoms[i].name, s)) which = i;
+    if(which == -1 && s[0] >= '0' && s[0] <= '9') which = atoi(s.c_str());
+    if(which == -1) throw hr_exception("unknown seuphorica-geo geometry");
+    seuphgeoms[which].launcher();
+    launch(); enable(); pushScreen(seuphorica_screen);
+    });
 
 }
 }
