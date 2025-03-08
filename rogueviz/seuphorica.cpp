@@ -1045,7 +1045,7 @@ vector<seuphgeom> seuphgeoms = {
     arcm::load_symbol("4,6,12", true);
     vid.use_smart_range = 2;
     pconf.scale = 0.25;
-    vid.creature_scale = 4;
+    vid.creature_scale = 2;
     req_disksize = 0;
     }},
 
