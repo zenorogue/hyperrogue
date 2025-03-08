@@ -254,6 +254,7 @@ string fix(string s) {
   rep("<font color='#FF4040'>", "");
   rep("</font>", "");
   rep("<br/>", "\n");
+  rep("*", "×");
   rep("<li> ", "  * ");
   rep("<li>", "* ");
   rep("</li>", "\n");
