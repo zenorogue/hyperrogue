@@ -859,8 +859,11 @@ EX void mainloopiter() {
   timetowait = 0;
 #endif
 
-  if(timetowait > 0)
+  if(timetowait > 0) {
+    #if !CAP_SDL2
     SDL_Delay(timetowait);
+    #endif
+    }
   else {
     ors::check_orientation();
     if(cmode & sm::CENTER) {
@@ -931,6 +934,7 @@ EX void mainloopiter() {
   forcetarget = anyshiftclick;
   
   didsomething = false;
+  currently_scrolling = false;
   
   if(vid.shifttarget&1) {
     #if ISPANDORA
@@ -1067,6 +1071,14 @@ EX void mainloopiter() {
   if((cmode & (sm::DRAW | sm::MAP)) && holdmouse && anims::ma && mouseover)
     handlekey(getcstat, getcstat);
 
+  if(((SDL_GetMouseState(NULL, NULL) & SDL_BUTTON_MMASK)) && !mouseout2())
+    currently_scrolling = true;
+
+  #if CAP_SDL2
+  if(timetowait > 0) {
+    if(SDL_WaitEventTimeout(&ev, timetowait)) handle_event(ev);
+    }
+  #endif
   while(SDL_PollEvent(&ev)) handle_event(ev);
   fix_mouseh();
 

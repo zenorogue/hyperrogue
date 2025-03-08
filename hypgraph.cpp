@@ -2483,7 +2483,7 @@ EX void panning(shiftpoint hf0, shiftpoint ht0) {
   hyperpoint ht = unshift(ht0, hf0.shift);
   View = 
     rgpushxto0(hf) * rgpushxto0(gpushxto0(hf) * ht) * gpushxto0(hf) * View;
-  playermoved = false;
+  playermoved = false; currently_scrolling = true;
   }
 
 EX int cells_drawn, cells_generated;
