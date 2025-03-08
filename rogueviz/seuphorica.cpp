@@ -1079,6 +1079,26 @@ vector<seuphgeom> seuphgeoms = {
     diskshape = dshVertices;
     }},
 
+  {"Torus", []{
+    set_geometry(gEuclidSquare);
+    set_variation(eVariation::pure);
+    pconf.scale = 0.2;
+    vid.use_smart_range = 2;
+    vid.creature_scale = 1;
+    auto& T0 = euc::eu_input.user_axes; T0[0][0] = 20; T0[1][1] = 20; T0[0][1] = 11; T0[1][0] = -11; euc::eu_input.twisted = 0;
+    euc::build_torus3();
+    req_disksize = 0;
+    }},
+
+  {"Spherical Board", []{
+    set_geometry(gOctahedron);
+    gp::param = {6, 1};
+    set_variation(eVariation::goldberg);
+    gp::dual_of_current();
+    pconf.scale = 0.9;
+    req_disksize = 0;
+    }},
+
   {"Hyperbolic Board", []{
     set_geometry(g45);
     gp::param = {3, 1};
@@ -1091,22 +1111,6 @@ vector<seuphgeom> seuphgeoms = {
     arb::convert::convert();
     rulegen::prepare_rules();
     arb::convert::activate();
-    }},
-
-  {"Spherical Board", []{
-    set_geometry(gOctahedron);
-    gp::param = {6, 1};
-    set_variation(eVariation::goldberg);
-    gp::dual_of_current();
-    pconf.scale = 0.9;
-    req_disksize = 0;
-    }},
-
-  {"Kite and Dart", []{
-    set_geometry(gKiteDart2);
-    pconf.scale = 0.5;
-    vid.use_smart_range = 2;
-    req_disksize = 0;
     }},
 
   {"Hyperbolic Board II", []{
@@ -1122,26 +1126,6 @@ vector<seuphgeom> seuphgeoms = {
     arb::convert::activate();
     }},
 
-  {"Dodecagons", []{
-    set_variation(eVariation::pure);
-    arcm::load_symbol("4,6,12", true);
-    vid.use_smart_range = 2;
-    pconf.scale = 0.25;
-    vid.creature_scale = 2;
-    req_disksize = 0;
-    }},
-
-  {"Torus", []{
-    set_geometry(gEuclidSquare);
-    set_variation(eVariation::pure);
-    pconf.scale = 0.2;
-    vid.use_smart_range = 2;
-    vid.creature_scale = 1;
-    auto& T0 = euc::eu_input.user_axes; T0[0][0] = 20; T0[1][1] = 20; T0[0][1] = 11; T0[1][0] = -11; euc::eu_input.twisted = 0;
-    euc::build_torus3();
-    req_disksize = 0;
-    }},
-
   {"Bring Surface", []{
     set_geometry(gBring);
     gp::param = {3, 1};
@@ -1152,6 +1136,23 @@ vector<seuphgeom> seuphgeoms = {
     vid.creature_scale = 1.5;
     req_disksize = 0;
     }},
+
+  {"Dodecagons", []{
+    set_variation(eVariation::pure);
+    arcm::load_symbol("4,6,12", true);
+    vid.use_smart_range = 2;
+    pconf.scale = 0.25;
+    vid.creature_scale = 2;
+    req_disksize = 0;
+    }},
+
+  {"Kite and Dart", []{
+    set_geometry(gKiteDart2);
+    pconf.scale = 0.5;
+    vid.use_smart_range = 2;
+    req_disksize = 0;
+    }},
+
   };
 
 void reset_seuphorica_screen() {
