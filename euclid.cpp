@@ -799,7 +799,7 @@ EX namespace euc {
         if(dsx >= dsc) coo = coo - twisted_vec;
         else if (dsx < 0) coo = coo + twisted_vec;
         else break;
-        M = M * spintox(h) * MirrorY * rspintox(h);
+        M = M * rspintox(h) * MirrorY * spintox(h);
         auto s = ort * dscalar(d0, ort) * 2;
         auto v = dscalar(ort, ort);
         s.first /= v;
