@@ -1402,7 +1402,7 @@ void default_config() {
   -> set_sets([] { dialog::scaleLog(); });
   param_i(frametime, "seuphorica_animation", 500)
   -> editable(0, 2000, 100, "Seuphorica animation speed", "how long should each animation speed take", 'a')
-  -> set_sets([] { dialog::bound_low(0); });
+  -> set_sets([] { dialog::bound_low(0); dialog::scaleSinh();});
   param_b(tiles3, "seuphorica_tiles3", true)
   -> editable("3D tile effects", '3');
   }
