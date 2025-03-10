@@ -70,6 +70,26 @@ vector<cell*> orthoneighbors(cell* base) {
   }
 
 map<cell*, cellwalker> tile_orientation;
+map<cell*, int> tile_orientation_level;
+
+void check_orientation(cell *c) {
+  if(board.count(c)) { tile_orientation_level[c] = 1000000; return; }
+  int maxlev = 0, dir = 0;
+  forCellIdCM(c1, i, c) {
+    if(!distance_from_board[c1]) continue;
+    if(tile_orientation_level[c1] > maxlev)
+      maxlev = tile_orientation_level[c1], dir = i;
+    }
+  tile_orientation_level[c] = maxlev - 1;
+  auto c1 = c->cmove(dir);
+  cellwalker cw = tile_orientation[c1];
+  int steps = 0;
+  while(cw.spin != c->c.spin(dir)) { cw--; steps++; }
+  cw += wstep; cw += rev;
+  if(!anyshiftclick) while(steps) { cw++; steps--; }
+  tile_orientation[c] = cw;
+  }
+
 void set_orientation(cell *c, cellwalker cw) {
   tile_orientation[c] = cw;
   }
@@ -495,6 +515,7 @@ void render_tile(shiftmatrix V, tile& t, cell *c, vector<tile>* origbox, int box
 
 bool draw(cell *c, const shiftmatrix& V) {
   if(c->land == laMemory) return false;
+  check_orientation(c);
   bool inside = in_board(c);
   if(inside) {
     c->wall = waNone; c->landparam = 0x202020;
@@ -964,7 +985,7 @@ void seuphorica_screen() {
         }
       if(box_moved == &drawn && current_box == nullptr && mouseover) {
         auto at = mouseover;
-        if(in_board(at) && !board.count(at)) {
+        if(in_board(at) && !board.count(at) && tile_orientation.count(at)) {
           swap(drawn[tile_boxid], drawn[0]);
           drop_hand_on(at);
           sort_hand();
@@ -972,7 +993,7 @@ void seuphorica_screen() {
         }
       if(box_moved == &shop && current_box == nullptr && mouseover && tile_moved->price <= cash) {
         auto at = mouseover;
-        if(in_board(at) && !board.count(at)) {
+        if(in_board(at) && !board.count(at) && tile_orientation.count(at)) {
           buy(tile_boxid);
           drop_hand_on(at);
           }
@@ -1382,6 +1403,7 @@ void enable() {
     board.clear();
     just_placed.clear();
     tile_orientation.clear();
+    tile_orientation_level.clear();
     list_order.clear();
     distance_from_board.clear();
     distance_to.clear();
