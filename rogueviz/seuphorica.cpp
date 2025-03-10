@@ -80,13 +80,14 @@ void check_orientation(cell *c) {
     if(tile_orientation_level[c1] > maxlev)
       maxlev = tile_orientation_level[c1], dir = i;
     }
+  if(maxlev == 0) return;
   tile_orientation_level[c] = maxlev - 1;
   auto c1 = c->cmove(dir);
   cellwalker cw = tile_orientation[c1];
   int steps = 0;
   while(cw.spin != c->c.spin(dir)) { cw--; steps++; }
   cw += wstep; cw += rev;
-  if(!anyshiftclick) while(steps) { cw++; steps--; }
+  while(steps) { cw++; steps--; }
   tile_orientation[c] = cw;
   }
 
