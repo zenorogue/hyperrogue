@@ -1323,6 +1323,7 @@ void seuphorica_settings() {
   dialog::init("settings", 0xFFFF80);
   add_edit(tilesize);
   add_edit(tiles3);
+  add_edit(frametime);
   dialog::addItem("RogueViz settings", 'r');
   dialog::add_key_action('r', [] {
     pushScreen(showSettings);
@@ -1387,6 +1388,9 @@ void default_config() {
   -> editable(10, 50, 0.1, "Seuphorica tile size", "", 't')
   -> set_reaction([] { where_is_tile.clear(); })
   -> set_sets([] { dialog::scaleLog(); });
+  param_i(frametime, "seuphorica_animation", 500)
+  -> editable(0, 2000, 100, "Seuphorica animation speed", "how long should each animation speed take", 'a')
+  -> set_sets([] { dialog::bound_low(0); });
   param_b(tiles3, "seuphorica_tiles3", true)
   -> editable("3D tile effects", '3');
   }
