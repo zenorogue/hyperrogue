@@ -925,6 +925,18 @@ void seuphorica_screen() {
       }
     if(uni == PSEUDOKEY_RELEASE && among(hold_mode, 1, 2)) {
       where_is_tile[tile_moved->id] = eupoint(mousex, mousey);
+      if(box_moved == &shop && current_box != box_moved && tile_moved->price > cash) {
+        addMessage("Not enough cash to buy this!");
+        }
+      if(among(box_moved, &deck, &discard) && box_moved != current_box) {
+        addMessage("You can only use the tiles in hand and in shop!");
+        }
+      if(among(current_box, &deck, &discard) && box_moved != current_box) {
+        addMessage("Tiles will be moved to deck and discard automatically!");
+        }
+      if(box_moved != current_box && current_box == &shop && !tile_moved->price) {
+        addMessage("You can only cancel purchases made on the same turn!");
+        }
       if(box_moved == &shop && current_box == &drawn) {
         buy(tile_boxid);
         sort_hand();
