@@ -47,6 +47,13 @@ bool euclid_only() {
   return geometry == gEuclidSquare && variation == eVariation::pure && !quotient; /* to do: accept standard tori */
   }
 
+// 1 if no direction work, 2 if horizontal/vertical work, 4 if all directions work
+int euv;
+
+int euvalue() {
+  return euv;
+  }
+
 vector<cell*> gigacover(cell *c) {
   if(euclid_only()) {
     /* cannot do the default case because of mirror(...) */
@@ -86,7 +93,7 @@ void check_orientation(cell *c) {
   cellwalker cw = tile_orientation[c1];
   int steps = 0;
   while(cw.spin != c->c.spin(dir)) { cw--; steps++; }
-  cw += wstep; cw += rev;
+  cw += wstep; if(c->type % 4 == 0) cw += rev;
   while(steps) { cw++; steps--; }
   tile_orientation[c] = cw;
   }
@@ -105,13 +112,8 @@ vector<vect2> forward_steps(coord c) {
     }
   }
 
-struct xy { int x; int y; };
-
-xy to_xy(cellwalker c) {
-  auto co = euc2_coordinates(c.at);
-  auto co1 = euc2_coordinates(c.peek());
-  auto co2 = co1 - co;
-  return xy{co2.first, co2.second};
+bool is_dir(cellwalker cw, int d) {
+  return cw.spin % 2 == d;
   }
 
 cell *dist_for = nullptr;
@@ -188,7 +190,7 @@ void snapshot();
 void from_map(coord co, struct tile& t);
 void is_clone(struct tile& orig, struct tile& clone);
 
-bool gok_hv() { return euclid_only(); }
+bool gok_hv() { return euvalue() >= 2; }
 bool gok_gigacombo() { return euclid_only(); }
 
 bool gok_rev() { return euclid_only() || bidirectional; }
@@ -335,7 +337,7 @@ void push_tile_info_screen(tile &t, cell *c, vector<tile>* origbox, int boxid) {
     }
   c = get_gigantic(c);
   if(c && just_placed.count(c)) {
-    for(int i=1; i<c->type; i++)
+    for(int i=euv; i<c->type; i+=euv)
       help_extensions.push_back(help_extension{char('0'+i), "rotate " + its(i), [c,i] () { tile_orientation[c]+=i; popScreen(); }});
     }
   }
@@ -1115,6 +1117,7 @@ vector<seuphgeom> seuphgeoms = {
     auto& T0 = euc::eu_input.user_axes; T0[0][0] = T0[0][1] = T0[1][0] = T0[1][1] = euc::eu_input.twisted = 0;
     euc::build_torus3();
     req_disksize = 0;
+    euv = 4;
     }},
 
   {"Claustrophobia", []{
@@ -1127,6 +1130,7 @@ vector<seuphgeom> seuphgeoms = {
     euc::build_torus3();
     req_disksize = 15 * 15;
     diskshape = dshVertices;
+    euv = 4;
     }},
 
   {"Torus", []{
@@ -1138,6 +1142,7 @@ vector<seuphgeom> seuphgeoms = {
     auto& T0 = euc::eu_input.user_axes; T0[0][0] = 20; T0[1][1] = 20; T0[0][1] = 11; T0[1][0] = -11; euc::eu_input.twisted = 0;
     euc::build_torus3();
     req_disksize = 0;
+    euv = 4;
     }},
 
   {"Spherical Board", []{
@@ -1147,6 +1152,7 @@ vector<seuphgeom> seuphgeoms = {
     gp::dual_of_current();
     pconf.scale = 0.9;
     req_disksize = 0;
+    euv = 1;
     }},
 
   {"Hyperbolic Board", []{
@@ -1161,6 +1167,7 @@ vector<seuphgeom> seuphgeoms = {
     arb::convert::convert();
     rulegen::prepare_rules();
     arb::convert::activate();
+    euv = 1;
     }},
 
   {"Hyperbolic Board II", []{
@@ -1174,6 +1181,7 @@ vector<seuphgeom> seuphgeoms = {
     arb::convert::convert();
     rulegen::prepare_rules();
     arb::convert::activate();
+    euv = 2;
     }},
 
   {"Bring Surface", []{
@@ -1185,6 +1193,7 @@ vector<seuphgeom> seuphgeoms = {
     pconf.scale = 0.9;
     vid.creature_scale = 1.5;
     req_disksize = 0;
+    euv = 1;
     }},
 
   {"Dodecagons", []{
@@ -1194,6 +1203,7 @@ vector<seuphgeom> seuphgeoms = {
     pconf.scale = 0.25;
     vid.creature_scale = 2;
     req_disksize = 0;
+    euv = 1;
     }},
 
   {"Kite and Dart", []{
@@ -1201,11 +1211,25 @@ vector<seuphgeom> seuphgeoms = {
     pconf.scale = 0.5;
     vid.use_smart_range = 2;
     req_disksize = 0;
+    euv = 1;
     }},
 
   };
 
 void reset_seuphorica_screen() {
+  if(euv == 2) {
+    auto co = origin();
+    auto shift = forward_steps(co)[0];
+    int numhex = 0;
+    shift = getback(shift);
+    while(board.count(co)) { advance(co, shift); if(co->type % 4) numhex++; }
+    shift = getback(shift); advance(co, shift);
+    while(board.count(co)) {
+      if(co->type % 4) numhex++;
+      if(numhex & 1) tile_orientation[co]--;
+      advance(co, shift);
+      }
+    }
   popScreenAll();
   pushScreen(seuphorica_screen);
   centermap();
