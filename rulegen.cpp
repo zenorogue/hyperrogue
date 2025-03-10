@@ -1640,6 +1640,32 @@ void find_possible_parents() {
         ts.is_possible_parent = false;
         changes++;
         }
+
+    if(!changes) for(auto& ts: treestates)
+      if(ts.is_possible_parent) {
+        set<int> visited;
+        vector<int> vis;
+        auto visit = [&] (int v) { if(visited.count(v)) return; visited.insert(v); vis.push_back(v); };
+        bool left_found = false, right_found = false;
+        visit(ts.id);
+        for(int i=0; i<isize(vis); i++) {
+          auto at = vis[i];
+          for(auto p: treestates[at].possible_parents) {
+            int at1 = p.first, ppar = p.second;
+            visit(at1);
+            auto& r = treestates[at1].rules;
+            for(int j=1; j<isize(r); j++) if(r[j] >= 0 && treestates[r[j]].is_live) {
+              if(j < ppar) left_found = true;
+              if(j > ppar) right_found = true;
+              }
+            }
+          if(left_found && right_found) break;
+          }
+        if(!left_found || !right_found) {
+          ts.is_possible_parent = false;
+          changes++;
+          }
+        }
     if(!changes) break;
     }
   
