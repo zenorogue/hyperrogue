@@ -228,6 +228,7 @@ void thru_portal(coord& x, vect2& v) {
     }
   auto x1 = portals.at(x);
   v -= tile_orientation[x].spin;
+  if(tile_orientation[x].mirrored != tile_orientation[x1].mirrored) v.spin = -v.spin;
   v += tile_orientation[x1].spin;
   v.at = x1;
   x = x1;
@@ -381,7 +382,7 @@ void render_tile(shiftmatrix V, tile& t, cell *c, vector<tile>* origbox, int box
 
   auto pt0 = [&] (int id, ld r) {
     if(gig) r /= 3;
-    if(c) return currentmap->get_corner(c, cw.spin+id+1+c->type/2, r);
+    if(c) return currentmap->get_corner(c, (cw+id+(cw.mirrored?0:1)+c->type/2).spin, r);
     return spin(-90._deg * id) * eupoint(-3/r, -3/r);
     };
 
@@ -575,7 +576,7 @@ bool draw(cell *c, const shiftmatrix& V) {
 
       auto pt0 = [&] (cellwalker cw, int id, ld r = 4) {
         r /= gigscale;
-        return currentmap->get_corner(cw.at, cw.spin+id+1+c->type/2, r);
+        return currentmap->get_corner(cw.at, (cw+id+(cw.mirrored?0:1)+c->type/2).spin, r);
         };
 
       int j = 1 + c->type / 2;
