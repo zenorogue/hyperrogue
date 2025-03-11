@@ -774,12 +774,19 @@ void is_clone(struct tile& orig, struct tile& clone) {
   }
 
 void sort_hand() {
+  return;
   sort(drawn.begin(), drawn.end(), [] (tile &t1, tile &t2) {
     auto h1 = tb_hand.locate_tile(t1);
     auto h2 = tb_hand.locate_tile(t2);
     if(h1[1] != h2[1]) return h1[1] < h2[1];
     return h1[0] < h2[0];
     });
+  }
+
+void move_to_front(int &b) {
+  while(b > 0) {
+    swap(drawn[b], drawn[b-1]); b--;
+    }
   }
 
 void seuphorica_menu();
@@ -992,10 +999,11 @@ void seuphorica_screen() {
         }
       if(box_moved == &drawn && current_box == &drawn) {
         sort_hand();
+        move_to_front(tile_boxid);
         return;
         }
       if(box_moved == &drawn && current_box == &shop) {
-        swap(drawn[tile_boxid], drawn[0]);
+        move_to_front(tile_boxid);
         back_to_shop();
         sort_hand();
         }
@@ -1014,7 +1022,7 @@ void seuphorica_screen() {
       if(box_moved == &drawn && current_box == nullptr && mouseover) {
         auto at = mouseover;
         if(in_board(at) && !board.count(at) && tile_orientation.count(at)) {
-          swap(drawn[tile_boxid], drawn[0]);
+          move_to_front(tile_boxid);
           drop_hand_on(at);
           sort_hand();
           }
