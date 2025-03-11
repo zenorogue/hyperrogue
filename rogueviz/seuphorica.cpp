@@ -353,16 +353,19 @@ void push_tile_info_screen(tile &t, cell *c, vector<tile>* origbox, int boxid) {
     int z = FULL_EDGE;
     if(cflags & HAS_ROTATE_ALL) z = 1;
     if(cflags & HAS_ROTATE_EVEN) z = 2;
-    for(int i=z; i<c->type; z++) {
-      if((cflags & HAS_ROTATE_ALL) || ((cflags & HAS_ROTATE_EVEN) && (i%2 == 0)))
-
-      help_extensions.push_back(help_extension{char('0'+i), "rotate " + its(i), [c,i] () { tile_orientation[c]+=i; popScreen(); }});
+    for(int i=z; i<c->type; i+=z) {
+      help_extensions.push_back(help_extension{char('0'+i), "rotate " + its(i), [c,i] () {
+        tile_orientation[c]+=i;
+        compute_score();
+        popScreen();
+        }});
       }
     if(nonorientable)
       help_extensions.push_back(help_extension{'m', "mirror", [c] () {
         if(!tile_orientation.count(c)) return;
         if(cflags & HAS_ALL_FORWARD) tile_orientation[c]++;
         tile_orientation[c].mirrored ^= true;
+        compute_score();
         popScreen();
         }});
     }
