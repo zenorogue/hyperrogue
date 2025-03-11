@@ -241,7 +241,7 @@ void mirror(coord& at, vect2& prev) {
     vector<int> reindex = {0,3,6,1,4,7,2,5,8};
     for(int i=0; i<9; i++) if(v[i] == at) { at = v[reindex[i]]; prev.at = at; break; }
     }
-  prev.spin = tile_orientation[at].spin + 1 - prev.spin;
+  prev.spin = 2 * tile_orientation[at].spin + 1 - prev.spin;
   prev += 0;
   }
 
