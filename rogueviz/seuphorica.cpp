@@ -572,8 +572,13 @@ bool draw(cell *c, const shiftmatrix& V) {
     wider w(3);
     auto cw = tile_orientation[c];
     auto cw1 = tile_orientation[c1];
-    for(const shiftmatrix& V1: hr::span_at(current_display->all_drawn_copies, c1)) {
+    shiftmatrix V1; ld bestd = HUGE_VAL;
+    for(auto& cV1: hr::span_at(current_display->all_drawn_copies, c1)) {
+      ld d = hdist(cV1*tile_center(), V*tile_center());
+      if(d < bestd) bestd = d, V1 = cV1;
+      }
 
+    if(bestd < HUGE_VAL) {
       auto pt0 = [&] (cellwalker cw, int id, ld r = 4) {
         r /= gigscale;
         return currentmap->get_corner(cw.at, (cw+id+(cw.mirrored?0:1)+c->type/2).spin, r);
