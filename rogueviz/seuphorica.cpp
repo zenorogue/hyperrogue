@@ -1033,7 +1033,7 @@ void seuphorica_screen() {
         back_from_board(at); hold_mode = 1; tile_moved_from = mouseover;
         holdmouse = true; tile_moved = &(drawn[0]); tile_boxid = 0; box_moved = &drawn;
         }
-      else if(in_board(at)) {
+      else if(in_board(at) && tile_orientation.count(at)) {
         for(auto& s: snapshots) s.erase(drawn[0].id);
         drop_hand_on(at);
         if(snapshots.empty()) snapshot();
