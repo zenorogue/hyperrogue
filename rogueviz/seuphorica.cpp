@@ -1142,6 +1142,7 @@ int want_seed;
 void reset_rv() {
   View = Id; where_is_tile.clear(); current = next_language;
   tile_orientation.clear();
+  tile_orientation_level.clear();
   list_order.clear();
   distance_from_board.clear();
   dist_for = nullptr; distance_to.clear();
