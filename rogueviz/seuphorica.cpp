@@ -798,7 +798,6 @@ void seuphorica_screen() {
     start_tick = 0;
 
   if(start_tick && ticks - start_tick > frametime) {
-    println(hlog, "frame ended");
     start_tick = 0;
     snapshots.erase(snapshots.begin());
     }
@@ -807,7 +806,6 @@ void seuphorica_screen() {
     snapshots.clear();
 
   if(snapshots.size() && !start_tick) {
-    println(hlog, "frame started");
     start_tick = ticks;
     }
 
