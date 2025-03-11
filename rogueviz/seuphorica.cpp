@@ -569,15 +569,24 @@ bool draw(cell *c, const shiftmatrix& V) {
     auto c1 = portals.at(c);
     int gigscale = has_power(board.at(c), sp::gigantic) ? 3 : 1;
     wider w(3);
+    auto cw = tile_orientation[c];
+    auto cw1 = tile_orientation[c1];
     for(const shiftmatrix& V1: hr::span_at(current_display->all_drawn_copies, c1)) {
-      queueline(V * currentmap->get_corner(c, 2, 4 / gigscale), V1 * currentmap->get_corner(c1, 2, 4 / gigscale), 0xFF800080, 5);
-      queueline(V * currentmap->get_corner(c, 2+c->type/2, 4 / gigscale), V1 * currentmap->get_corner(c1, 2+c->type/2, 4 / gigscale), 0x0000FF80, 5);
+
+      auto pt0 = [&] (cellwalker cw, int id, ld r = 4) {
+        r /= gigscale;
+        return currentmap->get_corner(cw.at, cw.spin+id+1+c->type/2, r);
+        };
+
+      int j = 1 + c->type / 2;
+      queueline(V * pt0(cw, 1), V1 * pt0(cw1, 1), 0xFF800080, 5);
+      queueline(V * pt0(cw, j), V1 * pt0(cw1, j), 0x0000FF80, 5);
 
       if(tiles3) {
         auto high_V = orthogonal_move_fol(V, cgi.SLEV[1]);
         auto high_V1 = orthogonal_move_fol(V1, cgi.SLEV[1]);
-        queueline(high_V * currentmap->get_corner(c, 2, 4 / gigscale), high_V1 * currentmap->get_corner(c1, 2, 4 / gigscale), 0xFF800080, 5);
-        queueline(high_V * currentmap->get_corner(c, 2+c->type/2, 4 / gigscale), high_V1 * currentmap->get_corner(c1, 2+c->type/2, 4 / gigscale), 0x0000FF80, 5);
+        queueline(high_V * pt0(cw, 1), high_V1 * pt0(cw1, 1), 0xFF800080, 5);
+        queueline(high_V * pt0(cw, j), high_V1 * pt0(cw1, j), 0x0000FF80, 5);
         }
       }
     }
