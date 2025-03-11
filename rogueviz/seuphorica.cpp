@@ -47,15 +47,17 @@ bool euclid_only() {
   return geometry == gEuclidSquare && variation == eVariation::pure && !quotient; /* to do: accept standard tori */
   }
 
-// 1 if no direction work, 2 if horizontal/vertical work, 4 if all directions work
-int euv;
+flagtype HAS_HV = 1;
+flagtype HAS_GIGACOMBO = 2;
+flagtype HAS_ALL_FORWARD = 4;
+flagtype HAS_SOME_FORWARD = 8;
+flagtype HAS_ROTATE_ALL = 16;
+flagtype HAS_ROTATE_EVEN = 32;
 
-int euvalue() {
-  return euv;
-  }
+int cflags;
 
 vector<cell*> gigacover(cell *c) {
-  if(euclid_only()) {
+  if(cflags & HAS_GIGACOMBO) {
     /* cannot do the default case because of mirror(...) */
     vector<cell*> res;
     res.push_back(c->cmove(0)->cmove(1));
@@ -99,12 +101,15 @@ void check_orientation(cell *c) {
   }
 
 void set_orientation(cell *c, cellwalker cw) {
+  println(hlog, "set tile_orientation of ", c, " to ", cw);
   tile_orientation[c] = cw;
   }
 
 vector<vect2> forward_steps(coord c) {
-  if(euclid_only() && !bidirectional)
+  if((cflags & HAS_ALL_FORWARD) && !bidirectional)
     return {cellwalker(c, 2), cellwalker(c, 3)};
+  else if((cflags & HAS_SOME_FORWARD) && !bidirectional)
+    return {cellwalker(c, 2), cellwalker(c, 3), cellwalker(c, 1)};
   else {
     vector<vect2> vs;
     for(int i=0; i<c->type; i++) vs.push_back(cellwalker(c, i));
@@ -190,10 +195,17 @@ void snapshot();
 void from_map(coord co, struct tile& t);
 void is_clone(struct tile& orig, struct tile& clone);
 
-bool gok_hv() { return euvalue() >= 2; }
-bool gok_gigacombo() { return euclid_only(); }
+bool gok_hv() { return cflags & HAS_HV; }
+bool gok_gigacombo() { return cflags & HAS_GIGACOMBO; }
 
-bool gok_rev() { return euclid_only() || bidirectional; }
+bool gok_rev() { return (cflags & (HAS_ALL_FORWARD | HAS_SOME_FORWARD)) || bidirectional; }
+bool gok_rev_on(vect2 v) { 
+  if(bidirectional) return true;
+  if(cflags & HAS_SOME_FORWARD) return v.spin == 2;
+  return gok_rev();
+  }
+
+vect2 canonicize(vect2 v) { v.mirrored = false; return v; }
 
 }
 
@@ -488,6 +500,7 @@ void render_tile(shiftmatrix V, tile& t, cell *c, vector<tile>* origbox, int box
 
   auto V2 = V1;
   if(c) V2 = V2 * ddspin(c,cw.spin,0);
+  if(c && cw.mirrored) V2 = V2 * MirrorY;
 
   write_in_space(V2, 72, gigscale, t.letter, darkena(darkened(gsp(t).text_color), 0, 0xFF), 0, 8);
   write_in_space(V2 * xpush(cgi.scalefactor*.2*gigscale) * ypush(cgi.scalefactor*.2*gigscale), 72, 0.4 * gigscale, its(t.value), darkena(darkened(gsp(t).text_color), 0, 0xFF), 0, 8);
@@ -1117,7 +1130,7 @@ vector<seuphgeom> seuphgeoms = {
     auto& T0 = euc::eu_input.user_axes; T0[0][0] = T0[0][1] = T0[1][0] = T0[1][1] = euc::eu_input.twisted = 0;
     euc::build_torus3();
     req_disksize = 0;
-    euv = 4;
+    cflags = HAS_HV | HAS_GIGACOMBO | HAS_ALL_FORWARD;
     }},
 
   {"Claustrophobia", []{
@@ -1130,7 +1143,7 @@ vector<seuphgeom> seuphgeoms = {
     euc::build_torus3();
     req_disksize = 15 * 15;
     diskshape = dshVertices;
-    euv = 4;
+    cflags = HAS_HV | HAS_GIGACOMBO | HAS_ALL_FORWARD;
     }},
 
   {"Torus", []{
@@ -1142,7 +1155,31 @@ vector<seuphgeom> seuphgeoms = {
     auto& T0 = euc::eu_input.user_axes; T0[0][0] = 20; T0[1][1] = 20; T0[0][1] = 11; T0[1][0] = -11; euc::eu_input.twisted = 0;
     euc::build_torus3();
     req_disksize = 0;
-    euv = 4;
+    cflags = HAS_HV | HAS_GIGACOMBO | HAS_ALL_FORWARD;
+    }},
+
+  {"Klein Bottle", []{
+    set_geometry(gEuclidSquare);
+    set_variation(eVariation::pure);
+    pconf.scale = 0.2;
+    vid.use_smart_range = 2;
+    vid.creature_scale = 1;
+    auto& T0 = euc::eu_input.user_axes; T0[0][0] = 0; T0[0][1] = 15; T0[1][0] = 15; T0[1][1] = 0; euc::eu_input.twisted = 8;
+    euc::build_torus3();
+    req_disksize = 0;
+    cflags = HAS_HV | HAS_SOME_FORWARD;
+    }},
+
+  {"Klein Bottle II", []{
+    set_geometry(gEuclidSquare);
+    set_variation(eVariation::pure);
+    pconf.scale = 0.2;
+    vid.use_smart_range = 2;
+    vid.creature_scale = 1;
+    auto& T0 = euc::eu_input.user_axes; T0[0][0] = -10; T0[0][1] = 10; T0[1][0] = 10; T0[1][1] = 10; euc::eu_input.twisted = 8;
+    euc::build_torus3();
+    req_disksize = 0;
+    cflags = HAS_ALL_FORWARD;
     }},
 
   {"Spherical Board", []{
@@ -1152,7 +1189,7 @@ vector<seuphgeom> seuphgeoms = {
     gp::dual_of_current();
     pconf.scale = 0.9;
     req_disksize = 0;
-    euv = 1;
+    cflags = HAS_ROTATE_ALL;
     }},
 
   {"Hyperbolic Board", []{
@@ -1167,7 +1204,7 @@ vector<seuphgeom> seuphgeoms = {
     arb::convert::convert();
     rulegen::prepare_rules();
     arb::convert::activate();
-    euv = 1;
+    cflags = HAS_ROTATE_ALL;
     }},
 
   {"Hyperbolic Board II", []{
@@ -1181,7 +1218,7 @@ vector<seuphgeom> seuphgeoms = {
     arb::convert::convert();
     rulegen::prepare_rules();
     arb::convert::activate();
-    euv = 2;
+    cflags = HAS_HV | HAS_ROTATE_EVEN;
     }},
 
   {"Bring Surface", []{
@@ -1193,7 +1230,7 @@ vector<seuphgeom> seuphgeoms = {
     pconf.scale = 0.9;
     vid.creature_scale = 1.5;
     req_disksize = 0;
-    euv = 1;
+    cflags = HAS_ROTATE_ALL;
     }},
 
   {"Dodecagons", []{
@@ -1203,7 +1240,7 @@ vector<seuphgeom> seuphgeoms = {
     pconf.scale = 0.25;
     vid.creature_scale = 2;
     req_disksize = 0;
-    euv = 1;
+    cflags = HAS_ROTATE_ALL;
     }},
 
   {"Kite and Dart", []{
@@ -1211,13 +1248,13 @@ vector<seuphgeom> seuphgeoms = {
     pconf.scale = 0.5;
     vid.use_smart_range = 2;
     req_disksize = 0;
-    euv = 1;
+    cflags = HAS_ROTATE_ALL;
     }},
 
   };
 
 void reset_seuphorica_screen() {
-  if(euv == 2) {
+  if(cflags & HAS_ROTATE_EVEN) {
     auto co = origin();
     auto shift = forward_steps(co)[0];
     int numhex = 0;
