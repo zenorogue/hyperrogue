@@ -200,7 +200,7 @@ bool gok_hv() { return cflags & HAS_HV; }
 bool gok_gigacombo() { return cflags & HAS_GIGACOMBO; }
 
 bool gok_rev() { return (cflags & (HAS_ALL_FORWARD | HAS_SOME_FORWARD)) || bidirectional; }
-bool gok_rev_on(vect2 v) { 
+bool gok_rev_on(vect2 v) {
   if(bidirectional) return true;
   if(cflags & HAS_SOME_FORWARD) return v.spin == 2;
   return gok_rev();
@@ -350,8 +350,21 @@ void push_tile_info_screen(tile &t, cell *c, vector<tile>* origbox, int boxid) {
     }
   c = get_gigantic(c);
   if(c && just_placed.count(c)) {
-    for(int i=euv; i<c->type; i+=euv)
+    int z = FULL_EDGE;
+    if(cflags & HAS_ROTATE_ALL) z = 1;
+    if(cflags & HAS_ROTATE_EVEN) z = 2;
+    for(int i=z; i<c->type; z++) {
+      if((cflags & HAS_ROTATE_ALL) || ((cflags & HAS_ROTATE_EVEN) && (i%2 == 0)))
+
       help_extensions.push_back(help_extension{char('0'+i), "rotate " + its(i), [c,i] () { tile_orientation[c]+=i; popScreen(); }});
+      }
+    if(nonorientable)
+      help_extensions.push_back(help_extension{'m', "mirror", [c] () {
+        if(!tile_orientation.count(c)) return;
+        if(cflags & HAS_ALL_FORWARD) tile_orientation[c]++;
+        tile_orientation[c].mirrored ^= true;
+        popScreen();
+        }});
     }
   }
 
