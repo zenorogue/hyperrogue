@@ -119,7 +119,7 @@ vector<vect2> forward_steps(coord c) {
   }
 
 bool is_dir(cellwalker cw, int d) {
-  return cw.spin % 2 == d;
+  return gmod(cw.spin - tile_orientation[cw.at].spin, 2) == d;
   }
 
 cell *dist_for = nullptr;
@@ -481,14 +481,14 @@ void render_tile(shiftmatrix V, tile& t, cell *c, vector<tile>* origbox, int box
 
   if(has_power(t, sp::horizontal)) {
     wider w(3);
-    queueline(V1 * pt0(0, nearco), V1 * pt0(1, nearco), 0xFFFFFFFF, 2);
-    queueline(V1 * pt0(3, nearco), V1 * pt0(2, nearco), 0xFFFFFFFF, 2);
+    for(int a=0; a<corners; a+=2)
+      queueline(V1 * pt0(a+corners/2, nearco), V1 * pt0(a+corners/2+1, nearco), 0xFFFFFFFF, 2);
     }
 
   if(has_power(t, sp::vertical)) {
     wider w(3);
-    queueline(V1 * pt0(0, nearco), V1 * pt0(3, nearco), 0xFFFFFFFF, 2);
-    queueline(V1 * pt0(1, nearco), V1 * pt0(2, nearco), 0xFFFFFFFF, 2);
+    for(int a=0; a<corners; a+=2)
+      queueline(V1 * pt0(a+corners/2, nearco), V1 * pt0(a+corners/2-1, nearco), 0xFFFFFFFF, 2);
     }
 
   if(has_power(t, sp::initial)) {
