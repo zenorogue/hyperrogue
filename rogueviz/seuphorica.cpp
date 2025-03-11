@@ -85,7 +85,8 @@ void check_orientation(cell *c) {
   if(board.count(c)) { tile_orientation_level[c] = 1000000; return; }
   int maxlev = 0, dir = 0;
   forCellIdCM(c1, i, c) {
-    if(!distance_from_board[c1]) continue;
+    if(!distance_from_board[c1] && !disksize && !closed_manifold) continue;
+    if(c1->land == laMemory) continue;
     if(tile_orientation_level[c1] > maxlev)
       maxlev = tile_orientation_level[c1], dir = i;
     }
