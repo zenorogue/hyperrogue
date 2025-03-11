@@ -227,8 +227,8 @@ void thru_portal(coord& x, vect2& v) {
       }
     }
   auto x1 = portals.at(x);
-  v.spin -= tile_orientation[x].spin;
-  v.spin += tile_orientation[x1].spin;
+  v -= tile_orientation[x].spin;
+  v += tile_orientation[x1].spin;
   v.at = x1;
   x = x1;
   }
