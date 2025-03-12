@@ -1548,8 +1548,17 @@ void launch() {
 
   reset_rv();
   restart("", "", "");
+  for(int i=0; i<int(sp::first_artifact); i++)
+    special_allowed[i] =among(sp(i), sp::horizontal, sp::vertical, sp::reversing, sp::portal, sp::gigantic, sp::soothing, sp::bending, sp::tricky) && geom_allows(sp(i));
+  new_game();
   enable();
   reset_seuphorica_screen();
+  }
+
+void set_seuphorica_geometry(int id) {
+  current_seuphgeom = id;
+  seuphgeoms[id].launcher();
+  launch();
   }
 
 auto seuphorica_hook =
@@ -1562,10 +1571,14 @@ auto seuphorica_hook =
     for(int i=0; i<isize(seuphgeoms); i++) if(appears(seuphgeoms[i].name, s)) which = i;
     if(which == -1 && s[0] >= '0' && s[0] <= '9') which = atoi(s.c_str());
     if(which == -1) throw hr_exception("unknown seuphorica-geo geometry");
-    current_seuphgeom = which;
-    seuphgeoms[which].launcher();
-    launch();
+    set_seuphorica_geometry(which);
     });
+
+void invoke() {
+  set_seuphorica_geometry(0);
+  pushScreen([] { quitmainloop = true; });
+  pushScreen(seuphorica_newgame);
+  }
 
 }
 }
