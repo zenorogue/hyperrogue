@@ -11,6 +11,30 @@ namespace hr {
 
 EX namespace fifteen {
 
+struct puzzle {
+  string name;
+  string filename;
+  string desc;
+  string url;
+  };
+
+vector<puzzle> puzzles = {
+  puzzle{"15", "classic", "The original Fifteen puzzle.", ""},
+  puzzle{"15+4", "fifteen", "The 15+4 puzzle by Henry Segerman.", "https://www.youtube.com/watch?v=Hc3yfuXiWe0"},
+  puzzle{"15-4", "sphere11", "The 15-4 puzzle.", ""},
+  puzzle{"coiled", "coiled", "Coiled fifteen puzzle by Henry Segerman.", "https://www.youtube.com/watch?v=rfAEgxNEOrQ"},
+  puzzle{"Möbius band", "mobiusband", "Fifteen puzzle on a Möbius band.", ""},
+  puzzle{"Kite-and-dart", "kitedart", "Kite-and-dart puzzle.", ""},
+  puzzle{"29", "29", "The 29 puzzle by Henry Segerman.", "https://www.youtube.com/watch?v=EitWHthBY30"},
+  puzzle{"12", "12", "The 12 puzzle mentioned in the same video by Henry Segerman.", "https://www.youtube.com/watch?v=EitWHthBY30"},
+  puzzle{"124", "124", "The 124 puzzle mentioned in the same video by Henry Segerman.", "https://www.youtube.com/watch?v=EitWHthBY30"},
+  puzzle{"60", "60", "The 124 puzzle mentioned in the same video by Henry Segerman.", "https://www.youtube.com/watch?v=EitWHthBY30"},
+  puzzle{"Continental drift", "sphere19", "Based on the Continental Drift puzzle by Henry Segerman.", "https://www.youtube.com/watch?v=0uQx33KFMO0"},
+  };
+
+puzzle *current_puzzle;
+bool quit_from_menu;
+
 static constexpr int Empty = 0;
 
 struct celldata {
@@ -401,10 +425,19 @@ int rugArgs() {
   return 0;
   }
 
+void default_view_for_puzzle(const puzzle& p) {
+  auto lev = p.filename;
+  if(lev == "coiled" || lev == "mobiusband")
+    View = spin90() * View;
+  if(lev == "mobiusband")
+    View = MirrorX * View;
+  if(hyperbolic) rogueviz::rv_change(pconf.scale, 0.95);
+  }
+
 auto fifteen_hook = 
   addHook(hooks_args, 100, rugArgs)
 #if CAP_SHOT
-+ arg::add3("-fifteen-animate", [] { 
++ arg::add3("-fifteen-animate", [] {
     rogueviz::rv_hook(anims::hooks_record_anim, 100, [] (int i, int nof) {
     double at = (i * (isize(seq)-1) * 1.) / nof;
     int ati = at;
@@ -458,13 +491,13 @@ auto fifteen_hook =
           [] (presmode mode) {}
           });
       
-      auto add = [&] (string s, string lev, string text, string youtube = "") {
+      for(auto p: puzzles) {
         fifteen_slides.emplace_back(
-          tour::slide{s, 100, LEGAL::NONE | QUICKGEO, text,
+          tour::slide{p.name, 100, LEGAL::NONE | QUICKGEO, p.desc,
             [=] (presmode mode) {
-              if(youtube != "")
-                slide_url(mode, 'y', "YouTube link", youtube);
-              string fname = "fifteen/" + lev + ".lev";
+              if(p.url != "")
+                slide_url(mode, 'y', "YouTube link", p.url);
+              string fname = "fifteen/" + p.filename + ".lev";
               if(!file_exists(fname)) {
                 slide_error(mode, "file " + fname + " not found");
                 return;
@@ -479,26 +512,11 @@ auto fifteen_hook =
                 mapstream::loadMap(fname);
                 popScreenAll();
                 fullcenter();
-                if(lev == "coiled" || lev == "mobiusband")
-                  View = spin90() * View;
-                if(lev == "mobiusband")
-                  View = MirrorX * View;
+                default_view_for_puzzle(p);
                 }
               }});
         };
-      
-      add("15", "classic", "The original Fifteen puzzle.");
-      add("15+4", "fifteen", "The 15+4 puzzle by Henry Segerman.", "https://www.youtube.com/watch?v=Hc3yfuXiWe0");
-      add("15-4", "sphere11", "The 15-4 puzzle.");
-      add("coiled", "coiled", "Coiled fifteen puzzle by Henry Segerman.", "https://www.youtube.com/watch?v=rfAEgxNEOrQ");
-      add("Möbius band", "mobiusband", "Fifteen puzzle on a Möbius band.");
-      add("Kite-and-dart", "kitedart", "Kite-and-dart puzzle.");
-      add("29", "29", "The 29 puzzle by Henry Segerman.", "https://www.youtube.com/watch?v=EitWHthBY30");
-      add("12", "12", "The 12 puzzle mentioned in the same video by Henry Segerman.", "https://www.youtube.com/watch?v=EitWHthBY30");
-      add("124", "124", "The 124 puzzle mentioned in the same video by Henry Segerman.", "https://www.youtube.com/watch?v=EitWHthBY30");
-      add("60", "60", "The 124 puzzle mentioned in the same video by Henry Segerman.", "https://www.youtube.com/watch?v=EitWHthBY30");
-      add("Continental drift", "sphere19", "Based on the Continental Drift puzzle by Henry Segerman.", "https://www.youtube.com/watch?v=0uQx33KFMO0");
-      
+
       add_end(fifteen_slides);
       }
 
