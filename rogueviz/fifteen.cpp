@@ -139,6 +139,8 @@ void scramble() {
     }     
   }
 
+bool mouse_over_button;
+
 bool seupho3 = true;
 
 bool draw_fifteen(cell *c, const shiftmatrix& V) {
@@ -148,10 +150,12 @@ bool draw_fifteen(cell *c, const shiftmatrix& V) {
   check_move();
     
   auto& cd = fif[c];
+
+  bool showing = anyshiftclick | mouse_over_button;
   
-  int cur = anyshiftclick ? cd.target : cd.current;
-  int cdir = anyshiftclick ? cd.targetdir : cd.currentdir;
-  bool cmir = anyshiftclick ? cd.targetmirror : cd.currentmirror;
+  int cur = showing ? cd.target : cd.current;
+  int cdir = showing ? cd.targetdir : cd.currentdir;
+  bool cmir = showing ? cd.targetmirror : cd.currentmirror;
   
   if(cur == Empty) {
     c->land = laCanvas;
@@ -206,8 +210,8 @@ void edit_fifteen() {
   ss->item = itGold;
   gamescreen();
   ss->item = itNone;
-  
-  dialog::init("Fifteen Puzzle", iinf[itPalace].color, 150, 100);
+
+  dialog::init("edit puzzle", iinf[itPalace].color, 150, 100);
 
   dialog::addBoolItem("jump", pen == pmJump, 'j');
   dialog::add_action([] { pen = pmJump; });
@@ -238,24 +242,13 @@ void edit_fifteen() {
     init_fifteen(1);
     });
 
-  dialog::addItem("scramble", 's');
-  dialog::add_action(scramble);
-  
   dialog::addItem("save this puzzle", 'S');
   dialog::add_action([] { 
-    mapstream::saveMap("fifteen.lev");
+    mapstream::saveMap("fifteen-test.lev");
     #if ISWEB
     offer_download("fifteen.lev", "mime/type");
     #endif
     });
-
-  dialog::addItem("settings", 'X');
-  dialog::add_action_push(showSettings);
-
-  mine_adjacency_rule = true;
-  
-  dialog::addItem("new geometry", 'G');
-  dialog::add_action(runGeometryExperiments);
 
   dialog::addItem("load a puzzle", 'L');
   dialog::add_action([] { 
@@ -264,10 +257,36 @@ void edit_fifteen() {
       mapstream::loadMap("data.txt");
       });
     #else
-    mapstream::loadMap("fifteen.lev");
+    mapstream::loadMap("fifteen-test.lev");
     #endif
     mapeditor::drawplayer = false;
     });
+
+  dialog::addItem("new geometry", 'G');
+  dialog::add_action(runGeometryExperiments);
+
+  dialog::addBreak(100);
+  dialog::addBigItem("options", iinf[itPalace].color);
+
+  dialog::addItem("scramble", 's');
+  dialog::add_action(scramble);
+
+  dialog::addItem("settings", 'X');
+  dialog::add_action_push(showSettings);
+
+  mine_adjacency_rule = true;
+
+  if(current_puzzle && current_puzzle->url != "") {
+    dialog::addItem("Henry Segerman's video", 'V');
+    dialog::add_action([] {
+      open_url(current_puzzle->url);
+      });
+    }
+
+  if(quit_from_menu) {
+    dialog::addItem("quit", 'Q');
+    dialog::add_action([] { quitmainloop = true; });
+    }
 
   dialog::addBack();
   
@@ -448,6 +467,57 @@ void default_view_for_puzzle(const puzzle& p) {
   if(lev == "mobiusband")
     View = MirrorX * View;
   if(hyperbolic) rogueviz::rv_change(pconf.scale, 0.95);
+  }
+
+void fifteen_play() {
+  getcstat = '-';
+  cmode = sm::PANNING;
+  gamescreen();
+  stillscreen = true;
+
+  dialog::init();
+
+  displayButton(vid.fsize, vid.yres - vid.fsize, "Shift to see solution, mouse or WADX to move", ' ', 0);
+  mouse_over_button = getcstat == ' ';
+
+  displayButton(vid.xres - vid.fsize, vid.yres - vid.fsize, "(v) menu", 'v', 16);
+  dialog::add_key_action('v', [] { pushScreen(edit_fifteen); });
+
+  keyhandler = [] (int sym, int uni) {
+    handlePanning(sym, uni);
+    handle_movement(sym, uni);
+    if(sym == '-' || sym == PSEUDOKEY_WHEELDOWN) {
+      actonrelease = false;
+      mousemovement();
+      }
+    dialog::handleNavigation(sym, uni);
+    };
+  }
+
+void fifteen_menu() {
+  cmode = sm::NOSCR;
+  clearMessages();
+  gamescreen();
+  stillscreen = true;
+
+  dialog::init(XLAT("Variants of the Fifteen Puzzle"), 0x2020C0, 200, 0);
+  char key = 'a';
+  for(auto& p: puzzles) {
+    dialog::addBigItem(p.name, key++);
+    dialog::add_action([&p] {
+      popScreenAll();
+      string fname = "fifteen/" + p.filename + ".lev";
+      mapstream::loadMap(fname);
+      fullcenter();
+      default_view_for_puzzle(p);
+      pushScreen([]{ quitmainloop = true; });
+      pushScreen(fifteen_play);
+      current_puzzle = &p;
+      quit_from_menu = true;
+      });
+    dialog::addInfo(p.desc);
+    }
+  dialog::display();
   }
 
 auto fifteen_hook = 
