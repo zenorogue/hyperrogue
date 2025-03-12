@@ -142,7 +142,7 @@ void scramble() {
 bool draw_fifteen(cell *c, const shiftmatrix& V) {
   hr::addaura(tC0(V), darkened(0x0000FF), 0);
   lastexplore = turncount;
-  if(!fif.count(c)) { c->land = laNone; c->wall = waChasm; return false; }
+  if(!fif.count(c)) { c->land = laNone; c->wall = waChasm; c->item = itNone; c->monst = moNone; return false; }
   check_move();
     
   auto& cd = fif[c];
