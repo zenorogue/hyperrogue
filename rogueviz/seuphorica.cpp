@@ -406,7 +406,7 @@ void render_tile(shiftmatrix V, tile& t, cell *c, vector<tile>* origbox, int box
   color_t lines = 0x000000;
   int wide = 1;
   if(t.rarity == 2) lines = 0xFF4040, wide = 2;
-  if(t.rarity == 3) lines = 0xFFFF80, wide = 2;
+  if(t.rarity == 3) lines = 0xFFC040, wide = 2;
   if(t.rarity >= 4) lines = 0x40FF80, wide = 2;
   if(t.special >= sp::first_artifact) lines = 0xFFD500, wide = 2;
   lines = darkena(darkened(lines), 0, 0xFF);
