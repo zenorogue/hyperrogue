@@ -227,10 +227,9 @@ void thru_portal(coord& x, vect2& v) {
       }
     }
   auto x1 = portals.at(x);
-  v -= tile_orientation[x].spin;
-  if(tile_orientation[x].mirrored != tile_orientation[x1].mirrored) v.spin = -v.spin;
-  v += tile_orientation[x1].spin;
-  v.at = x1;
+
+  auto& tx = tile_orientation[x], tx1 = tile_orientation[x1];
+  v = tx1 + (v.spin - tx.spin) * (tx.mirrored?-1:1);
   x = x1;
   }
 
@@ -241,7 +240,11 @@ void mirror(coord& at, vect2& prev) {
     vector<int> reindex = {0,3,6,1,4,7,2,5,8};
     for(int i=0; i<9; i++) if(v[i] == at) { at = v[reindex[i]]; prev.at = at; break; }
     }
-  prev.spin = 2 * tile_orientation[at].spin + 1 - prev.spin;
+  auto& tat = tile_orientation[at];
+  if(!tat.mirrored)
+    prev.spin = 2 * tat.spin + 1 - prev.spin;
+  else
+    prev.spin = 2 * tat.spin - 1 - prev.spin;
   prev += 0;
   }
 
