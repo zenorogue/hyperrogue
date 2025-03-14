@@ -258,10 +258,6 @@ void edit_fifteen() {
       for(auto& p: puzzles) if(fname == p.full_filename()) current_puzzle = &p;
       quitter = q;
       });
-    #else
-    mapstream::loadMap("fifteen-test.lev");
-    #endif
-    mapeditor::drawplayer = false;
     });
 
   dialog::addItem("new geometry", 'G');
