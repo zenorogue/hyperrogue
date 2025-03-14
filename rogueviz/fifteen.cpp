@@ -212,6 +212,7 @@ bool draw_fifteen(cell *c, const shiftmatrix& V) {
   }
 
 string fname = "fifteen-saved.lev";
+void enable();
 
 void edit_fifteen() {
 
@@ -275,7 +276,24 @@ void edit_fifteen() {
     });
 
   dialog::addItem("new geometry", 'G');
-  dialog::add_action(runGeometryExperiments);
+  dialog::add_action([] {
+    auto q = quitter;
+    hook_in_subscreen(hooks_post_initgame, 100, [q] {
+      init_fifteen(10);
+      enable();
+      quitter = q;
+      state = state::unscrambled;
+      });
+    hook_in_subscreen(dialog::hooks_display_dialog, 100, [q] {
+      for(auto& it: dialog::items)
+        if(among(it.body, XLAT("land structure"), XLAT("pattern"), XLAT("adjacency rule"))) {
+          it.type = dialog::diBreak;
+          it.scale = 0;
+          dialog::key_actions.erase(it.key);
+          }
+      });
+    runGeometryExperiments();
+    });
 
   dialog::addBreak(100);
   dialog::addBigItem("options", iinf[itPalace].color);
