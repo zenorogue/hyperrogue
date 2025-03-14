@@ -16,6 +16,9 @@ struct puzzle {
   string filename;
   string desc;
   string url;
+  string full_filename() const {
+    return find_file("fifteen/" + filename + ".lev");
+    }
   };
 
 vector<puzzle> puzzles = {
@@ -508,8 +511,7 @@ void fifteen_menu() {
     dialog::addBigItem(p.name, key++);
     dialog::add_action([&p] {
       popScreenAll();
-      string fname = "fifteen/" + p.filename + ".lev";
-      mapstream::loadMap(fname);
+      mapstream::loadMap(p.full_filename());
       fullcenter();
       default_view_for_puzzle(p);
       pushScreen([]{ quitmainloop = true; });
@@ -585,7 +587,7 @@ auto fifteen_hook =
             [=] (presmode mode) {
               if(p.url != "")
                 slide_url(mode, 'y', "YouTube link", p.url);
-              string fname = "fifteen/" + p.filename + ".lev";
+              string fname = p.full_filename();
               if(!file_exists(fname)) {
                 slide_error(mode, "file " + fname + " not found");
                 return;
