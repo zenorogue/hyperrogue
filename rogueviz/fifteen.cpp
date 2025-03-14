@@ -137,7 +137,12 @@ void check_move() {
           if(f.current && (f.currentdir != f.targetdir || f.currentmirror != f.targetmirror))
             ok = false;
           }
-        if(ok == true) state = state::solved;
+        if(ok == true) {
+          state = state::solved;
+          #if RVCOL
+          if(current_puzzle = &puzzles[1]) rv_achievement("FIFTEEN");
+          #endif
+          }
         }
       }
     }
