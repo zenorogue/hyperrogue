@@ -295,6 +295,24 @@ void edit_fifteen() {
       });
     }
 
+  switch(state) {
+    case state::edited:
+      dialog::addInfo("edited");
+      break;
+
+    case state::unscrambled:
+      dialog::addInfo("not scrambled yet");
+      break;
+
+    case state::scrambled:
+      dialog::addInfo("scrambled");
+      break;
+
+    case state::solved:
+      dialog::addInfo("solved!");
+      break;
+    };
+
   if(quitter) quitter();
 
   dialog::addBack();
