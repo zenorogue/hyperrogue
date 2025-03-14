@@ -246,17 +246,15 @@ void edit_fifteen() {
 
   dialog::addItem("save this puzzle", 'S');
   dialog::add_action([] { 
-    mapstream::saveMap("fifteen-test.lev");
-    #if ISWEB
-    offer_download("fifteen.lev", "mime/type");
-    #endif
+    mapeditor::save_level_ext(fname, [] {});
     });
 
   dialog::addItem("load a puzzle", 'L');
   dialog::add_action([] { 
-    #if ISWEB
-    offer_choose_file([] {
-      mapstream::loadMap("data.txt");
+    auto q = quitter;
+    mapeditor::load_level_ext(fname, [q] {
+      for(auto& p: puzzles) if(fname == p.full_filename()) current_puzzle = &p;
+      quitter = q;
       });
     #else
     mapstream::loadMap("fifteen-test.lev");
