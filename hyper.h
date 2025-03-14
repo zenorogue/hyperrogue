@@ -792,6 +792,16 @@ template<class T, class V, class... U> V callhandlers(V zero, const hookset<T>& 
   return h.callhandlers(zero, static_cast<U&&>(args)...);
   }
 
+void popScreen();
+
+template<class T, class U> void hook_in_subscreen(hookset<T>& m, int prio, U&& hook) {
+  int v = m.add(prio, static_cast<U&&>(hook));
+  pushScreen([&m, v] {
+    delHook(m, v);
+    popScreen();
+    });
+  }
+
 string XLAT(string);
 
 #define GLERR(call) glError(call, __FILE__, __LINE__)
