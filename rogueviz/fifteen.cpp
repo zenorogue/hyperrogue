@@ -399,10 +399,8 @@ void load_fifteen(hstream& f) {
   int num;
   f.read(num);
   fif.clear();
-  println(hlog, "read num = ", num);
   for(int i=0; i<num; i++) {
     int32_t at = f.get<int>();
-    println(hlog, "at = ", at);
     cell *c = mapstream::cellbyid[at];
     auto& cd = fif[c];      
     f.read(cd.target);
@@ -415,7 +413,6 @@ void load_fifteen(hstream& f) {
     if(nonorientable) 
       f.read(cd.currentmirror);
     cd.currentdir = mapstream::fixspin(mapstream::relspin[at], cd.currentdir, c->type, f.vernum);
-    println(hlog, "assigned ", cd.current, " to ", c);
     }
   compute_triangle_markers();
   enable();
