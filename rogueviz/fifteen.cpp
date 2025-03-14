@@ -157,7 +157,7 @@ void scramble() {
 
 bool mouse_over_button;
 
-bool seupho3 = true;
+bool fifteen3 = true;
 
 bool draw_fifteen(cell *c, const shiftmatrix& V) {
   hr::addaura(tC0(V), darkened(0x0000FF), 0);
@@ -180,7 +180,7 @@ bool draw_fifteen(cell *c, const shiftmatrix& V) {
     }
   else {
 
-    if(seupho3) {
+    if(fifteen3) {
       set_floor(cgi.shFullFloor);
       ensure_floorshape_generated(shvid(c), c);
       for(int i=0; i<c->type; i++)
@@ -294,6 +294,8 @@ void edit_fifteen() {
       open_url(current_puzzle->url);
       });
     }
+
+  add_edit(fifteen3);
 
   switch(state) {
     case state::edited:
@@ -602,6 +604,8 @@ auto fifteen_hook =
 + addHook(hooks_configfile, 100, [] {
     param_b(show_dots, "fifteen_dots");
     param_b(show_triangles, "fifteen_tris");
+    param_b(fifteen3, "fifteen_3d")
+    -> editable("3D Fifteen tile effects", '3');
     })
 + addHook_slideshows(120, [] (tour::ss::slideshow_callback cb) {
 
