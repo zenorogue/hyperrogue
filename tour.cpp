@@ -1068,5 +1068,49 @@ auto a2 = addHook(hooks_handleKey, 100, handleKeyTour);
 auto a3 = addHook(hooks_nextland, 100, [] (eLand l) { return tour::on ? getNext(l) : laNone; });
 
 EX }
+
+/* these were originally in RogueViz, but useful enough to be moved to main */
+
+EX vector<reaction_t> cleanup;
+
+EX void do_cleanup() {
+  while(!cleanup.empty()) {
+    cleanup.back()();
+    cleanup.pop_back();
+    }
+  }
+
+EX void on_cleanup_or_next(const reaction_t& del) {
+  #if CAP_TOUR
+  if(tour::on) tour::on_restore(del);
+  else
+  #endif
+  cleanup.push_back(del);
+  }
+
+#if HDR
+template<class T> void rv_change(T& variable, const T& value) {
+  T backup = variable;
+  variable = value;
+  on_cleanup_or_next([backup, &variable] { variable = backup; });
+  }
+
+template<class T> void rv_keep(T& variable) {
+  T backup = variable;
+  on_cleanup_or_next([backup, &variable] { variable = backup; });
+  }
+
+template<class T, class U> void rv_hook(hookset<T>& m, int prio, U&& hook) {
+  int p = addHook(m, prio, hook);
+  auto del = [&m, p] {
+    delHook(m, p);
+    };
+  on_cleanup_or_next(del);
+  }
 #endif
+
+int ah_cleanup = addHook(hooks_clearmemory, 500, [] { do_cleanup(); });
+
+#endif
+
 }
