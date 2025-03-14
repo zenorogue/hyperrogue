@@ -1893,42 +1893,47 @@ EX namespace mapeditor {
     return cellwalker(mouseover, d);
     }
 
-  EX void save_level() {
+  EX void save_level_ext(string& lf, reaction_t after) {
     #if ISWEB
     mapstream::saveMap("web.lev");
     offer_download("web.lev", "mime/type");
     #else
-    dialog::openFileDialog(levelfile, XLAT("level to save:"), ".lev", [] () {
-      if(mapstream::saveMap(levelfile.c_str())) {
-        addMessage(XLAT("Map saved to %1", levelfile));
+    dialog::openFileDialog(lf, XLAT("level to save:"), ".lev", [&lf, after] () {
+      if(mapstream::saveMap(lf.c_str())) {
+        addMessage(XLAT("Map saved to %1", lf));
+        after();
         return true;
         }
       else {
-        addMessage(XLAT("Failed to save map to %1", levelfile));
+        addMessage(XLAT("Failed to save map to %1", lf));
         return false;
         }
       });
     #endif
     }
 
-  EX void load_level() {
+  EX void load_level_ext(string& lf, reaction_t after) {
     #if ISWEB
     offer_choose_file([] {
       mapstream::loadMap("data.txt");
       });
     #else
-    dialog::openFileDialog(levelfile, XLAT("level to load:"), ".lev", [] () {    
-      if(mapstream::loadMap(levelfile.c_str())) {
-        addMessage(XLAT("Map loaded from %1", levelfile));
+    dialog::openFileDialog(lf, XLAT("level to load:"), ".lev", [&lf, after] () {
+      if(mapstream::loadMap(lf.c_str())) {
+        addMessage(XLAT("Map loaded from %1", lf));
+        after();
         return true;
         }
       else {
-        addMessage(XLAT("Failed to load map from %1", levelfile));
+        addMessage(XLAT("Failed to load map from %1", lf));
         return false;
         }
       });
     #endif
     }
+
+  EX void save_level() { save_level_ext(levelfile, [] {}); }
+  EX void load_level() { load_level_ext(levelfile, [] {}); }
   
   EX void showList() {
     string caption;
