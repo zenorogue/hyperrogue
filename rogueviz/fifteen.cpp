@@ -53,6 +53,10 @@ vector<int> triangle_markers;
 vector<cell*> seq;
 vector<ld> turns;
 
+enum class state { edited, unscrambled, scrambled, solved };
+
+state state = state::edited;
+
 eWall empty = waChasm;
 
 enum ePenMove { pmJump, pmRotate, pmAdd, pmMirrorFlip };
@@ -126,12 +130,21 @@ void check_move() {
     cell *c1 = cwt.at->cmove(i);
     if(fif.count(c1) && fif[c1].current == Empty) {
       make_move(c1, cwt.at->c.spin(i));
+      if(state == state::scrambled) {
+        bool ok = true;
+        for(auto& [c,f]: fif) {
+          if(f.current != f.target) ok = false;
+          if(f.current && (f.currentdir != f.targetdir || f.currentmirror != f.targetmirror))
+            ok = false;
+          }
+        if(ok == true) state = state::solved;
+        }
       }
     }
   }
 
 void scramble() {
-  for(int i=0; i<1000; i++) {
+  for(int i=0; i<10000; i++) {
     int d = hrand(cwt.at->type);
     cell *c1 = cwt.at->move(d);
     if(fif.count(c1)) {
@@ -139,6 +152,7 @@ void scramble() {
       cwt.at = c1;
       }
     }     
+  if(state == state::unscrambled || state == state::solved) state = state::scrambled;
   }
 
 bool mouse_over_button;
@@ -295,12 +309,14 @@ void edit_fifteen() {
       
       if(pen == pmJump) {
         if(fif.count(c)) {
+          state = state::edited;
           auto& f0 = fif[cwt.at];
           auto& f1 = fif[c];
           swap(f0, f1);
           cwt.at = c;
           }
         else {
+          state = state::edited;
           fif[c] = fif[cwt.at];
           fif.erase(cwt.at);
           cwt.at = c;
@@ -309,6 +325,7 @@ void edit_fifteen() {
       
       if(pen == pmRotate) {
         if(fif.count(c) == 0) return;
+        state = state::edited;
         auto& f1 = fif[c];
         f1.currentdir = gmod(1+f1.currentdir, c->type);        
         f1.targetdir = gmod(1+f1.targetdir, c->type);        
@@ -316,6 +333,7 @@ void edit_fifteen() {
       
       if(pen == pmMirrorFlip) {
         if(fif.count(c) == 0) return;
+        state = state::edited;
         auto& f1 = fif[c];
         f1.currentmirror ^= true;
         f1.targetmirror ^= true; 
@@ -326,8 +344,10 @@ void edit_fifteen() {
           auto& f = fif[c];
           f.current = f.target = isize(fif)-1;
           f.currentdir = f.targetdir == 0;
+          state = state::edited;
           }
         else {
+          state = state::edited;
           auto& f = fif[c];
           if(f.current == isize(fif)-1)
             fif.erase(c);
@@ -379,6 +399,7 @@ void load_fifteen(hstream& f) {
     }
   compute_triangle_markers();
   enable();
+  state = state::unscrambled;
   }
 
 void o_key(o_funcs& v) {
@@ -409,6 +430,8 @@ void enable() {
     });
   rogueviz::rv_hook(hooks_music, 100, [] (eLand& l) { l = eLand(300); return false; });
   rogueviz::rv_change(patterns::whichShape, '9');
+  state = state::edited;
+  current_puzzle = nullptr;
   }
 
 #if CAP_COMMANDLINE
