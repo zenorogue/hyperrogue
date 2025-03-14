@@ -31,7 +31,7 @@ vector<puzzle> puzzles = {
   puzzle{"29", "29", "The 29 puzzle by Henry Segerman.", "https://www.youtube.com/watch?v=EitWHthBY30"},
   puzzle{"12", "12", "The 12 puzzle mentioned in the same video by Henry Segerman.", "https://www.youtube.com/watch?v=EitWHthBY30"},
   puzzle{"124", "124", "The 124 puzzle mentioned in the same video by Henry Segerman.", "https://www.youtube.com/watch?v=EitWHthBY30"},
-  puzzle{"60", "60", "The 124 puzzle mentioned in the same video by Henry Segerman.", "https://www.youtube.com/watch?v=EitWHthBY30"},
+  puzzle{"60", "60", "The 60 puzzle mentioned in the same video by Henry Segerman.", "https://www.youtube.com/watch?v=EitWHthBY30"},
   puzzle{"Continental drift", "sphere19", "Based on the Continental Drift puzzle by Henry Segerman.", "https://www.youtube.com/watch?v=0uQx33KFMO0"},
   };
 
