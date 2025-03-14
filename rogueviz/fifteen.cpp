@@ -419,8 +419,18 @@ void load_fifteen(hstream& f) {
   state = state::unscrambled;
   }
 
+void fifteen_play();
+
 void o_key(o_funcs& v) {
-  v.push_back(named_dialog("edit the Fifteen puzzle", edit_fifteen));
+  v.push_back(named_functionality("Fifteen interface", [] {
+     auto s = screens;
+     pushScreen(fifteen_play);
+     clearMessages();
+     quitter = [s] {
+       dialog::addItem("quit", 'Q');
+       dialog::add_action([s] { screens = s; });
+       };
+     }));
   }
 
 void enable() {
@@ -514,7 +524,9 @@ void fifteen_play() {
 
   dialog::init();
 
-  displayButton(vid.fsize, vid.yres - vid.fsize, "Shift to see solution, mouse or WADX to move", ' ', 0);
+  clearMessages();
+  displayButton(vid.fsize, vid.yres - vid.fsize*2, "Shift to see solution", ' ', 0);
+  displayButton(vid.fsize, vid.yres - vid.fsize, "mouse or WADX to move", ' ', 0);
   mouse_over_button = getcstat == ' ';
 
   displayButton(vid.xres - vid.fsize, vid.yres - vid.fsize, "(v) menu", 'v', 16);
