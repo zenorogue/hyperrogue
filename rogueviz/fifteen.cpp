@@ -36,7 +36,7 @@ vector<puzzle> puzzles = {
   };
 
 puzzle *current_puzzle;
-bool quit_from_menu;
+reaction_t quitter;
 
 static constexpr int Empty = 0;
 
@@ -62,13 +62,12 @@ bool show_triangles = false;
 bool show_dots = true;
 
 void init_fifteen(int q = 20) {  
-  println(hlog, "init_fifteen");
   auto ac = currentmap->allcells();
   for(int i=0; i<min(isize(ac), q); i++) {
     fif[ac[i]] = {i, 0, false, i, 0, false};
     }  
   cwt.at = ac[0];
-  println(hlog, "ok");
+  quitter = [] {};
   }
 
 void compute_triangle_markers() {
@@ -286,10 +285,7 @@ void edit_fifteen() {
       });
     }
 
-  if(quit_from_menu) {
-    dialog::addItem("quit", 'Q');
-    dialog::add_action([] { quitmainloop = true; });
-    }
+  if(quitter) quitter();
 
   dialog::addBack();
   
@@ -517,7 +513,10 @@ void fifteen_menu() {
       pushScreen([]{ quitmainloop = true; });
       pushScreen(fifteen_play);
       current_puzzle = &p;
-      quit_from_menu = true;
+      quitter = [] {
+        dialog::addItem("quit", 'Q');
+        dialog::add_action([] { quitmainloop = true; });
+        };
       });
     dialog::addInfo(p.desc);
     }
