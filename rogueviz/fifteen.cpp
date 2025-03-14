@@ -197,6 +197,8 @@ bool draw_fifteen(cell *c, const shiftmatrix& V) {
   return false;
   }
 
+string fname = "fifteen-saved.lev";
+
 void edit_fifteen() {
 
   if(!fif.count(cwt.at)) 
