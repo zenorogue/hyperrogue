@@ -2615,13 +2615,13 @@ EX void drawqueue() {
     int pp = int(p);
     if(qp0[pp] == qp[pp]) continue;
     for(int i=qp0[pp]; i<qp[pp]; i++) {
-      auto ap = (dqi_poly&) *ptds[i];
+      auto& ap = (dqi_poly&) *ptds[i];
       ap.cache = xintval(ap.V * xpush0(.1));
       }
     sort(&ptds[qp0[pp]], &ptds[qp[pp]], 
       [] (const unique_ptr<drawqueueitem>& p1, const unique_ptr<drawqueueitem>& p2) {
-        auto ap1 = (dqi_poly&) *p1;
-        auto ap2 = (dqi_poly&) *p2;
+        auto& ap1 = (dqi_poly&) *p1;
+        auto& ap2 = (dqi_poly&) *p2;
         return ap1.cache < ap2.cache;
         });
     }
