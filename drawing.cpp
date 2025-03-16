@@ -2310,6 +2310,7 @@ EX void quickqueue() {
 ld xintval(const shiftpoint& h) {
   if(sphere_flipped) return -h.h[2];
   if(hyperbolic) return -h.h[2];
+  if(euclid) return -hypot(h.h[0], h.h[1]);
   return -intval(h.h, C0);
   }
 
