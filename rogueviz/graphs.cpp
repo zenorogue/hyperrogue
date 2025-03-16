@@ -906,7 +906,6 @@ void close() {
   legend.clear();
   for(int i=0; i<isize(edgeinfos); i++) delete edgeinfos[i];
   edgeinfos.clear();
-  callhooks(hooks_close);
   edgetypes.clear();
   relmatrices.clear();
   }
