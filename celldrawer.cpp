@@ -2449,7 +2449,7 @@ void celldrawer::draw_wall_full() {
         sha0 ^= (w | r | r4);
         }
 
-      auto shad = sha0 &~ sha1; shad = shad & ((1<<28)-1);
+      auto shad = sha0 &~ sha1;
 
       while(shad) {
         int lev = __builtin_ctz(shad);
