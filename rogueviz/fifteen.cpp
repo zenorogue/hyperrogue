@@ -190,9 +190,9 @@ bool draw_fifteen(cell *c, const shiftmatrix& V) {
       ensure_floorshape_generated(shvid(c), c);
       for(int i=0; i<c->type; i++)
         if(!fif.count(c->move(i)) || (showing ? fif[c->move(i)].target : fif[c->move(i)].current) == Empty)
-          placeSidewall(c, i, SIDE_SLEV, V, 0xFFFFFFFF);
-      auto V1 = orthogonal_move_fol(V, cgi.SLEV[1]);
-      draw_qfi(c, V1, 0xFFFFFFFF, PPR::WALL3A);
+          placeSidewall(c, i, SIDE::RED1, V, 0xFFFFFFFF);
+      auto V1 = orthogonal_move_fol(V, cgi.RED[1]);
+      draw_qfi(c, V1, 0xFFFFFFFF, PPR::WALL_DECO);
       write_in_space(V1 * ddspin(c,cdir,0) * (cmir ? MirrorX: Id), 72, 1, dotted(cur), 0xFF, 0, 8);
       return true;
       }

@@ -465,7 +465,7 @@ struct lilymodel : public model {
     h[0] += 0.67; h[1] -= 0.36; 
     h[0] *= 5;
     h[1] *= 5;
-    h[2] = lerp(cgi.LAKE, cgi.FLOOR, ilerp(0.018, -0.0496, h[2]) * hmul);
+    h[2] = lerp(cgi.WATERLEVEL, cgi.FLOOR, ilerp(0.018, -0.0496, h[2]) * hmul);
     if(GDIM == 3) h = cgi.emb->logical_to_actual(h);
     else h[2] = 1;
     return h;
@@ -479,7 +479,7 @@ struct duckmodel : public model {
   hyperpoint transform(hyperpoint h) override { 
     h = cspin90(1, 2) * h;
     h[0] += 3.8; h[1] -= 2;
-    h[2] = lerp(cgi.LAKE, cgi.FLOOR, ilerp(0.056, -0.408, h[2]) * hmul * 1.5);
+    h[2] = lerp(cgi.WATERLEVEL, cgi.FLOOR, ilerp(0.056, -0.408, h[2]) * hmul * 1.5);
     if(GDIM == 3) h = cgi.emb->logical_to_actual(h);
     else h[2] = 1;
     return h;
@@ -1030,16 +1030,16 @@ bool chess_ceiling(celldrawer *cw) {
     color_t wcol1 = (gradient(0, domcol, 0, .9, 1) << 8) | 0xFF;
     color_t wcol2 = (gradient(0, domcol, 0, .8, 1) << 8) | 0xFF;
     if(house1.count(cw->c)) forCellIdEx(c2, i, cw->c) if(!house1.count(c2)) {
-      placeSidewall(cw->c, i, SIDE_HIGH, cw->V, (i&1)?wcol1:wcol2); 
-      placeSidewall(cw->c, i, SIDE_HIGH2, cw->V, (i&1)?wcol1:wcol2); 
+      placeSidewall(cw->c, i, SIDE::HIGH, cw->V, (i&1)?wcol1:wcol2);
+      placeSidewall(cw->c, i, SIDE::HIGH2, cw->V, (i&1)?wcol1:wcol2);
       }
     forCellIdEx(c2, i, cw->c) if(!house2.count(c2)) {
-      placeSidewall(cw->c, i, SIDE_HIGH2, cw->V, (i&1)?wcol1:wcol2); 
+      placeSidewall(cw->c, i, SIDE::HIGH2, cw->V, (i&1)?wcol1:wcol2);
       }
     if(house1.count(cw->c) != house2.count(cw->c))
-      draw_shapevec(cw->c, cw->V, qfi.fshape->levels[SIDE_HIGH], col, PPR::REDWALL);
+      draw_shapevec(cw->c, cw->V, qfi.fshape->levels[SIDE::HIGH], col, PPR::RED1_TOP);
     if(house2.count(cw->c))
-      draw_shapevec(cw->c, cw->V, qfi.fshape->levels[SIDE_HIGH2], (domroof << 8) | 0xFF, PPR::REDWALL);
+      draw_shapevec(cw->c, cw->V, qfi.fshape->levels[SIDE::HIGH2], (domroof << 8) | 0xFF, PPR::RED1_TOP);
 
     auto co = euc::full_coords2(cw->c);
     int x = gmod(co.first, 20);
@@ -1047,7 +1047,7 @@ bool chess_ceiling(celldrawer *cw) {
     char ch = xmap[y][x];
 
     if(ch == 'O') {
-      placeSidewall(cw->c, 1, SIDE_HIGH, cw->V, 0xC0E0FFC0);
+      placeSidewall(cw->c, 1, SIDE::HIGH, cw->V, 0xC0E0FFC0);
       ((dqi_poly&)(*ptds.back())).tinf = nullptr;
       }
     }

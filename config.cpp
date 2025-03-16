@@ -3020,7 +3020,7 @@ EX void show3D_height_details() {
     dialog::addBreak(100);
     dialog::addHelp(lalign(0, "absolute altitudes:\n\n"
       "depth ", cgi.INFDEEP,
-      " water ", tie(cgi.BOTTOM, cgi.SHALLOW, cgi.LAKE),
+      " water ", tie(cgi.DEEP, cgi.SHALLOW, cgi.WATERLEVEL),
       " floor ", cgi.FLOOR,
       " eye ", vid.eye,
       " walls ", tie(cgi.WALL, cgi.HIGH, cgi.HIGH2),

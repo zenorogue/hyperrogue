@@ -417,20 +417,20 @@ void render_tile(shiftmatrix V, tile& t, cell *c, vector<tile>* origbox, int box
     set_floor(cgi.shFullFloor);
     ensure_floorshape_generated(shvid(c), c);
     for(int i=0; i<c->type; i++)
-      if(!board.count(c->move(i))) placeSidewall(c, i, SIDE_SLEV, V, back);
-    V1 = orthogonal_move_fol(V, cgi.SLEV[1]);
-    if(!gig || !euclid_only()) draw_qfi(c, V1, back, PPR::WALL3A);
+      if(!board.count(c->move(i))) placeSidewall(c, i, SIDE::RED1, V, back);
+    V1 = orthogonal_move_fol(V, cgi.RED[1]);
+    if(!gig || !euclid_only()) draw_qfi(c, V1, back, PPR::WALL_DECO);
     }
   else if(get_gigantic(c) == c) {
     wider w(wide);
     for(int i=0; i<=corners; i++) curvepoint(pt(i, 3));
-    queuecurve(V, lines, backd, PPR::WALL3A);
+    queuecurve(V, lines, backd, PPR::WALL_DECO);
     }
 
   if(c && gig) {
     if(gigants.at(c) != c) return;
     if(euclid_only())
-      draw_qfi(c, V1 * euscalexx(3), back, PPR::WALL3A);
+      draw_qfi(c, V1 * euscalexx(3), back, PPR::WALL_DECO);
     }
 
   const ld nearco = 4;
@@ -441,7 +441,7 @@ void render_tile(shiftmatrix V, tile& t, cell *c, vector<tile>* origbox, int box
     a = floor(a) + 1;
     while(a < b) curvepoint(pt(a++, 3));
     curvepoint(pt(b, 3));
-    queuecurve(V1, 0, darkena(col, 0, 0xFF), PPR::WALL3A);
+    queuecurve(V1, 0, darkena(col, 0, 0xFF), PPR::WALL_DECO);
     };
 
   if(has_power(t, sp::polski)) {
@@ -466,14 +466,14 @@ void render_tile(shiftmatrix V, tile& t, cell *c, vector<tile>* origbox, int box
 
   if(has_power(t, sp::english)) {
     vid.linewidth *= 3;
-    for(int i=0; i<corners; i++) queueline(V1 * pt(i/2., 3), V1 * pt((i+corners)/2., 3), darkena(0xFFFFFF, 0, 0xFF), 2, PPR::WALL3A);
+    for(int i=0; i<corners; i++) queueline(V1 * pt(i/2., 3), V1 * pt((i+corners)/2., 3), darkena(0xFFFFFF, 0, 0xFF), 2, PPR::WALL_DECO);
     vid.linewidth /= 3;
     // for simplicity, and less confusion with the letter, we do not add the red cross on top
     }
 
   if(has_power(t, sp::portugues_br)) {
     for(int i=0; i<=corners; i++) curvepoint(pt(i+.5, 3));
-    queuecurve(V1, 0, darkena(0xFEDD00, 0, 0xFF), PPR::WALL3A);
+    queuecurve(V1, 0, darkena(0xFEDD00, 0, 0xFF), PPR::WALL_DECO);
     }
 
   if(has_power(t, sp::bending)) {
@@ -592,8 +592,8 @@ bool draw(cell *c, const shiftmatrix& V) {
       queueline(V * pt0(cw, j), V1 * pt0(cw1, j), 0x0000FF80, 5);
 
       if(tiles3) {
-        auto high_V = orthogonal_move_fol(V, cgi.SLEV[1]);
-        auto high_V1 = orthogonal_move_fol(V1, cgi.SLEV[1]);
+        auto high_V = orthogonal_move_fol(V, cgi.RED[1]);
+        auto high_V1 = orthogonal_move_fol(V1, cgi.RED[1]);
         queueline(high_V * pt0(cw, 1), high_V1 * pt0(cw1, 1), 0xFF800080, 5);
         queueline(high_V * pt0(cw, j), high_V1 * pt0(cw1, j), 0x0000FF80, 5);
         }

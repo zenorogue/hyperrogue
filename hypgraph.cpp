@@ -2227,7 +2227,7 @@ EX void adjust_eye(transmatrix& T, cell *c, ld sign) {
   if(isWorm(c->monst) && sl < 3) sl++;
   ld i = cgi.emb->center_z();
   if(sl || vid.eye || i)
-    T = T * lzpush(sign * (cgi.SLEV[sl] - cgi.FLOOR - vid.eye + i));
+    T = T * lzpush(sign * (cgi.RED[sl] - cgi.FLOOR - vid.eye + i));
   }
 
 EX bool shmup_inverted() {

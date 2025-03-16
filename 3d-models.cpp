@@ -1135,7 +1135,7 @@ void geometry_information::make_3d_models() {
     }
 
   shift_shape(shBoatOuter, FLOOR);
-  shift_shape(shBoatInner, (FLOOR+LAKE)/2);
+  shift_shape(shBoatInner, (FLOOR+WATERLEVEL)/2);
   
   for(int i=0; i<14; i++)
     shift_shape(shTriheptaSpecial[i], FLOOR);

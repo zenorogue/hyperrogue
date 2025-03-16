@@ -2387,9 +2387,12 @@ EX void reverse_priority(PPR p) {
   reverse(ptds.begin()+qp0[int(p)], ptds.begin()+qp[int(p)]);
   }
 
+constexpr PPR all_side_prios[] = {
+  PPR::DEEP_SIDE, PPR::SHALLOW_SIDE, PPR::WATERLEVEL_SIDE, PPR::FLOOR_SIDE, PPR::RED1_SIDE, PPR::RED2_SIDE, PPR::RED3_SIDE, PPR::WALL_SIDE
+  };
+
 EX void reverse_side_priorities() {
-  for(PPR p: {PPR::REDWALLs, PPR::REDWALLs2, PPR::REDWALLs3, PPR::WALL3s,
-    PPR::LAKEWALL, PPR::INLAKEWALL, PPR::BELOWBOTTOM, PPR::BSHALLOW, PPR::ASHALLOW})
+  for(PPR p: all_side_prios)
       reverse_priority(p);
   }
 
@@ -2609,9 +2612,8 @@ EX void drawqueue() {
 
   DEBB(DF_GRAPH, ("sort walls"));
   
-  if(GDIM == 2) 
-  for(PPR p: {PPR::REDWALLs, PPR::REDWALLs2, PPR::REDWALLs3, PPR::WALL3s,
-    PPR::LAKEWALL, PPR::INLAKEWALL, PPR::BELOWBOTTOM, PPR::ASHALLOW, PPR::BSHALLOW}) {
+  if(GDIM == 2)
+  for(PPR p: all_side_prios) {
     int pp = int(p);
     if(qp0[pp] == qp[pp]) continue;
     for(int i=qp0[pp]; i<qp[pp]; i++) {

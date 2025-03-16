@@ -1046,13 +1046,13 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
       shiftmatrix V2 = V * spin(pticks * vid.ispeed / 1500.);
       /* divisors should be higher than in plate renderer */
       qfi.fshape = &cgi.shMFloor2;
-      draw_shapevec(c, V2 * lzpush(-h/30), qfi.fshape->levels[0], 0xFFD500FF, PPR::WALL);
+      draw_shapevec(c, V2 * lzpush(-h/30), qfi.fshape->levels[SIDE::FLOOR], 0xFFD500FF, PPR::WALL);
 
       qfi.fshape = &cgi.shMFloor3;
-      draw_shapevec(c, V2 * lzpush(-h/25), qfi.fshape->levels[0], darkena(icol, 0, 0xFF), PPR::WALL);
+      draw_shapevec(c, V2 * lzpush(-h/25), qfi.fshape->levels[SIDE::FLOOR], darkena(icol, 0, 0xFF), PPR::WALL);
 
       qfi.fshape = &cgi.shMFloor4;
-      draw_shapevec(c, V2 * lzpush(-h/20), qfi.fshape->levels[0], 0xFFD500FF, PPR::WALL);
+      draw_shapevec(c, V2 * lzpush(-h/20), qfi.fshape->levels[SIDE::FLOOR], 0xFFD500FF, PPR::WALL);
       }
     else if(WDIM == 3 && c) {
       ld h = cgi.human_height;
@@ -3881,38 +3881,47 @@ EX bool use_warp_graphics() {
   return true;
   }
 
-EX void escherSidewall(cell *c, int sidepar, const shiftmatrix& V, color_t col) {
-  if(sidepar >= SIDE_SLEV && sidepar <= SIDE_SLEV+2) {
-    int sl = sidepar - SIDE_SLEV;
+EX void escherSidewall(cell *c, SIDE sidepar, const shiftmatrix& V, color_t col) {
+  if(sidepar >= SIDE::RED1 && sidepar <= SIDE::RED3) {
+    int sl = int(sidepar) - int(SIDE::RED1);
     for(int z=1; z<=4; z++) if(z == 1 || (z == 4 && detaillevel == 2))
-      draw_qfi(c, orthogonal_move_fol(V, zgrad0(cgi.slev * sl, cgi.slev * (sl+1), z, 4)), col, PPR::REDWALL-4+z+4*sl);
+      draw_qfi(c, orthogonal_move_fol(V, zgrad0(cgi.slev * sl, cgi.slev * (sl+1), z, 4)), col, PPR::RED1_ESCHER+3*sl);
     }
-  else if(sidepar == SIDE_WALL) {
+  else if(sidepar == SIDE::WALL) {
     const int layers = 2 << detaillevel;
     for(int z=1; z<layers; z++) 
-      draw_qfi(c, orthogonal_move_fol(V, zgrad0(0, geom3::actual_wall_height(), z, layers)), col, PPR::WALL3+z-layers);
+      draw_qfi(c, orthogonal_move_fol(V, zgrad0(0, geom3::actual_wall_height(), z, layers)), col, PPR::WALL_ESCHER);
     }
-  else if(sidepar == SIDE_LAKE) {
+  else if(sidepar == SIDE::FLOOR) {
     const int layers = 1 << (detaillevel-1);
-    if(detaillevel) for(int z=0; z<layers; z++) 
-      draw_qfi(c, orthogonal_move_fol(V, zgrad0(-vid.lake_top, 0, z, layers)), col, PPR::FLOOR+z-layers);
+    if(detaillevel) for(int z=0; z<layers; z++)
+      draw_qfi(c, orthogonal_move_fol(V, zgrad0(-vid.lake_top, 0, z, layers)), col, PPR::FLOOR_ESCHER);
     }
-  else if(sidepar == SIDE_LTOB) {
+  else if(sidepar == SIDE::WATERLEVEL) {
     const int layers = 1 << (detaillevel-1);
-    if(detaillevel) for(int z=0; z<layers; z++) 
-      draw_qfi(c, orthogonal_move_fol(V, zgrad0(-vid.lake_bottom, -vid.lake_top, z, layers)), col, PPR::INLAKEWALL+z-layers);
+    if(detaillevel) for(int z=0; z<layers; z++)
+      draw_qfi(c, orthogonal_move_fol(V, zgrad0(-vid.lake_shallow, -vid.lake_top, z, layers)), col, PPR::WATERLEVEL_ESCHER);
     }
-  else if(sidepar == SIDE_BTOI) {
+  else if(sidepar == SIDE::SHALLOW) {
+    const int layers = 1 << (detaillevel-1);
+    if(detaillevel) for(int z=0; z<layers; z++)
+      draw_qfi(c, orthogonal_move_fol(V, zgrad0(-vid.lake_bottom, -vid.lake_shallow, z, layers)), col, PPR::SHALLOW_ESCHER);
+    }
+  else if(sidepar == SIDE::DEEP) {
     const int layers = 1 << detaillevel;
     draw_qfi(c, orthogonal_move_fol(V, cgi.INFDEEP), col, PPR::MINUSINF);
-    for(int z=1; z<layers; z++) 
-      draw_qfi(c, orthogonal_move_fol(V, zgrad0(-vid.lake_bottom, -vid.lake_top, -z, 1)), col, PPR::LAKEBOTTOM+z-layers);
+    for(int z=layers-1; z>1; z--)
+      draw_qfi(c, orthogonal_move_fol(V, zgrad0(-vid.lake_bottom, -vid.lake_top, -z, 1)), col, PPR::DEEP_ESCHER);
     }
   }
 
-EX bool placeSidewall(cell *c, int i, int sidepar, const shiftmatrix& V, color_t col) {
+EX bool use_escher(SIDE sidepar) {
+  return (!qfi.fshape || !qfi.fshape->is_plain || !cgi.validsidepar[sidepar] || qfi.usershape >= 0) && (GDIM == 2);
+  }
 
-  if(!qfi.fshape || !qfi.fshape->is_plain || !cgi.validsidepar[sidepar] || qfi.usershape >= 0) if(GDIM == 2) {
+EX bool placeSidewall(cell *c, int i, SIDE sidepar, const shiftmatrix& V, color_t col) {
+
+  if(use_escher(sidepar)) {
     escherSidewall(c, sidepar, V, col);
     return true;
     }
@@ -3921,16 +3930,7 @@ EX bool placeSidewall(cell *c, int i, int sidepar, const shiftmatrix& V, color_t
   if(qfi.fshape == &cgi.shBigTriangle && pseudohept(c->move(i))) return false;
   if(qfi.fshape == &cgi.shTriheptaFloor && !pseudohept(c) && !pseudohept(c->move(i))) return false;
 
-  PPR prio;
-  /* if(mirr) prio = PPR::GLASS - 2;
-  else */ if(sidepar == SIDE_WALL) prio = PPR::WALL3 - 2;
-  else if(sidepar == SIDE_WTS3) prio = PPR::WALL3 - 2;
-  else if(sidepar == SIDE_LAKE) prio = PPR::LAKEWALL;
-  else if(sidepar == SIDE_LTOB) prio = PPR::INLAKEWALL;
-  else if(sidepar == SIDE_BTOI) prio = PPR::BELOWBOTTOM;
-  else if(sidepar == SIDE_ASHA) prio = PPR::ASHALLOW;
-  else if(sidepar == SIDE_BSHA) prio = PPR::BSHALLOW;
-  else prio = PPR::REDWALL-2+4*(sidepar-SIDE_SLEV);
+  PPR prio = side_to_prio[sidepar];
 
   if((col & 255) < 255) prio = PPR::TRANSPARENT_WALL;
   
@@ -3950,12 +3950,12 @@ EX bool placeSidewall(cell *c, int i, int sidepar, const shiftmatrix& V, color_t
     if(currentmap->strict_tree_rules()) {
       i = rulegen::get_arb_dir(c, i);
       }
-    if(sidepar >= SIDEPARS) {
-      println(hlog, "ERROR: sidepar >= SIDEPARS", make_pair(sidepar, SIDEPARS));
+    if(int(sidepar) >= SIDEPARS) {
+      println(hlog, "ERROR: sidepar >= SIDEPARS: ", make_pair(int(sidepar), SIDEPARS));
       return false;
       }
     if(i >= isize(qfi.fshape->gpside[sidepar])) {
-      println(hlog, "ERROR: i >= gpside[sidepar]", make_tuple(sidepar, i, isize(qfi.fshape->gpside[sidepar])));
+      println(hlog, "ERROR: i >= gpside[sidepar]", make_tuple(int(sidepar), i, isize(qfi.fshape->gpside[sidepar])));
       return false;
       }
     draw_shapevec(c, V2, qfi.fshape->gpside[sidepar][i], col, prio);
@@ -3990,7 +3990,7 @@ EX int gridcolor(cell *c1, cell *c2) {
     if(r == 3) return Dark(0xC02020);
     if(r == 2) return Dark(0xF02020);
     }
-  if(chasmgraph(c1) != chasmgraph(c2) && c1->land != laAsteroids && c2->land != laAsteroids)
+  if((get_spatial_info(c1).deep<SIDE::SHALLOW) != (get_spatial_info(c2).deep<SIDE::SHALLOW) && c1->land != laAsteroids && c2->land != laAsteroids)
     return Dark(0x808080);
   if(c1->land == laAlchemist && c2->land == laAlchemist && c1->wall != c2->wall && !c1->item && !c2->item)
     return Dark(0xC020C0);
@@ -4050,34 +4050,17 @@ EX void pushdown(cell *c, int& q, const shiftmatrix &V, double down, bool rezoom
       
     if(!repriority) ;
     else if(nlev < -vid.lake_bottom-1e-3) {
-      ptd.prio = PPR::BELOWBOTTOM_FALLANIM;
+      ptd.prio = PPR::DEEP_FALLANIM;
       if(c->wall != waChasm)
         ptd.color = 0; // disappear!
       }
     else if(nlev < -vid.lake_top-1e-3)
-      ptd.prio = PPR::INLAKEWALL_FALLANIM;
+      ptd.prio = PPR::SHALLOW_FALLANIM;
     else if(nlev < 0)
-      ptd.prio = PPR::LAKEWALL_FALLANIM;
+      ptd.prio = PPR::FLOOR_FALLANIM;
     }
   }
 #endif
-
-// 1 : (floor, water); 2 : (water, bottom); 4 : (bottom, inf)
-
-EX int shallow(cell *c) {
-  if(cellUnstable(c)) return 0;
-  else if(
-    c->wall == waReptile) return 1;
-  else if(c->wall == waReptileBridge ||
-    c->wall == waGargoyleFloor ||
-    c->wall == waGargoyleBridge ||
-    c->wall == waTempFloor ||
-    c->wall == waTempBridge ||
-    c->wall == waPetrifiedBridge ||
-    c->wall == waFrozenLake)
-    return 5;
-  return 7;
-  }
 
 bool allemptynear(cell *c) {
   if(c->wall) return false;
@@ -4202,10 +4185,10 @@ EX color_t transcolor(cell *c, cell *c2, color_t wcol) {
   if(among(c->wall, waCanopy, waSolidBranch, waWeakBranch) && !among(c2->wall, waCanopy, waSolidBranch, waWeakBranch)) return 0x00C00060;
   if(c->wall == waFloorA && c2->wall == waFloorB && !c->item && !c2->item) return darkena3(0xFF00FF, 0, 0x80);
   if(realred(c->wall) || realred(c2->wall)) {
-    int l = snakelevel(c) - snakelevel(c2);
+    int l = int(get_spatial_info(c).top) - int(get_spatial_info(c2).top);
     if(l > 0) return darkena3(floorcolors[laRedRock], 0, 0x30 * l);
     }
-  if(among(c->wall, waRubble, waDeadfloor2) && !snakelevel(c2)) return darkena3(winf[c->wall].color, 0, 0x40);
+  if(among(c->wall, waRubble, waDeadfloor2) && !among(get_spatial_info(c2).top, SIDE::RED1, SIDE::RED2, SIDE::RED3)) return darkena3(winf[c->wall].color, 0, 0x40);
   if(c->wall == waMagma && c2->wall != waMagma) return darkena3(magma_color(lavatide(c, -1)/4), 0, 0x80);
   if(among(c->wall, waMineUnknown, waMineMine) && !among(c2->wall, waMineMine, waMineUnknown) && mine_opacity > 0 && mine_opacity < 255) 
     return 0xFFFFFF00 | mine_opacity;
@@ -4781,7 +4764,7 @@ void celldrawer::draw_fallanims() {
        if(t <= maxtime) {
          erase = false;
          if(GDIM == 3)
-           draw_shapevec(c, V, qfi.fshape->levels[0], darkena(fcol, fd, 0xFF), PPR::WALL);
+           draw_shapevec(c, V, qfi.fshape->levels[SIDE::FLOOR], darkena(fcol, fd, 0xFF), PPR::WALL);
          else if(fa.walltype == waNone) {
            draw_qfi(c, V, darkena(fcol, fd, 0xFF), PPR::FLOOR);
            }
@@ -4793,10 +4776,10 @@ void celldrawer::draw_fallanims() {
            ddalt.setcolors();
            int starcol = c->wall == waVinePlant ? 0x60C000 : ddalt.wcol;
            c->wall = w; c->wparam = p;
-           draw_qfi(c, orthogonal_move_fol(V, cgi.WALL), darkena(starcol, fd, 0xFF), PPR::WALL3);
-           queuepolyat(orthogonal_move_fol(V, cgi.WALL), cgi.shWall[ct6], darkena(ddalt.wcol, 0, 0xFF), PPR::WALL3A);
+           draw_qfi(c, orthogonal_move_fol(V, cgi.WALL), darkena(starcol, fd, 0xFF), PPR::WALL_TOP);
+           queuepolyat(orthogonal_move_fol(V, cgi.WALL), cgi.shWall[ct6], darkena(ddalt.wcol, 0, 0xFF), PPR::WALL_DECO);
            forCellIdEx(c2, i, c)
-             if(placeSidewall(c, i, SIDE_WALL, V, darkena(ddalt.wcol, 1, 0xFF))) break;
+             if(placeSidewall(c, i, SIDE::WALL, V, darkena(ddalt.wcol, 1, 0xFF))) break;
            }
          pushdown(c, q, V, t*t / 1000000. + t / 1000., true, true);
          }
@@ -4848,14 +4831,17 @@ EX void queuecircleat1(cell *c, const shiftmatrix& V, double rad, color_t col) {
   #endif
   queuecircle(V, rad, col);  
   if(!wmspatial) return;
-  if(highwall(c))
+  auto si = get_spatial_info(c);
+  if(si.top == SIDE::WALL)
     queuecircle(orthogonal_move_fol(V, cgi.WALL), rad, col);
-  int sl;
-  if((sl = snakelevel(c))) {
-    queuecircle(orthogonal_move_fol(V, cgi.SLEV[sl]), rad, col);
-    }
-  if(chasmgraph(c))
-    queuecircle(orthogonal_move_fol(V, cgi.LAKE), rad, col);
+  if(si.top == SIDE::RED1)
+    queuecircle(orthogonal_move_fol(V, cgi.RED[1]), rad, col);
+  if(si.top == SIDE::RED2)
+    queuecircle(orthogonal_move_fol(V, cgi.RED[2]), rad, col);
+  if(si.top == SIDE::RED3)
+    queuecircle(orthogonal_move_fol(V, cgi.RED[3]), rad, col);
+  if(si.top <= SIDE::WATERLEVEL)
+    queuecircle(orthogonal_move_fol(V, cgi.WATERLEVEL), rad, col);
   }
 
 EX void queuecircleat(cell *c, double rad, color_t col) {

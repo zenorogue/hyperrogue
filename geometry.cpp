@@ -38,18 +38,32 @@ struct hpcshape {
   hpcshape() { clear(); }
   };
 
-#define SIDE_SLEV 0
-#define SIDE_WTS3 3
-#define SIDE_WALL 4
-#define SIDE_LAKE 5
-#define SIDE_LTOB 6
-#define SIDE_BTOI 7
-#define SIDE_SKY  8
-#define SIDE_HIGH 9
-#define SIDE_HIGH2 10
-#define SIDE_ASHA 11
-#define SIDE_BSHA 12
-#define SIDEPARS  13
+enum class SIDE {
+  INFDEEP, DEEP, SHALLOW, WATERLEVEL, FLOOR, RED1, RED2, RED3, RED4, WALL, HIGH, HIGH2, SKY, GUARD
+  };
+
+constexpr SIDE allsides[] = {
+  SIDE::INFDEEP, SIDE::DEEP, SIDE::SHALLOW, SIDE::WATERLEVEL, SIDE::FLOOR, SIDE::RED1, SIDE::RED2, SIDE::RED3, SIDE::RED4, SIDE::WALL, SIDE::HIGH, SIDE::HIGH2, SIDE::SKY
+  };
+
+constexpr int SIDEPARS = int(SIDE::GUARD);
+
+template<class T> struct sidearray : array<T, SIDEPARS> {
+  T& operator [] (SIDE s) { return array<T, SIDEPARS>::operator[] ((int) s); };
+  const T& operator [] (SIDE s) const { return array<T, SIDEPARS>::operator[] ((int) s); };
+  };
+
+constexpr sidearray<PPR> side_to_prio = {
+  PPR::DEEP_SIDE, PPR::DEEP_SIDE, PPR::SHALLOW_SIDE, PPR::WATERLEVEL_SIDE, PPR::FLOOR_SIDE, PPR::RED1_SIDE, PPR::RED2_SIDE, PPR::RED3_SIDE,
+  PPR::WALL_SIDE, PPR::WALL_SIDE,
+  PPR::DEFAULT, PPR::DEFAULT, PPR::DEFAULT
+  };
+
+constexpr sidearray<PPR> side_to_prio_top = {
+  PPR::DEEP_TOP, PPR::DEEP_TOP, PPR::SHALLOW_TOP, PPR::WATERLEVEL_TOP, PPR::FLOOR, PPR::RED1_TOP, PPR::RED2_TOP, PPR::RED3_TOP,
+  PPR::WALL_TOP, PPR::WALL_TOP,
+  PPR::DEFAULT, PPR::DEFAULT, PPR::DEFAULT
+  };
 
 /** GOLDBERG_BITS controls the size of tables for Goldberg. see gp::check_limits */
 
@@ -79,8 +93,9 @@ struct floorshape {
   int pstrength; // pattern strength in 3D
   int fstrength; // frame strength in 3D
   PPR prio;
-  vector<hpcshape> b, shadow, side[SIDEPARS], levels[SIDEPARS], cone[2];
-  vector<vector<hpcshape>> gpside[SIDEPARS];
+  vector<hpcshape> b, shadow, cone[2];
+  sidearray<vector<hpcshape>> side, levels;
+  sidearray<vector<vector<hpcshape>>> gpside;
   floorshape() { prio = PPR::FLOOR; pstrength = fstrength = 10; }
   };
 
@@ -231,20 +246,22 @@ struct geometry_information {
   int use_direct;
   
   /** various parameters related to the 3D view */
-  ld INFDEEP, BOTTOM, HELLSPIKE, LAKE, WALL, FLOOR, STUFF,
-    SLEV[4], FLATEYE,
+  ld INFDEEP, HELL, DEEP, HELLSPIKE, SHALLOW, WATERLEVEL, FLOOR, RED[4], WALL, HIGH, HIGH2, LOWSKY, SKY, STAR,
+    STUFF, FLATEYE,
     LEG0, LEG1, LEG, LEG3, GROIN, GROIN1, GHOST,
     BODY, BODY1, BODY2, BODY3,
     NECK1, NECK, NECK3, HEAD, HEAD1, HEAD2, HEAD3,
-    ALEG0, ALEG, ABODY, AHEAD, BIRD, LOWSKY, SKY, HIGH, HIGH2,
-    HELL, STAR, SHALLOW;
+    ALEG0, ALEG, ABODY, AHEAD, BIRD;
+
   ld human_height, slev;
 
   ld eyelevel_familiar, eyelevel_human, eyelevel_dog;
 
 #if CAP_SHAPES
+
+sidearray<hpcshape> shSemiFloorSide;
+
 hpcshape 
-  shSemiFloorSide[SIDEPARS],
   shBFloor[2],
   shWave[8][2],  
   shCircleFloor,
@@ -397,7 +414,7 @@ hpcshape
     shDesertFloor, shPowerFloor, shRoseFloor, shSwitchFloor,
     shTurtleFloor, shRedRockFloor[3], shDragonFloor;
 
-  ld dlow_table[SIDEPARS], dhi_table[SIDEPARS], dfloor_table[SIDEPARS];
+  sidearray<ld> dlow_table, dhi_table;
 
   int prehpc;
   /** list of points in all shapes */
@@ -415,7 +432,7 @@ hpcshape
   /** last ideal point of the current shape */
   hyperpoint last_ideal;
 
-  bool validsidepar[SIDEPARS];
+  sidearray<bool> validsidepar;
 
   vector<glvertex> ourshape;
 #endif
@@ -456,7 +473,7 @@ hpcshape
   void hpcpush(hyperpoint h);
   void hpc_connect_ideal(hyperpoint a, hyperpoint b);
   void hpcsquare(hyperpoint h1, hyperpoint h2, hyperpoint h3, hyperpoint h4);
-  void chasmifyPoly(double fac, double fac2, int k);
+  void chasmifyPoly(double fac, double fac2, SIDE p);
   void shift(hpcshape& sh, double dx, double dy, double dz);
   void initPolyForGL();
   void extra_vertices();
@@ -1027,15 +1044,17 @@ EX namespace geom3 {
   
     if(invalid != "") {
       INFDEEP = .7;
-      BOTTOM = .8;
+      DEEP = .8;
       HELLSPIKE = .85;
-      LAKE = .9;
+      SHALLOW = .9;
+      WATERLEVEL = .95;
       FLOOR = 1;
+      RED[0] = 1;
+      RED[1] = 1.08;
+      RED[2] = 1.16;
+      RED[3] = 1.24;
       WALL = 1.25;
-      SLEV[0] = 1;
-      SLEV[1] = 1.08;
-      SLEV[2] = 1.16;
-      SLEV[3] = 1.24;
+
       FLATEYE = 1.03;
       LEG1 = 1.025;
       LEG = 1.05;
@@ -1057,7 +1076,6 @@ EX namespace geom3 {
       ABODY = 1.08;
       AHEAD = 1.12;
       BIRD = 1.20;
-      SHALLOW = .95;
       STUFF = 1;
       LOWSKY = SKY = HIGH = HIGH2 = STAR = 1;
       }
@@ -1107,11 +1125,11 @@ EX namespace geom3 {
       
       slev = vid.rock_wall_ratio * wh / 3;
       for(int s=0; s<=3; s++)
-        SLEV[s] = lev_to_factor(vid.rock_wall_ratio * wh * s/3);
-      LAKE = lev_to_factor(wh * -vid.lake_top);
+        RED[s] = lev_to_factor(vid.rock_wall_ratio * wh * s/3);
+      WATERLEVEL = lev_to_factor(wh * -vid.lake_top);
       SHALLOW = lev_to_factor(wh * -vid.lake_shallow);
       HELLSPIKE = lev_to_factor(wh * -(vid.lake_top+vid.lake_bottom)/2);
-      BOTTOM = lev_to_factor(wh * -vid.lake_bottom);
+      DEEP = lev_to_factor(wh * -vid.lake_bottom);
       LOWSKY = lev_to_factor(vid.lowsky_height * wh);
       HIGH = lev_to_factor(vid.wall_height2 * wh);
       HIGH2 = lev_to_factor(vid.wall_height3 * wh);
@@ -1138,9 +1156,9 @@ EX namespace geom3 {
         adjust(HIGH2, HIGH, 0.5);
         adjust(SKY, FLOOR, 1);
         adjust(STAR, FLOOR, 0.9);
-        adjust(LAKE, FLOOR, 0.8);
-        adjust(SHALLOW, LAKE, 0.9);
-        adjust(BOTTOM, SHALLOW, 0.5);
+        adjust(WATERLEVEL, FLOOR, 0.8);
+        adjust(SHALLOW, WATERLEVEL, 0.9);
+        adjust(DEEP, SHALLOW, 0.5);
         adjust(INFDEEP, FLOOR, 1);
         }
       }

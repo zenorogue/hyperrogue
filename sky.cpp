@@ -406,7 +406,7 @@ void celldrawer::draw_ceiling() {
         if(star_for(fieldpattern::fieldval_uniq(c) ^ 0x5555))
           draw_star(V, cgi.shNightStar, 0xFFFFFFFF, true);
         int sk = get_skybrightness(-1);
-        auto sky = draw_shapevec(c, V * MirrorZ, cgi.shFullFloor.levels[SIDE_SKY], 0x000000FF + 0x100 * (sk/17), PPR::SKY);
+        auto sky = draw_shapevec(c, V * MirrorZ, cgi.shFullFloor.levels[SIDE::SKY], 0x000000FF + 0x100 * (sk/17), PPR::SKY);
         if(sky) sky->tinf = NULL, sky->flags |= POLY_INTENSE;
         }
       return;
@@ -491,13 +491,13 @@ void celldrawer::draw_ceiling() {
       add_to_sky(0, 0);
       if(camera_over(cgi.WALL)) return;
       if(c->land == laMercuryRiver) fcol = linf[laTerracotta].color, fd = 1;
-      if(qfi.fshape) draw_shapevec(c, V, qfi.fshape->levels[SIDE_WALL], darkena(fcol, fd, 0xFF), PPR::WALL);
+      if(qfi.fshape) draw_shapevec(c, V, qfi.fshape->levels[SIDE::WALL], darkena(fcol, fd, 0xFF), PPR::WALL);
       forCellIdEx(c2, i, c) 
         if(ceiling_category(c2) != 3) {
           color_t wcol2 = gradient(0, wcol, 0, .8, 1);
-          placeSidewall(c, i, SIDE_HIGH, V, darkena(wcol2, fd, 0xFF));
-          placeSidewall(c, i, SIDE_HIGH2, V, darkena(wcol2, fd, 0xFF));
-          placeSidewall(c, i, SIDE_SKY, V, darkena(wcol2, fd, 0xFF));
+          placeSidewall(c, i, SIDE::HIGH, V, darkena(wcol2, fd, 0xFF));
+          placeSidewall(c, i, SIDE::HIGH2, V, darkena(wcol2, fd, 0xFF));
+          placeSidewall(c, i, SIDE::SKY, V, darkena(wcol2, fd, 0xFF));
           }
       return;
       }
@@ -509,17 +509,17 @@ void celldrawer::draw_ceiling() {
       color_t wcol2 = 0xFFD500;
       if(ispal(c)) {
         forCellIdEx(c2, i, c) if(!ispal(c2))
-          placeSidewall(c, i, SIDE_HIGH, V, darkena(wcol2, fd, 0xFF));
+          placeSidewall(c, i, SIDE::HIGH, V, darkena(wcol2, fd, 0xFF));
         }
       else {
         bool window = false;
         forCellIdEx(c2, i, c) if(c2->wall == waPalace && ispal(c->cmodmove(i+1)) && ispal(c->cmodmove(i-1))) window = true;        
-        if(qfi.fshape && !window) draw_shapevec(c, V, qfi.fshape->levels[SIDE_HIGH], darkena(fcol, fd, 0xFF), PPR::WALL);
+        if(qfi.fshape && !window) draw_shapevec(c, V, qfi.fshape->levels[SIDE::HIGH], darkena(fcol, fd, 0xFF), PPR::WALL);
         if(window) 
           forCellIdEx(c2, i, c) 
-            placeSidewall(c, i, SIDE_HIGH2, V, darkena(wcol2, fd, 0xFF));
+            placeSidewall(c, i, SIDE::HIGH2, V, darkena(wcol2, fd, 0xFF));
         }
-      if(among(c->wall, waClosedGate, waOpenGate) && qfi.fshape) draw_shapevec(c, V, qfi.fshape->levels[SIDE_WALL], 0x202020FF, PPR::WALL);
+      if(among(c->wall, waClosedGate, waOpenGate) && qfi.fshape) draw_shapevec(c, V, qfi.fshape->levels[SIDE::WALL], 0x202020FF, PPR::WALL);
 
       draw_star(V, cgi.shNightStar, 0xFFFFFFFF);
       break;
@@ -531,14 +531,14 @@ void celldrawer::draw_ceiling() {
       color_t wcol2 = winf[waRuinWall].color;
       if(c->landparam == 1)
         forCellIdEx(c2, i, c) if(c2->landparam != 1)
-          placeSidewall(c, i, SIDE_HIGH, V, darkena(wcol2, fd, 0xFF));
+          placeSidewall(c, i, SIDE::HIGH, V, darkena(wcol2, fd, 0xFF));
       if(c->landparam != 2)
         forCellIdEx(c2, i, c) if(c2->landparam == 2)
-          placeSidewall(c, i, SIDE_HIGH2, V, darkena(wcol2, fd, 0xFF));
+          placeSidewall(c, i, SIDE::HIGH2, V, darkena(wcol2, fd, 0xFF));
       /* if(c->landparam == 0)
-        if(qfi.fshape) draw_shapevec(c, V, qfi.fshape->levels[SIDE_HIGH], darkena(wcol2, fd, 0xFF), PPR::WALL); */
+        if(qfi.fshape) draw_shapevec(c, V, qfi.fshape->levels[SIDE::HIGH], darkena(wcol2, fd, 0xFF), PPR::WALL); */
       if(c->landparam == 1)
-        if(qfi.fshape) draw_shapevec(c, V, qfi.fshape->levels[SIDE_WALL], darkena(wcol2, fd, 0xFF), PPR::WALL);
+        if(qfi.fshape) draw_shapevec(c, V, qfi.fshape->levels[SIDE::WALL], darkena(wcol2, fd, 0xFF), PPR::WALL);
       break;
       }
     
@@ -550,14 +550,14 @@ void celldrawer::draw_ceiling() {
       color_t wcol2 = winf[waColumn].color;
       if(c->landparam == 1)
         forCellIdEx(c2, i, c) if(c2->landparam != 1)
-          placeSidewall(c, i, SIDE_HIGH, V, darkena(wcol2, fd, 0xFF));
+          placeSidewall(c, i, SIDE::HIGH, V, darkena(wcol2, fd, 0xFF));
       if(c->landparam != 2)
         forCellIdEx(c2, i, c) if(c2->landparam == 2)
-          placeSidewall(c, i, SIDE_HIGH2, V, darkena(wcol2, fd, 0xFF));
+          placeSidewall(c, i, SIDE::HIGH2, V, darkena(wcol2, fd, 0xFF));
       if(c->landparam == 0)
-        if(qfi.fshape) draw_shapevec(c, V, qfi.fshape->levels[SIDE_HIGH], darkena(wcol2, fd, 0xFF), PPR::WALL);
+        if(qfi.fshape) draw_shapevec(c, V, qfi.fshape->levels[SIDE::HIGH], darkena(wcol2, fd, 0xFF), PPR::WALL);
       if(c->landparam == 1)
-        if(qfi.fshape) draw_shapevec(c, V, qfi.fshape->levels[SIDE_WALL], darkena(wcol2, fd, 0xFF), PPR::WALL);
+        if(qfi.fshape) draw_shapevec(c, V, qfi.fshape->levels[SIDE::WALL], darkena(wcol2, fd, 0xFF), PPR::WALL);
       break;
       }
     
@@ -567,10 +567,10 @@ void celldrawer::draw_ceiling() {
     
       if(pseudohept(c)) {
         forCellIdEx(c2, i, c) 
-          placeSidewall(c, i, SIDE_HIGH, V, darkena(fcol, fd, 0xFF));
+          placeSidewall(c, i, SIDE::HIGH, V, darkena(fcol, fd, 0xFF));
         }
       else if(qfi.fshape)
-        draw_shapevec(c, V, qfi.fshape->levels[SIDE_WALL], darkena(fcol, fd, 0xFF), PPR::WALL);
+        draw_shapevec(c, V, qfi.fshape->levels[SIDE::WALL], darkena(fcol, fd, 0xFF), PPR::WALL);
 
       draw_star(V, cgi.shNightStar, 0xFFFFFFFF);
       break;

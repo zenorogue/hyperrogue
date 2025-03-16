@@ -90,7 +90,7 @@ void geometry_information::hpcpush(hyperpoint h) {
     }
   }
 
-void geometry_information::chasmifyPoly(double fol, double fol2, int k) {
+void geometry_information::chasmifyPoly(double fol, double fol2, SIDE p) {
   if(GDIM == 2) {
      for(int i=isize(hpc)-1; i >= last->s; i--) {
        hpc.push_back(orthogonal_move_fol(hpc[i], fol));
@@ -375,39 +375,31 @@ template<class... T> ld grot(bool geometry, ld factor, T... t) {
 #endif
 
 void geometry_information::make_sidewalls() {
-  for(int i=0; i<=3; i++)
-    dfloor_table[i] = SLEV[i];
-  dfloor_table[SIDE_WALL] = WALL;
-  dfloor_table[SIDE_LAKE] = LAKE;
-  dfloor_table[SIDE_LTOB] = BOTTOM;
-  dfloor_table[SIDE_BTOI] = INFDEEP;
-  dfloor_table[SIDE_HIGH] = HIGH;
-  dfloor_table[SIDE_HIGH2] = HIGH2;
-  dfloor_table[SIDE_SKY ] = SKY;
-  dfloor_table[SIDE_ASHA] = SHALLOW;
-
   // sidewall parameters for the 3D mode
   for(int k=0; k<SIDEPARS; k++) {
     double dlow=FLOOR, dhi=FLOOR;
-    if(k==SIDE_WALL) dhi = WALL;
-    else if(k==SIDE_LAKE) dlow = LAKE;
-    else if(k==SIDE_LTOB) dlow = BOTTOM, dhi = LAKE;
-    else if(k==SIDE_BTOI) dlow = INFDEEP, dhi = BOTTOM;
-    else if(k==SIDE_WTS3) dlow = SLEV[3], dhi = WALL;
-    else if(k==SIDE_HIGH) dlow = WALL, dhi = HIGH;
-    else if(k==SIDE_HIGH2) dlow = HIGH, dhi = HIGH2;
-    else if(k==SIDE_SKY) dlow = HIGH2, dhi = SKY;
-    else if(k==SIDE_BSHA) dlow = BOTTOM, dhi = SHALLOW;
-    else if(k==SIDE_ASHA) dlow = SHALLOW, dhi = LAKE;
-    else dlow = SLEV[k-SIDE_SLEV], dhi = SLEV[k-SIDE_SLEV+1];
-    dlow_table[k] = dlow;
-    dhi_table[k] = dhi;
+    auto p = SIDE(k);
+    if(p==SIDE::INFDEEP) dlow = INFDEEP, dhi = INFDEEP;
+    else if(p==SIDE::DEEP) dlow = INFDEEP, dhi = DEEP;
+    else if(p==SIDE::SHALLOW) dlow = DEEP, dhi = SHALLOW;
+    else if(p==SIDE::WATERLEVEL) dlow = SHALLOW, dhi = WATERLEVEL;
+    else if(p==SIDE::FLOOR) dlow = WATERLEVEL, dhi = FLOOR;
+    else if(p==SIDE::RED1) dlow = RED[0], dhi = RED[1];
+    else if(p==SIDE::RED2) dlow = RED[1], dhi = RED[2];
+    else if(p==SIDE::RED3) dlow = RED[2], dhi = RED[3];
+    else if(p==SIDE::RED4) dlow = RED[3], dhi = WALL;
+    else if(p==SIDE::WALL) dlow = FLOOR, dhi = WALL;
+    else if(p==SIDE::HIGH) dlow = WALL, dhi = HIGH;
+    else if(p==SIDE::HIGH2) dlow = HIGH, dhi = HIGH2;
+    else if(p==SIDE::SKY) dlow = HIGH2, dhi = SKY;
+    dlow_table[p] = dlow;
+    dhi_table[p] = dhi;
 
-    validsidepar[k] = (dlow > 0 && dhi > 0) || (dlow < 0 && dhi < 0) || GDIM == 3;
+    validsidepar[p] = (dlow > 0 && dhi > 0) || (dlow < 0 && dhi < 0) || GDIM == 3;
 
-    bshape(shSemiFloorSide[k], PPR::LAKEWALL);
+    bshape(shSemiFloorSide[p], PPR::FLOOR_SIDE);
     for(int t=0; t<=3; t+=3) hpcpush(ddi(S7 + (3+t)*S14, floorrad0) * C0);
-    chasmifyPoly(dlow, dhi, k);
+    chasmifyPoly(dlow, dhi, p);
     }
   }
 
@@ -1241,16 +1233,16 @@ void geometry_information::prepare_shapes() {
     ld hlenx = hdist(xpush0(hcrossf), spin(TAU/S7) * xpush0(hcrossf));
 
     bshape(shHalfMirror[2], PPR::WALL);
-    hpcpush(C0); hpcpush(xpush0(-len6*scalefactor));  chasmifyPoly(FLOOR, WALL, 0);
+    hpcpush(C0); hpcpush(xpush0(-len6*scalefactor));  chasmifyPoly(FLOOR, WALL, SIDE::FLOOR);
     bshape(shHalfMirror[1], PPR::WALL);
     if(PURE) {
-      hpcpush(xpush0(-hlen7)); hpcpush(xpush0(hcrossf+hlenx/2));  chasmifyPoly(FLOOR, WALL, 0);
+      hpcpush(xpush0(-hlen7)); hpcpush(xpush0(hcrossf+hlenx/2));  chasmifyPoly(FLOOR, WALL, SIDE::FLOOR);
       }
     else {
-      hpcpush(xpush0(-len7*scalefactor)); hpcpush(xpush0((hexf+lenx/2)*scalefactor));  chasmifyPoly(FLOOR, WALL, 0);
+      hpcpush(xpush0(-len7*scalefactor)); hpcpush(xpush0((hexf+lenx/2)*scalefactor));  chasmifyPoly(FLOOR, WALL, SIDE::FLOOR);
       }
     bshape(shHalfMirror[0], PPR::WALL);
-    hpcpush(xpush0(len6)); hpcpush(xpush0(-len6));  chasmifyPoly(FLOOR, WALL, 0);
+    hpcpush(xpush0(len6)); hpcpush(xpush0(-len6));  chasmifyPoly(FLOOR, WALL, SIDE::FLOOR);
     }
 
   bshape(shAsymmetric, PPR::TEXT, scalefactor, 374);

@@ -345,14 +345,33 @@ EX bool highwall(cell *c) {
   return winf[c->wall].glyph == '#' || c->wall == waClosedGate;
   }
 
-EX int chasmgraph(cell *c) {
-  if(c->wall == waChasm || c->wall == waInvisibleFloor) return 2;
-  if(isChasmy(c)) return 1;
-  if(isWateryOrBoat(c)) return 1;
-  if(c->wall == waShallow) return 1;
-  if(wmescher && c->wall == waBarrier && c->land == laOceanWall) return 1;
-  if(c->wall == waReptileBridge) return 1;
-  return 0;
+EX spatial_info get_spatial_info(cell *c) {
+  #define F(x) Flag((int) SIDE::x)
+  if(cellUnstable(c))
+    return spatial_info{SIDE::INFDEEP, SIDE::INFDEEP, 0};
+  if(c->wall == waChasm || c->wall == waInvisibleFloor)
+    return spatial_info{SIDE::INFDEEP, SIDE::INFDEEP, 0};
+  if(c->wall == waBarrier && wmescher && c->land == laOceanWall)
+    return spatial_info{SIDE::WATERLEVEL, SIDE::DEEP, F(DEEP)};
+  if(c->wall == waReptile)
+    return spatial_info{SIDE::FLOOR, SIDE::FLOOR, F(FLOOR) | F(DEEP)};
+  if(c->wall == waShallow)
+    return spatial_info{SIDE::WATERLEVEL, SIDE::SHALLOW, F(SHALLOW) | F(DEEP)};
+  if(isWateryOrBoat(c) || isChasmy(c))
+    return spatial_info{SIDE::WATERLEVEL, SIDE::DEEP, F(DEEP)};
+  if(among(c->wall, waReptileBridge, waGargoyleFloor, waGargoyleBridge, waTempFloor, waTempBridge, waPetrifiedBridge, waFrozenLake))
+    return spatial_info{SIDE::WATERLEVEL, SIDE::DEEP, F(WATERLEVEL) | F(DEEP)};
+  int slev = snakelevel(c);
+  if(slev == 1)
+    return spatial_info{SIDE::RED1, SIDE::RED1, F(RED1) | F(FLOOR) | F(WATERLEVEL) | F(SHALLOW) | F(DEEP)};
+  if(slev == 2)
+    return spatial_info{SIDE::RED2, SIDE::RED2, F(RED1) | F(RED2) | F(FLOOR) | F(WATERLEVEL) | F(SHALLOW) | F(DEEP)};
+  if(slev == 3)
+    return spatial_info{SIDE::RED3, SIDE::RED3, F(RED1) | F(RED2) | F(RED3) | F(FLOOR) | F(WATERLEVEL) | F(SHALLOW) | F(DEEP)};
+  if(highwall(c))
+    return spatial_info{SIDE::WALL, SIDE::WALL, F(WALL) | F(FLOOR) | F(WATERLEVEL) | F(SHALLOW) | F(DEEP)};
+  return spatial_info{SIDE::FLOOR, SIDE::FLOOR, F(FLOOR) | F(WATERLEVEL) | F(SHALLOW) | F(DEEP)};
+  #undef F
   }
 
 EX bool conegraph(cell *c) {
