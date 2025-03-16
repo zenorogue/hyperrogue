@@ -989,19 +989,17 @@ void celldrawer::draw_halfvine() {
       dynamicval<color_t> p(poly_outline, OUTLINE_TRANS);
       queuepolyat(V2 * spin(120._deg), cgi.shSemiFloorShadow, SHADOW_WALL, GDIM == 2 ? PPR::WALLSHADOW : PPR::TRANSPARENT_SHADOW);
       }
-    #if MAXMDIM >= 4
-    if(GDIM == 3 && qfi.fshape) {
-      auto& side = queuepolyat(V2, cgi.shSemiFloorSide[SIDE::WALL], darkena(vcol, fd, 0xFF), PPR::WALL_DECO-2+away(V2.T));
-      side.tinf = &floor_texture_vertices[shar.id];
-      ensure_vertex_number(*side.tinf, side.cnt);
+    if(qfi.fshape) {
+      auto& side = queuepolyat(V2, cgi.shSemiFloorSide[SIDE::WALL], darkena(vcol2, fd, 0xFF), PPR::WALL_SIDE);
+      if(GDIM == 3) {
+        side.tinf = &floor_texture_vertices[shar.id];
+        ensure_vertex_number(*side.tinf, side.cnt);
+        }
       }
-    #endif
 
     if(cgi.validsidepar[SIDE::WALL]) forCellIdEx(c2, j, c) {
-      int dis = i-j;
-      dis %= 6;
-      if(dis<0) dis += 6;
-      if(dis != 1 && dis != 5) continue;
+      int dis = gmod(i-j, 6);
+      if(dis != 2 && dis != 4) continue;
       if(placeSidewall(c, j, SIDE::WALL, V, darkena(vcol2, fd, 0xFF))) break;
       }
     }
