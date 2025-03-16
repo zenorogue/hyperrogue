@@ -320,16 +320,14 @@ void geometry_information::bshape_regular(floorshape &fsh, int id, int sides, ld
       }
     
     for(auto p: allsides) {
-      if(isize(fsh.gpside[p]) < c->type)
-        fsh.gpside[p].resize(c->type);
       for(int i=0; i<c->type; i++) {
-        sizeto(fsh.gpside[p][i], id);
-        bshape(fsh.gpside[p][i][id], PPR::FLOOR_SIDE);
+        sizeto(fsh.side[p][i], id);
+        bshape(fsh.side[p][i][id], PPR::FLOOR_SIDE);
         hyperpoint h0 = bt::get_corner_horo_coordinates(c, i) * size;
         hyperpoint h1 = bt::get_corner_horo_coordinates(c, i+1) * size;
         hyperpoint hd = (h1 - h0) / STEP;
         for(int j=0; j<=STEP; j++)
-          hpcpush(iddspin_side(c, i) * bt::get_horopoint(h0 + hd * j));
+          hpcpush(bt::get_horopoint(h0 + hd * j));
         chasmifyPoly(dlow_table[p], dhi_table[p], p);
         }
       }
@@ -347,21 +345,13 @@ void geometry_information::bshape_regular(floorshape &fsh, int id, int sides, ld
     hpcpush(xspinpush0(t * TAU / sides + shift * S_step, size * SHADMUL));
 
   for(auto p: allsides) {
-    fsh.side[p].resize(2);
-    bshape(fsh.side[p][id], PPR::FLOOR_SIDE);
-    hpcpush(xspinpush0(+M_PI/sides, size));
-    hpcpush(xspinpush0(-M_PI/sides, size));
-    chasmifyPoly(dlow_table[p], dhi_table[p], p);
-
-    if(cgi.emb->is_euc_in_noniso()) {
-      fsh.gpside[p].resize(c->type);
-      for(int i=0; i<c->type; i++) {
-        sizeto(fsh.gpside[p][i], id);
-        bshape(fsh.gpside[p][i][id], PPR::FLOOR_SIDE);
-        hpcpush(xspinpush0(M_PI - i * TAU / sides + shift * S_step, size));
-        hpcpush(xspinpush0(M_PI - (i + 1) * TAU / sides + shift * S_step, size));
-        chasmifyPoly(dlow_table[p], dhi_table[p], p);
-        }
+    fsh.side[p].resize(c->type);
+    for(int i=0; i<c->type; i++) {
+      sizeto(fsh.side[p][i], id);
+      bshape(fsh.side[p][i][id], PPR::FLOOR_SIDE);
+      hpcpush(xspinpush0(- i * TAU / sides + shift * S_step, size));
+      hpcpush(xspinpush0(- (i+1) * TAU / sides + shift * S_step, size));
+      chasmifyPoly(dlow_table[p], dhi_table[p], p);
       }
     }
   }
@@ -416,10 +406,10 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
 
       ld hexside = fsh.rad0, heptside = fsh.rad1;
       
-      for(auto p: allsides) sizeto(fsh.side[p], id);
-      
       ld td = (PURE && !(S7&1)) ? S42+S6 : 0;
       if(&fsh == &shBigHepta) td += S6;
+
+      if(dont_inverse()) td += S42;
       
       if(S3 >= OINF && !(S7 & 1)) td = S42 * 1. / S7;
     
@@ -595,13 +585,13 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
       hpcpush(mid_at(hpxy(0,0), cornerlist[i%cor], SHADMUL));
     
     for(auto p: allsides) {
-      if(isize(fsh.gpside[p]) < cor)
-        fsh.gpside[p].resize(cor);
+      if(isize(fsh.side[p]) < cor)
+        fsh.side[p].resize(cor);
       for(int cid=0; cid<cor; cid++) {
-        sizeto(fsh.gpside[p][cid], id);
-        bshape(fsh.gpside[p][cid][id], fsh.prio);
-        hpcpush(iddspin_side(c, cid) * cornerlist[cid]);
-        hpcpush(iddspin_side(c, cid) * cornerlist[(cid+1)%cor]);
+        sizeto(fsh.side[p][cid], id);
+        bshape(fsh.side[p][cid][id], fsh.prio);
+        hpcpush(cornerlist[cid]);
+        hpcpush(cornerlist[(cid+1)%cor]);
         chasmifyPoly(dlow_table[p], dhi_table[p], p);
         }
       }
@@ -791,11 +781,8 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
         }
 
       for(auto p: allsides) {
-        for(auto& li: fsh.side[p]) 
-          bind_floor_texture(li, fsh.id);
-        if(isize(fsh.gpside[p]) < c->type)
-          fsh.gpside[p].resize(c->type);
-        for(auto& gs: fsh.gpside[p]) {
+        sizeto(fsh.side[p], c->type);
+        for(auto& gs: fsh.side[p]) {
           for(auto& li: gs) 
             bind_floor_texture(li, fsh.id);
           }
@@ -809,13 +796,10 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
         fsh.levels[p] = shFullFloor.levels[p];
         fsh.shadow = shFullFloor.shadow;
         for(auto& li: fsh.levels[p]) bind_floor_texture(li, fsh.id);
-        fsh.side[p] = shFullFloor.side[p];
-        for(auto& li: fsh.side[p]) bind_floor_texture(li, fsh.id);
-        if(isize(fsh.gpside[p]) < c->type)
-          fsh.gpside[p].resize(c->type);
+        sizeto(fsh.side[p], c->type);
         for(int e=0; e<c->type; e++) {
-          fsh.gpside[p][e] = shFullFloor.gpside[p][e];
-          for(auto& li: fsh.gpside[p][e])
+          fsh.side[p][e] = shFullFloor.side[p][e];
+          for(auto& li: fsh.side[p][e])
             bind_floor_texture(li, fsh.id);
           }
         fsh.cone[0] = shFullFloor.cone[0];

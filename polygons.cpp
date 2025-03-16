@@ -92,12 +92,15 @@ void geometry_information::hpcpush(hyperpoint h) {
 
 void geometry_information::chasmifyPoly(double fol, double fol2, SIDE p) {
   if(GDIM == 2) {
+     hyperpoint tester = Hypc;
      for(int i=isize(hpc)-1; i >= last->s; i--) {
+       tester += hpc[i];
        hpc.push_back(orthogonal_move_fol(hpc[i], fol));
        hpc[i] = orthogonal_move_fol(hpc[i], fol2);
        }
      hpc.push_back(hpc[last->s]);
      last->flags |= POLY_ISSIDE;
+     last->intester = normalize(tester);
      }
   else {
     vector<hyperpoint> points;

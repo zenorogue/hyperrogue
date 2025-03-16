@@ -87,7 +87,7 @@ struct dqi_poly : drawqueueitem {
   flagtype flags;
   /** \brief Texture data for textured polygons. Requires POLY_TRIANGLES flag */
   struct basic_textureinfo *tinf;
-  /** \brief used to find the correct side to draw in spherical geometries */
+  /** \brief used to find the correct side to draw in spherical geometries, and also to sort sidewalls */
   hyperpoint intester;
   /** \brief temporarily cached data */
   float cache;
@@ -2618,7 +2618,7 @@ EX void drawqueue() {
     if(qp0[pp] == qp[pp]) continue;
     for(int i=qp0[pp]; i<qp[pp]; i++) {
       auto& ap = (dqi_poly&) *ptds[i];
-      ap.cache = xintval(ap.V * xpush0(.1));
+      ap.cache = xintval(ap.V * ap.intester);
       }
     sort(&ptds[qp0[pp]], &ptds[qp[pp]], 
       [] (const unique_ptr<drawqueueitem>& p1, const unique_ptr<drawqueueitem>& p2) {

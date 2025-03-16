@@ -94,8 +94,8 @@ struct floorshape {
   int fstrength; // frame strength in 3D
   PPR prio;
   vector<hpcshape> b, shadow, cone[2];
-  sidearray<vector<hpcshape>> side, levels;
-  sidearray<vector<vector<hpcshape>>> gpside;
+  sidearray<vector<hpcshape>> levels;
+  sidearray<vector<vector<hpcshape>>> side;
   floorshape() { prio = PPR::FLOOR; pstrength = fstrength = 10; }
   };
 

@@ -3934,35 +3934,24 @@ EX bool placeSidewall(cell *c, int i, SIDE sidepar, const shiftmatrix& V, color_
 
   if((col & 255) < 255) prio = PPR::TRANSPARENT_WALL;
   
-  if(cgi.emb->is_in_noniso()) {
-    draw_shapevec(c, V, qfi.fshape->gpside[sidepar][i], col, prio);
-    return false;
-    }
-
   dynamicval<bool> ncor(approx_nearcorner, true);
-  shiftmatrix V2 = V * ddspin_side(c, i);
   
-  if(NONSTDVAR || !standard_tiling()) {
-    #if CAP_ARCM
-    if(arcm::in() && !PURE)
-      i = gmod(i + arcm::parent_index_of(c->master)/DUALMUL, c->type);
-    #endif
-    if(currentmap->strict_tree_rules()) {
-      i = rulegen::get_arb_dir(c, i);
-      }
-    if(int(sidepar) >= SIDEPARS) {
-      println(hlog, "ERROR: sidepar >= SIDEPARS: ", make_pair(int(sidepar), SIDEPARS));
-      return false;
-      }
-    if(i >= isize(qfi.fshape->gpside[sidepar])) {
-      println(hlog, "ERROR: i >= gpside[sidepar]", make_tuple(int(sidepar), i, isize(qfi.fshape->gpside[sidepar])));
-      return false;
-      }
-    draw_shapevec(c, V2, qfi.fshape->gpside[sidepar][i], col, prio);
+  #if CAP_ARCM
+  if(arcm::in() && !PURE)
+    i = gmod(i + arcm::parent_index_of(c->master)/DUALMUL, c->type);
+  #endif
+  if(currentmap->strict_tree_rules()) {
+    i = rulegen::get_arb_dir(c, i);
+    }
+  if(int(sidepar) >= SIDEPARS) {
+    println(hlog, "ERROR: sidepar >= SIDEPARS: ", make_pair(int(sidepar), SIDEPARS));
     return false;
     }
-  
-  queuepolyat(V2, qfi.fshape->side[sidepar][shvid(c)], col, prio);
+  if(i >= isize(qfi.fshape->side[sidepar])) {
+    println(hlog, "ERROR: i >= side[sidepar]", make_tuple(int(sidepar), i, isize(qfi.fshape->side[sidepar])));
+    return false;
+    }
+  draw_shapevec(c, V, qfi.fshape->side[sidepar][i], col, prio);
   return false;
   }
 #endif
