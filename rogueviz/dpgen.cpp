@@ -11,8 +11,6 @@ namespace hr {
 
 EX namespace dpgen {
 
-EX bool in;
-
 typedef tuple<cell*, cell*, int> cpos;
 
 map<cpos, int> visited;
@@ -61,6 +59,12 @@ int last_seed = 0;
 
 void check();
 
+void show_menu();
+
+const struct puzzle *current_puzzle;
+
+int orig_cheat;
+
 void launch(int seed, int elimit, int hlimit) {
 
   /* setup */
@@ -75,7 +79,6 @@ void launch(int seed, int elimit, int hlimit) {
   enable_canvas(); ccolor::set_random(0);
   shrand(seed);
   start_game();
-  in = true;
   
   cell *c0, *c1;
   dual::switch_to(0);
@@ -164,15 +167,20 @@ void launch(int seed, int elimit, int hlimit) {
   worst.first->wall = waOpenPlate;
   worst.second->wall = waOpenPlate;
   rogueviz::rv_hook(dual::hooks_after_move, 100, dpgen::check);
-  bool b = gen_wandering;
-  rogueviz::on_cleanup_or_next([b] { gen_wandering = b; });
-  gen_wandering = false;
+  orig_cheat = cheater;
+
+  rv_change(gen_wandering, false);
+  rv_hook(hooks_o_key, 91, [] (o_funcs& v) {
+    v.push_back(named_dialog(XLAT("select a puzzle"), show_menu));
+    });
+  current_puzzle = nullptr;
   }
 
 struct puzzle {
   string name;
   int seed;
   int el, hl;
+  string achievement;
   };
 
 bool restricted;
@@ -184,17 +192,18 @@ void launch_puzzle(const puzzle& p) {
   if(restricted) pushScreen(puzzle_restrict);
   clearMessages();
   addMessage("Welcome to Dual Geometry Puzzle!");
+  current_puzzle = &p;
   }
 
 vector<puzzle> puzzles = {
-  {"easy 1", 1, 3, 2},
-  {"easy 2", 2, 3, 2},
-  {"easy 3", 5, 3, 2},
-  {"medium 1", 7, 3, 3},
-  {"medium 2", 11, 3, 3},
-  {"hard 1", 1, 4, 3},
-  {"hard 2", 1, 3, 4},
-  {"hard 3", 1, 3, 5},
+  {"easy 1", 1, 3, 2, "DP-EASY"},
+  {"easy 2", 2, 3, 2, "DP_EASY"},
+  {"easy 3", 5, 3, 2, "DP_EASY"},
+  {"medium 1", 7, 3, 3, "DP-MEDIUM"},
+  {"medium 2", 11, 3, 3, "DP-MEDIUM"},
+  {"hard 1", 1, 4, 3, "DP-HARD"},
+  {"hard 2", 1, 3, 4, "DP_HARD"},
+  {"hard 3", 1, 3, 5, "DP_HARD"},
   };
 
 void launch_sample_puzzle() {
@@ -202,13 +211,16 @@ void launch_sample_puzzle() {
   }
 
 EX void check() {
-  if(in) {
-    int k = dual::currently_loaded;
-    dual::switch_to(1-k);
-    bool ok = cwt.at->wall == waOpenPlate;
-    dual::switch_to(k);
-    ok = ok && cwt.at->wall == waOpenPlate;
-    if(ok) addMessage("You won!");
+  int k = dual::currently_loaded;
+  dual::switch_to(1-k);
+  bool ok = cwt.at->wall == waOpenPlate;
+  dual::switch_to(k);
+  ok = ok && cwt.at->wall == waOpenPlate;
+  if(ok) {
+    addMessage("You won!");
+    #if RVCOL
+    if(cheater == orig_cheat) rv_achievement(current_puzzle->achievement);
+    #endif
     }
   }
 
@@ -303,9 +315,7 @@ auto sbhook = addHook(hooks_args, 100, [] {
     }
   else return 1;
   return 0;
-  }) + addHook(hooks_o_key, 91, [] (o_funcs& v) {
-    if(in) v.push_back(named_dialog(XLAT("select a puzzle"), show_menu));
-    })
+  })
   + addHook_rvslides(205, [] (string s, vector<tour::slide>& v) {
       if(s != "mixed") return;
       v.push_back(tour::slide{
