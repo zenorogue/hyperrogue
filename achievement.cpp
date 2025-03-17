@@ -982,7 +982,12 @@ EX void achievement_victory(bool hyper) {
 #endif
   }
 
+EX hookset<string()> hooks_rich_presence;
+
 EX string get_rich_presence_text() {
+
+  string s = callhandlers(string(""), hooks_rich_presence);
+  if(s != "") return s;
 
   #if CAP_DAILY
   if(daily::on)
