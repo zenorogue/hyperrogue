@@ -1820,8 +1820,6 @@ EX void initAll() {
   srand(time(NULL));
   shrand(fixseed ? startseed : time(NULL));
 
-  achievement_init(); // not in ANDROID
-
   firstland0 = firstland;
 
   // initlanguage();
@@ -1870,7 +1868,6 @@ EX void finishAll() {
   quit_all();
 #endif
 
-  achievement_close();
   callhooks(hooks_final_cleanup);
   }
 

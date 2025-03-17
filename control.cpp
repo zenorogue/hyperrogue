@@ -1057,7 +1057,6 @@ EX void mainloopiter() {
   #if CAP_VR
   vrhr::vr_control();
   #endif
-  achievement_pump();  
 
   callhooks(hooks_control);
 
