@@ -49,6 +49,9 @@ constexpr SIDE allsides[] = {
 constexpr int SIDEPARS = int(SIDE::GUARD);
 
 template<class T> struct sidearray : array<T, SIDEPARS> {
+  sidearray() {};
+  // not needed in newer C++ standards, I do not know how to do this correctly in C++11
+  constexpr sidearray(T a, T b, T c, T d, T e, T f, T g, T h, T i, T j, T k, T l, T m) : array<T, SIDEPARS> ({a,b,c,d,e,f,g,h,i,j,k,l,m}) {};
   T& operator [] (SIDE s) { return array<T, SIDEPARS>::operator[] ((int) s); };
   const T& operator [] (SIDE s) const { return array<T, SIDEPARS>::operator[] ((int) s); };
   };
