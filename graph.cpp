@@ -3663,7 +3663,10 @@ EX const char* minetexts[8] = {
   "Seven mines next to you!"
   };
 
+EX map<cell*, int> fake_minecount;
+
 EX int countMinesAround(cell *c) {
+  if(fake_minecount.count(c)) return fake_minecount[c];
   int mines = 0;
   for(cell *c2: adj_minefield_cells(c))
     if(c2->wall == waMineMine)
