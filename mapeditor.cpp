@@ -380,10 +380,19 @@ EX namespace mapeditor {
   EX void scaleall(ld z, bool keep_mouse) { 
      
      if(keep_mouse) {
-       ld mrx = (.0 + mousex - current_display->xcenter) / vpconf.scale;
-       ld mry = (.0 + mousey - current_display->ycenter) / vpconf.scale;
+       ld mrx = (.0 + mousex - current_display->xcenter);
+       ld mry = (.0 + mousey - current_display->ycenter);
        
-       if(vid.xres > vid.yres) {      
+       if(euclid && pmodel == mdDisk) {
+         ld tilerad = current_display->radius / (1 + vpconf.alpha);
+         mrx /= tilerad;
+         mry /= tilerad;
+         ld s = (1-z);
+         println(hlog, tie(mrx, mry, tilerad, s));
+         View = eupush(s * mrx, s * mry) * View;
+         }
+       else if(vid.xres > vid.yres) {
+         mrx /= vpconf.scale; mry /= vpconf.scale;
          vpconf.xposition += (vpconf.scale - vpconf.scale*z) * mrx / current_display->scrsize;
          vpconf.yposition += (vpconf.scale - vpconf.scale*z) * mry / current_display->scrsize;
          }
