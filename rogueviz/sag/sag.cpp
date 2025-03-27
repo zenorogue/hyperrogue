@@ -338,7 +338,7 @@ void init() {
 
   rogueviz::init(RV_GRAPH | RV_WHICHWEIGHT | RV_AUTO_MAXWEIGHT | RV_HAVE_WEIGHT);
 
-  rv_hook(rogueviz::hooks_close, 100, clear);
+  rv_hook(hooks_clearmemory, 100, clear);
   rv_hook(shmup::hooks_turn, 100, turn);
   rv_hook(hooks_drawcell, 100, visualize_subcells);
   rv_hook(rogueviz::hooks_rvmenu, 100, [] {
