@@ -2707,7 +2707,7 @@ EX namespace linepatterns {
 
   EX ld tree_starter = 0.25;
 
-  EX linepattern patTree = linepattern("underlying tree", 0x00d0d000, [] { return trees_known() && mod_allowed(); },
+  EX linepattern patTree = linepattern("underlying tree", 0x00d0d000, [] { return bt::in() || (trees_known() && mod_allowed()); },
     ALLCELLS(
       if(is_master(c)) {
         int dir = updir(c->master);
