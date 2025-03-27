@@ -321,6 +321,7 @@ void geometry_information::bshape_regular(floorshape &fsh, int id, int sides, ld
     
     for(auto p: allsides) {
       for(int i=0; i<c->type; i++) {
+        sizeto(fsh.side[p], c->type);
         sizeto(fsh.side[p][i], id);
         bshape(fsh.side[p][i][id], PPR::FLOOR_SIDE);
         hyperpoint h0 = bt::get_corner_horo_coordinates(c, i) * size;
