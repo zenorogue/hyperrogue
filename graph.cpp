@@ -330,7 +330,7 @@ void drawLightning(const shiftmatrix& V) {
 
 void drawCurse(const shiftmatrix& V, eItem it) {
 #if CAP_QUEUE
-  float ds = ptick(450) + (it * 5.5); // Extra offset so both Gluttony and Repulsion are easily visible
+  float ds = ptick(450) + (int(it) * 5.5); // Extra offset so both Gluttony and Repulsion are easily visible
   color_t col = darkena(iinf[it].color, 0, 0xFF);
   for(int u=0; u<20; u++) {
     ld leng, rad;

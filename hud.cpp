@@ -73,7 +73,7 @@ bool ikappear(int i) {
   return ikmerge(i);
   }
 
-const int glyphs = ittypes + motypes;
+const int glyphs = int(ittypes) + int(motypes);
 
 int gfirsttime[glyphs], glasttime[glyphs], gcopy[glyphs], ikland[glyphs];
 int glyphorder[glyphs];
@@ -302,7 +302,7 @@ bool displayglyph(int cx, int cy, int buttonsize, char glyph, color_t color, int
     qty < 100 ? buttonsize / 2 :
     buttonsize / 3;
 
-  if(id == moMutant + ittypes && clearing::imputed.nonzero()) {
+  if(id == int(moMutant) + int(ittypes) && clearing::imputed.nonzero()) {
     bignum bn = clearing::imputed + qty;
     str = short_form(bn);
     bsize = buttonsize / 4;
