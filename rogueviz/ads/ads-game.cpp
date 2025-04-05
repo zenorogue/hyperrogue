@@ -98,6 +98,7 @@ void run_ads_game_hooks() {
   rogueviz::rv_hook(shmup::hooks_turn, 0, ads_turn);
   rogueviz::rv_hook(anims::hooks_anim, 100, replay_animation);
   rogueviz::rv_hook(hooks_nextland, 0, ads_nextland);
+  rogueviz::rv_hook(hooks_music, 100, [] (eLand& l) { l = vctr->land; return false; });
   }
 
 void run_size_hooks() {
