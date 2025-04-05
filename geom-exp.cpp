@@ -1218,9 +1218,20 @@ EX void field_quotient_3d(int p, unsigned hash) {
   set_geometry(gFieldQuotient);
   for(;; p++) { 
     println(hlog, "trying p = ", p);
-    currfp.Prime = p; currfp.force_hash = hash; if(!currfp.solve()) break; 
+    currfp.Prime = p; currfp.force_hash = hash;
+    if(!currfp.solve()) break;
     }
   println(hlog, "set prime = ", currfp.Prime);
+  }
+
+EX void field_quotient_3d(string code) {
+  check_cgi();
+  cgi.require_basics();
+  stop_game_and_switch_mode(rg::nothing);
+  fieldpattern::field_from_current();
+  set_geometry(gFieldQuotient);
+  shstream ins(code);
+  hread_fpattern(ins, currfp);
   }
 
 EX void field_quotient_2d(int group, int id, int triplet) {
