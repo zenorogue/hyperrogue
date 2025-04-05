@@ -139,7 +139,7 @@ void level::draw_planning_screen() {
   auto& T = plan_transform;
   
   auto scr_to_map = [&] (hyperpoint h) {
-    transmatrix mousef = inverse_shift(T, atscreenpos(h[0], h[1]));
+    transmatrix mousef = inverse_shift_any(T, atscreenpos(h[0], h[1]));
     h = mousef * C0;
     h /= h[2];
     return h;
@@ -244,12 +244,12 @@ int move_id = -1, move_dir = 0;
 bool level::handle_planning(int sym, int uni) {
   if(sym == PSEUDOKEY_WHEELUP || sym == SDLK_PAGEUP) {
     dynamicval<eGeometry> g(geometry, gEuclid);
-    plan_transform = atscreenpos(mousex, mousey, 1.2) * inverse_shift(atscreenpos(mousex, mousey, 1), plan_transform);
+    plan_transform = atscreenpos(mousex, mousey, 1.2) * inverse_shift_any(atscreenpos(mousex, mousey, 1), plan_transform);
     return true;
     }
   if(sym == PSEUDOKEY_WHEELDOWN || sym == SDLK_PAGEDOWN) {
     dynamicval<eGeometry> g(geometry, gEuclid);
-    plan_transform = atscreenpos(mousex, mousey, 1) * inverse_shift(atscreenpos(mousex, mousey, 1.2), plan_transform);
+    plan_transform = atscreenpos(mousex, mousey, 1) * inverse_shift_any(atscreenpos(mousex, mousey, 1.2), plan_transform);
     return true;
     }
   for(auto& b: buttons) if(uni == b.first) {
