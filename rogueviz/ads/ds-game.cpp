@@ -760,6 +760,7 @@ void run_ds_game_hooks() {
   rogueviz::rv_hook(anims::hooks_anim, 100, replay_animation);
   rogueviz::rv_hook(hooks_global_mouseover, 100, generate_mouseovers);
   rogueviz::rv_change<color_t>(titlecolor, 0xFFC000);
+  rv_hook(hooks_music, 100, [] (eLand& l) { l = mfcode("C5"); return false; });
   }
 
 void run_ds_game() {
