@@ -155,6 +155,10 @@ EX void resetmusic() {
     }
   }
 
+#if HDR
+constexpr eLand mfcode(const char* buf) { return eLand((buf[0] - '0') * 10 + buf[1] - '0'); }
+#endif
+
 EX bool loadMusicInfo(string dir) {
   DEBBI(DF_INIT, ("load music info"));
   if(dir == "") return false;
