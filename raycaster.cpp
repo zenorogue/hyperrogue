@@ -2500,7 +2500,7 @@ struct raycast_map {
         dd.setcolors();
         shiftmatrix Vf;
         dd.set_land_floor(Vf);
-        color_t wcol = darkena(dd.wcol, 0, 0xFF);
+        color_t wcol = darkena(dd.wcol, darken, 0xFF);
         int dv = get_darkval(c1, c->c.spin(i));
         float p = 1 - dv / 16.;
         wallcolor[u] = glhr::acolor(wcol);
