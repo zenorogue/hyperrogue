@@ -252,4 +252,6 @@ int generate_mouseovers();
 
 bool all_params_default();
 
+void start_relhell_tour();
+
 }}

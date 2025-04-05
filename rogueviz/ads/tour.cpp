@@ -719,7 +719,14 @@ int pohooks =
     cb(XLAT("Relative Hell guided tour"), &relhell_tour[0], 'S');
     });
 
-
 }
+
+void start_relhell_tour() {
+  popScreenAll();
+  tour::slides = &ads_tour::relhell_tour[0];
+  tour::start();
+  if(!tour::on) tour::start();
+  }
+
 }
 }
