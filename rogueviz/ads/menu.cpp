@@ -9,6 +9,38 @@ void adjust_for_scale() {
   else max_gen_per_frame = 3, draw_per_frame = 1000;
   }
 
+vector<void*> get_all_params() {
+  vector<void*> vec = {&DS_(simspeed), &DS_(accel), &DS_(how_much_invincibility), &vid.creature_scale, &DS_(missile_rapidity)};
+  if(!main_rock) {
+    vec.push_back(&rock_max_rapidity);
+    vec.push_back(&rock_density);
+    }
+  auto all = [&] (player_data& d) {
+    vec.push_back(&d.hitpoints);
+    vec.push_back(&d.ammo);
+    vec.push_back(&d.fuel);
+    vec.push_back(&d.oxygen);
+    };
+  all(DS_(max_pdata));
+  all(DS_(tank_pdata));
+  return vec;
+  }
+
+bool all_params_default() {
+  for(auto v: get_all_params()) {
+    for(auto& fs: params)
+      if(fs.second->affects(v) && fs.second->dosave()) return false;
+    }
+  return true;
+  }
+
+void all_params_reset() {
+  for(auto v: get_all_params())
+    for(auto& fs: params)
+      if(fs.second->affects(v))
+        fs.second->reset();
+  }
+
 void edit_difficulty() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen();
@@ -48,6 +80,9 @@ void edit_difficulty() {
       restart();
       });
     }
+
+  dialog::addBoolItem(XLAT("all default"), all_params_default(), 'D');
+  dialog::add_action([] { all_params_reset(); restart(); });
 
   dialog::addBack();
   dialog::display();

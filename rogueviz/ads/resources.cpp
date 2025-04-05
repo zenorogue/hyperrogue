@@ -200,6 +200,9 @@ void gain_resource(eResourceType rsrc) {
   D(rtOxygen, oxygen)
   for(auto r: {rtGoldGate, rtGoldRocks, rtGoldTurret}) {
     D(r, score[treasure_id(r)])
+    #ifdef RVCOL
+    if(pdata.score[0] + pdata.score[1] + pdata.score[2] == 30 && all_params_default()) rogueviz::rv_achievement("ADSGAME");
+    #endif
     }
   playSound(nullptr, rsrc_sound[rsrc]);
   }

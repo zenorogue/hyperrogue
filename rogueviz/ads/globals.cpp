@@ -250,4 +250,6 @@ void load_hiscores();
 string get_main_help();
 int generate_mouseovers();
 
+bool all_params_default();
+
 }}

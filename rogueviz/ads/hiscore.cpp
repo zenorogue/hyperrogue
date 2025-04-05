@@ -19,6 +19,7 @@ void fill_gamedata() {
   char buf[128]; strftime(buf, 128, "%c", localtime(&timer)); cur.timerend = buf;
   cur.seconds = int(timer - timerstart);
   for(int a=0; a<3; a++) cur.scores[a] = pdata.score[a];
+  if(main_rock) cur.scores[0] = current.shift;
   shstream hs;
   print(hs, main_rock ? "2 " : "1 ");
   print(hs, DS_(simspeed), " ", DS_(accel), " ", DS_(how_much_invincibility), " ", vid.creature_scale, " ", DS_(missile_rapidity));
@@ -64,11 +65,23 @@ void game_over_with_message(const string& reason) {
   if(pdata.fuel <= 0) cur.deathreason += " while out of fuel";
   if(pdata.ammo <= 0) cur.deathreason += " while out of ammo";
   game_over = true;
+  #if RVCOL
+  if(main_rock && all_params_default())
+    rogueviz::rv_leaderboard("de Sitter", current.shift * 1000, 1, rvlc::ms);
+  if(!main_rock && all_params_default()) {
+    auto& s = pdata.score;
+    string data = lalign(0, s[0], " ", s[1], " ", s[2]);
+    rogueviz::rv_leaderboard("anti de Sitter: total score", s[0] + s[1] + s[2], 1, rvlc::num, data);
+    rogueviz::rv_leaderboard("anti de Sitter: platinum", s[0], 1, rvlc::num, data);
+    rogueviz::rv_leaderboard("anti de Sitter: plasteel", s[1], 1, rvlc::num, data);
+    rogueviz::rv_leaderboard("anti de Sitter: uranium", s[2], 1, rvlc::num, data);
+    }
+  #endif
   }
 
 void save_to_hiscores() {
   if(!main_rock && (pdata.score[0] + pdata.score[1] + pdata.score[2] == 0)) return;
-  if(main_rock && pdata.score[0] < 5) return;
+  if(main_rock && current.shift < 5) return;
   save(cur);
   allsaves.push_back(cur);
   }
