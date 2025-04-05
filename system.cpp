@@ -1456,8 +1456,8 @@ EX void stop_game() {
   camelot::knighted = 0;
   #endif
   // items[itGreenStone] = 100;
-  clearMemory();
   game_active = false;
+  clearMemory();
 #if CAP_DAILY
   if(daily::on)
     daily::turnoff();
