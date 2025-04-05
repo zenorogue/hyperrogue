@@ -99,6 +99,7 @@ void run_ads_game_hooks() {
   rogueviz::rv_hook(anims::hooks_anim, 100, replay_animation);
   rogueviz::rv_hook(hooks_nextland, 0, ads_nextland);
   rogueviz::rv_hook(hooks_music, 100, [] (eLand& l) { l = vctr->land; return false; });
+  specialland = laCrossroads; land_structure = lsNiceWalls;
   }
 
 void run_size_hooks() {
@@ -172,6 +173,7 @@ void default_settings() {
   lps_add(lps_relhell, ccolor::rwalls, 0);
   lps_add(lps_relhell, vid.fov, 150.);
   lps_add(lps_relhell, specialland, laCrossroads);
+  lps_add(lps_relhell, land_structure, lsNiceWalls);
 
   lps_add(lps_relhell_ds_spacetime_klein, pmodel, mdDisk);
 
