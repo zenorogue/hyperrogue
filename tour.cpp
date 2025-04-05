@@ -1100,12 +1100,13 @@ template<class T> void rv_keep(T& variable) {
   on_cleanup_or_next([backup, &variable] { variable = backup; });
   }
 
-template<class T, class U> void rv_hook(hookset<T>& m, int prio, U&& hook) {
+template<class T, class U> auto autoclear_hook(hookset<T>& m, int prio, U&& hook) {
   int p = addHook(m, prio, hook);
-  auto del = [&m, p] {
-    delHook(m, p);
-    };
-  on_cleanup_or_next(del);
+  return [&m, p] { delHook(m, p); };
+  }
+
+template<class T, class U> void rv_hook(hookset<T>& m, int prio, U&& hook) {
+  on_cleanup_or_next(autoclear_hook(m, prio, hook));
   }
 #endif
 
