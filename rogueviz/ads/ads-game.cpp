@@ -199,7 +199,7 @@ void default_settings() {
   lps_add(lps_relhell, cs.haircolor, 0xC0FFC0FF);
   }
 
-void gamedata(hr::gamedata* gd) {
+void gamedata_store(struct hr::gamedata* gd) {
   gd->store(history);
   gd->store(ci_at);
   gd->store(rocks);
@@ -255,7 +255,7 @@ auto shot_hooks =
 + arg::add3("-ads-menu", [] { set_config(); pushScreen(pick_the_game); })
 + arg::add3("-ads-scale", [] { arg::shift(); ld s = arg::argf(); change_scale(s); })
 + arg::add3("-ads-restart", restart)
-+ addHook(hooks_gamedata, 500, gamedata)
++ addHook(hooks_gamedata, 500, gamedata_store)
 + addHook(hooks_configfile, 100, [] {
     param_f(ads_how_much_invincibility, "ads_invinc")
     -> editable(0, TAU, TAU/4, "AdS invincibility time", "How long does the period of invincibility after crashing last, in absolute units.", 'i');
