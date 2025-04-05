@@ -85,7 +85,7 @@ void switch_spacetime() {
     }
 
   View = Id;
-  cwt = centerover = currentmap->gamestart();
+  if(game_active) cwt = centerover = currentmap->gamestart();
   }
 
 bool ads_draw_cell(cell *c, const shiftmatrix& V) {
