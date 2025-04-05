@@ -372,7 +372,7 @@ void pick_level() {
         }
       });
     });
-  dialog::addBack();
+  dialog::addItem(XLAT("play this track"), SDLK_ESCAPE);
   dialog::display();
   }
 
