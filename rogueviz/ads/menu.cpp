@@ -70,7 +70,7 @@ void edit_difficulty() {
   dialog::addBreak(100);
   edit_rsrc();
   
-  if(!main_rock) {
+  if(true) {
     dialog::addBreak(100);
     dialog::addItem(XLAT("scale everything :2"), '!');
     dialog::add_action([] {
