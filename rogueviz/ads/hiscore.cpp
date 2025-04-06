@@ -66,9 +66,9 @@ void game_over_with_message(const string& reason) {
   if(pdata.ammo <= 0) cur.deathreason += " while out of ammo";
   game_over = true;
   #if RVCOL
-  if(main_rock && all_params_default())
+  if(main_rock && no_param_change)
     rogueviz::rv_leaderboard("de Sitter", current.shift * 1000, 1, rvlc::ms);
-  if(!main_rock && all_params_default()) {
+  if(!main_rock && no_param_change) {
     auto& s = pdata.score;
     string data = lalign(0, s[0], " ", s[1], " ", s[2]);
     rogueviz::rv_leaderboard("anti de Sitter: total score", s[0] + s[1] + s[2], 1, rvlc::num, data);

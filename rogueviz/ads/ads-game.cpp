@@ -85,6 +85,7 @@ void restart() {
 
   paused = false;
   ship_pt = 0;
+  no_param_change = all_params_default();
   init_gamedata();
   }
 

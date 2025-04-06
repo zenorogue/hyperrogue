@@ -81,8 +81,11 @@ void edit_difficulty() {
       });
     }
 
-  dialog::addBoolItem(XLAT("all default"), all_params_default(), 'D');
-  dialog::add_action([] { all_params_reset(); restart(); });
+  bool pa = all_params_default();
+  dialog::addSelItem(XLAT("all default"),
+    (pa && !no_param_change) ? XLAT("PARTIAL") : ONOFF(pa), 'd');
+  if(pa)
+    dialog::add_action([] { all_params_reset(); restart(); });
 
   dialog::addBack();
   dialog::display();

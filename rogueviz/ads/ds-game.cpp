@@ -345,6 +345,7 @@ bool ds_turn(int idelta) {
   if(!(cmode & sm::NORMAL)) return false;
 
   ds_handle_crashes();
+  if(no_param_change && !all_params_default()) no_param_change = false;
 
   auto& act = multi::action_states[1];
 
@@ -396,7 +397,7 @@ bool ds_turn(int idelta) {
     if(mshift) {
       #if RVCOL
       constexpr ld win_time = 60;
-      if(current.shift < win_time && (current.shift + mshift) >= win_time && !game_over && all_params_default())
+      if(current.shift < win_time && (current.shift + mshift) >= win_time && !game_over && no_param_change)
         rogueviz::rv_achievement("DSGAME");
       #endif
       current.shift += mshift;
@@ -741,6 +742,7 @@ void ds_restart() {
     }
 
   ship_pt = 0;
+  no_param_change = all_params_default();
 
   rocks.clear();
   history.clear();

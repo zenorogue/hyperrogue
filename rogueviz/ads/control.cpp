@@ -153,12 +153,13 @@ ld read_movement() {
 bool ads_turn(int idelta) {
   multi::handleInput(idelta, multi::scfg_default);
   ld delta = idelta / 1000.;
-  
+
   if(!(cmode & sm::NORMAL)) return false;
-  
+
   hybrid::in_actual([&] {
 
   handle_crashes();
+  if(no_param_change && !all_params_default()) no_param_change = false;
 
   auto& act = multi::action_states[1];
 

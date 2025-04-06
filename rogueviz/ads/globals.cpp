@@ -251,6 +251,8 @@ string get_main_help();
 int generate_mouseovers();
 
 bool all_params_default();
+bool no_param_change;
+bool params_changed();
 
 void start_relhell_tour();
 
