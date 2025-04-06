@@ -2,6 +2,11 @@ namespace hr {
 
 namespace ads_game {
 
+void restart() {
+  if(main_rock) ds_restart();
+  else ads_restart();
+  }
+
 void adjust_for_scale() {
   ld ads_scale = get_scale();
   if(ads_scale < 0.3) max_gen_per_frame = 1, draw_per_frame = 30;
@@ -211,8 +216,7 @@ void game_menu() {
   dialog::add_action([] {
     game_over_with_message("restarted");
     save_to_hiscores();
-    if(main_rock) ds_restart();
-    else restart();
+    restart();
     popScreen(); });
 
   dialog::addItem(XLAT("highscores"), 'h');
