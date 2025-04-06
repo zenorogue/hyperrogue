@@ -60,11 +60,11 @@ void set_default_keys() {
   multi::change_default_key(lps_relhell, 'l', 16 + 15);
   }
 
-void restart() {
+void ads_sub_restart() {
 
   if(in_spacetime()) {
     switch_spacetime();
-    restart();
+    ads_sub_restart();
     switch_spacetime();
     return;
     }
@@ -87,6 +87,15 @@ void restart() {
   ship_pt = 0;
   no_param_change = all_params_default();
   init_gamedata();
+  }
+
+void ads_restart() {
+  bool b = in_spacetime();
+  stop_game();
+  run_ads_game();
+  // to ensure correct LPS, switch reverse first
+  switch_spacetime_to(!b);
+  switch_spacetime_to(b);
   }
 
 void run_ads_game_hooks() {
@@ -140,7 +149,7 @@ void run_ads_game() {
   pmodel = mdDisk;
   cwt.at = centerover = currentmap->gamestart();
 
-  restart();
+  ads_sub_restart();
   }
 
 void add_ads_cleanup() {

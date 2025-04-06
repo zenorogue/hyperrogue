@@ -256,4 +256,7 @@ bool params_changed();
 
 void start_relhell_tour();
 
+void ads_restart();
+void run_ads_game();
+
 }}
