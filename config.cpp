@@ -3256,7 +3256,7 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
   param_f(vid.creature_scale, parameter_names("creature_scale", "3d-creaturescale"), 1)
     ->editable(0, 1, .1, "Creature scale", "", 'C')
     ->set_extra([] { dialog::addInfo(XLAT("changing this during shmup is counted as cheating")); })
-    ->set_reaction([] { if(shmup::on) cheater++; });
+    ->set_reaction([] { propagate_scale_change(); if(shmup::on) cheater++; });
   param_f(vid.height_width, parameter_names("heiwi", "3d-heightwidth"), 1.5)
     ->editable(0, 1, .1, "Height to width", "", 'h');
   param_f(vid.yshift, parameter_names("yshift", "Y shift"), 0)

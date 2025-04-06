@@ -1449,6 +1449,27 @@ EX void check_cgi() {
 
   }
 
+EX void propagate_scale_change() {
+
+  auto affect = [] (auto& alt_cgip, const auto& switcher) {
+    auto gi = alt_cgip;
+    bool changed = false;
+    switcher([&] {
+      check_cgi();
+      changed = gi != cgip;
+      if(changed && (gi->state & 1)) cgi.require_basics();
+      if(changed && (gi->state & 2)) cgi.require_shapes();
+      gi = alt_cgip = cgip;
+      });
+    alt_cgip = gi;
+    if(changed) switcher(propagate_scale_change);
+    };
+
+  if(mhybrid) affect(hybrid::underlying_cgip, [] (const auto& f) { hybrid::in_underlying_geometry(f); });
+  if(hybrid::pmap) affect(hybrid::pcgip, [] (const auto& f) { hybrid::in_actual(f); });
+  if(fake::in()) affect(fake::underlying_cgip, [] (const auto& f) { fake::in_underlying_geometry(f); });
+  }
+
 void clear_cgis() {
   printf("clear_cgis\n");
   for(auto& p: cgis) if(&p.second != &cgi) { cgis.erase(p.first); return; }
