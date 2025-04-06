@@ -1562,7 +1562,7 @@ EX void clearCellMemory() {
     if(allmaps[i])
       delete allmaps[i];
   allmaps.clear();
-  currentmap = nullptr;
+  currentmap = nullptr; hybrid::pmap = nullptr; fake::pmap = nullptr; gp::pmap = nullptr;
   last_cleared = NULL;
   saved_distances.clear();
   dists_computed.clear();
