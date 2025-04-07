@@ -376,7 +376,7 @@ void raygen::compute_which_and_dist(int flat1, int flat2) {
     else if(in_h2xe() && hybrid::underlying == gBinaryTiling)
       fmain += "for(int i=0; i<=4; i++) if(i == 0 || i == 4) {";
     else
-      fmain += "for(int i="+its(flat1)+"; i<"+(gproduct ? "sides-2" : ((WDIM == 2 || is_subcube_based(variation) || intra::in) && !bt::in()) ? "sides" : its(flat2))+"; i++) {\n";
+      fmain += "for(int i="+its(flat1)+"; i<"+(gproduct ? "sides-2" : ((WDIM == 2 || is_subcube_based(variation) || intra::in || geometry == gOctTet3) && !bt::in()) ? "sides" : its(flat2))+"; i++) {\n";
 
     fmain += "    mediump mat4 m = " + getM("walloffset+i") + ";\n";
 

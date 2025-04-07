@@ -755,7 +755,7 @@ enum eGeometry {
   gHalfBring,
   gAperiodicHat,
   gSierpinski3, gSierpinski4, gSixFlake, gMengerSponge, gSierpinskiTet,
-  gAperiodicSpectre,
+  gAperiodicSpectre, gOctTet3,
   gGUARD};
 
 enum eGeometryClass { gcHyperbolic, gcEuclid, gcSphere, gcSol, gcNIH, gcSolN, gcNil, gcProduct, gcSL2 };
@@ -972,6 +972,7 @@ EX vector<geometryinfo> ginf = {
   {"{4,3,4}","none",    "Menger sponge",                              "S8",       6, 4, qFRACTAL,  giEuclid3, {{10, 10}}, eVariation::pure},
   {"rh{4,3,4}","none",  "Sierpiński tetrahedron",                     "S4b",     12, 3, qFRACTAL,  giEuclid3, {{10, 10}}, eVariation::pure},
   {"spectre","none",    "aperiodic spectre",                          "spectre", 14, 3, qAPERIODIC | qHAT,  giEuclid2, {{7, 7}}, eVariation::pure},
+  {"ot{4,3,4}","none",  "octahedral-tetrahedral honeycomb",           "ot434",    8, 3, qOPTQ,     giEuclid3, {{7, 5}}, eVariation::pure},
   };
   // bits: 9, 10, 15, 16, (reserved for later) 17, 18
 

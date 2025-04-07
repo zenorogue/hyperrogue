@@ -4207,6 +4207,7 @@ EX int get_darkval(cell *c, int d) {
   const int darkval_kite[12] = {0, 2, 0, 2, 4, 4, 6, 6, 6, 6, 6, 6};
   const int darkval_nil[8] = {6,6,0,3,6,6,0,3};
   const int darkval_nih[11] = {0,2,0,2,4,6,6,6,6,6,6};
+  const int darkval_ot[8] = {0,1,2,3,6,5,4,3};
   #if MAXMDIM >= 4
   if(among(variation, eVariation::dual_subcubes, eVariation::bch, eVariation::bch_oct, eVariation::coxeter)) {
     int v = reg3::get_face_vertex_count(c, d);
@@ -4219,6 +4220,7 @@ EX int get_darkval(cell *c, int d) {
   if(euclid && S7 == 14) return darkval_e14[d];
   if(geometry == gHoroHex) return darkval_hh[d];
   if(geometry == gHoroRec) return darkval_hrec[d];
+  if(geometry == gOctTet3) return darkval_ot[d + (shvid(c) == 2 ? 4 : 0)];
   if(kite::in()) return darkval_kite[d];
   if(asonov::in()) return darkval_arnold[d];
   if(sol) return darkval_sol[d];
@@ -4487,7 +4489,7 @@ EX subcellshape& generate_subcellshape_if_needed(cell *c, int id) {
 int hrmap::wall_offset(cell *c) {
   int id = currentmap->full_shvid(c);
 
-  if(WDIM == 3 && !mhybrid && !reg3::in()) return 0;
+  if(WDIM == 3 && !mhybrid && !reg3::in() && geometry != gOctTet3) return 0;
 
   if(isize(cgi.walloffsets) <= id) cgi.walloffsets.resize(id+1, {-1, nullptr});
   auto &wop = cgi.walloffsets[id];

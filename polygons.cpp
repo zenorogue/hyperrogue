@@ -1067,7 +1067,7 @@ void geometry_information::create_wall3d() {
     walloffsets.clear();
     }
 
-  else if(reg3::in() && !PURE) {
+  else if((reg3::in() && !PURE) || geometry == gOctTet3) {
     int tot = 0;
     for(auto& ss: cgi.subshapes) tot += isize(ss.faces);
     reserve_wall3d(tot);

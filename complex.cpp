@@ -3652,7 +3652,7 @@ EX namespace windmap {
       // cw.spin = 0;
       neighbors.emplace_back();
       auto &v = neighbors.back();
-      if(NONSTDVAR && !sphere && !arcm::in() && !mhybrid && !INVERSE && WDIM == 2)
+      if(NONSTDVAR && !sphere && !arcm::in() && !mhybrid && !INVERSE && WDIM == 2 && geometry != gOctTet3)
         for(int l=0; l<S7; l++) {
           v.push_back(getId(cw + cth + l + wstep + cth));
           }

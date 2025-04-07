@@ -1627,6 +1627,7 @@ EX void initConfig() {
   param_f(sightranges[gECell120], "sight-120cell-elliptic", M_PI);
   param_f(sightranges[gRhombic3], "sight-rhombic", 10.5 * emul);
   param_f(sightranges[gBitrunc3], "sight-bitrunc", 12 * emul);
+  param_f(sightranges[gOctTet3], "sight-octtet", 12 * emul);
   param_f(sightranges[gSpace534], "sight-534", 4 + bonus);
   param_f(sightranges[gSpace435], "sight-435", 3.8 + bonus);
 

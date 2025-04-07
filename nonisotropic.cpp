@@ -1696,6 +1696,11 @@ EX namespace hybrid {
     });
   
   EX vector<pair<int, cell*>> gen_sample_list() {
+    if(geometry == gOctTet3) {
+      auto c = centerover;
+      if(currentmap->shvid(c)) c = c->cmove(0);
+      return {make_pair(0, c), make_pair(8, c->cmove(4)), make_pair(12, c->cmove(0)), make_pair(16, nullptr)};
+      }
     if(!mhybrid && WDIM != 2 && PURE)
       return {make_pair(0, centerover), make_pair(centerover->type, nullptr)};
     vector<pair<int, cell*>> result;
