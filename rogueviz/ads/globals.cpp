@@ -198,10 +198,12 @@ struct ads_object {
   ld life_start, life_end;
   cross_result pt_main;
   vector<cross_result> pts;
+  int subtype;
 
   ads_object(eObjType t, cell *_owner, const ads_matrix& T, color_t _col) : type(t), owner(_owner), at(T), col(_col) {
     life_start = -HUGE_VAL;
     life_end = HUGE_VAL;
+    subtype = 0;
     }
   };
 

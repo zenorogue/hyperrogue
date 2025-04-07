@@ -113,7 +113,7 @@ struct rock_generator {
     ld step = rand_range(0.17, 0.23);
     for(int i=0; i<45; i++) {
       cshift += step;
-      add(spin(alpha + i * TAU / 30) * div_matrix());
+      add(spin(alpha + i * TAU / 30) * div_matrix())->subtype = 1;
       }
     cshift += rand_range(.3, .7);
     }
@@ -125,7 +125,7 @@ struct rock_generator {
     ld step = rand_range(0.17, 0.23);
     for(int i=0; i<45; i++) {
       cshift += step;
-      add(spin(alpha + i * TAU / 30) * conv_matrix());
+      add(spin(alpha + i * TAU / 30) * conv_matrix())->subtype = 2;
       }
     cshift += rand_range(.3, .7);
     }
@@ -213,6 +213,8 @@ struct rock_generator {
 rock_generator rockgen, rsrcgen;
 
 auto future_shown = 5 * TAU;
+
+auto future_shown_condiv = 2 * TAU;
 
 /** start with a fixed good-looking sequence */
 bool demo;
@@ -526,8 +528,8 @@ void view_ds_game() {
       poly_outline = 0xFF;
       if(rock.type == oMainRock) rock.at.shift = current.shift;
     
-      if(rock.at.shift < current.shift - future_shown) continue;
-      if(rock.at.shift > current.shift + future_shown) continue;
+      if(current.shift < rock.at.shift - (rock.subtype == 1 ? future_shown_condiv : future_shown)) continue;
+      if(current.shift > rock.at.shift + (rock.subtype == 2 ? future_shown_condiv : future_shown)) continue;
 
       if(1) {
         dynamicval<eGeometry> g(geometry, gSpace435);
