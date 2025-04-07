@@ -2334,6 +2334,7 @@ struct raycast_map {
 
   int saved_frameid;
   int saved_map_version;
+  int saved_darken;
   
   vector<cell*> lst;
   map<cell*, int> ids;
@@ -2630,6 +2631,7 @@ struct raycast_map {
   void create_all(cell *cs) {
     saved_frameid = frameid;
     saved_map_version = mapeditor::map_version;
+    saved_darken = darken;
     generate_initial_ms(cs);
     generate_cell_listing(cs);
     apply_shape();
@@ -2639,6 +2641,7 @@ struct raycast_map {
   bool need_to_create(cell *cs) {
     if(!fixed_map && frameid != saved_frameid) return true;
     if(saved_map_version != mapeditor::map_version) return true;
+    if(darken != saved_darken) return true;
     return !ids.count(cs);
     }
   };
