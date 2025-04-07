@@ -79,6 +79,13 @@ void straight_line_viz(presmode mode) {
     });
   }
 
+void ds_restart_scaled() {
+  check_cgi();
+  cgi.require_basics();
+  cgi.require_shapes();
+  ds_restart();
+  }
+
 void set_spacerocks_ship() {
   auto& cs = getcs();
   tour::slide_backup(cs.charid, 10);
@@ -125,7 +132,7 @@ slide relhell_tour[] = {
         tour::slide_backup(pconf.scale, sca);
         tour::slide_backup(texture_off, true);
         dynamicval<ld> fs(future_shown, -10);
-        ds_restart();
+        ds_restart_scaled();
 
         rockgen.cshift = 0;
 
@@ -163,7 +170,7 @@ slide relhell_tour[] = {
         tour::slide_backup(pconf.scale, sca);
         tour::slide_backup(texture_off, true);
         dynamicval<ld> fs(future_shown, -10);
-        ds_restart();
+        ds_restart_scaled();
 
         rockgen.cshift = 0;
 
@@ -205,7 +212,7 @@ slide relhell_tour[] = {
         tour::slide_backup(texture_off, true);
         tour::slide_backup(view_proper_times, true);
         dynamicval<ld> fs(future_shown, -10);
-        ds_restart();
+        ds_restart_scaled();
 
         rockgen.cshift = 10;
         });
