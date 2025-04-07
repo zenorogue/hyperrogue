@@ -609,12 +609,11 @@ void view_ds_game() {
 
       if(view_proper_times && rock.type != oParticle) {
         ld t = rock.pt_main.shift;
-        ld ds_scale = get_scale();
         if(rock.type == oMainRock) t += current.shift;
         string str = hr::format(tformat, t / ds_time_unit);
-        queuestr(shiftless(sphereflip * rgpushxto0(rock.pt_main.h)), time_scale * ds_scale, str, 0xFFFF00, 8);
+        queuestr(shiftless(sphereflip * rgpushxto0(rock.pt_main.h)), time_scale, str, 0xFFFF00, 8);
         }
-      
+
       if(rock.pt_main.h[2] > 0.1 && rock.life_end == HUGE_VAL) {
         displayed.push_back(&rock);
         }
@@ -670,8 +669,7 @@ void view_ds_game() {
 
       if(view_proper_times) {
         string str = hr::format(tformat, (cr.shift + ss.start) / ds_time_unit);
-        ld ds_scale = get_scale();
-        queuestr(shiftless(sphereflip * rgpushxto0(cr.h)), time_scale * ds_scale, str, 0xC0C0C0, 8);
+        queuestr(shiftless(sphereflip * rgpushxto0(cr.h)), time_scale, str, 0xC0C0C0, 8);
         }
       }
 
@@ -699,9 +697,8 @@ void view_ds_game() {
       poly_outline = 0xFF;
 
       if(view_proper_times) {
-        ld ds_scale = get_scale();
         string str = hr::format(tformat, ship_pt / ds_time_unit);
-        queuestr(shiftless(sphereflip), time_scale * ds_scale, str, 0xFFFFFF, 8);
+        queuestr(shiftless(sphereflip), time_scale, str, 0xFFFFFF, 8);
         }
       }
     
