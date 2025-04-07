@@ -670,6 +670,11 @@ EX namespace euc {
     eu.twisted = eu_input.twisted;
     if(dim == 3) {
       auto &T0 = eu.user_axes;
+      // for OctTet3 just force all divisible by 4, for simplicity
+      if(g == gOctTet3)
+        for(int a=0; a<3; a++) for(int b=0; b<3; b++)
+          if(T0[a][b] & 3)
+            eu.twisted = 0;
       if(valid_third_turn(eu.user_axes)) {
         eu.twisted &= 16;
         if(g == gRhombic3 && (T0[2][2]&1)) eu.twisted = 0;
