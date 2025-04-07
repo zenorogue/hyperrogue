@@ -331,6 +331,9 @@ auto shot_hooks =
     param_i(draw_per_frame, "ads_draw_per_frame")
     -> editable(0, 3000, 0.1, "tiles to draw per frame", "reduce if the framerate is low", 'D');
 
+    param_f(time_scale, "rh_time_scale")
+    -> editable(0, 1, 0.1, "Relative Hell time label scale", "scaling factor for the time labels", 'T');
+
     param_i(XSCALE, "ds_xscale")
     -> editable(4, 512, 8, "x precision of Earth-de Sitter", "", 'x');
     param_i(YSCALE, "ds_yscale")

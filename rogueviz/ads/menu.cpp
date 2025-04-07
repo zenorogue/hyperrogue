@@ -205,6 +205,9 @@ void game_menu() {
   add_edit(pause_speed);
   add_edit(view_proper_times);
   add_edit(DS_(time_unit));
+  if(view_proper_times)
+    add_edit(time_scale);
+  else dialog::addBreak(100);
 
   dialog::addItem(XLAT("set view mode"), 'v');
   dialog::add_action_push(edit_view_mode);
