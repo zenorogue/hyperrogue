@@ -250,6 +250,7 @@ void change_scale(ld s) {
   rock_density /= (s * s);
   rock_max_rapidity *= s;
   ads_simspeed *= s;
+  ds_accel *= s;
   pconf.scale /= s;
   ads_how_much_invincibility *= s;
   ads_max_pdata.oxygen *= s;
