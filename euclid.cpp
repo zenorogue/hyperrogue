@@ -589,7 +589,7 @@ EX namespace euc {
     auto cat = compute_cat(x);
     auto& st = cubemap()->shifttable;
     while(!hash.count(cat)) {
-      if(index == isize(seq)) throw hr_exception();
+      if(index == isize(seq)) throw hr_exception("no cat in hash");
       auto v = seq[index++];
       for(auto s: st) add(v + s);
       }
