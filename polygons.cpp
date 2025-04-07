@@ -1078,6 +1078,7 @@ void geometry_information::create_wall3d() {
         make_wall(0, id++, face);
       }
     hassert(id == tot);
+    wallstart.push_back(isize(raywall));
     compute_cornerbonus();
     return;
     }
