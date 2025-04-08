@@ -575,4 +575,15 @@ EX vector<string> split_string(const string& s, char sep) {
   return res;
   }
 
+map<string, int> last_rlerr;
+int err_freq = 10000;
+
+EX void rate_limited_error(const string& s, const string& t IS("")) {
+  auto& last = last_rlerr[s];
+  if(!last || ticks > last + err_freq) {
+    last = ticks;
+    println(hlog, s, t);
+    }
+  }
+
 }

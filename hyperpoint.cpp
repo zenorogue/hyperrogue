@@ -1122,7 +1122,7 @@ EX ld det(const transmatrix& T) {
 
 /** warning about incorrect inverse */
 void inverse_error(const transmatrix& T) {
-  println(hlog, "Warning: inverting a singular matrix: ", T);
+  rate_limited_error("Warning: inverting a singular matrix", lalign(0, ": ", T));
   }
 
 /** inverse of a 3x3 matrix */
