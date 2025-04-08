@@ -685,7 +685,7 @@ slide relhell_tour[] = {
       latex_slide(mode, defs+R"=(
    {\color{remph}de Sitter spacetime:}
    \begin{itemize} 
-   \item $\dS{2} = \{(x,y,z,t) \in \bbE^{3,1}: \\ x^2+y^2+z^2-t^2=-1\}$
+   \item $\dS{2} = \{(x,y,z,t) \in \bbE^{3,1}: \\ x^2+y^2+z^2-t^2=1\}$
    \item take $t=0$ -- we get $\bbS^2$
    \item the universe is expanding with $t$ \\ (not if we apply Lorentz transformation)
    \end{itemize}
