@@ -1,8 +1,3 @@
-// TO DO
-// * knives in Asteroids sometimes do not hit rocks
-// * in Asteroids use the Relative Hell imagery
-// * visualize the 'Spherical symmetry' slide
-
 namespace hr {
 
 namespace ads_game {
