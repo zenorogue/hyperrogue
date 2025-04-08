@@ -82,7 +82,7 @@ struct player_data {
   };
 
 ld ads_how_much_invincibility = TAU / 4;
-ld ds_how_much_invincibility = TAU / 4;
+ld ds_how_much_invincibility = TAU / 8;
 
 player_data pdata, ads_max_pdata, ads_tank_pdata, ds_max_pdata, ds_tank_pdata;
 
