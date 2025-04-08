@@ -5903,6 +5903,9 @@ EX void gamescreen() {
   }
 
 EX void emptyscreen() {
+  check_cgi();
+  cgi.require_shapes();
+  make_actual_view();
   ptds.clear();
   ray::in_use = false;
   drawqueue();
