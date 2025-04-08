@@ -234,6 +234,18 @@ void return_geometry() {
   addMessage(XLAT("Returned to your game."));
   }
 
+EX void return_geometries() {
+  while(gamestack::pushed()) return_geometry();
+  }
+
+EX void stop_tour() {
+  if(!tour::on) return;
+  while(gamestack::pushed()) return_geometry();
+  presentation(pmStop);
+  slide_restore_all();
+  tour::on = false;
+  }
+
 EX bool next_slide() {
   flagtype flags = slides[currentslide].flags;
   popScreenAll();
@@ -574,11 +586,6 @@ EX void start() {
   pmodel = mdDisk;
   if(!tour::on) {
     initialize_slides();
-    }
-  else {
-    presentation(pmStop);
-    stop_game();
-    firstland = specialland = laIce;
     }
   restart_game(rg::tour);
   if(tour::on) {

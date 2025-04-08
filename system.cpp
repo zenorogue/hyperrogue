@@ -1547,13 +1547,6 @@ EX void set_variation(eVariation target) {
     }
   }
 
-void stop_tour() {
-  while(gamestack::pushed()) {
-    gamestack::pop();
-    stop_game();
-    }
-  }
-
 EX void switch_game_mode(char switchWhat) {
   DEBBI(DF_INIT, ("switch_game_mode ", switchWhat));
   switch(switchWhat) {
@@ -1566,7 +1559,6 @@ EX void switch_game_mode(char switchWhat) {
       break;
 
     case rg::dualmode:
-      stop_tour(); tour::on = false;
       racing::on = false;
       yendor::on = tactic::on = princess::challenge = false;
       bow::weapon = bow::wBlade;
@@ -1592,7 +1584,6 @@ EX void switch_game_mode(char switchWhat) {
 
 #if CAP_TOUR
     case rg::tour:
-      if(tour::on) stop_tour();
       geometry = gNormal;
       yendor::on = tactic::on = princess::challenge = peace::on = inv::on = false;
       dual::disable();
@@ -1603,7 +1594,6 @@ EX void switch_game_mode(char switchWhat) {
       gp::param = gp::loc(1, 1);
       #endif
       shmup::on = false;
-      tour::on = !tour::on;
       racing::on = false;
       break;
 #endif
@@ -1626,7 +1616,6 @@ EX void switch_game_mode(char switchWhat) {
       racing::on = !racing::on;
       shmup::on = racing::on;
       peace::on = false;
-      tour::on = false;
       inv::on = false;
       yendor::on = false;
       land_structure = racing::on ? lsSingle : lsNiceWalls;
@@ -1738,6 +1727,12 @@ EX void start_game() {
 // popAllScreens + popAllGames + stop_game + switch_game_mode + start_game
 EX void restart_game(char switchWhat IS(rg::nothing)) {
   popScreenAll();
+  stop_game_and_switch_mode(switchWhat);
+  start_game();
+  }
+
+// stop_game + switch_game_mode
+EX void stop_game_and_switch_mode(char switchWhat IS(rg::nothing)) {
   #if CAP_RACING
   if(switchWhat == rg::nothing && racing::on) {
     racing::restore_goals();
@@ -1746,15 +1741,12 @@ EX void restart_game(char switchWhat IS(rg::nothing)) {
     return;
     }
   #endif
+  bool b = (switchWhat == rg::tour && !tour::on);
+  if(tour::on && among(switchWhat, rg::racing, rg::tour, rg::dualmode))
+    tour::stop_tour();
   stop_game();
   switch_game_mode(switchWhat);
-  start_game();
-  }
-
-// stop_game + switch_game_mode
-EX void stop_game_and_switch_mode(char switchWhat IS(rg::nothing)) {
-  stop_game();
-  switch_game_mode(switchWhat);
+  if(b) tour::on = true;
   }
 
 EX purehookset hooks_clearmemory;
