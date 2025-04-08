@@ -500,7 +500,11 @@ slide relhell_tour[] = {
     },
 
   {"Euclidean geometry", 999, LEGAL::NONE | QUICKGEO | USE_SLIDE_NAME | NOTITLE,
-    "explanation",
+    "OK, so let us think what the Euclidean geometry is.\n\n"
+    "Let us focus on three-dimensional Euclidean geometry. "
+    "We need to define what points are in our space, and how to compute distances between them. "
+    "This, in turns, let us define 'isometries' (rotations, etc.) which are basically transformations of "
+    "the space that keep the distance.\n\nThis template will be also used in other geometries.",
     [] (presmode mode) {
       setCanvas(mode, &ccolor::chessboard, [] { set_geometry(gEuclidSquare); set_variation(eVariation::pure); });
       latex_slide(mode, defs+R"=(
@@ -519,7 +523,14 @@ slide relhell_tour[] = {
       }},
 
   {"Minkowski geometry", 999, LEGAL::NONE | QUICKGEO | USE_SLIDE_NAME | NOTITLE, 
-    "explanation",
+    "The Minkowski geometry is similar to Euclidean geometry, except that in the squared distance formula, "
+    "the square of the time difference has a different sign. Thus, we have different isometries, which "
+    "can turn space to time and vice versa, just like Euclidean rotations turned X to Y and vice versa. "
+    "Because of the different sign, these 'Lorentz transformations' work different -- for example, they are not based on sin and cos, "
+    "but sinh and cosh.\n\n"
+    "Just like Euclidean geometry, Minkowski geometry is maximally symmetric: spacetime directions can be classified as space-like (squared distance > 0), "
+    "light-like (squared distance = 0) and time-like (squared distance < 0), but if we have a point and direction, we have an isometry that "
+    "takes it into any other point and direction of the same type.",
     [] (presmode mode) {
       latex_slide(mode, defs+R"=(
    {\color{remph}Minkowski spacetime with 2 space and 1 time dimension:}
@@ -560,7 +571,12 @@ slide relhell_tour[] = {
       }},
 
   {"spherical geometry", 999, LEGAL::NONE | QUICKGEO | USE_SLIDE_NAME | NOTITLE, 
-    "explanation",
+    "Now, let us discuss how spherical and hyperbolic geometries are obtained. Spherical "
+    "is quite straightforward: we get the spherical geometry by restricting to the set of points "
+    "in distance 1 from the chosen center, and also distances are the arc lengths. Just like "
+    "Euclidean and Minkowski geometry, spherical geometry is maximally symmetric: every point and "
+    "every direction works the same.\n\n"
+    "The next slide gives a similar description of hyperbolic geometry.",
     [] (presmode mode) {
       setCanvas(mode, &ccolor::football, [] { set_geometry(gSphere); });
       if(mode == pmStart) {
@@ -580,7 +596,14 @@ slide relhell_tour[] = {
       }},    
 
   {"hyperbolic geometry", 999, LEGAL::NONE | QUICKGEO | USE_SLIDE_NAME | NOTITLE,
-    "explanation",
+    "To get hyperbolic geometry, we also restrict to the set of points in the same squared distance, "
+    "but now we start with Minkowski geometry, and the 'squared radius' is negative (time-like). "
+    "The obtained maximally symmetric manifold thus loses its time-like dimension and is purely a space.\n\n"
+    "Therefore, in this model, every point in two-dimensional hyperbolic space is described with three "
+    "coordinates. This may look scary, but actually is very similar to how spherical geometry works, "
+    "we just need to use sinh and cosh, not sin and cos. The usual 3D graphics "
+    "also employ an extra coordinate, and it is straightforward to apply 3D engines to work with "
+    "spherical and hyperbolic geometry too, using these models.",
     [] (presmode mode) {
       latex_slide(mode, defs+R"=(
    {\color{remph}2-dimensional hyperbolic space (Minkowski hyperboloid model):}
@@ -602,7 +625,13 @@ slide relhell_tour[] = {
       }},
 
   {"anti-de Sitter spacetime", 999, LEGAL::NONE | QUICKGEO | USE_SLIDE_NAME | NOTITLE,
-    "explanation",
+    "Here is how we add a time coordinate to the hyperbolic plane, in order to get 2+1D anti-de Sitter spacetime. "
+    "As you can see, the construction is quite similar, and again, we get a maximally symmetric spacetime.\n\n"
+    "Press 5 for an animated visualization of this construction. Initially you see the hyperbolic plane at time 0 (u=0, t>0). "
+    "First '5' adds the different time slices to the visualization, and the second '5' unwraps it into the universal cover.\n\n"
+    "Note: the construction is quite similar to that of the Thurston geometry 'universal cover of SL(2,R)' -- in fact, Relative Hell "
+    "uses the RogueViz implementation of that space. However, the angular coordinate becomes time-like, making our spacetime to be "
+    "much more symmetric, and the geodesics work in a much more intuitive way.",
     [] (presmode mode) {
       latex_slide(mode, defs+R"=(
    {\color{remph}anti-de Sitter spacetime:}
