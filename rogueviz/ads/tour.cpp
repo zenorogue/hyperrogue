@@ -127,7 +127,7 @@ slide relhell_tour[] = {
         const ld sca = 100;
         tour::slide_backup(ds_simspeed, M_PI / 10 / sca * 5);
         tour::slide_backup(ds_missile_rapidity, 0.1);
-        tour::slide_backup(vid.creature_scale, vid.creature_scale / sca);
+        tour::slide_backup(vid.creature_scale, 1 / sca);
         tour::slide_backup(pconf.scale, sca);
         tour::slide_backup(texture_off, true);
         dynamicval<ld> fs(future_shown, -10);
@@ -164,7 +164,7 @@ slide relhell_tour[] = {
         tour::slide_backup(ds_simspeed, M_PI / 10 / sca * 5);
         tour::slide_backup(ds_missile_rapidity, 0.5);
         tour::slide_backup(ds_accel, ds_accel * 10);
-        tour::slide_backup(vid.creature_scale, vid.creature_scale / sca);
+        tour::slide_backup(vid.creature_scale, 1 / sca);
         tour::slide_backup(pconf.scale, sca);
         tour::slide_backup(texture_off, true);
         dynamicval<ld> fs(future_shown, -10);
@@ -204,7 +204,7 @@ slide relhell_tour[] = {
         tour::slide_backup(ds_simspeed, M_PI / 10 / sca * 5);
         tour::slide_backup(ds_missile_rapidity, 0.5);
         tour::slide_backup(ds_accel, ds_accel * 10);
-        tour::slide_backup(vid.creature_scale, vid.creature_scale * 5 / sca);
+        tour::slide_backup(vid.creature_scale, 5 / sca);
         tour::slide_backup(pconf.scale, sca);
         tour::slide_backup(texture_off, true);
         tour::slide_backup(view_proper_times, true);
