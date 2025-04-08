@@ -17,6 +17,8 @@ void set_default_keys();
 
 vector<unique_ptr<ads_object>> rocks;
 
+bool disable_ds_gen;
+
 struct rock_generator {
   ld cshift;
 
@@ -190,10 +192,12 @@ struct rock_generator {
     }
 
   void add_until(ld t) {
+    if(disable_ds_gen) return;
     while(cshift < t) add_random();
     }
 
   void add_rsrc_until(ld t) {
+    if(disable_ds_gen) return;
     while(cshift < t) {
       ld rapidity = rand_range(0, 3);
       ld step = rand_range(.2, .5);

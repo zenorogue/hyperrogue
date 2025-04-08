@@ -126,6 +126,8 @@ slide relhell_tour[] = {
     "Such effects can be also observed in this slide, although you still need to wait for a long time or move very fast. They will be more pronounced in Relative Hell, and in the later slides.",
     [] (presmode mode) {
       setCanvas(mode, &ccolor::plain, [] {
+        add_ds_cleanup();
+        rogueviz::on_cleanup_or_next([] { lps_enable(nullptr); });
         ads_game::run_ds_game_std();
         const ld sca = 100;
         tour::slide_backup(ds_simspeed, M_PI / 10 / sca * 5);
@@ -149,10 +151,6 @@ slide relhell_tour[] = {
 
         rockgen.cshift = 10;
         });
-      if(mode == pmStart) {
-        add_ds_cleanup();
-        rogueviz::on_cleanup_or_next([] { lps_enable(nullptr); });
-        }
       }
     },
 
@@ -164,6 +162,8 @@ slide relhell_tour[] = {
     "the previous slide.",
     [] (presmode mode) {
       setCanvas(mode, &ccolor::plain, [] {
+        rogueviz::on_cleanup_or_next([] { lps_enable(nullptr); });
+        add_ds_cleanup();
         ads_game::run_ds_game_std();
         const ld sca = 100;
         tour::slide_backup(ds_simspeed, M_PI / 10 / sca * 5);
@@ -194,10 +194,6 @@ slide relhell_tour[] = {
 
         rockgen.cshift = 10;
         });
-      if(mode == pmStart) {
-        add_ds_cleanup();
-        rogueviz::on_cleanup_or_next([] { lps_enable(nullptr); });
-        }
       }
     },
 
@@ -206,6 +202,8 @@ slide relhell_tour[] = {
     "Try to accelerate, then return to the yellow star. Your clock will be different than the clock of the star.",
     [] (presmode mode) {
       setCanvas(mode, &ccolor::plain, [] {
+        rogueviz::on_cleanup_or_next([] { lps_enable(nullptr); });
+        add_ds_cleanup();
         ads_game::run_ds_game_std();
         const ld sca = 100;
         tour::slide_backup(ds_simspeed, M_PI / 10 / sca * 5);
@@ -215,16 +213,14 @@ slide relhell_tour[] = {
         tour::slide_backup(pconf.scale, sca);
         tour::slide_backup(texture_off, true);
         tour::slide_backup(view_proper_times, true);
+        tour::slide_backup(time_scale, 0.15);
+        tour::slide_backup(disable_ds_gen, true);
         dynamicval<ld> fs(future_shown, -10);
         ds_restart_scaled();
         tour::slide_backup(invincibility_pt, HUGE_VAL);
 
         rockgen.cshift = 10;
         });
-      if(mode == pmStart) {
-        add_ds_cleanup();
-        rogueviz::on_cleanup_or_next([] { lps_enable(nullptr); });
-        }
       }
     },
 
@@ -317,12 +313,10 @@ slide relhell_tour[] = {
 
     [] (presmode mode) {
       setCanvas(mode, &ccolor::plain, [] {
-        ads_game::run_ds_game_std();
-        });
-      if(mode == pmStart) {
         add_ds_cleanup();
         rogueviz::on_cleanup_or_next([] { lps_enable(nullptr); });
-        }
+        ads_game::run_ds_game_std();
+        });
       }
     },
 
@@ -385,6 +379,7 @@ slide relhell_tour[] = {
 
     [] (presmode mode) {
       setCanvas(mode, &ccolor::plain, [] {
+        rogueviz::on_cleanup_or_next([] { lps_enable(nullptr); });
         ads_game::run_ads_game_std();
         /* disable everything */
         tour::slide_backup(pconf.alpha, 1);
@@ -433,6 +428,7 @@ slide relhell_tour[] = {
 
     [] (presmode mode) {
       setCanvas(mode, &ccolor::plain, [] {
+        rogueviz::on_cleanup_or_next([] { lps_enable(nullptr); });
         ads_game::run_ads_game_std();
         /* disable everything */
         tour::slide_backup(pconf.alpha, 0);
@@ -462,6 +458,7 @@ slide relhell_tour[] = {
 
     [] (presmode mode) {
       setCanvas(mode, &ccolor::plain, [] {
+        rogueviz::on_cleanup_or_next([] { lps_enable(nullptr); });
         ads_game::run_ads_game_std();
         tour::slide_backup(pconf.alpha, 1);
         rv_hook(hooks_pre_ads_start, 100, [] {
@@ -483,6 +480,7 @@ slide relhell_tour[] = {
 
     [] (presmode mode) {
       setCanvas(mode, &ccolor::plain, [] {
+        rogueviz::on_cleanup_or_next([] { lps_enable(nullptr); });
         ads_game::run_ads_game_std();
        });
       }
