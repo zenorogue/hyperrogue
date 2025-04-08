@@ -675,7 +675,12 @@ slide relhell_tour[] = {
       }},
 
   {"de Sitter spacetime", 999, LEGAL::NONE | QUICKGEO | USE_SLIDE_NAME | NOTITLE,
-    "explanation",
+    "And here is how we add a time coordinate to 2D spherical geometry, to get 2+1D de Sitter spacetime. "
+    "The construction is actually very similar to three-dimensional hyperbolic plane, but now the "
+    "'squared radius' is space-like. So we get a maximally symmetric spacetime again.\n\n"
+    "Again, you see the slice t=0 -- press '5' to see how the universe expands, and '5' again to see how "
+    "it looks from the point of view of an inhabitant -- the whole 'sphere' does not expand.",
+
     [] (presmode mode) {
       latex_slide(mode, defs+R"=(
    {\color{remph}de Sitter spacetime:}
