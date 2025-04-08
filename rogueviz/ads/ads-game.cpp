@@ -187,6 +187,7 @@ void default_settings() {
   lps_add(lps_relhell, vid.fov, 150.);
   lps_add(lps_relhell, specialland, laCrossroads);
   lps_add(lps_relhell, land_structure, lsNiceWalls);
+  lps_add(lps_relhell, vid.creature_scale, 1);
 
   lps_add(lps_relhell_ds_spacetime_klein, pmodel, mdDisk);
 
