@@ -7,6 +7,8 @@ namespace hr {
 
 namespace ads_game {
 
+extern purehookset hooks_pre_ads_start;
+
 namespace ads_tour {
 using namespace rogueviz::pres;
 
@@ -462,6 +464,12 @@ slide relhell_tour[] = {
       setCanvas(mode, &ccolor::plain, [] {
         ads_game::run_ads_game_std();
         tour::slide_backup(pconf.alpha, 1);
+        rv_hook(hooks_pre_ads_start, 100, [] {
+          tour::slide_backup(specialland, laHunting);
+          tour::slide_backup(firstland, laHunting);
+          tour::slide_backup(land_structure, lsSingle);
+          });
+        ads_game::ads_restart();
        });
       }
     },

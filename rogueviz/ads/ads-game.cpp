@@ -98,6 +98,8 @@ void ads_restart() {
   switch_spacetime_to(b);
   }
 
+purehookset hooks_pre_ads_start;
+
 void run_ads_game_hooks() {
   rogueviz::rv_hook(hooks_global_mouseover, 100, generate_mouseovers);
   rogueviz::rv_change<color_t>(titlecolor, 0);
@@ -129,6 +131,7 @@ void run_ads_game() {
   run_size_hooks();
   hybrid::reconfigure(); // we need to reconfigure to take scalefactor change into account
   run_ads_game_hooks();
+  callhooks(hooks_pre_ads_start);
   start_game();
 
   starting_point = hybrid::get_where(cwt.at).first;
