@@ -182,12 +182,10 @@ void draw_game_cell(const cell_to_draw& cd) {
       queuestr(shiftless(rgpushxto0(rock.pt_main.h)), time_scale, str, 0xFFFFFF, 8);
       }
     }
-  
-  /* todo: binary search */
-  if(paused || which_cross) for(auto& rock: ci.shipstates) {
-    cross_result cr;
 
-    if(hv) render_ship_parts([&] (const hpcshape& sh, color_t col, int sym) {
+  if(paused || which_cross) if(hv) for(auto& rock: ci.shipstates) {
+
+    render_ship_parts([&] (const hpcshape& sh, color_t col, int sym) {
       int dx = sym ? -1 : 1;
       for(int i=sh.s; i<sh.e; i++) {
         auto h = twist::uxpush(cgi.hpc[i][0]) * twist::uypush(cgi.hpc[i][1] * dx) * C0;
@@ -200,17 +198,34 @@ void draw_game_cell(const cell_to_draw& cd) {
       queuecurve(S, col, 0, PPR::LINE);
       });
 
-    if(hv) continue;
+    }
+
+  if(paused || which_cross) if(!hv && !ci.shipstates.empty()) {
+    cross_result cr;
+
+    int lo = 0, hi = isize(ci.shipstates)-1;
+    while(lo < hi) {
+      auto med = (lo + hi + 1) / 2;
+      hybrid::in_actual([&]{
+        dynamicval<eGeometry> b(geometry, gTwistedProduct);
+        auto h = V * ci.shipstates[med].at;
+        cr = cross0(current * h);
+        });
+      if(cr.shift < -1e-6) hi = med - 1;
+      else lo = med;
+      }
+
+    auto& rock = ci.shipstates[lo];
 
     hybrid::in_actual([&]{
       dynamicval<eGeometry> b(geometry, gTwistedProduct);
       auto h = V * rock.at;
       cr = cross0(current * h);
       });
-        
-    if(cr.shift < -1e-6 || cr.shift > rock.duration + 1e-6) continue;
 
-    render_ship_parts([&] (const hpcshape& sh, color_t col, int sym) {
+    bool ok = cr.shift >= -1e-6 && cr.shift < rock.duration + 1e-6;
+
+    if(ok) render_ship_parts([&] (const hpcshape& sh, color_t col, int sym) {
       int dx = sym ? -1 : 1;
       vector<hyperpoint> pts;
       for(int i=sh.s; i<sh.e; i++) {
@@ -225,12 +240,12 @@ void draw_game_cell(const cell_to_draw& cd) {
       queuecurve(shiftless(Id), 0xFF, col, PPR::MONSTER_FOOT);
       });
 
-    if(view_proper_times) {
+    if(ok && view_proper_times) {
       string str = hr::format(tformat, (cr.shift + rock.start) / ads_time_unit);
       queuestr(shiftless(rgpushxto0(cr.h)), time_scale, str, 0xC0C0C0, 8);
       }
     }
-  
+
   if(paused && c == vctr_ship && !game_over && !in_replay && !hv) {
     cross_result cr;
     hybrid::in_actual([&]{
