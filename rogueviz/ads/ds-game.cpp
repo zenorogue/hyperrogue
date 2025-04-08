@@ -236,6 +236,9 @@ void init_ds_game() {
   main_rock->shape = &shape_gold;
   main_rock->type = oMainRock;
 
+  // do not shift time
+  main_rock->pt_main.shift = 0;
+
   /* also create shape_disk */
   shape_disk.clear();
   for(int d=0; d<=360; d += 15) {
