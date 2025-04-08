@@ -677,9 +677,9 @@ void view_ds_game() {
 
     if(!game_over && !paused) {
       poly_outline = 0xFF;
-      if(ship_pt < invincibility_pt) {
+      if(ship_pt < invincibility_pt && invincibility_pt < HUGE_VAL) {
         ld u = (invincibility_pt-ship_pt) / ds_how_much_invincibility;
-        poly_outline = gradient(shipcolor, rsrc_color[rtHull], 0, 0.5 + cos(5*u*TAU), 1);
+        poly_outline = gradient(shipcolor, rsrc_color[rtHull], 1, cos(5*u*TAU), -1);
         }
       render_ship_parts([&] (const hpcshape& sh, color_t col, int sym) {
         if(hv) {

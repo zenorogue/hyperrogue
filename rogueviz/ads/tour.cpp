@@ -133,6 +133,7 @@ slide relhell_tour[] = {
         tour::slide_backup(texture_off, true);
         dynamicval<ld> fs(future_shown, -10);
         ds_restart_scaled();
+        tour::slide_backup(invincibility_pt, HUGE_VAL);
 
         rockgen.cshift = 0;
 
@@ -171,6 +172,7 @@ slide relhell_tour[] = {
         tour::slide_backup(texture_off, true);
         dynamicval<ld> fs(future_shown, -10);
         ds_restart_scaled();
+        tour::slide_backup(invincibility_pt, HUGE_VAL);
 
         rockgen.cshift = 0;
 
@@ -213,6 +215,7 @@ slide relhell_tour[] = {
         tour::slide_backup(view_proper_times, true);
         dynamicval<ld> fs(future_shown, -10);
         ds_restart_scaled();
+        tour::slide_backup(invincibility_pt, HUGE_VAL);
 
         rockgen.cshift = 10;
         });
