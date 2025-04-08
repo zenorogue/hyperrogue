@@ -184,7 +184,7 @@ void draw_game_cell(const cell_to_draw& cd) {
     }
   
   /* todo: binary search */
-  if(paused) for(auto& rock: ci.shipstates) {
+  if(paused || which_cross) for(auto& rock: ci.shipstates) {
     cross_result cr;
 
     if(hv) render_ship_parts([&] (const hpcshape& sh, color_t col, int sym) {
