@@ -80,6 +80,7 @@ void editmap_frame() {
     dialog::display();
     });
   if(keypressed('f')) floodfill(mousepx / block_x, mousepy / block_y);
+  if(keypressed('t')) { m.where_x = mousepx; m.where_y = mousepy; m.vel_x = 0; m.vel_y = 0; }
   }
 
 void playing_frame() {
@@ -198,7 +199,7 @@ void run() {
       if(cmode == mode::playing) sync_map();
       render_the_map();
       if(cmode == mode::editmap) dialog::add_key_action('p', [] { println(hlog, "p pressed"); switch_mapmode_to(mapmode::poincare); });
-      if(cmode == mode::editmap) mouseovers = format("coordinates: %d %d", mousepx, mousepy);
+      if(cmode == mode::editmap) mouseovers = format("coordinates: %d %d (%.2lf)", mousepx, mousepy, double(get_scale_at(mousepy)));
       break;
 
     case mode::inventory:

@@ -30,6 +30,8 @@ void entity::apply_grav() {
 void entity::kino() {
   on_floor = false;
   on_ice = false;
+  wallhug = false;
+  on_bounce = false;
 
   // ld modv = 60. / game_fps;
 
@@ -45,8 +47,9 @@ void entity::kino() {
   for(int x = obb.minx; x < obb.maxx; x++) for(int y = obb.maxy; y < jbb.maxy; y++) {
     eWall b = current_room->at(x, y);
     if(walls[b].flags & blocking) {
+      if(walls[b].flags & W_BOUNCY) { vel_y = -vel_y; on_bounce = true; goto again; }
       on_floor = true;
-      if(b == wFrozen) on_ice = true;
+      if(walls[b].flags & W_FROZEN) on_ice = true;
       vel_y /= 2;
       if(abs(vel_y) < 1e-6) vel_y = 0;
       if(freezing()) {
@@ -85,6 +88,7 @@ void entity::kino() {
     if(walls[b].flags & W_BLOCK) {
       if(freezing()) { hit_wall(); }
       vel_x = (vel_x - max<ld>(vel_y, 0)/10) / 2;
+      wallhug = true;
       goto again;
       }
    }
@@ -98,6 +102,7 @@ void entity::kino() {
     if(walls[b].flags & W_BLOCK) {
       if(freezing()) { hit_wall(); }
       vel_x = (vel_x + max<ld>(vel_y, 0)/10) / 2;
+      wallhug = true;
       goto again;
       }
     }

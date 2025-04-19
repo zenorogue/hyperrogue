@@ -115,6 +115,7 @@ void load_room(fhstream& f, cell *c) {
         b->id = -1;
         for(int i=0; i<isize(powers); i++) if(powers[i].name == s) b->id = i;
         if(b->id == -1) println(hlog, "error: unknown item name ", s), b->id = 0;
+        b->pickup_message = scanline_noblank(f);
         r.entities.emplace_back(std::move(b)); 
         }
       else println(hlog, "unknown mapline ", s);

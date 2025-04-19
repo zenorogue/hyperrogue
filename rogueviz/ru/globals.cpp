@@ -58,16 +58,18 @@ flagtype W_TRANS = 2;
 flagtype W_PLATFORM = 4;
 flagtype W_STAIRCASE = 8;
 flagtype W_PAIN = 16;
+flagtype W_BOUNCY = 32;
+flagtype W_FROZEN = 64;
 
 constexpr int qwall = 14;
 
 ruwall walls[qwall] = {
   {"air", ".", 0x40404080, W_TRANS},
   {"wall", "#", 0xFFFFFFFF, W_BLOCK},
-  {"bouncy wall", "#", 0x80FF80FF, W_BLOCK},
+  {"bouncy wall", "#", 0x80FF80FF, W_BLOCK | W_BOUNCY},
   {"spike", "^", 0xC08080FF, W_BLOCK | W_TRANS},
   {"water", "~", 0x0000FFFF, W_BLOCK | W_TRANS},
-  {"frozen water", "#", 0xC0C0FFFF, W_BLOCK},
+  {"frozen water", "#", 0xC0C0FFFF, W_BLOCK | W_FROZEN},
   {"door", "+", 0xC06000FF, W_BLOCK},
   {"smashed door", "'", 0xC06000FF, W_TRANS},
   {"magic fountain", "!", 0x8080C0FF, W_TRANS},

@@ -1,11 +1,13 @@
 namespace rogue_unlike {
 
+/** a helper structure to mass to powerfun */
 struct data {
   int keystate;
   double d;
   ld modv;
   ld moda;
   int dx;
+  struct power *p;
   };
 
 using powerfun = hr::function<void(data&)>;
@@ -13,12 +15,15 @@ using powerfun = hr::function<void(data&)>;
 struct power {
   int key;
   string name;
+  string xname;
   string desc;
   string glyph;
   color_t color;
   flagtype flags;
   powerfun pf;
+  int id_status;
   power(int key, string name, string desc, string glyph, color_t color, flagtype f, powerfun pf) : key(key), name(name), desc(desc), glyph(glyph), color(color), flags(f), pf(pf) {
+    id_status = 0;
     }
   };
 
@@ -132,9 +137,7 @@ struct entity {
 
   virtual double grav() { return 0.1; }  
 
-  bool on_floor;
-  bool fallthru;
-  bool on_ice;
+  bool on_floor, fallthru, on_ice, wallhug, on_bounce;
 
   bool destroyed;
   void kino();
@@ -156,6 +159,11 @@ struct man : public entity {
   int facing;
   int attack_facing;
   int attack_when;
+
+  int on_floor_when;
+  int jump_control, next_jump_control;
+  int coyote_time, next_coyote_time;
+
   man() { facing = 1; attack_facing = 1; }
   double sx() override { return 12; }
   double sy() override { return 12; }
@@ -176,13 +184,15 @@ struct sage : public entity {
 
 struct item : public entity {
   int id;
+  string pickup_message;
   double sx() override { return 12; }
   double sy() override { return 12; }
   string glyph() override { return powers[id].glyph; }
   color_t color() override { return powers[id].color; }
   void act() override {
+    kino();
     if(intersect(get_pixel_bbox(), m.get_pixel_bbox())) {
-      addMessage("You pick up the " + powers[id].name + ".");
+      addMessage(pickup_message);
       destroyed = true;
       }
     }

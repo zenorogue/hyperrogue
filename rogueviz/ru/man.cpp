@@ -11,15 +11,21 @@ void man::act() {
   dat.moda = dat.modv * dat.modv;
   dat.dx = 0;  
 
+  coyote_time = next_coyote_time; next_coyote_time = 0;
+  jump_control = next_jump_control; next_jump_control = 0;
+
+  if(on_floor) on_floor_when = gframeid;
+
   fallthru = false;
    
   handle_powers(dat);
 
-  if(on_floor && !on_ice) {
+  if((on_floor || jump_control || wallhug) && !on_ice) {
     vel_x = dat.dx * dat.d * dat.modv * 2.5;
     }
-  else {
-    vel_x += dat.dx * dat.d * .05 * dat.moda;
+
+  if(on_bounce) {
+    vel_x += dat.dx * dat.d * dat.modv * 0.02;
     }
 
   if(dat.dx) facing = dat.dx;
