@@ -370,10 +370,12 @@ EX ld asin_auto_clamp(ld x) {
     }
   }
 
+EX ld acosh_clamp(ld x) { return x < 1 ? 0 : acosh(x); }
+
 EX ld acos_auto_clamp(ld x) {
   switch(cgclass) {
-    case gcHyperbolic: return x < 1 ? 0 : acosh(x);
-    case gcSL2: return x < 1 ? 0 : acosh(x);
+    case gcHyperbolic: return acosh_clamp(x);
+    case gcSL2: return acosh_clamp(x);
     case gcSphere: return acos_clamp(x);
     case gcProduct: return PIU(acos_auto_clamp(x));
     default: return x;
