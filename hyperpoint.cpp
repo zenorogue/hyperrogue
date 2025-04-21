@@ -340,6 +340,15 @@ EX ld area_auto(ld r) {
     }
   }
 
+EX ld inverse_area_auto(ld vol) {
+  switch(cgclass) {
+    case gcEuclid: return sqrt(vol / M_PI);
+    case gcHyperbolic: return acosh_clamp(vol / TAU + 1);
+    case gcSphere: return acos_clamp(1 - vol / TAU);
+    default: return 0;
+    }
+  }
+
 /** \brief volume in 3D, area in 2D */
 EX ld wvolarea_auto(ld r) {
   if(WDIM == 3) return volume_auto(r);
