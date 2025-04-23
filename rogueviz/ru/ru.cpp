@@ -175,11 +175,21 @@ void render_the_map() {
       draw_room();
       drawmessages();
       nomsg = false;
+      if(1) {
+        ld& scale = scrm.T[0][0];
+        mousepx = (mousex - current_display->xcenter) * 2 / scale / current_display->radius + screen_x/2;
+        mousepy = (mousey - current_display->ycenter) * 2 / scale / current_display->radius + screen_y/2;
+        }
       dialog::add_key_action('v', [] { cmode = mode::menu; });
       break;
     case mapmode::poincare:
     case mapmode::klein:
       gamescreen();
+      if(!mouseout() && mouseover && rooms.count(mouseover)) {
+        current_room = &rooms[mouseover];
+        auto h = inverse_shift(ggmatrix(current_room->where), mouseh);
+        tie(mousepx, mousepy) = from_hyper(h);
+        }
       if(cmode == mode::editmap) {
         getcstat = '-';
         dialog::add_key_action('-', [] { if(!mouseover) return; current_room = &rooms[mouseover]; switch_mapmode_to(mapmode::standard); });
