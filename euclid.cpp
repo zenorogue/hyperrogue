@@ -351,7 +351,7 @@ EX namespace euc {
     int shvid(cell *c) override {
       if(geometry == gOctTet3)
         return octtet_shvid(ispacemap[c->master]);
-      return 0;
+      return hrmap_standard::shvid(c);
       }
 
     transmatrix ray_iadj(cell *c, int i) override {
