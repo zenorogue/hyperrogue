@@ -349,10 +349,39 @@ EX ld inverse_area_auto(ld vol) {
     }
   }
 
+EX ld inverse_volume_euc(ld vol) {
+  return pow(vol * 3/4/M_PI, 1/3.);
+  }
+
+EX ld inverse_volume_auto(ld vol) {
+  switch(cgclass) {
+    case gcEuclid: return inverse_volume_euc(vol);
+    case gcHyperbolic: {
+      ld r = vol < 10 ? inverse_volume_euc(vol) : asinh(vol/M_PI)/2;
+      if(r>0) for(int i=0; i<5; i++) r += (vol - volume_auto(r)) / (4 * M_PI * pow(sinh(r), 2));
+      return r;
+      }
+    case gcSphere: {
+      if(vol <= 0) return 0;
+      if(vol >= TAU * M_PI) return M_PI;
+      ld r = vol < M_PI ? inverse_volume_euc(vol) : vol > TAU * M_PI - M_PI ? M_PI - inverse_volume_euc(TAU*M_PI-vol) : vol / TAU;
+      if(sin(r)) for(int i=0; i<5; i++) r += (vol - volume_auto(r)) / (4 * M_PI * pow(sin(r), 2));
+      return r;
+      }
+    default: return 0;
+    }
+  }
+
 /** \brief volume in 3D, area in 2D */
 EX ld wvolarea_auto(ld r) {
   if(WDIM == 3) return volume_auto(r);
   else return area_auto(r);
+  }
+
+/** \brief volume in 3D, area in 2D -- inverse */
+EX ld inverse_wvolarea_auto(ld r) {
+  if(WDIM == 3) return inverse_volume_auto(r);
+  else return inverse_area_auto(r);
   }
 
 EX ld asin_clamp(ld x) { return x>1 ? 90._deg : x<-1 ? -90._deg : std::isnan(x) ? 0 : asin(x); }
