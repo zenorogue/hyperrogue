@@ -177,6 +177,7 @@ struct list_parameter : parameter {
   virtual int get_value() = 0;
   virtual void set_value(int i) = 0;
   vector<pair<string, string> > options;
+  reaction_t extras;
   list_parameter* editable(const vector<pair<string, string> >& o, string menu_item_name, char key) {
     is_editable = true;
     options = o;
@@ -186,6 +187,11 @@ struct list_parameter : parameter {
     return this;
     }
   void show_edit_option(key_type key) override;
+  list_parameter* add_extra(reaction_t r) {
+    if(extras) { auto e = extras; extras = [e, r] { e(); r(); }; }
+    else extras = r;
+    return this;
+    }
   };
 
 namespace anims {
@@ -4069,6 +4075,8 @@ void list_parameter::show_edit_option(key_type key) {
       dialog::addHelp(XLAT(text));
       dialog::addBreak(100);
       }
+
+    if(extras) extras();
     dialog::addBack();
     dialog::display();
     };
