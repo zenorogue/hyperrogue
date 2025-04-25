@@ -996,7 +996,7 @@ EX void set_column(transmatrix& T, int i, const hyperpoint& H) {
     T[j][i] = H[j];
   }
 
-EX hyperpoint get_column(transmatrix& T, int i) {
+EX hyperpoint get_column(const transmatrix& T, int i) {
   hyperpoint h;
   for(int j=0; j<MXDIM; j++)
     h[j] = T[j][i];
