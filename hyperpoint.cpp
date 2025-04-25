@@ -1991,4 +1991,25 @@ EX bool same_point_may_warn(hyperpoint a, hyperpoint b) {
   return true;
   }
 
+/** compute the area of a shape -- v.back() must equal v[0] */
+EX ld compute_area(const vector<hyperpoint>& v) {
+  ld area = 0;
+  for(int i=0; i<v.size()-1; i++) {
+    hyperpoint h1 = v[i];
+    hyperpoint h2 = v[i+1];
+    if(euclid)
+      area += (h2[1] + h1[1]) * (h2[0] - h1[0]) / 2;
+    else {
+      hyperpoint rh2 = gpushxto0(h1) * h2;
+      hyperpoint rh1 = gpushxto0(h2) * h1;
+      ld b1 = atan2(rh1[1], rh1[0]);
+      ld b2 = atan2(rh2[1], rh2[0]);
+      ld x = b2 - b1 + M_PI;
+      cyclefix(x, 0);
+      area += x;
+      }
+    }
+  return area;
+  }
+
 }

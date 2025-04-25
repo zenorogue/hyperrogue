@@ -2209,30 +2209,9 @@ EX namespace mapeditor {
 
   ld compute_area(hpcshape& sh) {
     ld area = 0;
-    for(int i=sh.s; i<sh.e-1; i++) {
-      hyperpoint h1 = cgi.hpc[i];
-      hyperpoint h2 = cgi.hpc[i+1];
-      if(euclid)
-        area += (h2[1] + h1[1]) * (h2[0] - h1[0]) / 2;
-      else {
-        hyperpoint rh2 = gpushxto0(h1) * h2;
-        hyperpoint rh1 = gpushxto0(h2) * h1;
-        // ld a1 = atan2(h1[1], h1[0]);
-        // ld a2 = atan2(h2[1], h2[0]);
-        ld b1 = atan2(rh1[1], rh1[0]);
-        ld b2 = atan2(rh2[1], rh2[0]);
-        // C0 -> H1 -> H2 -> C0
-        // at C0: (a1-a2)
-        // at H1: (rh2 - a1 - M_PI)
-        // at H2: (a2+M_PI - rh1)
-        // total: rh2 - rh1
-        // ld z = degree;
-        ld x = b2 - b1 + M_PI;
-        cyclefix(x, 0);
-        area += x;
-        }
-      }
-    return area;
+    vector<hyperpoint> h;
+    for(int i=sh.s; i<sh.e; i++) h.push_back(cgi.hpc[i]);
+    return compute_area(h);
     }
 
 #define EDITING_TRIANGLES (GDIM == 3)
