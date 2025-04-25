@@ -565,8 +565,15 @@ EX namespace gp {
     };
 
   #define corner_coords (S3==3 ? corner_coords6 : corner_coords4)
+
+  EX hookset<bool(const transmatrix& corners, const hyperpoint& c, hyperpoint& h)> hooks_cornmul;
+  EX hookset<void(const transmatrix& corners)> hooks_init_cornmul;
   
-  hyperpoint cornmul(const transmatrix& corners, const hyperpoint& c) {
+  EX hyperpoint cornmul(const transmatrix& corners, const hyperpoint& c) {
+
+    hyperpoint h;
+    if(callhandlers(false, hooks_cornmul, corners, c, h)) return h;
+
     if(sphere && S3 == 3) {
       ld cmin = c[0] * c[1] * c[2] * (6 - S7);
       return corners * point3(c[0] + cmin, c[1] + cmin, c[2] + cmin);
@@ -641,6 +648,7 @@ EX namespace gp {
       set_column(cgi.gpdata->rotator, i, ac);
       }
 
+    callhooks(hooks_init_cornmul, dir_matrix(0));
 
     cgi.gpdata->Tf.resize(S7);
 
@@ -976,6 +984,9 @@ EX namespace gp {
       dialog::addItem(XLAT("dual of current"), 'D');
       dialog::add_action(dual_of_current);
       }
+
+    if(GOLDBERG_INV) add_edit(gp::su);
+    else dialog::addBreak(100);
     
     dialog::addBreak(100);
     dialog::addHelp();
