@@ -4242,7 +4242,7 @@ EX ld mousedist(shiftmatrix T) {
   return sqhypot_d(2, h1) + (point_behind(T1) ? 1e10 : 0);
   }
 
-vector<vector<hyperpoint>> clipping_plane_sets;
+EX vector<vector<hyperpoint>> clipping_plane_sets;
 EX int noclipped;
 
 EX bool frustum_culling = true;
@@ -4255,7 +4255,7 @@ EX bool other_stereo_mode() {
   return vid.stereo_mode != sOFF;
   }
 
-void make_clipping_planes() {
+EX void make_clipping_planes() {
 #if MAXMDIM >= 4
   clip_checked = false;
   if(!frustum_culling || PIU(sphere) || experimental || other_stereo_mode() || gproduct || embedded_plane) return;
@@ -4323,12 +4323,12 @@ void make_clipping_planes() {
 #endif
   }
 
-bool clipped_by(const hyperpoint& H, const vector<hyperpoint>& v) {
+EX bool clipped_by(const hyperpoint& H, const vector<hyperpoint>& v) {
   for(auto& cpoint: v) if((H|cpoint) < -threshold) return true;
   return false;
   }
 
-bool clipped_by(const hyperpoint& H, const vector<vector<hyperpoint>>& vv) {
+EX bool clipped_by(const hyperpoint& H, const vector<vector<hyperpoint>>& vv) {
   for(auto& cps: vv) if(!clipped_by(H, cps)) return false;
   return true;
   }
