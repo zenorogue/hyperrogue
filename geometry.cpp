@@ -1319,7 +1319,9 @@ EX string cgi_string() {
     return s;
     }
   
-  if(GOLDBERG_INV) V("GP", its(gp::param.first) + "," + its(gp::param.second));
+  if(GOLDBERG_INV) {
+    V("GP", its(gp::param.first) + "," + its(gp::param.second)+":"+its(int(gp::su)));
+    }
   if(IRREGULAR) V("IRR", its(irr::irrid));
   #if MAXMDIM >= 4
   if(is_subcube_based(variation)) V("SC", its(reg3::subcube_count));
