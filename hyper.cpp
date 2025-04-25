@@ -53,6 +53,7 @@
 #include "locations.cpp"
 #include "expansion.cpp"
 #include "goldberg.cpp"
+#include "goldberg-sub.cpp"
 #include "irregular.cpp"
 #include "pattern2.cpp"
 #include "flags.cpp"
