@@ -118,6 +118,15 @@ void load_room(fhstream& f, cell *c) {
         b->pickup_message = scanline_noblank(f);
         r.entities.emplace_back(std::move(b)); 
         }
+      else if(cap == "NPC") {
+        auto b = std::make_unique<npc>();
+        sscanf(param.c_str(), "%lf%lf%08x", &b->where_x, &b->where_y, &b->col);
+        s = scanline_noblank(f);
+        b->sglyph = s[0];
+        b->name = s.substr(1);
+        b->text = scanline_noblank(f);
+        r.entities.emplace_back(std::move(b));
+        }
       else println(hlog, "unknown mapline ", s);
       }
     else println(hlog, "unknown mapline ", s);

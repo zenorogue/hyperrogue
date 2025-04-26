@@ -177,11 +177,14 @@ struct man : public entity {
 
 extern man m;
 
-struct sage : public entity {
+struct npc : public entity {
+  string sglyph, name;
+  color_t col;
+  string text;
   double sx() override { return 12; }
   double sy() override { return 12; }
-  string glyph() override { return hallucinating ? "D" : "A"; }
-  color_t color() override { return hallucinating ? 0xFF0000FF : 0x90FF90FF; }
+  string glyph() override { return sglyph; }
+  color_t color() override { return col; }
   };
 
 struct item : public entity {
