@@ -245,7 +245,9 @@ void man::draw() {
 void render_room_objects(room *r) {
   initquickqueue();
   if(r == current_room) m.draw();
-  for(auto& e: r->entities) e->draw();
+  for(auto& e: r->entities)
+    if(e->visible(r))
+      e->draw();
   quickqueue();
   }
 

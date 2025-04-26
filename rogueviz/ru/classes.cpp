@@ -116,6 +116,8 @@ struct entity {
   double gwhere_x, gwhere_y;
   double gvel_x, gvel_y;
 
+  bool visible(room *r);
+
   void clearg() {
     gwhere_x = where_x;
     gwhere_y = where_y;

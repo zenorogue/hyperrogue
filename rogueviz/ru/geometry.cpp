@@ -94,8 +94,21 @@ bbox join(bbox a, bbox b) {
   return r;
   }
 
+bbox room_bb{0, 0, room_x, room_y};
+bbox screen_bb{0, 0, screen_x, screen_y};
+
+bbox get_intersect(bbox a, bbox b) {
+  bbox r;
+  r.minx = max(a.minx, b.minx);
+  r.miny = max(a.miny, b.miny);
+  r.maxx = min(a.maxx, b.maxx);
+  r.maxy = min(a.maxy, b.maxy);
+  return r;
+  }
+
 bool intersect(bbox a, bbox b) {
-  return max(a.minx, b.minx) < min(a.maxx, b.maxx) && max(a.miny, b.miny) < min(a.maxy, b.maxy);
+  auto g = get_intersect(a, b);
+  return g.minx < g.maxx && g.miny < g.maxy;
   }
 
 void print(hstream& hs, const bbox& b) {

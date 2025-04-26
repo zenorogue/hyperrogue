@@ -16,6 +16,12 @@ bbox entity::get_pixel_bbox_at(double x, double y) {
   return b;
   }
 
+bool entity::visible(room *r) {
+  auto bb = get_intersect(pixel_to_block(get_pixel_bbox()), room_bb);
+  for(int y = bb.miny; y < bb.maxy; y++) for(int x = bb.minx; x < bb.maxx; x++) if(r->fov[y][x]) return true;
+  return false;
+  }
+
 void entity::apply_grav() {
 
   if(non_hyperbolic) return apply_portal_grav();
