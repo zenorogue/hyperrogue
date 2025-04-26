@@ -1468,9 +1468,9 @@ template<class T> void affect_scale_change(geometry_information*& alt_cgip, cons
 
 EX void propagate_scale_change() {
 
-  if(mhybrid) affect_scale_change(hybrid::underlying_cgip, [] (const auto& f) { hybrid::in_underlying_geometry(f); });
-  if(hybrid::pmap) affect_scale_change(hybrid::pcgip, [] (const auto& f) { hybrid::in_actual(f); });
-  if(fake::in()) affect_scale_change(fake::underlying_cgip, [] (const auto& f) { fake::in_underlying_geometry(f); });
+  if(mhybrid) affect_scale_change(hybrid::underlying_cgip, [] (reaction_t f) { hybrid::in_underlying_geometry(f); });
+  if(hybrid::pmap) affect_scale_change(hybrid::pcgip, [] (reaction_t f) { hybrid::in_actual(f); });
+  if(fake::in()) affect_scale_change(fake::underlying_cgip, [] (reaction_t f) { fake::in_underlying_geometry(f); });
   }
 
 void clear_cgis() {
