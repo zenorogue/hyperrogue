@@ -194,4 +194,12 @@ void npc::act() {
     }
   }
 
+void hint::act() {
+  bool cur = intersect(get_pixel_bbox(), m.get_pixel_bbox());
+  if(cur && !state) {
+    addMessage(hint_text);
+    }
+  state = cur;
+  }
+
 }

@@ -191,6 +191,17 @@ struct npc : public entity {
   void act() override;
   };
 
+struct hint : public entity {
+  string hint_text;
+  int state;
+  int width, height;
+  double sx() override { return width; }
+  double sy() override { return height; }
+  string glyph() override { return " "; }
+  color_t color() override { return 0; }
+  void act() override;
+  };
+
 struct item : public entity {
   int id;
   string pickup_message;
