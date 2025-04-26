@@ -256,7 +256,7 @@ EX void gen_eclectic_monster(cell *c) {
   else if(c2->wall == waIcewall)
     c->monst = pick(moWolf, moIceGolem);
   
-  else if(c2->wall == waNone && !c2->monst && hrand(100) < 5) {
+  else if(c2->wall == waNone && !c2->monst && hrand(100) < 5 && !shmup::on) {
     cell *c1 = c;
     c1->monst = moPair;
     c2->monst = moPair;
