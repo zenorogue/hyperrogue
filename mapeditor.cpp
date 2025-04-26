@@ -2208,7 +2208,6 @@ EX namespace mapeditor {
   EX bool area_in_pi = false;
 
   ld compute_area(hpcshape& sh) {
-    ld area = 0;
     vector<hyperpoint> h;
     for(int i=sh.s; i<sh.e; i++) h.push_back(cgi.hpc[i]);
     return compute_area(h);
