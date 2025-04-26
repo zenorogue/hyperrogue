@@ -196,8 +196,10 @@ void render_the_map() {
     case mapmode::poincare:
     case mapmode::klein:
       gamescreen();
-      if(!mouseout() && mouseover && rooms.count(mouseover)) {
+      if(!mouseout() && mouseover && rooms.count(mouseover) && anyshiftclick) {
         current_room = &rooms[mouseover];
+        }
+      if(!mouseout()) {
         auto h = inverse_shift(ggmatrix(current_room->where), mouseh);
         tie(mousepx, mousepy) = from_hyper(h);
         }
@@ -207,6 +209,35 @@ void render_the_map() {
         }
       break;
     }
+  }
+
+hyperpoint pentagon_center = Hypc;
+cell *pentagon_at = nullptr;
+ld pentagon_spin = 0;
+
+void draw_pentagon() {
+
+  if(cmapmode == mapmode::standard) return;
+  dialog::add_key_action('P', [] {
+    pentagon_at = mouseover;
+    pentagon_center = inverse_shift(ggmatrix(mouseover), mouseh);
+    });
+  dialog::add_key_action('I', [] { pentagon_spin += 0.01; });
+  dialog::add_key_action('O', [] { pentagon_spin -= 0.01; });
+
+  if(!pentagon_at) return;
+
+  int q = 5;
+  ld e = edge_of_triangle_with_angles(90._deg, M_PI/q, 45._deg);
+  initquickqueue();
+  for(int i=0; i<6; i++) {
+    auto S = ggmatrix(pentagon_at) * rgpushxto0(pentagon_center) * spin(pentagon_spin);
+    vid.linewidth *= 5;
+    queueline(S * xspinpush0(TAU*i/q, e), S * xspinpush0(TAU*(i+1)/q, e), 0xFFD50080, 4);
+    vid.linewidth /= 5;
+    queueline(S * xspinpush0(TAU*i/q, e), S * xspinpush0(TAU*(i+1)/q, e), 0xFFD500FF, 4);
+    }
+  quickqueue();
   }
 
 void run() {
@@ -219,8 +250,12 @@ void run() {
     case mode::paused:
       if(cmode == mode::playing) sync_map();
       render_the_map();
-      if(cmode == mode::editmap) dialog::add_key_action('p', [] { println(hlog, "p pressed"); switch_mapmode_to(mapmode::poincare); });
+      if(cmode == mode::editmap) dialog::add_key_action('p', [] {
+        if(cmapmode == mapmode::poincare) switch_mapmode_to(mapmode::standard);
+        else switch_mapmode_to(mapmode::poincare);
+        });
       if(cmode == mode::editmap) mouseovers = format("coordinates: %d %d (%.2lf)", mousepx, mousepy, double(get_scale_at(mousepy)));
+      draw_pentagon();
       break;
 
     case mode::inventory:
