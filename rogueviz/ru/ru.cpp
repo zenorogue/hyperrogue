@@ -42,14 +42,25 @@ bool last_mkey = false;
 
 extern int mousepx, mousepy;
 
-void floodfill(int x, int y) {
+int lev = 0;
+void floodfill(int x, int y, int src, int tgt) {
+  dynamicval<int> d(lev, lev+1);
+  println(hlog, lev, ": ", tie(x, y));
   if(x < 0 || y < 0 || x >= room_x || y >= room_y) return;
-  if(current_room->block_at[y][x] != 0) return;
-  current_room->place_block_full(x, y, 8 * sel);
-  floodfill(x+1, y);
-  floodfill(x-1, y);
-  floodfill(x, y+1);
-  floodfill(x, y-1);
+  if(y > room_y - b_margin && tgt) return;
+  if(current_room->block_at[y][x] != src) return;
+  current_room->place_block_full(x, y, tgt);
+  floodfill(x+1, y, src, tgt);
+  floodfill(x-1, y, src, tgt);
+  floodfill(x, y+1, src, tgt);
+  floodfill(x, y-1, src, tgt);
+  }
+
+void floodfill_pick(int x, int y) {
+  if(x < 0 || y < 0 || x >= room_x || y >= room_y) return;
+  auto cur = current_room->block_at[y][x];
+  if(cur != 8*sel) floodfill(x, y, cur, 8 * sel);
+  else floodfill(x, y, 8 * sel, 0);
   }
 
 bool last_keystate[KEYSTATES], cur_keystate[KEYSTATES];
@@ -79,7 +90,7 @@ void editmap_frame() {
       }
     dialog::display();
     });
-  if(keypressed('f')) floodfill(mousepx / block_x, mousepy / block_y);
+  if(keypressed('f')) floodfill_pick(mousepx / block_x, mousepy / block_y);
   if(keypressed('t')) { m.where_x = mousepx; m.where_y = mousepy; m.vel_x = 0; m.vel_y = 0; }
   }
 
