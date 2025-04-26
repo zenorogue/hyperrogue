@@ -47,7 +47,14 @@ MAP
 #b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b
 NPC 157 219 404040FF
 @Thief
-There are surely some riches in the Dungeons of Alchemy!
+They say people never leave the Dungeons of Alchemy, but I have overheard some people claiming to work as suppliers for the Dungeon. Apparently there are traders there. And remember, whenever there is a shop, you can steal stuff!
+NPC 257 117 40C040FF
+@Ranger
+So you are going to the Dungeons? You seem so sure of that, so I will not stop you. You just need to go through the curved forest path to the west. Then enter the cave beyond that forest. Inside, there is a huge hole, just jump into it. Good luck!
+HINT 410 257 12 12
+Stay awhile and listen!
+HINT 254 266 12 12
+Hint: to talk to people or to read inscryptions, stay near them for a second.
 OK
 
 MOVE 0 Red Rooster Inn
@@ -98,6 +105,10 @@ MAP
 ##########################--------########################......................
 #b#b#b#b#b#b#b#b#b#b#b#b#b-b-b-b-b#b#b#b#b#b#b#b#b#b#b#b#b......................
 START 344 274
+HINT 306 292 12 12
+Attack the door with your dagger to open it.
+HINT 296 292 12 12
+Collect your dagger and press [key:dagger].
 ITEM 382 287
 dagger
 You collect your trusty dagger from the drawer.
