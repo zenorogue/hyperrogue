@@ -359,7 +359,6 @@ void add_platf_hooks() {
     while(gtime > 1000. / game_fps) {
       gtime -= 1000. / game_fps;
 
-      gframeid++;
       update_keystate();
 
       switch(cmode) {
@@ -368,6 +367,7 @@ void add_platf_hooks() {
           break;
 
         case mode::playing:
+          gframeid++;
           playing_frame();
           break;
 
