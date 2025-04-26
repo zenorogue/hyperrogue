@@ -2023,7 +2023,7 @@ EX bool same_point_may_warn(hyperpoint a, hyperpoint b) {
 /** compute the area of a shape -- v.back() must equal v[0] */
 EX ld compute_area(const vector<hyperpoint>& v) {
   ld area = 0;
-  for(int i=0; i<v.size()-1; i++) {
+  for(int i=0; i<isize(v)-1; i++) {
     hyperpoint h1 = v[i];
     hyperpoint h2 = v[i+1];
     if(euclid)
