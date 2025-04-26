@@ -186,7 +186,7 @@ void npc::act() {
     pushScreen([&] { cmode = mode::playing; popScreen(); });
     pushScreen([&] {
       dialog::init(name, col >> 8);
-      dialog::addInfo(text);
+      dialog::addHelp(text);
       dialog::addBreak(100);
       dialog::addBack();
       dialog::display();
