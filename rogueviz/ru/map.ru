@@ -45,6 +45,9 @@ MAP
 #b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b
 ################################################################################
 #b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b
+NPC 157 219 404040FF
+@Thief
+There are surely some riches in the Dungeons of Alchemy!
 OK
 
 MOVE 0 Red Rooster Inn
