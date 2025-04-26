@@ -244,7 +244,13 @@ auto hookc = addHook(hooks_configfile, 100, config_gpsubs) + arg::add3("-gbs-deb
       }
     vid.linewidth /= 3;
     });
-  });
+  }) + arg::add3("-gbs-ofc", [] {
+    start_game();
+    View = Id;
+    rotate_view(xpush(-cgi.hcrossf));
+    if(S3 == 4) rotate_view(spin(45._deg));
+    playermoved = false;
+    }) + arg::add3("-gbs-areas", [] { println(hlog, "areas = ", compute_all_areas(true)); });
     
 
 }
