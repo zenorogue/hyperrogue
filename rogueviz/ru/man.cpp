@@ -28,6 +28,8 @@ void man::act() {
     vel_x += dat.dx * dat.d * dat.modv * 0.02;
     }
 
+  if(!(on_floor && !dat.dx)) last_action = gframeid;
+
   if(dat.dx) facing = dat.dx;
 
   current_room->fov_from(where_x / block_x, where_y / block_y);

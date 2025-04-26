@@ -264,6 +264,9 @@ void run() {
       dialog::add_key_action('v', [] { cmode = mode::menu; });
       break;
 
+    case mode::talking:
+      break;
+
     case mode::menu:
       nomap = true;
       emptyscreen();

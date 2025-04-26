@@ -178,4 +178,20 @@ void missile::act() {
   if(where_x > screen_x || where_x < 0 || where_y < 0 || where_y > screen_y) destroyed = true;
   }
 
+void npc::act() {
+  kino();
+  if(gframeid > m.last_action + 300 && intersect(get_pixel_bbox(), m.get_pixel_bbox()) && talk_on != m.last_action) {
+    talk_on = m.last_action = gframeid;
+    cmode = mode::talking;
+    pushScreen([&] { cmode = mode::playing; popScreen(); });
+    pushScreen([&] {
+      dialog::init(name, col >> 8);
+      dialog::addInfo(text);
+      dialog::addBreak(100);
+      dialog::addBack();
+      dialog::display();
+      });
+    }
+  }
+
 }

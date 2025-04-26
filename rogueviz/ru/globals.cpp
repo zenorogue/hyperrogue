@@ -116,7 +116,7 @@ extern array<array<location, 256>, 256> all_locations;
 
 enum class mapmode { standard, poincare, klein };
 
-enum class mode { editmap, menu, playing, paused, inventory };
+enum class mode { editmap, menu, playing, paused, inventory, talking };
 
 mode cmode = mode::playing;
 

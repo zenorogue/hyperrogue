@@ -166,6 +166,8 @@ struct man : public entity {
   int jump_control, next_jump_control;
   int coyote_time, next_coyote_time;
 
+  int last_action;
+
   man() { facing = 1; attack_facing = 1; }
   double sx() override { return 12; }
   double sy() override { return 12; }
@@ -181,10 +183,12 @@ struct npc : public entity {
   string sglyph, name;
   color_t col;
   string text;
+  int talk_on;
   double sx() override { return 12; }
   double sy() override { return 12; }
   string glyph() override { return sglyph; }
   color_t color() override { return col; }
+  void act() override;
   };
 
 struct item : public entity {
