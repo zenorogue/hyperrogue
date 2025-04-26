@@ -101,7 +101,9 @@ EX bool collectItem(cell *c2, cell *last, bool telekinesis IS(false)) {
 
   bool dopickup = true;
   bool had_choice = false;
-  
+
+  if(shmup::on && !canmove) return false;
+
   if(cannotPickupItem(c2, telekinesis))
     return false;
 
