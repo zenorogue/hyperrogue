@@ -44,7 +44,7 @@ pair<ld, ld> compute_all_areas(bool recolor) {
   ld mina1 = qty_of_standard.begin()->first;
   ld maxa1 = e1->first;
 
-  if(recolor) for(auto [c, a]: areas) if(c->land == laCanvas) c->landparam = gradient(0xFF0000, 0x0000FF, mina, a, maxa);
+  if(recolor) for(auto& p: areas) if(c->land == laCanvas) p.firs5t->landparam = gradient(0xFF0000, 0x0000FF, mina, p.second, maxa);
 
   return {maxa/mina, maxa1/mina1};
   }
