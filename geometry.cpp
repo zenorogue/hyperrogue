@@ -1451,25 +1451,26 @@ EX void check_cgi() {
 
   }
 
+/** auxiliary for propagate_scale_change */
+template<class T> void affect_scale_change(geometry_information*& alt_cgip, const T& switcher) {
+  auto gi = alt_cgip;
+  bool changed = false;
+  switcher([&] {
+    check_cgi();
+    changed = gi != cgip;
+    if(changed && (gi->state & 1)) cgi.require_basics();
+    if(changed && (gi->state & 2)) cgi.require_shapes();
+    gi = alt_cgip = cgip;
+    });
+  alt_cgip = gi;
+  if(changed) switcher(propagate_scale_change);
+  };
+
 EX void propagate_scale_change() {
 
-  auto affect = [] (geometry_information*& alt_cgip, const auto& switcher) {
-    auto gi = alt_cgip;
-    bool changed = false;
-    switcher([&] {
-      check_cgi();
-      changed = gi != cgip;
-      if(changed && (gi->state & 1)) cgi.require_basics();
-      if(changed && (gi->state & 2)) cgi.require_shapes();
-      gi = alt_cgip = cgip;
-      });
-    alt_cgip = gi;
-    if(changed) switcher(propagate_scale_change);
-    };
-
-  if(mhybrid) affect(hybrid::underlying_cgip, [] (const auto& f) { hybrid::in_underlying_geometry(f); });
-  if(hybrid::pmap) affect(hybrid::pcgip, [] (const auto& f) { hybrid::in_actual(f); });
-  if(fake::in()) affect(fake::underlying_cgip, [] (const auto& f) { fake::in_underlying_geometry(f); });
+  if(mhybrid) affect_scale_change(hybrid::underlying_cgip, [] (const auto& f) { hybrid::in_underlying_geometry(f); });
+  if(hybrid::pmap) affect_scale_change(hybrid::pcgip, [] (const auto& f) { hybrid::in_actual(f); });
+  if(fake::in()) affect_scale_change(fake::underlying_cgip, [] (const auto& f) { fake::in_underlying_geometry(f); });
   }
 
 void clear_cgis() {
