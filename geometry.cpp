@@ -1453,7 +1453,7 @@ EX void check_cgi() {
 
 EX void propagate_scale_change() {
 
-  auto affect = [] (auto& alt_cgip, const auto& switcher) {
+  auto affect = [] (geometry_information*& alt_cgip, const auto& switcher) {
     auto gi = alt_cgip;
     bool changed = false;
     switcher([&] {
