@@ -127,6 +127,11 @@ void load_room(fhstream& f, cell *c) {
         b->text = scanline_noblank(f);
         r.entities.emplace_back(std::move(b));
         }
+      else if(cap == "BOAR") {
+        auto b = std::make_unique<boar>();
+        sscanf(param.c_str(), "%lf%lf", &b->where_x, &b->where_y);
+        r.entities.emplace_back(std::move(b));
+        }
       else if(cap == "HINT") {
         auto b = std::make_unique<hint>();
         sscanf(param.c_str(), "%lf%lf%d%d", &b->where_x, &b->where_y, &b->width, &b->height);

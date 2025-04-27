@@ -212,6 +212,8 @@ MAP
 #b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b
 ################################################################################
 #b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b
+BOAR 256 60
+BOAR 113 255
 ITEM 279 65
 furry ring
 Someone lost a small, weird ring here. Hopefully it will be useful to you.
@@ -262,6 +264,7 @@ MAP
 #b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b
 ################################################################################
 #b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b
+BOAR 348 202
 OK
 
 MOVE 1 Climbing the Hill

@@ -20,15 +20,21 @@ bool entity::visible(room *r) {
   return false;
   }
 
+data entity::get_dat() {
+  data dat;
+  dat.d = get_scale();
+  dat.modv = 60. / game_fps;
+  dat.moda = dat.modv * dat.modv;
+  dat.dx = 0;
+  return dat;
+  }
+
 void entity::apply_grav() {
 
   if(non_hyperbolic) return apply_portal_grav();
 
-  ld modv = 80. / game_fps;
-  ld moda = modv * modv;
-  auto d = get_scale();
-
-  vel_y += d * grav() * moda;
+  auto dat = get_dat();
+  vel_y += dat.d * grav() * dat.moda * 16/9.;
   }
 
 void entity::kino() {
@@ -201,6 +207,36 @@ void npc::act() {
       dialog::display();
       });
     }
+  }
+
+void boar::act() {
+  kino();
+  if(intersect(get_pixel_bbox(), m.get_pixel_bbox())) {
+    addMessage("The wild boar gores you!");
+    int s = where_x < m.where_x ? -1 : 1;
+    m.reduce_hp(15);
+    auto dat = get_dat();
+    auto mdat = m.get_dat();
+    if(m.on_floor) m.vel_x = mdat.d * mdat.modv * -s * 1.5, m.vel_y = -mdat.d * mdat.modv * 2;
+    if(on_floor) vel_x = dat.d * dat.modv * s * 1.5;
+    }
+  if(on_floor) {
+    auto dat = get_dat();
+    if(vel_x > 0) vel_x = max<ld>(vel_x - dat.d * dat.moda * 0.05, 0);
+    if(vel_x < 0) vel_x = min<ld>(vel_x + dat.d * dat.moda * 0.05, 0);
+    if(gframeid > invinc_end) {
+      if(intersect(extend(get_pixel_bbox(), 60 * dat.d, 0, 0, 0), m.get_pixel_bbox())) vel_x -= dat.d * dat.moda * 0.2;
+      if(intersect(extend(get_pixel_bbox(), 0, 60 * dat.d, 0, 0), m.get_pixel_bbox())) vel_x += dat.d * dat.moda * 0.2;
+      }
+    }
+  }
+
+void boar::attacked(int dmg) {
+  reduce_hp(dmg);
+  if(destroyed) addMessage("You kill the wild boar."); else addMessage("You hit the wild boar.");
+  auto dat = get_dat();
+  int s = where_x < m.where_x ? -1 : 1;
+  if(on_floor) vel_x = dat.d * dat.modv * s * 2, vel_y = -dat.d * dat.modv * 2.5;
   }
 
 void hint::act() {

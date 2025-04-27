@@ -97,6 +97,16 @@ bbox join(bbox a, bbox b) {
 bbox room_bb{0, 0, room_x, room_y};
 bbox screen_bb{0, 0, screen_x, screen_y};
 
+bbox extend(bbox a, int l, int r, int u, int d) {
+  a.minx -= l;
+  a.maxx += r;
+  a.miny -= u;
+  a.maxy += d;
+  return a;
+  }
+
+bbox extend_all(bbox a, int x) { return extend(a, x, x, x, x); }
+
 bbox get_intersect(bbox a, bbox b) {
   bbox r;
   r.minx = max(a.minx, b.minx);

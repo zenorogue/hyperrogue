@@ -64,7 +64,9 @@ vector<power> powers = {
     [] (data& d) {
       if(d.keystate != 1) return;
       m.attack_facing = m.facing; m.attack_when = gframeid;
-      auto bb = pixel_to_block(m.get_pixel_bbox_at(m.where_x + m.attack_facing * m.dsx(), m.where_y));
+      auto pb = m.get_pixel_bbox_at(m.where_x + m.attack_facing * m.dsx(), m.where_y);
+      auto bb = pixel_to_block(pb);
+      for(auto& e: current_room->entities) if(intersect(e->get_pixel_bbox(), pb)) e->attacked(15);
       for(int y=bb.miny; y<bb.maxy; y++)
       for(int x=bb.minx; x<bb.maxx; x++) {
         int b = current_room->at(x, y);

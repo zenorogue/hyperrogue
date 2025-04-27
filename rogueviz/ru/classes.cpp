@@ -143,6 +143,8 @@ struct entity {
     hp = max_hp();
     }
 
+  data get_dat();
+
   struct bbox get_pixel_bbox_at(double x, double y);
   struct bbox get_pixel_bbox() { return get_pixel_bbox_at(where_x, where_y); }
 
@@ -161,6 +163,8 @@ struct entity {
   virtual void hit_wall() {};
 
   virtual void draw();
+
+  virtual void attacked(int s) {}
 
   virtual string glyph() = 0;
   virtual color_t color() = 0;
@@ -213,6 +217,16 @@ struct npc : public entity {
   string glyph() override { return sglyph; }
   color_t color() override { return col; }
   void act() override;
+  };
+
+struct boar : public entity {
+  double sx() override { return 18; }
+  double sy() override { return 18; }
+  string glyph() override { return "B"; }
+  color_t color() override { return 0x804000FF; }
+  void act() override;
+  boar() { postfix(); }
+  void attacked(int s) override;
   };
 
 struct hint : public entity {

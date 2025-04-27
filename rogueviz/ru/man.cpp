@@ -5,11 +5,7 @@ void handle_powers(data& d);
 void man::act() {
   kino();
 
-  data dat;
-  dat.d = get_scale();
-  dat.modv = 60. / game_fps;
-  dat.moda = dat.modv * dat.modv;
-  dat.dx = 0;  
+  auto dat = get_dat();
 
   coyote_time = next_coyote_time; next_coyote_time = 0;
   jump_control = next_jump_control; next_jump_control = 0;

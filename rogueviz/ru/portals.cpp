@@ -7,16 +7,14 @@ bool gravision;
 array<array<location, 256>, 256> all_locations;
 
 void entity::apply_portal_grav() {
-  ld modv = 60. / game_fps;
-  ld moda = modv * modv;
-  auto d = get_scale();
+  auto dat = get_dat();
   int bx0 = floor(where_x / block_x);
   int by0 = floor(where_y / block_y);
   auto& loc = all_locations[by0][bx0];
   auto px = (loc.get(0).potential - loc.get(2).potential) * 255 / 2;
   auto py = (loc.get(3).potential - loc.get(1).potential) * 255 / 2;
-  vel_x += d * grav() * moda * px;
-  vel_y += d * grav() * moda * py;  
+  vel_x += dat.d * grav() * dat.moda * px * 16/9.;
+  vel_y += dat.d * grav() * dat.moda * py * 16/9.;  
   }
 
 void load_nonhyperbolic() {
