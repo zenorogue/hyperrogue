@@ -1,7 +1,5 @@
 namespace rogue_unlike {
 
-int gframeid = 0;
-
 man m;
 
 bbox entity::get_pixel_bbox_at(double x, double y) {
@@ -50,6 +48,13 @@ void entity::kino() {
 
   flagtype blocking = (vel_y < 0 || fallthru) ? W_BLOCK : (W_BLOCK | W_PLATFORM);
 
+  auto pain_effect = [&] {
+    if(!hurt_by_spikes()) return false;
+    reduce_hp(10);
+    vel_x = -vel_x; vel_y = -vel_y; apply_grav();
+    return true;
+    };
+
   for(int x = obb.minx; x < obb.maxx; x++) for(int y = obb.maxy; y < jbb.maxy; y++) {
     eWall b = current_room->at(x, y);
     if(walls[b].flags & blocking) {
@@ -65,6 +70,7 @@ void entity::kino() {
       if(pixel_to_block(get_pixel_bbox_at(where_x + vel_x, where_y + vel_y)).maxy <= y) where_y += vel_y; 
       goto again;
       }
+    if((walls[b].flags & W_PAIN) && pain_effect()) goto again;
     }
 
   for(int x = obb.minx; x < obb.maxx; x++) for(int y = jbb.miny; y < obb.miny; y++) {
@@ -75,6 +81,7 @@ void entity::kino() {
       if(pixel_to_block(get_pixel_bbox_at(where_x + vel_x, where_y + vel_y)).miny > y) where_y += vel_y; 
       goto again;
       }
+    if((walls[b].flags & W_PAIN) && pain_effect()) goto again;
     }
 
   if(!fallthru) for(int x = nbb.minx; x < nbb.maxx; x++) for(int y = jbb.maxy-1; y < jbb.maxy; y++) {
@@ -97,6 +104,7 @@ void entity::kino() {
       wallhug = true;
       goto again;
       }
+   if((walls[b].flags & W_PAIN) && pain_effect()) goto again;
    }
   
   for(int x = jbb.minx; x < obb.minx; x++) for(int y = jbb.miny; y < jbb.maxy; y++) {
@@ -111,6 +119,7 @@ void entity::kino() {
       wallhug = true;
       goto again;
       }
+    if((walls[b].flags & W_PAIN) && pain_effect()) goto again;
     }
   
   int bx0 = floor(where_x / block_x);

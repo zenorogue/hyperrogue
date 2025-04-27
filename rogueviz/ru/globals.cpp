@@ -34,6 +34,7 @@ constexpr int actual_screen_x = r_margin_at - l_margin_at;
 constexpr int actual_screen_y = b_margin_at - t_margin_at;
 
 int game_fps = 300;
+int gframeid = 0;
 bool bottom = 1;
 
 constexpr auto yctr = (t_margin_at + b_margin_at) / 2.;  
@@ -67,7 +68,7 @@ ruwall walls[qwall] = {
   {"air", ".", 0x40404080, W_TRANS},
   {"wall", "#", 0xFFFFFFFF, W_BLOCK},
   {"bouncy wall", "#", 0x80FF80FF, W_BLOCK | W_BOUNCY},
-  {"spike", "^", 0xC08080FF, W_BLOCK | W_TRANS},
+  {"spike", "^", 0xC08080FF, W_TRANS | W_PAIN},
   {"water", "~", 0x0000FFFF, W_BLOCK | W_TRANS},
   {"frozen water", "#", 0xC0C0FFFF, W_BLOCK | W_FROZEN},
   {"door", "+", 0xC06000FF, W_BLOCK},

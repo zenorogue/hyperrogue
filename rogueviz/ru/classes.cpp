@@ -116,6 +116,11 @@ struct entity {
   double gwhere_x, gwhere_y;
   double gvel_x, gvel_y;
 
+  int hp;
+  int invinc_end;
+
+  virtual int max_hp() { return 100; }
+
   bool visible(room *r);
 
   void clearg() {
@@ -133,6 +138,10 @@ struct entity {
     destroyed = false;
     clearg();
     };
+
+  void postfix() {
+    hp = max_hp();
+    }
 
   struct bbox get_pixel_bbox_at(double x, double y);
   struct bbox get_pixel_bbox() { return get_pixel_bbox_at(where_x, where_y); }
@@ -155,6 +164,20 @@ struct entity {
 
   virtual string glyph() = 0;
   virtual color_t color() = 0;
+
+  virtual bool hurt_by_spikes() { return false; }
+
+  bool visible_inv() {
+    return (invinc_end < gframeid || (invinc_end - gframeid) % 50 < 25);
+    }
+
+  virtual bool reduce_hp(int x) {
+    if(gframeid < invinc_end) return false;
+    hp -= x;
+    if(hp < 0) destroyed = true;
+    invinc_end = gframeid + 150;
+    return true;
+    }
   };
 
 struct man : public entity {
@@ -168,13 +191,14 @@ struct man : public entity {
 
   int last_action;
 
-  man() { facing = 1; attack_facing = 1; }
+  man() { facing = 1; attack_facing = 1; postfix(); }
   double sx() override { return 12; }
   double sy() override { return 12; }
   string glyph() override { return hallucinating ? "f" : "@"; }
   color_t color() override { return hallucinating ? 0x808080FF : 0xFF8080FF; }
   void act() override; 
   void draw() override;
+  virtual bool hurt_by_spikes() { return true; }
   };
 
 extern man m;
