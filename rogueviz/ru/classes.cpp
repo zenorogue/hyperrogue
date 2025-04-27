@@ -135,7 +135,7 @@ struct entity {
     where_y = screen_y / 2.;
     vel_x = 0;
     vel_y = 0;
-    destroyed = false;
+    destroyed = false; invinc_end = -1;
     clearg();
     };
 
