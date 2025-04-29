@@ -348,7 +348,7 @@ EX bool highwall(cell *c) {
 EX spatial_info get_spatial_info(cell *c) {
   #define F(x) Flag((int) SIDE::x)
   if(cellUnstable(c))
-    return spatial_info{SIDE::INFDEEP, SIDE::INFDEEP, 0};
+    return spatial_info{SIDE::FLOOR, SIDE::FLOOR, 0};
   if(c->wall == waChasm || c->wall == waInvisibleFloor)
     return spatial_info{SIDE::INFDEEP, SIDE::INFDEEP, 0};
   if(c->wall == waBarrier && wmescher && c->land == laOceanWall)
