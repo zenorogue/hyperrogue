@@ -503,9 +503,8 @@ hpcshape
   
   void init_floorshapes();
   void bshape2(hpcshape& sh, PPR prio, int shapeid, struct matrixlist& m);
-  void bshape_regular(floorshape &fsh, int id, int sides, ld shift, ld size, cell *model);
-  void generate_floorshapes_for(int id, cell *c, int siid, int sidir);
-  void generate_floorshapes();
+  void bshape_bt(floorshape &fsh, int id, int sides, ld size, cell *model);
+  void generate_floorshapes_for(int id, cell *c);
   void make_floor_textures_here();
   void finish_apeirogon(hyperpoint center);
 
@@ -553,7 +552,7 @@ hpcshape
     ld alpha;
     int area;
     int pshid[3][8][GOLDBERG_LIMIT][GOLDBERG_LIMIT][8];
-    int nextid;
+    vector<array<int, 5>> id_to_params;
     };
   shared_ptr<gpdata_t> gpdata = nullptr;
   #endif

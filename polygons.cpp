@@ -1164,7 +1164,6 @@ void geometry_information::configure_floorshapes() {
   shMFloor3.prio = PPR::FLOOR_DRAGON;
   shMFloor4.prio = PPR::FLOOR_DRAGON;
   for(int i=0; i<3; i++) shRedRockFloor[i].scale = .9 - .1 * i;
-  generate_floorshapes();
   }
 
 void geometry_information::prepare_shapes() {
