@@ -770,7 +770,7 @@ void celldrawer::draw_wall() {
     for(int z=1; z<layers; z++) {
       double zg = zgrad0(0, geom3::actual_wall_height(), z, layers);
       draw_qfi(c, xyzscale(V, zg*(layers-z)/layers, zg),
-        darkena(gradient(0, wcol_star, -layers, z, layers), 0, 0xFF), PPR::WALL_SIDE);
+        darkena(gradient(0, wcol_star, -layers, z, layers), 0, 0xFF), PPR::WALL_DECO);
       }
     floorShadow(c, V, SHADOW_WALL);
     }
@@ -1075,7 +1075,7 @@ void celldrawer::draw_mirrorwall() {
     else if(wmspatial) {
       const int layers = 2 << detaillevel;
       for(int z=1; z<layers; z++) 
-        queuepolyat(orthogonal_move_fol(V2, zgrad0(0, geom3::actual_wall_height(), z, layers)), cgi.shHalfMirror[ct6], 0xC0C0C080, PPR::WALL_SIDE);
+        queuepolyat(orthogonal_move_fol(V2, zgrad0(0, geom3::actual_wall_height(), z, layers)), cgi.shHalfMirror[ct6], 0xC0C0C080, PPR::WALL_DECO);
       }
     else 
       queuepolyat(V2, cgi.shHalfMirror[ct6], 0xC0C0C080, PPR::WALL_TOP);
@@ -1654,7 +1654,7 @@ void celldrawer::draw_features() {
        for(int z=1; z<layers; z++) {
          double zg = zgrad0(-vid.lake_top, geom3::actual_wall_height(), z, layers);
          draw_qfi(c, xyzscale(V, zg*(layers-z)/layers, zg),
-           darkena(gradient(0, wcol, -layers, z, layers), 0, 0xFF), PPR::WALL_SIDE);
+           darkena(gradient(0, wcol, -layers, z, layers), 0, 0xFF), PPR::WALL_DECO);
          }
         }
       else goto wa_default;

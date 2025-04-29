@@ -368,7 +368,7 @@ EX spatial_info get_spatial_info(cell *c) {
     return spatial_info{SIDE::RED2, SIDE::RED2, F(RED1) | F(RED2) | F(FLOOR) | F(WATERLEVEL) | F(SHALLOW) | F(DEEP)};
   if(slev == 3)
     return spatial_info{SIDE::RED3, SIDE::RED3, F(RED1) | F(RED2) | F(RED3) | F(FLOOR) | F(WATERLEVEL) | F(SHALLOW) | F(DEEP)};
-  if(highwall(c))
+  if(highwall(c) && !conegraph(c) && c->wall != waRose)
     return spatial_info{SIDE::WALL, SIDE::WALL, F(WALL) | F(FLOOR) | F(WATERLEVEL) | F(SHALLOW) | F(DEEP)};
   return spatial_info{SIDE::FLOOR, SIDE::FLOOR, F(FLOOR) | F(WATERLEVEL) | F(SHALLOW) | F(DEEP)};
   #undef F
