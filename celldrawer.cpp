@@ -999,7 +999,7 @@ void celldrawer::draw_halfvine() {
 
     if(cgi.validsidepar[SIDE::WALL]) forCellIdEx(c2, j, c) {
       int dis = gmod(i-j, 6);
-      if(dis != 2 && dis != 4) continue;
+      if(dis != 1 && dis != 5) continue;
       if(placeSidewall(c, j, SIDE::WALL, V, darkena(vcol2, fd, 0xFF))) break;
       }
     }
