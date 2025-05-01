@@ -328,7 +328,7 @@ void enable() {
   vid.binary_width = abs(aright[1] - aleft[1]) / log(2);
   
   start_game();
-  cgi.prepare_shapes();
+  cgi.require_shapes();
 
   current_room = get_room_at(cwt.at);
   

@@ -107,6 +107,7 @@ bool draw_room_on_map(cell *c, const shiftmatrix& V) {
   
   if(big || cmode == mode::editmap) {
     dynamicval<color_t> po(poly_outline, 0x80FF80FF);
+    ensure_floorshape_generated(shvid(c), c);
     queuepolyat(V, cgi.shFullFloor.b[0], 0, PPR::LINE);
     }
 
