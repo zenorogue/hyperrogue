@@ -110,7 +110,8 @@ void load_room(fhstream& f, cell *c) {
         }
       else if(cap == "ITEM") {
         auto b = std::make_unique<item>();
-        sscanf(param.c_str(), "%lf%lf", &b->where_x, &b->where_y);
+        b->qty = 1;
+        sscanf(param.c_str(), "%lf%lf%d", &b->where_x, &b->where_y, &b->qty);
         s = scanline_noblank(f);
         b->id = -1;
         for(int i=0; i<isize(powers); i++) if(powers[i].name == s) b->id = i;

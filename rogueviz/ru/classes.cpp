@@ -15,16 +15,26 @@ using powerfun = hr::function<void(data&)>;
 struct power {
   int key;
   string name;
-  string xname;
   string desc;
   string glyph;
   color_t color;
-  flagtype flags;
   powerfun pf;
   int id_status;
-  power(int key, string name, string desc, string glyph, color_t color, flagtype f, powerfun pf) : key(key), name(name), desc(desc), glyph(glyph), color(color), flags(f), pf(pf) {
-    id_status = 0;
-    }
+  int qty_filled;
+  int qty_owned;
+  flagtype flags;
+  void init();
+  hr::function<void(data&)> act, paused_act;
+  hr::function<string()> get_name;
+  hr::function<string()> get_desc;
+  hr::function<string()> get_glyph;
+  hr::function<color_t()> get_color;
+  hr::function<void(int)> picked_up;
+  power& is_starting();
+  power& be_weapon();
+  power& be_resource(string plural);
+  power& while_paused();
+  power& identified_name(string, string);
   };
 
 extern vector<power> powers;
@@ -241,16 +251,17 @@ struct hint : public entity {
   };
 
 struct item : public entity {
-  int id;
+  int id, qty;
   string pickup_message;
   double sx() override { return 12; }
   double sy() override { return 12; }
-  string glyph() override { return powers[id].glyph; }
-  color_t color() override { return powers[id].color; }
+  string glyph() override { return powers[id].get_glyph(); }
+  color_t color() override { return powers[id].get_color(); }
   void act() override {
     kino();
     if(intersect(get_pixel_bbox(), m.get_pixel_bbox())) {
       addMessage(pickup_message);
+      powers[id].picked_up(qty);
       destroyed = true;
       }
     }
