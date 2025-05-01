@@ -115,6 +115,9 @@ Collect your dagger and press [key:dagger].
 ITEM 382 287
 dagger
 You collect your trusty dagger from the drawer.
+ITEM 148 217 5
+gold
+It was worth it to explore the attic! You find a small quantity of gold.
 OK
 
 MOVE 1 Red Rooster Inn
@@ -417,6 +420,9 @@ MAP
 ITEM 380 131
 strange blue crystal ball
 What a shiny crystal ball!
+ITEM 70 200 20
+gold
+You found 20 gold pieces
 OK
 
 MOVE 2 Dungeon Entrance
@@ -514,6 +520,9 @@ MAP
 #b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b-b-b#b#b#b#b#b#b#b#b#b#b#b#b
 ####################################################----########################
 #b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b-b-b#b#b#b#b#b#b#b#b#b#b#b#b
+ITEM 569 100 10
+gold
+You found 10 gold pieces
 OK
 
 MOVE 3 First Magic Fountain Cave
