@@ -422,7 +422,7 @@ MAP
 ITEM 380 131
 strange blue crystal ball
 What a shiny crystal ball!
-ITEM 70 200 20
+ITEM 75 200 20
 gold
 You found 20 gold pieces
 OK
@@ -522,7 +522,7 @@ MAP
 #b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b-b-b#b#b#b#b#b#b#b#b#b#b#b#b
 ####################################################----########################
 #b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b-b-b#b#b#b#b#b#b#b#b#b#b#b#b
-ITEM 569 100 10
+ITEM 560 100 10
 gold
 You found 10 gold pieces
 OK
