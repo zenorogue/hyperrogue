@@ -88,7 +88,7 @@ void gen_powers() {
       if(d.keystate & 1) {
         bool can_jump = m.on_floor;
         if(gframeid <= m.on_floor_when + m.coyote_time) can_jump = true;
-        if(can_jump) m.vel_y = -(non_hyperbolic ? 3 : 5) * d.d * d.modv, m.on_floor_when = -1000;
+        if(can_jump) m.vel.y = -(non_hyperbolic ? 3 : 5) * d.d * d.modv, m.on_floor_when = -1000;
         }
       }
     ).is_starting(),
@@ -115,7 +115,7 @@ void gen_powers() {
     [] (data& d) {
       if(d.keystate != 1) return;
       m.attack_facing = m.facing; m.attack_when = gframeid;
-      auto pb = m.get_pixel_bbox_at(m.where_x + m.attack_facing * m.dsx(), m.where_y);
+      auto pb = m.get_pixel_bbox_at(xy{m.where.x + m.attack_facing * m.dsiz().x, m.where.y});
       auto bb = pixel_to_block(pb);
       for(auto& e: current_room->entities) if(intersect(e->get_pixel_bbox(), pb)) e->attacked(15);
       for(int y=bb.miny; y<bb.maxy; y++)

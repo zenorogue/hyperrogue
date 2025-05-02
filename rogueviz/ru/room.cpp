@@ -119,8 +119,8 @@ void room::fov_from(int sx, int sy) {
     for(int l=0; l<len; l++) {
       auto h = lerp(sh, th, l * 1. / len);
       auto xy = from_hyper(h);
-      int cx = int(xy.first / block_x);
-      int cy = int(xy.second / block_y);
+      int cx = int(xy.x / block_x);
+      int cy = int(xy.y / block_y);
       if(cx < 0 || cy < 0 || cx >= room_x || cy >= room_y) break;
       if(!(walls[at(cx, cy)].flags & W_TRANS)) break;
       reveal_around(cx, cy);

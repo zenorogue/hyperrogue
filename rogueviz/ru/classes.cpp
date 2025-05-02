@@ -114,37 +114,48 @@ struct room {
   void create_texture();
   };
 
+struct xy {
+  ld x, y;
+  xy() {}
+  xy(ld x, ld y) : x(x), y(y) {}
+  xy operator + (xy b) { return xy(x+b.x, y+b.y); }
+  xy operator - (xy b) { return xy(x-b.x, y-b.y); }
+  xy operator * (ld s) { return xy(x*s, y*s); }
+  xy operator / (ld s) { return xy(x/s, y/s); }
+  xy operator * (xy b) { return xy(x*b.x, y*b.y); }
+  xy operator / (xy b) { return xy(x/b.x, y/b.y); }
+  friend xy operator * (ld s, xy a) { return xy(s*a.x, s*a.y); }
+  xy& operator += (xy b) { x += b.x; y += b.y; return self; }
+  xy& operator -= (xy b) { x -= b.x; y -= b.y; return self; }
+  xy& operator *= (ld s) { x *= s; y *= s; return self; }
+  xy& operator /= (ld s) { x /= s; y /= s; return self; }
+  };
+
 struct entity {
-  virtual double sx() = 0;
-  virtual double sy() = 0;
-  double where_x, where_y;
-  double vel_x, vel_y;
+  virtual xy siz() = 0;
+  xy where, vel;
 
-  ld dsx() { return get_scale() * sx(); }
-  ld dsy() { return get_scale() * sy(); }
+  xy dsiz() { return get_scale() * siz(); }
 
-  double gwhere_x, gwhere_y;
-  double gvel_x, gvel_y;
+  xy gwhere, gvel;
+
+  virtual struct moving_platform* as_platform() { return nullptr; }
 
   int hp;
   int invinc_end;
 
   virtual int max_hp() { return 100; }
 
-  bool visible(room *r);
+  virtual bool visible(room *r);
 
   void clearg() {
-    gwhere_x = where_x;
-    gwhere_y = where_y;
-    gvel_x = vel_x;
-    gvel_y = vel_y;
+    gwhere = where;
+    gvel = vel;
     }
 
   entity() {
-    where_x = screen_x / 2.;
-    where_y = screen_y / 2.;
-    vel_x = 0;
-    vel_y = 0;
+    where = xy(screen_x / 2., screen_y / 2.);
+    vel = xy(0, 0);
     destroyed = false; invinc_end = -1;
     clearg();
     };
@@ -155,8 +166,8 @@ struct entity {
 
   data get_dat();
 
-  struct bbox get_pixel_bbox_at(double x, double y);
-  struct bbox get_pixel_bbox() { return get_pixel_bbox_at(where_x, where_y); }
+  struct bbox get_pixel_bbox_at(xy);
+  struct bbox get_pixel_bbox() { return get_pixel_bbox_at(where); }
 
   virtual double grav() { return 0.1; }  
 
@@ -168,7 +179,7 @@ struct entity {
   void apply_portal_grav();
   virtual void act() { kino(); }
 
-  double get_scale() { return get_scale_at(where_y); }
+  double get_scale() { return get_scale_at(where.y); }
   virtual bool freezing() { return false; }
   virtual void hit_wall() {};
 
@@ -206,8 +217,7 @@ struct man : public entity {
   int last_action;
 
   man() { facing = 1; attack_facing = 1; postfix(); }
-  double sx() override { return 12; }
-  double sy() override { return 12; }
+  xy siz() override { return {12, 12}; }
   string glyph() override { return hallucinating ? "f" : "@"; }
   color_t color() override { return hallucinating ? 0x808080FF : 0xFF8080FF; }
   void act() override; 
@@ -222,16 +232,14 @@ struct npc : public entity {
   color_t col;
   string text;
   int talk_on;
-  double sx() override { return 12; }
-  double sy() override { return 12; }
+  xy siz() override { return {12, 12}; }
   string glyph() override { return sglyph; }
   color_t color() override { return col; }
   void act() override;
   };
 
 struct boar : public entity {
-  double sx() override { return 18; }
-  double sy() override { return 18; }
+  xy siz() override { return {18, 18}; }
   string glyph() override { return "B"; }
   color_t color() override { return 0x804000FF; }
   void act() override;
@@ -242,9 +250,8 @@ struct boar : public entity {
 struct hint : public entity {
   string hint_text;
   int state;
-  int width, height;
-  double sx() override { return width; }
-  double sy() override { return height; }
+  xy size;
+  xy siz() override { return size; }
   string glyph() override { return " "; }
   color_t color() override { return 0; }
   void act() override;
@@ -253,8 +260,7 @@ struct hint : public entity {
 struct item : public entity {
   int id, qty;
   string pickup_message;
-  double sx() override { return 12; }
-  double sy() override { return 12; }
+  xy siz() override { return {12, 12}; }
   string glyph() override { return powers[id].get_glyph(); }
   color_t color() override { return powers[id].get_color(); }
   void act() override {
@@ -269,8 +275,7 @@ struct item : public entity {
 
 struct missile : public entity {
   missile() { destroyed = false; }
-  double sx() override { return 4; }
-  double sy() override { return 4; }
+  xy siz() override { return {4, 4}; }
   string glyph() override { return "*"; }
   color_t color() override { return 0x8080FFFF; }
   void act() override; 

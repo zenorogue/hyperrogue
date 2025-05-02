@@ -2,15 +2,15 @@ namespace rogue_unlike {
 
 man m;
 
-bbox entity::get_pixel_bbox_at(double x, double y) {
+bbox entity::get_pixel_bbox_at(xy p) {
   bbox b;
-  double d = get_scale_at(y);
-  double man_x = sx();
-  double man_y = sy();
-  b.minx = x - man_x * d / 2;
-  b.maxx = x + man_x * d / 2 + 1;
-  b.miny = y - man_y * d / 2;
-  b.maxy = y + man_y * d / 2 + 1;
+  double d = get_scale_at(p.y);
+  double man_x = siz().x;
+  double man_y = siz().y;
+  b.minx = p.x - man_x * d / 2;
+  b.maxx = p.x + man_x * d / 2 + 1;
+  b.miny = p.y - man_y * d / 2;
+  b.maxy = p.y + man_y * d / 2 + 1;
   return b;
   }
 
@@ -34,7 +34,7 @@ void entity::apply_grav() {
   if(non_hyperbolic) return apply_portal_grav();
 
   auto dat = get_dat();
-  vel_y += dat.d * grav() * dat.moda * 16/9.;
+  vel.y += dat.d * grav() * dat.moda * 16/9.;
   }
 
 void entity::kino() {
@@ -49,31 +49,31 @@ void entity::kino() {
   again:
 
   auto obb = pixel_to_block(get_pixel_bbox());
-  auto nbb = pixel_to_block(get_pixel_bbox_at(where_x + vel_x, where_y + vel_y));
+  auto nbb = pixel_to_block(get_pixel_bbox_at(where + vel));
   auto jbb = join(obb, nbb);
 
-  flagtype blocking = (vel_y < 0 || fallthru) ? W_BLOCK : (W_BLOCK | W_PLATFORM);
+  flagtype blocking = (vel.y < 0 || fallthru) ? W_BLOCK : (W_BLOCK | W_PLATFORM);
 
   auto pain_effect = [&] {
     if(!hurt_by_spikes()) return false;
     reduce_hp(10);
-    vel_x = -vel_x; vel_y = -vel_y; apply_grav();
+    vel.x = -vel.x; vel.y = -vel.y; apply_grav();
     return true;
     };
 
   for(int x = obb.minx; x < obb.maxx; x++) for(int y = obb.maxy; y < jbb.maxy; y++) {
     eWall b = current_room->at(x, y);
     if(walls[b].flags & blocking) {
-      if(walls[b].flags & W_BOUNCY) { vel_y = -vel_y; on_bounce = true; goto again; }
+      if(walls[b].flags & W_BOUNCY) { vel.y = -vel.y; on_bounce = true; goto again; }
       on_floor = true;
       if(walls[b].flags & W_FROZEN) on_ice = true;
-      vel_y /= 2;
-      if(abs(vel_y) < 1e-6) vel_y = 0;
+      vel.y /= 2;
+      if(abs(vel.y) < 1e-6) vel.y = 0;
       if(freezing()) {
         if(b == wWater) current_room->replace_block(x, y, wFrozen);
         else if(b != wFrozen) hit_wall();
         }
-      if(pixel_to_block(get_pixel_bbox_at(where_x + vel_x, where_y + vel_y)).maxy <= y) where_y += vel_y; 
+      if(pixel_to_block(get_pixel_bbox_at(where + vel)).maxy <= y) where.y += vel.y; 
       goto again;
       }
     if((walls[b].flags & W_PAIN) && pain_effect()) goto again;
@@ -82,9 +82,9 @@ void entity::kino() {
   for(int x = obb.minx; x < obb.maxx; x++) for(int y = jbb.miny; y < obb.miny; y++) {
     eWall b = current_room->at(x, y);
     if(walls[b].flags & W_BLOCK) {
-      vel_y /= 2;
-      if(abs(vel_y) < 1e-6) vel_y = 0;
-      if(pixel_to_block(get_pixel_bbox_at(where_x + vel_x, where_y + vel_y)).miny > y) where_y += vel_y; 
+      vel.y /= 2;
+      if(abs(vel.y) < 1e-6) vel.y = 0;
+      if(pixel_to_block(get_pixel_bbox_at(where + vel)).miny > y) where.y += vel.y;
       goto again;
       }
     if((walls[b].flags & W_PAIN) && pain_effect()) goto again;
@@ -94,7 +94,7 @@ void entity::kino() {
     eWall b = current_room->at(x, y);
     if(walls[b].flags & W_STAIRCASE) {
       on_floor = true;
-      if(vel_y > 0) { vel_y = 0; goto again; }
+      if(vel.y > 0) { vel.y = 0; goto again; }
       }
     }
 
@@ -106,7 +106,7 @@ void entity::kino() {
       }
     if(walls[b].flags & W_BLOCK) {
       if(freezing()) { hit_wall(); }
-      vel_x = (vel_x - max<ld>(vel_y, 0)/10) / 2;
+      vel.x = (vel.x - max<ld>(vel.y, 0)/10) / 2;
       wallhug = true;
       goto again;
       }
@@ -121,42 +121,41 @@ void entity::kino() {
       }
     if(walls[b].flags & W_BLOCK) {
       if(freezing()) { hit_wall(); }
-      vel_x = (vel_x + max<ld>(vel_y, 0)/10) / 2;
+      vel.x = (vel.x + max<ld>(vel.y, 0)/10) / 2;
       wallhug = true;
       goto again;
       }
     if((walls[b].flags & W_PAIN) && pain_effect()) goto again;
     }
   
-  int bx0 = floor(where_x / block_x);
-  int by0 = floor(where_y / block_y);
-  where_x += vel_x;
-  where_y += vel_y;
+  int bx0 = floor(where.x / block_x);
+  int by0 = floor(where.y / block_y);
+  where += vel;
 
-  int bx1 = floor(where_x / block_x);
-  int by1 = floor(where_y / block_y);
+  int bx1 = floor(where.x / block_x);
+  int by1 = floor(where.y / block_y);
 
   if(non_hyperbolic) {
     auto& loc = all_locations[by0][bx0];
     if(bx1 > bx0) {
       auto& loc1 = loc.get(0);
-      where_x += block_x * (loc1.x - (loc.x + 1));
-      where_y += block_y * (loc1.y - loc.y);
+      where.x += block_x * (loc1.x - (loc.x + 1));
+      where.y += block_y * (loc1.y - loc.y);
       }
     if(bx1 < bx0) {
       auto& loc1 = loc.get(2);
-      where_x += block_x * (loc1.x - (loc.x - 1));
-      where_y += block_x * (loc1.y - loc.y);
+      where.x += block_x * (loc1.x - (loc.x - 1));
+      where.y += block_x * (loc1.y - loc.y);
       }
     if(by1 < by0) {
       auto& loc1 = loc.get(1);
-      where_x += block_x * (loc1.x - loc.x);
-      where_y += block_x * (loc1.y - (loc.y - 1));
+      where.x += block_x * (loc1.x - loc.x);
+      where.y += block_x * (loc1.y - (loc.y - 1));
       }
     if(by1 > by0) {
       auto& loc1 = loc.get(3);
-      where_x += block_x * (loc1.x - loc.x);
-      where_y += block_x * (loc1.y - (loc.y + 1));
+      where.x += block_x * (loc1.x - loc.x);
+      where.y += block_x * (loc1.y - (loc.y + 1));
       }
     }
 
@@ -167,30 +166,27 @@ void entity::kino() {
   exit(1); */
 
   if(true || !non_hyperbolic) {  
-    hyperpoint h_at = to_hyper(where_x, where_y);
-    hyperpoint h_was = to_hyper(where_x - vel_x, where_y - vel_y);
+    hyperpoint h_at = to_hyper(where);
+    hyperpoint h_was = to_hyper(where - vel);
     hyperpoint h_willbe = rgpushxto0(h_at) * MirrorX * MirrorY * gpushxto0(h_at) * h_was;
-    ld next_x, next_y;
-    tie(next_x, next_y) = from_hyper(h_willbe);
-    vel_x = next_x - where_x;
-    vel_y = next_y - where_y;
+    xy next = from_hyper(h_willbe);
+    vel = next - where;
     }
 
   apply_grav();
 
-  gwhere_x += gvel_x;
-  gwhere_y += gvel_y;
+  gwhere += gvel;
 
   ld delta = 1/60.;
-  if((where_x - gwhere_x) * (gvel_x - vel_x) + (where_y - gwhere_y) * (gvel_y - vel_y) < 0) delta *= 2;
+  auto z = (where - gwhere) * (gvel - vel);
+  if(z.x + z.y < 0) delta *= 2;
   ld ndelta = 1-delta;
-  gvel_x = ndelta * gvel_x + delta * (where_x - gwhere_x);
-  gvel_y = ndelta * gvel_y + delta * (where_y - gwhere_y);
+  gvel = ndelta * gvel + delta * (where - gwhere);
   }
 
 void missile::act() {
   kino();
-  if(where_x > screen_x || where_x < 0 || where_y < 0 || where_y > screen_y) destroyed = true;
+  if(where.x > screen_x || where.x < 0 || where.y < 0 || where.y > screen_y) destroyed = true;
   }
 
 void npc::act() {
@@ -213,20 +209,20 @@ void boar::act() {
   kino();
   if(intersect(get_pixel_bbox(), m.get_pixel_bbox())) {
     addMessage("The wild boar gores you!");
-    int s = where_x < m.where_x ? -1 : 1;
+    int s = where.x < m.where.x ? -1 : 1;
     m.reduce_hp(15);
     auto dat = get_dat();
     auto mdat = m.get_dat();
-    if(m.on_floor) m.vel_x = mdat.d * mdat.modv * -s * 1.5, m.vel_y = -mdat.d * mdat.modv * 2;
-    if(on_floor) vel_x = dat.d * dat.modv * s * 1.5;
+    if(m.on_floor) m.vel.x = mdat.d * mdat.modv * -s * 1.5, m.vel.y = -mdat.d * mdat.modv * 2;
+    if(on_floor) vel.x = dat.d * dat.modv * s * 1.5;
     }
   if(on_floor) {
     auto dat = get_dat();
-    if(vel_x > 0) vel_x = max<ld>(vel_x - dat.d * dat.moda * 0.05, 0);
-    if(vel_x < 0) vel_x = min<ld>(vel_x + dat.d * dat.moda * 0.05, 0);
+    if(vel.x > 0) vel.x = max<ld>(vel.x - dat.d * dat.moda * 0.05, 0);
+    if(vel.x < 0) vel.x = min<ld>(vel.x + dat.d * dat.moda * 0.05, 0);
     if(gframeid > invinc_end) {
-      if(intersect(extend(get_pixel_bbox(), 60 * dat.d, 0, 0, 0), m.get_pixel_bbox())) vel_x -= dat.d * dat.moda * 0.2;
-      if(intersect(extend(get_pixel_bbox(), 0, 60 * dat.d, 0, 0), m.get_pixel_bbox())) vel_x += dat.d * dat.moda * 0.2;
+      if(intersect(extend(get_pixel_bbox(), 60 * dat.d, 0, 0, 0), m.get_pixel_bbox())) vel.x -= dat.d * dat.moda * 0.2;
+      if(intersect(extend(get_pixel_bbox(), 0, 60 * dat.d, 0, 0), m.get_pixel_bbox())) vel.x += dat.d * dat.moda * 0.2;
       }
     }
   }
@@ -235,8 +231,8 @@ void boar::attacked(int dmg) {
   reduce_hp(dmg);
   if(destroyed) addMessage("You kill the wild boar."); else addMessage("You hit the wild boar.");
   auto dat = get_dat();
-  int s = where_x < m.where_x ? -1 : 1;
-  if(on_floor) vel_x = dat.d * dat.modv * s * 2, vel_y = -dat.d * dat.modv * 2.5;
+  int s = where.x < m.where.x ? -1 : 1;
+  if(on_floor) vel.x = dat.d * dat.modv * s * 2, vel.y = -dat.d * dat.modv * 2.5;
   }
 
 void hint::act() {

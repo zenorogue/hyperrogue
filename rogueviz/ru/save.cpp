@@ -106,12 +106,12 @@ void load_room(fhstream& f, cell *c) {
       string param = s.substr(pos+1);
       if(cap == "START") {
         current_room = &r;
-        sscanf(param.c_str(), "%lf%lf", &m.where_x, &m.where_y);
+        sscanf(param.c_str(), "%lf%lf", &m.where.x, &m.where.y);
         }
       else if(cap == "ITEM") {
         auto b = std::make_unique<item>();
         b->qty = 1;
-        sscanf(param.c_str(), "%lf%lf%d", &b->where_x, &b->where_y, &b->qty);
+        sscanf(param.c_str(), "%lf%lf%d", &b->where.x, &b->where.y, &b->qty);
         s = scanline_noblank(f);
         b->id = -1;
         for(int i=0; i<isize(powers); i++) if(powers[i].name == s) b->id = i;
@@ -121,7 +121,7 @@ void load_room(fhstream& f, cell *c) {
         }
       else if(cap == "NPC") {
         auto b = std::make_unique<npc>();
-        sscanf(param.c_str(), "%lf%lf%08x", &b->where_x, &b->where_y, &b->col);
+        sscanf(param.c_str(), "%lf%lf%08x", &b->where.x, &b->where.y, &b->col);
         s = scanline_noblank(f);
         b->sglyph = s[0];
         b->name = s.substr(1);
@@ -130,12 +130,12 @@ void load_room(fhstream& f, cell *c) {
         }
       else if(cap == "BOAR") {
         auto b = std::make_unique<boar>();
-        sscanf(param.c_str(), "%lf%lf", &b->where_x, &b->where_y);
+        sscanf(param.c_str(), "%lf%lf", &b->where.x, &b->where.y);
         r.entities.emplace_back(std::move(b));
         }
       else if(cap == "HINT") {
         auto b = std::make_unique<hint>();
-        sscanf(param.c_str(), "%lf%lf%d%d", &b->where_x, &b->where_y, &b->width, &b->height);
+        sscanf(param.c_str(), "%lf%lf%lf%lf", &b->where.x, &b->where.y, &b->size.x, &b->size.y);
         b->hint_text = scanline_noblank(f);
         r.entities.emplace_back(std::move(b));
         }
@@ -173,7 +173,7 @@ void load_cheat(string fname) {
         for(auto& [c,r]: rooms) if(r.roomname == param) current_room = &r;
         }
       else if(cap == "POS") {
-        sscanf(param.c_str(), "%lf%lf", &m.where_x, &m.where_y);
+        sscanf(param.c_str(), "%lf%lf", &m.where.x, &m.where.y);
         }
       else if(cap == "ITEM") {
         bool found = false;

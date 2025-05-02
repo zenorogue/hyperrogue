@@ -219,12 +219,14 @@ void entity::draw() {
 
   double d = get_scale();
 
-  gwhere_x = where_x; gwhere_y = where_y;
+  gwhere = where;
 
-  ld minx = min(where_x, gwhere_x) - sx() * d / 2;
-  ld miny = min(where_y, gwhere_y) - sy() * d / 2;
-  ld maxx = max(where_x, gwhere_x) + sx() * d / 2;
-  ld maxy = max(where_y, gwhere_y) + sy() * d / 2;
+  auto si = siz();
+
+  ld minx = min(where.x, gwhere.x) - si.x * d / 2;
+  ld miny = min(where.y, gwhere.y) - si.y * d / 2;
+  ld maxx = max(where.x, gwhere.x) + si.x * d / 2;
+  ld maxy = max(where.y, gwhere.y) + si.y * d / 2;
 
   asciiletter(minx, miny, maxx, maxy, glyph(), color());
   }
@@ -235,9 +237,10 @@ void man::draw() {
   ld t = gframeid - attack_when;
   if(t < 50) {
     auto af = attack_facing * (1 - t * 0.01);
+    auto ds = dsiz();
     asciiletter(
-      where_x + af * dsx() - dsx()/2, where_y - dsy()/2, 
-      where_x + af * dsx() + dsx()/2, where_y + dsy()/2, 
+      where.x + af * ds.x - ds.x/2, where.y - ds.y/2,
+      where.x + af * ds.x + ds.x/2, where.y + ds.y/2,
       attack_facing == -1 ? "(" : ")", 0xFFFFFF00 + (255 - t * 5)
       );
     }

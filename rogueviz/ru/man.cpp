@@ -17,18 +17,18 @@ void man::act() {
   handle_powers(dat);
 
   if((on_floor || jump_control || wallhug) && !on_ice) {
-    vel_x = dat.dx * dat.d * dat.modv * 2.5;
+    vel.x = zero_speed + dat.dx * dat.d * dat.modv * 2.5;
     }
 
   if(on_bounce) {
-    vel_x += dat.dx * dat.d * dat.modv * 0.02;
+    vel.x += dat.dx * dat.d * dat.modv * 0.02;
     }
 
   if(!(on_floor && !dat.dx)) last_action = gframeid;
 
   if(dat.dx) facing = dat.dx;
 
-  current_room->fov_from(where_x / block_x, where_y / block_y);
+  current_room->fov_from(where.x / block_x, where.y / block_y);
   }
 
 }

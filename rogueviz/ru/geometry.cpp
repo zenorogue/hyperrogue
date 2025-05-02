@@ -20,7 +20,10 @@ hyperpoint to_hyper(ld x, ld y) {
   return perspective_to_space(h, 1, gcHyperbolic);
   }
 
-pair<ld, ld> from_hyper(hyperpoint h) {
+hyperpoint to_hyper(xy xy) { return to_hyper(xy.x, xy.y); }
+
+
+xy from_hyper(hyperpoint h) {
   if(non_hyperbolic) return {h[0], h[1]};
   h = spin90() * h; h[0] = -h[0];
   h[2] += 1;

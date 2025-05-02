@@ -91,7 +91,7 @@ void editmap_frame() {
     dialog::display();
     });
   if(keypressed('f')) floodfill_pick(mousepx / block_x, mousepy / block_y);
-  if(keypressed('t')) { m.where_x = mousepx; m.where_y = mousepy; m.vel_x = 0; m.vel_y = 0; }
+  if(keypressed('t')) { m.where = xy(mousepx, mousepy); m.vel = xy(0, 0); }
   }
 
 void playing_frame() {
@@ -104,46 +104,46 @@ void playing_frame() {
   auto mb = ents.begin();
   for(auto& e: ents) if(!e->destroyed) *(mb++) = std::move(e);
   ents.resize(mb - ents.begin());
-  
+
   auto& nonh = non_hyperbolic;
   if(one_room) return;
   
-  if(m.where_x < l_margin_at) {
-    m.where_x += actual_screen_x;
+  if(m.where.x < l_margin_at) {
+    m.where.x += actual_screen_x;
     switch_to_adjacent_room(2);
     m.clearg();
     }
-  if(m.where_x > r_margin_at) {
-    m.where_x -= actual_screen_x;
+  if(m.where.x > r_margin_at) {
+    m.where.x -= actual_screen_x;
     switch_to_adjacent_room(nonh ? 0 : 4);
     m.clearg();
     }
   
-  if(m.where_y < t_margin_at && !nonh) {
-    m.where_y = (m.where_y - t_margin_at) * 2 + b_margin_at;
-    m.where_x -= l_margin_at;
-    m.where_x = 2 * m.where_x;
-    if(m.where_x > actual_screen_x) {
-      m.where_x -= actual_screen_x;
+  if(m.where.y < t_margin_at && !nonh) {
+    m.where.y = (m.where.y - t_margin_at) * 2 + b_margin_at;
+    m.where.x -= l_margin_at;
+    m.where.x = 2 * m.where.x;
+    if(m.where.x > actual_screen_x) {
+      m.where.x -= actual_screen_x;
       switch_to_adjacent_room(0);
       }
     else
       switch_to_adjacent_room(1);
-    m.where_x += l_margin_at;
-    m.vel_x *= 2; m.vel_y *= 2;
+    m.where.x += l_margin_at;
+    m.vel *= 2;
     m.clearg();
     }
-  if(m.where_y > b_margin_at && !nonh) {
-    m.where_x -= l_margin_at;
-    m.where_y -= b_margin_at;
-    m.where_y /= 2;
-    m.where_y += t_margin_at;
+  if(m.where.y > b_margin_at && !nonh) {
+    m.where.x -= l_margin_at;
+    m.where.y -= b_margin_at;
+    m.where.y /= 2;
+    m.where.y += t_margin_at;
     if(is_right(current_room))
-      m.where_x += actual_screen_x;
+      m.where.x += actual_screen_x;
     switch_to_adjacent_room(3);
-    m.where_x /= 2;
-    m.where_x += l_margin_at;
-    m.vel_x /= 2; m.vel_y /= 2;
+    m.where.x /= 2;
+    m.where.x += l_margin_at;
+    m.vel /= 2;
     m.clearg();
     }
   }
@@ -155,7 +155,7 @@ void sync_map() {
   View = cspin90(1, 0);
   // if(cmode == mode::playing) View = View * inverse(parabolic13_at(to_hyper(m.where_x, m.where_y)));
   if(cmode == mode::playing) {
-    hyperpoint p = to_hyper(m.where_x, m.where_y);
+    hyperpoint p = to_hyper(m.where);
     transmatrix T = iso_inverse(parabolic13_at(deparabolic13(p)));
     View = View * T;
     }
@@ -202,7 +202,8 @@ void render_the_map() {
         }
       if(!mouseout()) {
         auto h = inverse_shift(ggmatrix(current_room->where), mouseh);
-        tie(mousepx, mousepy) = from_hyper(h);
+        auto fh = from_hyper(h);
+        tie(mousepx, mousepy) = pair(fh.x, fh.y);
         }
       if(cmode == mode::editmap) {
         getcstat = '-';
@@ -397,10 +398,10 @@ void add_platf_hooks() {
       }
     f.write<int>(-1);
     f.write(mapstream::cellids[current_room->where]);
-    f.write(m.where_x);
-    f.write(m.where_y);
-    f.write(m.vel_x);
-    f.write(m.vel_y);
+    f.write(m.where.x);
+    f.write(m.where.y);
+    f.write(m.vel.x);
+    f.write(m.vel.y);
     });
 
   pushScreen(run);  
@@ -424,10 +425,10 @@ auto chk = arg::add3("-ru", enable)
         }
       int id = f.get<int>();
       current_room = get_room_at(mapstream::cellbyid[id]);
-      f.read(m.where_x);
-      f.read(m.where_y);
-      f.read(m.vel_x);
-      f.read(m.vel_y);
+      f.read(m.where.x);
+      f.read(m.where.y);
+      f.read(m.vel.x);
+      f.read(m.vel.y);
       add_platf_hooks();
       println(hlog, "done");
       set_sval();
