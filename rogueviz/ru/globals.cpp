@@ -52,7 +52,7 @@ struct ruwall {
   flagtype flags;
   };
 
-enum eWall { wAir, wWall, wBouncy, wSpike, wWater, wFrozen, wDoor, wSmashedDoor, wFountain0, wFountain1, wBluePortal, wOrangePortal, wPlatform };
+enum eWall { wAir, wWall, wBouncy, wSpike, wWater, wFrozen, wDoor, wSmashedDoor, wLockedDoor, wFountain0, wFountain1, wBluePortal, wOrangePortal, wPlatform, wStaircase, wColumn, wForge, wGUARD };
 
 flagtype W_BLOCK = 1;
 flagtype W_TRANS = 2;
@@ -62,7 +62,7 @@ flagtype W_PAIN = 16;
 flagtype W_BOUNCY = 32;
 flagtype W_FROZEN = 64;
 
-constexpr int qwall = 14;
+constexpr int qwall = int(wGUARD);
 
 ruwall walls[qwall] = {
   {"air", ".", 0x40404080, W_TRANS},
@@ -73,12 +73,15 @@ ruwall walls[qwall] = {
   {"frozen water", "#", 0xC0C0FFFF, W_BLOCK | W_FROZEN},
   {"door", "+", 0xC06000FF, W_BLOCK},
   {"smashed door", "'", 0xC06000FF, W_TRANS},
+  {"locked door", "+", 0xA05000FF, W_BLOCK},
   {"magic fountain", "!", 0x8080C0FF, W_TRANS},
   {"magic fountain (active)", "!", 0xA0A0FFFF, W_TRANS},
   {"blue portal", "=", 0x4040C0FF, W_TRANS},
   {"orange portal", "=", 0xC08040FF, W_TRANS},
   {"platform", "-", 0xFFFFFFFF, W_PLATFORM | W_TRANS },
   {"staircase", "-", 0xFFFF80FF, W_PLATFORM | W_TRANS | W_STAIRCASE },
+  {"column", "|", 0x40404080, W_TRANS},
+  {"forge", "&", 0xB0202080, W_TRANS | W_PAIN},
   };
 
 int sel = 1;

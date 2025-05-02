@@ -139,7 +139,7 @@ void render_room_walls(room *r) {
   for(int y=0; y<room_y; y++)
   for(int x=0; x<room_x; x++) {
     if(af && !r->fov[y][x]) continue;
-    char c = r->block_at[y][x];
+    int c = r->block_at[y][x];
 
     // ld sx = 1.5;
     // ld sy = 1.3;

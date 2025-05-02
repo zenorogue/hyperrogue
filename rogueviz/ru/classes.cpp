@@ -51,7 +51,7 @@ struct room {
   string roomname;
   renderbuffer *rbuf;
   cell *where;
-  char block_at[room_y][room_x];
+  short block_at[room_y][room_x];
   bool fov[room_y][room_x];
   bool which_map_rendered;
   bool infile, need_rerender;
