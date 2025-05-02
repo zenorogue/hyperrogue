@@ -187,6 +187,7 @@ void render_the_map() {
       drawmessages();
       nomsg = false;
       if(1) {
+        compute_scrm();
         ld& scale = scrm.T[0][0];
         mousepx = (mousex - current_display->xcenter) * 2 / scale / current_display->radius + screen_x/2;
         mousepy = (mousey - current_display->ycenter) * 2 / scale / current_display->radius + screen_y/2;
