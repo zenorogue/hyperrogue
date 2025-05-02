@@ -138,6 +138,7 @@ struct entity {
   xy dsiz() { return get_scale() * siz(); }
 
   xy gwhere, gvel;
+  xy zero_vel; /* relative to the platform */
 
   virtual struct moving_platform* as_platform() { return nullptr; }
 
@@ -226,6 +227,22 @@ struct man : public entity {
   };
 
 extern man m;
+
+struct moving_platform : public entity {
+  xy ctr;
+  ld radius, shift;
+  xy siz() override { return {36, 12}; }
+  string glyph() override { return "#"; }
+  color_t color() override { return 0xFFFFFFFF; }
+  virtual xy location_at(ld t) = 0;
+  void draw() override;
+  void act() override;
+  virtual moving_platform* as_platform() { return this; }
+  };
+
+struct ferris_platform : public moving_platform {
+  xy location_at(ld t) override;
+  };
 
 struct npc : public entity {
   string sglyph, name;

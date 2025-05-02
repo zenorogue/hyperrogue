@@ -133,6 +133,17 @@ void load_room(fhstream& f, cell *c) {
         sscanf(param.c_str(), "%lf%lf", &b->where.x, &b->where.y);
         r.entities.emplace_back(std::move(b));
         }
+      else if(cap == "FERRIS") {
+        ld cx, cy, radius; int qty;
+        sscanf(param.c_str(), "%lf%lf%lf%d", &cx, &cy, &radius, &qty);
+
+        for(int i=0; i<qty; i++) {
+          auto b = std::make_unique<ferris_platform>();
+          b->ctr = {cx, cy}; b->radius = radius;
+          b->shift = i * TAU / qty;
+          r.entities.emplace_back(std::move(b));
+          }
+        }
       else if(cap == "HINT") {
         auto b = std::make_unique<hint>();
         sscanf(param.c_str(), "%lf%lf%lf%lf", &b->where.x, &b->where.y, &b->size.x, &b->size.y);

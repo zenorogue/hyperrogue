@@ -88,7 +88,7 @@ void gen_powers() {
       if(d.keystate & 1) {
         bool can_jump = m.on_floor;
         if(gframeid <= m.on_floor_when + m.coyote_time) can_jump = true;
-        if(can_jump) m.vel.y = -(non_hyperbolic ? 3 : 5) * d.d * d.modv, m.on_floor_when = -1000;
+        if(can_jump) m.vel.y = m.zero_vel.y-(non_hyperbolic ? 3 : 5) * d.d * d.modv, m.on_floor_when = -1000;
         }
       }
     ).is_starting(),

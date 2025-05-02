@@ -42,6 +42,7 @@ void entity::kino() {
   on_ice = false;
   wallhug = false;
   on_bounce = false;
+  zero_vel = xy(0, 0);
 
   // ld modv = 60. / game_fps;
 
@@ -126,6 +127,22 @@ void entity::kino() {
       goto again;
       }
     if((walls[b].flags & W_PAIN) && pain_effect()) goto again;
+    }
+
+  for(auto& e: current_room->entities) if(e->as_platform() && intersect(e->get_pixel_bbox(), get_pixel_bbox())) {
+    auto p = e->as_platform();
+    auto oldpos = p->location_at(gframeid-1);
+    auto newpos = p->location_at(gframeid-0);
+    auto oldscale = get_scale_at(oldpos.y);
+    auto newscale = get_scale_at(newpos.y);
+    auto new_where = (where - oldpos) / oldscale * newscale + newpos;
+    zero_vel = new_where - where;
+    vel.y -= zero_vel.y;
+    bool err = vel.y == 0;
+    if(abs(vel.y) < 1e-6) vel.y = 0; else vel.y /= 2;
+    vel.y += zero_vel.y;
+    on_floor = true;
+    if(!err) goto again;
     }
   
   int bx0 = floor(where.x / block_x);
@@ -242,5 +259,25 @@ void hint::act() {
     }
   state = cur;
   }
+
+xy ferris_platform::location_at(ld t) {
+  return from_hyper(rgpushxto0(to_hyper(ctr)) * xspinpush0(t / game_fps + shift, radius));
+  }
+
+void moving_platform::draw() {
+  double d = get_scale();
+  for(int w=-1; w<=1; w++) {
+    ld minx = where.x + siz().x * d * (w - 0.5) / 3;
+    ld miny = where.y - siz().y * d / 2;
+    ld maxx = where.x + siz().x * d * (w + 0.5) / 3;
+    ld maxy = where.y + siz().y * d / 2;
+    asciiletter(minx, miny, maxx, maxy, "#", 0xFFFFFFFF);
+    }
+  }
+
+void moving_platform::act() {
+  where = location_at(gframeid);
+  }
+
 
 }

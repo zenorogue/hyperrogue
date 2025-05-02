@@ -140,5 +140,6 @@ void sync_map();
 
 void render_room_objects(room *r);
 
+void asciiletter(ld minx, ld miny, ld maxx, ld maxy, const string& ch, color_t col);
 
 }

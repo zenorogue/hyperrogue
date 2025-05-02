@@ -17,7 +17,7 @@ void man::act() {
   handle_powers(dat);
 
   if((on_floor || jump_control || wallhug) && !on_ice) {
-    vel.x = zero_speed + dat.dx * dat.d * dat.modv * 2.5;
+    vel.x = zero_vel.x + dat.dx * dat.d * dat.modv * 2.5;
     }
 
   if(on_bounce) {
