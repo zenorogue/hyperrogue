@@ -1,0 +1,4 @@
+START Central Cavern
+ITEM dagger
+GAIN 5 3
+POS 320 100

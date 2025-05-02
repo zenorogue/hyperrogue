@@ -407,6 +407,7 @@ void add_platf_hooks() {
   }
 
 auto chk = arg::add3("-ru", enable)
+  + arg::add3("-ru-cheat", [] { arg::shift(); load_cheat(arg::args()); })
   + addHook(mapstream::hooks_loadmap, 100, [] (hstream& f, int id) {
     if(id == 67) {
       println(hlog, "loading platformer");

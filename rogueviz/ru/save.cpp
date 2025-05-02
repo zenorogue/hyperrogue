@@ -160,5 +160,45 @@ void load_map(string fname) {
     }
   }
 
+void load_cheat(string fname) {
+  fhstream f(fname, "r");
+  auto power_edited = &powers[0];
+  while(!feof(f.f)) {
+    string s = scanline_noblank(f);
+    auto pos = s.find(" ");
+    if(pos != string::npos) {
+      string cap = s.substr(0, pos);
+      string param = s.substr(pos+1);
+      if(cap == "START") {
+        for(auto& [c,r]: rooms) if(r.roomname == param) current_room = &r;
+        }
+      else if(cap == "POS") {
+        sscanf(param.c_str(), "%lf%lf", &m.where_x, &m.where_y);
+        }
+      else if(cap == "ITEM") {
+        bool found = false;
+        for(int i=0; i<isize(powers); i++) if(powers[i].name == param) found = true, power_edited = &powers[i];
+        if(!found) println(hlog, "cheat item not found: ", param);
+        }
+      else if(cap == "GAIN") {
+        int a, b;
+        sscanf(param.c_str(), "%d%d", &a, &b);
+        power_edited->qty_owned += a;
+        power_edited->qty_filled += b;
+        println(hlog, "gain ", power_edited->name, " qty ", tie(a,b));
+        }
+      else println(hlog, "unrecognized cheat: ", s);
+      }
+    else if(s == "IDENTIFY") {
+      power_edited->flags |= IDENTIFIED;
+      }
+    else if(s == "ACTIVATE") {
+      power_edited->flags |= ACTIVE;
+      }
+    else if(s == "") {}
+    else println(hlog, "unrecognized cheat: ", s);
+    }
+  }
+
 
 }
