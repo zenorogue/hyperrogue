@@ -240,23 +240,22 @@ void handle_powers(data& d) {
   }
 
 void draw_inventory() {
+  flat_model_enabler fme;
   initquickqueue();
   for(int a: {0, 1, 3, 2, 0})
-    curvepoint(hyperpoint((a&1)?16:screen_x-16, (a&2)?16:screen_y-16, 1, 0));
-  queuecurve(scrm, 0xFFFFFFFF, 0x000000E0, PPR::LINE);
+    curvepoint(eupoint((a&1)?16:vid.xres-16, (a&2)?16:vid.yres-16));
+  queuecurve(atscreenpos(0, 0), 0xFFFFFFFF, 0x000000E0, PPR::LINE);
   quickqueue();
-  int sy = 200 * vid.yres / 1440;
-  int sx = 100 * vid.xres / 2560;
-  auto st = vid.fsize * 1.2;
-  displaystr(sx, sy, 0, vid.fsize, "Your inventory:", 0xC0C0C0, 0);
-  int lineid = 2;
+  int next_y = 48;
+  int st = vid.fsize * 1.2;
+  displaystr(32, next_y, 0, vid.fsize, "Your inventory:", 0xC0C0C0, 0);
+  next_y += st * 1.5;
   for(auto& p: powers) if(p.qty_owned) {
-    string s = ""; s += dialog::keyname(p.key);
-    s += " ";
-    s += p.get_glyph();
-    s += " ";
-    s += p.get_name();
-    displaystr(sx, sy + st * (lineid++), 0, vid.fsize, s, p.color >> 8, 0);
+    string key = p.key == ' ' ? "␣" : dialog::keyname(p.key);
+    displaystr(100, next_y, 0, vid.fsize, key, p.color >> 8, 16);
+    displaystr(130, next_y, 0, vid.fsize, p.get_glyph(), p.color >> 8, 8);
+    displaystr(160, next_y, 0, vid.fsize, p.get_name(), p.color >> 8, 0);
+    next_y += st;
     }
   }
 
