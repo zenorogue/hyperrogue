@@ -213,6 +213,8 @@ struct entity {
     invinc_end = gframeid + 150;
     return true;
     }
+
+  virtual string get_help() { return "No help about this."; }
   };
 
 struct man : public entity {
@@ -234,6 +236,7 @@ struct man : public entity {
   void draw() override;
   virtual bool hurt_by_spikes() { return true; }
   string get_name() override { return "alchemist"; }
+  string get_help() override { return "This is you."; }
   };
 
 extern man m;
@@ -249,7 +252,8 @@ struct moving_platform : public entity {
   void act() override;
   virtual moving_platform* as_platform() { return this; }
   string get_name() override { return "moving platform"; }
-  };
+  string get_help() override { return "Moving platforms move."; }
+};
 
 struct ferris_platform : public moving_platform {
   xy location_at(ld t) override;
@@ -265,6 +269,7 @@ struct npc : public entity {
   color_t color() override { return col; }
   void act() override;
   string get_name() override { return name; }
+  string get_help() override { return "Stay awhile and listen."; }
   };
 
 struct boar : public entity {
@@ -278,6 +283,7 @@ struct boar : public entity {
   void attacked(int s) override;
   void on_kill() override { entity::on_kill(); num_kills++; }
   string get_name() override { return "giant boar"; }
+  string get_help() override { return "Beware their tusks."; }
   };
 
 struct hint : public entity {
@@ -306,6 +312,7 @@ struct item : public entity {
       }
     }
   string get_name() override { return powers[id].name; }
+  string get_help() override { return powers[id].get_desc(); }
   };
 
 struct missile : public entity {

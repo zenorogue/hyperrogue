@@ -108,6 +108,10 @@ bbox extend(bbox a, int l, int r, int u, int d) {
   return a;
   }
 
+bool contains(bbox a, xy pos) {
+  return pos.x >= a.minx && pos.x < a.maxx && pos.y >= a.miny && pos.y < a.maxy;
+  }
+
 bbox extend_all(bbox a, int x) { return extend(a, x, x, x, x); }
 
 bbox get_intersect(bbox a, bbox b) {

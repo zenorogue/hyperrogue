@@ -52,6 +52,7 @@ struct ruwall {
   string glyph;
   color_t color;
   flagtype flags;
+  string help;
   };
 
 enum eWall { wAir, wWall, wBouncy, wSpike, wWater, wFrozen, wDoor, wSmashedDoor, wLockedDoor, wFountain0, wFountain1, wBluePortal, wOrangePortal, wPlatform, wStaircase, wColumn, wForge, wGUARD };
@@ -67,23 +68,23 @@ flagtype W_FROZEN = 64;
 constexpr int qwall = int(wGUARD);
 
 ruwall walls[qwall] = {
-  {"air", ".", 0x40404080, W_TRANS},
-  {"wall", "#", 0xFFFFFFFF, W_BLOCK},
-  {"bouncy wall", "#", 0x80FF80FF, W_BLOCK | W_BOUNCY},
-  {"spike", "^", 0xC08080FF, W_TRANS | W_PAIN},
-  {"water", "~", 0x0000FFFF, W_BLOCK | W_TRANS},
-  {"frozen water", "#", 0xC0C0FFFF, W_BLOCK | W_FROZEN},
-  {"door", "+", 0xC06000FF, W_BLOCK},
-  {"smashed door", "'", 0xC06000FF, W_TRANS},
-  {"locked door", "+", 0xA05000FF, W_BLOCK},
-  {"magic fountain", "!", 0x8080C0FF, W_TRANS},
-  {"magic fountain (active)", "!", 0xA0A0FFFF, W_TRANS},
-  {"blue portal", "=", 0x4040C0FF, W_TRANS},
-  {"orange portal", "=", 0xC08040FF, W_TRANS},
-  {"platform", "-", 0xFFFFFFFF, W_PLATFORM | W_TRANS },
-  {"staircase", "-", 0xFFFF80FF, W_PLATFORM | W_TRANS | W_STAIRCASE },
-  {"column", "|", 0x40404080, W_TRANS},
-  {"forge", "&", 0xB0202080, W_TRANS | W_PAIN},
+  {"air", ".", 0x40404080, W_TRANS, "Looks like an empty space, but actually necessary for survival."},
+  {"wall", "#", 0xFFFFFFFF, W_BLOCK, "These kinds of tough walls can never be destroyed."},
+  {"bouncy wall", "#", 0x80FF80FF, W_BLOCK | W_BOUNCY, "Like walls, but things bounce off them."},
+  {"spike", "^", 0xC08080FF, W_TRANS | W_PAIN, "Dangerous!"},
+  {"water", "~", 0x0000FFFF, W_BLOCK | W_TRANS, "Not used yet."},
+  {"frozen water", "#", 0xC0C0FFFF, W_BLOCK | W_FROZEN, "Water magically turned into a slippery wall."},
+  {"door", "+", 0xC06000FF, W_BLOCK, "Attack the doors with your weapon to open them."},
+  {"smashed door", "'", 0xC06000FF, W_TRANS, "This door has been already opened."},
+  {"locked door", "+", 0xA05000FF, W_BLOCK, "What is behind this door is not your business."},
+  {"magic fountain", "!", 0x8080C0FF, W_TRANS, "Wow! A magic fountain!"},
+  {"magic fountain (active)", "!", 0xA0A0FFFF, W_TRANS, "Wow! An active magic fountain!"},
+  {"blue portal", "=", 0x4040C0FF, W_TRANS, "Blue portal."},
+  {"orange portal", "=", 0xC08040FF, W_TRANS, "Orange portal."},
+  {"platform", "-", 0xFFFFFFFF, W_PLATFORM | W_TRANS, "You can fall down through such platforms."},
+  {"staircase", "-", 0xFFFF80FF, W_PLATFORM | W_TRANS | W_STAIRCASE, "You can climb staircases and ladders." },
+  {"column", "|", 0x40404080, W_TRANS, "A background decoration." },
+  {"forge", "&", 0xB0202080, W_TRANS | W_PAIN, "Used by runesmiths."},
   };
 
 int sel = 1;

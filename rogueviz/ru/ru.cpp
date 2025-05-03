@@ -264,6 +264,37 @@ void run() {
         if(current_target && current_target->existing)
         displayfr(vid.xres - vid.fsize, vid.fsize, 2, vid.fsize, "HP " + its(current_target->hp) + "/" + its(current_target->max_hp()) + " " + current_target->get_name(), titlecolor, 16);
         }
+      if(cmode == mode::paused) {
+        xy mousep(mousepx, mousepy);
+        string helpstr = "";
+        entity* help_entity = nullptr;
+
+        if(contains(m.get_pixel_bbox(), mousep)) {
+          help_entity = &m;
+          }
+
+        for(auto& e: current_room->entities)
+          if(e->existing && e->visible(current_room) && e->visible_inv() && e->have_help())
+            if(contains(e->get_pixel_bbox(), mousep))
+              help_entity = &*e;
+
+        if(help_entity) {
+          mouseovers = help_entity->get_name();
+          helpstr = help_entity->get_help();
+          }
+
+        int x = mousepx / block_x, y = mousepy / block_y;
+        if(!help_entity && x >= 0 && y >= 0 && x < room_x && y < room_y) {
+          if(!current_room->fov[y][x]) mouseovers = "invisible", helpstr = "You need to explore to see what is there.";
+          else {
+            auto&w = walls[current_room->block_at[y][x] >> 3];
+            mouseovers = w.name;
+            helpstr = w.help;
+            }
+          }
+
+        dialog::add_key_action(SDLK_F1, [helpstr] { gotoHelp(helpstr); });
+        }
       draw_pentagon();
       break;
 
