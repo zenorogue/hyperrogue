@@ -278,7 +278,7 @@ void run() {
       dialog::add_action([] { cmode = mode::playing; });
 
       dialog::addItem("inventory", 'i');
-      dialog::add_action([] { cmode = mode::inventory; });
+      dialog::add_action([] { clearMessages(); cmode = mode::inventory; });
 
       dialog::addItem("map editor", 'e');
       dialog::add_action([] { cmode = mode::editmap; });
