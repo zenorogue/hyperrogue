@@ -134,6 +134,7 @@ struct xy {
 struct entity {
   virtual xy siz() = 0;
   xy where, vel;
+  bool existing;
 
   xy dsiz() { return get_scale() * siz(); }
 
@@ -157,6 +158,7 @@ struct entity {
   entity() {
     where = xy(screen_x / 2., screen_y / 2.);
     vel = xy(0, 0);
+    existing = true;
     destroyed = false; invinc_end = -1;
     clearg();
     };
@@ -197,10 +199,14 @@ struct entity {
     return (invinc_end < gframeid || (invinc_end - gframeid) % 50 < 25);
     }
 
+  virtual void on_kill() {
+    existing = false;
+    }
+
   virtual bool reduce_hp(int x) {
     if(gframeid < invinc_end) return false;
     hp -= x;
-    if(hp < 0) destroyed = true;
+    if(hp < 0) on_kill();
     invinc_end = gframeid + 150;
     return true;
     }
@@ -256,12 +262,15 @@ struct npc : public entity {
   };
 
 struct boar : public entity {
+  xy respawn;
+  int num_kills;
   xy siz() override { return {18, 18}; }
   string glyph() override { return "B"; }
   color_t color() override { return 0x804000FF; }
   void act() override;
-  boar() { postfix(); }
+  boar() { num_kills = 0; postfix(); }
   void attacked(int s) override;
+  void on_kill() override { entity::on_kill(); num_kills++; }
   };
 
 struct hint : public entity {
@@ -285,7 +294,7 @@ struct item : public entity {
     if(intersect(get_pixel_bbox(), m.get_pixel_bbox())) {
       addMessage(pickup_message);
       powers[id].picked_up(qty);
-      destroyed = true;
+      existing = false;
       }
     }
   };

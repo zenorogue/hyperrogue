@@ -250,7 +250,7 @@ void render_room_objects(room *r) {
   initquickqueue();
   if(r == current_room && m.visible_inv()) m.draw();
   for(auto& e: r->entities)
-    if(e->visible(r) && e->visible_inv())
+    if(e->existing && e->visible(r) && e->visible_inv())
       e->draw();
   quickqueue();
   }

@@ -131,6 +131,7 @@ void load_room(fhstream& f, cell *c) {
       else if(cap == "BOAR") {
         auto b = std::make_unique<boar>();
         sscanf(param.c_str(), "%lf%lf", &b->where.x, &b->where.y);
+        b->respawn = b->where;
         r.entities.emplace_back(std::move(b));
         }
       else if(cap == "FERRIS") {
