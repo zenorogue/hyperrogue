@@ -257,6 +257,13 @@ void run() {
         else switch_mapmode_to(mapmode::poincare);
         });
       if(cmode == mode::editmap) mouseovers = format("coordinates: %d %d (%.2lf)", mousepx, mousepy, double(get_scale_at(mousepy)));
+      if(cmode == mode::playing) {
+        titlecolor = 0xFFFFFF;
+        mouseovers = current_room->roomname;
+        displayfr(vid.fsize, vid.fsize, 2, vid.fsize, "HP " + its(m.hp) + "/" + its(m.max_hp()), titlecolor, 0);
+        if(current_target && current_target->existing)
+        displayfr(vid.xres - vid.fsize, vid.fsize, 2, vid.fsize, "HP " + its(current_target->hp) + "/" + its(current_target->max_hp()) + " " + current_target->get_name(), titlecolor, 16);
+        }
       draw_pentagon();
       break;
 

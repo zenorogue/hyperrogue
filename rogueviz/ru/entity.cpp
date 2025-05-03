@@ -276,6 +276,7 @@ void boar::act() {
   }
 
 void boar::attacked(int dmg) {
+  current_target = this;
   reduce_hp(dmg);
   if(destroyed) addMessage("You kill the wild boar."); else addMessage("You hit the wild boar.");
   auto dat = get_dat();

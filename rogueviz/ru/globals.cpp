@@ -45,6 +45,8 @@ double mscale = 100;
 bool non_hyperbolic;
 bool one_room;
 
+struct entity *current_target;
+
 struct ruwall {
   string name;
   string glyph;
