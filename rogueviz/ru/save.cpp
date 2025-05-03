@@ -145,6 +145,11 @@ void load_room(fhstream& f, cell *c) {
           r.entities.emplace_back(std::move(b));
           }
         }
+      else if(cap == "PENDULUM") {
+        auto b = std::make_unique<pendulum_platform>();
+        sscanf(param.c_str(), "%lf%lf%lf%lf%lf%lf", &b->a.x, &b->a.y, &b->b.x, &b->b.y, &b->period, &b->shift);
+        r.entities.emplace_back(std::move(b));
+        }
       else if(cap == "HINT") {
         auto b = std::make_unique<hint>();
         sscanf(param.c_str(), "%lf%lf%lf%lf", &b->where.x, &b->where.y, &b->size.x, &b->size.y);

@@ -257,6 +257,16 @@ struct moving_platform : public entity {
 
 struct ferris_platform : public moving_platform {
   xy location_at(ld t) override;
+  string get_name() override { return "Ferris platform"; }
+  string get_help() override { return "Ferris wheel platforms, powered by some ancient mechanism. They always go in perfect circles, with constant velocity."; }
+  };
+
+struct pendulum_platform : public moving_platform {
+  xy a, b;
+  ld period, shift;
+  xy location_at(ld t) override;
+  string get_name() override { return "pendulum platform"; }
+  string get_help() override { return "These pendulum platforms go back and forth between two locations, taking the shortest path possible."; }
   };
 
 struct npc : public entity {

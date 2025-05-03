@@ -296,6 +296,14 @@ xy ferris_platform::location_at(ld t) {
   return from_hyper(rgpushxto0(to_hyper(ctr)) * xspinpush0(t / game_fps + shift, radius));
   }
 
+xy pendulum_platform::location_at(ld t) {
+  auto h1 = to_hyper(a);
+  auto h2 = to_hyper(b);
+  auto d = hdist(h1, h2);
+  auto x = (1 - cos(t / game_fps * TAU / period)) / 2 * d;
+  return from_hyper(rgpushxto0(h1) * rspintox(gpushxto0(h1) * h2) * xpush0(x));
+  }
+
 void moving_platform::draw() {
   double d = get_scale();
   for(int w=-1; w<=1; w++) {
