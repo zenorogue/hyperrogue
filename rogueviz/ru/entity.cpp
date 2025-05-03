@@ -46,8 +46,11 @@ void entity::kino() {
 
   // ld modv = 60. / game_fps;
 
+  int loopcount = 0;
+
   apply_grav();
   again:
+  loopcount++;
 
   auto obb = pixel_to_block(get_pixel_bbox());
   auto nbb = pixel_to_block(get_pixel_bbox_at(where + vel));
@@ -129,20 +132,48 @@ void entity::kino() {
     if((walls[b].flags & W_PAIN) && pain_effect()) goto again;
     }
 
-  for(auto& e: current_room->entities) if(e->as_platform() && intersect(e->get_pixel_bbox(), get_pixel_bbox())) {
-    auto p = e->as_platform();
-    auto oldpos = p->location_at(gframeid-1);
-    auto newpos = p->location_at(gframeid-0);
-    auto oldscale = get_scale_at(oldpos.y);
-    auto newscale = get_scale_at(newpos.y);
-    auto new_where = (where - oldpos) / oldscale * newscale + newpos;
-    zero_vel = new_where - where;
-    vel.y -= zero_vel.y;
-    bool err = vel.y == 0;
-    if(abs(vel.y) < 1e-6) vel.y = 0; else vel.y /= 2;
-    vel.y += zero_vel.y;
-    on_floor = true;
-    if(!err) goto again;
+  if(loopcount < 100) for(auto& e: current_room->entities) if(auto p = e->as_platform()) {
+    auto opw = p->location_at(gframeid-1);
+    auto npw = p->location_at(gframeid);
+
+    xy screen_ctr(xctr, yctr);
+
+    auto rmow = (where - opw) / get_scale_at(opw.y) + screen_ctr;
+    auto rmnw = (where + vel - npw) / get_scale_at(npw.y) + screen_ctr;
+    auto rvel = rmnw - rmow;
+
+    auto eb = get_pixel_bbox_at(rmnw);
+    auto pb = p->get_pixel_bbox_at(screen_ctr);
+
+    if(intersect(pb, eb)) {
+      zero_vel = (rmow - screen_ctr) * get_scale_at(npw.y) + npw - where;
+
+
+      bool reset = false;
+
+      if(intersect(pb, get_pixel_bbox_at(rmow))) { /* should not happen */ }
+
+      else if(!intersect(pb, get_pixel_bbox_at(rmow + xy(rvel.x, 0))) && rvel.y > 0) {
+        on_floor = true;
+        rvel.y /= 2;
+        if(abs(rvel.y) < 1e-6) rvel.y = 0;
+        reset = true;
+        }
+
+      else if(!intersect(pb, get_pixel_bbox_at(rmow + xy(rvel.x, 0))) && rvel.y < 0) {
+        rvel.y /= 2;
+        if(abs(rvel.y) < 1e-6) rvel.y = 0;
+        reset = true;
+        }
+
+      else {
+        rvel.x = -rvel.x;
+        reset = true;
+        }
+
+      vel = (rmow + rvel - screen_ctr) * get_scale_at(npw.y) + npw - where;
+      if(reset) goto again;
+      }
     }
   
   int bx0 = floor(where.x / block_x);
