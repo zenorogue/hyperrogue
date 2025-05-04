@@ -261,9 +261,8 @@ void npc::act() {
 void boar::act() {
   kino();
   if(intersect(get_pixel_bbox(), m.get_pixel_bbox())) {
-    addMessage("The wild boar gores you!");
     int s = where.x < m.where.x ? -1 : 1;
-    m.reduce_hp(15);
+    if(m.reduce_hp(15)) addMessage("The wild boar gores you!");
     auto dat = get_dat();
     auto mdat = m.get_dat();
     if(m.on_floor) m.vel.x = mdat.d * mdat.modv * -s * 1.5, m.vel.y = -mdat.d * mdat.modv * 2;
