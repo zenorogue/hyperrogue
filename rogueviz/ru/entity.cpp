@@ -343,7 +343,7 @@ void moving_platform::act() {
   where = location_at(gframeid);
   }
 
-void kestrel::act() {
+void entity::apply_walls_reflect() {
   int loopcount = 0;
   again:
   loopcount++;
@@ -383,7 +383,10 @@ void kestrel::act() {
       vel.x = -vel.x; goto again;
       }
     }
+  }
 
+void kestrel::act() {
+  apply_walls_reflect();
   apply_vel();
 
   if(intersect(get_pixel_bbox(), m.get_pixel_bbox())) {

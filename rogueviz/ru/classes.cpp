@@ -181,6 +181,7 @@ struct entity {
   void kino();
   void apply_vel();
   void apply_walls();
+  void apply_walls_reflect();
   void apply_grav();
   void apply_portal_grav();
   virtual void act() { kino(); }
