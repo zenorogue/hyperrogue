@@ -246,7 +246,7 @@ void npc::act() {
   kino();
   if(gframeid > m.last_action + 300 && intersect(extend_all(get_pixel_bbox(), get_scale()*12), m.get_pixel_bbox()) && talk_on != m.last_action) {
     talk_on = m.last_action = gframeid;
-    cmode = mode::talking;
+    cmode = mode::menu;
     pushScreen([&] { cmode = mode::playing; popScreen(); });
     pushScreen([&] {
       dialog::init(name, col >> 8);

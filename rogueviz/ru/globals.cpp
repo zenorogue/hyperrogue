@@ -124,14 +124,14 @@ extern array<array<location, 256>, 256> all_locations;
 
 enum class mapmode { standard, poincare, klein };
 
-enum class mode { editmap, menu, playing, paused, inventory, talking };
+enum class mode { editmap, menu, playing, paused };
 
 mode cmode = mode::playing;
 
 mapmode cmapmode = mapmode::standard;
 void switch_mapmode_to(mapmode m);
 
-bool should_apply_fov() { return among(cmode, mode::playing, mode::paused, mode::inventory); }
+bool should_apply_fov() { return among(cmode, mode::playing, mode::paused, mode::menu); }
 
 void enable();
 
@@ -145,5 +145,7 @@ void sync_map();
 void render_room_objects(room *r);
 
 void asciiletter(ld minx, ld miny, ld maxx, ld maxy, const string& ch, color_t col);
+
+void render_the_map();
 
 }

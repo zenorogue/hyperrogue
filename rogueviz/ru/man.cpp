@@ -5,6 +5,8 @@ void handle_powers(data& d);
 void man::act() {
   kino();
 
+  current_stats = next_stats;
+  next_stats = base_stats;
   auto dat = get_dat();
 
   coyote_time = next_coyote_time; next_coyote_time = 0;

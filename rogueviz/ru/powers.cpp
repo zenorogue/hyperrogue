@@ -117,7 +117,7 @@ void gen_powers() {
       m.attack_facing = m.facing; m.attack_when = gframeid;
       auto pb = m.get_pixel_bbox_at(xy{m.where.x + m.attack_facing * m.dsiz().x, m.where.y});
       auto bb = pixel_to_block(pb);
-      for(auto& e: current_room->entities) if(e->existing && intersect(e->get_pixel_bbox(), pb)) e->attacked(15);
+      for(auto& e: current_room->entities) if(e->existing && intersect(e->get_pixel_bbox(), pb)) e->attacked((m.current_stats[stat::str] + 1) * 3 / 2);
       for(int y=bb.miny; y<bb.maxy; y++)
       for(int x=bb.minx; x<bb.maxx; x++) {
         int b = current_room->at(x, y);
@@ -207,6 +207,8 @@ void gen_powers() {
     "Is it safe to put this ring on?",
     "=", 0xC04040FF,
     [] (data& d) {
+      if(d.p->flags & ACTIVE)
+        m.next_stats[stat::str] += d.p->qty_filled;
       if(d.keystate == 1) {
         d.p->flags ^= ACTIVE;
         d.p->flags |= IDENTIFIED;
@@ -239,23 +241,44 @@ void handle_powers(data& d) {
     }
   }
 
-void draw_inventory() {
+void draw_inventory_frame() {
   flat_model_enabler fme;
   initquickqueue();
   for(int a: {0, 1, 3, 2, 0})
     curvepoint(eupoint((a&1)?16:vid.xres-16, (a&2)?16:vid.yres-16));
   queuecurve(atscreenpos(0, 0), 0xFFFFFFFF, 0x000000E0, PPR::LINE);
   quickqueue();
+  }
+
+void draw_inventory() {
+  render_the_map();
+  draw_inventory_frame();
+  dialog::init();
   int next_y = 48;
   int st = vid.fsize * 1.2;
   displaystr(32, next_y, 0, vid.fsize, "Your inventory:", 0xC0C0C0, 0);
   next_y += st * 1.5;
   for(auto& p: powers) if(p.qty_owned) {
     string key = p.key == ' ' ? "␣" : dialog::keyname(p.key);
-    displaystr(100, next_y, 0, vid.fsize, key, p.color >> 8, 16);
-    displaystr(130, next_y, 0, vid.fsize, p.get_glyph(), p.color >> 8, 8);
-    displaystr(160, next_y, 0, vid.fsize, p.get_name(), p.color >> 8, 0);
+    if(displaystr(100, next_y, 0, vid.fsize, key, p.color >> 8, 16)) getcstat = p.key;
+    if(displaystr(130, next_y, 0, vid.fsize, p.get_glyph(), p.color >> 8, 8)) getcstat = p.key;
+    if(displaystr(160, next_y, 0, vid.fsize, p.get_name(), p.color >> 8, 0)) getcstat = p.key;
     next_y += st;
+    dialog::add_key_action(p.key, [&p] { pushScreen([&p] {
+      render_the_map();
+      draw_inventory_frame();
+      dialog::init(p.get_name(), p.color);
+      dialog::addHelp(p.get_desc());
+      dialog::addItem("press a key to redefine", SDLK_ESCAPE);
+      dialog::display();
+      dialog::addBack();
+      keyhandler = [&p] (int sym, int uni) {
+        if(sym == 0) return;
+        if(sym == SDLK_ESCAPE) return popScreen();
+        for(auto& p1: powers) if(p1.key == sym) p1.key = p.key;
+        p.key = sym;
+        };
+      }); });
     }
   }
 

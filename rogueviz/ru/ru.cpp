@@ -33,6 +33,7 @@ Have fun!
 #include "portals.cpp"
 #include "powers.cpp"
 #include "save.cpp"
+#include "stats.cpp"
 
 namespace rogue_unlike {
 
@@ -298,25 +299,19 @@ void run() {
       draw_pentagon();
       break;
 
-    case mode::inventory:
-      render_the_map();
-      draw_inventory();
-      dialog::add_key_action('v', [] { cmode = mode::menu; });
-      break;
-
-    case mode::talking:
-      break;
-
     case mode::menu:
-      nomap = true;
-      emptyscreen();
+      render_the_map();
+      draw_inventory_frame();
       dialog::init();
       dialog::addTitle("Fountains of Alchemy", 0x4040C0, 150);
       dialog::addItem("return to game", 'v');
       dialog::add_action([] { cmode = mode::playing; });
 
       dialog::addItem("inventory", 'i');
-      dialog::add_action([] { clearMessages(); cmode = mode::inventory; });
+      dialog::add_action_push(draw_inventory);
+
+      dialog::addItem("character", 'k');
+      dialog::add_action_push(draw_stats);
 
       dialog::addItem("map editor", 'e');
       dialog::add_action([] { cmode = mode::editmap; });

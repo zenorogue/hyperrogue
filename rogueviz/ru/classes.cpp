@@ -132,6 +132,17 @@ struct xy {
   xy& operator /= (ld s) { x /= s; y /= s; return self; }
   };
 
+enum class stat { str, con, wis, dex };
+
+constexpr stat allstats[] =  { stat::str, stat::con, stat::wis, stat::dex };
+constexpr int qstat = 4;
+
+template<class T> struct statarray : array<T, qstat> {
+  statarray() {};
+  T& operator [] (stat s) { return array<T, qstat>::operator[] ((int) s); };
+  const T& operator [] (stat s) const { return array<T, qstat>::operator[] ((int) s); };
+  };
+
 struct entity {
   virtual xy siz() = 0;
   xy where, vel;
@@ -232,7 +243,17 @@ struct man : public entity {
 
   int last_action;
 
-  man() { facing = 1; attack_facing = 1; postfix(); }
+  int experience;
+  statarray<int> base_stats, current_stats, next_stats;
+
+  virtual int max_hp() { return 10 * current_stats[stat::con]; }
+
+  man() {
+    facing = 1; attack_facing = 1;
+    for(auto s: allstats) base_stats[s] = 10;
+    next_stats = base_stats; current_stats = base_stats;
+    postfix();
+    }
   xy siz() override { return {12, 12}; }
   string glyph() override { return hallucinating ? "f" : "@"; }
   color_t color() override { return hallucinating ? 0x808080FF : 0xFF8080FF; }
