@@ -1115,7 +1115,7 @@ You find some more gold.
 OK
 
 MOVE 2 Ferris Wheel
-ROOM Platform Fest
+ROOM Bat Cave
 # wall
 - staircase
 . air
