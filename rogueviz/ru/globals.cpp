@@ -64,6 +64,7 @@ flagtype W_STAIRCASE = 8;
 flagtype W_PAIN = 16;
 flagtype W_BOUNCY = 32;
 flagtype W_FROZEN = 64;
+flagtype W_BLOCKBIRD = 128;
 
 constexpr int qwall = int(wGUARD);
 
@@ -71,8 +72,8 @@ ruwall walls[qwall] = {
   {"air", ".", 0x40404080, W_TRANS, "Looks like an empty space, but actually necessary for survival."},
   {"wall", "#", 0xFFFFFFFF, W_BLOCK, "These kinds of tough walls can never be destroyed."},
   {"bouncy wall", "#", 0x80FF80FF, W_BLOCK | W_BOUNCY, "Like walls, but things bounce off them."},
-  {"spike", "^", 0xC08080FF, W_TRANS | W_PAIN, "Dangerous!"},
-  {"water", "~", 0x0000FFFF, W_BLOCK | W_TRANS, "Not used yet."},
+  {"spike", "^", 0xC08080FF, W_TRANS | W_PAIN | W_BLOCKBIRD, "Dangerous!"},
+  {"water", "~", 0x0000FFFF, W_BLOCK | W_TRANS | W_BLOCKBIRD, "Not used yet."},
   {"frozen water", "#", 0xC0C0FFFF, W_BLOCK | W_FROZEN, "Water magically turned into a slippery wall."},
   {"door", "+", 0xC06000FF, W_BLOCK, "Attack the doors with your weapon to open them."},
   {"smashed door", "'", 0xC06000FF, W_TRANS, "This door has been already opened."},
@@ -81,9 +82,9 @@ ruwall walls[qwall] = {
   {"magic fountain (active)", "!", 0xA0A0FFFF, W_TRANS, "Wow! An active magic fountain!"},
   {"blue portal", "=", 0x4040C0FF, W_TRANS, "Blue portal."},
   {"orange portal", "=", 0xC08040FF, W_TRANS, "Orange portal."},
-  {"platform", "-", 0xFFFFFFFF, W_PLATFORM | W_TRANS, "You can fall down through such platforms."},
+  {"platform", "-", 0xFFFFFFFF, W_PLATFORM | W_TRANS | W_BLOCKBIRD, "You can fall down through such platforms."},
   {"staircase", "-", 0xFFFF80FF, W_PLATFORM | W_TRANS | W_STAIRCASE, "You can climb staircases and ladders." },
-  {"column", "|", 0x40404080, W_TRANS, "A background decoration." },
+  {"column", "|", 0x40404080, W_TRANS | W_BLOCKBIRD, "A background decoration." },
   {"forge", "&", 0xB0202080, W_TRANS | W_PAIN, "Used by runesmiths."},
   };
 

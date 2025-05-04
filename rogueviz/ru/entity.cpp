@@ -288,6 +288,26 @@ void boar::attacked(int dmg) {
   if(on_floor) vel.x = dat.d * dat.modv * s * 2, vel.y = -dat.d * dat.modv * 2.5;
   }
 
+void snake::act() {
+  kino();
+  if(abs(vel.x) < 1e-6) {
+    auto dat = get_dat();
+    vel.x = zero_vel.x + dat.d * dat.modv * dir;
+    dir = -dir;
+    }
+  if(intersect(get_pixel_bbox(), m.get_pixel_bbox())) {
+    if(m.reduce_hp(25)) addMessage("The snake bites you!");
+    }
+  }
+
+void snake::attacked(int dmg) {
+  current_target = this;
+  reduce_hp(dmg);
+  if(!existing) addMessage("You kill the snake."); else addMessage("You hit the snake.");
+  if(where.x < m.where.x) vel.x = -abs(vel.x);
+  if(where.x > m.where.x) vel.x = +abs(vel.x);
+  }
+
 void hint::act() {
   bool cur = intersect(get_pixel_bbox(), m.get_pixel_bbox());
   if(cur && !state) {
@@ -323,5 +343,60 @@ void moving_platform::act() {
   where = location_at(gframeid);
   }
 
+void kestrel::act() {
+  int loopcount = 0;
+  again:
+  loopcount++;
+
+  auto obb = pixel_to_block(get_pixel_bbox());
+  auto nbb = pixel_to_block(get_pixel_bbox_at(where + vel));
+  auto jbb = join(obb, nbb);
+
+  flagtype blocking = (W_BLOCK | W_BLOCKBIRD);
+
+  if(loopcount >= 100) return;
+
+  for(int x = obb.minx; x < obb.maxx; x++) for(int y = obb.maxy; y < jbb.maxy; y++) {
+    eWall b = current_room->at(x, y);
+    if(walls[b].flags & blocking) {
+      vel.y = -vel.y; goto again;
+      }
+    }
+
+  for(int x = obb.minx; x < obb.maxx; x++) for(int y = jbb.miny; y < obb.miny; y++) {
+    eWall b = current_room->at(x, y);
+    if(walls[b].flags & blocking) {
+      vel.y = -vel.y; goto again;
+      }
+    }
+
+  for(int x = nbb.minx; x < nbb.maxx; x++) for(int y = jbb.miny; y < jbb.maxy; y++) {
+    eWall b = current_room->at(x, y);
+    if(walls[b].flags & blocking) {
+      vel.x = -vel.x; goto again;
+      }
+    }
+
+  for(int x = obb.maxx; x < jbb.maxx; x++) for(int y = jbb.miny; y < jbb.maxy; y++) {
+    eWall b = current_room->at(x, y);
+    if(walls[b].flags & blocking) {
+      vel.x = -vel.x; goto again;
+      }
+    }
+
+  apply_vel();
+
+  if(intersect(get_pixel_bbox(), m.get_pixel_bbox())) {
+    if(m.reduce_hp(15)) addMessage("The kestrel claws you!");
+    }
+  }
+
+void kestrel::attacked(int dmg) {
+  current_target = this;
+  reduce_hp(dmg);
+  if(!existing) addMessage("You kill the kestrel."); else addMessage("You hit the kestrel.");
+  if(where.x < m.where.x) vel.x = -abs(vel.x);
+  if(where.x > m.where.x) vel.x = +abs(vel.x);
+  }
 
 }

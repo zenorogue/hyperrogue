@@ -303,6 +303,27 @@ struct boar : public enemy {
   string get_help() override { return "Beware their tusks."; }
   };
 
+struct snake : public enemy {
+  int dir;
+  xy siz() override { return {18, 8}; }
+  string glyph() override { return "S"; }
+  color_t color() override { return 0x20D020FF; }
+  void act() override;
+  void attacked(int s) override;
+  string get_name() override { return "snake"; }
+  string get_help() override { return "A nasty dungeon snake."; }
+  };
+
+struct kestrel : public enemy {
+  xy siz() override { return {10, 10}; }
+  string glyph() override { return "K"; }
+  color_t color() override { return 0xD0A0A0FF; }
+  void act() override;
+  void attacked(int s) override;
+  string get_name() override { return "kestrel"; }
+  string get_help() override { return "A standard dungeon kestrel."; }
+  };
+
 struct hint : public entity {
   string hint_text;
   int state;
