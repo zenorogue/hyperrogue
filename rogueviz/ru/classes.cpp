@@ -128,6 +128,7 @@ struct xy {
   xy& operator += (xy b) { x += b.x; y += b.y; return self; }
   xy& operator -= (xy b) { x -= b.x; y -= b.y; return self; }
   xy& operator *= (ld s) { x *= s; y *= s; return self; }
+  xy& operator *= (xy b) { x *= b.x; y *= b.y; return self; }
   xy& operator /= (ld s) { x /= s; y /= s; return self; }
   };
 
