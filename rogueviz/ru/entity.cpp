@@ -394,12 +394,42 @@ void kestrel::act() {
     }
   }
 
+void bat::act() {
+  if(gframeid >= next_change && gframeid > invinc_end + 300) {
+    next_change = gframeid + 300 + rand() % 300;
+    int angle = rand() % 360;
+
+    auto dat = get_dat();
+    ld v = dat.d * dat.modv;
+
+    vel.x = v * cos(angle);
+    vel.y = v * sin(angle);
+    }
+
+  apply_walls_reflect();
+  apply_vel();
+
+  if(intersect(get_pixel_bbox(), m.get_pixel_bbox())) {
+    if(m.reduce_hp(15)) addMessage("The bat bites you!");
+    }
+  }
+
 void kestrel::attacked(int dmg) {
   current_target = this;
   reduce_hp(dmg);
   if(!existing) addMessage("You kill the kestrel."); else addMessage("You hit the kestrel.");
   if(where.x < m.where.x) vel.x = -abs(vel.x);
   if(where.x > m.where.x) vel.x = +abs(vel.x);
+  }
+
+void bat::attacked(int dmg) {
+  current_target = this;
+  reduce_hp(dmg);
+  if(!existing) addMessage("You kill the bat."); else addMessage("You hit the bat.");
+  if(where.x < m.where.x) vel.x = -abs(vel.x);
+  if(where.x > m.where.x) vel.x = +abs(vel.x);
+  if(where.y < m.where.y) vel.y = -abs(vel.y);
+  if(where.y > m.where.y) vel.y = +abs(vel.y);
   }
 
 }

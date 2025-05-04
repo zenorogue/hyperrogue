@@ -325,6 +325,17 @@ struct kestrel : public enemy {
   string get_help() override { return "A standard dungeon kestrel."; }
   };
 
+struct bat : public enemy {
+  int next_change;
+  xy siz() override { return {6, 6}; }
+  string glyph() override { return "B"; }
+  color_t color() override { return 0xD0A0A0FF; }
+  void act() override;
+  void attacked(int s) override;
+  string get_name() override { return "bat"; }
+  string get_help() override { return "A cave bat."; }
+  };
+
 struct hint : public entity {
   string hint_text;
   int state;

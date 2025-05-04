@@ -134,6 +134,12 @@ void load_room(fhstream& f, cell *c) {
         b->respawn = b->where;
         r.entities.emplace_back(std::move(b));
         }
+      else if(cap == "BAT") {
+        auto b = std::make_unique<bat>();
+        sscanf(param.c_str(), "%lf%lf", &b->where.x, &b->where.y);
+        b->respawn = b->where;
+        r.entities.emplace_back(std::move(b));
+        }
       else if(cap == "KESTREL") {
         auto b = std::make_unique<kestrel>();
         sscanf(param.c_str(), "%lf%lf%lf%lf", &b->where.x, &b->where.y, &b->vel.x, &b->vel.y);
