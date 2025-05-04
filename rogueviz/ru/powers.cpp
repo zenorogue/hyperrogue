@@ -117,7 +117,7 @@ void gen_powers() {
       m.attack_facing = m.facing; m.attack_when = gframeid;
       auto pb = m.get_pixel_bbox_at(xy{m.where.x + m.attack_facing * m.dsiz().x, m.where.y});
       auto bb = pixel_to_block(pb);
-      for(auto& e: current_room->entities) if(intersect(e->get_pixel_bbox(), pb)) e->attacked(15);
+      for(auto& e: current_room->entities) if(e->existing && intersect(e->get_pixel_bbox(), pb)) e->attacked(15);
       for(int y=bb.miny; y<bb.maxy; y++)
       for(int x=bb.minx; x<bb.maxx; x++) {
         int b = current_room->at(x, y);
