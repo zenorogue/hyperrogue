@@ -285,16 +285,20 @@ struct npc : public entity {
   string get_help() override { return "Stay awhile and listen."; }
   };
 
-struct boar : public entity {
+struct enemy : public entity {
   xy respawn;
   int num_kills;
+  void on_kill() override { entity::on_kill(); num_kills++; }
+  enemy() { num_kills = 0; postfix(); }
+  };
+
+
+struct boar : public enemy {
   xy siz() override { return {18, 18}; }
   string glyph() override { return "B"; }
   color_t color() override { return 0x804000FF; }
   void act() override;
-  boar() { num_kills = 0; postfix(); }
   void attacked(int s) override;
-  void on_kill() override { entity::on_kill(); num_kills++; }
   string get_name() override { return "giant boar"; }
   string get_help() override { return "Beware their tusks."; }
   };
