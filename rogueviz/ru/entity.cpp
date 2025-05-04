@@ -282,7 +282,7 @@ void boar::act() {
 void boar::attacked(int dmg) {
   current_target = this;
   reduce_hp(dmg);
-  if(destroyed) addMessage("You kill the wild boar."); else addMessage("You hit the wild boar.");
+  if(!existing) addMessage("You kill the wild boar."); else addMessage("You hit the wild boar.");
   auto dat = get_dat();
   int s = where.x < m.where.x ? -1 : 1;
   if(on_floor) vel.x = dat.d * dat.modv * s * 2, vel.y = -dat.d * dat.modv * 2.5;
