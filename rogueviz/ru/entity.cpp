@@ -37,18 +37,55 @@ void entity::apply_grav() {
   vel.y += dat.d * grav() * dat.moda * 16/9.;
   }
 
-void entity::kino() {
-  on_floor = false;
-  on_ice = false;
-  wallhug = false;
-  on_bounce = false;
-  zero_vel = xy(0, 0);
+void entity::apply_vel() {
+  int bx0 = floor(where.x / block_x);
+  int by0 = floor(where.y / block_y);
+  where += vel;
 
-  // ld modv = 60. / game_fps;
+  int bx1 = floor(where.x / block_x);
+  int by1 = floor(where.y / block_y);
 
+  if(non_hyperbolic) {
+    auto& loc = all_locations[by0][bx0];
+    if(bx1 > bx0) {
+      auto& loc1 = loc.get(0);
+      where.x += block_x * (loc1.x - (loc.x + 1));
+      where.y += block_y * (loc1.y - loc.y);
+      }
+    if(bx1 < bx0) {
+      auto& loc1 = loc.get(2);
+      where.x += block_x * (loc1.x - (loc.x - 1));
+      where.y += block_x * (loc1.y - loc.y);
+      }
+    if(by1 < by0) {
+      auto& loc1 = loc.get(1);
+      where.x += block_x * (loc1.x - loc.x);
+      where.y += block_x * (loc1.y - (loc.y - 1));
+      }
+    if(by1 > by0) {
+      auto& loc1 = loc.get(3);
+      where.x += block_x * (loc1.x - loc.x);
+      where.y += block_x * (loc1.y - (loc.y + 1));
+      }
+    }
+
+  // ld test_x, test_y;
+  // tie(test_x, test_y) = from_hyper(h_at);
+  
+  /*println(hlog, tie(where_x, where_y), " TO ", h_at, " TO ", tie(test_x, test_y));
+  exit(1); */
+
+  if(true || !non_hyperbolic) {
+    hyperpoint h_at = to_hyper(where);
+    hyperpoint h_was = to_hyper(where - vel);
+    hyperpoint h_willbe = rgpushxto0(h_at) * MirrorX * MirrorY * gpushxto0(h_at) * h_was;
+    xy next = from_hyper(h_willbe);
+    vel = next - where;
+    }
+  }
+
+void entity::apply_walls() {
   int loopcount = 0;
-
-  apply_grav();
   again:
   loopcount++;
 
@@ -175,52 +212,20 @@ void entity::kino() {
       if(reset) goto again;
       }
     }
-  
-  int bx0 = floor(where.x / block_x);
-  int by0 = floor(where.y / block_y);
-  where += vel;
+  }
 
-  int bx1 = floor(where.x / block_x);
-  int by1 = floor(where.y / block_y);
+void entity::kino() {
+  on_floor = false;
+  on_ice = false;
+  wallhug = false;
+  on_bounce = false;
+  zero_vel = xy(0, 0);
 
-  if(non_hyperbolic) {
-    auto& loc = all_locations[by0][bx0];
-    if(bx1 > bx0) {
-      auto& loc1 = loc.get(0);
-      where.x += block_x * (loc1.x - (loc.x + 1));
-      where.y += block_y * (loc1.y - loc.y);
-      }
-    if(bx1 < bx0) {
-      auto& loc1 = loc.get(2);
-      where.x += block_x * (loc1.x - (loc.x - 1));
-      where.y += block_x * (loc1.y - loc.y);
-      }
-    if(by1 < by0) {
-      auto& loc1 = loc.get(1);
-      where.x += block_x * (loc1.x - loc.x);
-      where.y += block_x * (loc1.y - (loc.y - 1));
-      }
-    if(by1 > by0) {
-      auto& loc1 = loc.get(3);
-      where.x += block_x * (loc1.x - loc.x);
-      where.y += block_x * (loc1.y - (loc.y + 1));
-      }
-    }
+  // ld modv = 60. / game_fps;
 
-  // ld test_x, test_y;
-  // tie(test_x, test_y) = from_hyper(h_at);
-  
-  /*println(hlog, tie(where_x, where_y), " TO ", h_at, " TO ", tie(test_x, test_y));
-  exit(1); */
-
-  if(true || !non_hyperbolic) {  
-    hyperpoint h_at = to_hyper(where);
-    hyperpoint h_was = to_hyper(where - vel);
-    hyperpoint h_willbe = rgpushxto0(h_at) * MirrorX * MirrorY * gpushxto0(h_at) * h_was;
-    xy next = from_hyper(h_willbe);
-    vel = next - where;
-    }
-
+  apply_grav();
+  apply_walls();
+  apply_vel();
   apply_grav();
 
   gwhere += gvel;

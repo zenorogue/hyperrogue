@@ -178,6 +178,8 @@ struct entity {
 
   bool destroyed;
   void kino();
+  void apply_vel();
+  void apply_walls();
   void apply_grav();
   void apply_portal_grav();
   virtual void act() { kino(); }
