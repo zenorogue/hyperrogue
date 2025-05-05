@@ -206,6 +206,13 @@ void entity::apply_walls() {
     }
   }
 
+void entity::stay_on_screen() {
+  if(where.x < l_margin_at && vel.x < 0) vel.x = -vel.x;
+  if(where.x > r_margin_at && vel.x > 0) vel.x = -vel.x;
+  if(where.y < t_margin_at && vel.y < 0) vel.y = -vel.y;
+  if(where.y > b_margin_at && vel.y > 0) vel.y = -vel.y;
+  }
+
 void entity::kino() {
   on_floor = false;
   on_ice = false;
@@ -251,6 +258,7 @@ void npc::act() {
   }
 
 void boar::act() {
+  stay_on_screen();
   kino();
   if(intersect(get_pixel_bbox(), m.get_pixel_bbox())) {
     int s = where.x < m.where.x ? -1 : 1;
@@ -281,6 +289,7 @@ void boar::attacked(int dmg) {
   }
 
 void snake::act() {
+  stay_on_screen();
   kino();
   if(abs(vel.x) < 1e-6) {
     auto dat = get_dat();
@@ -378,6 +387,7 @@ void entity::apply_walls_reflect() {
   }
 
 void kestrel::act() {
+  stay_on_screen();
   apply_walls_reflect();
   apply_vel();
 
@@ -398,6 +408,7 @@ void bat::act() {
     vel.y = v * sin(angle);
     }
 
+  stay_on_screen();
   apply_walls_reflect();
   apply_vel();
 

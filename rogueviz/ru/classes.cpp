@@ -202,6 +202,7 @@ struct entity {
   void apply_walls_reflect();
   void apply_grav();
   void apply_portal_grav();
+  void stay_on_screen();
   virtual void act() { kino(); }
 
   double get_scale() { return get_scale_at(where.y); }
