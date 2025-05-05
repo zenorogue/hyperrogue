@@ -31,11 +31,14 @@ struct power {
   hr::function<color_t()> get_color;
   hr::function<void(int)> picked_up;
   hr::function<void()> refill;
+  hr::function<void()> reshuffle;
   power& is_starting();
   power& be_weapon();
   power& be_resource(string plural);
   power& while_paused();
   power& identified_name(string, string);
+  power& be_wearable(string wear_effect, string remove_effect);
+  power& be_jewelry(string jtype, string desc);
   };
 
 extern vector<power> powers;

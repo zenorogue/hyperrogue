@@ -17,14 +17,69 @@ power& power::identified_name(string s, string desc) {
   return self;
   }
 
+string addqof(string base, power *p) {
+  if(p->qty_filled > 1) base = "+" + its(p->qty_filled) + " " + base;
+  if(p->qty_owned > p->qty_filled) base = base + " " + "(+" + its(p->qty_owned - p->qty_filled) + ")";
+  return base;
+  }
+
+
 power& power::be_weapon() {
   picked_up = [this] (int x) { qty_owned += x; qty_filled = max(qty_filled, x);  };
-  auto gn = get_name; get_name = [gn, this] { return "+" + its(qty_filled-1) + " " + gn() + " (+" + its(qty_owned-qty_filled) + ")"; };
+  auto gn = get_name; get_name = [gn, this] { return addqof(gn(), this); };
   return self;
   }
 
 power& power::be_resource(string s) {
   get_name = [this, s] { return its(qty_filled) + " " + s; };
+  return self;
+  }
+
+using flavor = pair<string, color_t>;
+
+vector<flavor> jewelry_colors = {
+  {"steel", 0xA0A0C0FF},
+  {"amethyst", 0xC060C0FF},
+  {"ruby", 0xC06060FF},
+  {"sapphire", 0x6060C0FF},
+  {"emerald", 0x60C060FF},
+  };
+
+int next_jewelry;
+
+power& power::be_jewelry(string jtype, string xdesc) {
+  int nj = next_jewelry++;
+  picked_up = [this] (int x) { qty_owned += x; qty_filled = max(qty_filled, x);  };
+  get_color = [nj] { return jewelry_colors[nj].second; };
+  get_name = [nj, this, jtype] {
+    string fname = jewelry_colors[nj].first + " " + jtype;
+    if(flags & IDENTIFIED) fname = fname + " of " + name;
+    fname = addqof(fname, this);
+    return fname;
+    };
+  get_desc = [this, xdesc] {
+    return (flags & IDENTIFIED) ? desc : xdesc;
+    };
+  return self;
+  }
+
+power& power::be_wearable(string wear_effect, string remove_effect) {
+  auto gn = get_name;
+  get_name = [this, gn] {
+    string s = gn();
+    if(flags & ACTIVE) s += " (worn)";
+    return s;
+    };
+  auto ac = act;
+  act = [this, ac, wear_effect, remove_effect] (data& d) {
+    if(d.keystate == 1) {
+      d.p->flags ^= ACTIVE;
+      string msg = (d.p->flags & ACTIVE) ? wear_effect : remove_effect;
+      if(msg.find("%") != string::npos) msg.replace(msg.find("%"), 1, get_name());
+      addMessage(msg);
+      }
+    ac(d);
+    };
   return self;
   }
 
@@ -42,6 +97,7 @@ void power::init() {
   get_glyph = [this] { return glyph; };
   picked_up = [this] (int x) { qty_filled += x; qty_owned += x; };
   refill = [this] {};
+  reshuffle = [this] {};
   }
 
 power& gen_power(int key, string name, string desc, string glyph, color_t color, powerfun pf) {
@@ -155,28 +211,19 @@ void gen_powers() {
     "This strange ring is too small to put on your finger, but maybe you could put it on your small toe?",
     "=", 0xe1cbbeFF,
     [] (data& d) {
-      if(d.keystate == 1) {
-        d.p->flags ^= ACTIVE;
-        if(d.p->flags & ACTIVE) addMessage("You put the " + d.p->get_name() + " on your toe.");
-        else addMessage("You remove the " + d.p->get_name() + " from your toe.");
-        }
       if(d.p->flags & ACTIVE) m.next_coyote_time += 30;
       if(!(d.p->flags & IDENTIFIED) && (gframeid <= m.on_floor_when + m.coyote_time) && !m.on_floor) {
         d.p->flags |= IDENTIFIED;
         addMessage("You feel a strange magical force wanting to hold your foot from below.");
         }
       }
-    ).identified_name("Toe Ring of the Coyote", "This ring, worn on a toe, will let you still jump after running off a platform. Just make sure that you run off with the foot that you are wearing this ring on!"),
+    ).identified_name("Toe Ring of the Coyote", "This ring, worn on a toe, will let you still jump after running off a platform. Just make sure that you run off with the foot that you are wearing this ring on!")
+    .be_wearable("You put the % on your toe.", "You remove the % from your toe.");
 
   gen_power('g', "Golden Shoelaces",
     "These shoelaces might bind you into place or give you freedom... or they could just be mundane shoelaces for rich people... one way to tell.",
     "=", 0xFFD500FF,
     [] (data& d) {
-      if(d.keystate == 1) {
-        d.p->flags ^= ACTIVE;
-        if(d.p->flags & ACTIVE) addMessage("You put the Golden Shoelaces on your boots.");
-        else addMessage("You remove the Golden Shoelaces from your boots.");
-        }
       if(d.p->flags & ACTIVE) {
         m.next_jump_control++;
         auto& ids = d.p->id_status;
@@ -202,22 +249,56 @@ void gen_powers() {
           }
         }
       }
-    ).identified_name("Golden Shoelaces", "Normally you cannot control your jumps while you are flying. These shoelaces allow you some control over your jumps."),
+    ).identified_name("Golden Shoelaces", "Normally you cannot control your jumps while you are flying. These shoelaces allow you some control over your jumps.")
+    .be_wearable("You put the Golden Shoelaces on your boots.", "You remove the Golden Shoelaces on your boots.");
 
-  gen_power('r', "steel ring",
-    "Is it safe to put this ring on?",
+  gen_power('r', "strength",
+    "Wearing this ring will raise your strength.",
     "=", 0xC04040FF,
     [] (data& d) {
-      if(d.p->flags & ACTIVE)
+      if(d.p->flags & ACTIVE) {
         m.next_stats[stat::str] += d.p->qty_filled;
-      if(d.keystate == 1) {
-        d.p->flags ^= ACTIVE;
         d.p->flags |= IDENTIFIED;
-        if(d.p->flags & ACTIVE) addMessage("You put the Ring of Strength on your finger.");
-        else addMessage("You remove the Ring of Strength from your finger.");
         }
       }
-    ).identified_name("Ring of Strength", "This will raise your strength!"),
+    ).be_jewelry("ring", "You need to wear this ring to know what it does.")
+     .be_wearable("You put the % on your finger. You feel stronger!", "You remove the %. You feel weaker..."),
+
+  gen_power('j', "toughness",
+    "Wearing this ring will raise your toughness.",
+    "=", 0xC04040FF,
+    [] (data& d) {
+      if(d.p->flags & ACTIVE) {
+        m.next_stats[stat::str] += d.p->qty_filled;
+        d.p->flags |= IDENTIFIED;
+        }
+      }
+    ).be_jewelry("ring", "You need to wear this ring to know what it does.")
+     .be_wearable("You put the % on your finger. You feel tougher!", "You remove the %. You feel weaker..."),
+
+  gen_power('y', "wisdom",
+    "Wearing this ring will raise your wisdom.",
+    "=", 0xC04040FF,
+    [] (data& d) {
+      if(d.p->flags & ACTIVE) {
+        m.next_stats[stat::str] += d.p->qty_filled;
+        d.p->flags |= IDENTIFIED;
+        }
+      }
+    ).be_jewelry("ring", "You need to wear this ring to know what it does.")
+     .be_wearable("You put the % on your finger. You feel wiser!", "You remove the %. You feel stupid..."),
+
+  gen_power('x', "dexterity",
+    "Wearing this ring will raise your dexterity.",
+    "=", 0xC04040FF,
+    [] (data& d) {
+      if(d.p->flags & ACTIVE) {
+        m.next_stats[stat::str] += d.p->qty_filled;
+        d.p->flags |= IDENTIFIED;
+        }
+      }
+    ).be_jewelry("ring", "You need to wear this ring to know what it does.")
+     .be_wearable("You put the % on your finger. You feel better with bows!", "You remove the %. You feel worse with bows..."),
 
   gen_power('g', "gold",
     "For some weird reason, people love gold, and they will give you anything if you give them enough gold.\n\n"
@@ -261,14 +342,14 @@ void draw_inventory() {
   next_y += st * 1.5;
   for(auto& p: powers) if(p.qty_owned) {
     string key = p.key == ' ' ? "␣" : dialog::keyname(p.key);
-    if(displaystr(100, next_y, 0, vid.fsize, key, p.color >> 8, 16)) getcstat = p.key;
-    if(displaystr(130, next_y, 0, vid.fsize, p.get_glyph(), p.color >> 8, 8)) getcstat = p.key;
-    if(displaystr(160, next_y, 0, vid.fsize, p.get_name(), p.color >> 8, 0)) getcstat = p.key;
+    if(displaystr(100, next_y, 0, vid.fsize, key, p.get_color() >> 8, 16)) getcstat = p.key;
+    if(displaystr(130, next_y, 0, vid.fsize, p.get_glyph(), p.get_color() >> 8, 8)) getcstat = p.key;
+    if(displaystr(160, next_y, 0, vid.fsize, p.get_name(), p.get_color() >> 8, 0)) getcstat = p.key;
     next_y += st;
     dialog::add_key_action(p.key, [&p] { pushScreen([&p] {
       render_the_map();
       draw_inventory_frame();
-      dialog::init(p.get_name(), p.color);
+      dialog::init(p.get_name(), p.get_color() >> 8);
       dialog::addHelp(p.get_desc());
       dialog::addItem("press a key to redefine", SDLK_ESCAPE);
       dialog::display();
@@ -281,6 +362,12 @@ void draw_inventory() {
         };
       }); });
     }
+  }
+
+void shuffle_all() {
+  auto& jc = jewelry_colors;
+  for(int i=1; i<isize(jc); i++) swap(jc[i], jc[rand() % (i+1)]);
+  for(auto& p: powers) p.reshuffle();
   }
 
 }

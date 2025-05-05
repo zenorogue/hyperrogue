@@ -20,6 +20,7 @@ void check_fountains() {
     for(auto& p: powers) p.refill();
     for(auto& r: rooms) for(auto& e: r.second.entities) e->regenerate();
     current_target = nullptr;
+    shuffle_all();
     }
   swap(on_fountain, next_on_fountain);
   }

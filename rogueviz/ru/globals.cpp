@@ -146,5 +146,6 @@ void render_room_objects(room *r);
 void asciiletter(ld minx, ld miny, ld maxx, ld maxy, const string& ch, color_t col);
 
 void render_the_map();
+void shuffle_all();
 
 }
