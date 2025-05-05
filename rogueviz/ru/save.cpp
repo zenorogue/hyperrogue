@@ -131,26 +131,26 @@ void load_room(fhstream& f, cell *c) {
       else if(cap == "BOAR") {
         auto b = std::make_unique<boar>();
         sscanf(param.c_str(), "%lf%lf", &b->where.x, &b->where.y);
-        b->respawn = b->where;
+        b->respawn = b->where; b->postfix();
         r.entities.emplace_back(std::move(b));
         }
       else if(cap == "BAT") {
         auto b = std::make_unique<bat>();
         sscanf(param.c_str(), "%lf%lf", &b->where.x, &b->where.y);
-        b->respawn = b->where;
+        b->respawn = b->where; b->postfix();
         r.entities.emplace_back(std::move(b));
         }
       else if(cap == "KESTREL") {
         auto b = std::make_unique<kestrel>();
         sscanf(param.c_str(), "%lf%lf%lf%lf", &b->where.x, &b->where.y, &b->vel.x, &b->vel.y);
         b->vel *= xy(block_x, block_y) / game_fps;
-        b->respawn = b->where; b->respawn_vel = b->vel;
+        b->respawn = b->where; b->respawn_vel = b->vel; b->postfix();
         r.entities.emplace_back(std::move(b));
         }
       else if(cap == "SNAKE") {
         auto b = std::make_unique<snake>();
         sscanf(param.c_str(), "%lf%lf%d", &b->where.x, &b->where.y, &b->dir);
-        b->respawn = b->where; b->respawn_dir = b->dir;
+        b->respawn = b->where; b->respawn_dir = b->dir; b->postfix();
         r.entities.emplace_back(std::move(b));
         }
       else if(cap == "FERRIS") {

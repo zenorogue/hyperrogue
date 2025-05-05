@@ -318,9 +318,14 @@ struct npc : public entity {
 struct enemy : public entity {
   xy respawn;
   int num_kills;
-  void on_kill() override { entity::on_kill(); num_kills++; }
+  void on_kill() override {
+    entity::on_kill();
+    num_kills++;
+    m.experience += (base_xp() * 25 + 24) / (4 + num_kills) / (4 + num_kills);
+    }
   enemy() { num_kills = 0; postfix(); }
   void regenerate() override { where = respawn; vel = xy(0, 0); existing = true; hp = max_hp(); }
+  virtual int base_xp() { return 0; }
   };
 
 
@@ -332,6 +337,8 @@ struct boar : public enemy {
   void attacked(int s) override;
   string get_name() override { return "giant boar"; }
   string get_help() override { return "Beware their tusks."; }
+  int base_xp() { return 60; }
+  int max_hp() { return 60; }
   };
 
 struct snake : public enemy {
@@ -344,6 +351,8 @@ struct snake : public enemy {
   string get_name() override { return "snake"; }
   string get_help() override { return "A nasty dungeon snake."; }
   void regenerate() override { enemy::regenerate(); dir = respawn_dir; }
+  int base_xp() { return 10; }
+  int max_hp() { return 30; }
   };
 
 struct kestrel : public enemy {
@@ -356,6 +365,8 @@ struct kestrel : public enemy {
   string get_name() override { return "kestrel"; }
   string get_help() override { return "A standard dungeon kestrel."; }
   void regenerate() override { enemy::regenerate(); vel = respawn_vel; }
+  int base_xp() { return 30; }
+  int max_hp() { return 30; }
   };
 
 struct bat : public enemy {
@@ -367,6 +378,8 @@ struct bat : public enemy {
   void attacked(int s) override;
   string get_name() override { return "bat"; }
   string get_help() override { return "A cave bat."; }
+  int base_xp() { return 10; }
+  int max_hp() { return 10; }
   };
 
 struct hint : public entity {
