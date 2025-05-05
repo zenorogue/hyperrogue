@@ -105,8 +105,9 @@ void load_room(fhstream& f, cell *c) {
       string cap = s.substr(0, pos);
       string param = s.substr(pos+1);
       if(cap == "START") {
-        current_room = &r;
+        fountain_room = current_room = &r;
         sscanf(param.c_str(), "%lf%lf", &m.where.x, &m.where.y);
+        fountain_where = m.where;
         }
       else if(cap == "ITEM") {
         auto b = std::make_unique<item>();

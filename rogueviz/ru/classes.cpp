@@ -25,7 +25,7 @@ struct power {
   flagtype flags;
   int random_flavor;
   void init();
-  hr::function<void(data&)> act, paused_act;
+  hr::function<void(data&)> act, paused_act, dead_act;
   hr::function<string()> get_name;
   hr::function<string()> get_desc;
   hr::function<string()> get_glyph;
@@ -37,6 +37,7 @@ struct power {
   power& be_weapon();
   power& be_resource(string plural);
   power& while_paused();
+  power& while_dead();
   power& identified_name(string, string);
   power& be_wearable(string wear_effect, string remove_effect);
   power& be_jewelry(string jtype, string desc);
@@ -44,6 +45,11 @@ struct power {
   };
 
 extern vector<power> powers;
+extern power *extra_life;
+
+flagtype IDENTIFIED = Flag(1);
+flagtype ACTIVE = Flag(2);
+flagtype PARTIAL = Flag(4);
 
 struct bbox {
   int minx, miny, maxx, maxy;
@@ -230,9 +236,10 @@ struct entity {
     }
 
   virtual bool reduce_hp(int x) {
+    if(hp < 0) return false;
     if(gframeid < invinc_end) return false;
     hp -= x;
-    if(hp < 0) on_kill();
+    if(hp <= 0) on_kill();
     invinc_end = gframeid + 150;
     return true;
     }
@@ -270,6 +277,8 @@ struct man : public entity {
   virtual bool hurt_by_spikes() { return true; }
   string get_name() override { return "alchemist"; }
   string get_help() override { return "This is you."; }
+
+  void on_kill() override;
   };
 
 extern man m;
@@ -403,6 +412,9 @@ struct item : public entity {
     kino();
     if(intersect(get_pixel_bbox(), m.get_pixel_bbox())) {
       addMessage(pickup_message);
+      int q0 = powers[id].qty_filled;
+      int q1 = powers[id].qty_owned;
+      add_revert(death_revert, [this, q0, q1] { existing = true; powers[id].qty_filled = q0; powers[id].qty_owned = q1; });
       powers[id].picked_up(qty);
       existing = false;
       }

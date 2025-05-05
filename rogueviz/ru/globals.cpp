@@ -148,4 +148,12 @@ void asciiletter(ld minx, ld miny, ld maxx, ld maxy, const string& ch, color_t c
 void render_the_map();
 void shuffle_all();
 
+using revert_stack = vector<reaction_t>;
+
+revert_stack death_revert, fountain_revert;
+
+void add_revert(revert_stack& s, const reaction_t& what);
+
+void revert_all(revert_stack& s);
+
 }

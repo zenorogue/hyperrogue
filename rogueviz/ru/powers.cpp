@@ -1,14 +1,12 @@
 namespace rogue_unlike {
 
-flagtype IDENTIFIED = Flag(1);
-flagtype ACTIVE = Flag(2);
-flagtype PARTIAL = Flag(4);
-
 data fakedata;
 
 power& power::is_starting() { qty_filled = qty_owned = 1; return self; }
 
-power& power::while_paused() { paused_act = act; return self; }
+power& power::while_paused() { paused_act = act; dead_act = act; return self; }
+
+power& power::while_dead() { dead_act = act; return self; }
 
 power& power::identified_name(string s, string desc) {
   auto gn = get_name;
@@ -122,6 +120,7 @@ void power::init() {
   flags = 0;
   act = [this] (data& d) { pf(d); };
   paused_act = [] (data&) {};
+  dead_act = [] (data&) {};
   get_name = [this] { return name; };
   get_desc = [this] { return desc; };
   get_color = [this] { return color; };
@@ -144,17 +143,47 @@ power& gen_power(int key, string name, string desc, string glyph, color_t color,
   return p;
   }
 
+power *extra_life;
+
 void gen_powers() {
   powers.reserve(100);
 
-  gen_power('1', "Extra Life",
+  extra_life = &gen_power('1', "Extra Life",
     "You are really proud of this potion, which, after you die, will let you return to the moment of time when you drank it. "
     "Unfortunately it still requires an ingredient found only in the magical fountains of the Dungeons of Alchemy.\n\n"
     "You can only drink this potion when at a magical fountain. To protect yourself from dying permanently, when you drink it, "
     "you drink it automatically whenever you are at a magical fountain.",
     "!", 0xFFFF00FF,
-    [] (data& d) { d.p->flags |= IDENTIFIED; }
-    ).is_starting().be_potion(),
+    [] (data& d) {
+      d.p->flags |= IDENTIFIED;
+      if(d.keystate == 1) {
+        if(!m.existing) {
+          revert_all(death_revert);
+          regenerate_all();
+          if(!(extra_life->flags & ACTIVE)) extra_life->qty_filled = 0;
+          m.existing = true;
+          m.where = fountain_where;
+          current_room = fountain_room;
+          if(d.p->flags & ACTIVE)
+            addMessage("You wake up at the Magic Fountain.");
+          else
+            addMessage("You wake up from a very bad nightmare. Wow, you are really stressed.");
+          }
+        else if(!d.p->qty_filled)
+          addMessage("You need to find a Magic Fountain to prepare this potion.");
+        else if(d.p->flags & ACTIVE)
+          addMessage("This potion is drank automatically whenever you visit a Magic Fountain.");
+        else if(!on_fountain)
+          addMessage("For safety, you can only drink " + d.p->get_name() + " at the Magic Fountain.");
+        else {
+          d.p->flags = ACTIVE;
+          fountain_room = current_room; fountain_where = m.where;
+          addMessage("You drink the " + d.p->get_name() + " and you feel that nothing will stop you now!");
+          }
+        }
+      }
+    ).is_starting().be_potion().while_dead();
+  extra_life->qty_filled = 0;
 
   gen_power('d', "move right",
     "A special power of human beings, and most other animals, that they earn early in their life.",
@@ -212,6 +241,8 @@ void gen_powers() {
         if(b == wDoor) {
           current_room->replace_block(x, y, wSmashedDoor);
           addMessage("You smash the door!");
+          auto cr = current_room;
+          add_revert(fountain_revert, [cr, x, y] { cr->replace_block(x, y, wDoor); });
           }
         }
       }).be_weapon(),
@@ -374,6 +405,7 @@ void handle_powers(data& d) {
     if(keywasheld(p.key)) d.keystate |= 2;
     d.p = &p;
     if(cmode == mode::paused) p.paused_act(d);
+    else if(!m.existing) p.dead_act(d);
     else p.act(d);
     }
   }
