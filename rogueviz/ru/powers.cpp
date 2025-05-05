@@ -41,6 +41,7 @@ void power::init() {
   get_color = [this] { return color; };
   get_glyph = [this] { return glyph; };
   picked_up = [this] (int x) { qty_filled += x; qty_owned += x; };
+  refill = [this] {};
   }
 
 power& gen_power(int key, string name, string desc, string glyph, color_t color, powerfun pf) {

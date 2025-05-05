@@ -136,6 +136,9 @@ void compute_scrm() {
 void render_room_walls(room *r) {
   initquickqueue();
   bool af = should_apply_fov();
+
+  walls[wFountain].color = (r == fountain_room) ? 0xA0A0FFFF : 0x8080C0FF;
+
   for(int y=0; y<room_y; y++)
   for(int x=0; x<room_x; x++) {
     if(af && !r->fov[y][x]) continue;

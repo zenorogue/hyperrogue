@@ -30,6 +30,7 @@ struct power {
   hr::function<string()> get_glyph;
   hr::function<color_t()> get_color;
   hr::function<void(int)> picked_up;
+  hr::function<void()> refill;
   power& is_starting();
   power& be_weapon();
   power& be_resource(string plural);
@@ -159,6 +160,7 @@ struct entity {
   int invinc_end;
 
   virtual int max_hp() { return 100; }
+  virtual void regenerate() {}
 
   virtual bool visible(room *r);
 
@@ -312,6 +314,7 @@ struct enemy : public entity {
   int num_kills;
   void on_kill() override { entity::on_kill(); num_kills++; }
   enemy() { num_kills = 0; postfix(); }
+  void regenerate() override { where = respawn; vel = xy(0, 0); existing = true; hp = max_hp(); }
   };
 
 
@@ -326,7 +329,7 @@ struct boar : public enemy {
   };
 
 struct snake : public enemy {
-  int dir;
+  int dir, respawn_dir;
   xy siz() override { return {18, 8}; }
   string glyph() override { return "S"; }
   color_t color() override { return 0x20D020FF; }
@@ -334,9 +337,11 @@ struct snake : public enemy {
   void attacked(int s) override;
   string get_name() override { return "snake"; }
   string get_help() override { return "A nasty dungeon snake."; }
+  void regenerate() override { enemy::regenerate(); dir = respawn_dir; }
   };
 
 struct kestrel : public enemy {
+  xy respawn_vel;
   xy siz() override { return {10, 10}; }
   string glyph() override { return "K"; }
   color_t color() override { return 0xD0A0A0FF; }
@@ -344,6 +349,7 @@ struct kestrel : public enemy {
   void attacked(int s) override;
   string get_name() override { return "kestrel"; }
   string get_help() override { return "A standard dungeon kestrel."; }
+  void regenerate() override { enemy::regenerate(); vel = respawn_vel; }
   };
 
 struct bat : public enemy {

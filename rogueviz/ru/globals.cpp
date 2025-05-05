@@ -55,7 +55,7 @@ struct ruwall {
   string help;
   };
 
-enum eWall { wAir, wWall, wBouncy, wSpike, wWater, wFrozen, wDoor, wSmashedDoor, wLockedDoor, wFountain0, wFountain1, wBluePortal, wOrangePortal, wPlatform, wStaircase, wColumn, wForge, wGUARD };
+enum eWall { wAir, wWall, wBouncy, wSpike, wWater, wFrozen, wDoor, wSmashedDoor, wLockedDoor, wFountain, wBluePortal, wOrangePortal, wPlatform, wStaircase, wColumn, wForge, wGUARD };
 
 flagtype W_BLOCK = 1;
 flagtype W_TRANS = 2;
@@ -79,7 +79,6 @@ ruwall walls[qwall] = {
   {"smashed door", "'", 0xC06000FF, W_TRANS, "This door has been already opened."},
   {"locked door", "+", 0xA05000FF, W_BLOCK, "What is behind this door is not your business."},
   {"magic fountain", "!", 0x8080C0FF, W_TRANS, "Wow! A magic fountain!"},
-  {"magic fountain (active)", "!", 0xA0A0FFFF, W_TRANS, "Wow! An active magic fountain!"},
   {"blue portal", "=", 0x4040C0FF, W_TRANS, "Blue portal."},
   {"orange portal", "=", 0xC08040FF, W_TRANS, "Orange portal."},
   {"platform", "-", 0xFFFFFFFF, W_PLATFORM | W_TRANS | W_BLOCKBIRD, "You can fall down through such platforms."},

@@ -144,13 +144,13 @@ void load_room(fhstream& f, cell *c) {
         auto b = std::make_unique<kestrel>();
         sscanf(param.c_str(), "%lf%lf%lf%lf", &b->where.x, &b->where.y, &b->vel.x, &b->vel.y);
         b->vel *= xy(block_x, block_y) / game_fps;
-        b->respawn = b->where;
+        b->respawn = b->where; b->respawn_vel = b->vel;
         r.entities.emplace_back(std::move(b));
         }
       else if(cap == "SNAKE") {
         auto b = std::make_unique<snake>();
         sscanf(param.c_str(), "%lf%lf%d", &b->where.x, &b->where.y, &b->dir);
-        b->respawn = b->where;
+        b->respawn = b->where; b->respawn_dir = b->dir;
         r.entities.emplace_back(std::move(b));
         }
       else if(cap == "FERRIS") {

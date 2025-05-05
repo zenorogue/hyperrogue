@@ -141,10 +141,6 @@ void entity::apply_walls() {
 
   for(int x = obb.maxx; x < jbb.maxx; x++) for(int y = jbb.miny; y < jbb.maxy; y++) {
     eWall b = current_room->at(x, y);
-    if(b == wFountain0) {
-      current_room->replace_block(x, y, wFountain1);
-      addMessage("A magic fountain! You feel safe and refill your potions.");
-      }
     if(walls[b].flags & W_BLOCK) {
       if(freezing()) { hit_wall(); }
       vel.x = (vel.x - max<ld>(vel.y, 0)/10) / 2;
@@ -156,10 +152,6 @@ void entity::apply_walls() {
   
   for(int x = jbb.minx; x < obb.minx; x++) for(int y = jbb.miny; y < jbb.maxy; y++) {
     eWall b = current_room->at(x, y);
-    if(b == wFountain0) {
-      current_room->replace_block(x, y, wFountain1);
-      addMessage("A magic fountain! You feel safe and refill your potions.");
-      }
     if(walls[b].flags & W_BLOCK) {
       if(freezing()) { hit_wall(); }
       vel.x = (vel.x + max<ld>(vel.y, 0)/10) / 2;
