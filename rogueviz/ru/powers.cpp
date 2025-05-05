@@ -2,6 +2,7 @@ namespace rogue_unlike {
 
 flagtype IDENTIFIED = Flag(1);
 flagtype ACTIVE = Flag(2);
+flagtype PARTIAL = Flag(4);
 
 data fakedata;
 
@@ -36,6 +37,7 @@ power& power::be_resource(string s) {
   }
 
 using flavor = pair<string, color_t>;
+int next_potion, next_jewelry;
 
 vector<flavor> jewelry_colors = {
   {"steel", 0xA0A0C0FF},
@@ -45,7 +47,15 @@ vector<flavor> jewelry_colors = {
   {"emerald", 0x60C060FF},
   };
 
-int next_jewelry;
+vector<flavor> potion_colors = {
+  {"bubbling", 0xC0C0C0FF},
+  {"golden", 0xFFD500FF},
+  {"red", 0xC00000FF},
+  {"blue", 0x0000C0FF},
+  {"green", 0x00C000FF},
+  {"white", 0xFFFFFFFF},
+  {"black", 0x303030FF},
+  };
 
 power& power::be_jewelry(string jtype, string xdesc) {
   int nj = next_jewelry++;
@@ -83,6 +93,27 @@ power& power::be_wearable(string wear_effect, string remove_effect) {
   return self;
   }
 
+power& power::be_potion() {
+  int np = next_potion++;
+  picked_up = [this] (int x) { qty_owned += x; qty_filled = max(qty_filled, x);  };
+  get_color = [np] { return potion_colors[np].second; };
+  refill = [this] { qty_filled = qty_owned; };
+  reshuffle = [this] { random_flavor = rand() % 5040; flags &=~ IDENTIFIED; };
+  get_name = [np, this] {
+    string fname = potion_colors[np].first + " potion";
+    if(flags & (PARTIAL | IDENTIFIED)) fname = fname + " of " + name;
+    fname += " (" + its(qty_filled) + "/" + its(qty_owned) + ")";
+    return fname;
+    };
+  auto gd = get_desc;
+  get_desc = [this, gd] () -> string {
+    if(!(flags & (PARTIAL | IDENTIFIED)))
+      return "You will need to drink this potion to identify it.";
+    else return gd();
+    };
+  return self;
+  }
+
 vector<power> powers;
 
 void power::init() {
@@ -116,14 +147,14 @@ power& gen_power(int key, string name, string desc, string glyph, color_t color,
 void gen_powers() {
   powers.reserve(100);
 
-  gen_power('1', "Potion of Extra Life",
+  gen_power('1', "Extra Life",
     "You are really proud of this potion, which, after you die, will let you return to the moment of time when you drank it. "
     "Unfortunately it still requires an ingredient found only in the magical fountains of the Dungeons of Alchemy.\n\n"
-    "You can only drink this potion when at a magical fountain. To protect yourself from dying permanently, it is drank "
-    "automatically whenever you are at a magical fountain.",
+    "You can only drink this potion when at a magical fountain. To protect yourself from dying permanently, when you drink it, "
+    "you drink it automatically whenever you are at a magical fountain.",
     "!", 0xFFFF00FF,
-    [] (data& d) { }
-    ).is_starting(),
+    [] (data& d) { d.p->flags |= IDENTIFIED; }
+    ).is_starting().be_potion(),
 
   gen_power('d', "move right",
     "A special power of human beings, and most other animals, that they earn early in their life.",
@@ -300,6 +331,30 @@ void gen_powers() {
     ).be_jewelry("ring", "You need to wear this ring to know what it does.")
      .be_wearable("You put the % on your finger. You feel better with bows!", "You remove the %. You feel worse with bows..."),
 
+  gen_power('2', "health",
+    "This will cure your wounds, in some way.",
+    "!", 0xFFFF00FF,
+    [] (data& d) { if(d.keystate == 1) d.p->flags |= (PARTIAL | IDENTIFIED); }
+    ).be_potion(),
+
+  gen_power('3', "reach",
+    "This will let you reach heights, in some way.",
+    "!", 0xFFFF00FF,
+    [] (data& d) { if(d.keystate == 1) d.p->flags |= (PARTIAL | IDENTIFIED); }
+    ).be_potion(),
+
+  gen_power('4', "fire",
+    "This will let you produce fire, in some way.",
+    "!", 0xFFFF00FF,
+    [] (data& d) { if(d.keystate == 1) d.p->flags |= (PARTIAL | IDENTIFIED); }
+    ).be_potion(),
+
+  gen_power('5', "polymorph",
+    "This will let you change into a small creature.",
+    "!", 0xFFFF00FF,
+    [] (data& d) { if(d.keystate == 1) d.p->flags |= (PARTIAL | IDENTIFIED); }
+    ).be_potion(),
+
   gen_power('g', "gold",
     "For some weird reason, people love gold, and they will give you anything if you give them enough gold.\n\n"
     "This can be used to buy things in shops. "
@@ -367,6 +422,8 @@ void draw_inventory() {
 void shuffle_all() {
   auto& jc = jewelry_colors;
   for(int i=1; i<isize(jc); i++) swap(jc[i], jc[rand() % (i+1)]);
+  auto& pc = potion_colors;
+  for(int i=1; i<isize(pc); i++) swap(pc[i], pc[rand() % (i+1)]);
   for(auto& p: powers) p.reshuffle();
   }
 

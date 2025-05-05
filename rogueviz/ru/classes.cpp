@@ -23,6 +23,7 @@ struct power {
   int qty_filled;
   int qty_owned;
   flagtype flags;
+  int random_flavor;
   void init();
   hr::function<void(data&)> act, paused_act;
   hr::function<string()> get_name;
@@ -39,6 +40,7 @@ struct power {
   power& identified_name(string, string);
   power& be_wearable(string wear_effect, string remove_effect);
   power& be_jewelry(string jtype, string desc);
+  power& be_potion();
   };
 
 extern vector<power> powers;
