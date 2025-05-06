@@ -413,7 +413,7 @@ void geometry_information::generate_floorshapes_for(int id, cell *c) {
     }
 
   else if(GOLDBERG_INV) {
-    siid = cgi.gpdata->id_to_params[id][0];
+    siid = cgi.gpdata->id_to_params[id][0] == 1;
     sidir = cgi.gpdata->id_to_params[id][1];
     }
 
@@ -836,11 +836,12 @@ EX namespace gp {
       current_li = get_local_info(c);
       }
     int siid, sidir;
+    // note: this siid can equal 2! it should be treated as 0 by floorshapes
     cell *c1 = c;
     auto f = [&] {
       if(geosupport_threecolor() == 2) {
         auto si = patterns::getpatterninfo(c1, patterns::PAT_COLORING, patterns::SPF_NO_SUBCODES);
-        siid = !(si.id>>2);
+        siid = si.id>>2; siid++; if(siid == 3) siid = 0;
         if((si.id>>2) == 1) si.dir++;
         sidir = c1->c.fix(si.dir);
         }
