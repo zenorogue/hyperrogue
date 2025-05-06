@@ -37,6 +37,7 @@ EX namespace fake {
     if(WDIM == 2 && standard_tiling() && GOLDBERG && S3 == 3 && ((gp::param.first-gp::param.second) % 3)) return true;
     if(WDIM == 2 && standard_tiling() && GOLDBERG && S3 == 4 && gp::param.first == 1 && gp::param.second == 1) return true;
     if(WDIM == 2 && standard_tiling() && UNRECTIFIED && S3 == 4 && gp::param.first == 1 && gp::param.second == 1) return true;
+    if(WDIM == 2 && standard_tiling() && UNTRUNCATED && S3 == 3 && gp::param.first == 1 && gp::param.second == 1) return true;
     if(arcm::in() && PURE) return true;
     if(hat::in()) return true;
     if(WDIM == 2) return false;
@@ -137,6 +138,10 @@ EX namespace fake {
         c->cmove(d);
         return spin(90._deg * d) *  lxpush(cgi.crossf) * spin(-90._deg * c->c.spin(d) + M_PI);
         }
+      if(UNTRUNCATED && S3 == 3 && gp::param.first == 1 && gp::param.second == 1) {
+        c->cmove(d);
+        return spin(120._deg * (1-d)) *  lxpush(cgi.crossf) * spin(-120._deg * (1-c->c.spin(d)) + M_PI);
+        }
       if(embedded_plane) {
         geom3::light_flip(true);
         transmatrix T = adj(c, d);
@@ -187,6 +192,7 @@ EX namespace fake {
       bool impure = reg3::in() && !PURE;
       #else
       bool impure = !PURE;
+      if(UNTRUNCATED && gp::param.first == 1 && gp::param.second == 1) impure = false;
       #endif
       vector<int> mseq;
       if(impure) {
@@ -589,6 +595,8 @@ EX ld compute_euclidean() {
     return S7 / (0.375 * S7 - 0.5);
   if(WDIM == 2 && standard_tiling() && UNRECTIFIED && S3 == 4 && gp::param.first == 1 && gp::param.second == 1)
     return 4;
+  if(WDIM == 2 && standard_tiling() && UNTRUNCATED && S3 == 3 && gp::param.first == 1 && gp::param.second == 1)
+    return 6;
 
   if(WDIM == 2) return 4 / (S7-2.) + 2;
 
@@ -612,6 +620,8 @@ EX ld around_orig() {
     return 3;
   if(WDIM == 2 && standard_tiling() && GOLDBERG && S3 == 4 && gp::param.first == 1 && gp::param.second == 1) return 4;
   if(WDIM == 2 && standard_tiling() && UNRECTIFIED && S3 == 4 && gp::param.first == 1 && gp::param.second == 1)
+    return S7;
+  if(WDIM == 2 && standard_tiling() && UNTRUNCATED && S3 == 3 && gp::param.first == 1 && gp::param.second == 1)
     return S7;
   if(WDIM == 2)
     return S3;
