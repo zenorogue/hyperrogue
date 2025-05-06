@@ -1152,7 +1152,7 @@ bool pcmove::attack() {
   auto& c2 = mi.t;
   if(!fmsAttack) return false;
 
-  if(items[itOrbFlash] || items[itOrbLightning])
+  if((items[itOrbFlash] || items[itOrbLightning]) && !good_tortoise)
     return false;
   
   attackflags = AF_NORMAL;
