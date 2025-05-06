@@ -2732,8 +2732,8 @@ EX void drawqueue() {
   }
 
 #if HDR
-template<class T, class... U> T& queuea(PPR prio, U... u) {
-  ptds.push_back(unique_ptr<T>(new T (u...)));
+template<class T, class... U> T& queuea(PPR prio, U&&... u) {
+  ptds.push_back(unique_ptr<T>(new T (std::forward<U>(u)...)));
   ptds.back()->prio = prio;  
   return (T&) *ptds.back();
   }
