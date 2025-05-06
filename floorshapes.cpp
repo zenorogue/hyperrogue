@@ -1281,6 +1281,10 @@ const int FLOORTEXTURESIZE = 4096;
 
 void geometry_information::make_floor_textures_here() {
   require_shapes();
+  auto m = euc::new_map();
+  dynamicval<hrmap*> dm(currentmap, m);
+  cgi.generate_floorshapes_for(0, m->gamestart());
+  cgi.finishshape(); cgi.extra_vertices();
 
   dynamicval<videopar> vi(vid, vid);
   vid.xres = FLOORTEXTURESIZE;
