@@ -944,6 +944,7 @@ void track_chooser(bool official) {
       multi::players = playercfg;
       specialland = l;
       if(!racing::on) switch_game_mode(rg::racing);
+      if(l == laCrossroads) land_structure = lsNiceWalls;
       if(official) {
         racing::on = false;
         load_official_track();
