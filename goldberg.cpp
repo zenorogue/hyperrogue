@@ -1425,10 +1425,8 @@ EX namespace gp {
       }
 
     int pattern_value(cell *c) override {
-      println(hlog, "here");
       auto c1 = get_mapped(c, 0);
       return UIU(currentmap->pattern_value(c1));
-      println(hlog, "done");
       }
     };
 
