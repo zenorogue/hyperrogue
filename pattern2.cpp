@@ -554,6 +554,9 @@ EX int getHemisphere(cell *c, int which) {
       if(score == 0 && error < -.001) score--;
       return score;
       }
+    else if(INVERSE) {
+      return UIU(getHemisphere(c, which));
+      }
     #endif
     #if CAP_IRR
     else if(IRREGULAR) {
