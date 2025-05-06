@@ -232,8 +232,6 @@ EX void resetScores() {
  
 bool configdead;
 
-void handleConfig(int sym, int uni);
-
 EX string player_count_name(int p) {
   return 
     p == 2 ? XLAT("two players") : 
@@ -419,37 +417,52 @@ struct shmup_configurer {
     cmode = sm::SHMUPCONFIG | sm::SIDE | sm::DARKEN;
     gamescreen();
     dialog::init(XLAT("keyboard & joysticks"));
+    auto& cmdlist = shmup::on ? (WDIM == 3 ? playercmds_shmup3 : playercmds_shmup) : playercmds_turn;
     
     bool haveconfig = shmup::on || players > 1 || multi::alwaysuse;
   
-    if(haveconfig)
+    if(haveconfig) {
       dialog::addItem(XLAT("configure player 1"), '1');
+      dialog::add_action_push(get_key_configurer(1, cmdlist));
+      }
     else
       dialog::addBreak(100);
-    if(players > 1)
+    if(players > 1) {
       dialog::addItem(XLAT("configure player 2"), '2');
-    else if(players == 1 && !shmup::on)
+      dialog::add_action_push(get_key_configurer(2, cmdlist));
+      }
+    else if(players == 1 && !shmup::on) {
       dialog::addSelItem(XLAT("input"), multi::alwaysuse ? XLAT("config") : XLAT("default"), 'a');
+      dialog::add_action([] { multi::alwaysuse = !multi::alwaysuse; });
+      }
     else
       dialog::addBreak(100);
-    if(players > 2)
+    if(players > 2) {
       dialog::addItem(XLAT("configure player 3"), '3');
+      dialog::add_action_push(get_key_configurer(3, cmdlist));
+      }
   #if CAP_SDLJOY
-    else if(!haveconfig)
+    else if(!haveconfig) {
       dialog::addItem(XLAT("old style joystick configuration"), 'b');
+      dialog::add_action_push(showJoyConfig);
+      }
   #endif
     else dialog::addBreak(100);
-    if(players > 3)
+    if(players > 3) {
       dialog::addItem(XLAT("configure player 4"), '4');
+      dialog::add_action_push(get_key_configurer(4, cmdlist));
+      }
     else if(!shmup::on && !multi::alwaysuse) {
-      dialog::addBoolItem(XLAT("smooth scrolling"), smooth_scrolling, 'c');
+      dialog::addBoolItem_action(XLAT("smooth scrolling"), smooth_scrolling, 'c');
       }
     else if(alwaysuse)
       dialog::addInfo(XLAT("note: configured input is designed for"));
     else dialog::addBreak(100);
       
-    if(players > 4)
+    if(players > 4) {
       dialog::addItem(XLAT("configure player 5"), '5');
+      dialog::add_action_push(get_key_configurer(5, cmdlist));
+      }
     else if(!shmup::on && !multi::alwaysuse) {
       if(GDIM == 2) {
         dialog::addSelItem(XLAT("help for keyboard users"), XLAT(axmodes[vid.axes]), 'h');
@@ -461,24 +474,32 @@ struct shmup_configurer {
       dialog::addInfo(XLAT("multiplayer and shmup mode; some features"));
     else dialog::addBreak(100);
   
-    if(players > 5)
+    if(players > 5) {
       dialog::addItem(XLAT("configure player 6"), '6');
+      dialog::add_action_push(get_key_configurer(6, cmdlist));
+      }
     else if(alwaysuse)
       dialog::addInfo(XLAT("work worse if you use it."));
     else dialog::addBreak(100);
   
-    if(players > 6)
+    if(players > 6) {
       dialog::addItem(XLAT("configure player 7"), '7');
+      dialog::add_action_push(get_key_configurer(7, cmdlist));
+      }
     else dialog::addBreak(100);
       
-    if(shmup::on || multi::alwaysuse || players > 1)
+    if(shmup::on || multi::alwaysuse || players > 1) {
       dialog::addItem(XLAT("configure panning and general keys"), 'p');
+      dialog::add_action_push(get_key_configurer(3, GDIM == 3 ? pancmds3 : pancmds));
+      }
     else dialog::addBreak(100);
   
   #if CAP_SDLJOY
     if(numsticks > 0) {
-      if(shmup::on || multi::alwaysuse || players > 1) 
+      if(shmup::on || multi::alwaysuse || players > 1)  {
         dialog::addItem(XLAT("configure joystick axes"), 'x');
+        dialog::add_action_push(joy_configurer(players, scfg_default));
+        }
       else dialog::addBreak(100);
       }
   #endif
@@ -491,35 +512,7 @@ struct shmup_configurer {
   
     dialog::addBack();
     dialog::display();
-    
-    keyhandler = [this] (int sym, int uni) { return handleConfig(sym, uni); };
   #endif
-    }
-
-  void handleConfig(int sym, int uni) {
-    auto& cmdlist = shmup::on ? (WDIM == 3 ? playercmds_shmup3 : playercmds_shmup) : playercmds_turn;
-    dialog::handleNavigation(sym, uni);
-    
-    if(0) ;
-    #if CAP_SDL
-    else if(uni == '1') pushScreen(get_key_configurer(1, cmdlist));
-    else if(uni == '2') pushScreen(get_key_configurer(2, cmdlist));
-    else if(uni == 'p') pushScreen(get_key_configurer(3, GDIM == 3 ? pancmds3 : pancmds));
-    else if(uni == '3') pushScreen(get_key_configurer(4, cmdlist));
-    else if(uni == '4') pushScreen(get_key_configurer(5, cmdlist));
-    else if(uni == '5') pushScreen(get_key_configurer(6, cmdlist));
-    else if(uni == '6') pushScreen(get_key_configurer(7, cmdlist));
-    else if(uni == '7') pushScreen(get_key_configurer(8, cmdlist));
-  #if CAP_SDLJOY
-    else if(uni == 'j') pushScreen(joy_configurer(players, scfg_default));
-  #endif
-    else if(uni == 'a') multi::alwaysuse = !multi::alwaysuse;
-  #if CAP_SDLJOY
-    else if(uni == 'b') pushScreen(showJoyConfig);
-  #endif
-    else if(uni == 'c') smooth_scrolling = !smooth_scrolling;
-    #endif
-    else if(doexiton(sym, uni)) popScreen();
     }
   };
 
