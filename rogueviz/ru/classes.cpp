@@ -335,6 +335,7 @@ struct enemy : public entity {
     m.experience += (base_xp() * 25 + 24) / (4 + num_kills) / (4 + num_kills);
     }
   enemy() { num_kills = 0; postfix(); }
+  void attacked(int s) override;
   void regenerate() override { where = respawn; vel = xy(0, 0); existing = true; hp = max_hp(); }
   virtual int base_xp() { return 0; }
   };
@@ -359,7 +360,6 @@ struct ghost : public enemy {
   string glyph() override { return "g"; }
   color_t color() override { return 0x4040A0FF; }
   void act() override;
-  void attacked(int s) override;
   string get_name() override { return "ghost"; }
   string get_help() override { return "This apparition looks strangely like you..."; }
   int base_xp() { return hp; }

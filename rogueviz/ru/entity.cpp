@@ -285,10 +285,15 @@ void boar::act() {
     }
   }
 
-void boar::attacked(int dmg) {
+void enemy::attacked(int dmg) {
   current_target = this;
-  reduce_hp(dmg);
-  if(!existing) addMessage("You kill the wild boar."); else addMessage("You hit the wild boar.");
+  if(reduce_hp(dmg)) {
+    if(!existing) addMessage("You kill the " + get_name() + "."); else addMessage("You hit the " + get_name() + ".");
+    }
+  }
+
+void boar::attacked(int dmg) {
+  enemy::attacked(dmg);
   auto dat = get_dat();
   int s = where.x < m.where.x ? -1 : 1;
   if(on_floor) vel.x = dat.d * dat.modv * s * 2, vel.y = -dat.d * dat.modv * 2.5;
@@ -311,12 +316,6 @@ void ghost::act() {
     }
   }
 
-void ghost::attacked(int dmg) {
-  current_target = this;
-  reduce_hp(dmg);
-  if(!existing) addMessage("You kill the ghost."); else addMessage("You hit the ghost.");
-  }
-
 void snake::act() {
   stay_on_screen();
   kino();
@@ -331,9 +330,7 @@ void snake::act() {
   }
 
 void snake::attacked(int dmg) {
-  current_target = this;
-  reduce_hp(dmg);
-  if(!existing) addMessage("You kill the snake."); else addMessage("You hit the snake.");
+  enemy::attacked(dmg);
   if(where.x < m.where.x) vel.x = -abs(vel.x);
   if(where.x > m.where.x) vel.x = +abs(vel.x);
   }
@@ -447,17 +444,13 @@ void bat::act() {
   }
 
 void kestrel::attacked(int dmg) {
-  current_target = this;
-  reduce_hp(dmg);
-  if(!existing) addMessage("You kill the kestrel."); else addMessage("You hit the kestrel.");
+  enemy::attacked(dmg);
   if(where.x < m.where.x) vel.x = -abs(vel.x);
   if(where.x > m.where.x) vel.x = +abs(vel.x);
   }
 
 void bat::attacked(int dmg) {
-  current_target = this;
-  reduce_hp(dmg);
-  if(!existing) addMessage("You kill the bat."); else addMessage("You hit the bat.");
+  enemy::attacked(dmg);
   if(where.x < m.where.x) vel.x = -abs(vel.x);
   if(where.x > m.where.x) vel.x = +abs(vel.x);
   if(where.y < m.where.y) vel.y = -abs(vel.y);
