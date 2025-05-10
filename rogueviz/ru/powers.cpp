@@ -144,6 +144,7 @@ power& gen_power(int key, string name, string desc, string glyph, color_t color,
   }
 
 power *extra_life;
+int gold_id;
 
 void gen_powers() {
   powers.reserve(100);
@@ -158,6 +159,9 @@ void gen_powers() {
       d.p->flags |= IDENTIFIED;
       if(d.keystate == 1) {
         if(!m.existing) {
+          auto w = m.where;
+          auto cr = current_room;
+          int hp = m.max_hp();
           revert_all(death_revert);
           regenerate_all();
           if(!(extra_life->flags & ACTIVE)) extra_life->qty_filled = 0;
@@ -168,6 +172,19 @@ void gen_powers() {
             addMessage("You wake up at the Magic Fountain.");
           else
             addMessage("You wake up from a very bad nightmare. Wow, you are really stressed.");
+
+          if(m.experience >= 50) {
+            auto g = std::make_unique<ghost>();
+            g->where = w; g->hp = hp; g->xp = m.experience/2; m.experience -= g->xp; g->postfix();
+            cr->entities.emplace_back(std::move(g));
+            }
+
+          auto bones = std::make_unique<item>();
+          bones->qty = 10;
+          bones->where = stable_where;
+          bones->id = gold_id;
+          bones->pickup_message = "You got it back.";
+          stable_room->entities.emplace_back(std::move(bones));
           }
         else if(!d.p->qty_filled)
           addMessage("You need to find a Magic Fountain to prepare this potion.");
@@ -385,6 +402,8 @@ void gen_powers() {
     "!", 0xFFFF00FF,
     [] (data& d) { if(d.keystate == 1) d.p->flags |= (PARTIAL | IDENTIFIED); }
     ).be_potion(),
+
+  gold_id = isize(powers);
 
   gen_power('g', "gold",
     "For some weird reason, people love gold, and they will give you anything if you give them enough gold.\n\n"

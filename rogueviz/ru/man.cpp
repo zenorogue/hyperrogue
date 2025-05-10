@@ -6,6 +6,9 @@ bool on_fountain;
 room *fountain_room;
 xy fountain_where;
 
+room *stable_room;
+xy stable_where;
+
 void regenerate_all() {
   m.hp = m.max_hp();
   for(auto& p: powers) p.refill();
@@ -36,6 +39,11 @@ void check_fountains() {
 
 void man::act() {
   kino();
+
+  if(is_stable) {
+    stable_room = current_room;
+    stable_where = where;
+    }
 
   current_stats = next_stats;
   next_stats = base_stats;

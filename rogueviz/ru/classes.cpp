@@ -199,7 +199,7 @@ struct entity {
 
   virtual double grav() { return 0.1; }  
 
-  bool on_floor, fallthru, on_ice, wallhug, on_bounce;
+  bool on_floor, fallthru, on_ice, wallhug, on_bounce, is_stable;
 
   bool destroyed;
   void kino();
@@ -208,7 +208,7 @@ struct entity {
   void apply_walls_reflect();
   void apply_grav();
   void apply_portal_grav();
-  void stay_on_screen();
+  bool stay_on_screen(); /* returns true if flipped */
   virtual void act() { kino(); }
 
   double get_scale() { return get_scale_at(where.y); }
@@ -235,12 +235,14 @@ struct entity {
     existing = false;
     }
 
+  virtual int invinc_time() { return 150; }
+
   virtual bool reduce_hp(int x) {
     if(hp < 0) return false;
     if(gframeid < invinc_end) return false;
     hp -= x;
     if(hp <= 0) on_kill();
-    invinc_end = gframeid + 150;
+    invinc_end = gframeid + invinc_time();
     return true;
     }
 
@@ -348,6 +350,21 @@ struct boar : public enemy {
   string get_help() override { return "Beware their tusks."; }
   int base_xp() { return 60; }
   int max_hp() { return 60; }
+  };
+
+struct ghost : public enemy {
+  int xp, hp;
+  bool flipped;
+  xy siz() override { return {12, 12}; }
+  string glyph() override { return "g"; }
+  color_t color() override { return 0x4040A0FF; }
+  void act() override;
+  void attacked(int s) override;
+  string get_name() override { return "ghost"; }
+  string get_help() override { return "This apparition looks strangely like you..."; }
+  int base_xp() { return hp; }
+  int max_hp() { return xp; }
+  void regenerate() override {}
   };
 
 struct snake : public enemy {

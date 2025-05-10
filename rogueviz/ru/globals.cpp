@@ -65,12 +65,13 @@ flagtype W_PAIN = 16;
 flagtype W_BOUNCY = 32;
 flagtype W_FROZEN = 64;
 flagtype W_BLOCKBIRD = 128;
+flagtype W_STABLE = 256;
 
 constexpr int qwall = int(wGUARD);
 
 ruwall walls[qwall] = {
   {"air", ".", 0x40404080, W_TRANS, "Looks like an empty space, but actually necessary for survival."},
-  {"wall", "#", 0xFFFFFFFF, W_BLOCK, "These kinds of tough walls can never be destroyed."},
+  {"wall", "#", 0xFFFFFFFF, W_BLOCK | W_STABLE, "These kinds of tough walls can never be destroyed."},
   {"bouncy wall", "#", 0x80FF80FF, W_BLOCK | W_BOUNCY, "Like walls, but things bounce off them."},
   {"spike", "^", 0xC08080FF, W_TRANS | W_PAIN | W_BLOCKBIRD, "Dangerous!"},
   {"water", "~", 0x0000FFFF, W_BLOCK | W_TRANS | W_BLOCKBIRD, "Not used yet."},

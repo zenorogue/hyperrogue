@@ -115,6 +115,9 @@ void entity::apply_walls() {
         else if(b != wFrozen) hit_wall();
         }
       if(pixel_to_block(get_pixel_bbox_at(where + vel)).maxy <= y) where.y += vel.y; 
+
+      if(walls[b].flags & W_STABLE) is_stable = true;
+
       goto again;
       }
     if((walls[b].flags & W_PAIN) && pain_effect()) goto again;
@@ -206,11 +209,13 @@ void entity::apply_walls() {
     }
   }
 
-void entity::stay_on_screen() {
-  if(where.x < l_margin_at && vel.x < 0) vel.x = -vel.x;
-  if(where.x > r_margin_at && vel.x > 0) vel.x = -vel.x;
-  if(where.y < t_margin_at && vel.y < 0) vel.y = -vel.y;
-  if(where.y > b_margin_at && vel.y > 0) vel.y = -vel.y;
+bool entity::stay_on_screen() {
+  bool res = false;
+  if(where.x < l_margin_at && vel.x < 0) vel.x = -vel.x, res = true;
+  if(where.x > r_margin_at && vel.x > 0) vel.x = -vel.x, res = true;
+  if(where.y < t_margin_at && vel.y < 0) vel.y = -vel.y, res = true;
+  if(where.y > b_margin_at && vel.y > 0) vel.y = -vel.y, res = true;
+  return res;
   }
 
 void entity::kino() {
@@ -218,6 +223,7 @@ void entity::kino() {
   on_ice = false;
   wallhug = false;
   on_bounce = false;
+  is_stable = false;
   zero_vel = xy(0, 0);
 
   // ld modv = 60. / game_fps;
@@ -286,6 +292,29 @@ void boar::attacked(int dmg) {
   auto dat = get_dat();
   int s = where.x < m.where.x ? -1 : 1;
   if(on_floor) vel.x = dat.d * dat.modv * s * 2, vel.y = -dat.d * dat.modv * 2.5;
+  }
+
+void ghost::act() {
+  hyperpoint g = to_hyper(where);
+  hyperpoint h = to_hyper(m.where);
+  ld d = hdist(g, h);
+  ld angle = gframeid < invinc_end ? M_PI : d > 0.5 ? 90._deg : d > 0.05 ? 80._deg : 5._deg;
+  ld gv = d > 0.04 && gframeid > invinc_end ? 0.2 : 0.1;
+  if(flipped) angle = -angle;
+  hyperpoint g1 = rgpushxto0(g) * rspintox(gpushxto0(g) * h) * spin(angle) * xpush0(gv / game_fps);
+  vel = from_hyper(g1) - where;
+  if(stay_on_screen()) flipped = !flipped;
+  apply_vel();
+  if(intersect(get_pixel_bbox(), m.get_pixel_bbox()) && gframeid > invinc_end) {
+    invinc_end = gframeid + 200;
+    if(m.reduce_hp(20)) addMessage("The ghost passes through you!");
+    }
+  }
+
+void ghost::attacked(int dmg) {
+  current_target = this;
+  reduce_hp(dmg);
+  if(!existing) addMessage("You kill the ghost."); else addMessage("You hit the ghost.");
   }
 
 void snake::act() {
