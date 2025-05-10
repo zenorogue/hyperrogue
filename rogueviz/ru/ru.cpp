@@ -208,7 +208,7 @@ void render_the_map() {
         }
       if(cmode == mode::editmap) {
         getcstat = '-';
-        dialog::add_key_action('-', [] { if(!mouseover) return; current_room = &rooms[mouseover]; switch_mapmode_to(mapmode::standard); });
+        dialog::add_key_action('-', [] { if(!mouseover || !rooms.count(mouseover)) return; current_room = &rooms[mouseover]; switch_mapmode_to(mapmode::standard); });
         }
       break;
     }
