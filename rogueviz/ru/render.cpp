@@ -149,6 +149,11 @@ void render_room_walls(room *r) {
 
     int cc = c >> 3;
 
+    if(cc == wSecretPassage && r->at(x, y-1) == wWall) {
+      current_room->replace_block(x, y, wAir);
+      current_room->replace_block(x, y-1, wSecretPassage);
+      }
+
     if((c & 7) == 0)
       asciiletter(x*block_x, y*block_y, (x+1)*block_x, (y+1)*block_y, walls[cc].glyph, walls[cc].color);
 
