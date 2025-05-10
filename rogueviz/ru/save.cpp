@@ -120,12 +120,30 @@ void load_room(fhstream& f, cell *c) {
         b->pickup_message = scanline_noblank(f);
         r.entities.emplace_back(std::move(b)); 
         }
+      else if(cap == "SHOPITEM") {
+        auto b = std::make_unique<shopitem>();
+        b->qty = 1; b->qty1 = 0;
+        sscanf(param.c_str(), "%lf%lf%d%d%d", &b->where.x, &b->where.y, &b->price, &b->qty, &b->qty1);
+        s = scanline_noblank(f);
+        b->id = -1;
+        for(int i=0; i<isize(powers); i++) if(powers[i].name == s) b->id = i;
+        if(b->id == -1) println(hlog, "error: unknown item name ", s), b->id = 0;
+        b->pickup_message = scanline_noblank(f);
+        r.entities.emplace_back(std::move(b));
+        }
       else if(cap == "NPC") {
         auto b = std::make_unique<npc>();
         sscanf(param.c_str(), "%lf%lf%08x", &b->where.x, &b->where.y, &b->col);
         s = scanline_noblank(f);
         b->sglyph = s[0];
         b->name = s.substr(1);
+        b->text = scanline_noblank(f);
+        r.entities.emplace_back(std::move(b));
+        }
+      else if(cap == "TRADER") {
+        auto b = std::make_unique<trader>();
+        sscanf(param.c_str(), "%lf%lf", &b->where.x, &b->where.y);
+        b->name = scanline_noblank(f);
         b->text = scanline_noblank(f);
         r.entities.emplace_back(std::move(b));
         }

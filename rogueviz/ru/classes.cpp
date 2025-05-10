@@ -166,6 +166,8 @@ struct entity {
   xy zero_vel; /* relative to the platform */
 
   virtual struct moving_platform* as_platform() { return nullptr; }
+  virtual struct shopitem* as_shopitem() { return nullptr; }
+  virtual struct trader* as_trader() { return nullptr; }
 
   int hp;
   int invinc_end;
@@ -313,17 +315,31 @@ struct pendulum_platform : public moving_platform {
   string get_help() override { return "These pendulum platforms go back and forth between two locations, taking the shortest path possible."; }
   };
 
-struct npc : public entity {
-  string sglyph, name;
-  color_t col;
+struct npc_or_trader : public entity {
   string text;
+  string name;
   int talk_on;
+  xy siz() override { return {12, 12}; }
+  void act() override;
+  string get_name() override { return name; }
+  };
+
+struct npc : public npc_or_trader {
+  string sglyph;
+  color_t col;
   xy siz() override { return {12, 12}; }
   string glyph() override { return sglyph; }
   color_t color() override { return col; }
-  void act() override;
-  string get_name() override { return name; }
   string get_help() override { return "Stay awhile and listen."; }
+  };
+
+struct trader : public npc_or_trader {
+  xy siz() override { return {18, 18}; }
+  string glyph() override { return "@"; }
+  color_t color() override { return 0x2020D0FF; }
+  void act() override;
+  string get_help() override { return "Stay awhile and listen. Or use gold to pay."; }
+  virtual struct trader* as_trader() { return this; }
   };
 
 struct enemy : public entity {
@@ -450,6 +466,26 @@ struct item : public entity {
     }
   string get_name() override { return powers[id].name; }
   string get_help() override { return powers[id].get_desc(); }
+  };
+
+struct shopitem : public item {
+  int qty1;
+  int price;
+  bool bought;
+  string glyph() override;
+  color_t color() override;
+  bool last_intersect;
+  void act() override {
+    kino();
+    bool next_intersect = intersect(get_pixel_bbox(), m.get_pixel_bbox());
+    if(next_intersect && !last_intersect) {
+      addMessage("This costs " + its(price) + " gold.");
+      }
+    last_intersect = next_intersect;
+    }
+  string get_name() override { if(bought) return its(price) + " gold"; return item::get_name(); }
+  string get_help() override { if(bought) return "You have bought something from this shop. The trader has stored the gold here."; return item::get_help() + "\n\nPrice: " + its(price); }
+  shopitem* as_shopitem() override { return this; }
   };
 
 struct missile : public entity {

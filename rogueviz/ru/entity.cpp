@@ -247,20 +247,41 @@ void missile::act() {
   if(where.x > screen_x || where.x < 0 || where.y < 0 || where.y > screen_y) destroyed = true;
   }
 
-void npc::act() {
+void npc_or_trader::act() {
   kino();
   if(gframeid > m.last_action + 300 && intersect(extend_all(get_pixel_bbox(), get_scale()*12), m.get_pixel_bbox()) && talk_on != m.last_action) {
     talk_on = m.last_action = gframeid;
     cmode = mode::menu;
     pushScreen([&] { cmode = mode::playing; popScreen(); });
     pushScreen([&] {
-      dialog::init(name, col >> 8);
+      dialog::init(name, color() >> 8);
       dialog::addHelp(text);
       dialog::addBreak(100);
       dialog::addBack();
       dialog::display();
       });
     }
+  }
+
+extern int gold_id;
+
+string shopitem::glyph() { if(bought) return powers[gold_id].get_glyph(); else return item::glyph(); }
+color_t shopitem::color() { if(bought) return powers[gold_id].get_color(); else return item::color(); }
+
+void trader::act() {
+  bool any_purchases = false;
+  for(auto& e: current_room->entities) if(auto si = e->as_shopitem()) if(!si->existing) any_purchases = true;
+  if(any_purchases) {
+    walls[wShopDoor].glyph = '+';
+    walls[wShopDoor].flags = W_BLOCK | W_BLOCKBIRD;
+    }
+  else {
+    walls[wShopDoor].glyph = '\'';
+    walls[wShopDoor].flags = W_TRANS;
+    }
+
+  if(any_purchases) talk_on = m.last_action;
+  npc_or_trader::act();
   }
 
 void boar::act() {

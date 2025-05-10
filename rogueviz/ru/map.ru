@@ -1182,6 +1182,15 @@ Why is there always gold lying in these mazes...
 ITEM 308 261
 toughness
 You find a beautiful ring.
+SHOPITEM 421 238 50 1 0
+toughness
+You find a beautiful ring in this store.
+SHOPITEM 420 200 50 1 0
+wisdom
+You find another beautiful ring in this store.
+TRADER 458 247
+John the trader
+Hello here! Please buy something from my shop!
 OK
 
 MOVE 2 Mazes of Menace
