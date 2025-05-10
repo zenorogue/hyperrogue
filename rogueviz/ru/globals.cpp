@@ -55,7 +55,7 @@ struct ruwall {
   string help;
   };
 
-enum eWall { wAir, wWall, wBouncy, wSpike, wWater, wFrozen, wDoor, wSmashedDoor, wLockedDoor, wFountain, wBluePortal, wOrangePortal, wPlatform, wStaircase, wColumn, wForge, wGUARD };
+enum eWall { wAir, wWall, wBouncy, wSpike, wWater, wFrozen, wDoor, wSmashedDoor, wLockedDoor, wFountain, wBluePortal, wOrangePortal, wPlatform, wStaircase, wColumn, wForge, wWoodWall, wShopDoor, wGUARD };
 
 flagtype W_BLOCK = 1;
 flagtype W_TRANS = 2;
@@ -86,6 +86,8 @@ ruwall walls[qwall] = {
   {"staircase", "-", 0xFFFF80FF, W_PLATFORM | W_TRANS | W_STAIRCASE, "You can climb staircases and ladders." },
   {"column", "|", 0x40404080, W_TRANS | W_BLOCKBIRD, "A background decoration." },
   {"forge", "&", 0xB0202080, W_TRANS | W_PAIN, "Used by runesmiths."},
+  {"wooden wall", "#", 0xFF8000FF, W_BLOCK | W_STABLE, "These kinds of tough walls can be destroyed with fire."},
+  {"shop door", "#", 0xFFD500FF, W_TRANS, "A powerful door, to protect against shoplifters."},
   };
 
 int sel = 1;
