@@ -435,7 +435,7 @@ void gridbug::act() {
   for(int y=0; y<room_y; y++)
   for(int x=0; x<room_x; x++) times[y][x] = HUGE_VAL;
 
-  for(auto& e: current_room->entities) if(&*e != this) {
+  for(auto& e: current_room->entities) if(&*e != this && e->existing) {
     auto obox = pixel_to_block(e->get_pixel_bbox());
     for(int x=obox.minx; x<obox.maxx; x++)
     for(int y=obox.miny; y<obox.maxy; y++) times[y][x] = -10;
