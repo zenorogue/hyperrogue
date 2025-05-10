@@ -168,7 +168,7 @@ MAP
 ..................................##############################################
 ..................................#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b
 ITEM 484 123
-steel ring
+strength
 You notice a crow nest. There is a shiny ring inside!
 OK
 
