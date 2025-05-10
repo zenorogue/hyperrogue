@@ -395,6 +395,18 @@ struct kestrel : public enemy {
   int max_hp() { return 30; }
   };
 
+struct gridbug : public enemy {
+  int next_move;
+  xy siz() override { return {10, 10}; }
+  string glyph() override { return "x"; }
+  color_t color() override { return 0xD000D0FF; }
+  void act() override;
+  string get_name() override { return "grid bug"; }
+  string get_help() override { return "You are not sure whether this is some kind of insect or some glitch in the fabric of the reality."; }
+  int base_xp() { return 10; }
+  int max_hp() { return 10; }
+  };
+
 struct bat : public enemy {
   int next_change;
   xy siz() override { return {6, 6}; }

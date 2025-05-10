@@ -422,6 +422,68 @@ void kestrel::act() {
     }
   }
 
+void gridbug::act() {
+
+  if(intersect(get_pixel_bbox(), m.get_pixel_bbox())) {
+    if(m.reduce_hp(15)) addMessage("The grid bug zaps you!");
+    }
+
+  if(gframeid < next_move || !visible(current_room) || gframeid < invinc_end) return;
+  auto gridbox = pixel_to_block(get_pixel_bbox());
+
+  array<array<ld, room_x>, room_y> times;
+  for(int y=0; y<room_y; y++)
+  for(int x=0; x<room_x; x++) times[y][x] = HUGE_VAL;
+
+  for(auto& e: current_room->entities) if(&*e != this) {
+    auto obox = pixel_to_block(e->get_pixel_bbox());
+    for(int x=obox.minx; x<obox.maxx; x++)
+    for(int y=obox.miny; y<obox.maxy; y++) times[y][x] = -10;
+    }
+
+  std::priority_queue<pair<ld, pair<int, int>>> q;
+
+  auto visit = [&] (int x, int y, ld t) {
+    q.push({-t, {x, y}});
+    };
+
+  auto manbox = pixel_to_block(m.get_pixel_bbox());
+  for(int x=manbox.minx; x<manbox.maxx; x++)
+  for(int y=manbox.miny; y<manbox.maxy; y++) visit(x, y, 0);
+
+  int origx = (gridbox.minx+gridbox.maxx)/2;
+  int origy = (gridbox.miny+gridbox.maxy)/2;
+  int resx = origx, resy = origy;
+  ld rest = HUGE_VAL;
+  ld res_move_t = 0.1;
+
+  while(!q.empty()) {
+    auto [t, xy] = q.top(); q.pop();
+    t = -t; auto [x, y] = xy;
+    ld& memt = times[y][x];
+    if(t > memt) continue;
+    memt = t;
+
+    auto move_to = [&] (int x1, int y1) {
+      if(x1 < 0 || y1 < 0 || x1 >= room_x || y1 >= room_y) return;
+      auto b = current_room->at(x1, y1);
+      flagtype blocking = (W_BLOCK | W_BLOCKBIRD);
+      if(walls[b].flags & blocking) return;
+      ld d = hdist(to_hyper(block_x*(x+.5), block_y*(y+.5)), to_hyper(block_x*(x1+.5), block_y*(y+1.5))) * 10;
+      if(x1 == origx && y1 == origy && rest > t+d) { rest = t+d; resx = x; resy = y; res_move_t = d; }
+      visit(x1, y1, t+d);
+      };
+
+    move_to(x+1, y);
+    move_to(x-1, y);
+    move_to(x, y+1);
+    move_to(x, y-1);
+    }
+
+  next_move = gframeid + game_fps * res_move_t;
+  where = xy(block_x * (resx + .5), block_y * (resy + .5));
+  }
+
 void bat::act() {
   if(gframeid >= next_change && gframeid > invinc_end + 300) {
     next_change = gframeid + 300 + rand() % 300;
