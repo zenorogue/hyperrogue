@@ -257,7 +257,7 @@ void run() {
         if(cmapmode == mapmode::poincare) switch_mapmode_to(mapmode::standard);
         else switch_mapmode_to(mapmode::poincare);
         });
-      if(cmode == mode::editmap) mouseovers = format("coordinates: %d %d (%.2lf)", mousepx, mousepy, double(get_scale_at(mousepy)));
+      if(cmode == mode::editmap) mouseovers = format("coordinates: %d %d (%.2lf) (hdist=%.2lf)", mousepx, mousepy, double(get_scale_at(mousepy)), hdist(to_hyper(m.where), to_hyper(xy(mousepx, mousepy))));
       if(cmode == mode::playing) {
         titlecolor = 0xFFFFFF;
         mouseovers = current_room->roomname;

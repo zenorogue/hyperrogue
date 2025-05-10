@@ -1055,8 +1055,8 @@ OK
 MOVE 2 Central Cavern Bottom Left
 ROOM Ferris Wheel
 # wall
+' smashed door
 . air
-- staircase
 ^ spike
 MAP
 ################################################################################
