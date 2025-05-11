@@ -2445,7 +2445,7 @@ void celldrawer::draw_wall_full() {
 
       if(fake::split()) sha1 ^= (w | r | r4);
 
-      if(c->land == laCamelot || ((sha0 & w) && (sha1 & r))) {
+      if((c->land == laCamelot && c->wall == waCamelot) || ((sha0 & w) && (sha1 & r))) {
         sha0 ^= (w | r | r4);
         }
 
