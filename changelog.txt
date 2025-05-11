@@ -5422,3 +5422,26 @@ Bug fixes:
 - incorrect scrolling when clicking the mousewheel from outside the Poincare disk
 - 'joystick initialization' moved from 'old-style joystick configuration' to 'keyboards & joysticks'
 - loading a map from the drawing tool sometimes caused a crash
+
+2025-05-11 12:06 Update 13.0y
+Technical: (hopefully these do not break anything -- in case of any problems, please report and/or use the 'previous' branch on Steam)
+- simplified the implementation of floor shapes/walls etc
+- updated the Linux runtime on Steam
+
+New features:
+- nicer Goldberg-Coxeter tile shapes, also the style can be changed based on several possible rules
+- tetrahedral-octahedral honeycomb
+
+Bug fixes:
+- fix the generation of Crossroads official track
+- fixed the returning of tortoises while you have Flash/Storms
+- fix the 'x' key not working in keyboard/joystick control
+- disabled Red Raiders from shmup in Eclectic City
+- no longer possible to pick up items while dead in shmup
+- more stable "strict tree rules" (chosen options are automatically taken into account, do not crash, and do not slowdown due to too large generation range)
+- fix many other crashes
+- better shift+ctrl scaling in Euclidean std projection
+- fixed a bug with rendering 45-degree-rotated Klein bottles
+- fixed the single-land mode on fractals
+- use two-letter labels instead of excessive primes in the fundamental domain display
+- fixed a bug with Cellular Automata crashing after map reloaded
