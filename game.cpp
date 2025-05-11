@@ -111,8 +111,6 @@ EX eMonster active_switch() {
 
 EX vector<cell*> crush_now, crush_next;
   
-EX int getDistLimit() { return cgi.base_distlimit; }
-
 EX void activateFlashFrom(cell *cf, eMonster who, flagtype flags);
 
 EX bool saved_tortoise_on(cell *c) {

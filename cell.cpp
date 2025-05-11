@@ -1744,7 +1744,7 @@ EX bool is_boundary(cell *c) {
   }
 
 /** compute the distlimit for a tessellation automatically */
-EX int auto_compute_range(cell *c) {  
+EX int auto_compute_range(cell *c) {
   if(sphere) {
     cgi.base_distlimit = SEE_ALL;
     return SEE_ALL;
@@ -1762,6 +1762,24 @@ EX int auto_compute_range(cell *c) {
     }
   if(isize(cl.dists) * z > expected_count * expected_count) d--;
   return ginf[geometry].distlimit[0] = cgi.base_distlimit = d;
+  }
+
+EX int getDistLimit() {
+  auto& res = cgi.base_distlimit;
+  if(res) return res;
+  if(arb::in() && arb::current.range)
+    return res = arb::current.range;
+  if(arcm::in() || arb::in()) {
+    if(!currentmap) return 0;
+    cell *c = currentmap->gamestart();
+    if(!c) return 0;
+    return res = auto_compute_range(c);
+    }
+  if(mhybrid)
+    return res = hybrid::in_underlying_geometry([&] {
+      return max(getDistLimit()-1, 0);
+      });
+  return ginf[geometry].distlimit[!BITRUNCATED];
   }
 
 EX cell out_of_bounds;

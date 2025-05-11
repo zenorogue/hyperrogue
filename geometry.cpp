@@ -218,7 +218,7 @@ struct geometry_information {
   /** for 2D geometries */
   vector<transmatrix> heptmove, hexmove, invhexmove;
 
-  int base_distlimit;
+  int base_distlimit = 0;
   
   unique_ptr<embedding_method> emb;
 
@@ -658,7 +658,6 @@ void geometry_information::prepare_basics() {
       t->tessf = cgi.tessf / d;
       t->hexvdist = cgi.hexvdist / d;
       t->hexhexdist = hdist(xpush0(cgi.hcrossf), xspinpush0(TAU/S7, cgi.hcrossf)) / d;
-      t->base_distlimit = cgi.base_distlimit-1;
       });
     goto hybrid_finish;
     }
@@ -756,8 +755,6 @@ void geometry_information::prepare_basics() {
     (hr::format("S7=%d S6=%d hexf = " LDF" hcross = " LDF" tessf = " LDF" hexshift = " LDF " hexhex = " LDF " hexv = " LDF "\n", S7, S6, hexf, hcrossf, tessf, hexshift, 
     hexhexdist, hexvdist)));  
   
-  base_distlimit = ginf[geometry].distlimit[!BITRUNCATED];
-
   hybrid_finish:
   
   #if CAP_GP
@@ -823,7 +820,6 @@ void geometry_information::prepare_basics() {
     scalefactor = csc;
     hcrossf = crossf = orbsize = hcrossf7 * csc;
     hexf = rhexf = hexvdist = csc * arb::current_or_slided().floor_scale;
-    base_distlimit = arb::current.range;
     }
   
   #if MAXMDIM >= 4

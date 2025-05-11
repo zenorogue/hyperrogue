@@ -1499,9 +1499,6 @@ struct hrmap_arbi : hrmap {
     transmatrix T = lxpush(.01241) * spin(1.4117) * lxpush(0.1241) * Id;
     arbi_matrix[origin] = make_pair(alt, T);
     altmap[alt].emplace_back(origin, T);
-    
-    if(!current.range)
-      current.range = auto_compute_range(origin->c7);
     }
 
   ~hrmap_arbi() {
@@ -1999,7 +1996,7 @@ EX void convert() {
   ac.cscale = cgi.scalefactor;
   ac.boundary_ratio = 1;
   ac.floor_scale = cgi.hexvdist / cgi.scalefactor;
-  ac.range = cgi.base_distlimit;
+  ac.range = getDistLimit();
   ac.shapes.clear();
   ac.shapes.resize(N);
 
