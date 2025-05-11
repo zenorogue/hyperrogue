@@ -413,8 +413,10 @@ void geometry_information::generate_floorshapes_for(int id, cell *c) {
     }
 
   else if(GOLDBERG_INV) {
-    siid = cgi.gpdata->id_to_params[id][0] == 1;
-    sidir = cgi.gpdata->id_to_params[id][1];
+    auto data = cgi.gpdata;
+    if(fake::in()) data = FPIU(cgi.gpdata);
+    siid = data->id_to_params[id][0] == 1;
+    sidir = data->id_to_params[id][1];
     }
 
   else if(PURE && geometry != gBinaryTiling && geosupport_football() < 2) {
