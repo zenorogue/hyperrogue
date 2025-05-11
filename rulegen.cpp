@@ -2539,16 +2539,25 @@ auto hooks_arg =
 #endif
 
 auto hooks = addHook(hooks_configfile, 100, [] {
-      param_i(max_retries, "max_retries");
+      param_i(max_retries, "max_retries")
+      ->set_reaction(change_rulegen_params);
       param_i(max_tcellcount, "max_tcellcount")
-      ->editable(0, 16000000, 100000, "maximum cellcount", "controls the max memory usage of conversion algorithm -- the algorithm fails if exceeded", 'c');
-      param_i(max_adv_steps, "max_adv_steps");
-      param_i(max_examine_branch, "max_examine_branch");
-      param_i(max_getside, "max_getside");
-      param_i(max_bdata, "max_bdata");
-      param_i(max_shortcut_length, "max_shortcut_length");
-      param_i(rulegen_timeout, "rulegen_timeout");
-      param_i(first_restart_on, "first_restart_on");
+      ->editable(0, 16000000, 100000, "maximum cellcount", "controls the max memory usage of conversion algorithm -- the algorithm fails if exceeded", 'c')
+      ->set_reaction(change_rulegen_params);
+      param_i(max_adv_steps, "max_adv_steps")
+      ->set_reaction(change_rulegen_params);
+      param_i(max_examine_branch, "max_examine_branch")
+      ->set_reaction(change_rulegen_params);
+      param_i(max_getside, "max_getside")
+      ->set_reaction(change_rulegen_params);
+      param_i(max_bdata, "max_bdata")
+      ->set_reaction(change_rulegen_params);
+      param_i(max_shortcut_length, "max_shortcut_length")
+      ->set_reaction(change_rulegen_params);
+      param_i(rulegen_timeout, "rulegen_timeout")
+      ->set_reaction(change_rulegen_params);
+      param_i(first_restart_on, "first_restart_on")
+      ->set_reaction(change_rulegen_params);
       #if MAXMDIM >= 4
       param_i(max_ignore_level_pre, "max_ignore_level_pre");
       param_i(max_ignore_level_post, "max_ignore_level_post");
@@ -2608,6 +2617,41 @@ EX void verify_parsed_treestates(arb::arbi_tiling& c) {
   find_possible_parents();
   }
 
+EX void prepare_rules_and_restart() {
+  if(!prepare_rules()) return;
+  println(hlog, "prepare_rules returned true");
+  stop_game();
+  arb::convert::activate();
+  start_game();
+  delete_tmap();
+  }
+
+EX void switch_tes_internal_format() {
+  if(!arb::in()) {
+    try {
+      arb::convert::convert();
+      arb::convert::activate();
+      start_game();
+      rule_status = XLAT("converted successfully -- %1 cell types", its(isize(arb::current.shapes)));
+      rules_known_for = "unknown";
+      }
+    catch(hr_parse_exception& ex) {
+      println(hlog, "failed: ", ex.s);
+      rule_status = XLAT("failed to convert: ") + ex.s;
+      rules_known_for = "unknown";
+      }
+    }
+  else if(arb::convert::in()) {
+    stop_game();
+    geometry = arb::convert::base_geometry;
+    variation = arb::convert::base_variation;
+    start_game();
+    }
+  else {
+    addMessage(XLAT("cannot be disabled for this tiling"));
+    }
+  }
+
 EX void show() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen();
@@ -2655,31 +2699,7 @@ EX void show() {
     }
 
   dialog::addBoolItem(XLAT("in tes internal format"), arb::in(), 't');
-  dialog::add_action([] {
-    if(!arb::in()) {
-      try {
-        arb::convert::convert();
-        arb::convert::activate();
-        start_game();
-        rule_status = XLAT("converted successfully -- %1 cell types", its(isize(arb::current.shapes)));
-        rules_known_for = "unknown";
-        }
-      catch(hr_parse_exception& ex) {
-        println(hlog, "failed: ", ex.s);
-        rule_status = XLAT("failed to convert: ") + ex.s;
-        rules_known_for = "unknown";
-        }
-      }
-    else if(arb::convert::in()) {
-      stop_game();
-      geometry = arb::convert::base_geometry;
-      variation = arb::convert::base_variation;
-      start_game();
-      }
-    else {
-      addMessage(XLAT("cannot be disabled for this tiling"));
-      }
-    });
+  dialog::add_action(switch_tes_internal_format);
 
   dialog::addBoolItem(XLAT("extended football colorability"), arb::extended_football, 'f');
   dialog::add_action([] {
@@ -2688,6 +2708,8 @@ EX void show() {
     rule_status = "manually disabled";
     if(arb::convert::in()) {
       stop_game();
+      geometry = arb::convert::base_geometry;
+      variation = arb::convert::base_variation;
       arb::convert::convert();
       arb::convert::activate();
       start_game();
@@ -2706,15 +2728,7 @@ EX void show() {
   add_edit(arb::convert::minimize_on_convert);
   dialog::addBoolItem(XLAT("strict tree maps"), currentmap->strict_tree_rules(), 's');
   dialog::add_action([] {
-    if(!currentmap->strict_tree_rules()) {
-      if(prepare_rules()) {
-        println(hlog, "prepare_rules returned true");
-        stop_game();
-        arb::convert::activate();
-        start_game();
-        delete_tmap();
-        }
-      }
+    if(!currentmap->strict_tree_rules()) prepare_rules_and_restart();
     else if(arb::current.have_tree) {
       addMessage(XLAT("cannot be disabled for this tiling"));
       }
@@ -2736,6 +2750,25 @@ EX void show() {
   dialog::addBreak(100);
   dialog::addBack();
   dialog::display();
+  }
+
+EX void change_rulegen_params() {
+  bool b = currentmap->strict_tree_rules();
+  if(b) {
+    rulegen::rules_known_for = "unknown";
+    prepare_rules_and_restart();
+    }
+  else rulegen::rules_known_for = "unknown";
+  }
+
+EX void change_minimize_on_convert() {
+  bool s = currentmap->strict_tree_rules();
+  if(arb::convert::in()) {
+    rules_known_for = "unknown";
+    switch_tes_internal_format();
+    switch_tes_internal_format();
+    if(s) prepare_rules_and_restart();
+    }
   }
 
 #if CAP_COMMANDLINE

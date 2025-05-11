@@ -1125,9 +1125,11 @@ EX void initConfig() {
   -> editable("simplified display of apeirogons", 'f')
   -> help("Connect the ends of the apeirogon segment with the boundary point using straight lines. This should be faster and, in most cases, actually more correct.");
   param_b(arb::convert::minimize_on_convert, "tes_minimize_on_convert", false)
-  -> editable("consider all symmetries when converting", 'm');
+  -> editable("consider all symmetries when converting", 'm')
+  -> set_reaction(rulegen::change_minimize_on_convert);
   param_b(arb::convert::reverse_order, "tes_reverse_order", false)
-  -> editable("tes reverse order on convert", 'r');
+  -> editable("tes reverse order on convert", 'r')
+  -> set_reaction(rulegen::change_rulegen_params);
 
   param_b(display_yasc_codes, "yasc", false)
   -> editable("YASC codes", 'Y')
