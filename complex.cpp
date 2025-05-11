@@ -2245,6 +2245,7 @@ EX namespace heat {
     manual_celllister cl;
     
     vector<cell*>& allcells = currentmap->allcells();
+    int siz = isize(offscreen_fire);
 
     for(int x: {0,1}) for(cell *c: x==0 ? allcells : offscreen_fire) {
       if(!cl.add(c)) continue;
@@ -2342,10 +2343,15 @@ EX namespace heat {
       else if(cellHalfvine(c)) destroyHalfvine(c, waPartialFire, 6);
       else makeflame(c, qty, false);
       if(c->wparam < qty) c->wparam = qty;
-      offscreen2.push_back(c);
       if(c->land == laRose || c->land == laWildWest || c->land == laOvergrown || isHaunted(c->land) || c->land == laMountain || c->land == laIce) {
-        for(int j=c->mpdist-1; j>=7; j--) setdist(c, j, NULL);
+        if(randomPatternsMode || siz > 5000) {
+           /* do not add to offscreen2 so that the fire will spread later */
+          if(c->mpdist == 8) continue;
+          }
+        else
+          for(int j=c->mpdist-1; j>=7; j--) setdist(c, j, NULL);
         }
+      offscreen2.push_back(c);
       }
    
     offscreen_fire = std::move(offscreen2);
