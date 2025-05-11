@@ -1745,10 +1745,7 @@ EX bool is_boundary(cell *c) {
 
 /** compute the distlimit for a tessellation automatically */
 EX int auto_compute_range(cell *c) {
-  if(sphere) {
-    cgi.base_distlimit = SEE_ALL;
-    return SEE_ALL;
-    }
+  if(sphere) return SEE_ALL;
   cgi.base_distlimit = 0;
   const int expected_count = 400;
   celllister cl(c, 1000, expected_count, NULL);
@@ -1779,7 +1776,27 @@ EX int getDistLimit() {
     return res = hybrid::in_underlying_geometry([&] {
       return max(getDistLimit()-1, 0);
       });
-  return ginf[geometry].distlimit[!BITRUNCATED];
+  res = ginf[geometry].distlimit[!BITRUNCATED];
+  if(GOLDBERG_INV) {
+    if(!cgi.gpdata) return res = 0;
+    println(hlog, "original = ", res);
+    using gp::param;
+    auto& scale = cgi.gpdata->scale;
+    if(S3 == 3)
+      res = (res + log(scale) / log(2.618)) / scale;
+    else
+      res = 3 * max(param.first, param.second) + 2 * min(param.first, param.second);
+    if(S7 == 12)
+      res = 2 * param.first + 2 * param.second + 1;
+    if(res > SEE_ALL)
+      res = SEE_ALL;
+    }
+  if(IRREGULAR) {
+    auto scale = irr::compute_scale();
+    res = (res + log(scale) / log(2.618)) / scale;
+    if(res > 25) res = 25;
+    }
+  return res;
   }
 
 EX cell out_of_bounds;

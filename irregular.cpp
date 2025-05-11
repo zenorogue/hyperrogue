@@ -476,15 +476,17 @@ bool step(int delta) {
   return false;
   }
 
+EX ld compute_scale() {
+  return sqrt(isize(cells_of_heptagon) * 1. / isize(cells));
+  }
+
 EX void compute_geometry() {
   if(IRREGULAR) {
-    ld scale = sqrt(isize(cells_of_heptagon) * 1. / isize(cells));
+    ld scale = compute_scale();
     cgi.crossf *= scale;
     cgi.rhexf *= scale;
     cgi.hexhexdist *= scale;
     cgi.hexvdist *= scale;
-    cgi.base_distlimit = (cgi.base_distlimit + log(scale) / log(2.618)) / scale;
-    if(cgi.base_distlimit > 25) cgi.base_distlimit = 25;
     }
   }
 

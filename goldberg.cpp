@@ -708,7 +708,8 @@ EX namespace gp {
       else
         cgi.gpdata->area = x * x + y * y;
       next = point3(x+y/2., -y * sqrt(3) / 2, 0);
-      ld scale = 1 / hypot_d(2, next);
+      auto& scale = cgi.gpdata->scale;
+      scale = 1 / hypot_d(2, next);
       if(!GOLDBERG) scale = 1;
       if(special_fake()) scale = 1;
       cgi.crossf *= scale;
@@ -718,14 +719,6 @@ EX namespace gp {
 //    spin = spintox(next);
 //    ispin = rspintox(next);
       cgi.gpdata->alpha = -atan2(next[1], next[0]) * 6 / S7;
-      if(S3 == 3)
-        cgi.base_distlimit = (cgi.base_distlimit + log(scale) / log(2.618)) / scale;
-      else
-        cgi.base_distlimit = 3 * max(param.first, param.second) + 2 * min(param.first, param.second);
-      if(S7 == 12)
-        cgi.base_distlimit = 2 * param.first + 2 * param.second + 1;
-      if(cgi.base_distlimit > SEE_ALL)
-        cgi.base_distlimit = SEE_ALL;
       DEBB(DF_GEOM | DF_POLY, ("scale = ", scale));
       }
     }
