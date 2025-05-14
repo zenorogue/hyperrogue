@@ -97,7 +97,7 @@ void entity::apply_walls() {
 
   auto pain_effect = [&] {
     if(!hurt_by_spikes()) return false;
-    reduce_hp(10);
+    spiked();
     vel.x = -vel.x; vel.y = -vel.y; apply_grav();
     return true;
     };

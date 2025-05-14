@@ -221,6 +221,10 @@ struct entity {
 
   virtual void attacked(int s) {}
 
+  virtual void spiked() {
+    reduce_hp(10);
+    }
+
   virtual string glyph() = 0;
   virtual color_t color() = 0;
 
@@ -283,6 +287,12 @@ struct man : public entity {
   string get_help() override { return "This is you."; }
 
   void on_kill() override;
+
+  virtual void spiked() {
+    entity::spiked();
+    addMessage("OUCH! These spikes hurt!");
+    }
+
   };
 
 extern man m;
