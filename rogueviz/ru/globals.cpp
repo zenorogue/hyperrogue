@@ -163,4 +163,6 @@ void add_revert(revert_stack& s, const reaction_t& what);
 
 void revert_all(revert_stack& s);
 
+string parse_markup(string s);
+
 }

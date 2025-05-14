@@ -255,7 +255,7 @@ void npc_or_trader::act() {
     pushScreen([&] { cmode = mode::playing; popScreen(); });
     pushScreen([&] {
       dialog::init(name, color() >> 8);
-      dialog::addHelp(text);
+      dialog::addHelp(parse_markup(text));
       dialog::addBreak(100);
       dialog::addBack();
       dialog::display();
@@ -360,7 +360,7 @@ void hint::act() {
   bool cur = intersect(get_pixel_bbox(), m.get_pixel_bbox());
   if(gframeid < 300) cur = 0;
   if(cur && !state) {
-    addMessage(hint_text);
+    addMessage(parse_markup(hint_text));
     }
   state = cur;
   }

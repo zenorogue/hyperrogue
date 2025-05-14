@@ -349,6 +349,23 @@ void set_sval() {
     }
   }
 
+string parse_markup(string s) {
+  while(s.find("\\n") != string::npos) s.replace(s.find("\\n"), 2, "\n");
+  while(s.find("[key:") != string::npos) {
+    int kf = s.find("[key:");
+    int ke = s.find("]", kf);
+    string what = s.substr(kf+5, ke-kf-5);
+    bool ok = false;
+    for(auto& p: powers) if(p.name == what) {
+      s.replace(kf, ke-kf+1, dialog::keyname(p.key));
+      ok = true;
+      break;
+      }
+    if(!ok) return s;
+    }
+  return s;
+  }
+
 void enable() {
   
   stop_game();
