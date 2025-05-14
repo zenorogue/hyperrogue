@@ -58,7 +58,7 @@ I have seen you jump to reach me. You always make exactly the same jump! You wil
 HINT 410 257 12 12
 Stay awhile and listen!
 HINT 254 266 12 12
-Hint: to talk to people or to read inscryptions, stay near them for a second.
+Hint: to talk to people, stay near them for a second.
 OK
 
 MOVE 0 Red Rooster Inn
@@ -186,6 +186,8 @@ ROOM Forest Path
 ^ spike
 x air
 W wooden wall
+X sign
+| column
 MAP
 ................................................................................
 ................................................................................
@@ -218,9 +220,9 @@ MAP
 ......................................^WW.......................................
 ..............................--.......WW^....--................................
 .......................................WW.......................................
-.......................................WW.......................................
-......................................WWWW......................................
-................^.....................#W#W...................^..................
+.......................................WW............................XXX........
+......................................WWWW............................|.........
+................^.....................#W#W...................^........|.........
 ################################################################################
 #b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b
 ################################################################################
@@ -232,6 +234,11 @@ BOAR 113 255
 ITEM 279 65
 furry ring
 Someone lost a small, weird ring here. Hopefully it will be useful to you.
+HINT 564 256 60 60
+Hint: to read signs, stay near them for a second.
+NPC 564 256 0
+@Forest Sign
+The sign reads, BEWARE THE WILD BOARS\n\nThis forest path feels somehow hostile indeed. You feel you will need to use your figthing skills soon.\n\nFights may be difficult if you try to handle them at the same speed as exploration. Press [key:dexmode] to slow down time when expecting combat. If you want to resume quick exploration, press [key:dexmode] again.
 OK
 
 MOVE 2 Forest Path
