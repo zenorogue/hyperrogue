@@ -10,10 +10,10 @@ statarray<statinfo> statdata;
 
 void draw_stats() {
 
-  statdata[stat::str] = {'s', "Strength", "Affects the strength of your mundane melee attacks."};
+  statdata[stat::str] = {'s', "Strength", "Affects the strength of your physical attacks."};
   statdata[stat::con] = {'t', "Toughness", "Affects the amount of hitpoints you have."};
   statdata[stat::wis] = {'w', "Wisdom", "Affects the power of your alchemy."};
-  statdata[stat::dex] = {'d', "Dexterity", "Affects the strength of your mundane missile attacks."};
+  statdata[stat::dex] = {'d', "Dexterity", "Improves your 'chill time' power."};
 
   render_the_map();
   draw_inventory_frame();

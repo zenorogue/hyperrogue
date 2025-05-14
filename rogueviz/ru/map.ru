@@ -238,7 +238,7 @@ HINT 564 256 60 60
 Hint: to read signs, stay near them for a second.
 NPC 564 256 0
 @Forest Sign
-The sign reads, BEWARE THE WILD BOARS\n\nThis forest path feels somehow hostile indeed. You feel you will need to use your figthing skills soon.\n\nFights may be difficult if you try to handle them at the same speed as exploration. Press [key:dexmode] to slow down time when expecting combat. If you want to resume quick exploration, press [key:dexmode] again.
+The sign reads, BEWARE THE WILD BOARS\n\nThis forest path feels somehow hostile indeed. You feel you will need to use your figthing skills soon.\n\nFights may be difficult if you try to handle them at the same speed as exploration. Press [key:chill time] to slow down time when expecting combat. If you want to resume quick exploration, press [key:chill time] again.
 OK
 
 MOVE 2 Forest Path

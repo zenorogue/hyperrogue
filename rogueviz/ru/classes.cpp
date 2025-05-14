@@ -39,7 +39,7 @@ struct power {
   power& while_paused();
   power& while_dead();
   power& identified_name(string, string);
-  power& be_wearable(string wear_effect, string remove_effect);
+  power& be_wearable(string wear_effect, string remove_effect, string worn = " (worn)");
   power& be_jewelry(string jtype, string desc);
   power& be_potion();
   };

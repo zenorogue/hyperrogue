@@ -71,11 +71,11 @@ power& power::be_jewelry(string jtype, string xdesc) {
   return self;
   }
 
-power& power::be_wearable(string wear_effect, string remove_effect) {
+power& power::be_wearable(string wear_effect, string remove_effect, string worn) {
   auto gn = get_name;
-  get_name = [this, gn] {
+  get_name = [this, gn, worn] {
     string s = gn();
-    if(flags & ACTIVE) s += " (worn)";
+    if(flags & ACTIVE) s += worn;
     return s;
     };
   auto ac = act;
@@ -145,6 +145,7 @@ power& gen_power(int key, string name, string desc, string glyph, color_t color,
 
 power *extra_life;
 int gold_id;
+power *dexmode;
 
 void power_death_revert(power& p) {
   int q0 = p.qty_filled;
@@ -242,12 +243,19 @@ void gen_powers() {
     ).is_starting(),
 
   gen_power('p', "pause",
-    "Becoming an alchemist requires intelligence: thinking quickly to react to surprising effects of experiments. "  
+    "Becoming an alchemist requires intelligence: thinking quickly to react to surprising effects of experiments. "
     "To reflect this, you can use this power at any time to give yourself more time to think about the situation.",
     "-", 0xFF0000FF,
     [] (data& d) {
       if(d.keystate == 1) cmode = (cmode == mode::paused ? mode::playing : mode::paused);
       }).is_starting().while_paused(),
+
+  dexmode = &gen_power('c', "chill time",
+    "Concentrate to make the timing of your moves perfect.\n\n"
+    "From the player's point of view, this makes the game run slower.\n\nThe higher your Dexterity, the slower the game becomes.",
+    "-", 0xFF0000FF,
+    [] (data& d) {
+      }).is_starting().while_paused().be_wearable("You concentrate.", "You calm down.", " (on)"),
 
   gen_power(' ', "dagger",
     "This sharp dagger is very useful during the preparation of alchemical ingredients, but it works as a basic weapon too.",
