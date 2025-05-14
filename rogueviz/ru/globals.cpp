@@ -87,7 +87,7 @@ ruwall walls[qwall] = {
   {"orange portal", "=", 0xC08040FF, W_TRANS, "Orange portal."},
   {"platform", "-", 0xFFFFFFFF, W_PLATFORM | W_TRANS | W_BLOCKBIRD, "You can fall down through such platforms."},
   {"staircase", "-", 0xFFFF80FF, W_PLATFORM | W_TRANS | W_STAIRCASE, "You can climb staircases and ladders." },
-  {"column", "|", 0x40404080, W_TRANS | W_BLOCKBIRD, "A background decoration." },
+  {"column", "|", 0x90909080, W_TRANS | W_BLOCKBIRD, "A background decoration." },
   {"forge", "&", 0xB0202080, W_TRANS | W_PAIN, "Used by runesmiths."},
   {"wooden wall", "#", 0xFF8000FF, W_BLOCK | W_STABLE, "These kinds of tough walls can be destroyed with fire."},
   {"shop door", "#", 0xFFD500FF, W_TRANS, "A powerful door, to protect against shoplifters."},
