@@ -114,6 +114,12 @@ HINT 306 292 12 12
 Attack the door with your dagger to open it.
 HINT 296 292 12 12
 Collect your dagger and press [key:dagger].
+HINT 344 275 12 60
+Press [key:move left] and [key:move right] to move.
+HINT 205 286 12 12
+Press [key:jump] to climb the ladder.
+HINT 197 210 12 12
+Press [key:fall] to drop down.
 ITEM 382 287
 dagger
 You collect your trusty dagger from the drawer.

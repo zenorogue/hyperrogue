@@ -358,6 +358,7 @@ void snake::attacked(int dmg) {
 
 void hint::act() {
   bool cur = intersect(get_pixel_bbox(), m.get_pixel_bbox());
+  if(gframeid < 300) cur = 0;
   if(cur && !state) {
     addMessage(hint_text);
     }

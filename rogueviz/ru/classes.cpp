@@ -441,6 +441,7 @@ struct hint : public entity {
   int state;
   xy size;
   xy siz() override { return size; }
+  hint() { state = 0; }
   string glyph() override { return " "; }
   color_t color() override { return 0; }
   void act() override;
