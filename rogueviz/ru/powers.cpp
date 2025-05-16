@@ -305,7 +305,7 @@ void gen_powers() {
     "=", 0xe1cbbeFF,
     [] (data& d) {
       if(d.p->flags & ACTIVE) m.next_coyote_time += 30;
-      if(!(d.p->flags & IDENTIFIED) && (gframeid <= m.on_floor_when + m.coyote_time) && !m.on_floor) {
+      if(!(d.p->flags & IDENTIFIED) && (gframeid <= m.on_floor_when + m.coyote_time) && !m.on_floor && (d.p->flags & ACTIVE)) {
         d.p->flags |= IDENTIFIED;
         addMessage("You feel a strange magical force wanting to hold your foot from below.");
         }
