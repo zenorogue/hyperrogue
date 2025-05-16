@@ -208,6 +208,7 @@ void init_scales() {
   letterscales['~'] = eupush(0, -0.4) * euscale(1.5, 1.2);
   letterscales[')'] = euscale(2.5, 1);
   letterscales['('] = euscale(2.5, 1);
+  letterscales['F'] = euscale(2.1, 1.3);
   }
 
 void asciiletter(ld minx, ld miny, ld maxx, ld maxy, const string& ch, color_t col) {

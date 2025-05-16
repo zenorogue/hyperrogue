@@ -381,6 +381,31 @@ struct boar : public enemy {
   int max_hp() { return 60; }
   };
 
+struct frog : public enemy {
+  int jphase, jump_at;
+  xy siz() override { return {10, 10}; }
+  string glyph() override { return "F"; }
+  virtual ld maxvel() { return 3; }
+  ld maxrange() { return 50; }
+  color_t color() override { return 0x208020FF; }
+  void act() override;
+  void attacked(int s) override;
+  string get_name() override { return "frog"; }
+  string get_help() override { return "What a nice frog."; }
+  int base_xp() { return 30; }
+  int max_hp() { return 30; }
+  };
+
+struct giantfrog : public frog {
+  int jphase, jump_at;
+  xy siz() override { return {36, 36}; }
+  string get_name() override { return "giant frog"; }
+  string get_help() override { return "Beware their jumps."; }
+  int base_xp() { return 200; }
+  int max_hp() { return 200; }
+  ld maxvel() { return 5; }
+  };
+
 struct ghost : public enemy {
   int xp, hp;
   bool flipped;

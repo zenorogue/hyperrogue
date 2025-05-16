@@ -168,6 +168,18 @@ void load_room(fhstream& f, cell *c) {
         b->respawn = b->where; b->postfix();
         r.entities.emplace_back(std::move(b));
         }
+      else if(cap == "GIANTFROG") {
+        auto b = std::make_unique<giantfrog>();
+        sscanf(param.c_str(), "%lf%lf", &b->where.x, &b->where.y);
+        b->respawn = b->where; b->postfix();
+        r.entities.emplace_back(std::move(b));
+        }
+      else if(cap == "FROG") {
+        auto b = std::make_unique<frog>();
+        sscanf(param.c_str(), "%lf%lf", &b->where.x, &b->where.y);
+        b->respawn = b->where; b->postfix();
+        r.entities.emplace_back(std::move(b));
+        }
       else if(cap == "BAT") {
         auto b = std::make_unique<bat>();
         sscanf(param.c_str(), "%lf%lf", &b->where.x, &b->where.y);

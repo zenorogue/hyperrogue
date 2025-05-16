@@ -320,6 +320,60 @@ void boar::attacked(int dmg) {
   if(on_floor) vel.x = dat.d * dat.modv * s * 2, vel.y = -dat.d * dat.modv * 2.5;
   }
 
+void frog::act() {
+  stay_on_screen();
+  kino();
+  if(intersect(get_pixel_bbox(), m.get_pixel_bbox())) {
+    int s = where.x < m.where.x ? -1 : 1;
+    if(m.reduce_hp(20)) addMessage("The giant frog crushes you!");
+    auto dat = get_dat();
+    auto mdat = m.get_dat();
+    if(m.on_floor) m.vel.x = mdat.d * mdat.modv * -s * 1.5, m.vel.y = -mdat.d * mdat.modv * 2;
+    if(on_floor) vel.x = dat.d * dat.modv * s * 1.5;
+    }
+  if(on_floor) {
+    vel.x = 0;
+    if(gframeid > invinc_end) {
+      auto dat = get_dat();
+      if(jphase == 0 && gframeid >= jump_at && intersect(extend(get_pixel_bbox(), 100 * dat.d, 100 * dat.d, 20 * dat.d, 20 * dat.d), m.get_pixel_bbox())) {
+        vel.y = -2 * dat.modv;
+        jphase = 1;
+        }
+      else if(jphase == 1) {
+        auto p = where;
+        ld v = maxvel();
+        array<xy, 2> fp;
+        for(int i=0; i<2; i++) {
+          where = p, vel.x = (i ? v : -v) * dat.modv, vel.y = -v * dat.modv;
+          int it = 0;
+          do { stay_on_screen(); kino(); } while(!on_floor && it++ < 5000);
+          fp[i] = where;
+          }
+        ld dist = max(abs(fp[0].x - p.x), abs(fp[1].x - p.x));
+        where = p;
+        jphase = 2;
+        println(hlog, tuple(fp[0].x, fp[0].y, fp[1].x, fp[1].y));
+        vel.y = -v * dat.modv;
+        if(dist == 0) return;
+        ld il = (m.where.x - where.x) / dist;
+        if(il > 1) il = 1 - (rand() % 100) / 1000;
+        if(il < -1) il = -1 + (rand() % 100) / 1000;
+        vel.x = il * v * dat.modv;
+        }
+      else if(jphase == 2) {
+        jphase = 0; jump_at = gframeid + game_fps * (maxvel() > 4 ? 2 : 0) + rand() % game_fps;
+        }
+      }
+    }
+  }
+
+void frog::attacked(int dmg) {
+  enemy::attacked(dmg);
+  auto dat = get_dat();
+  int s = where.x < m.where.x ? -1 : 1;
+  if(on_floor) vel.x = dat.d * dat.modv * s * 2, vel.y = -dat.d * dat.modv * 2.5;
+  }
+
 void ghost::act() {
   hyperpoint g = to_hyper(where);
   hyperpoint h = to_hyper(m.where);
