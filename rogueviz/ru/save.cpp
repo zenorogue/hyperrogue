@@ -186,6 +186,15 @@ void load_room(fhstream& f, cell *c) {
         b->respawn = b->where; b->postfix();
         r.entities.emplace_back(std::move(b));
         }
+      else if(cap == "VTRAP") {
+        auto b = std::make_unique<vtrap>();
+        sscanf(param.c_str(), "%lf%lf", &b->where.x, &b->where.y);
+        auto dat = b->get_dat();
+        b->vel.x = 0; b->vel.y = 150 * 0.005 * dat.modv * dat.d;
+
+        b->postfix();
+        r.entities.emplace_back(std::move(b));
+        }
       else if(cap == "GRIDBUG") {
         auto b = std::make_unique<gridbug>();
         sscanf(param.c_str(), "%lf%lf", &b->where.x, &b->where.y);

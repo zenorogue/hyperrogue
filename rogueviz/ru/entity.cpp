@@ -581,6 +581,21 @@ void bat::act() {
     }
   }
 
+void vtrap::act() {
+  auto v = vel;
+  stay_on_screen();
+  apply_walls_reflect();
+  if(v.y * vel.y < 0) {
+    auto dat = get_dat();
+    vel.y = (rand() % 100 + 100) * (vel.y > 0 ? 1 : -1) * 0.005 * dat.modv * dat.d;
+    }
+  apply_vel();
+
+  if(intersect(get_pixel_bbox(), m.get_pixel_bbox())) {
+    if(m.reduce_hp(200)) addMessage("The trap zaps you!");
+    }
+  }
+
 void kestrel::attacked(int dmg) {
   enemy::attacked(dmg);
   if(where.x < m.where.x) vel.x = -abs(vel.x);

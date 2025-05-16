@@ -368,6 +368,14 @@ struct enemy : public entity {
   virtual int base_xp() { return 0; }
   };
 
+struct vtrap : public entity {
+  xy siz() override { return {6, 18}; }
+  string glyph() override { return "^"; }
+  color_t color() override { return 0xD00000FF; }
+  void act() override;
+  string get_name() override { return "moving trap"; }
+  string get_help() override { return "A deadly but invisible trap."; }
+  };
 
 struct boar : public enemy {
   xy siz() override { return {18, 18}; }
