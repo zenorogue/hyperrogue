@@ -268,6 +268,19 @@ extern int gold_id;
 string shopitem::glyph() { if(bought) return powers[gold_id].get_glyph(); else return item::glyph(); }
 color_t shopitem::color() { if(bought) return powers[gold_id].get_color(); else return item::color(); }
 
+void timed_orb::act() {
+  if(gframeid > current_room->timed_orb_end) {
+    walls[wTimeDoor].glyph = '+';
+    walls[wTimeDoor].flags = W_BLOCK | W_BLOCKBIRD;
+    }
+  else {
+    walls[wTimeDoor].glyph = '\'';
+    walls[wTimeDoor].flags = W_TRANS;
+    }
+  if(intersect(get_pixel_bbox(), m.get_pixel_bbox()))
+    current_room->timed_orb_end = gframeid + duration;
+  }
+
 void trader::act() {
   bool any_purchases = false;
   for(auto& e: current_room->entities) if(auto si = e->as_shopitem()) if(!si->existing) any_purchases = true;

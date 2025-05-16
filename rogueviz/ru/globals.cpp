@@ -58,7 +58,7 @@ struct ruwall {
 enum eWall {
   wAir, wWall, wBouncy, wSpike, wWater, wFrozen, wDoor, wSmashedDoor,
   wLockedDoor, wFountain, wBluePortal, wOrangePortal, wPlatform, wStaircase,
-  wColumn, wForge, wWoodWall, wShopDoor, wSecretPassage, wSign, wWallSign, wGUARD };
+  wColumn, wForge, wWoodWall, wShopDoor, wSecretPassage, wSign, wWallSign, wTimeDoor, wGUARD };
 
 flagtype W_BLOCK = 1;
 flagtype W_TRANS = 2;
@@ -94,6 +94,7 @@ ruwall walls[qwall] = {
   {"secret passage", "#", 0xFFFF40FF, W_PLATFORM | W_BLOCKBIRD, "You have discovered a secret passage from the other side."},
   {"sign", "X", 0xFFFF40FF, W_TRANS, "You need to wait close to this sign to read it."},
   {"wall sign", "X", 0xFFFFC0FF, W_BLOCK, "You need to wait close to this sign to read it."},
+  {"time door", "#", 0x8080FFFF, W_BLOCK | W_STABLE, "A powerful door, opened by a mechanism."},
   };
 
 int sel = 1;

@@ -67,6 +67,7 @@ struct room {
   bool fov[room_y][room_x];
   bool which_map_rendered;
   bool infile, need_rerender;
+  int timed_orb_end;
 
   vector<unique_ptr<struct entity>> entities;
 
@@ -325,6 +326,20 @@ struct pendulum_platform : public moving_platform {
   xy location_at(ld t) override;
   string get_name() override { return "pendulum platform"; }
   string get_help() override { return "These pendulum platforms go back and forth between two locations, taking the shortest path possible."; }
+  };
+
+struct timed_orb : public entity {
+  int duration;
+  xy siz() override { return {18, 18}; }
+  string glyph() override { return "O"; }
+  color_t color() override {
+    println(hlog, tie(gframeid, current_room->timed_orb_end));
+    if(gframeid > current_room->timed_orb_end) return 0x8080FFFF;
+    return gradient(0x404080FF, 0x8080FFFF, -1, cos((gframeid - current_room->timed_orb_end) * TAU * 5 / game_fps), 1);
+    }
+  void act() override;
+  string get_name() override { return "time orb"; }
+  string get_help() override { return "These orbs activate mechanisms for a limited time."; }
   };
 
 struct npc_or_trader : public entity {

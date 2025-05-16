@@ -180,6 +180,13 @@ void load_room(fhstream& f, cell *c) {
         b->respawn = b->where; b->postfix();
         r.entities.emplace_back(std::move(b));
         }
+      else if(cap == "TIMEORB") {
+        auto b = std::make_unique<timed_orb>();
+        ld dur = 0;
+        sscanf(param.c_str(), "%lf%lf%lf", &b->where.x, &b->where.y, &dur);
+        b->duration = dur * game_fps;
+        r.entities.emplace_back(std::move(b));
+        }
       else if(cap == "BAT") {
         auto b = std::make_unique<bat>();
         sscanf(param.c_str(), "%lf%lf", &b->where.x, &b->where.y);
