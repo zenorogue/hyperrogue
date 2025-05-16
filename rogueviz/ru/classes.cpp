@@ -212,6 +212,8 @@ struct entity {
   void apply_portal_grav();
   bool stay_on_screen(); /* returns true if flipped */
   virtual void act() { kino(); }
+  /* for things which can act while not existing */
+  virtual void unact() { }
 
   double get_scale() { return get_scale_at(where.y); }
   virtual bool freezing() { return false; }
@@ -465,6 +467,7 @@ struct item : public entity {
   string glyph() override { return powers[id].get_glyph(); }
   color_t color() override { return powers[id].get_color(); }
   void act() override {
+    stay_on_screen();
     kino();
     if(intersect(get_pixel_bbox(), m.get_pixel_bbox())) {
       addMessage(pickup_message);
@@ -497,6 +500,25 @@ struct shopitem : public item {
   string get_name() override { if(bought) return its(price) + " gold"; return item::get_name(); }
   string get_help() override { if(bought) return "You have bought something from this shop. The trader has stored the gold here."; return item::get_help() + "\n\nPrice: " + its(price); }
   shopitem* as_shopitem() override { return this; }
+  };
+
+struct loot : public item {
+  entity *owner;
+  bool dropped;
+  void act() {
+    item::act();
+    if(on_floor) {
+      auto dat = get_dat();
+      if(vel.x > 0) vel.x = max<ld>(vel.x - dat.d * dat.moda * 0.02, 0);
+      if(vel.x < 0) vel.x = min<ld>(vel.x + dat.d * dat.moda * 0.02, 0);
+      }
+    }
+  void unact() override {
+    if(!dropped && !owner->existing) {
+      where = owner->where, vel = owner->vel;
+      dropped = true; existing = true;
+      }
+    }
   };
 
 struct missile : public entity {

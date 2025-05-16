@@ -120,6 +120,21 @@ void load_room(fhstream& f, cell *c) {
         b->pickup_message = scanline_noblank(f);
         r.entities.emplace_back(std::move(b)); 
         }
+      else if(cap == "LOOT") {
+        auto b = std::make_unique<loot>();
+        b->qty = 1;
+        b->owner = &*r.entities.back();
+        sscanf(param.c_str(), "%d", &b->qty);
+        s = scanline_noblank(f);
+        b->id = -1;
+        b->where = xy(320, 200);
+        for(int i=0; i<isize(powers); i++) if(powers[i].name == s) b->id = i;
+        if(b->id == -1) println(hlog, "error: unknown loot name ", s), b->id = 0;
+        b->pickup_message = scanline_noblank(f);
+        b->existing = false; b->dropped = false;
+        r.entities.emplace_back(std::move(b));
+        println(hlog, "loot pushed");
+        }
       else if(cap == "SHOPITEM") {
         auto b = std::make_unique<shopitem>();
         b->qty = 1; b->qty1 = 0;

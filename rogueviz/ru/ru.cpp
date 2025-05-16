@@ -100,7 +100,7 @@ void playing_frame() {
 
   auto& ents = current_room->entities;
 
-  for(auto& e: ents) if(e->existing) e->act();
+  for(auto& e: ents) if(e->existing) e->act(); else e->unact();
 
   auto mb = ents.begin();
   for(auto& e: ents) if(!e->destroyed) *(mb++) = std::move(e);
