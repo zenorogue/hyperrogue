@@ -149,9 +149,9 @@ void render_room_walls(room *r) {
 
     int cc = c >> 3;
 
-    if(cc == wSecretPassage && r->at(x, y-1) == wWall) {
-      current_room->replace_block(x, y, wAir);
-      current_room->replace_block(x, y-1, wSecretPassage);
+    if(r == current_room && cc == wSecretPassage && r->at(x, y-1) == wWall) {
+      r->replace_block(x, y, wAir);
+      r->replace_block(x, y-1, wSecretPassage);
       }
 
     if((c & 7) == 0)
