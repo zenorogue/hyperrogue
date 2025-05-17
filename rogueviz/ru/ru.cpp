@@ -95,6 +95,41 @@ void editmap_frame() {
   if(keypressed('t')) { m.where = xy(mousepx, mousepy); m.vel = xy(0, 0); current_room->edited = true; }
   }
 
+/* new w, velocity multiplier, neighbor id */
+tuple<xy, ld, int> get_next_room(xy w, room *r) {
+  if(w.x < l_margin_at) {
+    w.x += actual_screen_x;
+    return {w, 1, 2};
+    }
+  if(w.x > r_margin_at) {
+    w.x -= actual_screen_x;
+    return {w, 1, non_hyperbolic ? 0 : 4};
+    }
+
+  if(w.y < t_margin_at && !non_hyperbolic) {
+    w.y = (w.y - t_margin_at) * 2 + b_margin_at;
+    w.x -= l_margin_at;
+    w.x = 2 * w.x;
+    int rid = w.x <= actual_screen_x;
+    if(rid == 0) w.x -= actual_screen_x;
+    w.x += l_margin_at;
+    return {w, 2, rid};
+    }
+  if(w.y > b_margin_at && !non_hyperbolic) {
+    w.x -= l_margin_at;
+    w.y -= b_margin_at;
+    w.y /= 2;
+    w.y += t_margin_at;
+    if(is_right(current_room))
+      w.x += actual_screen_x;
+    w.x /= 2;
+    w.x += l_margin_at;
+    return {w, .5, 3};
+    }
+
+  return {w, 1, -1};
+  }
+
 void playing_frame() {
   m.act();
 
@@ -106,45 +141,14 @@ void playing_frame() {
   for(auto& e: ents) if(!e->destroyed) *(mb++) = std::move(e);
   ents.resize(mb - ents.begin());
 
-  auto& nonh = non_hyperbolic;
   if(one_room) return;
-  
-  if(m.where.x < l_margin_at) {
-    m.where.x += actual_screen_x;
-    switch_to_adjacent_room(2);
-    m.clearg();
-    }
-  if(m.where.x > r_margin_at) {
-    m.where.x -= actual_screen_x;
-    switch_to_adjacent_room(nonh ? 0 : 4);
-    m.clearg();
-    }
-  
-  if(m.where.y < t_margin_at && !nonh) {
-    m.where.y = (m.where.y - t_margin_at) * 2 + b_margin_at;
-    m.where.x -= l_margin_at;
-    m.where.x = 2 * m.where.x;
-    if(m.where.x > actual_screen_x) {
-      m.where.x -= actual_screen_x;
-      switch_to_adjacent_room(0);
-      }
-    else
-      switch_to_adjacent_room(1);
-    m.where.x += l_margin_at;
-    m.vel *= 2;
-    m.clearg();
-    }
-  if(m.where.y > b_margin_at && !nonh) {
-    m.where.x -= l_margin_at;
-    m.where.y -= b_margin_at;
-    m.where.y /= 2;
-    m.where.y += t_margin_at;
-    if(is_right(current_room))
-      m.where.x += actual_screen_x;
-    switch_to_adjacent_room(3);
-    m.where.x /= 2;
-    m.where.x += l_margin_at;
-    m.vel /= 2;
+
+  auto [w1, vmul, cr] = get_next_room(m.where, current_room);
+
+  if(cr != -1) {
+    m.where = w1;
+    m.vel *= vmul;
+    switch_to_adjacent_room(cr);
     m.clearg();
     }
   }
@@ -257,7 +261,11 @@ void run() {
         if(cmapmode == mapmode::poincare) switch_mapmode_to(mapmode::standard);
         else switch_mapmode_to(mapmode::poincare);
         });
-      if(cmode == mode::editmap) mouseovers = format("coordinates: %d %d (%.2lf) (hdist=%.2lf)", mousepx, mousepy, double(get_scale_at(mousepy)), hdist(to_hyper(m.where), to_hyper(xy(mousepx, mousepy))));
+      if(cmode == mode::editmap) {
+        mouseovers = format("coordinates: %d %d (%.2lf) (hdist=%.2lf)", mousepx, mousepy, double(get_scale_at(mousepy)), hdist(to_hyper(m.where), to_hyper(xy(mousepx, mousepy))));
+        auto [w, vmul, id] = get_next_room(xy(mousepx, mousepy), current_room);
+        if(id != -1) mouseovers += format(" (%.1lf %.1lf %d)", w.x, w.y, id);
+        }
       if(cmode == mode::playing) {
         titlecolor = 0xFFFFFF;
         mouseovers = current_room->roomname;
