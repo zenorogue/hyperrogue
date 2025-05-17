@@ -68,6 +68,7 @@ struct room {
   bool which_map_rendered;
   bool infile, need_rerender;
   int timed_orb_end;
+  bool edited;
 
   vector<unique_ptr<struct entity>> entities;
 
@@ -84,6 +85,7 @@ struct room {
     }
   
   void initial() {
+    edited = false;
     int ylev = where->master->distance;
     if(ylev <= 0)
       for(int y=room_y-6; y<room_y; y++)

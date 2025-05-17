@@ -22,6 +22,10 @@ void save_map(string fname) {
     q.pop();
     auto& r = rooms[c];
     if(!r.infile) continue;
+
+    for(int i=0; i<c->type; i++) visit(c->cmove(i), c->c.spin(i));
+
+    if(!r.edited) continue;
     auto inq = in_queue[c];
     if(inq != -1) {
       println(f, "MOVE ", c->c.spin(inq), " ", rooms[c->move(inq)].roomname);
@@ -54,8 +58,6 @@ void save_map(string fname) {
       }
 
     println(f, "OK\n");
-
-    for(int i=0; i<c->type; i++) visit(c->cmove(i), c->c.spin(i));
     }
   }
 

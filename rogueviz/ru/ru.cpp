@@ -77,11 +77,11 @@ void update_keystate() {
 
 void editmap_frame() {
   if(keyheld('1'))
-    current_room->place_block_full(mousepx / block_x, mousepy / block_y, 8*sel);
+    current_room->place_block_full(mousepx / block_x, mousepy / block_y, 8*sel), current_room->edited = true;
   if(keyheld('2'))
-    current_room->place_block_full(mousepx / block_x, mousepy / block_y, 8*sel+4);
+    current_room->place_block_full(mousepx / block_x, mousepy / block_y, 8*sel+4), current_room->edited = true;
   if(keyheld('3'))
-    current_room->place_block_full(mousepx / block_x, mousepy / block_y, 0);
+    current_room->place_block_full(mousepx / block_x, mousepy / block_y, 0), current_room->edited = true;
   if(keypressed('4')) pushScreen([] {
     dialog::init();
     dialog::addTitle("what to add", 0x4040C0, 150);
@@ -92,7 +92,7 @@ void editmap_frame() {
     dialog::display();
     });
   if(keypressed('f')) floodfill_pick(mousepx / block_x, mousepy / block_y);
-  if(keypressed('t')) { m.where = xy(mousepx, mousepy); m.vel = xy(0, 0); }
+  if(keypressed('t')) { m.where = xy(mousepx, mousepy); m.vel = xy(0, 0); current_room->edited = true; }
   }
 
 void playing_frame() {
