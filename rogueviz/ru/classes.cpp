@@ -305,7 +305,9 @@ extern man m;
 struct moving_platform : public entity {
   xy ctr;
   ld radius, shift;
-  xy siz() override { return {36, 12}; }
+  virtual int width() { return 3; }
+  virtual eWall platform_type() { return wWall; }
+  xy siz() override { return {12.*width(), 12}; }
   string glyph() override { return "#"; }
   color_t color() override { return 0xFFFFFFFF; }
   virtual xy location_at(ld t) = 0;

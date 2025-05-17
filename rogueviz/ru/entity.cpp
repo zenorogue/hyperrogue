@@ -178,29 +178,35 @@ void entity::apply_walls() {
     auto pb = p->get_pixel_bbox_at(screen_ctr);
 
     if(intersect(pb, eb)) {
-      zero_vel = (rmow - screen_ctr) * get_scale_at(npw.y) + npw - where;
-
+      auto zvel = (rmow - screen_ctr) * get_scale_at(npw.y) + npw - where;
 
       bool reset = false;
 
-      if(intersect(pb, get_pixel_bbox_at(rmow))) { /* should not happen */ }
+      if(p->platform_type() == wStaircase) {
+        if(!fallthru) { on_floor = true; zero_vel = zvel; if(rvel.y > 0) rvel.y = 0; }
+        }
+
+      else if(intersect(pb, get_pixel_bbox_at(rmow))) { /* should not happen */ }
 
       else if(!intersect(pb, get_pixel_bbox_at(rmow + xy(rvel.x, 0))) && rvel.y > 0) {
         on_floor = true;
         rvel.y /= 2;
         if(abs(rvel.y) < 1e-6) rvel.y = 0;
         reset = true;
+        zero_vel = zvel;
         }
 
       else if(!intersect(pb, get_pixel_bbox_at(rmow + xy(rvel.x, 0))) && rvel.y < 0) {
         rvel.y /= 2;
         if(abs(rvel.y) < 1e-6) rvel.y = 0;
         reset = true;
+        zero_vel = zvel;
         }
 
       else {
         rvel.x = -rvel.x;
         reset = true;
+        zero_vel = zvel;
         }
 
       vel = (rmow + rvel - screen_ctr) * get_scale_at(npw.y) + npw - where;
@@ -446,12 +452,13 @@ xy pendulum_platform::location_at(ld t) {
 
 void moving_platform::draw() {
   double d = get_scale();
-  for(int w=-1; w<=1; w++) {
-    ld minx = where.x + siz().x * d * (w - 0.5) / 3;
+  auto wi = width();
+  for(int w=0; w<wi; w++) {
+    ld minx = where.x + siz().x * d * (w - 0.5) / wi;
     ld miny = where.y - siz().y * d / 2;
-    ld maxx = where.x + siz().x * d * (w + 0.5) / 3;
+    ld maxx = where.x + siz().x * d * (w + 0.5) / wi;
     ld maxy = where.y + siz().y * d / 2;
-    asciiletter(minx, miny, maxx, maxy, "#", 0xFFFFFFFF);
+    asciiletter(minx, miny, maxx, maxy, glyph(), color());
     }
   }
 
