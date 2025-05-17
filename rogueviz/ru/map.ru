@@ -1430,7 +1430,7 @@ MAP
 ################################################################################
 #b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b
 NPC 76 77 0
-@Forest Sign
+@Cave Sign
 DEADLY TRAPS AHEAD
 NPC 43 232 0
 @Floor Engraving
