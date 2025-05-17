@@ -332,6 +332,16 @@ struct pendulum_platform : public moving_platform {
   string get_help() override { return "These pendulum platforms go back and forth between two locations, taking the shortest path possible."; }
   };
 
+struct rope_platform : public moving_platform {
+  ld period, shift, dist, max_swing;
+  xy location_at(ld t) override;
+  int width() override { return 1; }
+  eWall platform_type() override { return wStaircase; }
+  string glyph() override { return "-"; }
+  string get_name() override { return "Swinging rope"; }
+  string get_help() override { return "A part of a swinging rope."; }
+  };
+
 struct timed_orb : public entity {
   int duration;
   xy siz() override { return {18, 18}; }

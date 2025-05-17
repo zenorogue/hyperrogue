@@ -442,6 +442,10 @@ xy ferris_platform::location_at(ld t) {
   return from_hyper(rgpushxto0(to_hyper(ctr)) * xspinpush0(t / game_fps + shift, radius));
   }
 
+xy rope_platform::location_at(ld t) {
+  return from_hyper(eupush(to_hyper(ctr)) * xspinpush0(sin(t / game_fps / period * TAU + shift) * max_swing, dist));
+  }
+
 xy pendulum_platform::location_at(ld t) {
   auto h1 = to_hyper(a);
   auto h2 = to_hyper(b);

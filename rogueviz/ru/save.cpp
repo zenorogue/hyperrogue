@@ -234,6 +234,17 @@ void load_room(fhstream& f, cell *c) {
           r.entities.emplace_back(std::move(b));
           }
         }
+      else if(cap == "ROPE") {
+        ld cx, cy, radius, period, shift, max_swing; int qty;
+        sscanf(param.c_str(), "%lf%lf%lf%d%lf%lf%lf", &cx, &cy, &radius, &qty, &period, &shift, &max_swing);
+
+        for(int i=0; i<qty; i++) {
+          auto b = std::make_unique<rope_platform>();
+          b->ctr = {cx, cy}; b->radius = radius; b->period = period; b->max_swing = max_swing * 1._deg; b->shift = shift;
+          b->dist = radius * (i+0.5) / qty;
+          r.entities.emplace_back(std::move(b));
+          }
+        }
       else if(cap == "PENDULUM") {
         auto b = std::make_unique<pendulum_platform>();
         sscanf(param.c_str(), "%lf%lf%lf%lf%lf%lf", &b->a.x, &b->a.y, &b->b.x, &b->b.y, &b->period, &b->shift);
