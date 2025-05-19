@@ -417,6 +417,12 @@ void gen_powers() {
     [] (data& d) { if(d.keystate == 1) d.p->flags |= (PARTIAL | IDENTIFIED); }
     ).be_potion(),
 
+  gen_power('6', "the thief",
+    "This will let you bypass trapped areas, in some way.",
+    "!", 0xFFFF00FF,
+    [] (data& d) { if(d.keystate == 1) d.p->flags |= (PARTIAL | IDENTIFIED); }
+    ).be_potion(),
+
   gold_id = isize(powers);
 
   gen_power('t', "gold",
