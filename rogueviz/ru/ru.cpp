@@ -420,7 +420,7 @@ void add_platf_hooks() {
 
     ld tscale = 1;
     if(dexmode->flags & ACTIVE)
-      tscale *= 10. / (10 + m.current_stats[stat::dex]);
+      tscale *= 10. / (10 + m.current.stats[stat::dex]);
 
     gtime += d * tscale;
     while(gtime > 1000. / game_fps) {

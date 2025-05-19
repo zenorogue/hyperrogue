@@ -228,7 +228,7 @@ void gen_powers() {
     [] (data& d) {
       if(d.keystate & 1) {
         bool can_jump = m.on_floor;
-        if(gframeid <= m.on_floor_when + m.coyote_time) can_jump = true;
+        if(gframeid <= m.on_floor_when + m.current.coyote_time) can_jump = true;
         if(can_jump) m.vel.y = m.zero_vel.y-(non_hyperbolic ? 3 : 5) * d.d * d.modv, m.on_floor_when = -1000;
         }
       }
@@ -265,7 +265,7 @@ void gen_powers() {
       m.attack_facing = m.facing; m.attack_when = gframeid;
       auto pb = m.get_pixel_bbox_at(xy{m.where.x + m.attack_facing * m.dsiz().x, m.where.y});
       auto bb = pixel_to_block(pb);
-      for(auto& e: current_room->entities) if(e->existing && intersect(e->get_pixel_bbox(), pb)) e->attacked((m.current_stats[stat::str] + 1) * 3 / 2);
+      for(auto& e: current_room->entities) if(e->existing && intersect(e->get_pixel_bbox(), pb)) e->attacked((m.current.stats[stat::str] + 1) * 3 / 2);
       for(int y=bb.miny; y<bb.maxy; y++)
       for(int x=bb.minx; x<bb.maxx; x++) {
         int b = current_room->at(x, y);
@@ -304,8 +304,8 @@ void gen_powers() {
     "This strange ring is too small to put on your finger, but maybe you could put it on your small toe?",
     "=", 0xe1cbbeFF,
     [] (data& d) {
-      if(d.p->flags & ACTIVE) m.next_coyote_time += 30;
-      if(!(d.p->flags & IDENTIFIED) && (gframeid <= m.on_floor_when + m.coyote_time) && !m.on_floor && (d.p->flags & ACTIVE)) {
+      if(d.p->flags & ACTIVE) m.next.coyote_time += 30;
+      if(!(d.p->flags & IDENTIFIED) && (gframeid <= m.on_floor_when + m.current.coyote_time) && !m.on_floor && (d.p->flags & ACTIVE)) {
         d.p->flags |= IDENTIFIED;
         addMessage("You feel a strange magical force wanting to hold your foot from below.");
         }
@@ -318,7 +318,7 @@ void gen_powers() {
     "=", 0xFFD500FF,
     [] (data& d) {
       if(d.p->flags & ACTIVE) {
-        m.next_jump_control++;
+        m.next.jump_control++;
         auto& ids = d.p->id_status;
         bool id_up = (!!m.on_floor) == !!(ids & 1);
         if(id_up) {
@@ -350,7 +350,7 @@ void gen_powers() {
     "=", 0xC04040FF,
     [] (data& d) {
       if(d.p->flags & ACTIVE) {
-        m.next_stats[stat::str] += d.p->qty_filled;
+        m.next.stats[stat::str] += d.p->qty_filled;
         d.p->flags |= IDENTIFIED;
         }
       }
@@ -362,7 +362,7 @@ void gen_powers() {
     "=", 0xC04040FF,
     [] (data& d) {
       if(d.p->flags & ACTIVE) {
-        m.next_stats[stat::str] += d.p->qty_filled;
+        m.next.stats[stat::str] += d.p->qty_filled;
         d.p->flags |= IDENTIFIED;
         }
       }
@@ -374,7 +374,7 @@ void gen_powers() {
     "=", 0xC04040FF,
     [] (data& d) {
       if(d.p->flags & ACTIVE) {
-        m.next_stats[stat::str] += d.p->qty_filled;
+        m.next.stats[stat::str] += d.p->qty_filled;
         d.p->flags |= IDENTIFIED;
         }
       }
@@ -386,7 +386,7 @@ void gen_powers() {
     "=", 0xC04040FF,
     [] (data& d) {
       if(d.p->flags & ACTIVE) {
-        m.next_stats[stat::str] += d.p->qty_filled;
+        m.next.stats[stat::str] += d.p->qty_filled;
         d.p->flags |= IDENTIFIED;
         }
       }

@@ -260,31 +260,36 @@ struct entity {
   virtual string get_help() { return "No help about this."; }
   };
 
+struct statdata {
+  statarray<int> stats;
+  int jump_control, coyote_time, hallucinating;
+  void reset();
+  };
+
 struct man : public entity {
   int facing;
   int attack_facing;
   int attack_when;
-
   int on_floor_when;
-  int jump_control, next_jump_control;
-  int coyote_time, next_coyote_time;
 
   int last_action;
 
   int experience;
-  statarray<int> base_stats, current_stats, next_stats;
 
-  virtual int max_hp() { return 10 * current_stats[stat::con]; }
+  statarray<int> base_stats;
+  statdata current, next;
+
+  virtual int max_hp() { return 10 * current.stats[stat::con]; }
 
   man() {
     facing = 1; attack_facing = 1;
     for(auto s: allstats) base_stats[s] = 10;
-    next_stats = base_stats; current_stats = base_stats;
+    next.reset(); current.reset();
     postfix();
     }
   xy siz() override { return {12, 12}; }
-  string glyph() override { return hallucinating ? "f" : "@"; }
-  color_t color() override { return hallucinating ? 0x808080FF : 0xFF8080FF; }
+  string glyph() override { return "@"; }
+  color_t color() override { return 0xFF8080FF; }
   void act() override; 
   void draw() override;
   virtual bool hurt_by_spikes() { return true; }

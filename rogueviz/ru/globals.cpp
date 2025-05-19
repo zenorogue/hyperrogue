@@ -99,8 +99,6 @@ ruwall walls[qwall] = {
 
 int sel = 1;
 
-bool hallucinating;
-
 template<class T> bool in_range(T val, T minv, T maxv) { return val >= minv && val <= maxv; }
 
 map<cell*, struct room> rooms;

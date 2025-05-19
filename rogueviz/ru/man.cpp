@@ -37,6 +37,12 @@ void check_fountains() {
   swap(on_fountain, next_on_fountain);
   }
 
+void statdata::reset() {
+  stats = m.base_stats;
+  coyote_time = 0;
+  jump_control = 0;
+  }
+
 void man::act() {
   kino();
 
@@ -45,12 +51,9 @@ void man::act() {
     stable_where = where;
     }
 
-  current_stats = next_stats;
-  next_stats = base_stats;
+  current = next;
+  next.reset();
   auto dat = get_dat();
-
-  coyote_time = next_coyote_time; next_coyote_time = 0;
-  jump_control = next_jump_control; next_jump_control = 0;
 
   if(on_floor) on_floor_when = gframeid;
 
@@ -58,7 +61,7 @@ void man::act() {
    
   handle_powers(dat);
 
-  if((on_floor || jump_control || wallhug) && !on_ice) {
+  if((on_floor || current.jump_control || wallhug) && !on_ice) {
     vel.x = zero_vel.x + dat.dx * dat.d * dat.modv * 2.5;
     }
 

@@ -23,7 +23,7 @@ void draw_stats() {
   
   for(auto st: allstats) {
     string s = its(m.base_stats[st]);
-    if(m.current_stats[st] != m.base_stats[st]) s += " (" + its(m.current_stats[st]) + ")";
+    if(m.current.stats[st] != m.base_stats[st]) s += " (" + its(m.current.stats[st]) + ")";
     dialog::addSelItem(statdata[st].name, s, statdata[st].key);
     dialog::add_action_push([st] {
       render_the_map();
@@ -32,7 +32,7 @@ void draw_stats() {
       dialog::addHelp(statdata[st].desc);
       dialog::addBreak(100);
       dialog::addSelItem("base value", its(m.base_stats[st]), 0);
-      dialog::addSelItem("current value", its(m.current_stats[st]), 0);
+      dialog::addSelItem("current value", its(m.current.stats[st]), 0);
       dialog::addBreak(100);
       dialog::addBack();
       dialog::display();
