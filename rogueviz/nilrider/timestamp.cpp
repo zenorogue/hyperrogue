@@ -1,5 +1,7 @@
 namespace nilrider {
 
+using hr::lerp;
+
 ld timestamp::energy_in_squares() { return vel * vel / (2 * gravity); }
 
 /** convert rotationally symmetric to internal model */

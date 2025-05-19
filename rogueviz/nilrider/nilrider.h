@@ -115,12 +115,15 @@ struct checkerparam {
 
 using goalchecker = std::function<eGoalResult(checkerparam)>;
 
+using star_awarder = std::function<ld(ld)>;
+
 struct goal {
   color_t color;
   string desc;
   goalchecker check;
   string achievement_name;
   string leaderboard_name;
+  star_awarder sa;
   };
 
 using surface_fun = std::function<ld(hyperpoint h)>;
@@ -136,6 +139,7 @@ struct level {
   char hotkey;
   string longdesc;
   flagtype flags;
+  int stars_needed;
   ld minx, miny, maxx, maxy;
   vector<string> map_tiles;
   ld startx, starty;
@@ -145,8 +149,8 @@ struct level {
   
   bool initialized;
   
-  level(string name, char hotkey, flagtype flags, string longdesc, ld minx, ld miny, ld maxx, ld maxy, const vector<string>& mt, ld sx, ld sy, const vector<level*> subs, const std::function<ld(hyperpoint h)>& surf, vector<goal> g) :
-    name(name), hotkey(hotkey), longdesc(longdesc), flags(flags), minx(minx), miny(miny), maxx(maxx), maxy(maxy), map_tiles(mt), startx(sx), starty(sy), sublevels(subs), surface(surf), goals(g) {
+  level(string name, char hotkey, flagtype flags, int sneed, string longdesc, ld minx, ld miny, ld maxx, ld maxy, const vector<string>& mt, ld sx, ld sy, const vector<level*> subs, const std::function<ld(hyperpoint h)>& surf, vector<goal> g) :
+    name(name), hotkey(hotkey), longdesc(longdesc), flags(flags), stars_needed(sneed), minx(minx), miny(miny), maxx(maxx), maxy(maxy), map_tiles(mt), startx(sx), starty(sy), sublevels(subs), surface(surf), goals(g) {
     initialized = false;
     unil_texture = nullptr;
     unil_texture_stepped = nullptr;

@@ -6,6 +6,7 @@ namespace bricks {
   extern void build(bool in_pair);
 
   #if !NILRIDER
+  #ifndef BRICK
   struct brick {
     euc::coord co;
     color_t col;
@@ -13,6 +14,7 @@ namespace bricks {
     hyperpoint location;
     hpcshape shRotWall[6];
     };
+  #endif
   #endif
   
   extern vector<brick> bricks;
