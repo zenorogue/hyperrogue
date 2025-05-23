@@ -38,7 +38,7 @@ void check_fountains() {
   }
 
 void statdata::reset() {
-  stats = m.base_stats;
+  for(auto i: allstats) stats[i] = m.base_stats[i];
   coyote_time = 0;
   jump_control = 0;
   }

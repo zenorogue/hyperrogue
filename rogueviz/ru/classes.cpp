@@ -261,7 +261,7 @@ struct entity {
   };
 
 struct statdata {
-  statarray<int> stats;
+  statarray<ld> stats;
   int jump_control, coyote_time, hallucinating;
   void reset();
   };

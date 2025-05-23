@@ -22,8 +22,12 @@ void draw_stats() {
   dialog::addSelItem("free experience", its(m.experience), 'x');
   
   for(auto st: allstats) {
-    string s = its(m.base_stats[st]);
-    if(m.current.stats[st] != m.base_stats[st]) s += " (" + its(m.current.stats[st]) + ")";
+    auto bas = m.base_stats[st];
+    auto cur = m.current.stats[st];
+    string s = its(bas);
+    int curi = cur + 0.01;
+    if(cur != bas && abs(cur-curi) < 1e-6) s += " (" + its(curi) + ")";
+    else if(cur != bas) s += " (" + format("%.2f", cur) + ")";
     dialog::addSelItem(statdata[st].name, s, statdata[st].key);
     dialog::add_action_push([st] {
       render_the_map();
