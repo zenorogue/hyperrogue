@@ -52,8 +52,11 @@ void man::act() {
     stable_where = where;
     }
 
+  auto h = max_hp();
   current = next;
   next.reset();
+  if(h != max_hp())
+    hp = randround(1. * hp * max_hp() / h);
   auto dat = get_dat();
 
   if(on_floor) on_floor_when = gframeid;

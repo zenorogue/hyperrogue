@@ -1,5 +1,9 @@
 namespace rogue_unlike {
 
+int randround(ld x) {
+  return x + randd();
+  }
+
 hyperpoint to_hyper(ld x, ld y) {
   if(non_hyperbolic) return hyperpoint(x, y, 1, 1);
   y -= t_margin_at;
