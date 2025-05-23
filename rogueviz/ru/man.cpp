@@ -41,6 +41,7 @@ void statdata::reset() {
   for(auto i: allstats) stats[i] = m.base_stats[i];
   coyote_time = 0;
   jump_control = 0;
+  hallucinating = false;
   }
 
 void man::act() {
