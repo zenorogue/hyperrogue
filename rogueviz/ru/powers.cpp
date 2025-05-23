@@ -24,6 +24,7 @@ string addqof(string base, power *p) {
 
 
 power& power::be_weapon() {
+  flags |= WEAPON;
   picked_up = [this] (int x) { qty_owned += x; qty_filled = max(qty_filled, x);  };
   auto gn = get_name; get_name = [gn, this] { return addqof(gn(), this); };
   return self;
@@ -396,31 +397,37 @@ void gen_powers() {
   gen_power('2', "health",
     "This will cure your wounds, in some way.",
     "!", 0xFFFF00FF,
-    [] (data& d) { if(d.keystate == 1) d.p->flags |= (PARTIAL | IDENTIFIED); }
+    random_potion_act
     ).be_potion(),
 
   gen_power('3', "reach",
     "This will let you reach heights, in some way.",
     "!", 0xFFFF00FF,
-    [] (data& d) { if(d.keystate == 1) d.p->flags |= (PARTIAL | IDENTIFIED); }
+    random_potion_act
     ).be_potion(),
 
   gen_power('4', "fire",
     "This will let you produce fire, in some way.",
     "!", 0xFFFF00FF,
-    [] (data& d) { if(d.keystate == 1) d.p->flags |= (PARTIAL | IDENTIFIED); }
+    random_potion_act
     ).be_potion(),
 
   gen_power('5', "polymorph",
     "This will let you change into a small creature.",
     "!", 0xFFFF00FF,
-    [] (data& d) { if(d.keystate == 1) d.p->flags |= (PARTIAL | IDENTIFIED); }
+    random_potion_act
     ).be_potion(),
 
   gen_power('6', "the thief",
     "This will let you bypass trapped areas, in some way.",
     "!", 0xFFFF00FF,
-    [] (data& d) { if(d.keystate == 1) d.p->flags |= (PARTIAL | IDENTIFIED); }
+    random_potion_act
+    ).be_potion(),
+
+  gen_power('7', "mystery",
+    "A potion with some random effect.",
+    "!", 0xFFFF00FF,
+    random_potion_act
     ).be_potion(),
 
   gold_id = isize(powers);
@@ -552,6 +559,12 @@ void shuffle_all() {
   auto& pc = potion_colors;
   for(int i=1; i<isize(pc); i++) swap(pc[i], pc[rand() % (i+1)]);
   for(auto& p: powers) p.reshuffle();
+  assign_potion_powers();
+  }
+
+power& find_power(string name) {
+  for(auto& p: powers) if(p.name == name) return p;
+  throw hr_exception("unknown power");
   }
 
 }

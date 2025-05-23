@@ -34,6 +34,7 @@ Have fun!
 #include "powers.cpp"
 #include "save.cpp"
 #include "stats.cpp"
+#include "randeff.cpp"
 
 namespace rogue_unlike {
 

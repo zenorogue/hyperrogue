@@ -155,6 +155,7 @@ void asciiletter(ld minx, ld miny, ld maxx, ld maxy, const string& ch, color_t c
 
 void render_the_map();
 void shuffle_all();
+void assign_potion_powers();
 
 using revert_stack = vector<reaction_t>;
 

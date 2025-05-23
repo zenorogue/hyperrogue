@@ -1,5 +1,7 @@
 namespace rogue_unlike {
 
+enum class rev { start, active, stop };
+
 /** a helper structure to mass to powerfun */
 struct data {
   int keystate;
@@ -8,9 +10,21 @@ struct data {
   ld moda;
   int dx;
   struct power *p;
+  struct randeff *re;
+  rev mode;
   };
 
 using powerfun = hr::function<void(data&)>;
+
+struct randeff {
+  string name;
+  string desc;
+  string effect;
+  power *which_weapon;
+  int qty, a, b, c, d;
+  powerfun act;
+  randeff (string name, string desc, string effect, powerfun act) : name(name), desc(desc), effect(effect), act(act) {}
+  };
 
 struct power {
   int key;
@@ -24,6 +38,7 @@ struct power {
   int qty_owned;
   flagtype flags;
   int random_flavor;
+  vector<struct randeff*> randeffs;
   void init();
   hr::function<void(data&)> act, paused_act, dead_act;
   hr::function<string()> get_name;
@@ -50,6 +65,7 @@ extern power *extra_life;
 flagtype IDENTIFIED = Flag(1);
 flagtype ACTIVE = Flag(2);
 flagtype PARTIAL = Flag(4);
+flagtype WEAPON = Flag(8);
 
 struct bbox {
   int minx, miny, maxx, maxy;
