@@ -237,6 +237,7 @@ struct entity {
 
   double get_scale() { return get_scale_at(where.y); }
   virtual bool freezing() { return false; }
+  virtual bool burning() { return false; }
   virtual void hit_wall() {};
 
   virtual void draw();
@@ -609,10 +610,19 @@ struct missile : public entity {
   missile() { destroyed = false; }
   xy siz() override { return {4, 4}; }
   string glyph() override { return "*"; }
-  color_t color() override { return 0x8080FFFF; }
   void act() override; 
-  bool freezing() override { return true; }
   void hit_wall() override { destroyed = true; }
+  };
+
+struct ice_missile : public missile {
+  color_t color() override { return 0x8080FFFF; }
+  bool freezing() override { return true; }
+  };
+
+struct fire_missile : public missile {
+  int index;
+  color_t color() override { return gradient(0xFFFF00FF, 0xFF0000FF, -1, sin(index+ticks/100), 1); }
+  bool burning() override { return true; }
   };
 
 }

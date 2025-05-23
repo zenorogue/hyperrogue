@@ -70,7 +70,18 @@ randeff health_bubbles("Bubbles", "When you are attacked, you produce red bubble
   });
 
 // fire powers
-randeff fire_spit("Fiery Spit", "Lets you spit fire.", "You feel fire in your mouth!", [] (data &d) { });
+randeff fire_spit("Fiery Spit", "Lets you spit fire.", "You feel fire in your mouth!", [] (data &d) {
+  if(d.mode == rev::start || (d.mode == rev::active && d.keystate == 1))
+    for(int i=1; i<10; i++) {
+      auto d = m.get_dat();
+      auto mi = std::make_unique<fire_missile>();
+      mi->where = m.where + xy(m.facing * m.get_scale() * m.siz().y * 0.45, 0);
+      mi->vel = m.vel + xy(m.facing * d.modv * i, d.modv * (10-i) / 5.);
+      mi->clearg();
+      mi->index = i;
+      current_room->entities.emplace_back(std::move(mi));
+      }
+  });
 randeff fire_weapon("Fiery Weapon", "Attacks with your [weapon] set things on fire.", "Your hands glow, and your [weapon] burst into flame!", [] (data &d) { });
 
 // morph powers

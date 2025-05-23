@@ -110,6 +110,10 @@ void entity::apply_walls() {
       if(walls[b].flags & W_FROZEN) on_ice = true;
       vel.y /= 2;
       if(abs(vel.y) < 1e-6) vel.y = 0;
+      if(burning()) {
+        if(b == wWoodWall) current_room->replace_block(x, y, wAir);
+        else hit_wall();
+        }
       if(freezing()) {
         if(b == wWater) current_room->replace_block(x, y, wFrozen);
         else if(b != wFrozen) hit_wall();
@@ -129,6 +133,9 @@ void entity::apply_walls() {
       vel.y /= 2;
       if(abs(vel.y) < 1e-6) vel.y = 0;
       if(pixel_to_block(get_pixel_bbox_at(where + vel)).miny > y) where.y += vel.y;
+      if(burning()) {
+        if(b == wWoodWall) current_room->replace_block(x, y, wAir);
+        }
       goto again;
       }
     if((walls[b].flags & W_PAIN) && pain_effect()) goto again;
@@ -146,6 +153,10 @@ void entity::apply_walls() {
     eWall b = current_room->at(x, y);
     if(walls[b].flags & W_BLOCK) {
       if(freezing()) { hit_wall(); }
+      if(burning()) {
+        if(b == wWoodWall) current_room->replace_block(x, y, wAir);
+        else hit_wall();
+        }
       vel.x = (vel.x - max<ld>(vel.y, 0)/10) / 2;
       wallhug = true;
       goto again;
@@ -157,6 +168,10 @@ void entity::apply_walls() {
     eWall b = current_room->at(x, y);
     if(walls[b].flags & W_BLOCK) {
       if(freezing()) { hit_wall(); }
+      if(burning()) {
+        if(b == wWoodWall) current_room->replace_block(x, y, wAir);
+        else hit_wall();
+        }
       vel.x = (vel.x + max<ld>(vel.y, 0)/10) / 2;
       wallhug = true;
       goto again;
