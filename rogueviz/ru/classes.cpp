@@ -161,6 +161,7 @@ struct xy {
   xy& operator *= (ld s) { x *= s; y *= s; return self; }
   xy& operator *= (xy b) { x *= b.x; y *= b.y; return self; }
   xy& operator /= (ld s) { x /= s; y /= s; return self; }
+  bool operator == (xy b) { return x == b.x && y == b.y; }
   };
 
 enum class stat { str, con, wis, dex };
