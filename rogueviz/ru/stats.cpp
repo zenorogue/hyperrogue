@@ -8,6 +8,13 @@ struct statinfo {
 
 statarray<statinfo> statdata;
 
+string prettystat(ld cur) {
+  int curi = cur + 0.01;
+  if(abs(cur-curi) < 1e-6) return its(curi);
+  if(abs(cur-curi-.5) < 1e-6) return its(curi) + "½";
+  return format("%.lf", cur);
+  }
+
 void draw_stats() {
 
   statdata[stat::str] = {'s', "Strength", "Affects the strength of your physical attacks."};
@@ -25,9 +32,7 @@ void draw_stats() {
     auto bas = m.base_stats[st];
     auto cur = m.current.stats[st];
     string s = its(bas);
-    int curi = cur + 0.01;
-    if(cur != bas && abs(cur-curi) < 1e-6) s += " (" + its(curi) + ")";
-    else if(cur != bas) s += " (" + format("%.2f", cur) + ")";
+    if(cur != bas) s += " (" + prettystat(cur) + ")";
     dialog::addSelItem(statdata[st].name, s, statdata[st].key);
     dialog::add_action_push([st] {
       render_the_map();
@@ -36,7 +41,7 @@ void draw_stats() {
       dialog::addHelp(statdata[st].desc);
       dialog::addBreak(100);
       dialog::addSelItem("base value", its(m.base_stats[st]), 0);
-      dialog::addSelItem("current value", its(m.current.stats[st]), 0);
+      dialog::addSelItem("current value", prettystat(m.current.stats[st]), 0);
       dialog::addBreak(100);
       dialog::addBack();
       dialog::display();
