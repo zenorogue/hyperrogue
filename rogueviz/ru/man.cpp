@@ -23,13 +23,13 @@ void check_fountains() {
   auto bb = pixel_to_block(m.get_pixel_bbox());
   for(int x = bb.minx; x < bb.maxx; x++) for(int y = bb.miny; y < bb.maxy; y++) {
     eWall b = current_room->at(x, y);
-    println(hlog, tuple(x, y, int(b)));
     if(b == wFountain) next_on_fountain = true;
     }
   if(next_on_fountain && !on_fountain) {
     if(extra_life->flags & ACTIVE) {
       fountain_room = current_room;
       fountain_where = m.where;
+      death_revert.clear();
       }
     addMessage("A magic fountain! You feel safe and refill your potions.");
     regenerate_all();
