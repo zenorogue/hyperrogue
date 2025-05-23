@@ -101,17 +101,56 @@ power& power::be_potion() {
   get_name = [np, this] {
     string fname = potion_colors[np].first + " potion";
     if(flags & (PARTIAL | IDENTIFIED)) fname = fname + " of " + name;
+    int insq = 0;
+    if(flags & IDENTIFIED)
+      for(auto& e: randeffs) {
+        if(!insq) fname += " ["; else fname += ", ";
+        fname += e->name;
+        insq++;
+        }
+    if(insq) fname += "]";
     fname += " (" + its(qty_filled) + "/" + its(qty_owned) + ")";
+    if(flags & ACTIVE) fname += " [active]";
     return fname;
     };
   auto gd = get_desc;
   get_desc = [this, gd] () -> string {
     if(!(flags & (PARTIAL | IDENTIFIED)))
       return "You will need to drink this potion to identify it.";
-    else return gd();
+    else {
+      auto desc = gd();
+      if(flags & IDENTIFIED)
+        for(auto& e: randeffs)
+          desc += e->desc;
+      return desc;
+      }
     };
   return self;
   }
+
+void random_potion_act(data& d) {
+  if(d.p->qty_filled == d.p->qty_owned) d.p->flags &=~ ACTIVE;
+  if(d.keystate == 1 && !(d.p->flags & ACTIVE)) {
+    if(d.p->qty_filled == 0) {
+      addMessage("You have no more " + d.p->get_name());
+      return;
+      }
+    addMessage("You drink the " + d.p->get_name());
+    for(auto& e: d.p->randeffs) {
+      if(e->effect != "") addMessage(e->effect);
+      d.re = e; d.mode = rev::start;
+      e->act(d);
+      }
+    d.p->flags |= (ACTIVE | PARTIAL | IDENTIFIED);
+    d.p->qty_filled--;
+    }
+  else if(d.p->flags & ACTIVE) {
+    for(auto& e: d.p->randeffs) {
+      d.re = e; d.mode = rev::active;
+      e->act(d);
+      }
+    }
+  };
 
 vector<power> powers;
 
