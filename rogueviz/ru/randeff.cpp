@@ -82,7 +82,10 @@ randeff fire_spit("Fiery Spit", "Lets you spit fire.", "You feel fire in your mo
       current_room->entities.emplace_back(std::move(mi));
       }
   });
-randeff fire_weapon("Fiery Weapon", "Attacks with your [weapon] set things on fire.", "Your hands glow, and your [weapon] burst into flame!", [] (data &d) { });
+randeff fire_weapon("Fiery Weapon", "Attacks with your [weapon] set things on fire.", "Your hands glow, and your [weapon] burst into flame!", [] (data &d) {
+  if(d.mode == rev::active)
+    m.next.mods.emplace_back(d.re->which_weapon, mod::burning, 2 * m.current.stats[stat::wis] + 1e-6);
+  });
 
 // morph powers
 randeff morph_cat("Cat", "Turns you into a cat.", "You turn into a cat!", [] (data &d) { });

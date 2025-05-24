@@ -42,6 +42,7 @@ void statdata::reset() {
   coyote_time = 0;
   jump_control = 0;
   hallucinating = false;
+  mods.clear();
   }
 
 void man::act() {
@@ -55,6 +56,8 @@ void man::act() {
   auto h = max_hp();
   current = next;
   next.reset();
+  for(auto& po: powers) po.mods.clear();
+  for(auto& [po, type, val]: current.mods) po->mods.emplace_back(type, val);
   if(h != max_hp())
     hp = randround(1. * hp * max_hp() / h);
   auto dat = get_dat();

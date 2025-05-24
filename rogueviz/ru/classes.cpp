@@ -26,6 +26,8 @@ struct randeff {
   randeff (string name, string desc, string effect, powerfun act) : name(name), desc(desc), effect(effect), act(act) {}
   };
 
+enum class mod { burning, freezing };
+
 struct power {
   int key;
   string name;
@@ -40,6 +42,7 @@ struct power {
   int random_flavor;
   vector<struct randeff*> randeffs;
   void init();
+  vector<pair<mod, int>> mods;
   hr::function<void(data&)> act, paused_act, dead_act;
   hr::function<string()> get_name;
   hr::function<string()> get_desc;
@@ -291,6 +294,7 @@ struct statdata {
   statarray<ld> stats;
   int jump_control, coyote_time, hallucinating;
   void reset();
+  vector<tuple<power*, mod, int>> mods;
   };
 
 struct man : public entity {

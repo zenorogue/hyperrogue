@@ -26,7 +26,22 @@ string addqof(string base, power *p) {
 power& power::be_weapon() {
   flags |= WEAPON;
   picked_up = [this] (int x) { qty_owned += x; qty_filled = max(qty_filled, x);  };
-  auto gn = get_name; get_name = [gn, this] { return addqof(gn(), this); };
+  auto gn = get_name; get_name = [gn, this] {
+    string s = addqof(gn(), this);
+    for(auto& [m, qty]: mods) {
+      if(m == mod::burning) s = "flaming " + s;
+      if(m == mod::freezing) s = "freezing " + s;
+      }
+    return s;
+    };
+  auto gc = get_color; get_color = [gc, this] {
+    auto col = gc();
+    for(auto& [m, qty]: mods) {
+      if(m == mod::burning) col = gradient(0xFFFF00FF, 0xFF0000FF, -1, sin(ticks/100), 1);
+      if(m == mod::freezing) col = 0x8080FFFF;
+      }
+    return col;
+    };
   return self;
   }
 
@@ -305,15 +320,31 @@ void gen_powers() {
       m.attack_facing = m.facing; m.attack_when = gframeid;
       auto pb = m.get_pixel_bbox_at(xy{m.where.x + m.attack_facing * m.dsiz().x, m.where.y});
       auto bb = pixel_to_block(pb);
-      for(auto& e: current_room->entities) if(e->existing && intersect(e->get_pixel_bbox(), pb)) e->attacked((m.current.stats[stat::str] + 1) * 3 / 2);
+      for(auto& e: current_room->entities)
+        if(e->existing && intersect(e->get_pixel_bbox(), pb)) {
+          int sav = e->invinc_end;
+          e->attacked((m.current.stats[stat::str] + 1) * 3 / 2);
+          for(auto& [m, qty]: d.p->mods) {
+            if(m == mod::burning) { e->invinc_end = sav; e->attacked(qty); }
+            if(m == mod::freezing) { e->invinc_end = sav; e->attacked(qty); }
+            }
+          }
       for(int y=bb.miny; y<bb.maxy; y++)
       for(int x=bb.minx; x<bb.maxx; x++) {
         int b = current_room->at(x, y);
         if(b == wDoor) {
-          current_room->replace_block(x, y, wSmashedDoor);
+          current_room->replace_block_frev(x, y, wSmashedDoor);
           addMessage("You smash the door!");
-          auto cr = current_room;
-          add_revert(fountain_revert, [cr, x, y] { cr->replace_block(x, y, wDoor); });
+          }
+        for(auto& [m, qty]: d.p->mods) {
+          if(m == mod::burning && b == wWoodWall) {
+            current_room->replace_block_frev(x, y, wAir);
+            addMessage("You burn the wall!");
+            }
+          if(m == mod::freezing && b == wWater) {
+            current_room->replace_block_frev(x, y, wFrozen);
+            addMessage("You freeze the water!");
+            }
           }
         }
       }).be_weapon(),
