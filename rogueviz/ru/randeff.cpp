@@ -87,9 +87,35 @@ randeff fire_weapon("Fiery Weapon", "Attacks with your [weapon] set things on fi
     m.next.mods.emplace_back(d.re->which_weapon, mod::burning, 2 * m.current.stats[stat::wis] + 1e-6);
   });
 
+cat_color morph_cat_color;
+
 // morph powers
-randeff morph_cat("Cat", "Turns you into a cat.", "You turn into a cat!", [] (data &d) { });
-randeff morph_capy("Capybara", "Turns you into a capybara.", "You turn into a capybara!", [] (data &d) { });
+randeff morph_cat("Cat", "Turns you into a cat.", "You turn into a cat!", [] (data &d) {
+  if(d.mode == rev::start || (d.mode == rev::active && d.keystate == 1) || (d.mode == rev::stop && m.morphed)) {
+    if(m.morphed) {
+      delete(m.morphed), m.morphed = nullptr;
+      addMessage("You morph back into a human.");
+      }
+    else {
+      auto mcat = new cat;
+      mcat->col = morph_cat_color;
+      m.morphed = mcat;
+      addMessage("You morph into a " + m.morphed->get_name() + "!");
+      }
+    }
+  });
+randeff morph_capy("Capybara", "Turns you into a capybara.", "You turn into a capybara!", [] (data &d) {
+  if(d.mode == rev::start || (d.mode == rev::active && d.keystate == 1) || (d.mode == rev::stop && m.morphed)) {
+    if(m.morphed) {
+      delete(m.morphed), m.morphed = nullptr;
+      addMessage("You morph back into a human.");
+      }
+    else {
+      m.morphed = new capybara;
+      addMessage("You morph into a lovely capybara!");
+      }
+    }
+  });
 
 vector<power*> all_weapons() {
   vector<power*> res;
@@ -115,6 +141,7 @@ void assign_potion_powers() {
   find_power("reach").randeffs = relist{ pick(&jump_double, &jump_high, &jump_bubble, &jump_light), random_powers[3] };
   find_power("fire").randeffs = relist{ pick(&fire_spit, &fire_weapon), random_powers[4] };
   find_power("mystery").randeffs = relist{ random_powers[5], random_powers[6], random_powers[7] };
+  morph_cat_color = hrand_elt(cat_colors);
   }
 
 }

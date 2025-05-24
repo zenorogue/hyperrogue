@@ -303,6 +303,7 @@ struct man : public entity {
   int attack_facing;
   int attack_when;
   int on_floor_when;
+  entity *morphed = nullptr;
 
   int last_action;
 
@@ -319,9 +320,18 @@ struct man : public entity {
     next.reset(); current.reset();
     postfix();
     }
-  xy siz() override { return {12, 12}; }
-  string glyph() override { return "@"; }
-  color_t color() override { return 0xFF8080FF; }
+  xy siz() override {
+    if(morphed) return morphed->siz();
+    return {12, 12};
+    }
+  string glyph() override {
+    if(morphed) return morphed->glyph();
+    return "@";
+    }
+  color_t color() override {
+    if(morphed) return morphed->color();
+    return 0xFF8080FF;
+    }
   void act() override; 
   void draw() override;
   virtual bool hurt_by_spikes() { return true; }
@@ -444,6 +454,33 @@ struct vtrap : public entity {
   void act() override;
   string get_name() override { return "moving trap"; }
   string get_help() override { return "A deadly but invisible trap."; }
+  };
+
+struct cat_color {
+  string name;
+  color_t col;
+  };
+
+struct cat : public enemy {
+  cat_color col;
+  cat();
+  xy siz() override { return {5, 5}; }
+  string glyph() override { return "f"; }
+  color_t color() override { return col.col; }
+  string get_name() override { return col.name + " cat"; }
+  string get_help() override { return "Do not fight cats!"; }
+  int base_xp() { return 10; }
+  int max_hp() { return 20; }
+  };
+
+struct capybara : public enemy {
+  xy siz() override { return {6, 6}; }
+  string glyph() override { return "C"; }
+  color_t color() override { return 0xC08040FF; }
+  string get_name() override { return "capybara"; }
+  string get_help() override { return "Do not fight capybaras!"; }
+  int base_xp() { return 15; }
+  int max_hp() { return 40; }
   };
 
 struct boar : public enemy {
