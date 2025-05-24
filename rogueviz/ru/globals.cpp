@@ -167,4 +167,6 @@ void revert_all(revert_stack& s);
 
 string parse_markup(string s);
 
+struct power& find_power(string name);
+
 }

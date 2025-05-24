@@ -247,10 +247,13 @@ void man::draw() {
   if(t < 50) {
     auto af = attack_facing * (1 - t * 0.01);
     auto ds = dsiz();
+    auto col = find_power("dagger").get_color();
+    auto& alpha = part(col, 0);
+    alpha = max<int> (0, alpha - 5 * t);
     asciiletter(
       where.x + af * ds.x - ds.x/2, where.y - ds.y/2,
       where.x + af * ds.x + ds.x/2, where.y + ds.y/2,
-      attack_facing == -1 ? "(" : ")", 0xFFFFFF00 + (255 - t * 5)
+      attack_facing == -1 ? "(" : ")", col
       );
     }
   }
