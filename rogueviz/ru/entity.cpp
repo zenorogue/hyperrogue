@@ -266,6 +266,13 @@ void entity::kino() {
 void missile::act() {
   kino();
   if(where.x > screen_x || where.x < 0 || where.y < 0 || where.y > screen_y) destroyed = true;
+  for(auto& e: current_room->entities) if(e->hit_by_missile(this) && intersect(get_pixel_bbox(), e->get_pixel_bbox()) && !hit_list.count(&*e)) {
+    if(burning() && e->as_missile() && e->freezing()) { destroyed = true; e->destroyed = true; }
+    if(freezing() && e->as_missile() && e->burning()) { destroyed = true; e->destroyed = true; }
+    hit_list.insert(&*e);
+    e->invinc_end = 0;
+    e->attacked(power);
+    }
   }
 
 void npc_or_trader::act() {

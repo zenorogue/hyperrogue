@@ -78,7 +78,7 @@ randeff fire_spit("Fiery Spit", "Lets you spit fire.", "You feel fire in your mo
       mi->where = m.where + xy(m.facing * m.get_scale() * m.siz().y * 0.45, 0);
       mi->vel = m.vel + xy(m.facing * d.modv * i, d.modv * (10-i) / 5.);
       mi->clearg();
-      mi->index = i;
+      mi->index = i; mi->power = m.current.stats[stat::wis] * 2 / 5 + 1e-6;
       current_room->entities.emplace_back(std::move(mi));
       }
   });

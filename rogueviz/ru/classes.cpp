@@ -188,6 +188,7 @@ struct entity {
   virtual struct moving_platform* as_platform() { return nullptr; }
   virtual struct shopitem* as_shopitem() { return nullptr; }
   virtual struct trader* as_trader() { return nullptr; }
+  virtual struct missile* as_missile() { return nullptr; }
 
   int hp;
   int invinc_end;
@@ -276,6 +277,8 @@ struct entity {
     }
 
   virtual string get_help() { return "No help about this."; }
+
+  virtual bool hit_by_missile(missile *m) { return false; }
   };
 
 struct statdata {
@@ -315,6 +318,8 @@ struct man : public entity {
   string get_help() override { return "This is you."; }
 
   void on_kill() override;
+
+  bool hit_by_missile(missile *m) override { return true; }
 
   virtual void spiked() {
     entity::spiked();
@@ -418,6 +423,7 @@ struct enemy : public entity {
   void attacked(int s) override;
   void regenerate() override { where = respawn; vel = xy(0, 0); existing = true; hp = max_hp(); }
   virtual int base_xp() { return 0; }
+  bool hit_by_missile(missile *m) override { return true; }
   };
 
 struct vtrap : public entity {
@@ -607,22 +613,27 @@ struct loot : public item {
   };
 
 struct missile : public entity {
+  int power;
   missile() { destroyed = false; }
-  xy siz() override { return {4, 4}; }
+  xy siz() override { auto p = 2 + sqrt(power); return {p, p}; }
   string glyph() override { return "*"; }
+  set<entity*> hit_list;
   void act() override; 
   void hit_wall() override { destroyed = true; }
+  struct missile* as_missile() override { return this; }
   };
 
 struct ice_missile : public missile {
   color_t color() override { return 0x8080FFFF; }
   bool freezing() override { return true; }
+  bool hit_by_missile(missile *m) override { return m->burning(); }
   };
 
 struct fire_missile : public missile {
   int index;
   color_t color() override { return gradient(0xFFFF00FF, 0xFF0000FF, -1, sin(index+ticks/100), 1); }
   bool burning() override { return true; }
+  bool hit_by_missile(missile *m) override { return m->freezing(); }
   };
 
 }
