@@ -185,6 +185,7 @@ template<class T> struct statarray : array<T, qstat> {
   };
 
 struct entity {
+  virtual ~entity() {}
   virtual xy siz() = 0;
   xy where, vel;
   bool existing;
