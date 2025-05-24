@@ -111,11 +111,13 @@ void entity::apply_walls() {
       vel.y /= 2;
       if(abs(vel.y) < 1e-6) vel.y = 0;
       if(burning()) {
-        if(b == wWoodWall) current_room->replace_block(x, y, wAir);
+        if(b == wWoodWall)
+          current_room->replace_block_frev(x, y, wAir);
         else hit_wall();
         }
       if(freezing()) {
-        if(b == wWater) current_room->replace_block(x, y, wFrozen);
+        if(b == wWater)
+          current_room->replace_block_frev(x, y, wFrozen);
         else if(b != wFrozen) hit_wall();
         }
       if(pixel_to_block(get_pixel_bbox_at(where + vel)).maxy <= y) where.y += vel.y; 
@@ -134,7 +136,7 @@ void entity::apply_walls() {
       if(abs(vel.y) < 1e-6) vel.y = 0;
       if(pixel_to_block(get_pixel_bbox_at(where + vel)).miny > y) where.y += vel.y;
       if(burning()) {
-        if(b == wWoodWall) current_room->replace_block(x, y, wAir);
+        if(b == wWoodWall) current_room->replace_block_frev(x, y, wAir);
         }
       goto again;
       }
@@ -154,7 +156,7 @@ void entity::apply_walls() {
     if(walls[b].flags & W_BLOCK) {
       if(freezing()) { hit_wall(); }
       if(burning()) {
-        if(b == wWoodWall) current_room->replace_block(x, y, wAir);
+        if(b == wWoodWall) current_room->replace_block_frev(x, y, wAir);
         else hit_wall();
         }
       vel.x = (vel.x - max<ld>(vel.y, 0)/10) / 2;
@@ -169,7 +171,7 @@ void entity::apply_walls() {
     if(walls[b].flags & W_BLOCK) {
       if(freezing()) { hit_wall(); }
       if(burning()) {
-        if(b == wWoodWall) current_room->replace_block(x, y, wAir);
+        if(b == wWoodWall) current_room->replace_block_frev(x, y, wAir);
         else hit_wall();
         }
       vel.x = (vel.x + max<ld>(vel.y, 0)/10) / 2;

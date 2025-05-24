@@ -136,6 +136,12 @@ struct room {
     place_block_full(x, y, b);
     }
   
+  void replace_block_frev(int x, int y, eWall w) {
+    auto orig = at(x, y);
+    replace_block(x, y, w);
+    add_revert(fountain_revert, [this, x, y, orig] { replace_block(x, y, orig); });
+    }
+
   void generate();
 
   void reveal(int cx, int cy);
