@@ -4661,23 +4661,25 @@ EX void set_detail_level(const shiftmatrix& V) {
     }
   }
 
+#if HDR
 struct flashdata {
   int t;
   int size;
   cell *where;
-  double angle;
-  double angle2;
+  transmatrix angle_matrix;
+  ld bubblesize;
   int spd; // 0 for flashes, >0 for particles
   color_t color;
   string text;
   flashdata(int _t, int _s, cell *_w, color_t col, int sped) { 
-    t=_t; size=_s; where=_w; color = col; 
-    angle = rand() % 1000; spd = sped;
-    if(GDIM == 3) angle2 = acos((rand() % 1000 - 499.5) / 500);
+    t=_t; size=_s; where=_w; color = col;
+    spd = sped;
+    angle_matrix = random_spin();
     }
   };
+#endif
 
-vector<flashdata> flashes;
+EX vector<flashdata> flashes;
 
 auto ahgf = addHook(hooks_removecells, 1, [] () {
   eliminate_if(flashes, [] (flashdata& f) { return is_cell_removed(f.where); });
@@ -4687,7 +4689,7 @@ EX void drawBubble(cell *c, color_t col, string s, ld size) {
   LATE( drawBubble(c, col, s, size); )
   auto fd = flashdata(ticks, 1000, c, col, 0);
   fd.text = s;
-  fd.angle = size;
+  fd.bubblesize = size;
   flashes.push_back(fd);
   }
 
@@ -4712,12 +4714,12 @@ EX void drawDirectionalParticle(cell *c, int dir, color_t col, int maxspeed IS(1
   if(vid.particles && !confusingGeometry()) {
     int speed = 1 + rand() % maxspeed;
     auto fd = flashdata(ticks, rand() % 16, c, col, speed);
-    fd.angle = -atan2(tC0(currentmap->adj(c, dir)));
-    fd.angle += TAU * (rand() % 100 - rand() % 100) / 100 / c->type;
+    ld angle = -atan2(tC0(currentmap->adj(c, dir)));
+    angle += TAU * (rand() % 100 - rand() % 100) / 100 / c->type;
+    fd.angle_matrix = spin(angle);
     flashes.push_back(fd); 
     }
   }
-
 
 EX void drawParticles(cell *c, color_t col, int qty, int maxspeed IS(100)) { 
   if(vid.particles)
@@ -5135,12 +5137,12 @@ EX void draw_flash(struct flashdata& f, const shiftmatrix& V, bool& kill) {
     int r = 2;
     apply_neon(col, r);
     if(GDIM == 3 || sphere)
-      queuestr(V, (1 - tim * 1. / f.size) * f.angle * mapfontscale / 100, f.text, col, r);
+      queuestr(V, (1 - tim * 1. / f.size) * f.bubblesize * mapfontscale / 100, f.text, col, r);
     else if(!kill) {
       shiftpoint h = tC0(V);
       if(hdist0(h) > .1) {
         transmatrix V2 = rspintox(h.h) * xpush(hdist0(h.h) * (1 / (1 - tim * 1. / f.size)));
-        queuestr(shiftless(V2, h.shift), f.angle * mapfontscale / 100, f.text, col, r);
+        queuestr(shiftless(V2, h.shift), f.bubblesize * mapfontscale / 100, f.text, col, r);
         }
       }
     if(static_bubbles) {
@@ -5158,9 +5160,7 @@ EX void draw_flash(struct flashdata& f, const shiftmatrix& V, bool& kill) {
     int partcol = darkena(f.color, 0, GDIM == 3 ? 255 : max(255 - tim*255/300, 0));
     poly_outline = OUTLINE_DEFAULT;
     ld t = f.spd * tim * cgi.scalefactor / 50000.;
-    shiftmatrix T =
-      GDIM == 2 ? V * spin(f.angle) * xpush(t) :
-      V * cspin(0, 1, f.angle) * cspin(0, 2, f.angle2) * cpush(2, t);
+    shiftmatrix T = V * f.angle_matrix * (GDIM == 2 ? xpush(t) : cpush(2, t));
     queuepoly(T, cgi.shParticle[f.size], partcol);
     #endif
     }

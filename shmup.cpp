@@ -302,7 +302,11 @@ void killMonster(monster* m, eMonster who_kills, flagtype flags = 0) {
     m->inBoat = false;
     }
   m->base->monst = m->type;
+  int pos = isize(flashes);
   killMonster(m->base, who_kills, flags);
+  for(int i=pos; i<isize(flashes); i++)
+    if(flashes[i].where == m->base)
+      flashes[i].angle_matrix = m->at * flashes[i].angle_matrix;
   m->base->monst = m->stk;
   if(multi::cpid >= 0)
     multi::kills[multi::cpid] += tkills() - tk;
