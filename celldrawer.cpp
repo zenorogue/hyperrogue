@@ -7,6 +7,7 @@ int coastvalEdge(cell *c);
 struct spatial_info {
   SIDE top, deep;
   int levels;
+  int sl; /* snake level */
   };
 
 struct celldrawer {
@@ -25,7 +26,6 @@ struct celldrawer {
   char asciichar;
   shiftmatrix Vboat;
   shiftmatrix Vd;
-  int sl;
   spatial_info sha;
   color_t asciiborder;
   color_t asciicol1;
@@ -1679,8 +1679,8 @@ void celldrawer::draw_features() {
     default: {
       wa_default:
 
-      if(sl && wmspatial) {
-        floorShadow(c, V, SHADOW_SL * sl);
+      if(sha.sl && wmspatial) {
+        floorShadow(c, V, SHADOW_SL * sha.sl);
         }
 
       else if(highwall(c)) draw_wall();
@@ -2467,8 +2467,8 @@ void celldrawer::draw_wall_full() {
           col1 = darkena(col1, fd, 255);
           }
 
-        if(lev >= int(SIDE::RED1) && lev <= int(SIDE::RED3) && sl) {
-          col1 = getSnakelevColor(lev - int(SIDE::RED1), sl);
+        if(lev >= int(SIDE::RED1) && lev <= int(SIDE::RED3) && sha.sl) {
+          col1 = getSnakelevColor(lev - int(SIDE::RED1), sha.sl);
           }
 
         if(placeSidewall(c, i, SIDE(lev), V, col1)) shab &= ~(1<<lev);
@@ -2591,8 +2591,8 @@ void celldrawer::draw_monster_full() {
   if(dm) onradar = false; 
   #if CAP_SHAPES
   if(isize(ptds) != q && !(c == lmouseover_distant && isDie(c->monst))) {
-    if(WDIM == 2 && GDIM == 3 && abs(cgi.RED[sl] - cgi.FLOOR) > 1e-6)
-      pushdown(c, q, V, cgi.RED[sl] - cgi.FLOOR, false, false);
+    if(WDIM == 2 && GDIM == 3 && abs(cgi.RED[sha.sl] - cgi.FLOOR) > 1e-6)
+      pushdown(c, q, V, cgi.RED[sha.sl] - cgi.FLOOR, false, false);
     if(GDIM ==2 && abs(geom3::factor_to_lev(zlevel(tC0(Vboat.T)))) > 1e-6)
       pushdown(c, q, V, -geom3::factor_to_lev(zlevel(tC0(Vboat.T))), !isMultitile(c->monst), false);
     }
@@ -2922,12 +2922,10 @@ void celldrawer::draw() {
     
     poly_outline = OUTLINE_DEFAULT;
 
-    sl = snakelevel(c);
-    
     Vd =
       WDIM == 3 ? V:
       !wmspatial ? V : 
-      sl ? orthogonal_move_fol(V, GDIM == 3 ? cgi.RED[sl] - cgi.FLOOR : cgi.RED[sl]) :
+      sha.sl ? orthogonal_move_fol(V, GDIM == 3 ? cgi.RED[sha.sl] - cgi.FLOOR : cgi.RED[sha.sl]) :
       (highwall(c) && GDIM == 2) ? orthogonal_move_fol(V, (1+cgi.WALL)/2) :
 #if CAP_SHAPES
       (sha.top < SIDE::FLOOR) ? orthogonal_move_fol(V, GDIM == 3 ? cgi.WATERLEVEL - cgi.FLOOR : cgi.WATERLEVEL) :

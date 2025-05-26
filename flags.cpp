@@ -348,29 +348,29 @@ EX bool highwall(cell *c) {
 EX spatial_info get_spatial_info(cell *c) {
   #define F(x) Flag((int) SIDE::x)
   if(cellUnstable(c))
-    return spatial_info{SIDE::FLOOR, SIDE::FLOOR, 0};
+    return spatial_info{SIDE::FLOOR, SIDE::FLOOR, 0, 0};
   if(c->wall == waChasm || c->wall == waInvisibleFloor)
-    return spatial_info{SIDE::INFDEEP, SIDE::INFDEEP, 0};
+    return spatial_info{SIDE::INFDEEP, SIDE::INFDEEP, 0, 0};
   if(c->wall == waBarrier && wmescher && c->land == laOceanWall)
-    return spatial_info{SIDE::WATERLEVEL, SIDE::DEEP, F(DEEP)};
+    return spatial_info{SIDE::WATERLEVEL, SIDE::DEEP, F(DEEP), 0};
   if(c->wall == waReptile)
-    return spatial_info{SIDE::FLOOR, SIDE::FLOOR, F(FLOOR) | F(DEEP)};
+    return spatial_info{SIDE::FLOOR, SIDE::FLOOR, F(FLOOR) | F(DEEP), 0};
   if(c->wall == waShallow)
-    return spatial_info{SIDE::WATERLEVEL, SIDE::SHALLOW, F(SHALLOW) | F(DEEP)};
+    return spatial_info{SIDE::WATERLEVEL, SIDE::SHALLOW, F(SHALLOW) | F(DEEP), 0};
   if(isWateryOrBoat(c) || isChasmy(c))
-    return spatial_info{SIDE::WATERLEVEL, SIDE::DEEP, F(DEEP)};
+    return spatial_info{SIDE::WATERLEVEL, SIDE::DEEP, F(DEEP), 0};
   if(among(c->wall, waReptileBridge, waGargoyleFloor, waGargoyleBridge, waTempFloor, waTempBridge, waPetrifiedBridge, waFrozenLake))
-    return spatial_info{SIDE::WATERLEVEL, SIDE::DEEP, F(WATERLEVEL) | F(DEEP)};
+    return spatial_info{SIDE::WATERLEVEL, SIDE::DEEP, F(WATERLEVEL) | F(DEEP), 0};
   int slev = snakelevel(c);
   if(slev == 1)
-    return spatial_info{SIDE::RED1, SIDE::RED1, F(RED1) | F(FLOOR) | F(WATERLEVEL) | F(SHALLOW) | F(DEEP)};
+    return spatial_info{SIDE::RED1, SIDE::RED1, F(RED1) | F(FLOOR) | F(WATERLEVEL) | F(SHALLOW) | F(DEEP), 1};
   if(slev == 2)
-    return spatial_info{SIDE::RED2, SIDE::RED2, F(RED1) | F(RED2) | F(FLOOR) | F(WATERLEVEL) | F(SHALLOW) | F(DEEP)};
+    return spatial_info{SIDE::RED2, SIDE::RED2, F(RED1) | F(RED2) | F(FLOOR) | F(WATERLEVEL) | F(SHALLOW) | F(DEEP), 2};
   if(slev == 3)
-    return spatial_info{SIDE::RED3, SIDE::RED3, F(RED1) | F(RED2) | F(RED3) | F(FLOOR) | F(WATERLEVEL) | F(SHALLOW) | F(DEEP)};
+    return spatial_info{SIDE::RED3, SIDE::RED3, F(RED1) | F(RED2) | F(RED3) | F(FLOOR) | F(WATERLEVEL) | F(SHALLOW) | F(DEEP), 3};
   if(highwall(c) && !conegraph(c) && c->wall != waRose)
-    return spatial_info{SIDE::WALL, SIDE::WALL, F(WALL) | F(FLOOR) | F(WATERLEVEL) | F(SHALLOW) | F(DEEP)};
-  return spatial_info{SIDE::FLOOR, SIDE::FLOOR, F(FLOOR) | F(WATERLEVEL) | F(SHALLOW) | F(DEEP)};
+    return spatial_info{SIDE::WALL, SIDE::WALL, F(WALL) | F(FLOOR) | F(WATERLEVEL) | F(SHALLOW) | F(DEEP), 0};
+  return spatial_info{SIDE::FLOOR, SIDE::FLOOR, F(FLOOR) | F(WATERLEVEL) | F(SHALLOW) | F(DEEP), 0};
   #undef F
   }
 
