@@ -918,7 +918,7 @@ EX void load_official_track() {
   #if CAP_EDIT
   mapstream::loadMap(sf);
   #endif
-  cheater = autocheat = 0;
+  cheater = 0;
   official_race = true;
   }
 
