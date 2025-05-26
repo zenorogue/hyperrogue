@@ -1544,7 +1544,7 @@ void celldrawer::draw_features() {
           const int layers = 2 << detaillevel;
           for(int z=1; z<=layers; z++) {
             double zg = zgrad0(0, geom3::actual_wall_height(), z, layers);
-            queuepolyat(xyzscale(V, zg, zg), cgi.shBarrel, darkena((z&1) ? 0xFF0000 : 0xC00000, 0, 0xFF), PPR(PPR::RED1_SIDE));
+            queuepolyat(xyzscale(V, zg, zg), cgi.shBarrel, darkena((z&1) ? 0xFF0000 : 0xC00000, 0, 0xFF), PPR(PPR::WALL_DECO));
             }
           }
         else {
@@ -1734,7 +1734,7 @@ void celldrawer::draw_features() {
         const int layers = 2 << detaillevel;
         for(int z=1; z<=layers; z++) {
           double zg = zgrad0(0, geom3::actual_wall_height(), z, layers);
-          queuepolyat(xyzscale(V, zg, zg), cgi.shBarrel, darkena((z&1) ? 0xFF0000 : 0xC00000, 0, 0xFF), PPR(PPR::RED1_SIDE));
+          queuepolyat(xyzscale(V, zg, zg), cgi.shBarrel, darkena((z&1) ? 0xFF0000 : 0xC00000, 0, 0xFF), PPR(PPR::WALL_DECO));
           }
         }
       
