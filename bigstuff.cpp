@@ -134,8 +134,11 @@ EX cell *findcompass(cell *c) {
   int d = compassDist(c);
   if(among(d, NOCOMPASS, ALTDIST_BOUNDARY, ALTDIST_UNKNOWN, ALTDIST_ERROR)) return NULL;
   auto w = whichCompass(c);
+
+  auto gc = c;
   
   while(inscreenrange(c)) {
+    gc = c;
     if(!eubinary && !sphere && !quotient)
       currentmap->extend_altmap(c->master);
     forCellEx(c2, c) if(w == whichCompass(c2) && compassDist(c2) < d) {
@@ -152,7 +155,7 @@ EX cell *findcompass(cell *c) {
     nextk: ;
     }
   
-  return c;
+  return gc;
   }
 
 EX bool grailWasFound(cell *c) {

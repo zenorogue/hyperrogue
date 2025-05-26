@@ -6315,12 +6315,27 @@ EX void drawBug(const cellwalker& cw, color_t col) {
 #endif
   }
 
+EX bool inscreenrange_actual(cell *c) {
+  if(GDIM == 3) return true;
+  hyperpoint h1; applymodel(ggmatrix(c) * tile_center(), h1);
+  if(invalid_point(h1)) return false;
+  auto hscr = toscrcoord(h1);
+  auto& x = hscr[0], y = hscr[1];
+  if(x > current_display->xtop + current_display->xsize) return false;
+  if(x < current_display->xtop) return false;
+  if(y > current_display->ytop + current_display->ysize) return false;
+  if(y < current_display->ytop) return false;
+  return true;
+  }
+
 EX bool inscreenrange(cell *c) {
   if(sphere) return true;
-  if(euclid) return celldistance(centerover, c) <= get_sightrange_ambush();
+  if(euclid) return celldistance(centerover, c) <= get_sightrange_ambush() && inscreenrange_actual(c);
   if(nonisotropic) return gmatrix.count(c);
-  if(geometry == gCrystal344) return gmatrix.count(c);
-  return heptdistance(centerover, c) <= 8;
+  if(geometry == gCrystal344) return gmatrix.count(c) && inscreenrange_actual(c);
+  auto hd = heptdistance(centerover, c);
+  if(hd <= 1) return true;
+  return hd <= 8 && inscreenrange_actual(c);
   }
 
 #if MAXMDIM >= 4
