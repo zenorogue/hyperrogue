@@ -5445,3 +5445,13 @@ Bug fixes:
 - fixed the single-land mode on fractals
 - use two-letter labels instead of excessive primes in the fundamental domain display
 - fixed a bug with Cellular Automata crashing after map reloaded
+
+2025-05-26 09:17 Update 13.0z:
+Mostly bugfixes:
+- fixed some rock level rendering issues
+- fixed the rendering of explosive barrels (and crates)
+- fixed the bug with too large floors in pure Euclidean square
+- inventory icons: fixed the wrong size used, fixed the crash bug when rendering the hypersian rug in some settings
+- shmup: particle effects in shmup now appear from the correct locaton, fuel particles in space rocks
+- Racing official track no longer turns the "god mode" off
+- fixed the Yendor/Caribbean markers in some projections
