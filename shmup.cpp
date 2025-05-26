@@ -126,7 +126,7 @@ EX multimap<cell*, monster*> monstersAt;
 typedef multimap<cell*, monster*>::iterator mit;
 #endif
 
-vector<monster*> active, nonvirtual, additional;
+EX vector<monster*> active, nonvirtual, additional;
 
 cell *findbaseAround(shiftpoint p, cell *around, int maxsteps) {
 
