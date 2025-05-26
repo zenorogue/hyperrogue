@@ -854,8 +854,11 @@ void geometry_information::prepare_basics() {
   floorrad1 = rhexf * (GDIM == 3 ? 1 : 1 - 0.06 * global_boundary_ratio);
   
   if(euc::in(2,4)) {
-    if(!BITRUNCATED)
-      floorrad0 = floorrad1 = rhexf * (GDIM == 3 ? 1 : .94);
+    if(!BITRUNCATED) {
+      ld sca = (GDIM == 3 ? 1 : .94);
+      floorrad0 = hexvdist * sca;
+      floorrad1 = rhexf * sca;
+      }
     else
       floorrad0 = hexvdist * (GDIM == 3 ? 1 : .9),
       floorrad1 = rhexf * (GDIM == 3 ? 1 : .8);
