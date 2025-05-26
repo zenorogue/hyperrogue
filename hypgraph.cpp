@@ -2550,7 +2550,16 @@ EX void enable_flat_model(int val) {
     vid.creature_scale = 1;
     geom3::apply_always3();
     check_cgi();
+    cgi.require_basics();
     cgi.require_shapes();
+    if(cgi.shFloor.b.empty()) {
+      dynamicval<hrmap*> cm(currentmap);
+      currentmap = new hrmap_hyperbolic;
+      cgi.generate_floorshapes_for(1, currentmap->gamestart());
+      cgi.generate_floorshapes_for(0, currentmap->gamestart()->cmove(0));
+      cgi.finishshape();
+      cgi.extra_vertices();
+      }
     calcparam();
     }
   if(flat_on >= 1 && flat_on + val < 1) {
