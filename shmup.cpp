@@ -1028,6 +1028,13 @@ void movePlayer(monster *m, int delta) {
       m->inertia[1] -= sin(godir[cpid]) * coef * playergo[cpid];
       avg_inertia[1] -= sin(godir[cpid]) * coef * playergo[cpid] / 2;
       }
+
+    if(playergo[cpid] > 0 && m->base->land == laAsteroids) {
+      auto fd = flashdata(ticks, rand() % 16, m->base, getcs().haircolor >> 8, 100);
+      fd.angle_matrix = m->at * pispin * xpush(cgi.scalefactor/4) * ypush((rand() % 2 ? 1 : -1) * cgi.scalefactor/10) * spin(randd() * 15._deg);
+      flashes.push_back(fd);
+      }
+
     if(falling) {
       vector<cell*> below;
       manual_celllister mcl;
