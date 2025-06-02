@@ -2616,12 +2616,11 @@ EX void drawqueue() {
   if(GDIM == 2)
   for(PPR p: all_side_prios) {
     int pp = int(p);
-    if(qp0[pp] == qp[pp]) continue;
     for(int i=qp0[pp]; i<qp[pp]; i++) {
       auto& ap = (dqi_poly&) *ptds[i];
       ap.cache = xintval(ap.V * ap.intester);
       }
-    sort(&ptds[qp0[pp]], &ptds[qp[pp]], 
+    sort(ptds.begin() + qp0[pp], ptds.begin() + qp[pp], 
       [] (const unique_ptr<drawqueueitem>& p1, const unique_ptr<drawqueueitem>& p2) {
         auto& ap1 = (dqi_poly&) *p1;
         auto& ap2 = (dqi_poly&) *p2;
@@ -2631,8 +2630,7 @@ EX void drawqueue() {
 
   for(PPR p: {PPR::TRANSPARENT_WALL}) {
     int pp = int(p);
-    if(qp0[pp] == qp[pp]) continue;
-    sort(&ptds[qp0[int(p)]], &ptds[qp[int(p)]], 
+    sort(ptds.begin() + qp0[int(p)], ptds.begin() + qp[int(p)], 
       [] (const unique_ptr<drawqueueitem>& p1, const unique_ptr<drawqueueitem>& p2) {
         return p1->subprio > p2->subprio;
         });
