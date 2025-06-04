@@ -2630,7 +2630,7 @@ EX void drawqueue() {
 
   for(PPR p: {PPR::TRANSPARENT_WALL}) {
     int pp = int(p);
-    sort(ptds.begin() + qp0[int(p)], ptds.begin() + qp[int(p)], 
+    sort(ptds.begin() + qp0[pp], ptds.begin() + qp[pp], 
       [] (const unique_ptr<drawqueueitem>& p1, const unique_ptr<drawqueueitem>& p2) {
         return p1->subprio > p2->subprio;
         });
