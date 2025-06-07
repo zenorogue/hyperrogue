@@ -8,6 +8,11 @@
 namespace hr {
 
 namespace seuphorica {
+
+void save_old_game_if_needed();
+void save();
+void load();
+
 void read_dictionary(struct language& l);
 void read_naughty_dictionary(language& l);
 void activate_scry();
@@ -825,8 +830,43 @@ void centermap() {
   View = iddspin(centerover,tile_orientation[centerover].spin,0);
   }
 
-void seuphorica_screen() {
+string get_setname() {
+  string res = "";
+  if(bidirectional) res += "/bi";
+  if(game_restricted) res += "/x";
+  if(is_seeded) res += "/seeded";
+  if(!enabled_spells) res += "/nospells";
+  if(!enabled_stay) res += "/nostay";
+  if(!enabled_power) res += "/nopower";
+  if(!enabled_id) res += "/noid";
+  return res;
+  }
 
+void pre_achievements() {
+  #if RVCOL
+  for(auto p: just_placed) {
+    auto t = board.at(p);
+    if(has_power(t, sp::bending)) {
+      int qty = 0;
+      forCellEx(c1, p) if(just_placed.count(c1)) qty++;
+      if(qty >= 4) rogueviz::rv_achievement("SEUMIRROR");
+      }
+    }
+  if(ev.total_score >= 2000) rogueviz::rv_achievement("SEU20000");
+  #endif
+  }
+
+void post_achievements() {
+  #if RVCOL
+  if(word_use_count.count(current->gamename)) rogueviz::rv_achievement("SEUNAME");
+  #endif
+  }
+
+string rv_data();
+
+string get_geom_name();
+
+void seuphorica_screen() {
   if(snapshots.empty())
     start_tick = 0;
 
@@ -984,7 +1024,20 @@ void seuphorica_screen() {
 
   if(ev.valid_move) {
     displayButton(lerp(ui.x0, ui.x2, 1/8.), vid.yres - vid.fsize, just_placed.empty() ? str_skip_turn : str_play, SDLK_RETURN, 8);
-    dialog::add_key_action(SDLK_RETURN, play);
+    dialog::add_key_action(SDLK_RETURN, [] {
+      pre_achievements();
+      accept_move();
+      post_achievements();
+      if(roundindex == 21) {
+        save();
+        if(is_daily && cheats == 0) rogueviz::rv_leaderboard(get_geom_name() + " daily " + its(daily), total_gain, 1, rvlc::num, rv_data());
+        if(cheats == 0) rogueviz::rv_leaderboard(get_geom_name() + get_setname() + " (20 turns)", total_gain, 1, rvlc::num, rv_data());
+        }
+      if(roundindex == 51) {
+        save();
+        if(cheats == 0) rogueviz::rv_leaderboard(get_geom_name() + get_setname() + " (50 turns)", total_gain, 1, rvlc::num, rv_data());
+        }
+      });
     }
 
   displayButton(lerp(ui.x0, ui.x2, 3/8.), vid.yres - vid.fsize, "center", ' ', 8);
@@ -1133,15 +1186,19 @@ vector<ss> special_setting;
 
 int pick_qty = 8;
 
+ss get_default_special_setting(int i) {
+  return
+    (i < 2) ? ss::technical :
+    (sp(i) == sp::naughty) ? ss::disabled :
+    (i > int(sp::naughty)) ? ss::disabled :
+    ss::random;
+  }
+
 void init_special_setting() {
   int qty = int(sp::first_artifact);
   special_setting.resize(qty);
   for(int i=0; i<qty; i++)
-    special_setting[i] =
-      (i < 2) ? ss::technical :
-      (sp(i) == sp::naughty) ? ss::disabled :
-      (i > int(sp::naughty)) ? ss::disabled :
-      ss::random;
+    special_setting[i] = get_default_special_setting(i);
   }
 
 bool want_spells = true, want_stay = true, want_power = true, want_id = true;
@@ -1158,6 +1215,7 @@ void reset_rv() {
     auto v = currentmap->allcells();
     for(int i=0; i<hr::isize(v); i++) list_order[v[i]] = i;
     }
+  timerstart = time(NULL);
   }
 
 struct seuphgeom {
@@ -1337,7 +1395,7 @@ void seuphorica_setgeom() {
       seuphgeoms[i].launcher();
       start_game();
       reset_rv();
-      new_game();
+      restart("", "", "");
       enable();
       reset_seuphorica_screen();
       });
@@ -1365,6 +1423,7 @@ void seuphorica_newgame() {
 
   dialog::addItem("start new standard game", 's');
   dialog::add_action([] {
+    save_old_game_if_needed();
     reset_rv();
     restart("", "", "");
     reset_seuphorica_screen();
@@ -1373,6 +1432,7 @@ void seuphorica_newgame() {
     check_daily_time();
     dialog::addSelItem("start new daily game", its(daily), 'd');
     dialog::add_action([] {
+      save_old_game_if_needed();
       reset_rv();
       restart((its(daily) + "9").c_str(), "D", "8");
       reset_seuphorica_screen();
@@ -1409,6 +1469,8 @@ void seuphorica_newgame() {
     });
   dialog::addItem("start custom game", 'c');
   dialog::add_action([] {
+    save_old_game_if_needed();
+    is_seeded = want_seed;
     if(!want_seed) gameseed = time(NULL);
     else gameseed = want_seed;
     enabled_spells = want_spells;
@@ -1447,7 +1509,11 @@ void seuphorica_newgame() {
 
     reset_rv();
     is_daily = false; game_restricted = false;
-    for(int i=0; i<qty; i++) if(!special_allowed[i]) game_restricted = true;
+
+    for(int i=0; i<qty; i++) {
+      if(special_allowed[i] != (get_default_special_setting(i) == ss::random))
+        game_restricted = true;
+      }
     new_game();
     reset_seuphorica_screen();
     });
@@ -1496,27 +1562,33 @@ void seuphorica_menu() {
         });
     });
   dialog::addItem("quit", 'q');
-  dialog::add_action([] { quitmainloop = true; });
+  dialog::add_action([] {
+    quitmainloop = true;
+    });
   dialog::addItem("settings", 's');
   dialog::add_action_push(seuphorica_settings);
   dialog::addItem("cheat", 'c');
-  dialog::add_action(cheat);
+  dialog::add_action([] { cheat(); for(auto& s: spells) s.inventory++, s.identified = true; } );
   dialog::addBack();
   dialog::display();
+  }
+
+void cleanup() {
+  save_old_game_if_needed();
+  board.clear();
+  just_placed.clear();
+  tile_orientation.clear();
+  tile_orientation_level.clear();
+  list_order.clear();
+  distance_from_board.clear();
+  distance_to.clear();
+  roundindex = 0;
   }
 
 void enable() {
   rogueviz::rv_hook(hooks_build_help, 100, [] { help = fix(seuphorica::rules); return true; });
   rogueviz::rv_hook(hooks_drawcell, 100, draw);
-  rogueviz::rv_hook(hooks_clearmemory, 100, [] {
-    board.clear();
-    just_placed.clear();
-    tile_orientation.clear();
-    tile_orientation_level.clear();
-    list_order.clear();
-    distance_from_board.clear();
-    distance_to.clear();
-    });
+  rogueviz::rv_hook(hooks_clearmemory, 100, cleanup);
   rogueviz::rv_change(showstartmenu, false);
   rogueviz::rv_change(mapeditor::drawplayer, false);
   rogueviz::rv_change(mine_adjacency_rule, 1);
@@ -1550,6 +1622,7 @@ void launch() {
   ccolor::set_plain_nowall(0x202020);
   lps_enable(&lps_seuphorica);
   start_game();
+  load();
 
   reset_rv();
   restart("", "", "");
@@ -1581,8 +1654,110 @@ auto seuphorica_hook =
 
 void invoke() {
   set_seuphorica_geometry(0);
-  pushScreen([] { quitmainloop = true; });
+  pushScreen([] { 
+    quitmainloop = true;
+    });
   pushScreen(seuphorica_newgame);
+  }
+
+/* -- highscores -- */
+
+struct gamedata {
+  string geom_name;
+  string myname;
+  string timerstart, timerend;
+  array<bool, (int) sp::first_artifact> special_allowed;
+  int flags;
+  int best_turn_score;
+  pair<int, string> best_word;
+  int score, turns, seed;
+  };
+
+string rv_data() {
+  return lalign(0, best_word.first, " ", best_word.second, " ", best_turn_score);
+  }
+
+gamedata cur;
+vector<gamedata> allsaves;
+
+void fill_gamedata() {
+  cur.geom_name = get_geom_name();
+  time_t timer;
+  timer = time(NULL);
+  char buf[128];
+  strftime(buf, 128, "%c", localtime(&timerstart)); cur.timerstart = buf;
+  strftime(buf, 128, "%c", localtime(&timer)); cur.timerend = buf;
+  cur.myname = "unnamed";
+  cur.special_allowed = special_allowed;
+  cur.flags = 0;
+  if(enabled_spells) cur.flags |= 1;
+  if(enabled_stay) cur.flags |= 2;
+  if(enabled_power) cur.flags |= 4;
+  if(enabled_id) cur.flags |= 8;
+  if(is_daily) cur.flags |= 16;
+  if(is_seeded) cur.flags |= 32;
+  if(bidirectional) cur.flags |= 64;
+  cur.best_word = best_word;
+  cur.best_turn_score = best_turn_score;
+  }
+
+void save(const gamedata& sd) {
+  #if CAP_SAVE
+  fhstream f("seuphorica.save", "at");
+  println(f, "Seuphorica ", SEUPHORICA_VERSION);
+  println(f, sd.geom_name);
+  println(f, sd.myname);
+  println(f, sd.timerstart);
+  println(f, sd.timerend);
+  for(auto v: sd.special_allowed) print(f, v ? "1" : "0");
+  println(f, " ", sd.flags);
+  println(f, sd.score, " ", sd.turns, " ", sd.seed);
+  println(f, cur.best_word.second, " ", cur.best_word.first, " ", cur.best_turn_score);
+  println(f);
+  #endif
+  }
+
+void save() {
+  if(cheats) return;
+  fill_gamedata();
+  save(cur);
+  allsaves.push_back(cur);
+  }
+
+string get_geom_name() {
+  if(current_seuphgeom == -1) return "unknown: " + full_geometry_name();
+  return seuphgeoms[current_seuphgeom].name;
+  }
+
+void save_old_game_if_needed() {
+  // no point to save on the 1st turn, and also on 21st and 51st turn, it has just been saved
+  if(!among(roundindex, 0, 1, 21, 51)) save();
+  if(cheats == 0) rogueviz::rv_leaderboard(get_geom_name() + get_setname() + " (endless)", total_gain, 1, rvlc::num);
+  }
+
+void load() {
+  allsaves.clear();
+  fhstream f("seuphorica.save", "rt");
+  if(!f.f) return;
+  string s;
+  while(!feof(f.f)) {
+    s = scanline_noblank(f);
+    if(s == "Seuphorica 20") {
+      gamedata gd;
+      gd.geom_name = scanline_noblank(f);
+      gd.myname = scanline_noblank(f);
+      gd.timerstart = scanline_noblank(f);
+      gd.timerend = scanline_noblank(f);
+      auto s = scanline_noblank(f);
+      int id = 0;
+      for(auto& v: gd.special_allowed) v = s[id++] == '1';
+      sscanf(s.c_str()+id, "%d",&gd.flags);
+      sscanf(scanline_noblank(f).c_str(), "%d%d%d", &gd.score, &gd.turns, &gd.seed);
+      char buf[80];
+      sscanf(scanline_noblank(f).c_str(), "%80s%d%d", buf, &gd.best_word.first, &gd.best_turn_score); gd.best_word.second = buf;
+      allsaves.push_back(gd);
+      }
+    }
   }
 
 }
