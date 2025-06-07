@@ -1158,7 +1158,7 @@ void seuphorica_dictionary() {
   dialog::addHelp(fix(str_dict_help));
 
   keyhandler = [] (int sym, int uni) {
-    if(among(uni, '$', '?')) { dialog::infix += uni; return; }
+    if(among(uni, '$', '?', '.')) { dialog::infix += uni; return; }
     dialog::handleNavigation(sym, uni);
     if(dialog::editInfix(uni)) dialog::list_skip = 0;
     else if(doexiton(sym, uni)) popScreen();
