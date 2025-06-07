@@ -140,7 +140,7 @@ void check_move() {
         if(ok == true) {
           state = state::solved;
           #if RVCOL
-          if(current_puzzle = &puzzles[1]) rv_achievement("FIFTEEN");
+          if(current_puzzle == &puzzles[1]) rogueviz::rv_achievement("FIFTEEN");
           #endif
           }
         }

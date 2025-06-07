@@ -219,7 +219,7 @@ EX void check() {
   if(ok) {
     addMessage("You won!");
     #if RVCOL
-    if(cheater == orig_cheat) rv_achievement(current_puzzle->achievement);
+    if(cheater == orig_cheat) rogueviz::rv_achievement(current_puzzle->achievement);
     #endif
     }
   }

@@ -754,7 +754,7 @@ void new_piece() {
     state = tsGameover;
     #if RCVOL
     if(cur.pro_game && cur.max_piece == bgeoms[bgeom].default_max_piece)
-      rv_leaderboard(bgeoms[bgeom].name, cur.score);
+      rogueviz::rv_leaderboard(bgeoms[bgeom].name, cur.score, 1, rvlc::num, lalign(0, cur.bricks, " ", cur.cubes, " ", cur.completed));
     #endif
     save();
     }
@@ -826,7 +826,7 @@ void find_lines() {
     cur.completed += points;
     playSound(cwt.at, points == 1 ? "pickup-gold" : "orb-mind");
     #if RVCOL
-    if(points == 4 && cur.pro_game && cur.max_piece == 4 && bgeoms[bgeom].default_max_piece == 4) rv_achievement("BRINGRISFOUR");
+    if(points == 4 && cur.pro_game && cur.max_piece == 4 && bgeoms[bgeom].default_max_piece == 4) rogueviz::rv_achievement("BRINGRISFOUR");
     #endif
     }
   }
@@ -1028,7 +1028,7 @@ void shift_block(int dir, bool camera_only) {
   if(camera_only || !shape_conflict(at1)) {
     // playSound(cwt.at, "hit-crush1");
     #if RVCOL
-    if(check_bshift(at, at1)) rv_achievement("BSHIFT");
+    if(check_bshift(at, at1)) rogueviz::rv_achievement("BSHIFT");
     #endif
     at = at1;
     if(solnil) {
