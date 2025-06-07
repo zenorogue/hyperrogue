@@ -2631,8 +2631,7 @@ EX void drawqueue() {
 
   for(PPR p: {PPR::TRANSPARENT_WALL}) {
     int pp = int(p);
-    if(qp0[pp] == qp[pp]) continue;
-    sort(&ptds[qp0[int(p)]], &ptds[qp[int(p)]], 
+    sort(ptds.data() + qp0[pp], ptds.data() + qp[pp],
       [] (const unique_ptr<drawqueueitem>& p1, const unique_ptr<drawqueueitem>& p2) {
         return p1->subprio > p2->subprio;
         });
@@ -2651,7 +2650,7 @@ EX void drawqueue() {
       h = unshift(d->V) * h;
       return h[2];
       };
-    sort(&ptds[qp0[int(p)]], &ptds[qp[int(p)]],
+    sort(ptds.data() + qp0[pp], ptds.data() + qp[pp],
       [&] (const unique_ptr<drawqueueitem>& p1, const unique_ptr<drawqueueitem>& p2) {
         return get_z(p1) > get_z(p2);
         });
