@@ -553,6 +553,11 @@ void render_tile(shiftmatrix V, tile& t, cell *c, vector<tile>* origbox, int box
 bool draw(cell *c, const shiftmatrix& V) {
   if(c->land == laMemory) return false;
   check_orientation(c);
+  if(!board.count(c) && in_board(c) && tile_orientation.count(c) && anyshiftclick) {
+    int spi = tile_orientation[c].spin;
+    for(int i=0; i<c->type; i++) if((i & 1) == (spi & 1))
+      queueline(V * tile_center(), V * mid(tile_center(), currentmap->adj(c, i) * tile_center()), 0xFFD500FF);
+    }
   bool inside = in_board(c);
   if(inside) {
     c->wall = waNone; c->landparam = 0x202020;
