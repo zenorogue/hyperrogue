@@ -1515,7 +1515,7 @@ void enable() {
   rogueviz::rv_change(showstartmenu, false);
   rogueviz::rv_change(mapeditor::drawplayer, false);
   rogueviz::rv_change(mine_adjacency_rule, 1);
-  rogueviz::rv_hook(hooks_music, 100, [] (eLand& l) { l = eLand(250); return false; });
+  rogueviz::rv_hook(hooks_music, 100, [] (eLand& l) { l = mfcode("C0"); return false; });
   }
 
 local_parameter_set lps_seuphorica("seuphorica:");

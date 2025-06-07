@@ -478,7 +478,7 @@ void enable() {
   rogueviz::rv_hook(hooks_clearmemory, 40, [] () {
     fif.clear();
     });
-  rogueviz::rv_hook(hooks_music, 100, [] (eLand& l) { l = eLand(300); return false; });
+  rogueviz::rv_hook(hooks_music, 100, [] (eLand& l) { l = mfcode("C2"); return false; });
   rogueviz::rv_change(patterns::whichShape, '9');
   state = state::edited;
   current_puzzle = nullptr;
