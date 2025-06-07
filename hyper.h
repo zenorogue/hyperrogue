@@ -932,8 +932,8 @@ template<class T> ld binsearch(ld dmin, ld dmax, const T& f, int iterations = 20
   return dmin;
   } 
 
-  static constexpr int max_vec = (1<<14);
-  extern bool needConfirmationEvenIfSaved();
+static constexpr int max_vec = (1<<14);
+extern bool needConfirmationEvenIfSaved();
 
 typedef unsigned long long flagtype;
 #define Flag(i) (flagtype(1ull<<i))
