@@ -1834,22 +1834,31 @@ EX ld raddif(ld a, ld b) {
 
 EX int bucket_scale = 10000;
 
-EX unsigned bucketer(ld x) {
-  return (unsigned) (long long) (floor(x * bucket_scale + .5));
+#if HDR
+using buckethash_t = uint64_t;
+
+inline void hashmix(buckethash_t& seed, buckethash_t i) { seed ^= i + 0x9e3779b9 + (seed << 6) + (seed >> 2); }
+inline buckethash_t hashmix_to(buckethash_t seed, buckethash_t i) { hashmix(seed, i); return seed; }
+#endif
+
+EX buckethash_t bucketer(ld x) {
+  return (buckethash_t) (long long) (floor(x * bucket_scale + .5));
   }
 
-EX unsigned bucketer(hyperpoint h) {
-  unsigned dx = 0;
+EX buckethash_t bucketer(hyperpoint h) {
+  buckethash_t seed = 0;
   if(gproduct) {
     auto d = product_decompose(h);
     h = d.second;
-    dx += bucketer(d.first) * 50;
+    hashmix(seed, bucketer(d.first));
     if(cgi.emb->is_euc_in_product() && in_h2xe()) h /= h[2];
     }
-  dx += bucketer(h[0]) + 1000 * bucketer(h[1]) + 1000000 * bucketer(h[2]);
-  if(MDIM == 4) dx += bucketer(h[3]) * 1000000001;
-  if(elliptic) dx = min(dx, -dx);
-  return dx;
+  if(elliptic && make_tuple(h[0], h[1], h[2], h[3]) < make_tuple(-h[0], -h[1], -h[2], -h[3])) h = -h;
+  hashmix(seed, bucketer(h[0]));
+  hashmix(seed, bucketer(h[1]));
+  hashmix(seed, bucketer(h[2]));
+  if(MDIM == 4) hashmix(seed, bucketer(h[3]));
+  return seed;
   }  
 
 #if MAXMDIM >= 4

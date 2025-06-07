@@ -3272,12 +3272,12 @@ EX shiftmatrix optimized_shift(const shiftmatrix& T) {
 EX namespace dq {
   EX queue<pair<heptagon*, shiftmatrix>> drawqueue;
   
-  EX unsigned bucketer(const shiftpoint& T) {
+  EX buckethash_t bucketer(const shiftpoint& T) {
     if(cgi.emb->is_euc_in_sl2()) {
       auto T1 = T; optimize_shift(T1);
-      return bucketer(T1.h) + unsigned(floor(T1.shift*81527+.5));
+      return hashmix_to(bucketer(T1.h), hr::bucketer(T1.shift));
       }
-    return bucketer(T.h) + unsigned(floor(T.shift*81527+.5));
+    return hashmix_to(bucketer(T.h), hr::bucketer(T.shift));
     }
 
   EX set<heptagon*> visited;
@@ -3287,10 +3287,10 @@ EX namespace dq {
     drawqueue.emplace(h, T);
     }  
 
-  EX set<unsigned> visited_by_matrix;
+  EX set<buckethash_t> visited_by_matrix;
   EX void enqueue_by_matrix(heptagon *h, const shiftmatrix& T) {
     if(!h) return;
-    unsigned b = bucketer(T * tile_center());
+    buckethash_t b = bucketer(T * tile_center());
     if(visited_by_matrix.count(b)) { return; }
     visited_by_matrix.insert(b);
     drawqueue.emplace(h, T);
@@ -3307,7 +3307,7 @@ EX namespace dq {
 
   EX void enqueue_by_matrix_c(cell *c, const shiftmatrix& T) {
     if(!c) return;
-    unsigned b = bucketer(T * tile_center());
+    buckethash_t b = bucketer(T * tile_center());
     if(visited_by_matrix.count(b)) { return; }
     visited_by_matrix.insert(b);
     drawqueue_c.emplace(c, T);
