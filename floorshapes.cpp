@@ -1374,6 +1374,7 @@ void geometry_information::make_floor_textures_here() {
 EX void make_floor_textures() {
   if(noGUI || !vid.usingGL) return;
   DEBBI(DF_POLY, ("make_floor_textures"));
+  dynamicval<euc::torus_config_full> geu(euc::eu, euc::eu);
   dynamicval<eGeometry> g(geometry, gEuclidSquare);
   dynamicval<eModel> gm(pmodel, mdDisk);
   dynamicval<eVariation> va(variation, eVariation::pure);
