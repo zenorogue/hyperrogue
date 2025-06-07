@@ -2429,7 +2429,7 @@ void celldrawer::draw_wall_full() {
     }
 
 #if CAP_SHAPES
-  if(wmspatial) {
+  if(wmspatial && WDIM == 2) {
 
     color_t col = (highwall(c) || c->wall == waTower) ? wcol : fcol;
 
