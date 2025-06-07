@@ -1506,13 +1506,13 @@ void adjust_animation(ld part) {
 
 bool next_fail = false;
 
-int TEXTURESIZE = 256;
+int BRINGRIS_TEXTURESIZE = 256;
 
 int nxmin, nxmax, nymin, nymax;
 
 void render_next(int xstart) {
   if(!next_buffer && !next_fail) {
-    next_buffer = new renderbuffer(TEXTURESIZE, TEXTURESIZE, true);
+    next_buffer = new renderbuffer(BRINGRIS_TEXTURESIZE, BRINGRIS_TEXTURESIZE, true);
     if(!next_buffer->valid) {
       next_fail = true;
       delete next_buffer;
@@ -1549,8 +1549,8 @@ void render_next(int xstart) {
   if(1) {
     resetbuffer rb;
     next_buffer->enable();
-    dynamicval<int> dx(vid.xres, TEXTURESIZE);
-    dynamicval<int> dy(vid.yres, TEXTURESIZE);
+    dynamicval<int> dx(vid.xres, BRINGRIS_TEXTURESIZE);
+    dynamicval<int> dy(vid.yres, BRINGRIS_TEXTURESIZE);
     dynamicval<ld> dxmi(current_display->xmin, 0);
     dynamicval<ld> dxma(current_display->xmax, 1);
     dynamicval<ld> dymi(current_display->ymin, 0);
