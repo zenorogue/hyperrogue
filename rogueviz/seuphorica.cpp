@@ -1626,9 +1626,9 @@ void launch() {
 
   reset_rv();
   restart("", "", "");
-  for(int i=0; i<int(sp::first_artifact); i++)
+  /* for(int i=0; i<int(sp::first_artifact); i++)
     special_allowed[i] =among(sp(i), sp::horizontal, sp::vertical, sp::reversing, sp::portal, sp::gigantic, sp::soothing, sp::bending, sp::tricky) && geom_allows(sp(i));
-  new_game();
+  new_game(); */
   enable();
   reset_seuphorica_screen();
   }
