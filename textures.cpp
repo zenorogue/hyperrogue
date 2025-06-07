@@ -143,6 +143,10 @@ EX cpatterntype cgroup;
 
 #if CAP_PNG
 SDL_Surface *convertSurface(SDL_Surface* s) {
+  #if SDLVER >= 3
+  return SDL_ConvertSurface(s, SDL_PIXELFORMAT_BGRA8888);
+
+#else
   SDL_PixelFormat fmt;
   // fmt.format = SDL_PIXELFORMAT_BGRA8888;
   fmt.BitsPerPixel = 32;
@@ -159,12 +163,13 @@ SDL_Surface *convertSurface(SDL_Surface* s) {
   fmt.Aloss = fmt.Rloss = fmt.Gloss = fmt.Bloss = 0;
   fmt.palette = NULL;
 
-#if !CAP_SDL2
+#if SDLVER <= 1
   fmt.alpha = 0;
   fmt.colorkey = 0x1ffffff;
 #endif
   
   return SDL_ConvertSurface(s, &fmt, SDL_SWSURFACE);
+#endif
   }
 #endif
 
@@ -244,7 +249,7 @@ bool texture_data::readtexture(string tn) {
     return false;
     }
   auto txt2 = convertSurface(txt);
-  SDL_FreeSurface(txt);
+  SDL_DestroySurface(txt);
 
   tx = txt2->w, ty = txt2->h;
   
@@ -367,7 +372,7 @@ bool texture_data::readtexture(string tn) {
     }
 
 #if CAP_SDL_IMG
-  SDL_FreeSurface(txt2);
+  SDL_DestroySurface(txt2);
 #endif
   
   return true;
@@ -382,7 +387,7 @@ void texture_data::saveRawTexture(string tn) {
   for(int x=0; x<twidth; x++)
     qpixel(sraw,x,y) = get_texture_pixel(x, y);
   IMAGESAVE(sraw, tn.c_str());
-  SDL_FreeSurface(sraw);
+  SDL_DestroySurface(sraw);
   addMessage(XLAT("Saved the raw texture to %1", tn));
   }
 

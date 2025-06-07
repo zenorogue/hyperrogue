@@ -432,7 +432,7 @@ void bantar_anim() {
     
     SDL_Event ev;
     while(SDL_PollEvent(&ev)) 
-      if(ev.type == SDL_KEYDOWN || ev.type == SDL_MOUSEBUTTONDOWN)
+      if(ev.type == SDL_EVENT_KEY_DOWN || ev.type == SDL_EVENT_MOUSE_BUTTON_DOWN)
         breakanim = true;      
     }
   mapeditor::drawplayer = true;

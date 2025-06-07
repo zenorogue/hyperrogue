@@ -1455,7 +1455,7 @@ EX namespace dialog {
     
     display();
 
-    #if CAP_SDL2
+    #if SDLVER >= 2
     texthandler = [&ne] (const SDL_TextInputEvent& ev) {
       if(key_actions.count(ev.text[0])) return;
       ne.s += ev.text;
@@ -1466,7 +1466,7 @@ EX namespace dialog {
     keyhandler = [this, &ne] (int sym, int uni) {
       handleNavigation(sym, uni);
       if((uni >= '0' && uni <= '9') || among(uni, '.', '+', '-', '*', '/', '^', '(', ')', ',', '|', 3) || (uni >= 'a' && uni <= 'z')) {
-        #if !CAP_SDL2
+        #if SDLVER == 1
         if(uni == 3) ne.s += "pi";
         else ne.s += uni;
         apply_edit();
@@ -1791,7 +1791,7 @@ EX namespace dialog {
     dialog::addItem("cancel", SDLK_ESCAPE);
     dialog::display();
 
-    #if CAP_SDL2
+    #if SDLVER >= 2
     texthandler = [this] (const SDL_TextInputEvent& ev) {
       int i = isize(*cfileptr) - (editext?0:4);
       cfileptr->insert(i, ev.text);
@@ -1819,7 +1819,7 @@ EX namespace dialog {
       highlight_text = "//missing";
       list_skip = 0;
       }
-    #if !CAP_SDL2
+    #if SDLVER == 1
     else if(uni >= 32 && uni < 127) {
       s.insert(i, s0 + char(uni));
       highlight_text = "//missing";
@@ -1946,7 +1946,7 @@ EX namespace dialog {
       if(reaction) reaction();
       }
     else if((u2 = checker(sym, uni)) != "") {
-      #if !CAP_SDL2
+      #if SDLVER == 1
       for(char c: u2) {
         es.insert(editpos, 1, c);
         editpos ++;
@@ -1959,7 +1959,7 @@ EX namespace dialog {
     }
 
   void string_dialog::handle_textinput() {
-    #if CAP_SDL2
+    #if SDLVER >= 2
     texthandler = [this] (const SDL_TextInputEvent& ev) {
       auto& es = *edited_string;
       string txt = ev.text;

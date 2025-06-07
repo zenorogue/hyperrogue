@@ -226,7 +226,7 @@ renderbuffer::~renderbuffer() {
 #endif
 #if CAP_SDL
   if(srf) 
-    SDL_FreeSurface(srf);
+    SDL_DestroySurface(srf);
 #endif
   }
 
@@ -238,7 +238,7 @@ void renderbuffer::clear(color_t col) {
     }
   #endif
   #if CAP_SDL
-  SDL_FillRect(srf, NULL, col);
+  SDL_FillSurfaceRect(srf, NULL, col);
   #endif
   }
 

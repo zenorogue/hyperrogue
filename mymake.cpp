@@ -72,6 +72,10 @@ void set_linux() {
     opts = "-DFHS -DLINUX -I/usr/include/SDL2";
     libs = " -lSDL2 -lSDL2_ttf -lSDL2_mixer -lSDL2_gfx -lGLEW -lGL -lpng -rdynamic -lpthread -lz";
     }
+  else if(sdlver == 3) {
+    opts = "-DFHS -DLINUX -I/usr/include/SDL3";
+    libs = " -lSDL3 -lSDL3_ttf -lSDL3_mixer -lSDL3_gfx -lGLEW -lGL -lpng -rdynamic -lpthread -lz";
+    }
   else if(sdlver == 1) {
     opts = "-DFHS -DLINUX -I/usr/include/SDL";
     libs = " -lSDL -lSDL_ttf -lSDL_mixer -lSDL_gfx -lGLEW -lGL -lpng -rdynamic -lpthread -lz";
@@ -114,6 +118,7 @@ void set_mingw64_cross() {
   libs = " hyper64.res -static-libgcc -lopengl32";
   if(sdlver == 1) libs += " -lSDL -lSDL_gfx -lSDL_mixer -lSDL_ttf";
   if(sdlver == 2) libs += " -lSDL2 -lSDL2_gfx -lSDL2_mixer -lSDL2_ttf";
+  if(sdlver == 3) libs += " -lSDL3 -lSDL3_gfx -lSDL3_mixer -lSDL3_ttf";
   libs += " -lpthread -lz -lglew32 -lpng";
   setvbuf(stdout, NULL, _IONBF, 0); // MinGW is quirky with output buffering
   if(!file_exists("hyper64.res"))
@@ -238,7 +243,7 @@ int main(int argc, char **argv) {
       set_os(os);
       obj_dir += "/sdl1";
       setdir += "../";
-      opts += " -DCAP_SDL2=0";
+      opts += " -DSDLVER=1";
       }
     else if(s == "-sdl0") {
       sdlver = 0;
@@ -252,7 +257,14 @@ int main(int argc, char **argv) {
       set_os(os);
       obj_dir += "/sdl2";
       setdir += "../";
-      opts += " -DCAP_SDL2=1";
+      opts += " -DSDLVER=2";
+      }
+    else if(s == "-sdl3") {
+      sdlver = 3;
+      set_os(os);
+      obj_dir += "/sdl3";
+      setdir += "../";
+      opts += " -DSDLVER=3";
       }
     else if(s.substr(0, 2) == "-f" || s.substr(0, 2) == "-m") {
       opts += " " + s;

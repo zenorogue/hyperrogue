@@ -99,7 +99,7 @@ bool rawdisplaystr(int x, int y, int shift, int size, const char *str, int color
   bool clicked = (mousex >= rect.x && mousey >= rect.y && mousex <= rect.x+rect.w && mousey <= rect.y+rect.h);
   
   SDL_BlitSurface(txt, NULL, s,&rect); 
-  SDL_FreeSurface(txt);
+  SDL_DestroySurface(txt);
   
   return clicked;
   }

@@ -118,7 +118,7 @@ EX color_t rainbow_color(ld sat, ld hue) {
 
 /** Adjust col to SDL_gfx functions. No adjustment is needed in SDL 1.2, but it is needed in SDL2 */
 EX color_t align(color_t col) {
-  #if CAP_SDL2
+  #if SDLVER >= 2
   swap(part(col, 0), part(col, 3));
   swap(part(col, 1), part(col, 2));
   #endif

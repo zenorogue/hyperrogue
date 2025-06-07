@@ -214,7 +214,7 @@ EX void initAudio() {
   audio = loadMusicInfo();
 
   if(audio) {
-    if(Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, 2, 2048) != 0) {
+    if(SDL23(Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, 2, 2048) != 0, !Mix_OpenAudio(0, nullptr))) {
       fprintf(stderr, "Unable to initialize audio: %s\n", Mix_GetError());
       audio = false;
       }

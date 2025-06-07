@@ -449,7 +449,7 @@ void geometry_information::generate_floorshapes_for(int id, cell *c) {
 
     // special
     ld sca = 3 * shFullFloor.rad0 / fsh.rad0;
-    
+
     vector<hyperpoint> cornerlist;
     
     int cor = c->type;

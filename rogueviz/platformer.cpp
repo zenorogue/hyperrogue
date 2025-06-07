@@ -384,7 +384,7 @@ bool last_mkey = false;
 extern int mousepx, mousepy;
 
 void game_frame() {  
-  const Uint8 *keystate = SDL12_GetKeyState(NULL);
+  const sdl_keystate_type *keystate = SDL12_GetKeyState(NULL);
   if(keystate['3'])
     current_room->place_block_full(mousepx / block_x, mousepy / block_y, 0);
   if(keystate['1'])

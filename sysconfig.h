@@ -129,8 +129,12 @@
 #define CAP_SDL (!ISMOBILE)
 #endif
 
-#ifndef CAP_SDL2
-#define CAP_SDL2 0
+#ifndef SDLVER
+#ifdef CAP_SDL
+#define SDLVER 1
+#else
+#define SDLVER 0
+#endif
 #endif
 
 #ifndef CAP_TIMEOFDAY
@@ -357,57 +361,76 @@
 #include <stdio.h>
 
 #if CAP_SDL
-#if CAP_SDL2
-#include <SDL2/SDL.h>
-#define SDL12(x,y) y
-#define SDLK_KP1 SDLK_KP_1
-#define SDLK_KP2 SDLK_KP_2
-#define SDLK_KP3 SDLK_KP_3
-#define SDLK_KP4 SDLK_KP_4
-#define SDLK_KP5 SDLK_KP_5
-#define SDLK_KP6 SDLK_KP_6
-#define SDLK_KP7 SDLK_KP_7
-#define SDLK_KP8 SDLK_KP_8
-#define SDLK_KP9 SDLK_KP_9
-#define SDLK_KP0 SDLK_KP_0
-#define SDL12_GetKeyState SDL_GetKeyboardState
-#define KEYSTATES SDL_NUM_SCANCODES
-#else
-#include <SDL/SDL.h>
-#define SDL12(x,y) x
-#define SDL12_GetKeyState SDL_GetKeyState
-#define KEYSTATES SDLK_LAST
+#if SDLVER == 3
+#include <SDL3/SDL.h>
 #endif
+#if SDLVER == 2
+#include <SDL2/SDL.h>
+#endif
+#if SDLVER == 1
+#include <SDL/SDL.h>
+#endif
+#endif
+
+#if SDLVER >= 3
+#define SDL23(x,y) y
+#else
+#define SDL23(x,y) x
+#endif
+
+#if SDLVER >= 2
+#define SDL12(x,y) y
+#else
+#define SDL12(x,y) x
+#endif
+
+#define SDL123(x,y,z) SDL12(x,SDL23(y,z))
+
+#define SDL12_GetKeyState SDL12(SDL_GetKeyState, SDL_GetKeyboardState)
+#define sdl_keystate_type SDL23(Uint8, bool)
+#define KEYSTATES SDL123(SDLK_LAST, SDL_NUM_SCANCODES, SDL_SCANCODE_COUNT)
 
 #if !ISMAC
 #undef main
 #endif
 
 #if CAP_SDLAUDIO
-#if CAP_SDL2
-#include <SDL2/SDL_mixer.h>
-#else
+#if SDLVER == 1
 #include <SDL/SDL_mixer.h>
+#endif
+#if SDLVER == 2
+#include <SDL2/SDL_mixer.h>
+#endif
+#if SDLVER == 3
+#include <SDL3_mixer/SDL_mixer.h>
 #endif
 #endif
 
 #if CAP_SDLTTF
-#if CAP_SDL2
-#include <SDL2/SDL_ttf.h>
-#else
+#if SDLVER == 1
 #include <SDL/SDL_ttf.h>
+#endif
+#if SDLVER == 2
+#include <SDL2/SDL_ttf.h>
+#endif
+#if SDLVER == 3
+#include <SDL3_ttf/SDL_ttf.h>
 #endif
 #endif
 
 #if CAP_SDLGFX
-#if CAP_SDL2
-#include <SDL2/SDL2_gfxPrimitives.h>
-#else
+#if SDLVER == 1
 #include <SDL/SDL_gfxPrimitives.h>
+#endif
+#if SDLVER == 2
+#include <SDL2/SDL2_gfxPrimitives.h>
+#endif
+#if SDLVER == 3
+#include <SDL3_gfx/SDL3_gfxPrimitives.h>
 #endif
 #endif
 
-#elif !ISFAKEMOBILE
+#if !CAP_SDLGFX && !ISFAKEMOBILE
 #define SDLK_F1  (123001)
 #define SDLK_F2  (123002)
 #define SDLK_F3  (123003)
@@ -449,6 +472,86 @@
 #define FAKE_SDL
 typedef int SDL_Event;
 typedef unsigned int Uint32;
+#endif
+
+#if CAP_SDL
+#define SDL_error_in(x) SDL23(((x) < 0), !(x))
+
+#if SDLVER == 3
+#define SDL_SWSURFACE 0 /* unused parameter */
+inline SDL_Surface *SDL_CreateRGBSurface(Uint32 flags, int width, int height, int depth, Uint32 Rmask, Uint32 Gmask, Uint32 Bmask, Uint32 Amask) {
+  return SDL_CreateSurface(width, height, SDL_GetPixelFormatForMasks(depth, Rmask, Gmask, Bmask, Amask));
+  }
+
+inline int TTF_SizeUTF8(TTF_Font *font, const char *text, int *w, int *h) {
+  return TTF_GetStringSize(font, text, strlen(text), w, h);
+  }
+
+inline SDL_Surface* TTF_RenderUTF8_Blended(TTF_Font *font, const char *text, SDL_Color fg) {
+  return TTF_RenderText_Blended(font, text, strlen(text), fg);
+  }
+
+inline SDL_Surface* TTF_RenderUTF8_Solid(TTF_Font *font, const char *text, SDL_Color fg) {
+  return TTF_RenderText_Solid(font, text, strlen(text), fg);
+  }
+
+#define Mix_GetError SDL_GetError
+#endif
+
+#if SDLVER >= 2
+#define SDLK_KP1 SDLK_KP_1
+#define SDLK_KP2 SDLK_KP_2
+#define SDLK_KP3 SDLK_KP_3
+#define SDLK_KP4 SDLK_KP_4
+#define SDLK_KP5 SDLK_KP_5
+#define SDLK_KP6 SDLK_KP_6
+#define SDLK_KP7 SDLK_KP_7
+#define SDLK_KP8 SDLK_KP_8
+#define SDLK_KP9 SDLK_KP_9
+#define SDLK_KP0 SDLK_KP_0
+#endif
+
+#if SDLVER < 3
+#define SDL_EVENT_QUIT SDL_QUIT
+#define SDL_EVENT_MOUSE_BUTTON_DOWN SDL_MOUSEBUTTONDOWN
+#define SDL_EVENT_MOUSE_BUTTON_UP SDL_MOUSEBUTTONUP
+#define SDL_EVENT_MOUSE_MOTION SDL_MOUSEMOTION
+#define SDL_EVENT_MOUSE_WHEEL SDL_MOUSEWHEEL
+#define SDL_EVENT_KEY_DOWN SDL_KEYDOWN
+#define SDL_EVENT_KEY_UP SDL_KEYUP
+#define SDL_EVENT_JOYSTICK_BUTTON_DOWN SDL_JOYBUTTONDOWN
+#define SDL_EVENT_JOYSTICK_HAT_MOTION SDL_JOYHATMOTION
+#define SDL_EVENT_JOYSTICK_AXIS_MOTION SDL_JOYAXISMOTION
+#define SDL_EVENT_WINDOW SDL_WINDOWEVENT
+#define SDL_EVENT_TEXT_INPUT SDL_TEXTINPUT
+
+#define SDL_KMOD_NUM KMOD_NUM
+#define SDL_KMOD_LSHIFT KMOD_LSHIFT
+#define SDL_KMOD_LCTRL KMOD_LCTRL
+#define SDL_KMOD_LALT KMOD_LALT
+#define SDL_KMOD_RSHIFT KMOD_RSHIFT
+#define SDL_KMOD_RCTRL KMOD_RCTRL
+#define SDL_KMOD_RALT KMOD_RALT
+
+#define SDL_DestroySurface SDL_FreeSurface
+#define SDL_FillSurfaceRect SDL_FillRect
+#define SDL_GL_DestroyContext SDL_GL_DeleteContext
+#define SDL_WINDOW_HIGH_PIXEL_DENSITY SDL_WINDOW_ALLOW_HIGHDPI
+#define SDL_CreateWindow(a,b,c,d) SDL_CreateWindow(a,SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,b,c,d)
+#define SDL_GetCurrentRenderOutputSize SDL_GetRendererOutputSize
+#define SDL_GetNumJoystickButtons SDL_JoystickNumButtons
+#define SDL_GetJoystickButton SDL_JoystickGetButton
+#define SDL_GetJoystickHat SDL_JoystickGetHat
+#define SDL_GetNumJoystickHats SDL_JoystickNumHats
+#define SDL_GetNumJoystickAxes SDL_JoystickNumAxes
+#define SDL_GetJoystickAxis SDL_JoystickGetAxis
+#define SDL_OpenJoystick SDL_JoystickOpen
+#define SDL_CloseJoystick SDL_JoystickClose
+#endif
+
+#if SDLVER >= 3
+#define SDL_GetScancodeFromKey(x) SDL_GetScancodeFromKey(x, nullptr)
+#endif
 #endif
 
 #if ISWEB

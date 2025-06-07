@@ -342,12 +342,12 @@ EX namespace netgen {
     dynamicval<SDL_Surface*> ds(s);
 
     s = net = SDL_CreateRGBSurface(SDL_SWSURFACE,SX*nscale,SY*nscale,32,0,0,0,0);
-    #if CAP_SDL2
+    #if SDLVER >= 2
     dynamicval<SDL_Renderer*> dr(srend);
     srend = SDL_CreateSoftwareRenderer(s);
     #endif
 
-    SDL_FillRect(net, NULL, 0xFFFFFF);
+    SDL_FillSurfaceRect(net, NULL, 0xFFFFFF);
     
     int pateks = 0;
     for(int i=0; i<CELLS; i++) patek[i].resize(ct[i]);
@@ -442,9 +442,9 @@ EX namespace netgen {
       IMAGESAVE(quarter, hr::format("papermodel-page%d%d" IMAGEEXT, iy, ix).c_str());
       }
     
-    SDL_FreeSurface(net);
-    SDL_FreeSurface(quarter);
-    #if CAP_SDL2
+    SDL_DestroySurface(net);
+    SDL_DestroySurface(quarter);
+    #if SDLVER >= 2
     SDL_DestroyRenderer(srend);
     #endif
     }
@@ -624,28 +624,32 @@ EX namespace netgen {
       SDL_Event event;
       
       while(SDL_PollEvent(&event)) switch (event.type) {
-        case SDL_QUIT:
+        case SDL_EVENT_QUIT:
           exit(1);
           return;
     
-        case SDL_MOUSEBUTTONDOWN: {
+        case SDL_EVENT_MOUSE_BUTTON_DOWN: {
           clicked(event.button.x, event.button.y, event.button.button);
           break;
           }
         
-        case SDL_MOUSEBUTTONUP: {
+        case SDL_EVENT_MOUSE_BUTTON_UP: {
           clicked(event.button.x, event.button.y, 16+event.button.button);
           break;
           }
         
-        case SDL_MOUSEMOTION: {
+        case SDL_EVENT_MOUSE_MOTION: {
           clicked(event.motion.x, event.motion.y, 32);
           break;
           }
         
-        case SDL_KEYDOWN: {          
+        case SDL_EVENT_KEY_DOWN: {
+          #if SDLVER >= 3
+          int key = event.key.key;
+          #else
           int key = event.key.keysym.sym;
-          #if CAP_SDL2
+          #endif
+          #if SDLVER >= 2
           int uni = key;
           #else
           int uni = event.key.keysym.unicode;
@@ -663,7 +667,7 @@ EX namespace netgen {
           break;
           }
     
-        case SDL_KEYUP: {
+        case SDL_EVENT_KEY_UP: {
           rs = 0;
           rz = 0;          
           break;

@@ -626,7 +626,7 @@ EX always_false in;
           }
         }
       IMAGESAVE(s, (filename + "-floors.png").c_str());
-      SDL_FreeSurface(s);
+      SDL_DestroySurface(s);
       }
     #endif
     #endif
@@ -641,7 +641,7 @@ EX }
 void IMAGESAVE(SDL_Surface *s, const char *fname) {
   SDL_Surface *s2 = SDL_PNGFormatAlpha(s);
   SDL_SavePNG(s2, fname);
-  if(s != s2) SDL_FreeSurface(s2);
+  if(s != s2) SDL_DestroySurface(s2);
   }
 #endif
 
@@ -741,7 +741,7 @@ EX void postprocess(string fname, SDL_Surface *sdark, SDL_Surface *sbright) {
       }
     }
   output(sout, fname);
-  SDL_FreeSurface(sout);
+  SDL_DestroySurface(sout);
   }
 #endif
 

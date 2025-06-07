@@ -143,14 +143,14 @@ namespace spiral {
       SDL_Event event;
       while(SDL_PollEvent(&event)) switch (event.type) {
 
-        #if !CAP_SDL2
+        #if SDLVER == 1
         case SDL_VIDEORESIZE: {
           resize_screen_to(event.resize.w, event.resize.h);
           precompute();
           break;
           }
         #endif
-        #if CAP_SDL2
+        #if SDLVER == 2
         case SDL_WINDOWEVENT: {
           if(event.window.event == SDL_WINDOWEVENT_RESIZED)
           resize_screen_to(event.window.data1, event.window.data2);
@@ -158,13 +158,20 @@ namespace spiral {
           break;
           }
         #endif
-        case SDL_QUIT: case SDL_MOUSEBUTTONDOWN:
+        #if SDLVER == 3
+        case SDL_EVENT_WINDOW_RESIZED: {
+          resize_screen_to(event.window.data1, event.window.data2);
+          precompute();
+          break;
+          }
+        #endif
+        case SDL_EVENT_QUIT: case SDL_EVENT_MOUSE_BUTTON_DOWN:
           goto breakloop;
 
-        case SDL_KEYDOWN: {
-          int sym = event.key.keysym.sym;
+        case SDL_EVENT_KEY_DOWN: {
+          int sym = SDL23(event.key.keysym.sym, event.key.key);
           int uni = 0;
-          numlock_on = event.key.keysym.mod & KMOD_NUM;
+          numlock_on = SDL23(event.key.keysym.mod, event.key.mod) & SDL_KMOD_NUM;
           if(DKEY == SDLK_RIGHT) velx++;
           if(DKEY == SDLK_LEFT) velx--;
           if(DKEY == SDLK_UP) vely++;
@@ -481,7 +488,7 @@ EX namespace history {
         if(dospiral) 
           bands.push_back(band);
         else 
-          SDL_FreeSurface(band);
+          SDL_DestroySurface(band);
         };
       
       if(!band) {
@@ -557,7 +564,7 @@ EX namespace history {
     
     if(dospiral) {
       spiral::loop(bands);
-      for(int i=0; i<isize(bands); i++) SDL_FreeSurface(bands[i]);
+      for(int i=0; i<isize(bands); i++) SDL_DestroySurface(bands[i]);
       }
     }
 

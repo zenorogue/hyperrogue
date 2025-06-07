@@ -153,7 +153,7 @@ void pass_time() {
     ld delta = t - last_t;
     dynamicval<eGeometry> g(geometry, geometry == gTwistedProduct ? geometry : gCubeTiling);
 
-    const Uint8 *keystate = SDL12_GetKeyState(NULL);
+    const sdl_keystate_type *keystate = SDL12_GetKeyState(NULL);
     if(keystate['a'] || forcekey == 'a') current = apply_lorentz(current, lorentz(0, 2, delta*accel)), ang = 180, acc = true;
     if(keystate['d'] || forcekey == 'd') current = apply_lorentz(current, lorentz(0, 2, -delta*accel)), ang = 0, acc = true; 
     if(keystate['w'] || forcekey == 'w') current = apply_lorentz(current, lorentz(1, 2, delta*accel)), ang = 90, acc = true; 

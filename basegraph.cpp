@@ -165,7 +165,7 @@ void fix_font_size(int& size) {
 
 #if CAP_SDL
 
-#if !CAP_SDL2
+#if SDLVER == 1
 #if HDR
 typedef SDL_Surface SDL_Renderer;
 #define srend s
@@ -174,7 +174,7 @@ typedef SDL_Surface SDL_Renderer;
 
 EX SDL_Surface *s;
 EX SDL_Surface *s_screen;
-#if CAP_SDL2
+#if SDLVER >= 2
 EX SDL_Renderer *s_renderer, *s_software_renderer;
 #if HDR
 #define srend s_software_renderer
@@ -196,10 +196,14 @@ EX color_t& qpixel(SDL_Surface *surf, int x, int y) {
   }
 
 EX void present_surface() {
-  #if CAP_SDL2
+  #if SDLVER >= 2
   SDL_UpdateTexture(s_texture, nullptr, s->pixels, s->w * sizeof (Uint32));
   SDL_RenderClear(s_renderer);
+  #if SDLVER >= 3
+  SDL_RenderTexture(s_renderer, s_texture, nullptr, nullptr);
+  #else
   SDL_RenderCopy(s_renderer, s_texture, nullptr, nullptr);
+  #endif
   SDL_RenderPresent(s_renderer);
   #else
   SDL_UpdateRect(s, 0, 0, 0, 0);  
@@ -209,7 +213,7 @@ EX void present_surface() {
 EX void present_screen() {
 #if CAP_GL
   if(vid.usingGL) {
-    #if CAP_SDL2
+    #if SDLVER >= 2
     SDL_GL_SwapWindow(s_window);
     #else
     SDL_GL_SwapBuffers();
@@ -610,7 +614,7 @@ EX void init_glfont(int size) {
     fix_font_size(siz);
     if(ch < 128) {
       str[0] = ch;
-      txt = TTF_RenderText_Blended(cfont->font[siz], str, white);
+      txt = TTF_RenderUTF8_Blended(cfont->font[siz], str, white);
       }
     else {
       txt = TTF_RenderUTF8_Blended(cfont->font[siz], natchars[ch-128], white);
@@ -620,7 +624,7 @@ EX void init_glfont(int size) {
     generateFont(ch, txt);
 #endif
     sdltogl(txt, f, ch);
-    SDL_FreeSurface(txt);    
+    SDL_DestroySurface(txt);
 #endif
     }
 
@@ -895,7 +899,9 @@ EX bool displaystr(int x, int y, int shift, int size, const char *str, color_t c
   bool clicked = (mousex >= rect.x && mousey >= rect.y && mousex <= rect.x+rect.w && mousey <= rect.y+rect.h);
   
   if(shift) {
-    #if CAP_SDL2
+    #if SDLVER == 3
+    SDL_Surface* txt2 = SDL_ConvertSurface(txt, SDL_PIXELFORMAT_RGBA8888);
+    #elif SDLVER == 2
     SDL_Surface* txt2 = SDL_ConvertSurfaceFormat(txt, SDL_PIXELFORMAT_RGBA8888, 0);
     #else
     SDL_Surface* txt2 = SDL_DisplayFormat(txt);
@@ -909,12 +915,12 @@ EX bool displaystr(int x, int y, int shift, int size, const char *str, color_t c
       qpixel(s, rect.x+xx+shift, rect.y+yy) |= color & 0x00FFFF;
     SDL_UnlockSurface(s);
     SDL_UnlockSurface(txt2);
-    SDL_FreeSurface(txt2);
+    SDL_DestroySurface(txt2);
     }
   else {
     SDL_BlitSurface(txt, NULL, s,&rect); 
     }
-  SDL_FreeSurface(txt);
+  SDL_DestroySurface(txt);
   
   return clicked;
 #endif
@@ -1256,19 +1262,19 @@ EX bool need_to_apply_screen_settings() {
   }
 
 EX void close_renderer() {
-  #if CAP_SDL2
+  #if SDLVER >= 2
   if(s_renderer) SDL_DestroyRenderer(s_renderer), s_renderer = nullptr;
   if(s_texture) SDL_DestroyTexture(s_texture), s_texture = nullptr;
-  if(s) SDL_FreeSurface(s), s = nullptr;
+  if(s) SDL_DestroySurface(s), s = nullptr;
   if(s_software_renderer) SDL_DestroyRenderer(s_software_renderer), s_software_renderer = nullptr;
   #endif
   }
 
 EX void close_window() {
-  #if CAP_SDL2
+  #if SDLVER >= 2
   close_renderer();
   if(s_have_context) {
-    SDL_GL_DeleteContext(s_context), s_have_context = false;
+    SDL_GL_DestroyContext(s_context), s_have_context = false;
     }
   if(s_window) SDL_DestroyWindow(s_window), s_window = nullptr;
   #endif
@@ -1289,7 +1295,7 @@ EX void apply_screen_settings() {
   #endif
 
   #if CAP_SDL
-  #if !CAP_SDL2
+  #if SDLVER == 1
   if(need_to_reopen_window())
     SDL_QuitSubSystem(SDL_INIT_VIDEO);
   #endif
@@ -1352,12 +1358,12 @@ EX void setvideomode() {
 #if CAP_GL
   vid.usingGL = vid.wantGL;
   if(vid.usingGL) {
-    flags = SDL12(SDL_OPENGL | SDL_HWSURFACE, SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI);
+    flags = SDL12(SDL_OPENGL | SDL_HWSURFACE, SDL_WINDOW_OPENGL | SDL_WINDOW_HIGH_PIXEL_DENSITY);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 1);
 
     vid.current_vsync = want_vsync();
-    #if !ISMOBWEB && !CAP_SDL2
+    #if !ISMOBWEB && SDLVER == 1
     if(vid.current_vsync) 
       SDL_GL_SetAttribute( SDL_GL_SWAP_CONTROL, 1 );
     else
@@ -1393,15 +1399,15 @@ EX void setvideomode() {
   #endif
   #endif
   
-  #if CAP_SDL2
+  #if SDLVER >= 2
   if(s_renderer) SDL_DestroyRenderer(s_renderer), s_renderer = nullptr;
   #endif
 
   auto create_win = [&] {
-    #if CAP_SDL2
+    #if SDLVER >= 2
     if(s_window && current_window_flags != (flags | sizeflag)) {
       if(s_have_context) {
-        SDL_GL_DeleteContext(s_context), s_have_context = false;
+        SDL_GL_DestroyContext(s_context), s_have_context = false;
         glhr::glew = false;
         }
       SDL_DestroyWindow(s_window), s_window = nullptr;
@@ -1409,10 +1415,7 @@ EX void setvideomode() {
     if(s_window)
       SDL_SetWindowSize(s_window, vid.xres, vid.yres);
     else
-      s_window = SDL_CreateWindow(CUSTOM_CAPTION, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
-      vid.xres, vid.yres,
-      flags | sizeflag
-      );
+      s_window = SDL_CreateWindow(CUSTOM_CAPTION, vid.xres, vid.yres, flags | sizeflag);
     current_window_flags = (flags | sizeflag);
     #else
     s = SDL_SetVideoMode(vid.xres, vid.yres, 32, flags | sizeflag);
@@ -1441,15 +1444,23 @@ EX void setvideomode() {
     create_win();
     }
   
-  #if CAP_SDL2
+  #if SDLVER >= 2
   if(s_renderer) SDL_DestroyRenderer(s_renderer), s_renderer = nullptr;
+
+  #if SDLVER >= 3
+  s_renderer = SDL_CreateRenderer(s_window, nullptr);
+  SDL_SetRenderVSync(s_renderer, vid.current_vsync ? 1 : SDL_RENDERER_VSYNC_DISABLED);
+  // todo VSYNC -- , SDL_PROP_RENDERER_CREATE_PRESENT_VSYNC_NUMBER
+  #else
   s_renderer = SDL_CreateRenderer(s_window, -1, vid.current_vsync ? SDL_RENDERER_PRESENTVSYNC : 0);
-  SDL_GetRendererOutputSize(s_renderer, &vid.xres, &vid.yres);
+  #endif
+
+  SDL_GetCurrentRenderOutputSize(s_renderer, &vid.xres, &vid.yres);
   
   if(s_texture) SDL_DestroyTexture(s_texture), s_texture = nullptr;
   s_texture = SDL_CreateTexture(s_renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, vid.xres, vid.yres);
   
-  if(s) SDL_FreeSurface(s), s = nullptr;
+  if(s) SDL_DestroySurface(s), s = nullptr;
   s = shot::empty_surface(vid.xres, vid.yres, false);
   
   if(s_software_renderer) SDL_DestroyRenderer(s_software_renderer), s_software_renderer = nullptr;
@@ -1469,8 +1480,8 @@ EX void setvideomode() {
       glDisable(GL_MULTISAMPLE_ARB);
       }
   
-    #if CAP_SDL2
-    if(s_have_context) SDL_GL_DeleteContext(s_context), s_have_context = false;
+    #if SDLVER >= 2
+    if(s_have_context) SDL_GL_DestroyContext(s_context), s_have_context = false;
     if(!s_have_context) s_context = SDL_GL_CreateContext(s_window);
     s_have_context = true; glhr::glew = false;
     #endif
@@ -1487,13 +1498,14 @@ EX bool noGUI = false;
 
 #if CAP_SDL
 EX bool sdl_on = false;
-EX int SDL_Init1(Uint32 flags) {
+EX bool SDL_Init1(Uint32 flags) {
   if(!sdl_on) {
     sdl_on = true;
-    return SDL_Init(flags);
+    return !SDL_error_in(SDL_Init(flags));
     }
-  else  
-    return SDL_InitSubSystem(flags);
+  else {
+    return !SDL_error_in(SDL_InitSubSystem(flags));
+    }
   }
 #endif
 
@@ -1510,7 +1522,7 @@ EX void set_cfont() {
 
 EX void init_font() {
 #if CAP_SDLTTF
-  if(TTF_Init() != 0) {
+  if(SDL_error_in(TTF_Init())) {
     printf("Failed to initialize TTF.\n");
     exit(2);
     }
@@ -1542,7 +1554,7 @@ EX void close_font() {
 
 EX void init_graph() {
 #if CAP_SDL
-  if (SDL_Init1(SDL_INIT_VIDEO) == -1)
+  if (!SDL_Init1(SDL_INIT_VIDEO))
   {
     printf("Failed to initialize video.\n");
     exit(2);
@@ -1552,7 +1564,15 @@ EX void init_graph() {
   get_canvas_size();
 #else
   if(!vid.xscr) {
-    #if CAP_SDL2
+    #if SDLVER >= 3
+    int count;
+    auto displays = SDL_GetDisplays(&count);
+    if(!count) { println(hlog, "error: no displays"); return; }
+    const SDL_DisplayMode* dm = SDL_GetCurrentDisplayMode(displays[0]);
+    if(!dm) println(hlog, "SDL_GetCurrentDisplayMode error: ", SDL_GetError());
+    if(dm) vid.xscr = vid.xres = dm->w;
+    if(dm) vid.yscr = vid.yres = dm->h;
+    #elif SDLVER >= 2
     SDL_DisplayMode dm;
     SDL_GetCurrentDisplayMode(0, &dm);
     vid.xscr = vid.xres = dm.w;
@@ -1565,7 +1585,7 @@ EX void init_graph() {
     }
 #endif
 
-#if !CAP_SDL2
+#if SDLVER == 1
   SDL_WM_SetCaption(CUSTOM_CAPTION, CUSTOM_CAPTION);
 #endif
 #endif
@@ -1587,7 +1607,7 @@ EX void init_graph() {
     exit(2);
     }
     
-  #if !CAP_SDL2
+  #if SDLVER == 1
   SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
   SDL_EnableUNICODE(1);
   #endif

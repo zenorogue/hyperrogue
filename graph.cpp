@@ -5549,7 +5549,7 @@ EX void drawthemap() {
     }
 
   #if CAP_SDL
-  const Uint8 *keystate = SDL12_GetKeyState(NULL);
+  const sdl_keystate_type *keystate = SDL12_GetKeyState(NULL);
   lmouseover = mouseover;
   lmouseover_distant = lmouseover;
   bool useRangedOrb = (!(vid.shifttarget & 1) && haveRangedOrb() && lmouseover && lmouseover->cpdist > 1) || (keystate[SDL12(SDLK_RSHIFT, SDL_SCANCODE_RSHIFT)] | keystate[SDL12(SDLK_LSHIFT, SDL_SCANCODE_LSHIFT)]);
@@ -6045,7 +6045,7 @@ EX void drawscreen() {
   #if CAP_GL
   if(!vid.usingGL) 
   #endif
-    SDL_FillRect(s, NULL, backcolor);
+    SDL_FillSurfaceRect(s, NULL, backcolor);
   #endif
    
   // displaynum(vx,100, 0, 24, 0xc0c0c0, celldist(cwt.at), ":");

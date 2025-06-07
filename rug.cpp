@@ -1347,7 +1347,7 @@ EX void actDraw() {
   #endif
 
   #if CAP_HOLDKEYS
-  const Uint8 *keystate = SDL12_GetKeyState(NULL);
+  const sdl_keystate_type *keystate = SDL12_GetKeyState(NULL);
   if(keystate[SDL12(SDLK_LALT, SDL_SCANCODE_LALT)]) alpha /= 10;
   #endif
 

@@ -188,17 +188,17 @@ string listkeys(config& scfg, int id) {
   string lk = "";
   for(int i=0; i<SCANCODES; i++)
     if(scfg.keyaction[i] == id)
-      #if CAP_SDL2
+      #if SDLVER >= 2
       lk = lk + " " + SDL_GetScancodeName(SDL_Scancode(i));
       #else
       lk = lk + " " + SDL_GetKeyName(SDLKey(i));
       #endif
 #if CAP_SDLJOY
-  for(int i=0; i<numsticks; i++) for(int k=0; k<SDL_JoystickNumButtons(sticks[i]) && k<MAXBUTTON; k++)
+  for(int i=0; i<numsticks; i++) for(int k=0; k<SDL_GetNumJoystickButtons(sticks[i]) && k<MAXBUTTON; k++)
     if(scfg.joyaction[i][k] == id) {
       lk = lk + " " + cts('A'+i)+"-B"+its(k);
       }
-  for(int i=0; i<numsticks; i++) for(int k=0; k<SDL_JoystickNumHats(sticks[i]) && k<MAXHAT; k++)
+  for(int i=0; i<numsticks; i++) for(int k=0; k<SDL_GetNumJoystickHats(sticks[i]) && k<MAXHAT; k++)
     for(int d=0; d<4; d++)
       if(scfg.hataction[i][k][d] == id) {
         lk = lk + " " + cts('A'+i)+"-"+"URDL"[d];
@@ -293,7 +293,7 @@ struct key_configurer {
 
 #if CAP_SDLJOY    
     joyhandler = [this] (SDL_Event& ev) { 
-      if(ev.type == SDL_JOYBUTTONDOWN && setwhat) {
+      if(ev.type == SDL_EVENT_JOYSTICK_BUTTON_DOWN && setwhat) {
         int joyid = ev.jbutton.which;
         int button = ev.jbutton.button;
         if(joyid < 8 && button < 32)
@@ -302,7 +302,7 @@ struct key_configurer {
         return true;
         }
   
-      else if(ev.type == SDL_JOYHATMOTION && setwhat) {
+      else if(ev.type == SDL_EVENT_JOYSTICK_HAT_MOTION && setwhat) {
         int joyid = ev.jhat.which;
         int hat = ev.jhat.hat;
         int dir = 4;
@@ -357,8 +357,8 @@ struct joy_configurer {
     getcstat = ' ';
     numaxeconfigs = 0;
     for(int j=0; j<numsticks; j++) {
-      for(int ax=0; ax<SDL_JoystickNumAxes(sticks[j]) && ax < MAXAXE; ax++) if(numaxeconfigs<24) {
-        int y = SDL_JoystickGetAxis(sticks[j], ax);
+      for(int ax=0; ax<SDL_GetNumJoystickAxes(sticks[j]) && ax < MAXAXE; ax++) if(numaxeconfigs<24) {
+        int y = SDL_GetJoystickAxis(sticks[j], ax);
         string buf = " ";
         if(configdead)
           buf += its(y);
@@ -614,7 +614,7 @@ void pressaction(int id) {
   }
 
 EX int key_to_scan(int sym) {
-  #if CAP_SDL2
+  #if SDLVER >= 2
   return SDL_GetScancodeFromKey(sym);
   #else
   return sym;
@@ -669,7 +669,7 @@ EX void initConfig() {
   
   int* t = scfg.keyaction;
   
-  #if CAP_SDL2
+  #if SDLVER >= 2
 
   t[SDL_SCANCODE_W] = 16 + 4;
   t[SDL_SCANCODE_D] = 16 + 5;
@@ -830,7 +830,7 @@ EX void initConfig() {
 EX void get_actions(config& scfg) {
 
   #if !ISMOBILE
-  const Uint8 *keystate = SDL12_GetKeyState(NULL);
+  const sdl_keystate_type *keystate = SDL12_GetKeyState(NULL);
 
   for(auto& a: action_states_flat) a.last = a.held, a.held = 0;
 
@@ -842,20 +842,20 @@ EX void get_actions(config& scfg) {
 #if CAP_SDLJOY  
   for(int j=0; j<numsticks; j++) {
 
-    for(int b=0; b<SDL_JoystickNumButtons(sticks[j]) && b<MAXBUTTON; b++)
-      if(SDL_JoystickGetButton(sticks[j], b))
+    for(int b=0; b<SDL_GetNumJoystickButtons(sticks[j]) && b<MAXBUTTON; b++)
+      if(SDL_GetJoystickButton(sticks[j], b))
         pressaction(scfg.joyaction[j][b]);
 
-    for(int b=0; b<SDL_JoystickNumHats(sticks[j]) && b<MAXHAT; b++) {
-      int stat = SDL_JoystickGetHat(sticks[j], b);
+    for(int b=0; b<SDL_GetNumJoystickHats(sticks[j]) && b<MAXHAT; b++) {
+      int stat = SDL_GetJoystickHat(sticks[j], b);
       if(stat & SDL_HAT_UP) pressaction(scfg.hataction[j][b][0]);
       if(stat & SDL_HAT_RIGHT) pressaction(scfg.hataction[j][b][1]);
       if(stat & SDL_HAT_DOWN) pressaction(scfg.hataction[j][b][2]);
       if(stat & SDL_HAT_LEFT) pressaction(scfg.hataction[j][b][3]);
       }
     
-    for(int b=0; b<SDL_JoystickNumAxes(sticks[j]) && b<MAXAXE; b++) {
-      int value = SDL_JoystickGetAxis(sticks[j], b);
+    for(int b=0; b<SDL_GetNumJoystickAxes(sticks[j]) && b<MAXAXE; b++) {
+      int value = SDL_GetJoystickAxis(sticks[j], b);
       int dz = scfg.deadzoneval[j][b];
       if(value > dz) value -= dz; else if(value < -dz) value += dz;
       else value = 0;
@@ -876,7 +876,7 @@ EX void handleInput(int delta, config &scfg) {
 
   get_actions(scfg);
 
-  const Uint8 *keystate = SDL12_GetKeyState(NULL);
+  const sdl_keystate_type *keystate = SDL12_GetKeyState(NULL);
 
   if(keystate[SDL12(SDLK_LCTRL, SDL_SCANCODE_LCTRL)] || keystate[SDL12(SDLK_RCTRL, SDL_SCANCODE_RCTRL)]) d /= 5;
   

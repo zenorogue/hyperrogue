@@ -253,7 +253,7 @@ EX void glflush() {
 #if CAP_SDL && !ISMOBILE
 
 SDL_Surface *aux;
-#if CAP_SDL2
+#if SDLVER >= 2
 SDL_Renderer *auxrend;
 #else
 #define auxrend aux
@@ -2661,15 +2661,15 @@ EX void drawqueue() {
   if(current_display->separate_eyes() && !vid.usingGL) {
 
     if(aux && (aux->w != s->w || aux->h != s->h)) {
-      SDL_FreeSurface(aux);
-      #if CAP_SDL2
+      SDL_DestroySurface(aux);
+      #if SDLVER >= 2
       SDL_DestroyRenderer(auxrend);
       #endif
       }
   
     if(!aux) {
       aux = SDL_CreateRGBSurface(SDL_SWSURFACE,s->w,s->h,32,0,0,0,0);
-      #if CAP_SDL2
+      #if SDLVER >= 2
       auxrend = SDL_CreateSoftwareRenderer(aux);
       #endif
       }
