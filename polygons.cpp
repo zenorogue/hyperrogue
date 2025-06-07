@@ -242,6 +242,7 @@ void geometry_information::finishshape() {
   if(allminus || allplus) last->flags |= POLY_CCONVEX;
 
   allplus = true, allminus = true;
+  if(last->s == isize(hpc)) { last = NULL; return; }
   ld cx = hpc[last->s][0], cy = hpc[last->s][1];
 
   for(int i=last->s; i<last->e-1; i++) {
