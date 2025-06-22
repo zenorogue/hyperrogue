@@ -870,11 +870,14 @@ EX void get_actions(config& scfg) {
 static constexpr int pantable = 3;
 #endif
 
+EX purehookset hooks_handleInput;
+
 EX void handleInput(int delta, config &scfg) {
 #if CAP_SDL
   double d = delta / 500.;
 
   get_actions(scfg);
+  callhooks(hooks_handleInput);
 
   const sdl_keystate_type *keystate = SDL12_GetKeyState(NULL);
 
