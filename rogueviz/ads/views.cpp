@@ -104,6 +104,10 @@ bool ads_draw_cell(cell *c, const shiftmatrix& V) {
   return false;
   }
 
+bool missile_replay = false;
+
+purehookset hook_alter_replay;
+
 void replay_animation() {
   nomap = main_rock ? (!hyperbolic || among(pmodel, mdRelPerspective, mdRelOrthogonal)) : !sl2;
 
@@ -133,6 +137,19 @@ void replay_animation() {
           });
         break;
         }
+    if(missile_replay == true) {
+      for(auto& [c, ci]: ci_at) for(auto& r: ci.rocks) {
+        if(r->type != oMissile) continue;
+        if(view_pt < r->shot_at + r->life_start) continue;
+        if(view_pt > r->shot_at + r->life_end) continue;
+        PIA({
+          // vctr = new_vctr = c;
+          current = ads_matrix(cspin(3, 2, view_pt - r->shot_at)) * ads_inverse(r->at);
+          // vctrV = new_vctrV = current.T;
+          });
+        }
+      }
+    callhooks(hook_alter_replay);
     }
   
   if(main_rock && hyperbolic) {

@@ -192,6 +192,7 @@ struct ads_object {
   expiry_data expire;
   vector<ld>* shape;
   ld last_shot;
+  ld shot_at;
   int hlast;
 
   map<ld, turret_state> turret_states;

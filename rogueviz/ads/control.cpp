@@ -24,6 +24,7 @@ void fire() {
   r->shape = &shape_missile;
   r->life_start = 0;
   r->life_end = M_PI;
+  r->shot_at = ship_pt;
 
   ads_matrix Scell(Id, 0);    
   cell *lcell = hybrid::get_at(vctr, 0);
