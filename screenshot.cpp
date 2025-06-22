@@ -1782,6 +1782,7 @@ auto animhook = addHook(hooks_frame, 100, display_animation)
     param_f(env_volcano, "env_volcano");
     param_b(wallopt, "wallopt");
     param_b(clearup, "anim_clearup");
+    param_b(env_shmup, "anim_shmup");
     param_color(circle_display_color, "circle_display_color", true);
     param_enum(anims::ma, parameter_names("ma", "movement_animation"), maNone)
     -> editable({{"none", ""}, {"translation", ""}, {"rotation", ""}, {"circle", ""}, {"parabolic", ""}, {"translation+rotation", ""}}, "movement animation", 'a')
