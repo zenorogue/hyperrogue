@@ -209,10 +209,12 @@ void celldrawer::setcolors() {
       for(int a=0; a<21; a++)
         if((b >> a) & 1)
           fcol += variant::features[a].color_change;
-      /*if(c->wall == waAncientGrave)
-        wcol = 0x080808;
-      else if(c->wall == waFreshGrave)
-        wcol = 0x202020;*/
+      if(!higher_contrast) {
+        if(c->wall == waAncientGrave)
+          wcol = 0x080808;
+        else if(c->wall == waFreshGrave)
+          wcol = 0x202020;
+        }
       break;
       }
     #endif
