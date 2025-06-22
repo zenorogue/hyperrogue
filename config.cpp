@@ -29,6 +29,8 @@ EX bool linked_consequence;
 
 EX bool hr_hud_enabled = true;
 
+EX bool higher_contrast = false;
+
 EX void adjust_linked() {
   indenter ind(2);
   geom3::invalid = "";
@@ -1110,6 +1112,10 @@ EX void initConfig() {
      "Enable this for a full dialog when editing some on/off settings (otherwise, the dialog is not shown, we just switch). "
      "This lets you see an explanation of what the setting does. "
      "You can also press ALT while changing such settings.");
+
+  param_b(higher_contrast, "higher_contrast")
+  ->editable("use higher contrast", 'h')
+  ->help("Use higher contrast for some terrain elements.");
 
   param_b(vid.grid, "grid");
   param_b(models::desitter_projections, "desitter_projections", false);
@@ -3720,6 +3726,7 @@ EX void show_color_dialog() {
 
   dialog::addColorItem(XLAT("dialogs"), addalpha(dialog::dialogcolor), 'd');
   dialog::add_action([] () { dialog::openColorDialog(dialog::dialogcolor); dialog::colorAlpha = false; dialog::get_di().dialogflags |= sm::SIDE; });
+  dialog::addBoolItem_action(XLAT("higher contrast"), higher_contrast, 'h');
 
   dialog::addBreak(50);
   if(specialland == laCanvas && ccolor::which->ctab.size()) {
