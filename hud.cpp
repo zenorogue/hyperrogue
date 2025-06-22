@@ -493,6 +493,8 @@ EX string mode_description1() {
   }
 
 EX bool radar_drawn;
+EX bool hide_kills;
+EX bool hide_watermark;
 
 EX void drawStats() {
   if(vid.stereo_mode == sLR) return;
@@ -732,7 +734,7 @@ EX void drawStats() {
       while(siz > 4 && textwidth(siz, s) > vid.xres - textwidth(vid.fsize, scoreline)) siz--;
       }
     
-    if(displayButtonS(8, top_y, s, forecolor, 0, siz)) {
+    if(!hide_kills && displayButtonS(8, top_y, s, forecolor, 0, siz)) {
       instat = true;
       getcstat = SDLK_F1;
       if(long_kills) { mouseovers = " "; help = generateHelpForMonster(moMutant); }
@@ -767,7 +769,7 @@ EX void drawStats() {
     }
   else 
   #endif
-  if(displayButtonS(4, vid.yres - 4 - vid.fsize/2 - hud_margin(1), vers, 0x202020, 0, vid.fsize/2)) {
+  if(!hide_watermark && displayButtonS(4, vid.yres - 4 - vid.fsize/2 - hud_margin(1), vers, 0x202020, 0, vid.fsize/2)) {
     mouseovers = XLAT("frames per second"),
     getcstat = SDLK_F1,
     instat = true,
