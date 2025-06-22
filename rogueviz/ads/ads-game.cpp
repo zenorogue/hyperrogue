@@ -100,6 +100,8 @@ void ads_restart() {
 
 purehookset hooks_pre_ads_start;
 
+bool changed_structure = false;
+
 void run_ads_game_hooks() {
   rogueviz::rv_hook(hooks_global_mouseover, 100, generate_mouseovers);
   rogueviz::rv_change<color_t>(titlecolor, 0);
@@ -111,7 +113,9 @@ void run_ads_game_hooks() {
   rogueviz::rv_hook(anims::hooks_anim, 100, replay_animation);
   rogueviz::rv_hook(hooks_nextland, 0, ads_nextland);
   rogueviz::rv_hook(hooks_music, 100, [] (eLand& l) { l = vctr->land; return false; });
-  specialland = laCrossroads; land_structure = lsNiceWalls;
+  if(!changed_structure) {
+    specialland = laCrossroads; land_structure = lsNiceWalls;
+    }
   }
 
 void run_size_hooks() {
