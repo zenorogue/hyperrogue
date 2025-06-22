@@ -170,7 +170,7 @@ EX namespace whirlwind {
       auto mi = movei(c, dfrom[0]);
       jdata.moves.push_back(mi.rev());
       cell *c2 = c->move(dfrom[0]);
-      if(!passable(c, c2, P_JUMP1)) return NULL;
+      if(!passable(c, c2, P_JUMP1 | P_ISPLAYER)) return NULL;
       if(player && i == 0 && !passable(c, c2, P_ISPLAYER)) return NULL;
       c = c2;
       }
