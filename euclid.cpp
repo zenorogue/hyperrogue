@@ -1439,6 +1439,11 @@ EX void generate() {
     }
 
   hsh.compute_hept();
+
+  if(geometry == gCubeTiling) {
+    cgi.loop = 4;
+    reg3::build_regular_spins(1, 90._deg);
+    }
   #endif
   }
 

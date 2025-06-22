@@ -195,6 +195,56 @@ EX namespace reg3 {
       }    
     }
 
+  EX void build_regular_spins(ld between_centers, ld angle_between_faces) {
+    auto& spins = cgi.spins;
+    int& face = cgi.face;
+
+    if(S7 == 20) {
+      spins[0] = Id;
+      spins[1] = cspin(0, 1, angle_between_faces) * cspin180(1, 2);
+      spins[2] = spins[1] * cspin(1, 2, -TAU/face) * spins[1];
+      spins[3] = spins[1] * cspin(1, 2, +TAU/face) * spins[1];
+      for(int a=4; a<10; a++) spins[a] = cspin(1, 2, TAU/face) * spins[a-3];
+      for(int a=S7/2; a<S7; a++) spins[a] = spins[a-S7/2] * spin180();
+      }
+
+    if(S7 == 12 || S7 == 8) {
+      spins[0] = Id;
+      spins[1] = cspin(0, 1, angle_between_faces) * cspin180(1, 2);
+      for(int a=2; a<face+1; a++) spins[a] = cspin(1, 2, TAU*(a-1)/face) * spins[1];
+      for(int a=S7/2; a<S7; a++) spins[a] = cspin180(0, 1) * spins[a-S7/2];
+      if(S7 == 8) swap(spins[6], spins[7]);
+      if(S7 == 12) swap(spins[8], spins[11]);
+      if(S7 == 12) swap(spins[9], spins[10]);
+      }
+
+    if(S7 == 6) {
+      spins[0] = Id;
+      spins[1] = cspin(0, 1, angle_between_faces) * cspin180(1, 2);
+      spins[2] = cspin90(1, 2) * spins[1];
+      for(int a=S7/2; a<S7; a++) spins[a] = spins[a-S7/2] * cspin180(0, 1);
+      }
+
+    if(S7 == 4) {
+      spins[0] = Id;
+      spins[1] = cspin(0, 1, angle_between_faces) * cspin180(1, 2);
+      for(int a=2; a<face+1; a++) spins[a] = cspin(1, 2, TAU*(a-1)/face) * spins[1];
+      }
+
+    cgi.adjmoves[0] = cpush(0, between_centers) * cspin180(0, 2);
+    for(int i=1; i<S7; i++) cgi.adjmoves[i] = spins[i] * cgi.adjmoves[0];
+
+    for(int a=0; a<S7; a++)
+      DEBB(DF_GEOM, ("center of ", a, " is ", kz(tC0(cgi.adjmoves[a]))));
+
+    DEBB(DF_GEOM, ("doublemove = ", kz(tC0(cgi.adjmoves[0] * cgi.adjmoves[0]))));
+
+    cgi.adjcheck = hdist(tC0(cgi.adjmoves[0]), tC0(cgi.adjmoves[1])) * 1.0001;
+
+    if(cgi.loop == 4) cgi.strafedist = cgi.adjcheck;
+    else cgi.strafedist = hdist(cgi.adjmoves[0] * C0, cgi.adjmoves[1] * C0);
+    }
+
   EX void generate() {
 
     if(fake::in()) {
@@ -208,7 +258,6 @@ EX namespace reg3 {
     int& face = cgi.face;
     auto& spins = cgi.spins;
     auto& cellshape = hsh.faces;
-    auto& adjcheck = cgi.adjcheck;
   
     int& mid = cgi.schmid;
     mid = 3;
@@ -293,38 +342,8 @@ EX namespace reg3 {
     midface = normalize(midface);
     ld between_centers = 2 * hdist0(midface);
     DEBB(DF_GEOM, ("between_centers = ", between_centers));
-    
-    if(S7 == 20) {
-      spins[0] = Id;
-      spins[1] = cspin(0, 1, angle_between_faces) * cspin180(1, 2);
-      spins[2] = spins[1] * cspin(1, 2, -TAU/face) * spins[1];
-      spins[3] = spins[1] * cspin(1, 2, +TAU/face) * spins[1];
-      for(int a=4; a<10; a++) spins[a] = cspin(1, 2, TAU/face) * spins[a-3];
-      for(int a=S7/2; a<S7; a++) spins[a] = spins[a-S7/2] * spin180();
-      }
 
-    if(S7 == 12 || S7 == 8) {
-      spins[0] = Id;
-      spins[1] = cspin(0, 1, angle_between_faces) * cspin180(1, 2);
-      for(int a=2; a<face+1; a++) spins[a] = cspin(1, 2, TAU*(a-1)/face) * spins[1];
-      for(int a=S7/2; a<S7; a++) spins[a] = cspin180(0, 1) * spins[a-S7/2];
-      if(S7 == 8) swap(spins[6], spins[7]);
-      if(S7 == 12) swap(spins[8], spins[11]);
-      if(S7 == 12) swap(spins[9], spins[10]);
-      }
-    
-    if(S7 == 6) {
-      spins[0] = Id;
-      spins[1] = cspin(0, 1, angle_between_faces) * cspin180(1, 2);
-      spins[2] = cspin90(1, 2) * spins[1];
-      for(int a=S7/2; a<S7; a++) spins[a] = spins[a-S7/2] * cspin180(0, 1);
-      }
-    
-    if(S7 == 4) {
-      spins[0] = Id;
-      spins[1] = cspin(0, 1, angle_between_faces) * cspin180(1, 2);
-      for(int a=2; a<face+1; a++) spins[a] = cspin(1, 2, TAU*(a-1)/face) * spins[1];      
-      }
+    build_regular_spins(between_centers, angle_between_faces);
     
     cellshape.clear();
     cellshape.resize(S7);
@@ -332,19 +351,6 @@ EX namespace reg3 {
       for(int b=0; b<face; b++)
         cellshape[a].push_back(spins[a] * cspin(1, 2, TAU*b/face) * v2);
       }
-    
-    cgi.adjmoves[0] = cpush(0, between_centers) * cspin180(0, 2);
-    for(int i=1; i<S7; i++) cgi.adjmoves[i] = spins[i] * cgi.adjmoves[0];
-
-    for(int a=0; a<S7; a++)
-      DEBB(DF_GEOM, ("center of ", a, " is ", kz(tC0(cgi.adjmoves[a]))));
-    
-    DEBB(DF_GEOM, ("doublemove = ", kz(tC0(cgi.adjmoves[0] * cgi.adjmoves[0]))));
-
-    adjcheck = hdist(tC0(cgi.adjmoves[0]), tC0(cgi.adjmoves[1])) * 1.0001;
-
-    if(loop == 4) cgi.strafedist = adjcheck;
-    else cgi.strafedist = hdist(cgi.adjmoves[0] * C0, cgi.adjmoves[1] * C0);
     
     if(stretch::applicable()) {
       transmatrix T = cspin90(0, 2);
