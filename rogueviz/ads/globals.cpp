@@ -66,6 +66,7 @@ void change_scale(ld s);
 vector<struct ads_object*> displayed;
 
 ld time_scale = .5;
+ld time_shift = 0;
 
 color_t missile_color = 0xFF0000FF;
 

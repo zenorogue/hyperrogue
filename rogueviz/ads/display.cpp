@@ -23,6 +23,14 @@ void apply_duality(shiftmatrix& S) {
 vector<ads_object*> under_mouse;
 hyperpoint mousetester;
 
+void view_time(const shiftmatrix& S, ld t, color_t col) {
+  if(!view_proper_times) return;
+  auto S1 = S;
+  if(time_shift) S1.T = rgpushxto0(S1.T * C0) * ypush(time_shift);
+  string str = hr::format(tformat, t / (main_rock ? ds_time_unit : ads_time_unit));
+  queuestr(S1, time_scale, str, col, 8);
+  }
+
 void draw_game_cell(const cell_to_draw& cd) {
   bool hv = mtwisted;
   using cellptr = cell*;
@@ -104,10 +112,7 @@ void draw_game_cell(const cell_to_draw& cd) {
 
   ld ads_scale = get_scale();
 
-  if(view_proper_times) {
-    string str = hr::format(tformat, cd.center.shift / ads_time_unit);
-    queuestr(shiftless(rgpushxto0(cd.center.h)), time_scale, str, 0xFF4040, 8);
-    }
+  if(col >> 8) view_time(shiftless(rgpushxto0(cd.center.h)), cd.center.shift, 0xFF4040);
 
   // need i-loop because new rocks can be created in handle_turret
 
@@ -177,10 +182,7 @@ void draw_game_cell(const cell_to_draw& cd) {
         0x000000FF, rock.col, obj_prio[rock.type]);
       }
 
-    if(view_proper_times && rock.type != oParticle) {
-      string str = hr::format(tformat, rock.pt_main.shift / ads_time_unit);
-      queuestr(shiftless(rgpushxto0(rock.pt_main.h)), time_scale, str, 0xFFFFFF, 8);
-      }
+    if(rock.type != oParticle) view_time(shiftless(rgpushxto0(rock.pt_main.h)), rock.pt_main.shift, 0xFFFFFF);
     }
 
   if(paused || which_cross) if(hv) for(auto& rock: ci.shipstates) {
@@ -240,10 +242,7 @@ void draw_game_cell(const cell_to_draw& cd) {
       queuecurve(shiftless(Id), 0xFF, col, PPR::MONSTER_FOOT);
       });
 
-    if(ok && view_proper_times) {
-      string str = hr::format(tformat, (cr.shift + rock.start) / ads_time_unit);
-      queuestr(shiftless(rgpushxto0(cr.h)), time_scale, str, 0xC0C0C0, 8);
-      }
+    if(ok) view_time(shiftless(rgpushxto0(cr.h)), cr.shift + rock.start, 0xC0C0C0);
     }
 
   if(paused && c == vctr_ship && !game_over && !in_replay && !hv) {
@@ -389,10 +388,7 @@ void view_ads_game() {
         });
       poly_outline = 0xFF;
 
-      if(view_proper_times) {
-        string str = hr::format(tformat, ship_pt / ads_time_unit);
-        queuestr(shiftless(Id), time_scale, str, 0xFFFFFF, 8);
-        }
+      view_time(shiftless(Id), ship_pt, 0xFFFFFF);
       }    
     }
 

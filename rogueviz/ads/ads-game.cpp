@@ -342,6 +342,9 @@ auto shot_hooks =
     param_f(time_scale, "rh_time_scale")
     -> editable(0, 1, 0.1, "Relative Hell time label scale", "scaling factor for the time labels", 'T');
 
+    param_f(time_shift, "rh_time_shift")
+    -> editable(0, 1, 0.1, "Relative Hell time label shift", "shift for the time labels", 'U');
+
     param_i(XSCALE, "ds_xscale")
     -> editable(4, 512, 8, "x precision of Earth-de Sitter", "", 'x');
     param_i(YSCALE, "ds_yscale")
