@@ -2883,6 +2883,7 @@ EX int matrix_order(const transmatrix A) {
   transmatrix T = A;
   int res = 1;
   while(!eqmatrix(T, Id)) {
+    if(res >= 1000) throw hr_exception("matrix_order failed");
     res++; T = T * A;
     }
   return res;
