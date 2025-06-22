@@ -206,6 +206,10 @@ auto view_hooks =
 + arg::add3("-ads-replay", [] { arg::shift(); int i = arg::argi(); if(i != in_replay) switch_replay(); })
 + arg::add3("-ads-duality", [] { arg::shift(); use_duality = arg::argi(); })
 + arg::add3("-ads-cone", [] { arg::shift(); which_cross = arg::argi(); })
-+ arg::add3("-ads-spacetime", [] { arg::shift(); switch_spacetime_to(arg::argi()); });
++ arg::add3("-ads-ship-history", [] { arg::shift_arg_formula(ship_history_period); })
++ arg::add3("-ads-spacetime", [] { arg::shift(); switch_spacetime_to(arg::argi());
+  pmodel = mdRelPerspective;
+  use_duality = 0;
+  });
 
 }}

@@ -628,7 +628,11 @@ void view_ds_game() {
       }      
 
     ld delta = paused ? 1e-4 : -1e-4;
+    ld last_shown = -100;
+    vector<ld> times;
     if(paused) for(auto& ss: history) {
+      if(ss.start < last_shown + ship_history_period) continue;
+      last_shown = ss.start; times.push_back(ss.start);
       if(ss.at.shift < current.shift - 4 * TAU) continue;
       if(ss.at.shift > current.shift + 4 * TAU) continue;
 

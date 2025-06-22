@@ -190,7 +190,11 @@ void draw_game_cell(const cell_to_draw& cd) {
     if(rock.type != oParticle) view_time(shiftless(rgpushxto0(rock.pt_main.h)), rock.pt_main.shift, 0xFFFFFF);
     }
 
+  ld last_shown = -HUGE_VAL;
   if(paused || which_cross) if(hv) for(auto& rock: ci.shipstates) {
+
+    if(rock.start < last_shown + ship_history_period) continue;
+    last_shown = rock.start;
 
     render_ship_parts([&] (const hpcshape& sh, color_t col, int sym) {
       int dx = sym ? -1 : 1;

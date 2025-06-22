@@ -58,6 +58,8 @@ bool view_proper_times = false;
 /** format for displaying time */
 const char *tformat = "%.2f";
 
+ld ship_history_period = 0;
+
 void game_menu();
 void restart();
 void change_scale(ld s);
