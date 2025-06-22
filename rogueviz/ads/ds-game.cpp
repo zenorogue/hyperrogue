@@ -347,13 +347,15 @@ void ds_fire() {
   rocks.emplace_back(std::move(r));
   }
 
+bool have_crashes = true;
+
 bool ds_turn(int idelta) {
   multi::handleInput(idelta, multi::scfg_default);
   ld delta = idelta / 1000.;
   
   if(!(cmode & sm::NORMAL)) return false;
 
-  ds_handle_crashes();
+  if(have_crashes) ds_handle_crashes();
   if(no_param_change && !all_params_default()) no_param_change = false;
 
   auto& act = multi::action_states[1];
