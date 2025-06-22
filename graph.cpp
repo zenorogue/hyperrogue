@@ -4359,6 +4359,8 @@ int grid_depth = 0;
 
 EX bool fat_edges = false;
 
+EX bool gridbelow;
+
 EX void gridline(const shiftmatrix& V1, const hyperpoint h1, const shiftmatrix& V2, const hyperpoint h2, color_t col, int prec) {
   transmatrix U2 = unshift(V2, V1.shift);
 
@@ -4420,7 +4422,7 @@ EX void gridline(const shiftmatrix& V1, const hyperpoint h1, const shiftmatrix& 
     }
   else
 #endif
-    queueline(V1*h1, V2*h2, col, prec);
+    queueline(V1*h1, V2*h2, col, prec, gridbelow ? PPR::FLOORd : PPR::LINE);
   }
 
 EX void gridline(const shiftmatrix& V, const hyperpoint h1, const hyperpoint h2, color_t col, int prec) {
