@@ -88,7 +88,7 @@ void fire() {
 bool handleKey(int sym, int uni) {
   if(cmode & sm::NORMAL) {
     int* t = multi::scfg_default.keyaction;
-    if(t[sym] >= 16 && t[sym] < 32) return true;
+    if(sym >= 0 && sym < multi::SCANCODES && t[sym] >= 16 && t[sym] < 32) return true;
     if(sym == 'v') pushScreen(game_menu);
     if(sym == SDLK_ESCAPE) pushScreen(game_menu);
     if(sym == SDLK_F1) {
