@@ -383,9 +383,15 @@ namespace smoothcam {
   }
 
 #if RVCOL
+enum class rvlc { num, s, ms };
 void rv_achievement(const string& name);
-void rv_leaderboard(const string& name, int score);
+void rv_leaderboard(const string& name, int score, int highisgood, rvlc x);
+void rv_leaderboard(const string& name, int score, int highisgood, rvlc x, const string& data);
 #endif
 }
+
+#if RVCOL
+using rogueviz::rvlc;
+#endif
 
 #endif
