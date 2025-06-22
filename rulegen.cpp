@@ -1616,6 +1616,21 @@ void minimize_rules() {
     }
   }
 
+void find_live_states() {
+  for(auto& ts: treestates) ts.is_live = true;
+  while(true) {
+    int changes = 0;
+    for(auto& ts: treestates) if(ts.is_live) {
+      bool ok = false;
+      for(int r: ts.rules) {
+        if(r >= 0 && treestates[r].is_live) ok = true;
+        }
+      if(!ok) changes++, ts.is_live = false;
+      }
+    if(!changes) break;
+    }
+  }
+
 void find_possible_parents() {
 
   for(auto& ts: treestates) {
@@ -2614,6 +2629,7 @@ EX void verify_parsed_treestates(arb::arbi_tiling& c) {
       throw hr_parse_exception("undefined treestate");
     }
   for(auto& sh: c.shapes) sh.cycle_length = sh.size();
+  find_live_states();
   find_possible_parents();
   }
 
