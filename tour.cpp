@@ -25,6 +25,9 @@ EX bool on;
 /** \brief should the presentation texts be shown */
 EX bool texts = true;
 
+/** \brief helps to automatize interactive presentations */
+EX int tour_value;
+
 EX string tourhelp;
 
 /** \brief index of the current slide */
@@ -35,7 +38,7 @@ EX int currentslide;
 enum presmode { 
   pmStartAll = 0,
   pmStart = 1, pmFrame = 2, pmStop = 3, pmKey = 4, pmRestart = 5,
-  pmAfterFrame = 6, pmHelpEx = 7,
+  pmAfterFrame = 6, pmHelpEx = 7, pmKeyAlt = 8, pmKeyAlt2 = 9,
   pmGeometry = 11, pmGeometryReset = 13, pmGeometryStart = 15,
   pmGeometrySpecial = 16
   };

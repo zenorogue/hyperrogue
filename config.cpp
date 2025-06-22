@@ -3527,6 +3527,8 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
       addMessage(XLAT("Save the config to always use %1.", scorefile));
     });
 
+  param_i(tour::tour_value, "tval");
+
   param_ccolor(ccolor::which, "pattern");
   param_b(ccolor::live_canvas, "live_canvas")
   -> editable("apply color/pattern changes to canvas automatically", 'l');
