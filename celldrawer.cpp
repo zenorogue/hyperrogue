@@ -116,7 +116,27 @@ void celldrawer::addaura() {
 /* Eclectic City's version of Red Rock is of slightly different color, */
 /* to make it different from hot cells */
 void eclectic_red(color_t& col) {
-  part(col, 0) = part(col, 2) * 3 / 4;
+  if (!higher_contrast) {
+    part(col, 0) = part(col, 2) * 3 / 4;
+    } else {
+    auto d = (part(col, 0) + part(col, 1) + part(col, 2));
+    auto t = part(col, 0);
+    part(col, 0) = part(col, 1);
+    part(col, 1) = part(col, 2);
+    part(col, 2) = t + d/3;
+    //swap(part(col, 0), part(col, 1));
+    /* auto h = part(col, 0) / 2;
+    part(col, 0) -= h;
+    part(col, 1) += h;
+    part(col, 2) += h / 2; */
+    /* part(col, 0) += part(col, 0) / 4;
+    part(col, 1) += part(col, 1) + 16;
+    part(col, 2) += part(col, 2) / 2 + 8; */
+
+    /* part(col, 0) += d;
+    part(col, 1) += 3*d;
+    part(col, 2) += 2*d; */
+    }
   }
 
 constexpr ld spinspeed = .75 / M_PI;
@@ -716,7 +736,10 @@ int celldrawer::getSnakelevColor(int i, int last) {
     if(c->land == laEclectic)
       eclectic_red(col);
     }
-  return darkena(col, fd, 0xFF);
+  if (!higher_contrast)
+    return darkena(col, fd, 0xFF);
+  else
+    return darkena(col, 0, 0xFF);
   }
 
 void celldrawer::draw_wallshadow() {

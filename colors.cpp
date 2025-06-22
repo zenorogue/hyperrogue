@@ -55,6 +55,20 @@ EX int darkenedby(int c, int lev) {
   return c;
   }
 
+EX color_t lightena3(color_t c, int lev, int a) {
+  return (lightenedby(c, lev) << 8) + a;
+  }
+
+EX color_t lightena(color_t c, int lev, int a) {
+  return lightena3(c, lev, GDIM == 3 ? 255 : a);
+  }
+
+EX int lightenedby(int c, int lev) {
+  for(int i=0; i<lev; i++)
+    c = ((c | 0x010101) << 1);
+  return c;
+  }
+
 bool fading = false;
 
 ld fadeout = 1;
