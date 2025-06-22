@@ -1394,7 +1394,7 @@ int read_geom_args() {
     }
   #endif
   else if(argis("-d:quotient")) 
-    launch_dialog(showQuotientConfig);
+    launch_dialog(WDIM == 2 ? showQuotientConfig : showQuotientConfig3);
   else if(argis("-uqf")) 
     fieldpattern::use_quotient_fp = true;
   #endif
