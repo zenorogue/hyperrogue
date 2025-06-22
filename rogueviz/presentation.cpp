@@ -712,6 +712,28 @@ int runslide =
     arg::shift_arg_formula(angle);
     dir = 0;
     })
+  + arg::add3("-pres-key-at", [] {
+    arg::shift(); int *tickid = new int;
+    *tickid = arg::argi();
+    addHook(hooks_frame, 0, [tickid] {
+      if(ticks >= *tickid) {
+        presentation(pmKey);
+        *tickid = 999999999;
+        }
+      });
+    })
+  + arg::add3("-pres-key2-at", [] {
+    arg::shift(); int *tickid = new int;
+    *tickid = arg::argi();
+    addHook(hooks_frame, 0, [tickid] {
+      if(ticks >= *tickid) {
+        presentation(pmKeyAlt);
+        *tickid = 999999999;
+        }
+      });
+    })
+  + arg::add3("-pres-anf", [] { anims::noframes = anims::period * 60 / 1000; })
+  + arg::add3("-pres-mul", [] { arg::shift(); anims::noframes *= arg::argf(); })
   ;
 }
 #endif
