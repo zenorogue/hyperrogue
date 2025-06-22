@@ -430,7 +430,7 @@
 #endif
 #endif
 
-#if !CAP_SDLGFX && !ISFAKEMOBILE
+#if !CAP_SDL && !ISFAKEMOBILE
 #define SDLK_F1  (123001)
 #define SDLK_F2  (123002)
 #define SDLK_F3  (123003)

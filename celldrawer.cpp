@@ -121,10 +121,12 @@ void eclectic_red(color_t& col) {
 constexpr ld spinspeed = .75 / M_PI;
 
 EX color_t apply_mine_knowledge(color_t wcol, cell* c) {
+  #if CAP_COMPLEX2
   if(mine::marked_safe(c))
     return gradient(wcol, 0x40FF40, 0, 0.2, 1);
   if(mine::marked_mine(c))
     return gradient(wcol, 0xFF4040, -1, vid.ispeed ? sintick(100) : 1, 1);
+  #endif
   return wcol;
   }
 
@@ -1412,6 +1414,7 @@ EX void draw_mine_numbers(int mines, const shiftmatrix& V, int ct6) {
     }
   }
 
+#if CAP_COMPLEX2
 EX void draw_mine_markers(cell *c, const shiftmatrix& V) {
   if(mine_markers && !mine::marked_safe(c)) {
     color_t col = 0xFF4040;
@@ -1421,6 +1424,7 @@ EX void draw_mine_markers(cell *c, const shiftmatrix& V) {
     queuepoly(V, cgi.shJoint, 0);
     }
   }
+#endif
 
 void celldrawer::draw_features() {
   char xch = winf[c->wall].glyph;
@@ -1666,10 +1670,12 @@ void celldrawer::draw_features() {
       break;
       }
 
+    #if CAP_COMPLEX2
     case waMineUnknown: case waMineMine: {
       draw_mine_markers(c, V);
       break;
       }
+    #endif
     
     case waEditStatue:
       if(!mapeditor::drawUserShape(V * ddspin(c, c->mondir), mapeditor::sgWall, c->wparam, darkena(wcol, fd, 0xFF), c))
@@ -1787,8 +1793,10 @@ void celldrawer::draw_features_and_walls_3d() {
     if(anyshiftclick) return;
     }
 
+  #if CAP_COMPLEX2
   if(among(c->wall, waMineUnknown, waMineMine))
     draw_mine_markers(c, face_the_player(V));
+  #endif
 
   if(isWall3(c, wcol)) {
     if(!no_wall_rendering) {
@@ -2929,7 +2937,7 @@ void celldrawer::draw() {
       (highwall(c) && GDIM == 2) ? orthogonal_move_fol(V, (1+cgi.WALL)/2) :
 #if CAP_SHAPES
       (sha.top < SIDE::FLOOR) ? orthogonal_move_fol(V, GDIM == 3 ? cgi.WATERLEVEL - cgi.FLOOR : cgi.WATERLEVEL) :
-#endif
+#endif 
       V;
     
     Vboat = Vd;

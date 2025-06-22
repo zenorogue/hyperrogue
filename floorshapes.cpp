@@ -283,6 +283,7 @@ template<class T, class U> void sizeto(T& t, int n, const U& val) {
   if(isize(t) <= n) t.resize(n+1, val);
   }
 
+#if CAP_BT
 void geometry_information::bshape_bt(floorshape &fsh, int id, int sides, ld size, cell *c) {
   
   sizeto(fsh.b, id);
@@ -329,6 +330,7 @@ void geometry_information::bshape_bt(floorshape &fsh, int id, int sides, ld size
       }
     }
   }
+#endif
 
 #if CAP_IRR
 namespace irr { void generate_floorshapes(); }
@@ -378,7 +380,10 @@ void geometry_information::generate_floorshapes_for(int id, cell *c) {
 
   int siid = 0, sidir = 0;
 
-  if(arcm::in()) {
+  if(0) ;
+
+  #if CAP_ARCM
+  else if(arcm::in()) {
     if(BITRUNCATED)
       siid = arcm::pseudohept(c), sidir = arcm::pseudohept(c) ? 0 : !arcm::pseudohept(c->cmove(0));
     else if(geosupport_football() == 2)
@@ -386,6 +391,7 @@ void geometry_information::generate_floorshapes_for(int id, cell *c) {
     else
       siid = 1, sidir = 0;
     }
+  #endif
 
   #if CAP_IRR
   else if(IRREGULAR) {
@@ -442,10 +448,12 @@ void geometry_information::generate_floorshapes_for(int id, cell *c) {
   for(auto pfsh: all_plain_floorshapes) {
     auto& fsh = *pfsh;
 
+    #if CAP_BT
     if(bt::in()) {
       bshape_bt(fsh, id, S7, fsh.rad1, c);
       continue;
       }
+    #endif
 
     // special
     ld sca = 3 * shFullFloor.rad0 / fsh.rad0;

@@ -514,8 +514,10 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
     history::killhistory.push_back(make_pair(c,m));
     }
 #endif
-  
+
+#if CAP_COMPLEX2
   if(m == moHunterGuard) ambush::guard_attack();
+#endif
 
   if(m == moGolemMoved) m = moGolem;
   if(m == moKnightMoved) m = moKnight;

@@ -731,7 +731,11 @@ void geometry_information::prepare_basics() {
     int s6 = BITRUNCATED ? S3*2 : S3;
     vals.emplace_back(S7, unrect ? 0 : BITRUNCATED ? fake::around / 3 : fake::around / 2);
     vals.emplace_back(s6, unrect ? fake::around : BITRUNCATED ? fake::around * 2 / 3 : fake::around / 2);
+    #if CAP_ARCM
     ld edgelength = euclid ? 1 : arcm::compute_edgelength(vals);
+    #else
+    ld edgelength = 1;
+    #endif
 
     // circumradius and inradius, for S7 and S6 shapes
     auto c7 = asin_auto(sin_auto(edgelength/2) / sin(M_PI / S7));
@@ -906,7 +910,9 @@ void geometry_information::prepare_basics() {
     }
   if(mtwisted && underlying_euclid) {
     single_step = 1;
+    #if CAP_ARCM
     if(ug == gArchimedean) plevel = arcm::current_or_fake().dual_tile_area();
+    #endif
     if(ug == gEuclid && PURE) plevel = sqrt(3)/4.;
     if(ug == gEuclidSquare && PURE) plevel = 1;
     if(ug == gEuclidSquare && BITRUNCATED) plevel = 0.25;

@@ -1087,7 +1087,9 @@ EX void mainloopiter() {
 
   #if CAP_SDLJOY
   if(joydir.d != -1) checkjoy();
+  #if CAP_THREAD
   if(joystick_done && joythread) { joythread->join(); delete joythread; joystick_done = false; }
+  #endif
   #endif
   }
 
