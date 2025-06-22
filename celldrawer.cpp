@@ -89,8 +89,7 @@ static constexpr int trapcol[4] = {0x904040, 0xA02020, 0xD00000, 0x303030};
 static constexpr int terracol[8] = {0xD000, 0xE25050, 0xD0D0D0, 0x606060, 0x303030, 0x181818, 0x0080, 0x8080};
 
 EX colortable prairie_colors = { 0x402000, 0x503000 };
-//EX colortable prairie_colors_low_cont = { 0x402000, 0x503000 };
-//EX colortable prairie_colors_high_cont = { 0x102030, 0x905010 };
+EX colortable prairie_colors_high_cont = { 0x102030, 0x905010 };
 EX colortable mountain_colors = { 0x181008*2, 0x181008*4 };
 EX colortable tower_colors = { 0x202010, 0x404030 };
 EX colortable westwall_colors = { 0x211F6F, 0x413F8F };
@@ -404,7 +403,8 @@ void celldrawer::setcolors() {
     #if CAP_FIELD
     case laPrairie:
       if(prairie::isriver(c)) {
-        fcol = get_color_auto3(prairie::get_val(c), prairie_colors);
+        fcol = get_color_auto3(prairie::get_val(c),
+                  higher_contrast ? prairie_colors_high_cont : prairie_colors);
         }
       else {
         fcol = 0x004000 + 0x001000 * c->LHU.fi.walldist;
