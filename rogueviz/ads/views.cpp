@@ -133,7 +133,7 @@ void replay_animation() {
           vctrV = new_vctrV = ss.vctrV;
           current.T = cspin(3, 2, view_pt - ss.start) * current.T;
           if(auto_rotate)
-            current.T = cspin(1, 0, view_pt - ss.start) * current.T;
+            current.T = cspin(1, 0, view_pt) * current.T;
           });
         break;
         }
