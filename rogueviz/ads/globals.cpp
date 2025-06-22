@@ -89,6 +89,8 @@ player_data pdata, ads_max_pdata, ads_tank_pdata, ds_max_pdata, ds_tank_pdata;
 
 bool auto_angle = true;
 
+bool keep_ship_angle = false;
+
 ld rock_density = 0.25;
 ld rock_max_rapidity = 1.5;
 

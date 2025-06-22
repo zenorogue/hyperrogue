@@ -217,7 +217,7 @@ bool ads_turn(int idelta) {
     
     if(auto_rotate)
       current.T = cspin(1, 0, tc) * current.T;
-    else if(!paused)
+    else if(!paused && !keep_ship_angle)
       ang += tc / degree;
 
     if(!paused) {
