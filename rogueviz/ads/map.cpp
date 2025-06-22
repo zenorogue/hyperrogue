@@ -178,7 +178,7 @@ void add_rsrc(cell *c, cellinfo& ci, const ads_matrix& T) {
   gen_resource(c, T, rt, gen_expire(c));
   }
 
-int turrets;
+int turret_limit = -1, turrets;
 
 struct placement {
   ld alpha;
@@ -232,6 +232,8 @@ void gen_rocks(cell *c, cellinfo& ci, int radius) {
       }
 
     q = rpoisson(rock_density * turret_frequency(c));
+    if(turret_limit >= 0) { if(q > turret_limit) q = turret_limit; turret_limit -= q; }
+
     // if(celldist(c) == 2) q += rpoisson(0.1);
     for(int i=0; i<q; i++) {
       auto p = get_placement(c, cgi.rhexf, rock_max_rapidity / 10);
