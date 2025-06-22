@@ -913,6 +913,7 @@ EX void moveWorm(cell *c) {
     c->monst = eMonster(moWormtail + id);
     goal->mondir = mi.rev_dir_or(NODIR);
     goal->monmirror = c->monmirror ^ c->c.mirror(dir);
+    goal->stuntime = 0;
     setdist(goal, 6, nullptr);
   
     mountmove(mi, true);
@@ -1050,7 +1051,7 @@ EX void moveivy() {
 
     if(mto && mto->cpdist) {
       animateMovement(mi, LAYER_BIG);
-      mto->monst = moIvyWait, mto->mondir = mi.rev_dir_or(NODIR);
+      mto->monst = moIvyWait, mto->mondir = mi.rev_dir_or(NODIR), mto->stuntime = 0;
       mto->monmirror = mi.s->monmirror ^ mi.mirror();
       moveEffect(mi, moIvyWait);
       // if this is the only branch, we want to move the head immediately to mto instead
@@ -1257,6 +1258,7 @@ EX void moveHexSnake(const movei& mi, bool mounted) {
   if(from->wall == waBoat) from->wall = waSea;
   moveEffect(mi, c->monst);
   from->monst = c->monst; from->mondir = mi.rev_dir_or(NODIR); from->hitpoints = c->hitpoints;
+  from->stuntime = 0;
   c->monst = moHexSnakeTail;
   preventbarriers(from);
   
