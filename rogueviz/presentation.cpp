@@ -604,8 +604,11 @@ void uses_game(presmode mode, string name, reaction_t launcher, reaction_t resto
 
 color_t latex_ring = 0x00FF0080;
 
+string latex_s;
+
 void latex_slide(presmode mode, string s, flagtype flags, int size) {
   empty_screen(mode);
+  latex_s = s;
   add_stat(mode, [=] {
     tour::slide_backup(no_find_player, true);
     if(flags & sm::SIDE) {
@@ -621,11 +624,12 @@ void latex_slide(presmode mode, string s, flagtype flags, int size) {
       gamescreen();
     dialog::init();
     dialog_may_latex(
-      s,
+      latex_s,
       "(LaTeX is off)",
       dialog::dialogcolor, size, LATEX_COLOR
       );
     dialog::display();
+    callhooks(hooks_post_latex_slide);
     return true;
     });
   no_other_hud(mode);

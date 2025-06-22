@@ -247,7 +247,7 @@ function<void(presmode)> roguevizslide_action(char c, const T& t, const U& act) 
   void latex_slide(presmode mode, string s, flagtype flags = 0, int size = 100);
   void latex_in_space(const shiftmatrix& V, ld scale, string s, color_t col, flagtype flags);
   
-  inline purehookset hooks_latex_slide;
+  inline purehookset hooks_latex_slide, hooks_post_latex_slide;
 
   inline ld angle = 0;
   inline int dir = -1;
