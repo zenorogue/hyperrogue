@@ -484,10 +484,12 @@ struct fontdata {
 #endif
 
 EX map<string, fontdata> fontdatas;
-
 EX fontdata *cfont, *cfont_chinese;
 
 EX fontdata* font_by_name(string fname) {
+  #if CAP_TABFONT
+  return &(fontdatas[""]);
+  #endif
   auto& fd = fontdatas[fname];
   if(fd.filename == "") {
     fd.filename = fname;
@@ -1527,6 +1529,9 @@ EX void init_font() {
     exit(2);
     }
   set_cfont();
+#endif
+#if CAP_TABFONT
+  cfont = cfont_chinese = font_by_name("");
 #endif
   }
 
