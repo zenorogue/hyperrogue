@@ -20,7 +20,8 @@
 #define CAP_ARCM 0
 #define CAP_HISTORY 0
 #define CAP_STARTANIM 0
-#include "../hyper.cpp"
+#include "../../hyper.cpp"
+#include "../presentation.cpp"
 
 namespace rogueviz { std::vector<hr::reaction_t> cleanup; }
 
@@ -369,15 +370,18 @@ auto shot_hooks =
 #ifdef RELHELL
 auto hook1=
     addHook(hooks_config, 100, [] {
-      lps_enable(&lps_relhell);
+      default_settings();
+      set_config();
       enable_canvas();
       if(arg::curphase == 1)
         conffile = "relhell.ini";
-      if(arg::curphase == 3) pushScreen(pick_the_game);
+      if(arg::curphase == 3) { showstartmenu = false; popScreenAll(); pushScreen(pick_the_game); }
       });
+
+#else
+auto hook2 = addHook(hooks_configfile, 300, default_settings);
 #endif
 
-auto hook2 = addHook(hooks_configfile, 300, default_settings);
 
 }
 }
