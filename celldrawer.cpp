@@ -88,7 +88,7 @@ inline void drawcell(cell *c, const shiftmatrix& V) {
 static constexpr int trapcol[4] = {0x904040, 0xA02020, 0xD00000, 0x303030};
 static constexpr int terracol[8] = {0xD000, 0xE25050, 0xD0D0D0, 0x606060, 0x303030, 0x181818, 0x0080, 0x8080};
 
-EX colortable prairie_colors = { 0x402000, 0x503000 };
+EX colortable prairie_colors = { 0x102030, 0x905010 };
 EX colortable mountain_colors = { 0x181008*2, 0x181008*4 };
 EX colortable tower_colors = { 0x202010, 0x404030 };
 EX colortable westwall_colors = { 0x211F6F, 0x413F8F };
