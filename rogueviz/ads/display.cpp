@@ -58,6 +58,8 @@ void draw_game_cell(const cell_to_draw& cd) {
 
   auto& t = ci.type;
 
+  color_t col = 0;
+
   if(hv) ;
   else if(t == wtGate) {
     ld minv = hlist[0].shift;
@@ -95,9 +97,11 @@ void draw_game_cell(const cell_to_draw& cd) {
     for(int v=floor(minv); v<maxv+1; v++) {
       draw_slice(v, v+1, (v & 3) ? 0x080828FF : 0xA04020FF);
       }
+
+    col = 1;
     }
   else {
-    color_t col = 
+    col = 
       t == wtSolid ? 0x603000FF :
       t == wtDestructible ? 0x301800FF :
       t == wtBarrier ? 0xC0C0C0FF :
@@ -106,7 +110,8 @@ void draw_game_cell(const cell_to_draw& cd) {
     color_t out = t == wtNone ? empty_outline(c) : 0xFF;
 
     for(auto h: hlist) curvepoint(h.h);
-    addaura(shiftless(cd.center.h), col >> 8, 0);
+    if(col >> 8)
+      addaura(shiftless(cd.center.h), col >> 8, 0);
     queuecurve(shiftless(Id), out, col, PPR::WALL);
     }
 
