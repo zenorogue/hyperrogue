@@ -1363,6 +1363,7 @@ EX void setvideomode() {
     flags = SDL12(SDL_OPENGL | SDL_HWSURFACE, SDL_WINDOW_OPENGL | SDL_WINDOW_HIGH_PIXEL_DENSITY);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 1);
+    SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
 
     vid.current_vsync = want_vsync();
     #if !ISMOBWEB && SDLVER == 1
@@ -1370,6 +1371,9 @@ EX void setvideomode() {
       SDL_GL_SetAttribute( SDL_GL_SWAP_CONTROL, 1 );
     else
       SDL_GL_SetAttribute( SDL_GL_SWAP_CONTROL, 0 ); 
+    #endif
+    #if SDLVER > 1
+    SDL_GL_SetSwapInterval(vid.current_vsync ? 1 : 0);
     #endif
     if(vid.antialias & AA_MULTI) {
       SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
@@ -1452,9 +1456,8 @@ EX void setvideomode() {
   #if SDLVER >= 3
   s_renderer = SDL_CreateRenderer(s_window, nullptr);
   SDL_SetRenderVSync(s_renderer, vid.current_vsync ? 1 : SDL_RENDERER_VSYNC_DISABLED);
-  // todo VSYNC -- , SDL_PROP_RENDERER_CREATE_PRESENT_VSYNC_NUMBER
   #else
-  s_renderer = SDL_CreateRenderer(s_window, -1, vid.current_vsync ? SDL_RENDERER_PRESENTVSYNC : 0);
+  s_renderer = SDL_CreateRenderer(s_window, -1, SDL_RENDERER_ACCELERATED | (vid.current_vsync ? SDL_RENDERER_PRESENTVSYNC : 0));
   #endif
 
   SDL_GetCurrentRenderOutputSize(s_renderer, &vid.xres, &vid.yres);
