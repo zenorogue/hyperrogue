@@ -2843,7 +2843,7 @@ EX void cast() {
         }
       }
     // println(hlog, "wallrange = ", tie(minval, maxval), " wallx = ", isize(wallx), " wallstart = ", isize(cgi.wallstart));
-    for(int i=0; i<isize(wallstart); i++) {
+    for(int i=0; i<isize(wallstart)-1; i++) {
       w_map[i+2*wlength][0] = (wallstart[i]+.5) / wlength;
       w_map[i+2*wlength][1] = wallangle[i];
       }
