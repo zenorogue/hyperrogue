@@ -510,8 +510,8 @@ void celldrawer::setcolors() {
         if(c->monst == moFriendlyGhost) 
           fcol = gradient(fcol, fghostcolor(c), 0, .5, 1);
     
-        if(c->wall == waSmallTree) wcol = 0x004000;
-        else if(c->wall == waBigTree) wcol = 0x008000;
+        /* if(c->wall == waSmallTree) wcol = 0x006000;
+        else if(c->wall == waBigTree) wcol = 0x008000; */
         }
     }
   
