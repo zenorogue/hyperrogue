@@ -370,18 +370,28 @@ auto shot_hooks =
 #ifdef RELHELL
 auto hook1=
     addHook(hooks_config, 100, [] {
-      default_settings();
-      set_config();
-      enable_canvas();
-      if(arg::curphase == 1)
+      if(arg::curphase == 1) {
         conffile = "relhell.ini";
-      if(arg::curphase == 3) { showstartmenu = false; popScreenAll(); pushScreen(pick_the_game); }
+        }
+      if(arg::curphase == 2) {
+        set_config();
+        enable_canvas();
+        }
+      if(arg::curphase == 3) {
+        showstartmenu = false;
+        popScreenAll();
+        pushScreen(pick_the_game);
+        }
       });
 
-#else
-auto hook2 = addHook(hooks_configfile, 300, default_settings);
 #endif
 
+auto hook2 = addHook(hooks_configfile, 300, default_settings)
+  + arg::add3("-relhell", [] {
+      set_config();
+      enable_canvas();
+      showstartmenu = false; popScreenAll(); pushScreen(pick_the_game);
+     });
 
 }
 }
