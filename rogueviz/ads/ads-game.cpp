@@ -2,7 +2,7 @@
 /* Compile with mymake -O3 -rv rogueviz/ads/ads-game */
 /* Best run with -ads-menu; more detailed options are available too */
 
-#define VER_RH "1.0"
+#define VER_RH "1.1"
 
 #ifdef RELHELL
 
