@@ -1091,8 +1091,6 @@ EX namespace mapstream {
           }
       }
 
-    relspin.clear();
-
     if(shmup::on) shmup::init();
 
     timerstart = time(NULL); turncount = 0; 
@@ -1191,6 +1189,7 @@ EX namespace mapstream {
     else
       callhooks(hooks_loadmap_old, f);
 
+    relspin.clear();
     cellbyid.clear();
     restartGraph();
     bfs();
