@@ -1510,6 +1510,11 @@ int BRINGRIS_TEXTURESIZE = 256;
 
 int nxmin, nxmax, nymin, nymax;
 
+auto ah = addHook(hooks_resetGL, 500, [] {
+  println(hlog, "hooks_resetGL called");
+  if(next_buffer) { delete next_buffer; next_buffer = nullptr; }
+  });
+
 void render_next(int xstart) {
   if(!next_buffer && !next_fail) {
     next_buffer = new renderbuffer(BRINGRIS_TEXTURESIZE, BRINGRIS_TEXTURESIZE, true);
