@@ -2843,9 +2843,9 @@ EX void cast() {
         }
       }
     // println(hlog, "wallrange = ", tie(minval, maxval), " wallx = ", isize(wallx), " wallstart = ", isize(cgi.wallstart));
-    for(int i=0; i<isize(wallstart)-1; i++) {
+    for(int i=0; i<isize(wallstart); i++) {
       w_map[i+2*wlength][0] = (wallstart[i]+.5) / wlength;
-      w_map[i+2*wlength][1] = wallangle[i];
+      w_map[i+2*wlength][1] = i <= isize(wallangle) ? wallangle[i] : 0;
       }
     bind_array(w_map, o->tWall, txWall, 8, wlength);
     glUniform1f(o->uInvLengthWall, 1. / wlength);
