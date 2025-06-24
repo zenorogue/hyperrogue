@@ -297,11 +297,17 @@ void run() {
     }
 
   int* t = multi::scfg_default.keyaction;
-  for(int i=1; i<512; i++) {
+  for(int i=1; i<multi::SCANCODES; i++) {
     auto& ka = dialog::key_actions;
-    if(t[i] == 16+nrPause) ka[i] = ka[PSEUDOKEY_PAUSE];
-    if(t[i] == 16+nrViewSimulation) ka[i] = ka[PSEUDOKEY_SIM];
-    if(t[i] == 16+nrMenu) ka[i] = ka[PSEUDOKEY_MENU];
+    auto match = [&] (int nr, int pseudokey) {
+      if(t[i] == 16+nr) {
+        auto key = SDL12(i, SDL_GetKeyFromScancode(SDL_Scancode(i)/*, 0, true*/));
+        ka[key] = ka[pseudokey];
+        }
+      };
+    match(nrPause, PSEUDOKEY_PAUSE);
+    match(nrViewSimulation, PSEUDOKEY_SIM);
+    match(nrMenu, PSEUDOKEY_MENU);
     }
   
   keyhandler = [] (int sym, int uni) {
@@ -726,10 +732,10 @@ void nilrider_keys() {
   multi::change_default_key(lps_nilrider, SDLK_LCTRL, 16 + nrFineControl);
   #endif
 
-  multi::change_default_key(lps_nilrider, 'p', 16 + nrPause);
-  multi::change_default_key(lps_nilrider, 'b', 16 + nrReverseTime);
-  multi::change_default_key(lps_nilrider, 'r', 16 + nrViewSimulation);
-  multi::change_default_key(lps_nilrider, 'v', 16 + nrMenu);
+  multi::change_default_key(lps_nilrider, SDL12('p', SDL_SCANCODE_P), 16 + nrPause);
+  multi::change_default_key(lps_nilrider, SDL12('b', SDL_SCANCODE_B), 16 + nrReverseTime);
+  multi::change_default_key(lps_nilrider, SDL12('r', SDL_SCANCODE_R), 16 + nrViewSimulation);
+  multi::change_default_key(lps_nilrider, SDL12('v', SDL_SCANCODE_V), 16 + nrMenu);
   }
 
 bool nilrider_music(eLand& l) {

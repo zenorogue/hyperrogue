@@ -2176,11 +2176,11 @@ int args() {
   }
 
 void default_config() {
-  multi::change_default_key(lps_bringris, '\r', 16 + 8);
-  multi::change_default_key(lps_bringris, 'q',  16 + 9);
-  multi::change_default_key(lps_bringris, 'e',  16 + 10);
-  multi::change_default_key(lps_bringris, ' ',  16 + 11);
-  multi::change_default_key(lps_bringris, 'p',  16 + 12);
+  multi::change_default_key(lps_bringris, SDL12('\r', SDL_SCANCODE_RETURN), 16 + 8);
+  multi::change_default_key(lps_bringris, SDL12('q', SDL_SCANCODE_Q), 16 + 9);
+  multi::change_default_key(lps_bringris, SDL12('e', SDL_SCANCODE_E), 16 + 10);
+  multi::change_default_key(lps_bringris, SDL12(' ', SDL_SCANCODE_SPACE), 16 + 11);
+  multi::change_default_key(lps_bringris, SDL12('p', SDL_SCANCODE_P), 16 + 12);
 
   param_i(bgeom, "bringris-geometry", 0);
   param_b(stars_enabled, "bringris_stars", true);

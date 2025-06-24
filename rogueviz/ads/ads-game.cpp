@@ -52,13 +52,13 @@ namespace ads_game {
 /* ADS-specific keys */
 
 void set_default_keys() {
-  multi::change_default_key(lps_relhell, 'p', 16 + 9);
-  multi::change_default_key(lps_relhell, 't', 16 + 10);
-  multi::change_default_key(lps_relhell, 'o', 16 + 11);
-  multi::change_default_key(lps_relhell, 'm', 16 + 12);
-  multi::change_default_key(lps_relhell, 'i', 16 + 13);
-  multi::change_default_key(lps_relhell, 'k', 16 + 14);
-  multi::change_default_key(lps_relhell, 'l', 16 + 15);
+  multi::change_default_key(lps_relhell, SDL12('p', SDL_SCANCODE_P), 16 + 9);
+  multi::change_default_key(lps_relhell, SDL12('t', SDL_SCANCODE_T), 16 + 10);
+  multi::change_default_key(lps_relhell, SDL12('o', SDL_SCANCODE_O), 16 + 11);
+  multi::change_default_key(lps_relhell, SDL12('m', SDL_SCANCODE_M), 16 + 12);
+  multi::change_default_key(lps_relhell, SDL12('i', SDL_SCANCODE_I), 16 + 13);
+  multi::change_default_key(lps_relhell, SDL12('k', SDL_SCANCODE_K), 16 + 14);
+  multi::change_default_key(lps_relhell, SDL12('l', SDL_SCANCODE_L), 16 + 15);
   }
 
 void ads_sub_restart() {
