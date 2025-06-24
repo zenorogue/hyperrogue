@@ -4557,6 +4557,11 @@ template<class T, class U> void lps_add(local_parameter_set& lps, T&val, U nvalu
     }
   if(found != 1) println(hlog, lps.label, " saver not found");
   }
+
+template<class T> void lps_add(local_parameter_set& lps, T&val) {
+  lps_add(lps, val, val);
+  }
+
 #endif
 
 vector<void*> lps_of_type;
