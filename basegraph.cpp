@@ -776,15 +776,15 @@ EX void resetGL() {
     airbuf = nullptr;
     }
   #endif
-  check_cgi();
-  if(currentmap) cgi.require_shapes();
-  #if MAXMDIM >= 4
-  if(GDIM == 3 && !floor_textures) make_floor_textures();
-  #endif
-  cgi.initPolyForGL();
   compiled_programs.clear();
   matched_programs.clear();
   glhr::current_glprogram = nullptr;
+  check_cgi();
+  if(currentmap) cgi.require_shapes();
+  cgi.initPolyForGL();
+  #if MAXMDIM >= 4
+  if(GDIM == 3 && !floor_textures) make_floor_textures();
+  #endif
   ray::reset_raycaster();
   #if CAP_RUG
   if(rug::glbuf) rug::close_glbuf();
