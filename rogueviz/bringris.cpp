@@ -2193,6 +2193,9 @@ void default_config() {
   lps_add(lps_bringris, vid.plevel_factor, 0.5);
   lps_add(lps_bringris, vid.axes3, false);
 
+  lps_add(lps_bringris, vid.cells_drawn_limit);
+  for(auto& g: sightranges) lps_add(lps_bringris, g);
+
   lps_add(lps_bringris_explore, mouseaim_sensitivity, 0.01);
   lps_add(lps_bringris_explore, camera_speed, 2);
   lps_add(lps_bringris_explore, smooth_scrolling, true);
