@@ -93,9 +93,10 @@ void compute_triangle_markers() {
 
   println(hlog, triangle_markers);
 
-  for(int i=0; i<isize(fif); i++) {
+  for(int i=0; i<isize(fif)-1; i++) {
     turns.push_back(triangle_markers[i+1] == 0 ? 90._deg : 0);
     }
+  turns.push_back(0);
   }
 
 string dotted(int i) {
