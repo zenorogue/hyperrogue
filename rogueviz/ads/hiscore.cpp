@@ -19,7 +19,6 @@ void fill_gamedata() {
   char buf[128]; strftime(buf, 128, "%c", localtime(&timer)); cur.timerend = buf;
   cur.seconds = int(timer - timerstart);
   for(int a=0; a<3; a++) cur.scores[a] = pdata.score[a];
-  if(main_rock) cur.scores[0] = current.shift;
   shstream hs;
   print(hs, main_rock ? "2 " : "1 ");
   print(hs, DS_(simspeed), " ", DS_(accel), " ", DS_(how_much_invincibility), " ", vid.creature_scale, " ", DS_(missile_rapidity));

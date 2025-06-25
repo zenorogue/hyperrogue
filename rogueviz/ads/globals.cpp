@@ -81,7 +81,7 @@ struct player_data {
   int ammo;
   ld fuel;
   ld oxygen;
-  int score[score_types];
+  ld score[score_types];
   };
 
 ld ads_how_much_invincibility = TAU / 4;

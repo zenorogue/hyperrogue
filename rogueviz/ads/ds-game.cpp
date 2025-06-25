@@ -405,15 +405,16 @@ bool ds_turn(int idelta) {
     current.T = lorentz(3, 2, -tc) * current.T;
 
     auto& mshift = main_rock->pt_main.shift;
-    if(mshift) {
+    if(mshift && !isnan(mshift)) {
       #if RVCOL
       constexpr ld win_time = 60;
-      if(current.shift < win_time && (current.shift + mshift) >= win_time && !game_over && no_param_change)
+      if(pdata.score[0] < win_time && (current.shift + mshift) >= win_time && !game_over && no_param_change)
         rogueviz::rv_achievement("DSGAME");
       #endif
       current.shift += mshift;
       current.T = current.T * lorentz(2, 3, mshift);
       mshift = 0;
+      pdata.score[0] = max(pdata.score[0], current.shift);
       }
     fixmatrix(current.T);
     
