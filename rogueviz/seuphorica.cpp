@@ -1443,7 +1443,7 @@ void seuphorica_newgame() {
         });
       }
     }
-  dialog::addBoolItem_action("customize grame", show_customize, 'C');
+  dialog::addBoolItem_action("customize game", show_customize, 'c');
   if(show_customize) do_show_customize();
   dialog::addBack();
   dialog::display();
@@ -1479,7 +1479,7 @@ void do_show_customize() {
   dialog::add_action([] {
     dialog::editNumber(want_seed, 0, 999999, 1, rand() % 1000000, "seed", "set to 0 for random");
     });
-  dialog::addItem("start custom game", 'c');
+  dialog::addItem("start custom game", 'd');
   dialog::add_action([] {
     save_old_game_if_needed();
     is_seeded = want_seed;
