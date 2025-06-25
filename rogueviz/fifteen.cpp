@@ -586,7 +586,7 @@ void fifteen_menu() {
       pushScreen(fifteen_play);
       current_puzzle = &p;
       quitter = [] {
-        dialog::addItem("quit", 'Q');
+        dialog::addItem("quit", 'q');
         dialog::add_action([] { quitmainloop = true; });
         };
       });
