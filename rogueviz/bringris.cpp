@@ -752,7 +752,7 @@ void new_piece() {
   if(shape_conflict(at)) {
     playSound(cwt.at, "die-bomberbird");
     state = tsGameover;
-    #if RCVOL
+    #if RVCOL
     if(cur.pro_game && cur.max_piece == bgeoms[bgeom].default_max_piece)
       rogueviz::rv_leaderboard(bgeoms[bgeom].name, cur.score, 1, rvlc::num, lalign(0, cur.bricks, " ", cur.cubes, " ", cur.completed));
     #endif
