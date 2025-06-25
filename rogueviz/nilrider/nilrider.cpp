@@ -345,8 +345,8 @@ void pick_level() {
         auto plan = l->records[1][gid];
         if(plan) score_here += l->goals[gid].sa(plan);
         }
-      cur_stars += score_here;
       }
+    cur_stars += score_here;
 
     if(l->stars_needed > total_stars) {
       dialog::addSelItem(l->name, "stars needed: " + its(l->stars_needed), l->hotkey);
