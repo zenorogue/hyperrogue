@@ -1608,6 +1608,10 @@ local_parameter_set lps_seuphorica("seuphorica:");
 
 void default_config() {
   lps_add(lps_seuphorica, menu_darkening, 3);
+  lps_add(lps_seuphorica, pconf.scale);
+  lps_add(lps_seuphorica, vid.use_smart_range);
+  lps_add(lps_seuphorica, vid.creature_scale);
+  lps_add(lps_seuphorica, req_disksize);
 
   param_i(tilesize, "seuphorica_tilesize", 20)
   -> editable(10, 50, 0.1, "Seuphorica tile size", "", 't')
@@ -1629,7 +1633,6 @@ void launch() {
   stop_game();
   enable_canvas();
   ccolor::set_plain_nowall(0x202020);
-  lps_enable(&lps_seuphorica);
   start_game();
   load();
 
@@ -1662,6 +1665,7 @@ auto seuphorica_hook =
     });
 
 void invoke() {
+  lps_enable(&lps_seuphorica);
   set_seuphorica_geometry(0);
   pushScreen([] { 
     quitmainloop = true;
