@@ -754,7 +754,7 @@ void new_piece() {
     state = tsGameover;
     #if RVCOL
     if(cur.pro_game && cur.max_piece == bgeoms[bgeom].default_max_piece)
-      rogueviz::rv_leaderboard(bgeoms[bgeom].name, cur.score, 1, rvlc::num, lalign(0, cur.bricks, " ", cur.cubes, " ", cur.completed));
+      rogueviz::rv_leaderboard("Bringris: " + bgeoms[bgeom].name, cur.score, 1, rvlc::num, lalign(0, cur.bricks, " ", cur.cubes, " ", cur.completed));
     #endif
     save();
     }

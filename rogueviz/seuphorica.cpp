@@ -1031,12 +1031,12 @@ void seuphorica_screen() {
       post_achievements();
       if(roundindex == 21) {
         save();
-        if(is_daily && cheats == 0) rogueviz::rv_leaderboard(get_geom_name() + " daily " + its(daily), total_gain, 1, rvlc::num, rv_data());
-        if(cheats == 0) rogueviz::rv_leaderboard(get_geom_name() + get_setname() + " (20 turns)", total_gain, 1, rvlc::num, rv_data());
+        if(is_daily && cheats == 0) rogueviz::rv_leaderboard("Seuphorica daily " + its(daily) + ": " + get_geom_name(), total_gain, 1, rvlc::num, rv_data());
+        if(cheats == 0) rogueviz::rv_leaderboard("Seuphorica 20: " + get_geom_name() + get_setname(), total_gain, 1, rvlc::num, rv_data());
         }
       if(roundindex == 51) {
         save();
-        if(cheats == 0) rogueviz::rv_leaderboard(get_geom_name() + get_setname() + " (50 turns)", total_gain, 1, rvlc::num, rv_data());
+        if(cheats == 0) rogueviz::rv_leaderboard("Seuphorica 50: " + get_geom_name() + get_setname(), total_gain, 1, rvlc::num, rv_data());
         }
       });
     }
@@ -1749,7 +1749,7 @@ string get_geom_name() {
 void save_old_game_if_needed() {
   // no point to save on the 1st turn, and also on 21st and 51st turn, it has just been saved
   if(!among(roundindex, 0, 1, 21, 51)) save();
-  if(cheats == 0) rogueviz::rv_leaderboard(get_geom_name() + get_setname() + " (endless)", total_gain, 1, rvlc::num);
+  if(cheats == 0) rogueviz::rv_leaderboard("Seuphorica endless: " + get_geom_name() + get_setname(), total_gain, 1, rvlc::num);
   }
 
 void load() {
