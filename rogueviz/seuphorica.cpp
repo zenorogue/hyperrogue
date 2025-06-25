@@ -1429,7 +1429,7 @@ void seuphorica_newgame() {
     dialog::add_action([] {
       save_old_game_if_needed();
       reset_rv();
-      restart((its(daily) + "9").c_str(), "D", "8");
+      restart("", "", "");
       reset_seuphorica_screen();
       });
     if(!is_daily) {
