@@ -92,7 +92,7 @@ void load_hiscores() {
   string s;
   while(!feof(f.f)) {
     s = scanline_noblank(f);
-    if(s == "Relative Hell 1.0") {
+    if(s == "Relative Hell 1.0" || s == "Relative Hell 1.1") {
       gamedata gd;
       gd.myname = scanline_noblank(f);
       gd.timerstart = scanline_noblank(f);
