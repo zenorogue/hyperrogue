@@ -762,6 +762,7 @@ void default_settings() {
   lps_add(lps_nilrider, logfog, 1);
   lps_add(lps_nilrider, ccolor::which, &ccolor::plain);
   lps_add(lps_nilrider, ccolor::rwalls, 0);
+  lps_add(lps_nilrider, game_keys_scroll);
 
   #if CAP_VR
   lps_add(lps_nilrider, vrhr::hsm, vrhr::eHeadset::reference);
