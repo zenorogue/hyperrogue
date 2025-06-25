@@ -1712,6 +1712,9 @@ void fill_gamedata() {
   if(bidirectional) cur.flags |= 64;
   cur.best_word = best_word;
   cur.best_turn_score = best_turn_score;
+  cur.turns = roundindex;
+  cur.score = total_gain;
+  cur.seed = gameseed;
   }
 
 void save(const gamedata& sd) {
