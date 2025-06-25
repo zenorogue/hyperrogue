@@ -566,6 +566,7 @@ bool draw(cell *c, const shiftmatrix& V) {
   bool inside = in_board(c);
   if(inside) {
     c->wall = waNone; c->landparam = 0x202020;
+    setdist(c, 6, nullptr);
     if(placing_portal) {
       int val; has_power(board.at(portal_from), sp::portal, val);
       if(dist(portal_from, c) <= val) c->landparam = 0x0000C0;
