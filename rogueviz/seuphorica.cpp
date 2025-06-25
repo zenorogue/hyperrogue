@@ -1410,6 +1410,9 @@ void seuphorica_setgeom() {
   dialog::display();
   }
 
+bool show_customize = false;
+void do_show_customize();
+
 void seuphorica_newgame() {
   cmode = sm::DARKEN;
   gamescreen();
@@ -1421,23 +1424,32 @@ void seuphorica_newgame() {
   dialog::addSelItem("geometry", current_seuphgeom == -1 ? "custom" : seuphgeoms[current_seuphgeom].name, 'g');
   dialog::add_action_push(seuphorica_setgeom);
 
-  dialog::addItem("start new standard game", 's');
-  dialog::add_action([] {
-    save_old_game_if_needed();
-    reset_rv();
-    restart("", "", "");
-    reset_seuphorica_screen();
-    });
-  if(!is_daily) {
-    check_daily_time();
-    dialog::addSelItem("start new daily game", its(daily), 'd');
+  if(!show_customize) {
+    dialog::addItem("start new standard game", 's');
     dialog::add_action([] {
       save_old_game_if_needed();
       reset_rv();
       restart((its(daily) + "9").c_str(), "D", "8");
       reset_seuphorica_screen();
       });
+    if(!is_daily) {
+      check_daily_time();
+      dialog::addSelItem("start new daily game", its(daily), 'd');
+      dialog::add_action([] {
+        save_old_game_if_needed();
+        reset_rv();
+        restart((its(daily) + "9").c_str(), "D", "8");
+        reset_seuphorica_screen();
+        });
+      }
     }
+  dialog::addBoolItem_action("customize grame", show_customize, 'C');
+  if(show_customize) do_show_customize();
+  dialog::addBack();
+  dialog::display();
+  }
+
+void do_show_customize() {
   dialog::addBreak(100);
   dialog::start_list(900, 900, 'A');
   int randoms = 0;
@@ -1517,9 +1529,6 @@ void seuphorica_newgame() {
     new_game();
     reset_seuphorica_screen();
     });
-
-  dialog::addBack();
-  dialog::display();
   }
 
 void seuphorica_settings() {
