@@ -164,6 +164,12 @@
 [91] */music/hr3-graveyard.ogg
 # Dice Reserve
 [92] */music/hr3-laboratory.ogg
+# Crossroads VI
+[93] */music/hr3-crossroads.ogg
+# Crossroads VII
+[94] */music/hr3-crossroads.ogg
+# Master Crossroads
+[:2] */music/hr3-crossroads.ogg
 
 # None [00] (used when the window is out of focus)
 
