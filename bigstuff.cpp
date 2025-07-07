@@ -1762,6 +1762,23 @@ EX void build_walls(cell *c, cell *from) {
         return;
         }
 
+      if(specialland == laCrossroads6 && hrand(I10000) < 5000) {
+        build_barrier_good(c, laCrossroads6);
+        return;
+        }
+
+      if(specialland == laThematic && good_for_wall(c) && hrand(10000) < 5000)
+        buildBarrierNowall(c, getNewThematic(c->land));
+
+      if(specialland == laMasterCrossroads && c->land == laMasterCrossroads && good_for_wall(c) && hrand(10000) < 100)
+        buildBarrierNowall(c, laCrossroads4);
+
+      if(specialland == laMasterCrossroads && hrand(10000) < 1500 && !among(c->land, laCrossroads4, laCrossroads2, laCrossroads5))
+        build_barrier_good(c, c->land == laMasterCrossroads ? pick(laCrossroads, laCrossroads2, laCrossroads3, laCrossroads5, laCrossroads6) : laMasterCrossroads);
+
+      if(specialland == laMasterCrossroads && hrand(10000) < 1500 && c->land == laCrossroads4)
+        buildBarrierNowall(c, laMasterCrossroads);
+
       if(specialland == laCrossroads3) {
         build_barrier_good(c, laCrossroads3);
         return;
