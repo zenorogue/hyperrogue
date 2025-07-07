@@ -190,6 +190,7 @@ void celldrawer::setcolors() {
     case laMotion: case laGraveyard: case laWineyard: case laLivefjord: 
     case laRlyeh: case laHell: case laCrossroads: case laJungle:
     case laAlchemist: case laFrog: case laCursed: case laDice:
+    case laThematic: case laThematicNature: case laThematicUrban: case laThematicDeath: case laThematicAbstract: case laThematicWater: case laThematicEarth:
       fcol = floorcolors[c->land]; break;
     
     case laCA:
@@ -443,7 +444,7 @@ void celldrawer::setcolors() {
       break;
       }
 
-    case laIce: case laCocytus: case laBlizzard: case laEclectic:
+    case laIce: case laCocytus: case laBlizzard: case laEclectic: case laThematicHeat:
       if(useHeatColoring(c)) {
         float h = HEAT(c);
         eLand l = c->land;

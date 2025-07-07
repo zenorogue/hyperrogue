@@ -241,6 +241,7 @@ EX void initgame() {
   splitrocks = 0;
 
   if(firstland == laElementalWall) cwt.at->land = randomElementalLand();
+  if(firstland == laThematic) cwt.at->land = getNewThematic(firstland);
 
   resetview();
   createMov(cwt.at, 0);

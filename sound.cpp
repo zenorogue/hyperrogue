@@ -32,6 +32,7 @@ EX eLand getCurrentLandForMusic() {
   if(isHaunted(id)) id = laHaunted;
   if(id == laWarpSea) id = laWarpCoast;
   if(id == laMercuryRiver) id = laTerracotta;
+  if(isThematic(id)) id = laThematic;
   return id;
   }
 

@@ -469,6 +469,8 @@ extern videopar vid;
 #define R200 (big_unlock ? 800 : 200)
 // Crossroads V
 #define R300 (big_unlock ? 1200 : 300)
+// Thematic Crossroads
+#define R400 (big_unlock ? 1600 : 400)
 // Master Crossroads
 #define R500 (big_unlock ? 2000 : 500)
 // kill types for Dragon Chasms
