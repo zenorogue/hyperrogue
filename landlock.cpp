@@ -53,11 +53,15 @@ EX int landMultiplier(eLand l) {
   }
 
 EX bool isCrossroads(eLand l) {
-  return among(l, laCrossroads, laCrossroads2, laCrossroads3, laCrossroads4, laCrossroads5, laCrossroads6);
+  return among(l, laCrossroads, laCrossroads2, laCrossroads3, laCrossroads4, laCrossroads5, laCrossroads6, laMasterCrossroads);
+  }
+
+EX bool isCrossroadsNM(eLand l) {
+  return isCrossroads(l) && l != laMasterCrossroads;
   }
 
 EX bool bearsCamelot(eLand l) {
-  return isCrossroads(l) && l != laCrossroads2 && l != laCrossroads5;
+  return isCrossroads(l) && !among(l, laCrossroads2, laCrossroads5, laMasterCrossroads);
   }
 
 EX bool inmirror(const cellwalker& cw) {
@@ -333,7 +337,8 @@ EX bool voronoi_sea_incompatible(eLand l1, eLand l2) {
   }
 
 EX bool incompatible1(eLand l1, eLand l2) {
-  if(isCrossroads(l1) && isCrossroads(l2)) return true;
+  if(l1 == laMasterCrossroads && !isCrossroads(l2)) return true;
+  if(isCrossroadsNM(l1) && isCrossroadsNM(l2)) return true;
   if(l1 == laJungle && l2 == laMotion) return true;
   if(l1 == laMirrorOld && l2 == laMotion) return true;
   if(l1 == laPower && l2 == laWineyard) return true;
@@ -566,7 +571,7 @@ EX eLand getNewLand(eLand old) {
     laDeadCaves, laRedRock, laVariant, laHell, laCocytus, laPower,
     laBull, laTerracotta, laRose, laGraveyard, laHive, laDragon, laTrollheim,
     laWet, laFrog, laEclectic, laCursed, laDice,
-    laCrossroads5, laCrossroads6
+    laCrossroads5, laCrossroads6, laMasterCrossroads
     })
     if(landUnlocked(l)) tab[cnt++] = l;    
 
@@ -737,7 +742,7 @@ EX vector<eLand> land_over = {
   laPrairie, laBull, laTerracotta, laRose,
   laElementalWall, laTrollheim,
   laHell, laCrossroads3, laCocytus, laPower, laCrossroads4,
-  laCrossroads5, laCrossroads6,
+  laCrossroads5, laCrossroads6, laMasterCrossroads,
   // EXTRA
   laWildWest, laHalloween, laDual, laSnakeNest, laMagnetic, laCA, laAsteroids
   };

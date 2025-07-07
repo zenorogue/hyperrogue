@@ -183,7 +183,7 @@ void celldrawer::setcolors() {
   // floor colors for all the lands
   else switch(c->land) {
     case laBurial: case laTrollheim: case laBarrier: case laOceanWall:
-    case laCrossroads2: case laCrossroads3: case laCrossroads4: case laCrossroads5: case laCrossroads6:
+    case laCrossroads2: case laCrossroads3: case laCrossroads4: case laCrossroads5: case laCrossroads6: case laMasterCrossroads:
     case laRose: case laPower: case laWildWest: case laHalloween: case laRedRock:
     case laDragon: case laStorms: case laTerracotta: case laMercuryRiver:
     case laDesert: case laKraken: case laDocks: 

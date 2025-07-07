@@ -1565,6 +1565,7 @@ EX int wallchance(cell *c, bool deepOcean) {
     l == laCrossroads5 ? 10000 : 
     l == laCrossroads4 ? 5000 :
     l == laCrossroads6 ? 5000 :
+    l == laMasterCrossroads ? 10000 :
     (l == laMirror && !yendor::generating) ? 2500 :
     tactic::on ? 0 :
     racing::on ? 0 :
@@ -1830,6 +1831,9 @@ EX void build_walls(cell *c, cell *from) {
   
   else if(good_for_wall(c) && ls::any_wall() && c->land == laCrossroads4 && hrand(10000) < 7000 && c->land && !c->master->alt && !tactic::on && !racing::on && 
     buildBarrierNowall(c, getNewLand(laCrossroads4))) ;
+
+  else if(good_for_wall(c) && ls::any_wall() && c->land == laMasterCrossroads && hrand(10000) < 500 && c->land && !c->master->alt && !tactic::on && !racing::on &&
+    landUnlockedIngame(laCrossroads4) && buildBarrierNowall(c, laCrossroads4)) ;
 
   else if(good_for_wall(c) && ls::any_wall() && hrand(I10000) < 20 && !generatingEquidistant && !yendor::on && !tactic::on && !racing::on && !isCrossroads(c->land) &&
     landUnlockedIngame(laCrossroads4) && !weirdhyperbolic && !c->master->alt && c->bardir != NOBARRIERS &&

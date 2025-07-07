@@ -1754,6 +1754,9 @@ LAND( 0x7030A0, "Crossroads VI", laCrossroads6, ZERO, itHyperstone, RESERVED, "A
   NATIVE(0)
   REQ(ITEMS(itCursed, 5))
 
+LAND( 0xC0B090, "Master Crossroads", laMasterCrossroads, ZERO, itHyperstone, RESERVED, "A crossroads that connects only to other crossroads.")
+  NATIVE(0) REQ(GOLD(R500))
+
 ITEM('}', 0xFFFF80, "Crossbow", itCrossbow, IC_NAI, ZERO, RESERVED, osNone,
   "Your crossbow. Press 'f' or click it in the inventory to toggle firing mode. In firing mode, select a tile to see the trajectory, then "
   "click again to fire. After firing, the crossbow takes some time to reload."
