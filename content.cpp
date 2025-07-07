@@ -1452,10 +1452,6 @@ LAND( 0xC000C0, "Crossroads V", laCrossroads5, ZERO, itHyperstone, RESERVED, "Ex
   NATIVE(0)
   REQ(GOLD(R300))
 
-LAND( 0x7030A0, "Crossroads VI", laCrossroads6, ZERO, itHyperstone, RESERVED, "A cursed Crossroads layout.\n")
-  NATIVE(0)
-  REQ(ITEMS(itCursed, 5))
-
 LAND( 0xC0C0C0, "Cellular Automaton", laCA, ZERO | LF_TECHNICAL, itNone, RESERVED, cadesc)
   NATIVE(0)
   REQ(ALWAYS)
@@ -1753,6 +1749,10 @@ MONSTER('d', 0x603010, "Animated Die", moAnimatedDie, ZERO, RESERVED, moAnimated
 MONSTER('d', 0x901020, "Angry Die", moAngryDie, ZERO, RESERVED, moAnimatedDie, 
   "You have made a die unhappy. Taste the revenge! This one won't forgive you, no matter what you do."
   )
+
+LAND( 0x7030A0, "Crossroads VI", laCrossroads6, ZERO, itHyperstone, RESERVED, "A cursed Crossroads layout.\n")
+  NATIVE(0)
+  REQ(ITEMS(itCursed, 5))
 
 ITEM('}', 0xFFFF80, "Crossbow", itCrossbow, IC_NAI, ZERO, RESERVED, osNone,
   "Your crossbow. Press 'f' or click it in the inventory to toggle firing mode. In firing mode, select a tile to see the trajectory, then "
