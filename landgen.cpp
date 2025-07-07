@@ -2519,6 +2519,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
     case laCrossroads3:
     case laCrossroads4:
     case laCrossroads5:
+    case laCrossroads6:
       if(c->wall == waTower) c->land = laCamelot;
       ONEMPTY {
         if(!BITRUNCATED && c->land == laCrossroads5 && hrand(100) < 60)

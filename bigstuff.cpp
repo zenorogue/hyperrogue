@@ -1564,6 +1564,7 @@ EX int wallchance(cell *c, bool deepOcean) {
     l == laCrossroads2 ? 10000 : 
     l == laCrossroads5 ? 10000 : 
     l == laCrossroads4 ? 5000 :
+    l == laCrossroads6 ? 5000 :
     (l == laMirror && !yendor::generating) ? 2500 :
     tactic::on ? 0 :
     racing::on ? 0 :

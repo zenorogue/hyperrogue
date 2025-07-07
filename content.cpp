@@ -1186,7 +1186,7 @@ LAND( 0xFFFF00, "Land of Power", laPower, ZERO, itPower, RESERVED,
 
 LAND( 0xD0D0D0, "Camelot", laCamelot, ZERO | LF_CYCLIC, itHolyGrail, RESERVED, camelothelp )
   NATIVE((m == moKnight || m == moHedge || m == moFlailer || m == moLancer) ? 1 : 0)
-  REQ(ITEMS(itEmerald, U5) ACCONLY3(laCrossroads, laCrossroads3, laCrossroads4))
+  REQ(ITEMS(itEmerald, U5) ACCONLY4(laCrossroads, laCrossroads3, laCrossroads4, laCrossroads6))
 
 LAND( 0xD000D0, "Temple of Cthulhu", laTemple, ZERO | LF_CYCLIC, itGrimoire, RESERVED, templehelp )
   NATIVE((m == moTentacle || m == moCultist || m == moPyroCultist || m == moCultistLeader) ? 1 : 0)
@@ -1451,6 +1451,10 @@ LAND( 0x800080, "Bull Dash", laBull, ZERO, itBull, RESERVED, bulldashdesc)
 LAND( 0xC000C0, "Crossroads V", laCrossroads5, ZERO, itHyperstone, RESERVED, "Extremely narrow Crossroads layout.\n")
   NATIVE(0)
   REQ(GOLD(R300))
+
+LAND( 0x7030A0, "Crossroads VI", laCrossroads6, ZERO, itHyperstone, RESERVED, "A cursed Crossroads layout.\n")
+  NATIVE(0)
+  REQ(ITEMS(itCursed, 5))
 
 LAND( 0xC0C0C0, "Cellular Automaton", laCA, ZERO | LF_TECHNICAL, itNone, RESERVED, cadesc)
   NATIVE(0)
@@ -1796,6 +1800,8 @@ MONSTER( '*', 0,        "vertex", moRogueviz, ZERO | CF_TECHNICAL, RESERVED, moN
 #undef ACCONLY
 #undef ACCONLY2
 #undef ACCONLY3
+#undef ACCONLY4
+#undef ACCONLY5
 #undef ACCONLYF
 #undef IFINGAME
 #undef INMODE

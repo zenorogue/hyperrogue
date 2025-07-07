@@ -616,8 +616,14 @@ EX void extendBarrier(cell *c) {
       }
     if(buildBarrier6(cw, 2)) return;    
     }
-    
+
   if(land_structure == lsCursedWalls && c->barleft != laMirror && c->barright != laMirror && hrand(100) < 80 && !among(laCrossroads2, c->barleft, c->barright)) {
+    cellwalker cw(c, c->bardir);
+    cw = cw + wstep + 3 + wstep - 1;
+    if(buildBarrier6(cw, c->barright, c->barleft)) return;
+    }
+
+  if(among(laCrossroads6, c->barleft, c->barright) && hrand(100) < 80) {
     cellwalker cw(c, c->bardir);
     cw = cw + wstep + 3 + wstep - 1;
     if(buildBarrier6(cw, c->barright, c->barleft)) return;
@@ -839,7 +845,12 @@ EX bool buildBarrier6(cellwalker cw, eLand m0, eLand m1) {
     setland((b[d+1]-2).cpeek(), m1);
     setland((b[d+1]+2).cpeek(), m0);
     }
-  if(hrand(100) < curse_percentage) {
+  int cp = curse_percentage;
+  if(m0 == laCrossroads6 || m1 == laCrossroads6) {
+    cp = 25;
+    if(m0 == laCursed || m1 == laCursed) cp = 100;
+    }
+  if(hrand(100) < cp) {
     setland(cw.at, laCursed);
     cw.at->wall = waRubble;
     cw.at->monst = moHexer;

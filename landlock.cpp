@@ -53,8 +53,7 @@ EX int landMultiplier(eLand l) {
   }
 
 EX bool isCrossroads(eLand l) {
-  return l == laCrossroads || l == laCrossroads2 || l == laCrossroads3 ||
-    l == laCrossroads4 || l == laCrossroads5;
+  return among(l, laCrossroads, laCrossroads2, laCrossroads3, laCrossroads4, laCrossroads5, laCrossroads6);
   }
 
 EX bool bearsCamelot(eLand l) {
@@ -264,6 +263,8 @@ EX bool landUnlocked(eLand l) {
     #define ACCONLY(x)
     #define ACCONLY2(x,y)
     #define ACCONLY3(x,y,z)
+    #define ACCONLY4(a,b,c,d)
+    #define ACCONLY5(a,b,c,d,e)
     #define ACCONLYF(x)
     #define IFINGAME(land, ok, fallback) if(isLandIngame(land)) { ok } else { fallback }
     #define INMODE(x) if(x) return true;
@@ -565,7 +566,7 @@ EX eLand getNewLand(eLand old) {
     laDeadCaves, laRedRock, laVariant, laHell, laCocytus, laPower,
     laBull, laTerracotta, laRose, laGraveyard, laHive, laDragon, laTrollheim,
     laWet, laFrog, laEclectic, laCursed, laDice,
-    laCrossroads5,
+    laCrossroads5, laCrossroads6
     })
     if(landUnlocked(l)) tab[cnt++] = l;    
 
@@ -588,6 +589,7 @@ EX eLand getNewLand(eLand old) {
     {laDesert, laRedRock, 5, 5},
     {laFrog, laReptile, 2, 2}, {laFrog, laSwitch, 2, 2}, {laFrog, laZebra, 2, 2},
     {laEclectic, laStorms, 3, 3}, {laEclectic, laIce, 3, 3}, {laEclectic, laPalace, 3, 3}, {laEclectic, laDeadCaves, 3, 3},
+    {laCursed, laCrossroads6, 1, 1},
     
     {laEFire, laDragon, 5, 5}, {laEWater, laLivefjord, 5, 5}, {laEEarth, laDeadCaves, 5, 5}, {laEAir, laWhirlwind, 5, 5},
     }) {
@@ -735,7 +737,7 @@ EX vector<eLand> land_over = {
   laPrairie, laBull, laTerracotta, laRose,
   laElementalWall, laTrollheim,
   laHell, laCrossroads3, laCocytus, laPower, laCrossroads4,
-  laCrossroads5,
+  laCrossroads5, laCrossroads6,
   // EXTRA
   laWildWest, laHalloween, laDual, laSnakeNest, laMagnetic, laCA, laAsteroids
   };
