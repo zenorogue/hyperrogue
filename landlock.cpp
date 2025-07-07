@@ -800,6 +800,7 @@ EX eLand which_thematic(eLand l) {
     case laEclectic:
     case laRlyeh:
     case laVariant:
+    case laMasterCrossroads:
     case laCamelot: // in
     case laTemple: // not via crossroads
     case laPrincessQuest: // not via crossroads
@@ -843,7 +844,6 @@ EX eLand which_thematic(eLand l) {
     case laCrossroads4:
     case laCrossroads5:
     case laCrossroads6:
-    case laMasterCrossroads:
     case laThematic:
     case laThematicAbstract:
     case laThematicNature:
