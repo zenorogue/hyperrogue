@@ -469,6 +469,8 @@ extern videopar vid;
 #define R200 (big_unlock ? 800 : 200)
 // Crossroads V
 #define R300 (big_unlock ? 1200 : 300)
+// Master Crossroads
+#define R500 (big_unlock ? 2000 : 500)
 // kill types for Dragon Chasms
 #define R20 (big_unlock ? 30 : 20)
 // kill count for Graveyard/Hive
