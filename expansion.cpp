@@ -470,11 +470,11 @@ EX int curr_dist(cell *c) {
     case dfStart:
       return celldist(c);
     case dfWorld:
-      if((isCyclic(c->land) || among(c->land, laCanvas, laCaribbean, laStorms, laRlyeh))) {
+      if((isCyclic(c->land) || among(c->land, laCanvas, laCaribbean, laStorms, laRlyeh) || among(land_structure, lsHorodisks, lsVoronoi))) {
         if(eubinary || c->master->alt) return celldistAlt(c);
         return UNKNOWN;
         }
-      return inmirror(c) ? (c->landparam & 255) : c->landparam;
+      return inmirror(c) ? (c->landparam & 255) : isEquidLand(c) ? c->landparam : UNKNOWN;
     }
   return 0;    
   }
@@ -608,8 +608,11 @@ void celldrawer::do_viewdist() {
  
   switch(number_coding) {
     case ncDistance: { 
-      label = cd == UNKNOWN ? "?" : its(cd);
+      label = among(cd, ALTDIST_BOUNDARY, ALTDIST_UNKNOWN, ALTDIST_ERROR, UNKNOWN) ? "?" : its(cd);
       dc = distcolors[cd];
+      // the '?' cases should have different colors
+      if(cd == UNKNOWN) dc = distcolors[ALTDIST_BOUNDARY+1];
+      if(cd == ALTDIST_ERROR) dc = distcolors[ALTDIST_BOUNDARY+2];
       break;
       }
     case ncType: {
