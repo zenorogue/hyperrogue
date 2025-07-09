@@ -855,13 +855,6 @@ EX string generateHelpForLand(eLand l) {
     }  
 #endif
 
-  if(isThematic(l)) {
-    s += XLAT("\n\nThe following lands connect to this part: ");
-
-    int qty = 0;
-    for(eLand l1: land_over) if(isLandIngame(l1) && which_thematic(l1) == l) { if(qty) s += ", "; qty++; s += XLATN(linf[l1].name); }
-    }
-
   return s;
   }
 

@@ -2521,27 +2521,13 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
     case laCrossroads5:
     case laCrossroads6:
     case laMasterCrossroads:
-
-    case laThematic: case laThematicNature: case laThematicUrban: case laThematicDeath: case laThematicAbstract: case laThematicWater: case laThematicEarth: case laThematicHeat:
       if(c->wall == waTower) c->land = laCamelot;
       ONEMPTY {
-        if(isThematic(c->land) && hrand(100) < 10) switch(c->land) {
-          case laThematicNature: c->wall = pick(waSmallTree, waBigTree); break;
-          case laThematicUrban: c->wall = pick(waRuinWall, waPalace); break;
-          case laThematicDeath: c->wall = pick(waAncientGrave, waFreshGrave); break;
-          case laThematicAbstract: c->wall = pick(waFloorA, waFloorB, waTrapdoor); break;
-          case laThematicWater: { c->wall = waShallow; forCellCM(c1, c) if(c1->land == c->land) c1->wall = waShallow; } break;
-          case laThematicEarth: c->wall = waStone; break;
-          case laThematicHeat: c->wall = pick(waBonfireOff, waIcewall); break;
-          default: ;
-          }
-        int them_abstract = c->land == laThematicAbstract ? 3 : isThematic(c->land) ? 0 : 1;
-
         if(!BITRUNCATED && c->land == laCrossroads5 && hrand(100) < 60)
           c->wall = waBarrier;
         else if(!inv::on && items[itShard] >= 10 && hrand(8000) < 120*orbcrossfun(items[itShard]) && mirror::build(c)) ;
-        else if(hyperstonesUnlocked() && !racing::on && hrand(8000) < 100 * them_abstract && mirror::build(c)) ;
-        else if(tactic::on && isCrossroads(specialland) && hrand(8000) < 120 * them_abstract && mirror::build(c)) ;
+        else if(hyperstonesUnlocked() && !racing::on && hrand(8000) < 100 && mirror::build(c)) ;
+        else if(tactic::on && isCrossroads(specialland) && hrand(8000) < 120 && mirror::build(c)) ;
         else if(c->land == laCrossroads4 && hrand(24000) < 10 && tactic::on)
           c->wall = waRose;
         else {
@@ -2877,7 +2863,7 @@ EX void repairLandgen(cell *c) {
   if(c->land == laAlchemist && c->wall != waFloorA && c->wall != waFloorB)
     c->wall = waFloorA;
   
-  if(c->wall == waIcewall && !among(c->land, laIce, laCocytus, laBlizzard, laEclectic, laThematicHeat))
+  if(c->wall == waIcewall && !among(c->land, laIce, laCocytus, laBlizzard, laEclectic))
     c->wall = waNone;
   
   if(c->wall == waRed3 && c->land != laRedRock && c->land != laSnakeNest && c->land != laBrownian && c->land != laEclectic)

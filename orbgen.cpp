@@ -600,12 +600,6 @@ EX void placeCrossroadOrbs(cell *c) {
     int gch = oi.gchance;
     if(!inv::on) gch /= orbcrossfun(treas); else gch /= 2;
 
-    if(isThematic(c->land)) {
-      bool local = which_thematic(oi.l) == c->land;
-      if(!local) continue;
-      mul *= 7;
-      }
-
     if(hrand(gch) >= mul) continue;
     if(hrand(50+items[itHyperstone]) >= 50) continue;
 

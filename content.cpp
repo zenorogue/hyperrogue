@@ -1754,30 +1754,6 @@ LAND( 0x7030A0, "Crossroads VI", laCrossroads6, ZERO, itHyperstone, RESERVED, "A
   NATIVE(0)
   REQ(ITEMS(itCursed, 5))
 
-LAND( 0xFF0060, "Crossroads VII", laThematic, ZERO, itHyperstone, RESERVED, thematic_crossroads)
-  NATIVE(0) REQ(GOLD(R400))
-
-LAND( 0x308030, "Crossroads VII (Nature)", laThematicNature, ZERO, itHyperstone, RESERVED, thematic_crossroads)
-  NATIVE(0) REQ(GOLD(R400))
-
-LAND( 0x60C0C0, "Crossroads VII (Urban)", laThematicUrban, ZERO, itHyperstone, RESERVED, thematic_crossroads)
-  NATIVE(0) REQ(GOLD(R400))
-
-LAND( 0x606060, "Crossroads VII (Death)", laThematicDeath, ZERO, itHyperstone, RESERVED, thematic_crossroads)
-  NATIVE(0) REQ(GOLD(R400))
-
-LAND( 0xC060C0, "Crossroads VII (Abstract)", laThematicAbstract, ZERO, itHyperstone, RESERVED, thematic_crossroads)
-  NATIVE(0) REQ(GOLD(R400))
-
-LAND( 0x6060C0, "Crossroads VII (Water)", laThematicWater, ZERO, itHyperstone, RESERVED, thematic_crossroads)
-  NATIVE(0) REQ(GOLD(R400))
-
-LAND( 0x1030F0, "Crossroads VII (Fire/Ice)", laThematicHeat, LF_ICY, itHyperstone, RESERVED, thematic_crossroads)
-  NATIVE(0) REQ(GOLD(R400))
-
-LAND( 0xFFFF00, "Crossroads VII (Earth/Air)", laThematicEarth, ZERO, itHyperstone, RESERVED, thematic_crossroads)
-  NATIVE(0) REQ(GOLD(R400))
-
 LAND( 0xC0B090, "Master Crossroads", laMasterCrossroads, ZERO, itHyperstone, RESERVED, "A crossroads that connects only to other crossroads.")
   NATIVE(0) REQ(GOLD(R500))
 

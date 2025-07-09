@@ -2064,7 +2064,6 @@ EX namespace heat {
   EX double absheat(cell *c) {
     if(c->land == laCocytus) return HEAT(c) -.6;
     if(c->land == laIce || c->land == laBlizzard || c->land == laEclectic) return HEAT(c) -.4;
-    if(c->land == laThematicHeat) return HEAT(c) - 0.2;
     return 0;
     }
   
@@ -2168,8 +2167,6 @@ EX namespace heat {
             hmod += xrate*.1;
           if(ct->land == laVolcano) 
             hmod += xrate * (ct->wall == waMagma ? .4 : .2);
-          else if(c->land == laThematicHeat && !isThematic(ct->land) && !isIcyLand(ct->land) && ct->land != laBarrier)
-            hmod += xrate * .3;
           }
         
         for(cell* ct: ls) {
@@ -2218,7 +2215,7 @@ EX namespace heat {
         addMessage(XLAT("%The1 melts away!", c->monst));
         fallMonster(c);
         }
-      if(c->wall == waIcewall && HEAT(c) > (c->land == laThematicHeat ? .2 : .4))
+      if(c->wall == waIcewall && HEAT(c) > .4)
         drawParticles(c, MELTCOLOR, 4, 60),
         c->wall = waNone, kills[0]++;
       if(c->wall == waFrozenLake && HEAT(c) > (c->land == laCocytus ? .6 : .4)) 

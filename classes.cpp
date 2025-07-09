@@ -420,9 +420,6 @@ const char *ruindesc =
 const char *rock_description = 
   "Shoot the Space Rocks for score. Large Rocks will split into two smaller rocks.";
 
-const char *thematic_crossroads =
-  "The Thematic Crossroads has various sections that connect to lands with specific theme.";
-
 #if HDR
 enum eSlimegroup { sgNone, sgCave, sgWater, sgFloorA, sgFloorB, sgVine, sgTree };
 #endif

@@ -53,7 +53,7 @@ EX int landMultiplier(eLand l) {
   }
 
 EX bool isCrossroads(eLand l) {
-  return among(l, laCrossroads, laCrossroads2, laCrossroads3, laCrossroads4, laCrossroads5, laCrossroads6, laMasterCrossroads) || isThematic(l);
+  return among(l, laCrossroads, laCrossroads2, laCrossroads3, laCrossroads4, laCrossroads5, laCrossroads6, laMasterCrossroads);
   }
 
 EX bool isCrossroadsNM(eLand l) {
@@ -61,7 +61,7 @@ EX bool isCrossroadsNM(eLand l) {
   }
 
 EX bool bearsCamelot(eLand l) {
-  return isCrossroads(l) && !among(l, laCrossroads2, laCrossroads5, laMasterCrossroads) && (l == laThematicUrban || !isThematic(l));
+  return isCrossroads(l) && !among(l, laCrossroads2, laCrossroads5, laMasterCrossroads);
   }
 
 EX bool inmirror(const cellwalker& cw) {
@@ -339,8 +339,6 @@ EX bool voronoi_sea_incompatible(eLand l1, eLand l2) {
 EX bool incompatible1(eLand l1, eLand l2) {
   if(l1 == laMasterCrossroads && !isCrossroads(l2)) return true;
 
-  if(isThematic(l1) && which_thematic(l2) != l1) return true;
-
   if(isCrossroadsNM(l1) && isCrossroadsNM(l2)) return true;
   if(l1 == laJungle && l2 == laMotion) return true;
   if(l1 == laMirrorOld && l2 == laMotion) return true;
@@ -463,14 +461,6 @@ EX bool all_unlocked = false;
 
 EX vector<eLand> cheatdest_list;
 
-EX eLand getNewThematic(eLand l) {
-  for(int it=0; it<100; it++) {
-    eLand l1 = pick(laThematicNature, laThematicUrban, laThematicDeath, laThematicAbstract, laThematicHeat, laThematicWater, laThematicEarth);
-    if(l1 != l) return l1;
-    }
-  return l;
-  }
-
 EX eLand getNewLand(eLand old) {
 
   #if CAP_LEGACY
@@ -583,8 +573,7 @@ EX eLand getNewLand(eLand old) {
     laDeadCaves, laRedRock, laVariant, laHell, laCocytus, laPower,
     laBull, laTerracotta, laRose, laGraveyard, laHive, laDragon, laTrollheim,
     laWet, laFrog, laEclectic, laCursed, laDice,
-    laCrossroads5, laCrossroads6, laMasterCrossroads,
-    laThematicNature, laThematicUrban, laThematicDeath, laThematicAbstract, laThematicHeat, laThematicWater, laThematicEarth
+    laCrossroads5, laCrossroads6, laMasterCrossroads
     })
     if(landUnlocked(l)) tab[cnt++] = l;    
 
@@ -755,131 +744,10 @@ EX vector<eLand> land_over = {
   laPrairie, laBull, laTerracotta, laRose,
   laElementalWall, laTrollheim,
   laHell, laCrossroads3, laCocytus, laPower, laCrossroads4,
-  laCrossroads5, laCrossroads6, laMasterCrossroads, laThematic,
+  laCrossroads5, laCrossroads6, laMasterCrossroads,
   // EXTRA
   laWildWest, laHalloween, laDual, laSnakeNest, laMagnetic, laCA, laAsteroids
   };
-
-EX bool isThematic(eLand l) {
-  return among(l, laThematic, laThematicNature, laThematicUrban, laThematicDeath, laThematicAbstract, laThematicHeat, laThematicWater, laThematicEarth);
-  }
-
-EX eLand which_thematic(eLand l) {
-  // note: even if some lands are not directly accessible from Thematic, they still affect orb generation in it
-  switch(l) {
-    case laJungle:
-    case laEndorian:
-    case laWineyard:
-    case laOvergrown:
-    case laFrog:
-    case laRose:
-    case laDryForest:
-    case laPrairie:
-    case laBull:
-    case laMountain: // not via crossroads
-    case laClearing: // not via crossroads
-    case laTortoise: // not via crossroads
-      return laThematicNature;
-    case laAlchemist:
-    case laMotion:
-    case laMirror:
-    case laMirrorOld:
-    case laMinefield:
-    case laSwitch:
-    case laReptile:
-    case laZebra:
-    case laDice:
-    case laWestWall:
-    case laHalloween: // not standard
-    case laDual: // not standard
-      return laThematicAbstract;
-    case laIvoryTower:
-    case laPalace:
-    case laDungeon:
-    case laRuins:
-    case laEclectic:
-    case laRlyeh:
-    case laVariant:
-    case laMasterCrossroads:
-    case laCamelot: // in
-    case laTemple: // not via crossroads
-    case laPrincessQuest: // not via crossroads
-    case laWildWest: // not standard
-      return laThematicUrban;
-    case laHunting:
-    case laGraveyard:
-    case laBurial:
-    case laCursed:
-    case laDeadCaves:
-    case laTerracotta:
-    case laHive:
-    case laHaunted: case laHauntedWall: case laHauntedBorder: // not via crossroads
-      return laThematicDeath;
-    case laIce:
-    case laVolcano:
-    case laDragon:
-    case laHell:
-    case laCocytus:
-    case laPower:
-    case laBlizzard:
-    case laEFire:
-      return laThematicHeat;
-    case laNone:
-    case laBarrier:
-    case laOceanWall:
-    case laCA:
-    case laCanvas:
-    case laElementalWall:
-    case laMercuryRiver:
-    case laMirrorWall:
-    case laMirrorWall2:
-    case laMirrored:
-    case laMirrored2:
-    case laMemory:
-    case landtypes:
-      return laNone;
-    case laCrossroads:
-    case laCrossroads2:
-    case laCrossroads3:
-    case laCrossroads4:
-    case laCrossroads5:
-    case laCrossroads6:
-    case laThematic:
-    case laThematicAbstract:
-    case laThematicNature:
-    case laThematicUrban:
-    case laThematicDeath:
-    case laThematicHeat:
-    case laThematicWater:
-    case laThematicEarth:
-    case laMagnetic:
-    case laAsteroids:
-      return laThematic;
-    case laOcean:
-    case laDocks:
-    case laWet:
-    case laWarpCoast: case laWarpSea:
-    case laLivefjord:
-    case laKraken: // not direct
-    case laCaribbean: // not direct
-    case laBrownian: // not direct
-    case laWhirlpool: // not direct
-    case laEWater:
-      return laThematicWater;
-    case laRedRock:
-    case laDesert:
-    case laCaves:
-    case laStorms:
-    case laWhirlwind:
-    case laEmerald:
-    case laEEarth:
-    case laEAir:
-    case laTrollheim:
-    case laSnakeNest: // not standard
-      return laThematicEarth;
-    }
-  return laThematic;
-  }
 
 EX vector<eLand> landlist;
 
