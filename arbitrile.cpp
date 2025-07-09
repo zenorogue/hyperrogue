@@ -2095,6 +2095,11 @@ int readArgs() {
     shift(); 
     run_raw(args());
     }
+  else if(argis("-tes-handled")) {
+    PHASEFROM(2);
+    shift();
+    run(args());
+    }
   else if(argis("-tes-opt")) {
      arg::run_arguments(current.options);
     }
