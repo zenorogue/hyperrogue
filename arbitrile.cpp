@@ -210,6 +210,14 @@ struct connection_debug_request : hr_exception {
   connection_debug_request(int i): id(i), c(cgclass) {}
   };
 
+struct connection_error : hr_exception {
+  int id;
+  eGeometryClass c;
+  string s;
+  const char *what() const noexcept override { return s.c_str(); }
+  connection_error(int i, string s): id(i), c(cgclass), s(s) {}
+  };
+
 void ensure_geometry(eGeometryClass c) {
   stop_game();
   if(c != cgclass) {
@@ -559,8 +567,9 @@ EX void compute_vertex_valence_prepare(arb::arbi_tiling& ac) {
         auto co = sh.connections[k];
         auto co1 = sh.connections[k-sh.cycle_length];
         if(co.sid != co1.sid) {
-          println(hlog, "ik = ", tie(i,k), " co=", co, " co1=", co1, " cl=", sh.cycle_length);
-          throw hr_parse_exception("connection error #2 in compute_vertex_valence");
+
+          string data = lalign(0, "ik = ", tie(i,k), " co=", co, " co1=", co1, " cl=", sh.cycle_length);
+          throw connection_error(i, "connection error #2 in compute_vertex_valence\n\n" + data);
           }
         mirror_connection(ac, co);
         mirror_connection(ac, co1);
@@ -571,7 +580,7 @@ EX void compute_vertex_valence_prepare(arb::arbi_tiling& ac) {
         auto co = sh.connections[k];
         auto co0 = co;
         co = ac.shapes[co.sid].connections[co.eid];
-        if(co.sid != i) throw hr_parse_exception("connection error in compute_vertex_valence");
+        if(co.sid != i) throw connection_error(i, "connection error in compute_vertex_valence");
         co.mirror ^= co0.mirror;
         mirror_connection(ac, co);
         reduce_gcd(sh.cycle_length, k-co.eid);
@@ -624,8 +633,8 @@ EX bool compute_vertex_valence_flat(arb::arbi_tiling& ac) {
         }
       while(total < TAU - 1e-6);
       if(total == 0) qty = OINF;
-      if(total > TAU + 1e-6) throw hr_parse_exception("improper total in compute_stats");
-      if(at.sid != i) throw hr_parse_exception("ended at wrong type determining vertex_valence");
+      if(total > TAU + 1e-6) throw connection_error(i, "improper total in compute_stats");
+      if(at.sid != i) throw connection_error(i, "ended at wrong type determining vertex_valence");
       if((at.eid - k) % ac.shapes[i].cycle_length) {
         reduce_gcd(ac.shapes[i].cycle_length, at.eid - k);
         return true;
@@ -1645,6 +1654,16 @@ EX void run_raw(string fname) {
   convert::base_geometry = gArbitrary;
   }
 
+EX void launch_connection_debugger(eGeometry g, const arbi_tiling& t, eGeometryClass c, int id) {
+  set_geometry(g);
+  debugged = current;
+  current = t;
+  ensure_geometry(c);
+  debug_polys.clear();
+  debug_polys.emplace_back(Id, id);
+  pushScreen(connection_debugger);
+  }
+
 EX void run(string fname) {
   eGeometry g = geometry;
   arbi_tiling t = current;
@@ -1670,14 +1689,12 @@ EX void run(string fname) {
      start_game();
      addMessage("failed: " + ex.s);
      }
+   catch(connection_error& ce) {
+     launch_connection_debugger(g, t, ce.c, ce.id);
+     gotoHelp(ce.s);
+     }
   catch(connection_debug_request& cr) {
-    set_geometry(g);     
-    debugged = current;
-    current = t;
-    ensure_geometry(cr.c);
-    debug_polys.clear();
-    debug_polys.emplace_back(Id, cr.id);
-    pushScreen(connection_debugger);
+    launch_connection_debugger(g, t, cr.c, cr.id);
     }
   start_game();
   }
@@ -1703,6 +1720,10 @@ EX void sliders_changed(bool need_restart, bool need_start) {
   catch(hr_polygon_error& poly) {
     c = backup;
     slider_error = poly.generate_error();
+    }
+  catch(connection_error& ce) {
+    c = backup;
+    slider_error = ce.s;
     }
   if(need_restart && need_start) start_game();
   }
