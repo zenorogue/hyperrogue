@@ -55,7 +55,8 @@ EX namespace dialog {
     reaction_t reaction_final;
     reaction_t extra_options;
     virtual void draw() = 0;
-    void operator() () { draw(); }
+    bool closed;
+    void operator() () { if(closed) popfinal(); else draw(); }
     virtual ~extdialog() {};
     extdialog();
     /** Pop screen, then call the final reaction. A bit more complex because it eeds to backup reaction_final due to popScreen */
@@ -1612,6 +1613,7 @@ EX namespace dialog {
     }
   
   extdialog::extdialog() {
+    closed = false;
     dialogflags = 0;
     if(cmode & sm::SIDE) dialogflags |= sm::MAYDARK | sm::SIDE;
     reaction = reaction_t();
@@ -1689,12 +1691,11 @@ EX namespace dialog {
   
   bool_reaction_t file_action;
   
-  void handleKeyFile(int sym, int uni);
-
   bool search_mode;
 
   struct file_dialog : extdialog {
     void draw() override;
+    void handleKey(int sym, int uni);
     };
 
   void file_dialog::draw() {
@@ -1744,7 +1745,7 @@ EX namespace dialog {
       dialog::lastItem().color = vv.second;
       string vf = vv.first;
       bool dir = vv.second == CDIR;
-      dialog::add_action([vf, dir] {
+      dialog::add_action([vf, dir, this] {
         string& s(*cfileptr);
         string where = "", what = s, whereparent = "../";
         string last = "";
@@ -1775,7 +1776,7 @@ EX namespace dialog {
           str1 = where + vf;
           if(s == str1) {
             bool ac = file_action();
-            if(ac) popScreen();
+            if(ac) closed = true;
             }
           s = str1;
           }
@@ -1798,10 +1799,10 @@ EX namespace dialog {
       };
     #endif
 
-    keyhandler = handleKeyFile;
+    keyhandler = [this] (int sym, int uni) { handleKey(sym, uni); };
     }
   
-  EX void handleKeyFile(int sym, int uni) {
+  void file_dialog::handleKey(int sym, int uni) {
     handleNavigation(sym, uni);
     string& s(*cfileptr);
     int i = isize(s) - (editext?0:4);
@@ -1811,7 +1812,7 @@ EX namespace dialog {
       }
     else if(sym == SDLK_RETURN || sym == SDLK_KP_ENTER) {
       bool ac = file_action();
-      if(ac) popScreen();
+      if(ac) closed = true;
       }
     else if(sym == SDLK_BACKSPACE && i) {
       int len = utfsize_before(s, i);
