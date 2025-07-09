@@ -2251,14 +2251,6 @@ EX void moreBigStuff(cell *c) {
   
   if(quotient) return;
 
-  extend_alt(c, laCaribbean, laCaribbean, false);
-  if(c->land == laCaribbean) {
-    if(have_alt(c) && celldistAlt(c) <= 0)
-      generateTreasureIsland(c);
-    else
-      c->wall = waSea;
-    }
-
   if(ls::voronoi_structure()) {
     auto p = get_voronoi_winner(c);
     auto ph = p.first;
@@ -2297,6 +2289,14 @@ EX void moreBigStuff(cell *c) {
       setland(c, laCrossroads);
     }
   
+  extend_alt(c, laCaribbean, laCaribbean, false);
+  if(c->land == laCaribbean) {
+    if(have_alt(c) && celldistAlt(c) <= 0)
+      generateTreasureIsland(c);
+    else
+      c->wall = waSea;
+    }
+
   if(!ls::hv_structure()) extend_alt(c, laPalace, laPalace, false, PRADIUS1);
 
   extend_alt(c, laCanvas, laCanvas);
