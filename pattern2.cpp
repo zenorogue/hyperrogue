@@ -1882,7 +1882,7 @@ EX namespace ccolor {
   void list(bool instant) {
     dialog::start_list(900, 900, 'a');
     for(auto p: ccolor::all) if(p->available()) {
-      dialog::addBoolItem(p->name, p == which, dialog::list_fake_key++);
+      dialog::addBoolItem(XLAT(p->name), p == which, dialog::list_fake_key++);
       dialog::add_action([instant, p] {
         if(p == &plain) {
           config_plain(instant);
@@ -2363,6 +2363,7 @@ EX namespace patterns {
     return false;
     }
   
+  #if HDR
   struct changeable_pattern_geometry {
     eGeometry geo;
     eVariation var;
@@ -2374,8 +2375,9 @@ EX namespace patterns {
     string name;
     vector<changeable_pattern_geometry> geometries;
     };
+  #endif
   
-  vector<changeable_pattern> cpatterns = {
+  EX vector<changeable_pattern> cpatterns = {
     {"football", {
       {gNormal, eVariation::bitruncated, PAT_TYPES, 0}, 
       {gSphere, eVariation::bitruncated, PAT_TYPES, 0}, 

@@ -1122,10 +1122,10 @@ EX void initConfig() {
   param_b(nonisotropic_weird_transforms, "nonisotropic_weird_transforms", false);
 
   param_b(arb::apeirogon_consistent_coloring, "apeirogon_consistent_coloring", true)
-  -> editable("apeirogon_consistent_coloring", 'c')
+  -> editable("apeirogon: consistent coloring", 'c')
   -> help("In arbitrary tilings, apeirogons are internally represented as multiple tiles. This option ensures that all subtiles have the same color.");
   param_b(arb::apeirogon_hide_grid_edges, "apeirogon_hide_grid_edges", true)
-  -> editable("apeirogon_hide_grid_edges", 'h')
+  -> editable("apeirogon: hide grid edges", 'h')
   -> help("In arbitrary tilings, apeirogons are internally represented as multiple tiles. This option hides the subtile edges.");
   param_b(arb::apeirogon_simplified_display, "apeirogon_simplified_display", false)
   -> editable("simplified display of apeirogons", 'f')

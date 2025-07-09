@@ -1502,7 +1502,7 @@ void mode_screen_for_current() {
     else gotoHelp(yendor::chelp);
     });
 
-  dialog::addSelItem(XLAT("Pure Tactics Mode"), its(tactic::compute_tscore(mc)), 't');
+  dialog::addSelItem(XLAT("pure tactics mode"), its(tactic::compute_tscore(mc)), 't');
   dialog::add_action(tactic::start);
 
   dialog::addBreak(100);
