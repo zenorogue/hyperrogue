@@ -384,9 +384,9 @@ hpcshape
 
   hpcshape shSpaceship, shMissile, shSpaceshipBase, shSpaceshipCockpit, shSpaceshipGun, shSpaceshipEngine;
 
-  hpcshape shChristmasLight;
+  hpcshape shChristmasLight, shSmallPike;
 
-  hpcshape shReserved[9];
+  hpcshape shReserved[8];
   
   int orb_inner_ring; //< for shDisk* shapes, the number of vertices in the inner ring
   int res1, res2;

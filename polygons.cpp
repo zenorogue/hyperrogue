@@ -1633,6 +1633,7 @@ void geometry_information::prepare_shapes() {
 
   bshape(shPikeBody, PPR::MONSTER_BODY, scalefactor, 402);
   bshape(shPikeEye, PPR::MONSTER_BODY, scalefactor, 403);
+  bshape(shSmallPike, PPR::MONSTER_BODY, scalefactor * 0.5, 402);
 
   // missiles
   bshape(shKnife, PPR::MISSILE, scalefactor, 87);

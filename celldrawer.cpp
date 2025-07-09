@@ -97,6 +97,11 @@ EX colortable endorian_colors = { 0x202010, 0x404030, 0x0000D0 };
 EX colortable canopy_colors = { 0x60C060, 0x489048 };
 EX colortable camelot_cheat_colors = { 0x606060, 0xC0C0C0 };
 
+bool thembound(cell *c) {
+  forCellEx(c1, c) if(c1->land != c->land && c1->land != laBarrier) return true;
+  return false;
+  }
+
 /** return the special colortable for the given cell -- color menu uses this to know that a colortable should be edited */
 EX colortable* special_colortable_for(cell *c) {
   if(c->land == laPrairie && prairie::isriver(c)) return &prairie_colors;
@@ -190,8 +195,10 @@ void celldrawer::setcolors() {
     case laMotion: case laGraveyard: case laWineyard: case laLivefjord: 
     case laRlyeh: case laHell: case laCrossroads: case laJungle:
     case laAlchemist: case laFrog: case laCursed: case laDice:
-    case laThematic: case laThematicNature: case laThematicUrban: case laThematicDeath: case laThematicAbstract: case laThematicWater: case laThematicEarth:
       fcol = floorcolors[c->land]; break;
+
+    case laThematic: case laThematicNature: case laThematicUrban: case laThematicDeath: case laThematicAbstract: case laThematicWater: case laThematicEarth: case laThematicHeat:
+      fcol = floorcolors[laThematic]; break;
     
     case laCA:
       fcol = floorcolors[c->land]; 
@@ -444,7 +451,7 @@ void celldrawer::setcolors() {
       break;
       }
 
-    case laIce: case laCocytus: case laBlizzard: case laEclectic: case laThematicHeat:
+    case laIce: case laCocytus: case laBlizzard: case laEclectic:
       if(useHeatColoring(c)) {
         float h = HEAT(c);
         eLand l = c->land;
@@ -1232,6 +1239,61 @@ void celldrawer::set_land_floor(const shiftmatrix& Vf) {
       set_floor(cgi.shSwitchFloor);
       if(ctof(c) && STDVAR && !arcm::in() && !bt::in() && GDIM == 2) for(int i=0; i<c->type; i++)
         queuepoly(Vf * ddspin(c, i, M_PI/S7) * xpush(cgi.rhexf), cgi.shSwitchDisk, darkena(minf[active_switch()].color, fd, 0xFF));
+      break;
+
+    case laThematicNature:
+      if(c->wall == waNone) {
+        dynamicval<color_t> p(poly_outline, OUTLINE_TRANS);
+        queuepolyat(Vf, cgi.shTreeIcon, darkena(linf[laThematicNature].color, 0, thembound(c) ? 0xFF : 0x10), PPR::FLOOR_DRAGON);
+        }
+      break;
+
+    case laThematicUrban:
+      if(c->wall == waNone) {
+        dynamicval<color_t> p(poly_outline, OUTLINE_TRANS);
+        queuepolyat(Vf, cgi.shHumanoid, darkena(linf[laThematicUrban].color, 0, thembound(c) ? 0xFF : 0x10), PPR::FLOOR_DRAGON);
+        }
+      break;
+
+    case laThematicEarth:
+      if(c->wall == waNone) {
+        dynamicval<color_t> p(poly_outline, OUTLINE_TRANS);
+        queuepolyat(Vf, cgi.shLightningBolt, darkena(linf[laThematicEarth].color, 0, thembound(c) ? 0xFF : 0x10), PPR::FLOOR_DRAGON);
+        }
+      break;
+
+    case laThematicWater:
+      if(c->wall == waNone) {
+        dynamicval<color_t> p(poly_outline, OUTLINE_TRANS);
+        queuepolyat(Vf, cgi.shSmallPike, darkena(linf[laThematicWater].color, 0, thembound(c) ? 0xFF : 0x10), PPR::FLOOR_DRAGON);
+        }
+      break;
+
+    case laThematicAbstract:
+      if(c->wall == waNone) {
+        dynamicval<color_t> p(poly_outline, OUTLINE_TRANS);
+        queuepolyat(Vf, cgi.shDodeca, darkena(linf[laThematicAbstract].color, 0, thembound(c) ? 0xFF : 0x10), PPR::FLOOR_DRAGON);
+        }
+      break;
+
+    case laThematicDeath:
+      if(c->wall == waNone) {
+        dynamicval<color_t> p(poly_outline, OUTLINE_TRANS);
+        queuepolyat(Vf, cgi.shMiniGhost, darkena(linf[laThematicDeath].color, 0, thembound(c) ? 0xFF : 0x10), PPR::FLOOR_DRAGON);
+        }
+      break;
+
+    case laThematicHeat:
+      if(c->wall == waNone) {
+        dynamicval<color_t> p(poly_outline, OUTLINE_TRANS);
+        float h = HEAT(c);
+        color_t col;
+        if(h < -1) col = 0xFF;
+        else if(h < 0) col = gradient(0xFFFFFF, 0xFF, 0, h, -1);
+        else if(h < 1) col = gradient(0xFFFFFF, 0xFFFF00, 0, h, 1);
+        else col = 0xFFFF00;
+        queuepolyat(Vf, cgi.shGem[0], darkena(col, 0, thembound(c) ? 0xFF : 0x10), PPR::FLOOR_DRAGON);
+        }
       break;
 
     case laStorms:

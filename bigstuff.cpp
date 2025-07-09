@@ -1847,7 +1847,7 @@ EX void build_walls(cell *c, cell *from) {
       return;
     }
   
-  else if(good_for_wall(c) && ls::any_wall() && isThematic(c->land) && hrand(10000) < 1000 && !c->master->alt && !racing::on &&
+  else if(good_for_wall(c) && ls::any_wall() && isThematic(c->land) && hrand(10000) < 1500 && !c->master->alt && !racing::on &&
     buildBarrierNowall(c, getNewThematic(c->land))) ;
 
   else if(good_for_wall(c) && ls::any_wall() && c->land == laCrossroads4 && hrand(10000) < 7000 && c->land && !c->master->alt && !tactic::on && !racing::on && 
