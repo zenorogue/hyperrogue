@@ -1489,7 +1489,7 @@ EX land_validity_t& land_validity(eLand l) {
   if(l == laCrossroads3 && !stdeucx && !bigsphere)
     return not_enough_space;
 
-  if(among(l, laCrossroads, laCrossroads2, laCrossroads3, laCrossroads5) && weirdhyperbolic && old_daily_id < walls_when)
+  if(among(l, laCrossroads, laCrossroads2, laCrossroads3, laCrossroads5, laCrossroads6, laMasterCrossroads) && weirdhyperbolic && old_daily_id < walls_when)
     return no_great_walls;
 
   // Crossroads IV is great in weird hyperbolic
