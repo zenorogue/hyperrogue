@@ -10053,3 +10053,452 @@ S("disabled in cheat mode", "wyłączone w trybie oszusta")
 S("disabled in casual mode", "wyłączone w trybie niezobowiązującym")
 S("not eligible due to current mode settings", "nielegalne w obecnych trybach")
 S("no achievements/leaderboards in this version", "brak osiągnięć i rankingów w tej wersji")
+
+// 13.1
+
+// extra gameplay messages
+//=========================
+
+S("You phase through %the1!", "Fazujesz się przez %a1!")
+S("You blow %the1 closer!", "Wdmuchujesz %a1 bliżej!")
+S("You cannot stay in place and shoot, those roses smell too nicely.",
+  "Nie możesz strzelać z miejsca, te róże zbyt pięknie pachną.")
+S("The roses smell nicely, but you are just too tired to care.",
+  "Te róże pięknie pachną, ale jesteś zbyt zmęczon%0y, by zwracać na to uwagę.")
+S("You crush %the1!", "Miażdzysz %a1!")
+S("You punch %the1.", "Uderzasz %a1.")
+S("\"I wouldn't say killing that guard was not pleasant...\"", "\"Nie powiedział%1bym, że zabicie tego strażnika nie było przyjemne...\"")
+S("%1 the Knight", "Rycerz %1")
+S("\n\nOrb charges gained on pickup: %1 (increased to %2 by %the3)",
+  "\n\nŁadunki zdobyte przy podniesieniu: %1 (powiększone do %2 przez %a3)"
+  )
+S("\n\nOrb charges gained on pickup: %1", "Ładunki zdobyte przy podniesieniu: %1")
+S("\n\nActivation cost: %1 charges (reduced to %2 by %the3)\n",
+  "\n\nKoszt aktywacji: %1 (zmniejszony do %2 przez %a3)\n")
+S("\n\nActivation cost: 1 charge\n", "\n\nKoszt aktywacji: 1 ładunek\n")
+S("\n\nActivation cost: %1 charges\n", "\n\nKoszt aktywacji: %1\n")
+S("\n\nFrogs move first, and after they use their jumping power, they stun adjacent non-frog monsters which are not friendly to the player for 2 turns.",
+  "\n\nŻaby ruszają się pierwsze. Po użyciu ich zdolności do skoku, ogłuszają sąsiednie nie-żaby nieprzyjazne graczowi na 2 kolejki.")
+S("Accessible only from %the1, %2, %3, or %4.\n", "Dostępne z: %1, %2, %3, %4.\n")
+S("Accessible only from %the1, %2, %3, %4, or %5.\n", "Dostępne z: %1, %2, %3, %4, %5.\n")
+S("Alternative rule when %the1 is not in the game:\n",
+  "Alternatywna reguła gdy %1 nie istnieje w grze:\n")
+
+// custom land list mode / custom mode manager
+//=============================================
+
+S(
+  "In this mode, you can choose the lands you want to be in game. You can also customize their treasure rate and difficulty.\n\n"
+  "While the game automatically selects a list of lands by default, "
+  "based on whether it thinks they work well in the currently selected tiling, "
+  "you might not agree with this selection.\n\n"
+  "Note that, often, lands are enabled or disabled for a GOOD reason! Use at your own risk.\n\n"
+  "Just click on a land to configure it. If you are not in the custom land list mode, "
+  "this will restart the game. You can change the settings during a custom game, but it counts as a cheat.",
+
+  "W tym trybie możesz wybrać krainy, które chcesz mieć w grze. Możesz także wybrać w nich ilość skarbów i trudność.\n\n"
+  "Wprawdzie gra automatycznie ustawia domyślną liczbę krain, na podstawie tego, co powinno działać dobrze w obecnym "
+  "parkietażu, ale możesz się nie zgadzać z tym wyborem.\n\n"
+  "Uwaga: czasami krainy są dostępne albo nie Z DOBREGO POWODU! Używaj na własne ryzyko.\n\n"
+  "Kliknik krainę by ją skonfigurować. Jeśli nie jesteś w trybie skonfigurowanej listy krain, "
+  "spowoduje to restart gry. Podczas gry w tym trybie można zmieniać ustawienia, ale liczy się to jako oszustwo.")
+
+S("custom land list", "skonfigurowana lista krain")
+S("land in game", "kraina w grze")
+S("customize", "skonfiguruj")
+S(" (ON)", " (WŁ)")
+S("treasure rate", "częstość skarbów")
+S("treasure rate in %the1", "częstość skarbów %abl1")
+S("difficulty", "trudność")
+S("difficulty of %the1", "trudność %abl1")
+S("wandering", "błądzące")
+S("PTM runs", "zagrania w trybie taktycznym")
+S("%the1: number of PTM runs", "%1: liczba zagrań w trybie taktycznym")
+S("PTM multiplier", "mnożnik w trybie taktycznym")
+S("%the1: PTM multiplier", "%1: mnożnik w trybie taktycznym")
+S("test", "testowanie")
+S("?", "?")
+
+S("custom mode manager", "menedżer ustawień")
+S("custom mode", "tryb ustawiony")
+S("recorded mode %1", "zapamiętany tryb %1")
+S("scores recorded", "wyniki zapisane")
+S("file to save:", "plik do zapisania:")
+S("Mode saved to %1", "Tryb zapisany do %1")
+S("Failed to save mode to %1", "Nie udało się zapisać trybu do %1")
+S("file to load:", "plik do załadowania")
+S("Loaded mode from %1", "Załadowano tryb z %1")
+S("Failed to load mode from %1", "Nie udało się załadować trybu z %1")
+S("set mode sort order", "ustaw porządek sortowania trybów")
+S("reverse order", "odwrotna kolejność")
+S("by number of scores", "po liczbie wyników")
+S("by Pure Tactics Mode score", "po wyniku trybu taktycznego")
+S("by Yendor Challenge score", "po wyniku Misji Yendor")
+S("alphabetically", "alfabetycznie")
+S(" scores: %1", " wyniki: %1")
+S(" Yendor: %1", " Yendor: %1")
+S(" tactic: %1", " taktyka: %1")
+S("unused modes: %1", "nieużywane tryby: %1")
+S("search for mode", "szukaj trybu")
+S("unidentified modes", "niezidentyfikowane tryby")
+
+
+// extra land structures
+//=======================
+
+S("landscape", "pejzaż")
+S("excessive crossing walls", "nadmierne krzyzujące się ściany")
+S("regular walls", "zwykłe ściany")
+S("cursed walls", "przeklęte ściany")
+
+S("curse percentage", "procent przeklętych wież")
+S("The percentage of towers in Cursed Walls mode to be manned by Canyon Hags",
+  "jaka część wież na Przeklętych Skrzyżowaniu jest obsadzona przez Wiedźmy z Kanionu")
+
+S("land size in landscape structure", "wielkość krainy w trybie struktury pejzażu")
+S("Each cell gets three coordinates, each of which change smoothly, using the same method as used for the generation of landscapes e.g. in Dragon Chasms. "
+  "Then, we find a cell of the bitruncated cubic honeycomb at these cordinates, and this cell determines which land it is. The bigger the value, the larger the lands.",
+
+  "Każde pole dostaje trzy współrzędne płynnie zmieniające się w przestrzeni, używając tej samej metody, co tworzenie "
+  "map terenu np. w Smoczej Otchłani. Następnie znajdujemy komórkę siatki ośmiościanów ściętych o tej współrzędnych. "
+  "Wybrane pole określa krainę pola oryginalnego. Im większa wartość, tym większe krainy.")
+
+// fundamental domain display mode
+//=================================
+
+// (seems I cannot find the Polish name of this)
+
+S("display fundamental domains", "pokaż dziedzinę podstawową")
+S("fundamental domain", "dziedzina podstawowa")
+S("opacity of domain fill colors", "nieprzezroczystość koloru wypełnienia")
+S("boundary of the central domain", "granica dziedziny środkowej")
+S("boundary of the other domains", "granica innych domen")
+S("gluing label color", "kolor etykiet sklejania")
+S("mirrored gluing label color", "kolor lustrzanych etykiet sklejania")
+S("fundamental: fill faces", "kolor ścian dziedziny podstawowej")
+S("gluing label distance", "odległość krawędzi sklejania")
+S("gluing label scale", "skala krawędzi sklejania")
+S("domain line quality", "jakość linii dziedzin")
+S("fundamental: single edges", "dziedzina podstawowa: pojedyncze krawędzie")
+S("domain boundary width factor", "mnożnik szerokości dla granicy")
+S("fundamental domain method", "metoda uzyskania dziedziny")
+S("disabled", "wyłączone")
+S("do not construct or draw the fundamental domains", "nie konstruuj dziedzin podstawowych")
+S("corners", "wierzchołki")
+S("find the shape automatically", "znajdź kształt automatycznie")
+S("centers", "środki")
+S("may produce less corners", "może uzyskać mniej wierzchołków")
+S("special", "specjalne")
+S("nice domains for specific quotient shapes", "ładne dziedziny dla poszczególnych kształtów")
+
+// VR quickmenu
+
+S("VR quickmenu", "szybkie menu VR")
+S("These hotkeys can be activated at any time by pressing Alt+key. They are mostly useful when showing VR to someone. Demos can define extra hotkeys.",
+  "Te opcje można uruchomić w dowolnym momencie z Altem. Są głównie użyteczne gdy pokazujesz VR komuś. "
+  "Dema definiują dodatkowe klawisze."
+  )
+S("increase camera speed", "szybsza kamera")
+S("decrease camera speed", "wolniejsza kamera")
+S("increase absolute unit", "większa jednostka absolutna")
+S("decrease absolute unit", "mniejsza jednostka absolutna")
+S("increase model size", "większy model")
+S("decrease model size", "mniejszy model")
+S("increase Z-shift", "większe przesunięcie w Z")
+S("decrease Z-shift", "mniejsze przesunięcie w Z")
+S("always show HUD", "zawsze pokazuje interfejs")
+S("reset VR reference", "resetuj punkt odniesienia VR")
+S("VR quickmenu help", "pomoc do szybkiego menu VR")
+
+// new map editor interface
+//==========================
+
+S("ESC = menu", "ESC = menu")
+S("teleport player", "teleportuj gracza")
+S("teleport where", "teleportuj gdzie")
+S("press Shift to clear", "naciśnij Shift by wczyścić")
+S("build on walls", "budowanie na ścianach")
+S("texture editor", "edytor tekstur")
+S("save only the shapes", "zapisz same kształty")
+S("load only the shapes", "załaduj same kształty")
+S("save the map", "zapisz mapę")
+S("load the map", "załaduj mapę")
+S("Are you sure you want to restart? This will erase all shapes.",
+  "Czy na pewno chcesz restartować? Wszystkie kształty znikną.")
+S("complex tessellations", "Złożone parkietaże")
+S("patterns", "wzory")
+S("color group", "grupa kolorów")
+S("load current", "załaduj obecny")
+S("switch auto", "zmiana trybu auto")
+S("area", "powierzchnia")
+S("camera", "kamera")
+S("Map settings", "ustawienia mapy")
+
+// canvas color patterns
+//=======================
+
+S("no walls", "bez ścian")
+S("rgb(r,g,b)\n", "rgb(r,g,b)\n")
+S("indexed(f) (where f is a function of p, p=1 for red, 2 for green, 3 for blue)",
+  "indexed(f) (gdzie f jest funkcją p, p=1/2/3 dla czerwonego/zielonego/niebieskiego)")
+S("random", "losowo")
+S("shape", "kształty")
+S("shape (mirror)", "kształty (lustro)")
+S("threecolor", "trójkolor")
+S("dark landscape", "mroczny krajobraz")
+S("Crystal cage", "Kryształ: klatka")
+S("Crystal hyperplane", "Kryształ: hiperpłaszczyzny")
+S("Crystal honeycomb", "Kryształ: plaster miodu")
+S("Crystal diagonal", "Kryształ: przekątna")
+
+// various settings
+//==================
+
+// configure scratch textures in 3D modes
+
+S("wall/floor texture settings", "ustawienia tekstur ścian/podłóg")
+S("strength of the Escher texture (inside)", "siła tekstury Eschera (wnętrze)")
+S("strength of the Escher texture (boundary)", "siła tekstury Eschera (brzeg)")
+S("strength of the Escher texture (boundary width)", "siła tekstury Eschera (szerokość brzegu)")
+S("scratch alpha", "nieprzezroczystość zadrapań")
+S("scratch brightness", "jasność zadrapań")
+S("scratch length", "długość zadrapań")
+S("the seed for scratch generation", "ziarno losowe zadrapań")
+S("scratch width", "szerokość zadrapań")
+S("the number of scratches around", "liczba kołowych zadrapań")
+S("the number of orthogonal scratches", "liczba zadrapań prostopadłych")
+S("the number of parallel scratches", "liczba zadrapań równoległych")
+S("the number of radial scratches", "liczba zadrapań promienistych")
+S("the number of random scratches", "liczba zadrapań losowych")
+S("grid darkness", "ciemność siatki")
+S("grid strength", "siła siatki")
+S("grid width", "szerokość siatki")
+
+// projections and projection-related settings
+
+S("rug projection", "rzut dywanu")
+S("layered equidistant", "ekwidystanty warstwami")
+S("variant fisheye", "wariant rybiego oka")
+S("polar coordinates", "współrzędne biegunowe")
+
+S("offside parameter", "parametr offside")
+S("Do not center the projection on the player -- move the center offside. Useful in polar, where the value equal to offside2 can be used to center the projection on the player.",
+"Nie centruj rzutu na graczu, tylko na boku. Użyteczne w rzucie biegunowym, gdzie wartość równa offside2 "
+"może być stosowana do wycentrowania rzutu na graczu.")
+
+S("offside parameter II", "parametr offside II")
+S("In polar projection, what distance to display in the center. Use asinh(1) (in hyperbolic) to make it conformal in the center, "
+  "and pi to have the projection extend the same distance to the left, right, and upwards.",
+  "W rzucie biegunowym, odległość pokazywana w centrum. Użyj asinh(1) (w geometrii hiperbolicznej) by obraz był konforemny w "
+  "centrum, i pi by rzut rozszerzał się na tą samą odległość w lewo, prawo, i górę.")
+
+S("off-center parameter", "Parametr niecentrowania")
+S("This projection is obtained by composing gnomonic projection and inverse stereographic projection. This parameter changes the center "
+  "of the first projection (0 = gnomonic, 1 = stereographic). Use a value closer to 1 to make the projection more conformal.",
+  "Ten rzut otrzymujemy przez złożenie rzutu gnomonicznego i odwrotnego rzutu stereograficznego. Ten tryb zmienia "
+  "środek pierwszego rzutu (0=gnomoniczny, 1=stereograficzny). Wartość bliżej 1 powoduje, że rzut jest bardziej konforemny.")
+
+S("halve distances", "połów odległości")
+S("This option halves the distances of every point from the center. Useful in the Minkowski hyperboloid model, "
+  "to get a visualization of an alternative hyperboloid model based on Clifford algebras.",
+  "Ta opcja dzieli odległości wszystkich punktów od centrum przez 2. Użyteczne w modelu hiperboloidy Minkowskiego, by uzyskać "
+  "wizualizację alternatywnego modelu hiperboloidy opartego na algebrach Clifforda.")
+
+// geometry settings
+
+S("Only works in orientable spaces", "działa tylko w przestrzeniach orientowalnych")
+S("twisted current x E", "skręcona obecna x E")
+S("ERROR: failed to solve the twist values, the map will be incorrect",
+  "BŁĄD: nie udało się rozwiązać wartości skręcenia, mapa będzie nieprawidłowa")
+S("The space you are currently in a twisted product space. ", "Przestrzeń w której jesteś, w przestrzeni skręconego produktu.")
+
+S("apeirogon: consistent coloring", "apeirogon: spójne kolorowanie")
+S("In arbitrary tilings, apeirogons are internally represented as multiple tiles. This option ensures that all subtiles have the same color.",
+  "W parkietażach z pliku apeirogony są wewnętrznie reprezentowane jako wiele płytek. Ta opcja powoduje spójne kolorowanie.")
+
+S("apeirogon: hide grid edges", "apeirogon: ukryj krawędzie")
+S("In arbitrary tilings, apeirogons are internally represented as multiple tiles. This option hides the subtile edges.",
+  "W parkietażach z pliku apeirogony są wewnętrznie reprezentowane jako wiele płytek. Ta opcja usuwa krawędzie podkomórek.")
+
+S("Connect the ends of the apeirogon segment with the boundary point using straight lines. This should be faster and, in most cases, actually more correct.",
+  "Łączy końce odcinków segmentów apeirogonów przy użyciu linii prostych. To powinno być szybsze, i zazwyczaj bardziej poprawne.")
+
+S("failed to convert: ", "Nie udało się skonwertować: ") // (to tes format to use rule generator)
+
+// Nil styles
+S("six sides", "sześć ścian")
+S("eight sides", "osiem ścian")
+S("hex", "heks")
+
+// expansion mode settings
+
+S("based on analysis", "na podstawie analizy")
+S("3D rules", "reguły 3D")
+S("generated rules", "reguły wygenerowane")
+S("built-in rules", "reguły wbudowane")
+S("cell counting range", "zasięg liczenia pól")
+S("max cells to count", "ile pól liczyć")
+S("Counting stops if that many cells are reached.", "Liczenie się kończy gdy osiągniemy tyle pól.")
+S("max distance to check", "największa odległość do sprawdzenia")
+S("Counting stops if this distance is reached.", "Liczenie się kończy gdy osiągniemy taką odległość.")
+S("use analyzer if possible", "użyj analizatora jeśli możesz")
+S("use sight range instead", "użyj zasięgu wzroku zamiast tego")
+
+// Goldberg settings
+
+S("cell area ratio (max/min)", "stosunek pól (max/min)")
+S("hex only", "tylko heksy")
+S("square only", "tylko kwadraty")
+S("Goldberg mapping", "mapowanie Goldberga")
+S("linear", "liniowe")
+S("straight lines remain straight", "linie proste pozostają proste")
+S("equal-area", "równopolowe")
+S("try to have tiles of equal area (tiles on corners will still be different)",
+  "postaraj się, by pola miały równe pola (pola na rogach wciąż różne)")
+S("conformal", "konforemne")
+S("try to get regularly shaped tiles", "postaraj się, by płytki miały regularne kształty")
+S("gnomonic (vertex)", "gnomoniczne (wierzchołek)")
+S("regular in gnomonic projection (centered on pure vertex)", "formene w rzucie gnomonicznym (centrowanym na wierzchołku)")
+S("gnomonic (face)", "gnomoniczne (ściana)")
+S("regular in gnomonic projection (centered on pure face)", "foremne w rzucie gnomonicznym (centrowanym na ścianie)")
+S("tangent adjustment", "dostosowanie tangensowe")
+S("equal distances on the original edges", "równe odległości na oryginalnych krawędziach")
+
+// font selection
+
+S("font to use:", "używana czcionka:")
+S("select font", "ustaw czcionkę")
+S("note: if using the Chinese translation, Noto Sans will override the options above it",
+  "uwaga: jeśli używasz chińskiego tłumaczenia, Noto Sans zastępuje opcję powyżej")
+S("TTF font", "czcionka TTF")
+S("OTF font", "czcionka OTF")
+S("Chinese ASCII", "chińskie ASCII")
+
+// boolean settings
+
+S("on/off dialog/help", "wł/wył dialog/help")
+S("Enable this for a full dialog when editing some on/off settings (otherwise, the dialog is not shown, we just switch). "
+  "This lets you see an explanation of what the setting does. You can also press ALT while changing such settings.",
+  "Uruchom to, by przy edycji ustawień wł/wył używać pełnego dialogu. (W przeciwnym przypadku przełącznik jest po "
+  "prostu przestawiany.) Pozwala to widzieć wyjaśnienie dla danego ustawienia. Możesz też trzymać ALT podczas zmiany "
+  "takich ustawień.")
+S("enable", "włącz")
+S("switch", "przestaw")
+S("set default", "ustaw domyślne")
+
+// menu names of some of the settings below were translated before, but extra help about what they do was added
+
+S("Do not show the 'find player' button even if the player seems to be lost.",
+  "Nie pokazuj przycisku 'znajdź gracza' nawet jak wydaje się, że gracz zaginął.")
+
+S("vsync", "vsync")
+S("Disable if you want to see the actual framerate rendered by the engine.",
+  "Wyłącz jeśli chcesz zobaczyć prawdziwą szybkość renderowania.")
+
+S("Buttons activate when they are pressed (by clicking), not when they are released.",
+  "Przyciski są aktywowane gdy się je naciśnie, nie gdy się zwolni.")
+
+S("Font size is set as a relation to screen size.", "Rozmiar czcionki ustawiony w stosunku do rozmiaru ekranu.")
+
+S("This lets your operating system resize the window.", "To pozwala systemowi operacyjnemu zmieniać rozmiar okna.")
+
+S("hollow mine symbols", "puste w środku symbole min")
+S("markers on possible mines", "markery na możliwych minach")
+
+S("If set, only the important items and kills will be shown",
+  "Jeśli włączone, tylko ważne przedmioty i zabicia są pokazane")
+
+S("apply color/pattern changes to canvas automatically",
+  "automatycznie zastosuj zmianę koloru/wzoru do płótna")
+
+S("Computing projections using a GPU (vertex shader) is faster, but sometimes, some projections or their minor details are not available.",
+"Obliczanie rzutów przy użyciu GPU (vertex shader) jest szybsze, ale czasami niektóre rzuty lub detale są niedostępne.")
+
+S("holiday options", "opcje świąteczne")
+S("Special graphical effects on holidays.", "Specjalne efekty graficzne na święta.")
+
+S("Do not draw if their distance is greater than the sight range (although some points might be closer). This is faster.",
+  "Nie rysuj komórek gdy odległość środka jest większa niż zasięg wzroku (mimo że niektóre punkty wciąż mogą być w zasiegu). "
+  "To jest szybsze.")
+
+S(" With the keyboard, you can press Tab to invert the way the pushing direction leans, or Shift+Tab to decide based on how the view is rotated.",
+  " Jeśli używasz klawiatury, możesz nacisnąć Tab by odwrócić kierunek pchnięcia, albo Shift+Tab by wybór zależał "
+  "od obrócenia widoku na ekranie.")
+S("control the pushing direction with TAB", "steruj kerunek pchnięcia przy użyciu TAB")
+S("If set, you control the off-hepetagon pushing direction with TAB. Otherwise, you control it by rotating the screen.",
+  "Jeśli ustawione, sterujesz kierunek odpychania z siedmiokąta naciskając TAB. W przeciwnym wypadku możesz to zrobić "
+  "obracając widok.")
+
+S("Background particle effects, e.g., in the Blizzard.", "Efekty cząsteczek w tle, np. w Zamieci.")
+
+S("Disable if you do not want particle effects and similar.", "Wyłącz jak nie chcesz efektów cząsteczek i tym podobnych.")
+
+S("In 3D modes, display all the walls, including the walls between adjacent wall tiles.",
+  "W trybach 3D, pokaż wszystkie ściany, łącznie ze ścianami między sąsiednimi polami ścian.")
+
+S("draw PC on the underlying map", "na mapie dolnej pokazuj gracza")
+
+S("allow access to all unlockable content", "odblokwanie całego kontentu blokowanego")
+
+S("Disable this to make all line widths 1.", "Wyłącz, by wszystkie linie miały grubość 1.")
+
+S("When this setting is ON, grid lines and various line patterns are drawn as pipes.",
+  "Jeśli ta opcja jest włączona, linie siatki i różne wzory linii będą rysowane jako rury.")
+
+S("Enables easier control of the camera for watching visualizations (when you are not playing the game).",
+  "Łatwiejsze sterowanie kamerach w wizualizacjach (gdy nie grasz w grę).")
+
+S("higher contrast", "większy kontrast")
+S("use higher contrast", "użyj większego kontrastu")
+S("Use higher contrast for some terrain elements.", "większy kontrast dla niektórych elementów terenu.")
+
+// other new settings
+
+// additional stereo mode
+S("cylindrical", "walcowe")
+S("full vertical (not implemented in raycaster)", "w pełni pionowe (nie zaimplementowane w raycasterze)")
+
+S("map font scale", "skala czcionki na mapie")
+S("This affects the size of the characters on the ASCII map. This includes ASCII walls/monster display mode, the minimap, minefield values, and various debug features.",
+  "To wpływa na rozmiar znaków na mapie ASCII. W to się włącza tryb ASCII pokazywania ścian/potworów, mini-mapa, liczby "
+  "pola minowego, i różne opcje ułatwiające debugowanie.")
+
+S("menu line format", "format linii menu")
+S("Displays an arbitrary text instead of menu. You can use e.g. $(turncount) or $(gametime,2) to display the values of parameters and statistics.",
+  "Pokazuje dowolny tekst zamiast 'menu'. Możesz użyć np. $(turncount) lub $(gametime,2) by widzieć wartości "
+"parametrów i statystyk.")
+S("testing", "testowanie")
+S("show turn count", "pokaż liczbę kolejek")
+
+S("display zeros in minefield", "pokazuj zera w polu minowym")
+S("never display zeros", "nigdy nie pokazuj zer")
+S("only in 3D modes", "tylko w trybach 3D")
+S("always display zeros", "zawsze pokazuj zera")
+
+S("opacity of undiscovered minefield", "nieprzezroczystość zakrytego pola minowego")
+S("3D modes only\n\n0 = invisible, 255 = fully opaque", "tylko w trybie 3D\n\n0 = niewidzialne, 255 = nieprzezroczyste")
+
+S("semicasual", "tryb półzobowiązujący")
+S("display save/load counts in exit screen", "pokazuj liczbę zapisów/ładowań na ekranie wyjścia")
+S(" saves: %1 loads: %2 branching: %3", " zapisy: %1 ładowanie: %2 rozgałęzienie: %3")
+
+S("joystick initialization", "inicjalizacja joysticka")
+S("do not use joysticks", "nie używaj joysticka")
+S("fast", "szybka")
+S("do not wait until the joysticks are initialized", "nie czekaj na inicjalizację joysticków")
+S("wait", "czekaj")
+S("wait until the joysticks are initialized", "czekaj aż joysticki się zainicjalizują")
+
+S("raw texture opacity", "nieprzezroczystość surowej tekstury")
+
+// other stuff:
+S("not editable", "nieedytowalne")
+
+// (used in the highscore list)
+S("where", "gdzie")
+S("zoom", "powiększenie")
+
+// (this is about the displayed creature size)
+S("changing this during shmup is counted as cheating", "zmiana tego parametru podczas trybu strzelanki to oszustwo")
+
+S("single type+symmetry", "typ+symetrie")
