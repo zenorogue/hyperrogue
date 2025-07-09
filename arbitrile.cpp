@@ -633,7 +633,7 @@ EX bool compute_vertex_valence_flat(arb::arbi_tiling& ac) {
         }
       while(total < TAU - 1e-6);
       if(total == 0) qty = OINF;
-      if(total > TAU + 1e-6) throw connection_error(i, "improper total in compute_stats");
+      if(total > TAU + 1e-6) throw connection_error(i, "jumped past 360 degrees while determining vertex_valence");
       if(at.sid != i) throw connection_error(i, "ended at wrong type determining vertex_valence");
       if((at.eid - k) % ac.shapes[i].cycle_length) {
         reduce_gcd(ac.shapes[i].cycle_length, at.eid - k);
