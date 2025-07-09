@@ -10056,6 +10056,15 @@ S("no achievements/leaderboards in this version", "brak osiągnięć i rankingó
 
 // 13.1
 
+// new crossroads variants
+//=========================
+
+N("Crossroads VI", GEN_O, "Skrzyżowanie VI", "Skrzyżowania VI", "Skrzyżowanie VI", "na Skrzyżowaniu VI")
+S("A cursed Crossroads layout.", "Przeklęty układ Skrzyżowań.")
+
+N("Master Crossroads", GEN_O, "Główne Skrzyżowanie", "Główne Skrzyżowania", "Główne Skrzyżowanie", "na Głównym Skrzyżowaniu")
+S("A crossroads that connects only to other crossroads.", "Skrzyżowanie łączące się jedynie z innymi skrzyżowaniami.")
+
 // extra gameplay messages
 //=========================
 
