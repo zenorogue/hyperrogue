@@ -615,17 +615,17 @@ color_t exp_parser::parsecolor(int prio) {
   string token = next_token();
   if(params.count(token)) return (color_t) real(params[token]->get_cld());
 
-  auto p = find_color_by_name(s);
+  auto p = find_color_by_name(token);
   if(p) return (p->second << 8) | 0xFF;
 
   color_t res;
-  if(s.size() == 6) {
-    int qty = sscanf(s.c_str(), "%x", &res);
+  if(token.size() == 6) {
+    int qty = sscanf(token.c_str(), "%x", &res);
     if(qty == 0) throw hr_parse_exception("color parse error");
     return res * 256 + 0xFF;
     }
-  else if(s.size() == 8) {
-    int qty = sscanf(s.c_str(), "%x", &res);
+  else if(token.size() == 8) {
+    int qty = sscanf(token.c_str(), "%x", &res);
     if(qty == 0) throw hr_parse_exception("color parse error");
     return res;
    }
