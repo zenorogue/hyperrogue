@@ -10162,7 +10162,7 @@ S("cursed walls", "przeklęte ściany")
 
 S("curse percentage", "procent przeklętych wież")
 S("The percentage of towers in Cursed Walls mode to be manned by Canyon Hags",
-  "jaka część wież na Przeklętych Skrzyżowaniu jest obsadzona przez Wiedźmy z Kanionu")
+  "Jaka część wież na Przeklętych Skrzyżowaniu jest obsadzona przez Wiedźmy z Kanionu")
 
 S("land size in landscape structure", "wielkość krainy w trybie struktury pejzażu")
 S("Each cell gets three coordinates, each of which change smoothly, using the same method as used for the generation of landscapes e.g. in Dragon Chasms. "

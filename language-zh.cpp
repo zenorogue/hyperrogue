@@ -30,7 +30,7 @@
 N("Yeti", GEN_N, "雪人","雪","个")
 N("Icewolf", GEN_N, "冰狼","狼","条")
 N("Ranger",  GEN_N, "游侠","侠","名")
-N("Rock Troll", GEN_N, "岩石巨魔","岩","个")
+N("Rock Troll", GEN_N, "岩石巨魔","魔","个")
 N("Goblin", GEN_N, "地精","地","个")
 N("Sand Worm", GEN_N, "沙虫","虫","条")
 N("Sand Worm Tail", GEN_N, "沙虫尾","虫","段")
@@ -46,21 +46,21 @@ N("Giant Ape", GEN_N, "巨猿","猿","只")
 N("Slime Beast", GEN_N, "黏液兽","黏","头")
 N("Mirror Image", GEN_N, "镜像","镜","个")
 N("Mirage", GEN_N, "幻影","影","个")
-N("Golem", GEN_N, "魔像","魔","个")
+N("Golem", GEN_N, "魔像","像","个")
 N("Eagle", GEN_N, "雄鹰","鹰","只")
 N("Seep", GEN_N, "渗怪","渗","头")
 N("Zombie", GEN_N, "僵尸","尸","个")
 N("Ghost", GEN_N, "鬼魂","鬼","个")
-N("Necromancer", GEN_N, "死灵法师","师","位")
-N("Shadow", GEN_N, "阴影","阴","道")
+N("Necromancer", GEN_N, "死灵法师","法","位")
+N("Shadow", GEN_N, "阴影","影","道")
 N("Tentacle", GEN_N, "触手","触","条")
 N("Tentacle Tail", GEN_N, "触手尾","触","段")
 N("Tentacle W", GEN_N, "触手 W","触","段")
 N("Tentacle (withdrawing)", GEN_N, "触手 （收缩）","触","条")
 N("Cultist", GEN_N, "邪教徒","邪","名")
 N("Fire Cultist", GEN_N, "烈焰邪教徒","邪","名")
-N("Greater Demon", GEN_N, "高等恶魔","恶","个")
-N("Lesser Demon", GEN_N, "低等恶魔","恶","个")
+N("Greater Demon", GEN_N, "高等恶魔","魔","个")
+N("Lesser Demon", GEN_N, "低等恶魔","魔","个")
 N("Ice Shark", GEN_N, "冰鲨","鲨","条")
 N("Running Dog", GEN_N, "奔行犬","犬","条")
 N("Demon Shark", GEN_N, "恶魔鲨","鲨","条")
@@ -80,17 +80,17 @@ N("Shard", GEN_N, "裂片", "片","枚")
 N("Necromancer's Totem", GEN_N, "死灵图腾","图","尊")
 N("Demon Daisy", GEN_N, "恶魔雏菊","菊","朵")
 N("Statue of Cthulhu", GEN_N, "克苏鲁雕像","雕","尊")
-N("Phoenix Feather", GEN_N, "凤凰羽毛","凤","根")
+N("Phoenix Feather", GEN_N, "凤凰羽毛","羽","根")
 N("Ice Sapphire", GEN_N, "冰蓝宝石","宝","枚")
 N("Hyperstone", GEN_N, "双曲石","石","块")
 N("Key", GEN_N, "钥匙","钥","把")
-N("Dead Orb", GEN_N, "失效法球","失","枚")
+N("Dead Orb", GEN_N, "失效法球","球","枚")
 N("Fern Flower", GEN_N, "蕨花","蕨","朵")
 
 // ORBS: we are using a macro here
 // ===============================
 
-#define Orb(E, P) N("Orb of " E, GEN_N, P "法球","法","")
+#define Orb(E, P) N("Orb of " E, GEN_N, P "法球","球","")
 Orb("Yendor", "Yendor")
 Orb("Storms", "风暴")
 Orb("Flash", "闪光")
@@ -107,32 +107,32 @@ Orb("Thorns", "荆棘")
 
 N("none", GEN_N, "无","无","")
 N("ice wall", GEN_N, "冰墙","冰","堵")
-N("great wall", GEN_N, "长城","长","道")
+N("great wall", GEN_N, "长城","城","道")
 N("red slime", GEN_N, "红黏液","红","滩")
 N("blue slime", GEN_N, "蓝黏液","蓝","滩")
-N("living wall", GEN_N, "生机墙","生","堵")
-N("living floor", GEN_N, "生机地板","生","块")
+N("living wall", GEN_N, "生机墙","墙","堵")
+N("living floor", GEN_N, "生机地板","地","块")
 N("dead troll", GEN_N, "死掉的巨魔","死","只")
 N("sand dune", GEN_N, "沙丘","沙","个")
-N("Magic Mirror", GEN_N, "魔镜","魔","面")
-N("Cloud of Mirage", GEN_N, "幻影云","幻","块")
-N("Thumper", GEN_N, "振鼓","振","面")
-N("Bonfire", GEN_N, "篝火","篝","道")
-N("ancient grave", GEN_N, "古墓","古","座")
-N("fresh grave", GEN_N, "新坟","新","座")
+N("Magic Mirror", GEN_N, "魔镜","镜","面")
+N("Cloud of Mirage", GEN_N, "幻影云","云","块")
+N("Thumper", GEN_N, "振鼓","鼓","面")
+N("Bonfire", GEN_N, "篝火","火","道")
+N("ancient grave", GEN_N, "古墓","墓","座")
+N("fresh grave", GEN_N, "新坟","坟","座")
 N("column", GEN_N, "石柱","石","根")
 N("lake of sulphur", GEN_N, "硫磺湖","硫","片")
 N("lake", GEN_N, "湖泊","湖","片")
 N("frozen lake", GEN_N, "冰冻湖","冰","片")
 N("chasm", GEN_N, "裂缝","裂","条")
-N("big tree", GEN_N, "大树","大","棵")
+N("big tree", GEN_N, "大树","树","棵")
 N("tree", GEN_N, "树","树","棵")
 
 // LANDS
 // =====
 
-N("Great Wall", GEN_N, "长城","长","")
-N("Crossroads", GEN_N, "交叉路口","交","")
+N("Great Wall", GEN_N, "长城","城","")
+N("Crossroads", GEN_N, "交叉路口","叉","")
 N("Desert", GEN_N, "沙漠","沙","")
 N("Icy Land", GEN_N, "冰霜之地","冰","")
 N("Living Cave", GEN_N, "生机洞穴","生","")
@@ -3153,7 +3153,7 @@ S(  "This Orb halves the power usage of orbs which cost some "
 
 // missing....
 
-N("warp gate", GEN_N, "扭曲之门","扭","道")
+N("warp gate", GEN_N, "扭曲之门","门","道")
 S("This gate separates the warped area from the normal land.",
   "这道大门分隔正常地域与扭曲区域。")
 S("You cannot move between the cells without dots here!",
@@ -9075,7 +9075,7 @@ S("error: this method works only in rectangular torus", "错误：该方法仅�
 S("set 20x20 torus", "设置20x20环面")
 S("error: this method works only in cylinder", "错误：该方法仅在圆柱中起效")
 S("set cylinder", "设置圆柱体")
-S("error: not supported", "错误：nie działa")
+S("error: not supported", "错误：不支持")
 S("error: this method does not work in spherical geometry", "错误：该方法在球面几何中无效")
 S("error: this method does not work in hyperbolic geometry", "错误：该方法在双曲几何中无效")
 S("3D styles", "3D式样")
@@ -9174,3 +9174,439 @@ S("disabled in cheat mode", "作弊模式中不可解锁")
 S("disabled in casual mode", "轻松模式中不可解锁")
 S("not eligible due to current mode settings", "由于当前模式设置不可解锁")
 S("no achievements/leaderboards in this version", "该版本中无成就/排行榜")
+
+
+// 13.1
+
+// extra gameplay messages
+//=========================
+
+S("You phase through %the1!", "你穿过了%1！")
+S("You blow %the1 closer!", "你将%1吹得更近！")
+S("You cannot stay in place and shoot, those roses smell too nicely.",
+  "你不能原地射击，这些玫瑰花香得太迷人了。")
+S("The roses smell nicely, but you are just too tired to care.",
+  "这些玫瑰花香得迷人，但你实在是太累了，无法在意。")
+S("You crush %the1!", "你压扁了%1！")
+S("You punch %the1.", "你拳打%1。")
+S("\"I wouldn't say killing that guard was not pleasant...\"", "“我不会说杀死那个守卫不愉快……”")
+S("%1 the Knight", "骑士%1")
+S("\n\nOrb charges gained on pickup: %1 (increased to %2 by %the3)",
+  "\n\n拾取时获得的法球充能：%1（增加%3至%2）"
+  )
+S("\n\nOrb charges gained on pickup: %1", "拾取时获得的法球充能：%1")
+S("\n\nActivation cost: %1 charges (reduced to %2 by %the3)\n",
+  "\n\n启动消耗：%1 (减少%3至%2)\n")
+S("\n\nActivation cost: 1 charge\n", "\n\n启动消耗：1充能\n")
+S("\n\nActivation cost: %1 charges\n", "\n\n启动消耗：%1充能\n")
+S("\n\nFrogs move first, and after they use their jumping power, they stun adjacent non-frog monsters which are not friendly to the player for 2 turns.",
+  "\n\n青蛙先行动，使用跳跃能力后，会在2回合内眩晕相邻的对玩家不友好的非青蛙怪物。")
+S("Accessible only from %the1, %2, %3, or %4.\n", "仅可从%1、%2、%3或%4抵达。\n")
+S("Accessible only from %the1, %2, %3, %4, or %5.\n", "仅可从 %1、%2、%3、%4或%5抵达。\n")
+S("Alternative rule when %the1 is not in the game:\n",
+  "%1不在游戏中时的替代规则：\n")
+
+// custom land list mode / custom mode manager
+//=============================================
+
+S(
+  "In this mode, you can choose the lands you want to be in game. You can also customize their treasure rate and difficulty.\n\n"
+  "While the game automatically selects a list of lands by default, "
+  "based on whether it thinks they work well in the currently selected tiling, "
+  "you might not agree with this selection.\n\n"
+  "Note that, often, lands are enabled or disabled for a GOOD reason! Use at your own risk.\n\n"
+  "Just click on a land to configure it. If you are not in the custom land list mode, "
+  "this will restart the game. You can change the settings during a custom game, but it counts as a cheat.",
+
+  "在此模式中，你可以选择希望在游戏中出现的地域。你还可以自定义它们的宝藏出现率和难度。\n\n"
+  "虽然游戏会根据当前选择的平铺方式自动选择地域列表，但你可能不同意此选择。\n\n"
+  "请注意，通常情况下，地域的启用或禁用是有充分理由的！请自行承担风险。\n\n"
+  "只需单击一个地域即可对其进行配置。如果你不在自定义地域列表模式中，"
+  "这将重新启动游戏。你可以在自定义游戏的过程中更改设置，但这将被视为作弊。")
+
+S("custom land list", "自定义地域列表")
+S("land in game", "游戏中的地域")
+S("customize", "自定义")
+S(" (ON)", " (开启)")
+S("treasure rate", "宝藏出现率")
+S("treasure rate in %the1", "%1的宝藏出现率")
+S("difficulty", "难度")
+S("difficulty of %the1", "%1的难度")
+S("wandering", "，漫游")
+S("PTM runs", "纯策略模式游戏")
+S("%the1: number of PTM runs", "%1：纯策略模式游戏数")
+S("PTM multiplier", "纯策略模式倍率")
+S("%the1: PTM multiplier", "%1：纯策略模式倍率")
+S("test", "测试")
+S("?", "?")
+
+S("custom mode manager", "自定义模式管理")
+S("custom mode", "自定义模式")
+S("recorded mode %1", "记录的模式 %1")
+S("scores recorded", "记录的分数")
+S("file to save:", "保存到文件:")
+S("Mode saved to %1", "模式已保存到%1")
+S("Failed to save mode to %1", "无法将模式保存到%1")
+S("file to load:", "加载文件:")
+S("Loaded mode from %1", "从%1加载模式")
+S("Failed to load mode from %1", "无法从%1加载模式")
+S("set mode sort order", "设置模式排序")
+S("reverse order", "反向排序")
+S("by number of scores", "按分数数量")
+S("by Pure Tactics Mode score", "按纯战术模式分数")
+S("by Yendor Challenge score", "按Yendor挑战分数")
+S("alphabetically", "按字母顺序")
+S(" scores: %1", " 分数: %1")
+S(" Yendor: %1", " Yendor: %1")
+S(" tactic: %1", " 战术: %1")
+S("unused modes: %1", "未使用的模式: %1")
+S("search for mode", "搜索模式")
+S("unidentified modes", "未识别的模式")
+
+
+// extra land structures
+//=======================
+
+S("landscape", "地貌")
+S("excessive crossing walls", "过度交叉的墙壁")
+S("regular walls", "普通墙壁")
+S("cursed walls", "被诅咒的墙壁")
+
+S("curse percentage", "诅咒比例")
+S("The percentage of towers in Cursed Walls mode to be manned by Canyon Hags",
+  "在被诅咒的墙壁模式中，由峡谷妖婆占据的塔楼的比例")
+
+S("land size in landscape structure", "地貌结构中的地域大小")
+S("Each cell gets three coordinates, each of which change smoothly, using the same method as used for the generation of landscapes e.g. in Dragon Chasms. "
+  "Then, we find a cell of the bitruncated cubic honeycomb at these cordinates, and this cell determines which land it is. The bigger the value, the larger the lands.",
+
+  "每个格子有三个坐标，每个坐标平滑变化，使用与巨龙裂隙等地貌生成相同的方法。然后，我们在这些坐标处的双截角立方体蜂窝中找一个格块，它决定是哪个地域。数值越大，地域越大。")
+
+// fundamental domain display mode
+//=================================
+
+// (seems I cannot find the Polish name of this)
+
+S("display fundamental domains", "显示基本域")
+S("fundamental domain", "基本域")
+S("opacity of domain fill colors", "域填充颜色的不透明度")
+S("boundary of the central domain", "中央域的边界")
+S("boundary of the other domains", "其他域的边界")
+S("gluing label color", "粘合标签颜色")
+S("mirrored gluing label color", "镜像粘合标签颜色")
+S("fundamental: fill faces", "基本域: 填充面")
+S("gluing label distance", "粘合标签距离")
+S("gluing label scale", "粘合标签缩放")
+S("domain line quality", "域线质量")
+S("fundamental: single edges", "基本域: 单边")
+S("domain boundary width factor", "域边界宽度因子")
+S("fundamental domain method", "基本域方法")
+S("disabled", "已禁用")
+S("do not construct or draw the fundamental domains", "不构建或绘制基本域")
+S("corners", "角落")
+S("find the shape automatically", "自动查找形状")
+S("centers", "中心")
+S("may produce less corners", "可能会产生更少的角落")
+S("special", "特殊")
+S("nice domains for specific quotient shapes", "针对特定商形状的优美域")
+
+// VR quickmenu
+
+S("VR quickmenu", "VR快速菜单")
+S("These hotkeys can be activated at any time by pressing Alt+key. They are mostly useful when showing VR to someone. Demos can define extra hotkeys.",
+  "这些热键可以通过按Alt+键随时激活。它们在向他人展示VR时非常有用。演示可以定义额外的热键。"
+  )
+S("increase camera speed", "加快相机速度")
+S("decrease camera speed", "减慢相机速度")
+S("increase absolute unit", "增大绝对单位")
+S("decrease absolute unit", "减小绝对单位")
+S("increase model size", "增大模型")
+S("decrease model size", "减小模型")
+S("increase Z-shift", "增大Z轴偏移")
+S("decrease Z-shift", "减小Z轴偏移")
+S("always show HUD", "始终显示HUD")
+S("reset VR reference", "重置VR参考")
+S("VR quickmenu help", "VR快速菜单帮助")
+
+// new map editor interface
+//==========================
+
+S("ESC = menu", "ESC = 菜单")
+S("teleport player", "传送玩家")
+S("teleport where", "传送到哪里")
+S("press Shift to clear", "按Shift键清除")
+S("build on walls", "在墙上建造")
+S("texture editor", "纹理编辑器")
+S("save only the shapes", "保存形状")
+S("load only the shapes", "加载形状")
+S("save the map", "保存地图")
+S("load the map", "加载地图")
+S("Are you sure you want to restart? This will erase all shapes.",
+  "确定要重启吗？这将删除所有形状。")
+S("complex tessellations", "复杂镶嵌")
+S("patterns", "图案")
+S("color group", "颜色组")
+S("load current", "加载当前")
+S("switch auto", "切换自动")
+S("area", "区域")
+S("camera", "相机")
+S("Map settings", "地图设置")
+
+// canvas color patterns
+//=======================
+
+S("no walls", "无墙壁")
+S("rgb(r,g,b)\n", "rgb(r,g,b)\n")
+S("indexed(f) (where f is a function of p, p=1 for red, 2 for green, 3 for blue)",
+  "indexed(f) （其中f是p的函数，p=1为红色，2为绿色，3为蓝色）")
+S("random", "随机")
+S("shape", "形状")
+S("shape (mirror)", "形状 (镜像)")
+S("threecolor", "三色")
+S("dark landscape", "黑暗地貌")
+S("Crystal cage", "晶体笼")
+S("Crystal hyperplane", "晶体超平面")
+S("Crystal honeycomb", "晶体蜂窝")
+S("Crystal diagonal", "晶体对角")
+
+// various settings
+//==================
+
+// configure scratch textures in 3D modes
+
+S("wall/floor texture settings", "墙壁/地板纹理设置")
+S("strength of the Escher texture (inside)", "埃舍尔纹理强度（内部）")
+S("strength of the Escher texture (boundary)", "埃舍尔纹理强度（边界）")
+S("strength of the Escher texture (boundary width)", "埃舍尔纹理强度（边界宽度）")
+S("scratch alpha", "划痕透明度")
+S("scratch brightness", "划痕亮度")
+S("scratch length", "划痕长度")
+S("the seed for scratch generation", "划痕生成的种子")
+S("scratch width", "划痕宽度")
+S("the number of scratches around", "周围划痕数")
+S("the number of orthogonal scratches", "正交划痕数")
+S("the number of parallel scratches", "平行划痕数")
+S("the number of radial scratches", "径向划痕数")
+S("the number of random scratches", "随机划痕数")
+S("grid darkness", "网格暗度")
+S("grid strength", "网格强度")
+S("grid width", "网格宽度")
+
+// projections and projection-related settings
+
+S("rug projection", "地毯投影")
+S("layered equidistant", "分层等距")
+S("variant fisheye", "鱼眼变体")
+S("polar coordinates", "极坐标")
+
+S("offside parameter", "离场参数")
+S("Do not center the projection on the player -- move the center offside. Useful in polar, where the value equal to offside2 can be used to center the projection on the player.",
+"不要将投影中心放在玩家身上 - 将中心移到场外。在极坐标中，等于 offside2 的值可用于将投影中心放在玩家身上。")
+
+S("offside parameter II", "离场参数 II")
+S("In polar projection, what distance to display in the center. Use asinh(1) (in hyperbolic) to make it conformal in the center, "
+  "and pi to have the projection extend the same distance to the left, right, and upwards.",
+  "在极坐标投影中，中心显示的距离。使用 asinh(1)（在双曲线中）使其在中心处保形，并使用 pi 使投影向左、右和上方延伸相同的距离。")
+
+S("off-center parameter", "离心参数")
+S("This projection is obtained by composing gnomonic projection and inverse stereographic projection. This parameter changes the center "
+  "of the first projection (0 = gnomonic, 1 = stereographic). Use a value closer to 1 to make the projection more conformal.",
+    "此投影是通过组合日晷投影和逆球面投影获得的。此参数更改第一个投影的中心（0 = 日晷，1 = 球面）。使用更接近 1 的值使投影更保形。")
+
+S("halve distances", "减半距离")
+S("This option halves the distances of every point from the center. Useful in the Minkowski hyperboloid model, "
+  "to get a visualization of an alternative hyperboloid model based on Clifford algebras.",
+  "此选项将每个点与中心的距离减半。在闵可夫斯基超曲面模型中很有用，可以获得基于克利福德代数的替代超曲面模型的可视化。")
+
+
+// geometry settings
+
+S("Only works in orientable spaces", "仅在可定向空间中有效")
+S("twisted current x E", "扭曲流 x E")
+S("ERROR: failed to solve the twist values, the map will be incorrect",
+  "错误：无法解决扭曲值，地图将不正确")
+S("The space you are currently in a twisted product space. ", "当前所在的空间是扭曲的乘积空间。")
+
+S("apeirogon: consistent coloring", "apeirogon: 一致的着色")
+S("In arbitrary tilings, apeirogons are internally represented as multiple tiles. This option ensures that all subtiles have the same color.",
+  "在任意平铺中，apeirogon内部表示为多个格块。此选项确保所有子格块具有相同的颜色。")
+
+S("apeirogon: hide grid edges", "apeirogon: 隐藏网格边缘")
+S("In arbitrary tilings, apeirogons are internally represented as multiple tiles. This option hides the subtile edges.",
+  "在任意平铺中，apeirogon内部表示为多个格块。此选项隐藏子格块的边缘。")
+
+S("Connect the ends of the apeirogon segment with the boundary point using straight lines. This should be faster and, in most cases, actually more correct.",
+  "通过使用直线连接apeirogon段的端点和边界点。这应该更快，并且在大多数情况下实际上更正确。")
+
+S("failed to convert: ", "转换失败：") // (to tes format to use rule generator)
+
+// Nil styles
+S("six sides", "六边")
+S("eight sides", "八边")
+S("hex", "六边形")
+
+// expansion mode settings
+
+S("based on analysis", "基于分析")
+S("3D rules", "3D规则")
+S("generated rules", "生成规则")
+S("built-in rules", "内置规则")
+S("cell counting range", "格子计数范围")
+S("max cells to count", "最大计数格子数")
+S("Counting stops if that many cells are reached.", "计数在达到该数量的格子时停止。")
+S("max distance to check", "最大检查距离")
+S("Counting stops if this distance is reached.", "计数在达到该距离时停止。")
+S("use analyzer if possible", "如果可能，使用分析器")
+S("use sight range instead", "改用视野范围")
+
+// Goldberg settings
+
+S("cell area ratio (max/min)", "格子面积比（最大/最小）")
+S("hex only", "仅六边形")
+S("square only", "仅方形")
+S("Goldberg mapping", "Goldberg映射")
+S("linear", "线性")
+S("straight lines remain straight", "保持直线平直")
+S("equal-area", "等面积")
+S("try to have tiles of equal area (tiles on corners will still be different)",
+  "尝试使格块面积相等（角落的格子仍然会有所不同）")
+S("conformal", "保形")
+S("try to get regularly shaped tiles", "尝试获得规则形状的格块")
+S("gnomonic (vertex)", "日晷（顶点）")
+S("regular in gnomonic projection (centered on pure vertex)", "在日晷投影中正规（以纯顶点为中心）")
+S("gnomonic (face)", "日晷（面）")
+S("regular in gnomonic projection (centered on pure face)", "在日晷投影中正规（以纯面为中心）")
+S("tangent adjustment", "切线调整")
+S("equal distances on the original edges", "原始边上等距")
+
+// font selection
+
+S("font to use:", "使用的字体：")
+S("select font", "选择字体")
+S("note: if using the Chinese translation, Noto Sans will override the options above it",
+  "注意：如果使用中文翻译，Noto Sans将覆盖上面的选项")
+S("TTF font", "TTF字体")
+S("OTF font", "OTF字体")
+S("Chinese ASCII", "中文ASCII")
+
+// boolean settings
+
+S("on/off dialog/help", "开启/关闭对话框/帮助")
+S("Enable this for a full dialog when editing some on/off settings (otherwise, the dialog is not shown, we just switch). "
+  "This lets you see an explanation of what the setting does. You can also press ALT while changing such settings.",
+  "在编辑某些开/关设置时启用此选项（否则不会显示对话框，只是切换）。这使你能看到该设置功能的解释。你也可以在更改此类设置时按ALT键。")
+S("enable", "启用")
+S("switch", "切换")
+S("set default", "设为默认")
+
+// menu names of some of the settings below were translated before, but extra help about what they do was added
+
+S("Do not show the 'find player' button even if the player seems to be lost.",
+  "即使玩家似乎不见了，也不要显示“寻找玩家”按钮。")
+
+S("vsync", "垂直同步")
+S("Disable if you want to see the actual framerate rendered by the engine.",
+  "如果你想看到引擎实际渲染的帧率，请禁用此选项。")
+
+S("Buttons activate when they are pressed (by clicking), not when they are released.",
+  "按钮在（通过点击）按下时激活，而不是在释放时激活。")
+
+S("Font size is set as a relation to screen size.", "字体大小根据屏幕大小的一定比例设置。")
+
+S("This lets your operating system resize the window.", "这允许你的操作系统调整窗口大小。")
+
+S("hollow mine symbols", "中空地雷符号")
+S("markers on possible mines", "可能存在地雷的标记")
+
+S("If set, only the important items and kills will be shown",
+  "如果启用，仅显示重要物品和击杀")
+
+S("apply color/pattern changes to canvas automatically",
+  "自动将颜色/图案更改应用于画布")
+
+S("Computing projections using a GPU (vertex shader) is faster, but sometimes, some projections or their minor details are not available.",
+"使用GPU（顶点着色器）计算投影速度更快，但有时某些投影或其细节不可用。")
+
+S("holiday options", "假日选项")
+S("Special graphical effects on holidays.", "假日特别图形效果。")
+
+S("Do not draw if their distance is greater than the sight range (although some points might be closer). This is faster.",
+  "如果中心的距离大于视野范围（尽管某些点可能更近），则不绘制该格。这更快。")
+
+S(" With the keyboard, you can press Tab to invert the way the pushing direction leans, or Shift+Tab to decide based on how the view is rotated.",
+  " 如果使用键盘，可以按Tab键反转推动方向，或按Shift+Tab键根据视图的旋转方式进行决定。")
+S("control the pushing direction with TAB", "使用TAB键控制推动方向")
+S("If set, you control the off-hepetagon pushing direction with TAB. Otherwise, you control it by rotating the screen.",
+  "如果设置，您可以使用TAB键控制离开七边形格时的推动方向。否则，你可以通过旋转屏幕来控制它。")
+
+S("Background particle effects, e.g., in the Blizzard.", "背景粒子效果，例如在暴风雪中的那种。")
+
+S("Disable if you do not want particle effects and similar.", "如果不想要粒子效果和类似效果，请禁用此选项。")
+
+S("In 3D modes, display all the walls, including the walls between adjacent wall tiles.",
+  "在3D模式中，显示所有墙壁，包括相邻墙块之间的墙壁。")
+
+S("draw PC on the underlying map", "在底层地图上显示玩家")
+
+S("allow access to all unlockable content", "解锁所有可解锁内容")
+
+S("Disable this to make all line widths 1.", "禁用此选项以使所有线条宽度为1。")
+
+S("When this setting is ON, grid lines and various line patterns are drawn as pipes.",
+  "如果此选项开启，网格线和各种线条图案将绘制为管道。")
+
+S("Enables easier control of the camera for watching visualizations (when you are not playing the game).",
+  "更容易控制相机以便观看可视化（当你不在玩游戏时）。")
+
+S("higher contrast", "更高对比度")
+S("use higher contrast", "使用更高的对比度")
+S("Use higher contrast for some terrain elements.", "令一些地形元素使用更高的对比度。")
+
+// other new settings
+
+// additional stereo mode
+S("cylindrical", "圆柱形")
+S("full vertical (not implemented in raycaster)", "完全垂直（在光线投射中未实现）")
+
+S("map font scale", "地图字体缩放")
+S("This affects the size of the characters on the ASCII map. This includes ASCII walls/monster display mode, the minimap, minefield values, and various debug features.",
+  "这会影响ASCII地图上字符的大小。这包括ASCII墙/怪物显示模式、迷你地图、雷区值和各种调试功能。")
+
+S("menu line format", "菜单行格式")
+S("Displays an arbitrary text instead of menu. You can use e.g. $(turncount) or $(gametime,2) to display the values of parameters and statistics.",
+  "显示任意文本而不是菜单。可以使用例如 $(turncount) 或 $(gametime,2) 来显示各种参数和统计信息的值。")
+S("testing", "测试")
+S("show turn count", "显示回合数")
+
+S("display zeros in minefield", "显示雷区中的零")
+S("never display zeros", "从不显示零")
+S("only in 3D modes", "仅在3D模式下")
+S("always display zeros", "始终显示零")
+
+S("opacity of undiscovered minefield", "未发现的雷区不透明度")
+S("3D modes only\n\n0 = invisible, 255 = fully opaque", "仅在3D模式下\n\n0 = 透明，255 = 不透明")
+
+S("semicasual", "半随意模式")
+S("display save/load counts in exit screen", "在退出屏幕上显示保存/加载计数")
+S(" saves: %1 loads: %2 branching: %3", " 保存：%1 加载：%2 分支：%3")
+
+S("joystick initialization", "摇杆初始化")
+S("do not use joysticks", "不使用摇杆")
+S("fast", "快速")
+S("do not wait until the joysticks are initialized", "不等待摇杆初始化")
+S("wait", "等待")
+S("wait until the joysticks are initialized", "等待摇杆初始化")
+
+S("raw texture opacity", "原始纹理不透明度")
+
+// other stuff:
+S("not editable", "不可编辑")
+
+// (used in the highscore list)
+S("where", "位置")
+S("zoom", "缩放")
+
+// (this is about the displayed creature size)
+S("changing this during shmup is counted as cheating", "在射击模式中更改此设置视为作弊")
+
+S("single type+symmetry", "单类型+对称")
