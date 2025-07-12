@@ -840,6 +840,7 @@ string get_setname() {
   if(!enabled_stay) res += "/nostay";
   if(!enabled_power) res += "/nopower";
   if(!enabled_id) res += "/noid";
+  if(is_basic) res += "/basic";
   return res;
   }
 
@@ -1430,6 +1431,13 @@ void seuphorica_newgame() {
   dialog::add_action_push(seuphorica_setgeom);
 
   if(!show_customize) {
+    dialog::addItem("start new basic game", 'b');
+    dialog::add_action([] {
+      save_old_game_if_needed();
+      reset_rv();
+      restart("", "B", "");
+      reset_seuphorica_screen();
+      });
     dialog::addItem("start new standard game", 's');
     dialog::add_action([] {
       save_old_game_if_needed();
