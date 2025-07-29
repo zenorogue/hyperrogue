@@ -66,6 +66,31 @@ void err(string s, string context) {
   throw hr_exception("ru read error");
   }
 
+void create_long_rope(room& r, int step, xy w) {
+  ld radius = 2.7;
+  ld qty = 300;
+  ld period = 5;
+  ld shift = 0;
+  ld max_swing = 7.5;
+  for(int i=0; i<qty; i++) {
+    auto b = std::make_unique<rope_platform>();
+    b->ctr = w; b->radius = radius; b->period = period; b->max_swing = max_swing * 1._deg; b->shift = shift;
+    b->dist = radius * (i+0.5) / qty;
+    r.entities.emplace_back(std::move(b));
+    }
+  for(auto& p: rooms) if(&p.second == &r) {
+    auto goto_rope = [&] (int i, int j) {
+      create_long_rope(*get_room_at(p.first->cmove(i)), j, get<0>(get_next_room(w, &r, i)));
+      };
+    if(step < 3) goto_rope(3, step + 1);
+    if(step == 3) goto_rope(4, 4);
+    if(step == 2) goto_rope(2, 4);
+    if(step == 2) goto_rope(4, 4);
+    if(step == 1) goto_rope(4, 4);
+    break;
+    }
+  }
+
 void load_room(fhstream& f, cell *c) {
   setdist(c, 7, nullptr);
   auto& r = *get_room_at(c);
@@ -244,6 +269,9 @@ void load_room(fhstream& f, cell *c) {
           b->dist = radius * (i+0.5) / qty;
           r.entities.emplace_back(std::move(b));
           }
+        }
+      else if(cap == "LONGROPE") {
+        create_long_rope(r, 0, {lerp(l_margin_at, r_margin_at, 2/3.), 0});
         }
       else if(cap == "PENDULUM") {
         auto b = std::make_unique<pendulum_platform>();
