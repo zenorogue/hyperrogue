@@ -97,31 +97,40 @@ void editmap_frame() {
   }
 
 /* new w, velocity multiplier, neighbor id */
-tuple<xy, ld, int> get_next_room(xy w, room *r) {
-  if(w.x < l_margin_at) {
+tuple<xy, ld, int> get_next_room(xy w, room *r, int which) {
+  auto chk = [&] (bool b, int rid) {
+    return which == rid || (which == -1 && b);
+    };
+
+  if(chk(w.x < l_margin_at, 2)) {
     w.x += actual_screen_x;
     return {w, 1, 2};
     }
-  if(w.x > r_margin_at) {
+  if(chk(w.x > r_margin_at, non_hyperbolic ? 0 : 4)) {
     w.x -= actual_screen_x;
     return {w, 1, non_hyperbolic ? 0 : 4};
     }
 
-  if(w.y < t_margin_at && !non_hyperbolic) {
-    w.y = (w.y - t_margin_at) * 2 + b_margin_at;
-    w.x -= l_margin_at;
-    w.x = 2 * w.x;
-    int rid = w.x <= actual_screen_x;
-    if(rid == 0) w.x -= actual_screen_x;
-    w.x += l_margin_at;
-    return {w, 2, rid};
+  xy w1;
+  w1.y = (w.y - t_margin_at) * 2 + b_margin_at;
+  w1.x = 2 * (w.x - l_margin_at);
+
+  if(chk(w.y < t_margin_at && !non_hyperbolic && w1.x <= actual_screen_x, 1)) {
+    w1.x += l_margin_at;
+    return {w1, 2, 1};
     }
-  if(w.y > b_margin_at && !non_hyperbolic) {
+  if(chk(w.y < t_margin_at && !non_hyperbolic && w1.x > actual_screen_x, 0)) {
+    w1.x -= actual_screen_x;
+    w1.x += l_margin_at;
+    return {w1, 2, 0};
+    }
+
+  if(chk(w.y > b_margin_at && !non_hyperbolic, 3)) {
     w.x -= l_margin_at;
     w.y -= b_margin_at;
     w.y /= 2;
     w.y += t_margin_at;
-    if(is_right(current_room))
+    if(is_right(r))
       w.x += actual_screen_x;
     w.x /= 2;
     w.x += l_margin_at;

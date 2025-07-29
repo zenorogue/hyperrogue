@@ -169,4 +169,7 @@ string parse_markup(string s);
 
 struct power& find_power(string name);
 
+tuple<struct xy, ld, int> get_next_room(struct xy w, room *r, int which = -1);
+
+extern shiftmatrix scrm;
 }
