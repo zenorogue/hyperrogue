@@ -389,6 +389,7 @@ struct rope_platform : public moving_platform {
   string glyph() override { return "-"; }
   string get_name() override { return "Swinging rope"; }
   string get_help() override { return "A part of a swinging rope."; }
+  void draw() override;
   };
 
 struct timed_orb : public entity {

@@ -470,6 +470,19 @@ xy rope_platform::location_at(ld t) {
   return from_hyper(eupush(to_hyper(ctr)) * xspinpush0(sin(t / game_fps / period * TAU + shift) * max_swing, dist));
   }
 
+void rope_platform::draw() {
+  if(cmode == mode::editmap) {
+    for(int a=-50; a<=50; a++) {
+      auto h = from_hyper(eupush(to_hyper(ctr)) * xspinpush0(a/50. * max_swing, dist));
+      curvepoint(eupush(h.x, h.y) * C0);
+      }
+    color_t col = color_t(dist * 0x41268517) | 0xFF;
+    queuecurve(scrm, col, 0, PPR::LINE);
+    }
+
+  moving_platform::draw();
+  }
+
 xy pendulum_platform::location_at(ld t) {
   auto h1 = to_hyper(a);
   auto h2 = to_hyper(b);
