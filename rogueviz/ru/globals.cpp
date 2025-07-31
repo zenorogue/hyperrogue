@@ -58,7 +58,8 @@ struct ruwall {
 enum eWall {
   wAir, wWall, wBouncy, wSpike, wWater, wFrozen, wDoor, wSmashedDoor,
   wLockedDoor, wFountain, wBluePortal, wOrangePortal, wPlatform, wStaircase,
-  wColumn, wForge, wWoodWall, wShopDoor, wSecretPassage, wSign, wWallSign, wTimeDoor, wGUARD };
+  wColumn, wForge, wWoodWall, wShopDoor, wSecretPassage, wSign, wWallSign, wTimeDoor, 
+  wBottomSpike, wGUARD };
 
 flagtype W_BLOCK = 1;
 flagtype W_TRANS = 2;
@@ -69,6 +70,7 @@ flagtype W_BOUNCY = 32;
 flagtype W_FROZEN = 64;
 flagtype W_BLOCKBIRD = 128;
 flagtype W_STABLE = 256;
+flagtype W_DOWNWARD = 512;
 
 constexpr int qwall = int(wGUARD);
 
@@ -95,6 +97,7 @@ ruwall walls[qwall] = {
   {"sign", "X", 0xFFFF40FF, W_TRANS, "You need to wait close to this sign to read it."},
   {"wall sign", "X", 0xFFFFC0FF, W_BLOCK, "You need to wait close to this sign to read it."},
   {"time door", "#", 0x8080FFFF, W_BLOCK | W_STABLE, "A powerful door, opened by a mechanism."},
+  {"bottom spike", "v", 0xC08080FF, W_TRANS | W_PAIN | W_BLOCKBIRD | W_DOWNWARD, "A downward-pointing spike. You can fall from above through it safely, but otherwise, it is very dangerous."},
   };
 
 int sel = 1;

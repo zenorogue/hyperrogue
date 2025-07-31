@@ -104,6 +104,7 @@ void entity::apply_walls() {
 
   for(int x = obb.minx; x < obb.maxx; x++) for(int y = obb.maxy; y < jbb.maxy; y++) {
     eWall b = current_room->at(x, y);
+    if(walls[b].flags & W_DOWNWARD) continue;
     if(walls[b].flags & blocking) {
       if(walls[b].flags & W_BOUNCY) { vel.y = -vel.y; apply_grav(); apply_grav(); if(vel.y > 0) vel.y = 0; on_bounce = true; goto again; }
       on_floor = true;
@@ -154,6 +155,7 @@ void entity::apply_walls() {
 
   for(int x = obb.maxx; x < jbb.maxx; x++) for(int y = jbb.miny; y < jbb.maxy; y++) {
     eWall b = current_room->at(x, y);
+    if((walls[b].flags & W_DOWNWARD) && b == current_room->at(x-1, y)) continue;
     if(walls[b].flags & W_BLOCK) {
       if(walls[b].flags & W_BOUNCY) { vel.x = -vel.x; on_bounce = true; goto again; }
       if(freezing()) { hit_wall(); }
@@ -170,6 +172,7 @@ void entity::apply_walls() {
   
   for(int x = jbb.minx; x < obb.minx; x++) for(int y = jbb.miny; y < jbb.maxy; y++) {
     eWall b = current_room->at(x, y);
+    if((walls[b].flags & W_DOWNWARD) && b == current_room->at(x+1, y)) continue;
     if(walls[b].flags & W_BLOCK) {
       if(walls[b].flags & W_BOUNCY) { vel.x = -vel.x; on_bounce = true; goto again; }
       if(freezing()) { hit_wall(); }
