@@ -41,6 +41,7 @@ void statdata::reset() {
   for(auto i: allstats) stats[i] = m.base_stats[i];
   coyote_time = 0;
   jump_control = 0;
+  detect_area = 0;
   hallucinating = false;
   mods.clear();
   }
@@ -83,6 +84,11 @@ void man::act() {
   current_room->fov_from(where.x / block_x, where.y / block_y);
 
   check_fountains();
+  }
+
+bool man::can_see(entity& e) {
+  ld d = hdist(to_hyper(m.where), to_hyper(e.where));
+  return d < inverse_wvolarea_auto(m.current.detect_area);
   }
 
 void man::on_kill() {

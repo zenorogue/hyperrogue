@@ -263,14 +263,25 @@ void man::draw() {
       }
     }
   effects.resize(efs - effects.begin());
+
+  if(m.current.detect_area > 0) {
+    ld r = inverse_wvolarea_auto(m.current.detect_area);
+    for(int a=0; a<=360; a++) {
+      auto h = from_hyper(eupush(to_hyper(m.where)) * xspinpush0(a*1._deg, r));
+      curvepoint(eupush(h.x, h.y) * C0);
+      }
+    queuecurve(scrm, 0x800080, 0, PPR::LINE);
+    }
   }
 
 void render_room_objects(room *r) {
   initquickqueue();
   if(r == current_room && m.visible_inv() && m.existing) m.draw();
   for(auto& e: r->entities)
-    if(e->existing && (cmode == mode::editmap || (e->visible(r) && e->visible_inv())))
+    if(e->existing && (cmode == mode::editmap || (e->visible(r) && e->visible_inv()))) {
+      if(e->hidden() && !m.can_see(*e)) continue;
       e->draw();
+      }
   quickqueue();
   }
 

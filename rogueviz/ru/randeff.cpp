@@ -31,7 +31,20 @@ randeff jump_bubble("Bubble", "Lets you create bubbles to reach higher places.",
 randeff jump_light("Lightness", "Causes you to be less affected by gravity.", "You feel lighter!", [] (data &d) { });
 
 // trap powers
-randeff trap_detect("Detect traps", "Lets you see traps and secret passages in a circle around you.", "You see things you could not see before!", [] (data &d) { });
+randeff trap_detect("Detect traps", "Lets you see traps and secret passages in a circle around you.", "You see things you could not see before!", [] (data &d) {
+  bool grow = gframeid > m.last_action + 10;
+  auto& nd = m.next.detect_area;
+  nd = m.current.detect_area;
+  if(grow) {
+    nd += 0.01 / game_fps * m.current.stats[stat::wis];
+    if(nd > 5) nd = 5;
+    }
+  else {
+    nd *= (1 - 5. / game_fps);
+    if(nd < 0) nd = 0;
+    }
+  });
+
 randeff trap_snake("Snake Hair", "Lets you create snakes that can be used to disarm traps and secret passages.", "You grow snakes on your head!", [] (data &d) { });
 randeff trap_disarm("Disarm traps", "Lets you see all traps on the level for a short time, and to attack them with your [weapon] to destroy them.", "You suddenly feel able to disarm traps with your [weapon]!", [] (data &d) { });
 

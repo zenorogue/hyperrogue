@@ -228,6 +228,8 @@ struct entity {
 
   data get_dat();
 
+  virtual bool hidden() { return false; }
+
   struct bbox get_pixel_bbox_at(xy, ld scalex = 1, ld scaley = 1);
   struct bbox get_pixel_bbox() { return get_pixel_bbox_at(where); }
 
@@ -295,6 +297,7 @@ struct entity {
 struct statdata {
   statarray<ld> stats;
   int jump_control, coyote_time, hallucinating;
+  ld detect_area;
   void reset();
   vector<tuple<power*, mod, int>> mods;
   };
@@ -326,6 +329,7 @@ struct man : public entity {
 
   virtual int max_hp() { return 10 * current.stats[stat::con]; }
 
+  bool can_see(entity& e);
   man() {
     facing = 1; attack_facing = 1;
     for(auto s: allstats) base_stats[s] = 10;
@@ -465,6 +469,7 @@ struct vtrap : public entity {
   xy siz() override { return {6, 18}; }
   string glyph() override { return "^"; }
   color_t color() override { return 0xD00000FF; }
+  bool hidden() override { return true; }
   void act() override;
   string get_name() override { return "moving trap"; }
   string get_help() override { return "A deadly but invisible trap."; }
