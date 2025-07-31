@@ -297,7 +297,7 @@ struct entity {
 struct statdata {
   statarray<ld> stats;
   int jump_control, coyote_time, hallucinating;
-  ld detect_area;
+  ld detect_area, detect_cross;
   void reset();
   vector<tuple<power*, mod, int>> mods;
   };

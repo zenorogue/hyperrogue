@@ -45,6 +45,10 @@ randeff trap_detect("Detect traps", "Lets you see traps and secret passages in a
     }
   });
 
+randeff trap_detect_cross("Detect cross", "Lets you see traps and secret passages in a cross around you.", "You see things you could not see before!", [] (data &d) {
+  m.next.detect_cross = m.current.detect_cross + 0.01 / game_fps * m.current.stats[stat::wis];
+  });
+
 randeff trap_snake("Snake Hair", "Lets you create snakes that can be used to disarm traps and secret passages.", "You grow snakes on your head!", [] (data &d) { });
 randeff trap_disarm("Disarm traps", "Lets you see all traps on the level for a short time, and to attack them with your [weapon] to destroy them.", "You suddenly feel able to disarm traps with your [weapon]!", [] (data &d) { });
 

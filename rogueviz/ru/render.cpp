@@ -272,6 +272,21 @@ void man::draw() {
       }
     queuecurve(scrm, 0x800080, 0, PPR::LINE);
     }
+
+  if(m.current.detect_cross > 0) for(int d: {0, 1, 2, 3}) {
+    transmatrix T = eupush(to_hyper(m.where)) * spin(90._deg * d);
+    ld dist = 0;
+    while(dist < m.current.detect_cross) {
+      dist += 0.01;
+      auto h = from_hyper(T * xpush0(dist));
+      curvepoint(eupush(h.x, h.y) * C0);
+      int cx = int(h.x / block_x);
+      int cy = int(h.y / block_y);
+      if(cx < 0 || cy < 0 || cx >= room_x || cy >= room_y) break;
+      if(!(walls[current_room->at(cx, cy)].flags & W_TRANS)) break;
+      }
+    queuecurve(scrm, 0x800080, 0, PPR::LINE);
+    }
   }
 
 void render_room_objects(room *r) {

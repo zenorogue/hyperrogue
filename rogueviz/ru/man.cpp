@@ -42,6 +42,7 @@ void statdata::reset() {
   coyote_time = 0;
   jump_control = 0;
   detect_area = 0;
+  detect_cross = 0;
   hallucinating = false;
   mods.clear();
   }
@@ -87,8 +88,23 @@ void man::act() {
   }
 
 bool man::can_see(entity& e) {
-  ld d = hdist(to_hyper(m.where), to_hyper(e.where));
-  return d < inverse_wvolarea_auto(m.current.detect_area);
+  if(m.current.detect_area) {
+    ld d = hdist(to_hyper(m.where), to_hyper(e.where));
+    if(d < inverse_wvolarea_auto(m.current.detect_area)) return true;
+    }
+  if(m.current.detect_cross) {
+    array<int, 4> ar;
+    transmatrix T = iso_inverse(eupush(to_hyper(m.where)));
+    auto bb = e.get_pixel_bbox();
+    for(int u=0; u<4; u++) {
+      xy vertex = { ld((u&1) ? bb.minx : bb.maxx), ld((u&2) ? bb.miny : bb.maxy) };
+      hyperpoint h = T * to_hyper(vertex);
+      ar[u] = (h[0] > 0 ? 1 : 0) + (h[1] > 0 ? 2 : 0);
+      if(hdist0(h) > m.next.detect_cross) ar[u] = 4;
+      }
+    if(ar[0] != ar[1] || ar[0] != ar[2] || ar[0] != ar[3]) return true;
+    }
+  return false;
   }
 
 void man::on_kill() {
