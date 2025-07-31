@@ -60,6 +60,7 @@ struct power {
   power& be_wearable(string wear_effect, string remove_effect, string worn = " (worn)");
   power& be_jewelry(string jtype, string desc);
   power& be_potion();
+  power& gain(int qf, int qo) { qty_filled += qf; qty_owned += qo; return self; }
   };
 
 extern vector<power> powers;
