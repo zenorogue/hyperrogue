@@ -101,4 +101,42 @@ void revert_all(revert_stack& s) {
   while(!s.empty()) { s.back()(); s.pop_back(); }
   }
 
+void man::launch_attack(power *p, int fac, boxfun f) {
+  effects.emplace_back();
+  auto& e = effects.back();
+  e.p = p;
+  e.attack_facing = fac;
+  e.attack_when = gframeid;
+  e.f = f;
+  auto pb = f(0);
+  auto bb = pixel_to_block(pb);
+  for(auto& e: current_room->entities)
+    if(e->existing && intersect(e->get_pixel_bbox(), pb)) {
+      int sav = e->invinc_end;
+      e->attacked((m.current.stats[stat::str] + 1) * 3 / 2);
+      for(auto& [m, qty]: p->mods) {
+        if(m == mod::burning) { e->invinc_end = sav; e->attacked(qty); }
+        if(m == mod::freezing) { e->invinc_end = sav; e->attacked(qty); }
+        }
+      }
+  for(int y=bb.miny; y<bb.maxy; y++)
+  for(int x=bb.minx; x<bb.maxx; x++) {
+    int b = current_room->at(x, y);
+    if(b == wDoor) {
+      current_room->replace_block_frev(x, y, wSmashedDoor);
+      addMessage("You smash the door!");
+      }
+    for(auto& [m, qty]: p->mods) {
+      if(m == mod::burning && b == wWoodWall) {
+        current_room->replace_block_frev(x, y, wAir);
+        addMessage("You burn the wall!");
+        }
+      if(m == mod::freezing && b == wWater) {
+        current_room->replace_block_frev(x, y, wFrozen);
+        addMessage("You freeze the water!");
+        }
+      }
+    }
+  }
+
 }

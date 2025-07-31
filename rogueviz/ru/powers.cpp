@@ -317,36 +317,17 @@ void gen_powers() {
     ")", 0xFFFFFFFF,
     [] (data& d) {
       if(d.keystate != 1) return;
-      m.attack_facing = m.facing; m.attack_when = gframeid;
-      auto pb = m.get_pixel_bbox_at(xy{m.where.x + m.attack_facing * m.dsiz().x, m.where.y});
-      auto bb = pixel_to_block(pb);
-      for(auto& e: current_room->entities)
-        if(e->existing && intersect(e->get_pixel_bbox(), pb)) {
-          int sav = e->invinc_end;
-          e->attacked((m.current.stats[stat::str] + 1) * 3 / 2);
-          for(auto& [m, qty]: d.p->mods) {
-            if(m == mod::burning) { e->invinc_end = sav; e->attacked(qty); }
-            if(m == mod::freezing) { e->invinc_end = sav; e->attacked(qty); }
-            }
-          }
-      for(int y=bb.miny; y<bb.maxy; y++)
-      for(int x=bb.minx; x<bb.maxx; x++) {
-        int b = current_room->at(x, y);
-        if(b == wDoor) {
-          current_room->replace_block_frev(x, y, wSmashedDoor);
-          addMessage("You smash the door!");
-          }
-        for(auto& [m, qty]: d.p->mods) {
-          if(m == mod::burning && b == wWoodWall) {
-            current_room->replace_block_frev(x, y, wAir);
-            addMessage("You burn the wall!");
-            }
-          if(m == mod::freezing && b == wWater) {
-            current_room->replace_block_frev(x, y, wFrozen);
-            addMessage("You freeze the water!");
-            }
-          }
-        }
+      for(auto fac: {1, -1})
+        m.launch_attack(d.p, fac, [fac] (int t) { return m.get_pixel_bbox_at(xy{m.where.x + fac * (1-0.01 * t) * m.dsiz().x, m.where.y}); });
+      }).be_weapon(),
+
+  gen_power('x', "axe",
+    "This axe is very sharp and strong! It could even destroy heavy doors.",
+    ")", 0xFFFFFFFF,
+    [] (data& d) {
+      if(d.keystate != 1) return;
+      int fac = m.facing;
+      m.launch_attack(d.p, fac, [fac] (int t) { return m.get_pixel_bbox_at(xy{m.where.x + fac * (1-0.01 * t) * m.dsiz().x, m.where.y}, 2, 2); });
       }).be_weapon(),
 
   gen_power('o', "strange blue crystal ball", "You feel an urge to look into it.",

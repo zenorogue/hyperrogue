@@ -228,7 +228,7 @@ struct entity {
 
   data get_dat();
 
-  struct bbox get_pixel_bbox_at(xy);
+  struct bbox get_pixel_bbox_at(xy, ld scalex = 1, ld scaley = 1);
   struct bbox get_pixel_bbox() { return get_pixel_bbox_at(where); }
 
   virtual double grav() { return 0.1; }  
@@ -299,12 +299,22 @@ struct statdata {
   vector<tuple<power*, mod, int>> mods;
   };
 
+using boxfun = hr::function<bbox(int)>;
+
+struct effect {
+  power *p;
+  int attack_facing;
+  int attack_when;
+  boxfun f;
+  };
+
 struct man : public entity {
   int facing;
   int attack_facing;
   int attack_when;
   int on_floor_when;
   entity *morphed = nullptr;
+  vector<effect> effects;
 
   int last_action;
 
@@ -349,6 +359,7 @@ struct man : public entity {
     addMessage("OUCH! These spikes hurt!");
     }
 
+  void launch_attack(power *p, int fac, boxfun f);
   };
 
 extern man m;

@@ -245,19 +245,24 @@ void entity::draw() {
 void man::draw() {
   entity::draw();
 
-  ld t = gframeid - attack_when;
-  if(t < 50) {
-    auto af = attack_facing * (1 - t * 0.01);
-    auto ds = dsiz();
-    auto col = find_power("dagger").get_color();
-    auto& alpha = part(col, 0);
-    alpha = max<int> (0, alpha - 5 * t);
-    asciiletter(
-      where.x + af * ds.x - ds.x/2, where.y - ds.y/2,
-      where.x + af * ds.x + ds.x/2, where.y + ds.y/2,
-      attack_facing == -1 ? "(" : ")", col
-      );
+  auto efs = effects.begin();
+
+  for(auto& e: effects) {
+    ld t = gframeid - e.attack_when;
+    if(t < 50) {
+      auto col = find_power("dagger").get_color();
+      auto& alpha = part(col, 0);
+      alpha = max<int> (0, alpha - 5 * t);
+      auto box = e.f(t);
+      asciiletter(
+        box.minx, box.miny, // where.x + af * ds.x - ds.x/2, where.y - ds.y/2,
+        box.maxx, box.maxy, // where.x + af * ds.x + ds.x/2, where.y + ds.y/2,
+        e.attack_facing == -1 ? "(" : ")", col
+        );
+      *(efs++) = e;
+      }
     }
+  effects.resize(efs - effects.begin());
   }
 
 void render_room_objects(room *r) {

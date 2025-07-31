@@ -2,15 +2,18 @@ namespace rogue_unlike {
 
 man m;
 
-bbox entity::get_pixel_bbox_at(xy p) {
+bbox entity::get_pixel_bbox_at(xy p, ld scalex, ld scaley) {
   bbox b;
   double d = get_scale_at(p.y);
+  ld dx = d * scalex;
+  ld dy = d * scaley;
   double man_x = siz().x;
   double man_y = siz().y;
-  b.minx = p.x - man_x * d / 2;
-  b.maxx = p.x + man_x * d / 2 + 1;
-  b.miny = p.y - man_y * d / 2;
-  b.maxy = p.y + man_y * d / 2 + 1;
+  b.minx = p.x - man_x * dx / 2;
+  b.maxx = p.x + man_x * dx / 2 + 1;
+  b.miny = p.y - man_y * dy / 2;
+  b.maxy = p.y + man_y * dy / 2 + 1;
+  if(ldebug) println(hlog, tie(man_x, man_y, d));
   return b;
   }
 

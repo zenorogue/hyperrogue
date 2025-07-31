@@ -133,7 +133,7 @@ void stat_screen(bool editable) {
       cmode = mode::playing;
       switch(m.profession) {
         case stat::str:
-          find_power("dagger").gain(1, 1); // no axe yet
+          find_power("axe").gain(1, 1);
           break;
         case stat::con:
           find_power("polymorph").gain(1, 1).flags |= IDENTIFIED | PARTIAL;
