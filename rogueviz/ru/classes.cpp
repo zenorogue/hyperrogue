@@ -176,8 +176,8 @@ struct xy {
 
 enum class stat { str, con, wis, dex };
 
-constexpr stat allstats[] =  { stat::str, stat::con, stat::wis, stat::dex };
 constexpr int qstat = 4;
+constexpr array<stat, qstat> allstats = { stat::str, stat::con, stat::wis, stat::dex };
 
 template<class T> struct statarray : array<T, qstat> {
   statarray() {};
@@ -309,6 +309,7 @@ struct man : public entity {
   int last_action;
 
   int experience;
+  stat profession;
 
   statarray<int> base_stats;
   statdata current, next;

@@ -481,7 +481,15 @@ void add_platf_hooks() {
   pushScreen(run);  
   }
 
+void start_new_game() {
+  enable();
+  randomize_stats();
+  cmode = mode::menu;
+  pushScreen(initial_stats);
+  }
+
 auto chk = arg::add3("-ru", enable)
+  + arg::add3("-ru-start", start_new_game)
   + arg::add3("-ru-cheat", [] { arg::shift(); load_cheat(arg::args()); })
   + addHook(mapstream::hooks_loadmap, 100, [] (hstream& f, int id) {
     if(id == 67) {
