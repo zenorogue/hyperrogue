@@ -163,6 +163,9 @@ struct room {
   void fov_from(int sx, int sy);
 
   void create_texture();
+
+  using bfs_progress = hr::function<bool(intxy)>;
+  vector<intxy> bfs(intxy start, const bfs_progress& f);
   };
 
 struct xy {
