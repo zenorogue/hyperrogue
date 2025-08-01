@@ -49,7 +49,19 @@ randeff trap_detect_cross("Detect cross", "Lets you see traps and secret passage
   m.next.detect_cross = m.current.detect_cross + 0.01 / game_fps * m.current.stats[stat::wis];
   });
 
-randeff trap_snake("Snake Hair", "Lets you create snakes that can be used to disarm traps and secret passages.", "You grow snakes on your head!", [] (data &d) { });
+randeff trap_snake("Snake Hair", "Lets you create snakes that can be used to disarm traps and secret passages.", "You grow snakes on your head!", [] (data &d) {
+  if(d.mode == rev::start || (d.mode == rev::active && d.keystate == 1)) {
+    auto d = m.get_dat();
+    auto mi = std::make_unique<disnake>();
+    mi->where = m.where + xy(m.facing * m.get_scale() * m.siz().y * 0.45, 0);
+    mi->vel = m.vel + xy(m.facing * d.modv * 2, -d.modv * 3.5);
+    mi->clearg();
+    mi->invinc_end = gframeid + 50;
+    mi->postfix();
+    mi->dir = m.facing * 2;
+    current_room->entities.emplace_back(std::move(mi));
+    }
+  });
 
 randeff trap_disarm("Disarm traps", "Lets you see all traps on the level for a short time, and to attack them with your [weapon] to destroy them.", "You suddenly feel able to disarm traps with your [weapon]!", [] (data &d) { 
   m.next.rough_detect = 0.1;
@@ -158,7 +170,7 @@ void assign_potion_powers() {
   trap_disarm.which_weapon = wpn[1];
   using relist = vector<randeff*>;
   find_power("health").randeffs = relist{ pick(&health_heal, &health_regen, &health_protect), random_powers[0] };
-  find_power("the thief").randeffs = relist{ pick(&trap_detect, &trap_snake, &trap_disarm), random_powers[1] };
+  find_power("the thief").randeffs = relist{ pick(&trap_detect, &trap_snake, &trap_disarm, &trap_detect_cross), random_powers[1] };
   find_power("polymorph").randeffs = relist{ pick(&morph_cat, &morph_capy), random_powers[2] };
   find_power("reach").randeffs = relist{ pick(&jump_double, &jump_high, &jump_bubble, &jump_light), random_powers[3] };
   find_power("fire").randeffs = relist{ pick(&fire_spit, &fire_weapon), random_powers[4] };

@@ -214,7 +214,7 @@ struct entity {
   virtual struct trader* as_trader() { return nullptr; }
   virtual struct missile* as_missile() { return nullptr; }
 
-  virtual bool is_disarmer() override { return false; }
+  virtual bool is_disarmer() { return false; }
 
   int hp;
   int invinc_end;
@@ -260,6 +260,7 @@ struct entity {
   void apply_grav();
   void apply_portal_grav();
   bool stay_on_screen(); /* returns true if flipped */
+  void kill_off_screen(); /* returns true if flipped */
   virtual void act() { kino(); }
   /* for things which can act while not existing */
   virtual void unact() { }
@@ -580,6 +581,17 @@ struct snake : public enemy {
   void regenerate() override { enemy::regenerate(); dir = respawn_dir; }
   int base_xp() { return 10; }
   int max_hp() { return 30; }
+  };
+
+struct disnake : public snake {
+  color_t color() override { return 0x2020F0FF; }
+  void act() override;
+  bool is_disarmer() override { return true; }
+  string get_name() override { return "hairsnake"; }
+  string get_help() override { return "A magically animated hair."; }
+  int base_xp() { return 0; }
+  int max_hp() { return 1; }
+  virtual void unact() { destroyed = true; }
   };
 
 struct kestrel : public enemy {

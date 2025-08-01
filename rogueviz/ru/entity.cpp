@@ -105,9 +105,18 @@ void entity::apply_walls() {
     return true;
     };
 
+  auto allside = [this] (int x, int y, eWall b) {
+    if(b == wRogueWallHidden && is_disarmer()) {
+      current_room->replace_block_frev(x, y, wRogueWall);
+      if(current_room->fov[y][x])
+        addMessage("Your hairsnake exposes a fake wall!");
+      }
+    };
+
   for(int x = obb.minx; x < obb.maxx; x++) for(int y = obb.maxy; y < jbb.maxy; y++) {
     eWall b = current_room->at(x, y);
     if(walls[b].flags & W_DOWNWARD) continue;
+    allside(x, y, b);
     if(walls[b].flags & blocking) {
       if(walls[b].flags & W_BOUNCY) { vel.y = -vel.y; apply_grav(); apply_grav(); if(vel.y > 0) vel.y = 0; on_bounce = true; goto again; }
       on_floor = true;
@@ -135,6 +144,7 @@ void entity::apply_walls() {
 
   for(int x = obb.minx; x < obb.maxx; x++) for(int y = jbb.miny; y < obb.miny; y++) {
     eWall b = current_room->at(x, y);
+    allside(x, y, b);
     if(walls[b].flags & W_BLOCK) {
       if(walls[b].flags & W_BOUNCY) { vel.y = -vel.y; apply_grav(); apply_grav(); on_bounce = true; goto again; }
       vel.y /= 2;
@@ -158,6 +168,7 @@ void entity::apply_walls() {
 
   for(int x = obb.maxx; x < jbb.maxx; x++) for(int y = jbb.miny; y < jbb.maxy; y++) {
     eWall b = current_room->at(x, y);
+    allside(x, y, b);
     if((walls[b].flags & W_DOWNWARD) && b == current_room->at(x-1, y)) continue;
     if(walls[b].flags & W_BLOCK) {
       if(walls[b].flags & W_BOUNCY) { vel.x = -vel.x; on_bounce = true; goto again; }
@@ -175,6 +186,7 @@ void entity::apply_walls() {
   
   for(int x = jbb.minx; x < obb.minx; x++) for(int y = jbb.miny; y < jbb.maxy; y++) {
     eWall b = current_room->at(x, y);
+    allside(x, y, b);
     if((walls[b].flags & W_DOWNWARD) && b == current_room->at(x+1, y)) continue;
     if(walls[b].flags & W_BLOCK) {
       if(walls[b].flags & W_BOUNCY) { vel.x = -vel.x; on_bounce = true; goto again; }
@@ -248,6 +260,13 @@ bool entity::stay_on_screen() {
   if(where.y < t_margin_at && vel.y < 0) vel.y = -vel.y, res = true;
   if(where.y > b_margin_at && vel.y > 0) vel.y = -vel.y, res = true;
   return res;
+  }
+
+void entity::kill_off_screen() {
+  if(where.x < l_margin_at && vel.x < 0) existing = false;
+  if(where.x > r_margin_at && vel.x > 0) existing = false;
+  if(where.y < t_margin_at && vel.y < 0) existing = false;
+  if(where.y > b_margin_at && vel.y > 0) existing = false;
   }
 
 void entity::kino() {
@@ -451,7 +470,7 @@ void snake::act() {
     vel.x = zero_vel.x + dat.d * dat.modv * dir;
     dir = -dir;
     }
-  if(intersect(get_pixel_bbox(), m.get_pixel_bbox())) {
+  if(intersect(get_pixel_bbox(), m.get_pixel_bbox()) && gframeid > invinc_end) {
     if(m.reduce_hp(25)) addMessage("The snake bites you!");
     }
   }
@@ -688,6 +707,17 @@ vector<cat_color> cat_colors = {
 
 cat::cat() {
   col = hrand_elt(cat_colors);
+  }
+
+void disnake::act() {
+  snake::act();
+  kill_off_screen();
+  for(auto& e: current_room->entities)
+    if(e->hidden() && e->existing && intersect(e->get_pixel_bbox(), get_pixel_bbox())) {
+      addMessage("Your hear a sound of a " + e->get_name() + " colliding with a hairsnake.");
+      e->existing = false;
+      destroyed = true;
+      }
   }
 
 }
