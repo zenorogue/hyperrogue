@@ -39,6 +39,7 @@ void save_map(string fname) {
     for(int y=0; y<room_y; y++)
     for(int x=0; x<room_x; x++) {
       auto i = r.block_at[y][x] >> 3;
+      if(i == int(wRogueWallHidden)) i = int(wRogueWall);
       auto& c = code_for[i];
       if(c == 0 && !code_used.count(walls[i].glyph[0])) c = walls[i].glyph[0];
       if(c == 0) c = next_code++;
@@ -52,6 +53,7 @@ void save_map(string fname) {
     for(int y=0; y<room_y; y++) {
       for(int x=0; x<room_x; x++) {
         auto v = r.block_at[y][x];
+        if(v == int(wRogueWallHidden)) v = int(wRogueWall);
         print(f, format("%c", (v & 7) == 7 ? 'b' : code_for[v>>3]));
         }
       println(f);
@@ -106,6 +108,8 @@ void load_room(fhstream& f, cell *c) {
     string t = s.substr(2);
     if(s.size() < 3 || s[1] != ' ') err("load codes", s);
     for(int i=0; i<qwall; i++) if(walls[i].name == t) {
+      if(i == int(wRogueWall)) i = int(wRogueWallHidden);
+      if(i == int(wSmashedDoor)) i = int(wDoor);
       codes[s[0]] = i;
       break;
       }

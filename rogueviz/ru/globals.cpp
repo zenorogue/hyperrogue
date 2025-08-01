@@ -59,7 +59,7 @@ enum eWall {
   wAir, wWall, wBouncy, wSpike, wWater, wFrozen, wDoor, wSmashedDoor,
   wLockedDoor, wFountain, wBluePortal, wOrangePortal, wPlatform, wStaircase,
   wColumn, wForge, wWoodWall, wShopDoor, wSecretPassage, wSign, wWallSign, wTimeDoor, 
-  wBottomSpike, wGUARD };
+  wBottomSpike, wRogueWallHidden, wRogueWall, wGUARD };
 
 flagtype W_BLOCK = 1;
 flagtype W_TRANS = 2;
@@ -98,6 +98,8 @@ ruwall walls[qwall] = {
   {"wall sign", "X", 0xFFFFC0FF, W_BLOCK, "You need to wait close to this sign to read it."},
   {"time door", "#", 0x8080FFFF, W_BLOCK | W_STABLE, "A powerful door, opened by a mechanism."},
   {"bottom spike", "v", 0xC08080FF, W_TRANS | W_PAIN | W_BLOCKBIRD | W_DOWNWARD, "A downward-pointing spike. You can fall from above through it safely, but otherwise, it is very dangerous."},
+  {"wall", "#", 0xFFFFFFFF, W_BLOCK | W_STABLE, "These kinds of tough walls can never be destroyed."},
+  {"fake wall", "#", 0x404080FF, W_PLATFORM | W_STABLE | W_BLOCKBIRD, "Your rogueish senses have discovered that this wall is fake."},
   };
 
 int sel = 1;

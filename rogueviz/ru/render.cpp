@@ -283,9 +283,16 @@ void man::draw() {
       int cx = int(h.x / block_x);
       int cy = int(h.y / block_y);
       if(cx < 0 || cy < 0 || cx >= room_x || cy >= room_y) break;
-      if(!(walls[current_room->at(cx, cy)].flags & W_TRANS)) break;
+      auto what = current_room->at(cx, cy);
+      if(what == wRogueWallHidden) {
+        current_room->replace_block_frev(cx, cy, wRogueWall);
+        addMessage("You discover a secret door!");
+        }
+      if(!(walls[what].flags & W_TRANS)) break;
       }
+    vid.linewidth *= 3;
     queuecurve(scrm, 0x800080, 0, PPR::LINE);
+    vid.linewidth /= 3;
     }
   }
 
