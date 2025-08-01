@@ -43,6 +43,7 @@ void statdata::reset() {
   jump_control = 0;
   detect_area = 0;
   detect_cross = 0;
+  rough_detect = 0;
   hallucinating = false;
   mods.clear();
   }
@@ -139,6 +140,10 @@ void man::launch_attack(power *p, int fac, boxfun f) {
       for(auto& [m, qty]: p->mods) {
         if(m == mod::burning) { e->invinc_end = sav; e->attacked(qty); }
         if(m == mod::freezing) { e->invinc_end = sav; e->attacked(qty); }
+        if(m == mod::disarming && e->hidden()) {
+          e->existing = false;
+          addMessage("You have disarmed a "+e->get_name()+".");
+          }
         }
       }
   for(int y=bb.miny; y<bb.maxy; y++)
@@ -156,6 +161,10 @@ void man::launch_attack(power *p, int fac, boxfun f) {
       if(m == mod::freezing && b == wWater) {
         current_room->replace_block_frev(x, y, wFrozen);
         addMessage("You freeze the water!");
+        }
+      if(m == mod::disarming && b == wRogueWallHidden) {
+        current_room->replace_block_frev(x, y, wRogueWall);
+        addMessage("You open a secret passage!");
         }
       }
     }

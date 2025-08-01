@@ -287,6 +287,33 @@ void man::draw() {
       });
     }
 
+  if(m.current.rough_detect > 0) {
+    ld r = inverse_wvolarea_auto(m.current.rough_detect);
+
+    auto h0 = to_hyper(m.where);
+
+    bool found = false;
+    for(auto& e: current_room->entities) if(e->existing && e->hidden() && hdist(h0, to_hyper(e->where)) < r) found = true;
+
+    if(!found) current_room->bfs(xy_to_block(m.where), [&] (intxy xy) {
+      if(hdist(h0, block_to_hyper(xy)) > r) return false;
+      auto what = current_room->at(xy);
+      if(what == wRogueWallHidden) { found = true; return false; }
+      return true;
+      });
+
+    if(found) {
+      auto T = eupush(h0);
+      for(int a=0; a<=360; a++) {
+        auto h = from_hyper(T * xspinpush0(a*1._deg, r));
+        curvepoint(eupush(h.x, h.y) * C0);
+        }
+      vid.linewidth *= 3;
+      queuecurve(scrm, 0xFF000080, 0, PPR::LINE);
+      vid.linewidth /= 3;
+      }
+    }
+
   if(m.current.detect_cross > 0) for(int d: {0, 1, 2, 3}) {
     transmatrix T = eupush(to_hyper(m.where)) * spin(90._deg * d);
     ld dist = 0;

@@ -50,7 +50,12 @@ randeff trap_detect_cross("Detect cross", "Lets you see traps and secret passage
   });
 
 randeff trap_snake("Snake Hair", "Lets you create snakes that can be used to disarm traps and secret passages.", "You grow snakes on your head!", [] (data &d) { });
-randeff trap_disarm("Disarm traps", "Lets you see all traps on the level for a short time, and to attack them with your [weapon] to destroy them.", "You suddenly feel able to disarm traps with your [weapon]!", [] (data &d) { });
+
+randeff trap_disarm("Disarm traps", "Lets you see all traps on the level for a short time, and to attack them with your [weapon] to destroy them.", "You suddenly feel able to disarm traps with your [weapon]!", [] (data &d) { 
+  m.next.rough_detect = 0.1;
+  if(d.mode == rev::active)
+    m.next.mods.emplace_back(d.re->which_weapon, mod::disarming, m.current.stats[stat::wis]);
+  });
 
 // health powers
 randeff health_heal("Healing", "Instantly heals you.", "You feel healthier!", [] (data &d) {

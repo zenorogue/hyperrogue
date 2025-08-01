@@ -26,7 +26,7 @@ struct randeff {
   randeff (string name, string desc, string effect, powerfun act) : name(name), desc(desc), effect(effect), act(act) {}
   };
 
-enum class mod { burning, freezing };
+enum class mod { burning, freezing, disarming };
 
 struct power {
   int key;
@@ -214,6 +214,8 @@ struct entity {
   virtual struct trader* as_trader() { return nullptr; }
   virtual struct missile* as_missile() { return nullptr; }
 
+  virtual bool is_disarmer() override { return false; }
+
   int hp;
   int invinc_end;
 
@@ -310,7 +312,7 @@ struct entity {
 struct statdata {
   statarray<ld> stats;
   int jump_control, coyote_time, hallucinating;
-  ld detect_area, detect_cross;
+  ld detect_area, detect_cross, rough_detect;
   void reset();
   vector<tuple<power*, mod, int>> mods;
   };
