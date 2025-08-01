@@ -266,11 +266,25 @@ void man::draw() {
 
   if(m.current.detect_area > 0) {
     ld r = inverse_wvolarea_auto(m.current.detect_area);
+    auto h0 = to_hyper(m.where);
+    auto T = eupush(h0);
     for(int a=0; a<=360; a++) {
-      auto h = from_hyper(eupush(to_hyper(m.where)) * xspinpush0(a*1._deg, r));
+      auto h = from_hyper(T * xspinpush0(a*1._deg, r));
       curvepoint(eupush(h.x, h.y) * C0);
       }
+    vid.linewidth *= 3;
     queuecurve(scrm, 0x800080, 0, PPR::LINE);
+    vid.linewidth /= 3;
+    current_room->bfs(xy_to_block(m.where), [&] (intxy xy) {
+      if(hdist(h0, block_to_hyper(xy)) > r) return false;
+      if(!current_room->fov[xy.y][xy.x]) return false;
+      auto what = current_room->at(xy);
+      if(what == wRogueWallHidden) {
+        current_room->replace_block_frev(xy, wRogueWall);
+        addMessage("You discover a secret door!");
+        }
+      return bool(walls[what].flags & W_TRANS);
+      });
     }
 
   if(m.current.detect_cross > 0) for(int d: {0, 1, 2, 3}) {
