@@ -107,6 +107,14 @@ power& power::be_wearable(string wear_effect, string remove_effect, string worn)
   return self;
   }
 
+string replace_weapon(string s, power *wpn) {
+  while(true) {
+    auto w = s.find("[weapon]");
+    if(w == string::npos) return s;
+    s.replace(w, 8, wpn->get_name());
+    }
+  }
+
 power& power::be_potion() {
   int np = next_potion++;
   picked_up = [this] (int x) { qty_owned += x; qty_filled = max(qty_filled, x);  };
@@ -136,7 +144,7 @@ power& power::be_potion() {
       auto desc = gd();
       if(flags & IDENTIFIED)
         for(auto& e: randeffs)
-          desc += e->desc;
+          desc += replace_weapon(e->desc, e->which_weapon);
       return desc;
       }
     };
@@ -152,7 +160,9 @@ void random_potion_act(data& d) {
       }
     addMessage("You drink the " + d.p->get_name());
     for(auto& e: d.p->randeffs) {
-      if(e->effect != "") addMessage(e->effect);
+      if(e->effect != "") {
+        addMessage(replace_weapon(e->effect, e->which_weapon));
+        }
       d.re = e; d.mode = rev::start;
       e->act(d);
       }
