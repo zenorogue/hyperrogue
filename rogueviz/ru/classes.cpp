@@ -579,8 +579,9 @@ struct snake : public enemy {
   string get_name() override { return "snake"; }
   string get_help() override { return "A nasty dungeon snake."; }
   void regenerate() override { enemy::regenerate(); dir = respawn_dir; }
-  int base_xp() { return 10; }
-  int max_hp() { return 30; }
+  int base_xp() override { return 10; }
+  int max_hp() override { return 30; }
+  virtual int bite() { return 25; }
   };
 
 struct disnake : public snake {
@@ -589,9 +590,10 @@ struct disnake : public snake {
   bool is_disarmer() override { return true; }
   string get_name() override { return "hairsnake"; }
   string get_help() override { return "A magically animated hair."; }
-  int base_xp() { return 0; }
-  int max_hp() { return 1; }
-  virtual void unact() { destroyed = true; }
+  int base_xp() override { return 0; }
+  int max_hp() override { return 1; }
+  void unact() override { destroyed = true; }
+  int bite() override { return 5; }
   };
 
 struct kestrel : public enemy {

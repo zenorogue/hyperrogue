@@ -471,7 +471,7 @@ void snake::act() {
     dir = -dir;
     }
   if(intersect(get_pixel_bbox(), m.get_pixel_bbox()) && gframeid > invinc_end) {
-    if(m.reduce_hp(25)) addMessage("The snake bites you!");
+    if(m.reduce_hp(bite())) addMessage("The snake bites you!");
     }
   }
 
