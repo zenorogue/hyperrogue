@@ -78,6 +78,12 @@ struct bbox {
 
 bool intersect(bbox a, bbox b);
 
+struct intxy {
+  int x, y;
+  intxy() {}
+  intxy(int x, int y) : x(x), y(y) {}
+  };
+
 struct room {
   // texture::texture_data *room_texture;
   string roomname;
@@ -95,6 +101,8 @@ struct room {
   eWall at(int x, int y) {
     return eWall(block_at[y][x] >> 3);
     }
+
+  eWall at(intxy xy) { return at(xy.x, xy.y); }
   
   void clear() {
     for(int y=0; y<room_y; y++) for(int x=0; x<room_x; x++) block_at[y][x] = 0;
@@ -145,6 +153,8 @@ struct room {
     replace_block(x, y, w);
     add_revert(fountain_revert, [this, x, y, orig] { replace_block(x, y, orig); });
     }
+
+  void replace_block_frev(intxy xy, eWall w) { replace_block_frev(xy.x, xy.y, w); }
 
   void generate();
 

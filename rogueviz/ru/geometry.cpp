@@ -26,6 +26,9 @@ hyperpoint to_hyper(ld x, ld y) {
 
 hyperpoint to_hyper(xy xy) { return to_hyper(xy.x, xy.y); }
 
+hyperpoint block_to_hyper(intxy xy) { return to_hyper((xy.x+.5) * block_x, (xy.y+.5) * block_y); }
+
+intxy xy_to_block(xy xy) { return intxy{ int(floor(xy.x / block_x)), int(floor(xy.y / block_y)) }; }
 
 xy from_hyper(hyperpoint h) {
   if(non_hyperbolic) return {h[0], h[1]};
