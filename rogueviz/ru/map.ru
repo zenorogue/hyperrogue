@@ -1557,6 +1557,10 @@ MAP
 ################################################################################
 #b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b
 ROPE 300 0 0.7 50 5 0 60
+ICICLE 60 60
+ICICLE 552 63
+ICICLE 597 118
+ICICLE 577 151
 OK
 
 MOVE 1 Swinging Rope Room

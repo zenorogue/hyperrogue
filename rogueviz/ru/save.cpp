@@ -231,6 +231,13 @@ void load_room(fhstream& f, cell *c) {
         b->respawn = b->where; b->respawn_spindir = b->spindir; b->postfix();
         r.entities.emplace_back(std::move(b));
         }
+      else if(cap == "ICICLE") {
+        auto b = std::make_unique<icicle>();
+        sscanf(param.c_str(), "%lf%lf", &b->where.x, &b->where.y);
+        b->falling = false; b->vel = xy{0,0};
+        b->respawn = b->where; b->postfix();
+        r.entities.emplace_back(std::move(b));
+        }
       else if(cap == "VTRAP") {
         auto b = std::make_unique<vtrap>();
         sscanf(param.c_str(), "%lf%lf", &b->where.x, &b->where.y);

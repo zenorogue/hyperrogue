@@ -652,6 +652,19 @@ struct guineapig : public enemy {
   int max_hp() { return 300; }
   };
 
+struct icicle : public enemy {
+  bool falling;
+  vector<xy> fallframes;
+  xy siz() override { return {10, 10}; }
+  string glyph() override { return "|"; }
+  color_t color() override { return 0xA0A0F0FF; }
+  void act() override;
+  string get_name() override { return "icicle"; }
+  string get_help() override { return "A dangerous looking icicle."; }
+  int base_xp() { return 1; }
+  int max_hp() { return 1; }
+  };
+
 struct hint : public entity {
   string hint_text;
   int state;

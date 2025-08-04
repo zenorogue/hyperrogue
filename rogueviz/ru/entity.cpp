@@ -792,4 +792,30 @@ void disnake::act() {
       }
   }
 
+void icicle::act() {
+  fallthru = true;
+  if(fallframes.empty()) {
+    while(isize(fallframes) < 9999) {
+      fallframes.push_back(where);
+      kino();
+      if(on_floor) break;
+      }
+    regenerate();
+    }
+  if(!falling) {
+    auto w = m.where;
+    for(auto f: fallframes) {
+      if(intersect(get_pixel_bbox_at(f), m.get_pixel_bbox_at(w))) falling = true;
+      w += m.vel;
+      }
+    }
+  if(falling) {
+    kino();
+    if(on_floor) existing = false;
+    }
+  if(intersect(get_pixel_bbox(), m.get_pixel_bbox())) {
+    if(m.reduce_hp(50)) addMessage("An icicle falls on you!");
+    }
+  }
+
 }
