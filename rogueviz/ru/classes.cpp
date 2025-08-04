@@ -635,6 +635,23 @@ struct bat : public enemy {
   int max_hp() { return 10; }
   };
 
+struct guineapig : public enemy {
+  int ca;
+  bool falling;
+  int spindir, respawn_spindir;
+  ld pigvel;
+  xy siz() override { return {10, 10}; }
+  string glyph() override { return "G"; }
+  color_t color() override { return 0xD0A0A0FF; }
+  void act() override;
+  void attacked(int s) override;
+  string get_name() override { return "guinea pig"; }
+  string get_help() override { return "A standard dungeon guinea pig."; }
+  void regenerate() override { enemy::regenerate(); falling = true; spindir = respawn_spindir; }
+  int base_xp() { return 30; }
+  int max_hp() { return 300; }
+  };
+
 struct hint : public entity {
   string hint_text;
   int state;

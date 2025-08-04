@@ -670,6 +670,78 @@ void bat::act() {
     }
   }
 
+void guineapig::act() {
+
+  if(falling) {
+    stay_on_screen();
+    kino();
+    if(on_floor) { ca = 0; falling = false; }
+    return;
+    }
+
+  auto nonblocked = [this] (int angle, int mul) {
+    auto w1 = from_hyper(eupush(to_hyper(where)) * xspinpush0(angle * 45._deg * spindir, pigvel * mul));
+
+    auto obb = pixel_to_block(get_pixel_bbox());
+    auto nbb = pixel_to_block(get_pixel_bbox_at(w1));
+    auto jbb = join(obb, nbb);
+
+    flagtype blocking = (W_BLOCK | W_BLOCKBIRD);
+
+    bool ok = true;
+
+    if(w1.x < 0 || w1.x > screen_x || w1.y < 0 || w1.y > screen_y) ok = false;
+
+    for(int x = obb.minx; x < obb.maxx; x++) for(int y = obb.maxy; y < jbb.maxy; y++) {
+      eWall b = current_room->at(x, y);
+      if(walls[b].flags & blocking) ok = false;
+      }
+
+    for(int x = obb.minx; x < obb.maxx; x++) for(int y = jbb.miny; y < obb.miny; y++) {
+      eWall b = current_room->at(x, y);
+      if(walls[b].flags & blocking) ok = false;
+      }
+
+    for(int x = nbb.minx; x < nbb.maxx; x++) for(int y = jbb.miny; y < jbb.maxy; y++) {
+      eWall b = current_room->at(x, y);
+      if(walls[b].flags & blocking) ok = false;
+      }
+
+    for(int x = obb.maxx; x < jbb.maxx; x++) for(int y = jbb.miny; y < jbb.maxy; y++) {
+      eWall b = current_room->at(x, y);
+      if(walls[b].flags & blocking) ok = false;
+      }
+
+    return pair(w1, ok);
+    };
+
+  for(int s: {1, 2, 3}) {
+    for(int i=0; i<8; i++) {
+      if(!nonblocked(ca+i-3, s).second) {
+        for(int j=i+1; j<i+8; j++) {
+          if(nonblocked(ca+j-3, s).second) {
+            where = nonblocked(ca = gmod(ca+j-3, 8), s).first;
+            if(intersect(get_pixel_bbox(), m.get_pixel_bbox())) {
+              if(m.reduce_hp(15)) {
+                addMessage("The guinea pig bites you!");
+                spindir *= -1;
+                }
+              }
+            return;
+            }
+          }
+        }
+      }
+    }
+
+  falling = true; vel = xy(0, 0);
+  }
+
+void guineapig::attacked(int dmg) {
+  enemy::attacked(dmg);
+  spindir *= -1;
+  }
+
 void vtrap::act() {
   auto v = vel;
   stay_on_screen();
