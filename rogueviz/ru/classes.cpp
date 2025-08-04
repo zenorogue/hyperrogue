@@ -653,7 +653,7 @@ struct guineapig : public enemy {
   };
 
 struct icicle : public enemy {
-  bool falling;
+  int state;
   vector<xy> fallframes;
   xy siz() override { return {10, 10}; }
   string glyph() override { return "|"; }

@@ -802,19 +802,26 @@ void icicle::act() {
       }
     regenerate();
     }
-  if(!falling) {
+  if(state == 0) {
     auto w = m.where;
     for(auto f: fallframes) {
-      if(intersect(get_pixel_bbox_at(f), m.get_pixel_bbox_at(w))) falling = true;
+      if(intersect(get_pixel_bbox_at(f), m.get_pixel_bbox_at(w))) state = 1;
       w += m.vel;
       }
     }
-  if(falling) {
+  if(state == 1) {
     kino();
-    if(on_floor) existing = false;
+    if(on_floor && vel.y > 0) existing = false;
+    if(vel.y < 0) state = 2;
     }
-  if(intersect(get_pixel_bbox(), m.get_pixel_bbox())) {
-    if(m.reduce_hp(50)) addMessage("An icicle falls on you!");
+  if(state == 2) {
+    kino();
+    if(vel.y >= 0) state = 0;
+    }
+  if(state != 0) {
+    if(intersect(get_pixel_bbox(), m.get_pixel_bbox())) {
+      if(m.reduce_hp(50)) addMessage("An icicle falls on you!");
+      }
     }
   }
 
