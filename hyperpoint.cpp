@@ -1854,10 +1854,14 @@ EX buckethash_t bucketer(hyperpoint h) {
     if(cgi.emb->is_euc_in_product() && in_h2xe()) h /= h[2];
     }
   if(elliptic && make_tuple(h[0], h[1], h[2], h[3]) < make_tuple(-h[0], -h[1], -h[2], -h[3])) h = -h;
-  hashmix(seed, bucketer(h[0]));
-  hashmix(seed, bucketer(h[1]));
-  hashmix(seed, bucketer(h[2]));
-  if(MDIM == 4) hashmix(seed, bucketer(h[3]));
+  // With one pass, e.g., (-149,9999,10000) vs (-298,19998,10000) is a hash collision,
+  // and that may happen during the rotation of a hex grid. So make two passes
+  for(int a=0; a<2; a++) {
+    hashmix(seed, bucketer(h[0]));
+    hashmix(seed, bucketer(h[1]));
+    hashmix(seed, bucketer(h[2]));
+    if(MDIM == 4) hashmix(seed, bucketer(h[3]));
+    }
   return seed;
   }  
 
