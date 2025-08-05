@@ -649,7 +649,7 @@ struct guineapig : public enemy {
   string get_help() override { return "A standard dungeon guinea pig."; }
   void regenerate() override { enemy::regenerate(); falling = true; spindir = respawn_spindir; }
   int base_xp() { return 30; }
-  int max_hp() { return 300; }
+  int max_hp() { return 30; }
   };
 
 struct icicle : public enemy {
