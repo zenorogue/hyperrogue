@@ -234,7 +234,7 @@ void load_room(fhstream& f, cell *c) {
       else if(cap == "ICICLE") {
         auto b = std::make_unique<icicle>();
         sscanf(param.c_str(), "%lf%lf", &b->where.x, &b->where.y);
-        b->falling = false; b->vel = xy{0,0};
+        b->state = 0; b->vel = xy{0,0};
         b->respawn = b->where; b->postfix();
         r.entities.emplace_back(std::move(b));
         }
