@@ -851,7 +851,8 @@ EX geometry_data compute_geometry_data() {
   if(gd.euler < 0 && !closed_manifold)
     gd.worldsize = -gd.worldsize;
 
-  string spf = its(ts);
+  auto& spf = gd.spf;
+  spf = its(ts);
   if(0) ;
   #if CAP_ARCM
   else if(arcm::in()) {
