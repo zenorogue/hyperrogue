@@ -1394,7 +1394,7 @@ EX namespace peace {
 
     if(true) {
       dialog::addBreak(100);
-      dialog::addBoolItem(XLAT("puzzles"), otherpuzzles, '1');
+      dialog::addBoolItem(XLAT("puzzles"), otherpuzzles && !explore_other, '1');
       dialog::add_action([] { otherpuzzles = true; explore_other = false; });
       dialog::addBoolItem(XLAT("exploration"), explore_other, '2');
       dialog::add_action([] { otherpuzzles = true; explore_other = true; });
@@ -1467,8 +1467,11 @@ EX namespace peace {
       });
     dialog::addItem(XLAT("Return to the normal game"), '0');
     dialog::add_action([] {
-      stop_game();
-      if(peace::on) stop_game_and_switch_mode(rg::peace);
+      if(peace::on) {
+        stop_game();
+        if(peace::on) stop_game_and_switch_mode(rg::peace);
+        start_game();
+        }
       });
 
     dialog::addBack();    
