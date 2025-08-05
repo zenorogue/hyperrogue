@@ -10333,3 +10333,459 @@ S("disabled in cheat mode", "v cheat módu jsou achievementy/leaderboardy nedost
 S("disabled in casual mode", "v neformálním módu jsou achievementy/leaderboardy nedostupné")
 S("not eligible due to current mode settings", "achievementy/leaderboardy nejsou dostupné díky současnému nastavení módu")
 S("no achievements/leaderboards in this version", "v této verzi žádné achievementy/leaderboardy nejsou")
+
+// 13.1
+
+// new crossroads variants
+//=========================
+
+N("Crossroads VI", GEN_F, "Křižovatka VI", "Křižovatky VI", "Křižovatku VI", "na Křižovatce VI")
+S("A cursed Crossroads layout.", "Prokleté rozložení Křižovatky.")
+
+N("Master Crossroads", GEN_O, "Hlavní Křižovatka", "Hlavní Křižovatky", "Hlavní Křižovatku", "na Hlavní Křižovatce")
+S("A crossroads that connects only to other crossroads.", "Křižovatka, která je spojená pouze s jinými Křižovatkami.")
+
+// extra gameplay messages
+//=========================
+
+S("You phase through %the1!", "Profázoval jsi skrz %a1!")
+S("You blow %the1 closer!", "Přifoukl jsi %a1 blíž!")
+S("You cannot stay in place and shoot, those roses smell too nicely.",
+  "Nemůžeš zůstat na místě a střílet, ty růže příliš krásně voní.")
+S("The roses smell nicely, but you are just too tired to care.",
+  "Růže krásně voní, ale ty jsi příliš unaven%0ý na to, aby tě to zajímalo.")
+S("You crush %the1!", "Drtíš %a1!")
+S("You punch %the1.", "Udeři%0l jsi %a1.")
+S("\"I wouldn't say killing that guard was not pleasant...\"", "\"Nechci tvrdit, že by se mi zabití toho strážného nelíbilo...\"")
+S("%1 the Knight", "Rytíř %1")
+S("\n\nOrb charges gained on pickup: %1 (increased to %2 by %the3)",
+  "\n\nNáboje Sfér získané sebráním: %1 (zvýšeno na %2 pomocí %a3)"
+  )
+S("\n\nOrb charges gained on pickup: %1", "Náboje Sfér získané sebráním: %1")
+S("\n\nActivation cost: %1 charges (reduced to %2 by %the3)\n",
+  "\n\nAktivační cena: %1 nábojů (sníženo na %2 pomocí %a3)\n")
+S("\n\nActivation cost: 1 charge\n", "\n\nAktivační cena: 1 náboj\n")
+S("\n\nActivation cost: %1 charges\n", "\n\nAktivační cena: %1\n")
+S("\n\nFrogs move first, and after they use their jumping power, they stun adjacent non-frog monsters which are not friendly to the player for 2 turns.",
+  "\n\nŽáby táhnou jako první, a poté, co použijí svou schopnost skoku, omráčí na 2 kola všechny sousední netvory, kteří nejsou žáby nebo přátelští.")
+S("Accessible only from %the1, %2, %3, or %4.\n", "Dostupné z: %1, %2, %3, %4.\n")
+S("Accessible only from %the1, %2, %3, %4, or %5.\n", "Dostupné z: %1, %2, %3, %4, %5.\n")
+S("Alternative rule when %the1 is not in the game:\n",
+  "Alternativní pravidlo, pokud %1 není ve hře:\n")
+
+// custom land list mode / custom mode manager
+//=============================================
+
+S(
+  "In this mode, you can choose the lands you want to be in game. You can also customize their treasure rate and difficulty.\n\n"
+  "While the game automatically selects a list of lands by default, "
+  "based on whether it thinks they work well in the currently selected tiling, "
+  "you might not agree with this selection.\n\n"
+  "Note that, often, lands are enabled or disabled for a GOOD reason! Use at your own risk.\n\n"
+  "Just click on a land to configure it. If you are not in the custom land list mode, "
+  "this will restart the game. You can change the settings during a custom game, but it counts as a cheat.",
+
+  "V tomto módu si můžeš vybrat, které kraje chceš ve hře mít. Také můžeš upravit frekvenci pokladů a obtížnost.\n\n"
+  "Hra sice automaticky vybírá seznam krajů na základě toho, zda podle jejího názoru fungují v momentálně vybraném "
+  "dláždění, ty však s tímto výběrem nemusíš souhlasit.\n\n"
+  "Pozor: často je DOBRÝ DŮVOD, proč je nějaký kraj povolený nebo zakázaný! Používej na vlastní nebezpečí.\n\n"
+  "Kraj nakonfiguruješ tím, že na něj klikneš. Pokud nejsi v módu nakonfigurovaného seznamu krajů, "
+  "hra se restartuje. Během hdy v tomto módu je možné nastavení měnit, počítá se to však jako cheat.")
+
+S("custom land list", "nakonfigurovaný seznam krajů")
+S("land in game", "kraj ve hře")
+S("customize", "konfigurovat")
+S(" (ON)", " (ZAP)")
+S("treasure rate", "frekvence pokladů")
+S("treasure rate in %the1", "frekvence pokladů %abl1")
+S("difficulty", "obtížnost")
+S("difficulty of %the1", "obtížnost %abl1")
+S("wandering", "bloumání")
+S("PTM runs", "hry v taktickém módu")
+S("%the1: number of PTM runs", "%1: počet her v taktickém módu")
+S("PTM multiplier", "multiplikátor v taktickém módu")
+S("%the1: PTM multiplier", "%1: multiplikátor v taktickém módu")
+S("test", "testování")
+S("?", "?")
+
+S("custom mode manager", "správce nastavení")
+S("custom mode", "mód nastavení")
+S("recorded mode %1", "zaznemananý mód %1")
+S("scores recorded", "zaznamenaná skóre")
+S("file to save:", "soubor pro uložení:")
+S("Mode saved to %1", "Mód uložen do %1")
+S("Failed to save mode to %1", "Uložení módu do %1 se nezdařilo")
+S("file to load:", "soubor pro nahrání:")
+S("Loaded mode from %1", "Mód nahrán z %1")
+S("Failed to load mode from %1", "Nahrání módu z %1 se nezdařilo")
+S("set mode sort order", "nastavit pořadí tříděí módů")
+S("reverse order", "obrácené pořadí")
+S("by number of scores", "podle počtu skóre")
+S("by Pure Tactics Mode score", "podle skóre v taktickém módu")
+S("by Yendor Challenge score", "podle skóre v Yendorské misi")
+S("alphabetically", "abecedně")
+S(" scores: %1", " skóre: %1")
+S(" Yendor: %1", " Yendor: %1")
+S(" tactic: %1", " taktika: %1")
+S("unused modes: %1", "nepoužívané módy: %1")
+S("search for mode", "hledat mód")
+S("unidentified modes", "neidentifikované módy")
+
+
+// extra land structures
+//=======================
+
+S("landscape", "krajina")
+S("excessive crossing walls", "nadměrné křižování zdí")
+S("regular walls", "obyčejné zdi")
+S("cursed walls", "prokleté zdi")
+
+S("curse percentage", "procento prokletých zdí")
+S("The percentage of towers in Cursed Walls mode to be manned by Canyon Hags",
+  "Procento věží v módu Prokletých zdí, které obsazují Kaňonové babice")
+
+S("land size in landscape structure", "velikost kraje ve struktuře krajiny")
+S("Each cell gets three coordinates, each of which change smoothly, using the same method as used for the generation of landscapes e.g. in Dragon Chasms. "
+  "Then, we find a cell of the bitruncated cubic honeycomb at these cordinates, and this cell determines which land it is. The bigger the value, the larger the lands.",
+
+  "Každé políčko má tři soužadnice, které se hladce mění pomocí stejné metody, jaká se používá k tvorbě "
+  "krajiny, například v Dračích propastech. Poté se najte políčko v dvojseříznutém krychlovém dělení s těmito souřadnicemi, "
+  "a to určí, o který kraj se jedná. Čím větší hodnota, tím větší kraje.")
+
+// fundamental domain display mode
+//=================================
+
+// (seems I cannot find the Polish name of this)
+
+S("display fundamental domains", "zobrazení fundamentální domény")
+S("fundamental domain", "fundamentální doména")
+S("opacity of domain fill colors", "neprůhlednost barvy pro vyplnění domény")
+S("boundary of the central domain", "hranice centrální domény")
+S("boundary of the other domains", "hranice ostatních domén")
+S("gluing label color", "barva označení slepení")
+S("mirrored gluing label color", "barva označení zrcadlových slepení")
+S("fundamental: fill faces", "fundamentální doména: vyplňovat stěny")
+S("gluing label distance", "vzdálenost označení slepení")
+S("gluing label scale", "velikost označení slepení")
+S("domain line quality", "kvalita čar domény")
+S("fundamental: single edges", "fundamentální doména: jednotlivé hrany")
+S("domain boundary width factor", "faktor šířky hranice domény")
+S("fundamental domain method", "metoda fundamentální domény")
+S("disabled", "vypnuto")
+S("do not construct or draw the fundamental domains", "nevytvářet a nekreslit fundamentální domény")
+S("corners", "vrcholy")
+S("find the shape automatically", "najít tvar automaticky")
+S("centers", "středy")
+S("may produce less corners", "může vytvářet méně vrcholů")
+S("special", "speciální")
+S("nice domains for specific quotient shapes", "hezké domény pro specifické tvary kvocientů")
+
+// VR quickmenu
+
+S("VR quickmenu", "rychlé menu VR")
+S("These hotkeys can be activated at any time by pressing Alt+key. They are mostly useful when showing VR to someone. Demos can define extra hotkeys.",
+  "Tyto příkazy je možné kdykoli aktivovat stisknutím Alt a dané klávesy. Hodí se především tehdy, když VR ukazuješ někomu jinému. "
+  "Dema mohou definovat další příkazy."
+  )
+S("increase camera speed", "zvýšit rychlost kamery")
+S("decrease camera speed", "snížit rychlost kamery")
+S("increase absolute unit", "zvýšit absolutní jednotku")
+S("decrease absolute unit", "snížit absolutní jednotku")
+S("increase model size", "zvýšit velikost modelu")
+S("decrease model size", "snížit velikost modelu")
+S("increase Z-shift", "zvýšit Z-posuv")
+S("decrease Z-shift", "snížit Z-posuv")
+S("always show HUD", "vždy ukazovat HUD")
+S("reset VR reference", "resetovat vztažný bod VR")
+S("VR quickmenu help", "nápověda rychlého menu VR")
+
+// new map editor interface
+//==========================
+
+S("ESC = menu", "ESC = menu")
+S("teleport player", "teleportovat hráče")
+S("teleport where", "teleportovat kam")
+S("press Shift to clear", "stiskni Shift pro vyčištění")
+S("build on walls", "stavění na zdech")
+S("texture editor", "editor textur")
+S("save only the shapes", "uložit pouze tvary")
+S("load only the shapes", "nahrát pouze tvary")
+S("save the map", "uložit mapu")
+S("load the map", "nahrát mapu")
+S("Are you sure you want to restart? This will erase all shapes.",
+  "Opravdu chceš restartovat? Tím se vymažou všechny tvary.")
+S("complex tessellations", "komplexní dláždění")
+S("patterns", "vzory")
+S("color group", "skupina barev")
+S("load current", "nahrát aktivní")
+S("switch auto", "přepnout automatiku")
+S("area", "obsah")
+S("camera", "kamera")
+S("Map settings", "nastavení mapy")
+
+// canvas color patterns
+//=======================
+
+S("no walls", "bez zdí")
+S("rgb(r,g,b)\n", "rgb(r,g,b)\n")
+S("indexed(f) (where f is a function of p, p=1 for red, 2 for green, 3 for blue)",
+  "s indexem f (kde f je funkce p, p=1 pro červenou, 2 pro zelenou, 3 pro modrou)")
+S("random", "náhodný")
+S("shape", "tvary")
+S("shape (mirror)", "tvary (zrcadlové)")
+S("threecolor", "trojbarevný")
+S("dark landscape", "tmavá krajina")
+S("Crystal cage", "Krystal: klec")
+S("Crystal hyperplane", "Krystal: nadrovina")
+S("Crystal honeycomb", "Krystal: dělení prostoru")
+S("Crystal diagonal", "Krystal: diagonální")
+
+// various settings
+//==================
+
+// configure scratch textures in 3D modes
+
+S("wall/floor texture settings", "nastavení textur zdí/podlahy")
+S("strength of the Escher texture (inside)", "síla Echerovy textury (uvnitř)")
+S("strength of the Escher texture (boundary)", "síla Escherovy textury (hranice)")
+S("strength of the Escher texture (boundary width)", "síla Escherovy textury (šířka hranice)")
+S("scratch alpha", "alfa škrábanců")
+S("scratch brightness", "jas škrábanců")
+S("scratch length", "délka škrábanců")
+S("the seed for scratch generation", "seed pro generování škrábanců")
+S("scratch width", "šířka škrábanců")
+S("the number of scratches around", "počet škrábanců kolem")
+S("the number of orthogonal scratches", "počet ortogonálních škrábanců")
+S("the number of parallel scratches", "počet rovnoběžných škrábanců")
+S("the number of radial scratches", "počet radiálních škrábanců")
+S("the number of random scratches", "počet náhodných škrábanců")
+S("grid darkness", "tmavost mřížky")
+S("grid strength", "síla mřížky")
+S("grid width", "šířka mřížky")
+
+// projections and projection-related settings
+
+S("rug projection", "kobercová projekce")
+S("layered equidistant", "vrstvená ekvidistantní")
+S("variant fisheye", "varianta rybího oka")
+S("polar coordinates", "polární souřadnice")
+
+S("offside parameter", "parametr offside")
+S("Do not center the projection on the player -- move the center offside. Useful in polar, where the value equal to offside2 can be used to center the projection on the player.",
+"Necentruj projekci na hráči -- přesuň její střed stranou. Hodí se v polární projekci, kdy můžeš projekci vycentrovat na hráče "
+"pomocí hodnoty rovnající se offside2.")
+
+S("offside parameter II", "parametr offside II")
+S("In polar projection, what distance to display in the center. Use asinh(1) (in hyperbolic) to make it conformal in the center, "
+  "and pi to have the projection extend the same distance to the left, right, and upwards.",
+  "Tento parametr určuje, jaká vzdálenost se má zobrazovat ve středu polární projekce. Použij asinh(1) (v hyperbolické geometrii), pokud chceš, aby byl obraz ve středu "
+  "konformní, a pí, pokud chceš, aby se projekce táhla na stejnou vzdálenost doleva, doprava a nahoru.")
+
+S("off-center parameter", "parametr výstřednosti")
+S("This projection is obtained by composing gnomonic projection and inverse stereographic projection. This parameter changes the center "
+  "of the first projection (0 = gnomonic, 1 = stereographic). Use a value closer to 1 to make the projection more conformal.",
+  "Tato projekce vznikne složením gnómonické projekce a inverzní stereografické projekce. Tento parametr mění "
+  "střed první projekce (0=gnómonická, 1=stereografická). Hodnoty bližší 1 vedou k více konformální projekci.")
+
+S("halve distances", "poloviční vzdálenosti")
+S("This option halves the distances of every point from the center. Useful in the Minkowski hyperboloid model, "
+  "to get a visualization of an alternative hyperboloid model based on Clifford algebras.",
+  "Tato možnost sníží vzdálenost každého bodu od středu na polovinu. To se hodí v modelu Minkowského hyperboloidu, kde tak získáme "
+  "vizualizaci alternativního hyperboloidového modelu založeného na Cliffordových algebrách.")
+
+// geometry settings
+
+S("Only works in orientable spaces", "tohle funguje jen v orientovatelných prostorech")
+S("twisted current x E", "zkroucená současná x E")
+S("ERROR: failed to solve the twist values, the map will be incorrect",
+  "CHYBA: nepodařilo se vyřešit hodnoty zkroucení, mapa nebude správná")
+S("The space you are currently in a twisted product space. ", "Prostor, ve kterém se nyní nacházíš, ve zkrouceném součinovém prostoru.")
+
+S("apeirogon: consistent coloring", "apeirogon: konzistentní obarvení")
+S("In arbitrary tilings, apeirogons are internally represented as multiple tiles. This option ensures that all subtiles have the same color.",
+  "V libovolných dlážděních jsou apeirogony interně reprezentovány jako více dlaždic. Tato možnost zajišťuje, že všechny poddlaždice budou mít stejnou barvu.")
+
+S("apeirogon: hide grid edges", "apeirogon: schovat okraje mřížky")
+S("In arbitrary tilings, apeirogons are internally represented as multiple tiles. This option hides the subtile edges.",
+  "V libovolných dlážděních jsou apeirogony interně reprezentovány jako více dlaždic. Tato možnost schová hrany poddlaždic.")
+
+S("Connect the ends of the apeirogon segment with the boundary point using straight lines. This should be faster and, in most cases, actually more correct.",
+  "Tato možnost spojí konce apeirogonového segmentu s bodem na hranici úsečkami. Mělo by to být rychlejší a ve většině případů je to dokonce i správnější.")
+
+S("failed to convert: ", "Nepodařilo se konvertovat: ") // (to tes format to use rule generator)
+
+// Nil styles
+S("six sides", "šest stran")
+S("eight sides", "osm stran")
+S("hex", "hex")
+
+// expansion mode settings
+
+S("based on analysis", "na základě analýzy")
+S("3D rules", "3D pravidla")
+S("generated rules", "vygenerovaná pravidla")
+S("built-in rules", "vestavěná pravidla")
+S("cell counting range", "dosah počítání políček")
+S("max cells to count", "maximální započtené množství políček")
+S("Counting stops if that many cells are reached.", "Počítání se zastaví, pokud dosáhne tohoto počtu políček.")
+S("max distance to check", "maximální vzdálenost pro kontrolu")
+S("Counting stops if this distance is reached.", "Počítání se zastaví, pokud dosáhne této vzdálenosti.")
+S("use analyzer if possible", "používat analyzátor, pokud je to možné")
+S("use sight range instead", "používat místo toho dohledovou vzdálenost")
+
+// Goldberg settings
+
+S("cell area ratio (max/min)", "poměr obsahu políček (max/min)")
+S("hex only", "pouze hexy")
+S("square only", "pouze čtverce")
+S("Goldberg mapping", "Goldbergovo mapování")
+S("linear", "lineární")
+S("straight lines remain straight", "přímky zůstávají rovné")
+S("equal-area", "rovnoploché")
+S("try to have tiles of equal area (tiles on corners will still be different)",
+  "snaž se, aby měly dlaždice stejnou plochu (dlaždice v rozích budou stále odlišné)")
+S("conformal", "konformální")
+S("try to get regularly shaped tiles", "snaž se mít dlaždice s pravidelnými tvary")
+S("gnomonic (vertex)", "gnómonické (vrchol)")
+S("regular in gnomonic projection (centered on pure vertex)", "pravidelné v gnómonické projekci (se středem v čistém vrcholu)")
+S("gnomonic (face)", "gnómonické (stěna)")
+S("regular in gnomonic projection (centered on pure face)", "pravidelné v gnómonické projekci (se středem v čisté stěně)")
+S("tangent adjustment", "tečnová úprava")
+S("equal distances on the original edges", "stejné vzdálenosti na původních hranách")
+
+// font selection
+
+S("font to use:", "font k použití:")
+S("select font", "vyber font")
+S("note: if using the Chinese translation, Noto Sans will override the options above it",
+  "poznámka: pokud používáš čínský překlad, Noto Sans přebije všechny možnosti nad sebou")
+S("TTF font", "font TTF")
+S("OTF font", "font OTF")
+S("Chinese ASCII", "čínské ASCII")
+
+// boolean settings
+
+S("on/off dialog/help", "zap/vyp dialog/nápověda")
+S("Enable this for a full dialog when editing some on/off settings (otherwise, the dialog is not shown, we just switch). "
+  "This lets you see an explanation of what the setting does. You can also press ALT while changing such settings.",
+  "Pokud je tato volba zapnutá, budou se u některých nastavení typu zapnuto/vypnuto zobrazovat plné dialogy (jinak se bude pouze "
+  " přepínat.) Tak můžeš vidět vysvětlení, co dané nastavení dělá. Také můžeš při změně nastavení "
+  "držet ALT.")
+S("enable", "zapnout")
+S("switch", "přepnout")
+S("set default", "standardní nastavení")
+
+// menu names of some of the settings below were translated before, but extra help about what they do was added
+
+S("Do not show the 'find player' button even if the player seems to be lost.",
+  "Neukazuj tlačítko 'najdi hráče', ani kdyby se zdálo, že se ztratil.")
+
+S("vsync", "vsync")
+S("Disable if you want to see the actual framerate rendered by the engine.",
+  "Vypni, pokud chceš vidět skutečný framerate, který renderuje herní engine.")
+
+S("Buttons activate when they are pressed (by clicking), not when they are released.",
+  "Tlačítka se aktivují stisknutím (kliknutím), nikoli uvolněním.")
+
+S("Font size is set as a relation to screen size.", "Velikost fontu se nastavuje vzhledem k velikosti obrazovky.")
+
+S("This lets your operating system resize the window.", "Toto umožní operačnímu systému měnit rozměr okna.")
+
+S("hollow mine symbols", "duté symboly min")
+S("markers on possible mines", "značky na možných minách")
+
+S("If set, only the important items and kills will be shown",
+  "Pokud je toto nastavení zapnuté, zobrazují se pouze důležité předměty a zabití")
+
+S("apply color/pattern changes to canvas automatically",
+  "automaticky aplikovat změny barvy/vzoru na plátno")
+
+S("Computing projections using a GPU (vertex shader) is faster, but sometimes, some projections or their minor details are not available.",
+"Výpočet projekcí pomocí GPU (vertex shader) je rychlejší; některé projekce nebo jejich drobné detaily však někdy nejsou k dispozici.")
+
+S("holiday options", "sváteční možnosti")
+S("Special graphical effects on holidays.", "Speciální grafické efekty o svátcích.")
+
+S("Do not draw if their distance is greater than the sight range (although some points might be closer). This is faster.",
+  "Nevykreslovat, pokud je jejich vzdálenost větší než dohled (i když některé body by mohly být blíž). "
+  "Je to rychlejší.")
+
+S(" With the keyboard, you can press Tab to invert the way the pushing direction leans, or Shift+Tab to decide based on how the view is rotated.",
+  " Na klávesnici je možné stisknout Tab pro obrácení směru, kterým se kloní směr tlačení, nebo Shift+Tab, aby se rozhodlo na základě toho, "
+  "jak je natočený pohled.")
+S("control the pushing direction with TAB", "řídit směr tlačení pomocí TAB")
+S("If set, you control the off-heptagon pushing direction with TAB. Otherwise, you control it by rotating the screen.",
+  "Toto nastavení ti umožňuje ovládat směr tlačení ze sedmiúhelníku pomocí TAB. Jinak ho můžeš ovládat natáčením obrazovky.")
+
+S("Background particle effects, e.g., in the Blizzard.", "Efekty částic na pozadí, např. ve Vánici.")
+
+S("Disable if you do not want particle effects and similar.", "Vypni, pokud nechceš částicové efekty a podobné věci.")
+
+S("In 3D modes, display all the walls, including the walls between adjacent wall tiles.",
+  "Zobrazovat ve 3D módech všechny stěny, včetně těch mezi sousedními stěnovými políčky.")
+
+S("draw PC on the underlying map", "vykreslovat hráče na dolní mapě")
+
+S("allow access to all unlockable content", "zpřístupnit veškerý odemykatelný obsah")
+
+S("Disable this to make all line widths 1.", "Vypnutím se všechny šířky čar nastaví na 1.")
+
+S("When this setting is ON, grid lines and various line patterns are drawn as pipes.",
+  "Když je toto nastavení zapnutí, čáry v mřížce a různé čárové vzory se vykreslují jako trubky.")
+
+S("Enables easier control of the camera for watching visualizations (when you are not playing the game).",
+  "Umožňuje snadnější ovládání kamery při sledování vizualizací (když nehraješ hru).")
+
+S("higher contrast", "vyšší kontrast")
+S("use higher contrast", "používat vyšší kontrast")
+S("Use higher contrast for some terrain elements.", "Používat vyšší kontrast pro některé terénní prvky.")
+
+// other new settings
+
+// additional stereo mode
+S("cylindrical", "válcové")
+S("full vertical (not implemented in raycaster)", "plně vertikální (není implementováno v raycasteru)")
+
+S("map font scale", "měřítko mapového fontu")
+S("This affects the size of the characters on the ASCII map. This includes ASCII walls/monster display mode, the minimap, minefield values, and various debug features.",
+  "Toto nastavení ovlivňuje velikost znaků na ASCII mapě. Zahrnuje to mód ASCII zobrazování zdí/netvorů, minimapu, hodnoty v minovém poli a různé debugové prvky.")
+
+S("menu line format", "formát řádků menu")
+S("Displays an arbitrary text instead of menu. You can use e.g. $(turncount) or $(gametime,2) to display the values of parameters and statistics.",
+  "Zobrazuje libovolný text místo 'menu'. Můžeš použít např. $(turncount) nebo $(gametime,2) k zobrazení hodnot "
+"parametrů a statistik.")
+S("testing", "testování")
+S("show turn count", "zobrazit počet kol")
+
+S("display zeros in minefield", "zobrazovat nuly v minovém poli")
+S("never display zeros", "nikdy nezobrazovat nuly")
+S("only in 3D modes", "pouze ve 3D módech")
+S("always display zeros", "vždy zobrazovat nuly")
+
+S("opacity of undiscovered minefield", "neprůhlednost neobjeveného minového pole")
+S("3D modes only\n\n0 = invisible, 255 = fully opaque", "pouze ve 3D módech\n\n0 = neviditelné, 255 = zcela neprůhledné")
+
+S("semicasual", "poloneformální")
+S("display save/load counts in exit screen", "zobrazovat na výstupní obrazovce počet uložení/nahrání")
+S(" saves: %1 loads: %2 branching: %3", " uložení: %1 nahrání: %2 rozvětvení: %3")
+
+S("joystick initialization", "inicializace joysticku")
+S("do not use joysticks", "nepoužívat joysticky")
+S("fast", "rychlá")
+S("do not wait until the joysticks are initialized", "nečekat na inicializaci joysticků")
+S("wait", "čekat")
+S("wait until the joysticks are initialized", "čekat na inicializaci joysticků")
+
+S("raw texture opacity", "neprůhlednost surové textury")
+
+// other stuff:
+S("not editable", "nelze editovat")
+
+// (used in the highscore list)
+S("where", "kde")
+S("zoom", "zoom")
+
+// (this is about the displayed creature size)
+S("changing this during shmup is counted as cheating", "změna tohoto parametru ve střílečkovém módu se počítá jako cheat")
+
+S("single type+symmetry", "jeden typ+symetrie")
