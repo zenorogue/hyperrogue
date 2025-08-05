@@ -1750,7 +1750,7 @@ MONSTER('d', 0x901020, "Angry Die", moAngryDie, ZERO, RESERVED, moAnimatedDie,
   "You have made a die unhappy. Taste the revenge! This one won't forgive you, no matter what you do."
   )
 
-LAND( 0x7030A0, "Crossroads VI", laCrossroads6, ZERO, itHyperstone, RESERVED, "A cursed Crossroads layout.\n")
+LAND( 0x7030A0, "Crossroads VI", laCrossroads6, ZERO, itHyperstone, RESERVED, "A cursed Crossroads layout.")
   NATIVE(0)
   REQ(ITEMS(itCursed, 5))
 
