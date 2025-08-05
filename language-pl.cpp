@@ -10434,7 +10434,7 @@ S(" With the keyboard, you can press Tab to invert the way the pushing direction
   " Jeśli używasz klawiatury, możesz nacisnąć Tab by odwrócić kierunek pchnięcia, albo Shift+Tab by wybór zależał "
   "od obrócenia widoku na ekranie.")
 S("control the pushing direction with TAB", "steruj kerunek pchnięcia przy użyciu TAB")
-S("If set, you control the off-hepetagon pushing direction with TAB. Otherwise, you control it by rotating the screen.",
+S("If set, you control the off-heptagon pushing direction with TAB. Otherwise, you control it by rotating the screen.",
   "Jeśli ustawione, sterujesz kierunek odpychania z siedmiokąta naciskając TAB. W przeciwnym wypadku możesz to zrobić "
   "obracając widok.")
 

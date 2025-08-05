@@ -1205,7 +1205,7 @@ EX void initConfig() {
   param_i(vid.faraway_highlight_color, "faraway_highlight_color", 50)
   -> editable(0, 100, 10, "faraway highlight color", "0 = monster color, 100 = red-light oscillation", 'c');
 
-  param_b(keybd_subdir_enabled, "keybd_subdir_enabled", 0)->editable("control the pushing direction with TAB", 'P')->help("If set, you control the off-hepetagon pushing direction with TAB. Otherwise, you control it by rotating the screen.");
+  param_b(keybd_subdir_enabled, "keybd_subdir_enabled", 0)->editable("control the pushing direction with TAB", 'P')->help("If set, you control the off-heptagon pushing direction with TAB. Otherwise, you control it by rotating the screen.");
 
   param_enum(glyphsortorder, parameter_names("glyph_sort", "glyph sort order"), glyphsortorder)
     ->editable({

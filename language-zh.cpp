@@ -9536,7 +9536,7 @@ S("Do not draw if their distance is greater than the sight range (although some 
 S(" With the keyboard, you can press Tab to invert the way the pushing direction leans, or Shift+Tab to decide based on how the view is rotated.",
   " 如果使用键盘，可以按Tab键反转推动方向，或按Shift+Tab键根据视图的旋转方式进行决定。")
 S("control the pushing direction with TAB", "使用TAB键控制推动方向")
-S("If set, you control the off-hepetagon pushing direction with TAB. Otherwise, you control it by rotating the screen.",
+S("If set, you control the off-heptagon pushing direction with TAB. Otherwise, you control it by rotating the screen.",
   "如果设置，您可以使用TAB键控制离开七边形格时的推动方向。否则，你可以通过旋转屏幕来控制它。")
 
 S("Background particle effects, e.g., in the Blizzard.", "背景粒子效果，例如在暴风雪中的那种。")
