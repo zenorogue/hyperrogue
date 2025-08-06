@@ -5455,3 +5455,16 @@ Mostly bugfixes:
 - shmup: particle effects in shmup now appear from the correct locaton, fuel particles in space rocks
 - Racing official track no longer turns the "god mode" off
 - fixed the Yendor/Caribbean markers in some projections
+
+2025-08-06 09:28 Update 13.1:
+- two new crossroads variants
+- translations updated
+- fixes in the peace/exploration menu
+- fixed the display of 'faces per vertex'
+- improvements to high contrast (by @jlm)
+- Caribbean spill in Voronoi should be fixed
+- launch the connection debugger on connection errors, also clearer error messages and horotiling.tes actually loads again
+- fixed the distance display in the expansion mode
+- fixed file dialog closing incorrectly
+- fixed Orb of Sword blocking strong wind
+https://zenorogue.blogspot.com/2025/08/hyperrogue-131.html
