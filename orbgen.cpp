@@ -304,11 +304,14 @@ EX eOrbLandRelation getOLR(eItem it, eLand l) {
     if(it == itOrbDragon || it == itOrbFire || it == itOrbFlash || it == itOrbLightning)
       return olrDangerous;
   
-  if(it == itOrbSafety)
+  if(it == itOrbSafety) {
     if(l == laCaves || l == laLivefjord || l == laRedRock || l == laCocytus || l == laHell ||
-      l == laDesert || l == laAlchemist || l == laDeadCaves || l == laMinefield || isHaunted(l) ||
+      l == laDesert || l == laAlchemist || l == laDeadCaves || l == laMinefield ||
       l == laDragon || l == laWet || l == laCursed)
       return olrDangerous;
+    if(isHaunted(l))
+      return olrForbidden;
+  }
     
   if(it == itOrbMatter)
     if(among(l, laCaves, laEmerald, laAlchemist, laCaribbean, laMinefield, laCocytus, laWestWall))
