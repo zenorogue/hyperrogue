@@ -108,10 +108,12 @@ vector<cheatkey> cheats = {
     cheatMoveTo(laCrossroads);
     addMessage(XLAT("Activated the Hyperstone Quest!"));
 
-    for(int t=1; t<ittypes; t++) 
-      if(t != itHyperstone && t != itBounty && itemclass(eItem(t)) == IC_TREASURE) {
+    generateLandList(isLandIngame);
+    for(eLand l: landlist) {
+      eItem t = treasureType(l);
+      if(required_for_hyperstones(t) && itemclass(eItem(t)) == IC_TREASURE)
         items[t] = inv::on ? 50 : 10;
-        }
+    }
     int qkills = inv::on ? 1000 : 200;
     kills[moYeti] = qkills;
     kills[moDesertman] = qkills;
