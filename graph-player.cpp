@@ -274,7 +274,7 @@ struct playershape {
   bool is_animal;
   };
 
-enum ePlayershape { pshRogue, pshPrincess, pshCat, pshDog, pshFamiliar, pshSpaceship, pshBunny, pshRatling, pshHyperbug, pshGUARD };
+enum ePlayershape { pshRogue, pshPrincess, pshCat, pshDog, pshFamiliar, pshSpaceship, pshBunny, pshRatling, pshHyperbug, pshSkeleton, pshGUARD };
 #endif
 
 EX vector<playershape> playershapes = {
@@ -286,7 +286,8 @@ EX vector<playershape> playershapes = {
   {"spaceship", false, false},
   {"bunny", false, true},
   {"Ratling", true, false},
-  {"hyperbug", false, true}
+  {"hyperbug", false, true},
+  {"Skeleton", true, false}
   };
 
 EX void drawPlayer_animal(eMonster m, cell *where, const shiftmatrix& V0, color_t col, double footphase, bool stop IS(false)) {
@@ -410,12 +411,12 @@ EX void drawPlayer_humanoid(eMonster m, cell *where, const shiftmatrix& V, color
   charstyle& cs = getcs();
   auto id = ePlayershape(cs.charid >> 1);
 
-  auto& body = (id == pshRatling) ? cgi.shYeti : (cs.charid&1) ? cgi.shFemaleBody : cgi.shPBody;
+  auto& body = (id == pshRatling) ? cgi.shYeti : (id == pshSkeleton) ? cgi.shSkeletonBody : (cs.charid&1) ? cgi.shFemaleBody : cgi.shPBody;
 
   ShadowV(V, body);
   if(stop) return;
 
-  const transmatrix VBS = otherbodyparts(V, fc(0, (id == pshRatling) ? cs.dresscolor : cs.skincolor, 0), items[itOrbFish] ? moWaterElemental : moPlayer, footphase);
+  const transmatrix VBS = otherbodyparts(V, fc(0, (id == pshRatling || id == pshSkeleton) ? cs.dresscolor : cs.skincolor, 0), items[itOrbFish] ? moWaterElemental : moPlayer, footphase);
 
 
   queuepoly(VBODY * VBS, body, fc(0, cs.skincolor, 0));
@@ -504,6 +505,10 @@ EX void drawPlayer_humanoid(eMonster m, cell *where, const shiftmatrix& V, color
     queuepoly(VHEAD, cgi.shWolf2, cs.eyecolor);
     queuepoly(VHEAD, cgi.shWolf3, darkena(0x202020, 0, 0xFF));
     }
+  else if(id == pshSkeleton) {
+    if(GDIM == 2) queuepoly(VHEAD, cgi.shSkull, fc(500, cs.haircolor, 1));
+    if(GDIM == 2) queuepoly(VHEAD1, cgi.shSkullEyes, 0x000000FF);
+    }
   else {
     queuepoly(VHEAD, cgi.shPFace, fc(500, cs.skincolor, 1));
     queuepoly(VHEAD1, (cs.charid&1) ? cgi.shFemaleHair : cgi.shPHead, fc(150, cs.haircolor, 2));
@@ -547,10 +552,11 @@ EX void drawPlayer(eMonster m, cell *where, const shiftmatrix& V, color_t col, d
 
 EX void drawMimic(eMonster m, cell *where, const shiftmatrix& V, color_t col, double footphase) {
   charstyle& cs = getcs();
+  auto id = ePlayershape(cs.charid >> 1);
   
   if(mapeditor::drawUserShape(V, mapeditor::sgPlayer, cs.charid, darkena(col, 0, 0x80), where)) return;
   
-  if(cs.charid >= 10) {
+  if(id == pshSpaceship) {
     ShadowV(V, cgi.shSpaceship);
     queuepoly(VBODY, cgi.shSpaceshipBase, darkena(col, 0, 0xC0));
     queuepoly(VBODY, cgi.shSpaceshipCockpit, darkena(col, 0, 0xC0));
@@ -559,7 +565,7 @@ EX void drawMimic(eMonster m, cell *where, const shiftmatrix& V, color_t col, do
     queuepoly(VBODY * lmirror(), cgi.shSpaceshipGun, darkena(col, 0, 0xC0));
     queuepoly(VBODY * lmirror(), cgi.shSpaceshipEngine, darkena(col, 0, 0xC0));
     }
-  else if(cs.charid >= 8) {
+  else if(id == pshFamiliar) {
     queuepoly(VABODY, cgi.shWolfBody, darkena(col, 0, 0xC0));
     ShadowV(V, cgi.shWolfBody);
 
@@ -572,7 +578,7 @@ EX void drawMimic(eMonster m, cell *where, const shiftmatrix& V, color_t col, do
     queuepoly(VAHEAD, cgi.shFamiliarEye, darkena(col, 0, 0xC0));
     queuepoly(VAHEAD * lmirror(), cgi.shFamiliarEye, darkena(col, 0, 0xC0));
     }
-  else if(cs.charid >= 6) {
+  else if(id == pshDog) {
     ShadowV(V, cgi.shDogBody);
     queuepoly(VAHEAD, cgi.shDogHead, darkena(col, 0, 0xC0));
     if(mmspatial || footphase) {
@@ -585,7 +591,36 @@ EX void drawMimic(eMonster m, cell *where, const shiftmatrix& V, color_t col, do
     queuepoly(VABODY, cgi.shWolf2, darkena(col, 1, 0xC0));
     queuepoly(VABODY, cgi.shWolf3, darkena(col, 1, 0xC0));
     }
-  else if(cs.charid >= 4) {
+  else if(id == pshBunny) {
+    ShadowV(V, cgi.shBunnyBody);
+    queuepoly(VAHEAD, cgi.shBunnyHead, darkena(col, 0, 0xC0));
+    if(mmspatial || footphase) {
+      animallegs(VALEGS, moRunDog, darkena(col, 0, 0xC0), footphase);
+      queuepoly(VABODY, cgi.shBunnyBody, darkena(col, 0, 0xC0));
+      }
+    else
+      queuepoly(VABODY, cgi.shBunnyBody, darkena(col, 0, 0xC0));
+
+    queuepoly(VABODY, cgi.shBunnyTail, darkena(col, 1, 0xC0));
+    queuepoly(VABODY, cgi.shBunnyHead, darkena(col, 1, 0xC0));
+
+    queuepoly(VAHEAD * xpush(.04), cgi.shWolf1, col);
+    queuepoly(VAHEAD * xpush(.04), cgi.shWolf2, col);
+
+    queuepoly(VAHEAD, cgi.shBunnyEar, darkena(col, 1, 0x80));
+    queuepoly(VAHEAD * MirrorY, cgi.shBunnyEar, darkena(col, 2, 0x80));
+    }
+  else if(id == pshHyperbug) {
+    ShadowV(V, cgi.shBugBody);
+    if(!mmspatial && !footphase)
+      queuepoly(VABODY, cgi.shBugBody, darkena(col, 0, 0xC0));
+    else {
+      animallegs(VALEGS, moBug0, darkena(col, 0, 0xC0), footphase);
+      queuepoly(VABODY, cgi.shBugAntenna, darkena(col, 0, 0xC0));
+      }
+    queuepoly(VABODY, cgi.shBugArmor, darkena(col, 0, 0xC0));
+    }
+  else if(id == pshCat) {
     ShadowV(V, cgi.shCatBody);
     queuepoly(VABODY, cgi.shCatBody, darkena(col, 0, 0xC0));
     queuepoly(VAHEAD, cgi.shCatHead, darkena(col, 0, 0xC0));
@@ -598,7 +633,8 @@ EX void drawMimic(eMonster m, cell *where, const shiftmatrix& V, color_t col, do
     }
   else {
     const transmatrix VBS = otherbodyparts(V, darkena(col, 0, 0x40), m, footphase);
-    queuepoly(VBODY * VBS, (cs.charid&1) ? cgi.shFemaleBody : cgi.shPBody,  darkena(col, 0, 0X80));
+    auto& body = (id == pshRatling) ? cgi.shYeti : (id == pshSkeleton) ? cgi.shSkeletonBody : (cs.charid&1) ? cgi.shFemaleBody : cgi.shPBody;
+    queuepoly(VBODY * VBS, body,  darkena(col, 0, 0X80));
 
     if(bow::crossbow_mode() && cs.charid < 4) {
       shiftmatrix VWPN = cs.lefthanded ? VBODY * VBS * lmirror() : VBODY * VBS;
@@ -637,8 +673,20 @@ EX void drawMimic(eMonster m, cell *where, const shiftmatrix& V, color_t col, do
       queuepoly(VBODY3 * VBS, cgi.shKnightCloak, darkena(col, 1, 0xC0));
     #endif
 
-    queuepoly(VHEAD1, (cs.charid&1) ? cgi.shFemaleHair : cgi.shPHead,  darkena(col, 1, 0XC0));
-    queuepoly(VHEAD, cgi.shPFace,  darkena(col, 0, 0XC0));
+    if(&body == &cgi.shYeti) {
+      queuepoly(VHEAD1, cgi.shRatHead,  darkena(col, 1, 0xC0));
+      queuepoly(VHEAD, cgi.shWolf1, darkena(col, 2, 0xC0));
+      queuepoly(VHEAD, cgi.shWolf2, darkena(col, 2, 0xC0));
+      queuepoly(VHEAD, cgi.shWolf3, darkena(col, 2, 0xC0));
+      }
+    else if(&body == &cgi.shSkeletonBody) {
+      queuepoly(VHEAD1, cgi.shSkull,  darkena(col, 1, 0xC0));
+      queuepoly(VHEAD, cgi.shSkullEyes, darkena(col, 2, 0xC0));
+      }
+    else {
+      queuepoly(VHEAD1, (cs.charid&1) ? cgi.shFemaleHair : cgi.shPHead,  darkena(col, 1, 0XC0));
+      queuepoly(VHEAD, cgi.shPFace,  darkena(col, 0, 0XC0));
+      }
     if(cs.charid&1)
       queuepoly(VBODY1 * VBS, cgi.shFemaleDress,  darkena(col, 1, 0XC0));
     if(cs.charid == 2)

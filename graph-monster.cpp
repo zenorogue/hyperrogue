@@ -217,10 +217,11 @@ EX transmatrix otherbodyparts(const shiftmatrix& V, color_t col, eMonster who, d
   // todo
 
   auto who1 = who;
-  if(who == moPlayer) {
+  if(among(who, moPlayer, moMimic, moShadow, moIllusion, moFalsePrincess, moRoseLady, moRoseBeauty, moPrincess, moPrincessArmed)) {
     charstyle& cs = getcs();
     auto id = ePlayershape(cs.charid >> 1);
     if(id == pshRatling) who1 = moRatling;
+    if(id == pshSkeleton) who1 = moSkeleton;
     }
 
   if(detaillevel >= 2 && GDIM == 2) { 
@@ -263,7 +264,7 @@ EX transmatrix otherbodyparts(const shiftmatrix& V, color_t col, eMonster who, d
     double fishtail = footfun(footphase / .4) / 4 * 1.5;
     queuepoly(VFOOT * xpush(fishtail), cgi.shFishTail, watercolor(100));
     }
-  else if(who == moSkeleton) {
+  else if(who1 == moSkeleton) {
     queuepoly(Tright, cgi.shSkeletalFoot, col);
     queuepoly(Tleft, cgi.shSkeletalFoot, col);
     return spin(rightfoot * wobble);
@@ -466,11 +467,11 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       auto& cs = vid.cs;
       auto id = ePlayershape(cs.charid >> 1);
 
-      auto& body = id == pshRatling ? cgi.shYeti : girl ? cgi.shFemaleBody : cgi.shPBody;
-      bool wears_dress = among(id, pshRogue, pshRatling);
+      auto& body = id == pshRatling ? cgi.shYeti : id == pshSkeleton ? cgi.shSkeletonBody : girl ? cgi.shFemaleBody : cgi.shPBody;
+      bool wears_dress = among(id, pshRogue, pshRatling, pshSkeleton);
 
       ShadowV(V, body);
-      const transmatrix VBS = otherbodyparts(V, facecolor, !evil && items[itOrbFish] && items[itOrbEmpathy] ? moWaterElemental : id == pshRatling ? moYeti : m, footphase);
+      const transmatrix VBS = otherbodyparts(V, facecolor, !evil && items[itOrbFish] && items[itOrbEmpathy] ? moWaterElemental : m, footphase);
       queuepoly(VBODY * VBS, body, facecolor);
   
       if(m == moPrincessArmed) 
@@ -494,7 +495,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
           queuepoly(VBODY1 * VBS, cgi.shPrinceDress,  evil ? 0x802080FF : 0x404040FF);
         }    
 
-      auto& hair = id == pshRatling ? cgi.shRatHead : girl ? cgi.shFemaleHair : cgi.shPHead;
+      auto& hair = id == pshRatling ? cgi.shRatHead : id == pshSkeleton ? cgi.shSkull : girl ? cgi.shFemaleHair : cgi.shPHead;
 
       if(m == moRoseLady) {
   //    queuepoly(V, girl ? cgi.shGoatHead : cgi.shDemon,  0x800000FF);
@@ -519,6 +520,9 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
         queuepoly(VHEAD, cgi.shWolf1, 0x008000FF);
         queuepoly(VHEAD, cgi.shWolf2, 0x008000FF);
         queuepoly(VHEAD, cgi.shWolf3, darkena(0x202020, 0, 0xFF));
+        }
+      else if(&hair == &cgi.shSkull) {
+        queuepoly(VHEAD, cgi.shSkullEyes, darkena(0x202020, 0, 0xFF));
         }
       else queuepoly(VHEAD, cgi.shPFace,  facecolor);
       humanoid_eyes(V, evil ? 0x0000C0FF : 0x00C000FF, facecolor);
