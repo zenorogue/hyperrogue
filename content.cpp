@@ -1752,7 +1752,7 @@ MONSTER('d', 0x901020, "Angry Die", moAngryDie, ZERO, RESERVED, moAnimatedDie,
 
 LAND( 0x7030A0, "Crossroads VI", laCrossroads6, ZERO, itHyperstone, RESERVED, "A cursed Crossroads layout.")
   NATIVE(0)
-  REQ(ITEMS(itCursed, 5))
+  REQ(IFINGAME(laCursed, ITEMS(itCursed, 5), GOLD(R400)))
 
 LAND( 0xC0B090, "Master Crossroads", laMasterCrossroads, ZERO, itHyperstone, RESERVED, "A crossroads that connects only to other crossroads.")
   NATIVE(0) REQ(GOLD(R500))
