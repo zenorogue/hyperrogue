@@ -220,7 +220,7 @@ EX void reduceOrbPowers() {
   mine::auto_teleport_charges();
   #endif
 
-  if(orbs_drained && items[itOrbRecall] <= 10) 
+  if(orbs_drained && items[itOrbRecall] && items[itOrbRecall] <= 10) 
     items[itOrbRecall] = 11;
   reduceOrbPower(itOrbRecall, 77);
 
