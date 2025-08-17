@@ -3569,10 +3569,33 @@ EX void pick_player_shape() {
   charstyle& cs = getcs();
   for(int i=0; i<pshGUARD; i++) {
     dialog::addBoolItem(XLAT(playershapes[i].name), i == (cs.charid>>1), 'a'+i);
+    if((i == pshPrincess && !princess::everSaved) ||
+       (i == pshRatling && hiitemsMax(itCoral) < 25) ||
+       (i == pshSkeleton && hiitemsMax(itPalace) < 25) ||
+       (i == pshHyperbug && hiitemsMax(itRoyalJelly) < 25)
+      ) dialog::lastItem().value = "(locked)";
     dialog::add_action([i, &cs] {
       if(i == pshPrincess) {
         if(!princess::everSaved && !autocheat && !unlock_all) {
           addMessage(XLAT("Save %the1 first!", moPrincess));
+          return;
+          }
+        }
+      if(i == pshRatling) {
+        if(hiitemsMax(itCoral) < 25 && !unlock_all && !autocheat) {
+          addMessage(XLAT("Collect 25 %1 to unlock first!", itCoral));
+          return;
+          }
+        }
+      if(i == pshSkeleton) {
+        if(hiitemsMax(itPalace) < 25 && !unlock_all && !autocheat) {
+          addMessage(XLAT("Collect 25 %1 to unlock first!", itPalace));
+          return;
+          }
+        }
+      if(i == pshHyperbug) {
+        if(hiitemsMax(itRoyalJelly) < 25 && !unlock_all && !autocheat) {
+          addMessage(XLAT("Collect 25 %1 to unlock first!", itRoyalJelly));
           return;
           }
         }
