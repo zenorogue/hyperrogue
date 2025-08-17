@@ -274,9 +274,10 @@ bool handleKeyTour(int sym, int uni) {
     dialog::key_actions[sym]();
     return true;
     }
+  if(sym == SDLK_PAGEDOWN) return next_slide();
   if((sym == SDLK_RETURN || sym == SDLK_KP_ENTER) && (!inhelp || (flags & QUICKSKIP)))
     return next_slide();
-  if(sym == SDLK_BACKSPACE) {
+  if(sym == SDLK_BACKSPACE || sym == SDLK_PAGEUP) {
     if(gamestack::pushed()) { 
       gamestack::pop();
       if(!(flags & QUICKGEO)) return true;
@@ -286,7 +287,7 @@ bool handleKeyTour(int sym, int uni) {
     currentslide--;
     presentation(pmStart);
     popScreenAll();
-    if(inhelp || (flags & ALWAYS_TEXT)) slidehelp();
+    if(sym != SDLK_PAGEUP) if(inhelp || (flags & ALWAYS_TEXT)) slidehelp();
     return true;
     }
   int legal = slides[currentslide].flags & 7;

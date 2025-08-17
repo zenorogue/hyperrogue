@@ -517,7 +517,7 @@ EX void handlePanning(int sym, int uni) {
     if(sym == SDLK_DOWN) full_rotate_camera(1, -0.2*shiftmul);
     }
 #endif
-  if(!smooth_scrolling) {
+  if(!smooth_scrolling && !tour::on) {
     if(sym == SDLK_PAGEUP) full_rotate_view(1, cgi.S_step*shiftmul);
     if(sym == SDLK_PAGEDOWN) full_rotate_view(-1, -cgi.S_step*shiftmul);
     if(sym == SDLK_PAGEUP || sym == SDLK_PAGEDOWN) 
@@ -1024,8 +1024,8 @@ EX void mainloopiter() {
     if(keystate[SDLK_LEFT] && DEFAULTNOR(SDLK_LEFT)) full_rotate_camera(0, t);
     if(keystate[SDLK_UP] && DEFAULTNOR(SDLK_UP)) full_rotate_camera(1, t);
     if(keystate[SDLK_DOWN] && DEFAULTNOR(SDLK_DOWN)) full_rotate_camera(1, -t);
-    if(keystate[SDLK_PAGEUP] && DEFAULTNOR(SDLK_PAGEUP)) full_rotate_view(t / degree, t);
-    if(keystate[SDLK_PAGEDOWN] && DEFAULTNOR(SDLK_PAGEDOWN)) full_rotate_view(-t / degree, -t);
+    if(keystate[SDLK_PAGEUP] && DEFAULTNOR(SDLK_PAGEUP) && !tour::on) full_rotate_view(t / degree, t);
+    if(keystate[SDLK_PAGEDOWN] && DEFAULTNOR(SDLK_PAGEDOWN) && !tour::on) full_rotate_view(-t / degree, -t);
     #endif
     }
   else sc_ticks = ticks;
