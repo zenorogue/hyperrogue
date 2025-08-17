@@ -433,11 +433,11 @@ EX void showGameMenu() {
   else if(peace::on) ;
   else if(racing::on) ;
   else if(!in_full_game()) ;
-  else if(tkills() < R100)
+  else if(tkills() < R100 && isLandIngame(laGraveyard))
     dialog::addInfo(XLAT("Defeat %1 enemies to access the Graveyard", its(R100)));
-  else if(kills[moVizier] == 0 && (items[itFernFlower] < U5 || items[itGold] < U5))
+  else if(kills[moVizier] == 0 && (items[itFernFlower] < U5 || items[itGold] < U5) && isLandIngame(laEmerald))
     dialog::addInfo(XLAT("Kill a Vizier in the Palace to access Emerald Mine"));
-  else if(items[itEmerald] < U5)
+  else if(items[itEmerald] < U5 && isLandIngame(laCamelot))
     dialog::addInfo(XLAT("Collect 5 Emeralds to access Camelot"));
   else if(landUnlocked(laHell) && ls::any_order()) {
     eLand l = nextHyperstone();
