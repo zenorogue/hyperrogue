@@ -274,7 +274,7 @@ struct playershape {
   bool is_animal;
   };
 
-enum ePlayershape { pshRogue, pshPrincess, pshCat, pshDog, pshFamiliar, pshSpaceship, pshBunny, pshRatling, pshGUARD };
+enum ePlayershape { pshRogue, pshPrincess, pshCat, pshDog, pshFamiliar, pshSpaceship, pshBunny, pshRatling, pshHyperbug, pshGUARD };
 #endif
 
 EX vector<playershape> playershapes = {
@@ -285,7 +285,8 @@ EX vector<playershape> playershapes = {
   {"Familiar", false, true},
   {"spaceship", false, false},
   {"bunny", false, true},
-  {"Ratling", true, false}
+  {"Ratling", true, false},
+  {"hyperbug", false, true}
   };
 
 EX void drawPlayer_animal(eMonster m, cell *where, const shiftmatrix& V0, color_t col, double footphase, bool stop IS(false)) {
@@ -294,6 +295,17 @@ EX void drawPlayer_animal(eMonster m, cell *where, const shiftmatrix& V0, color_
   auto id = ePlayershape(cs.charid >> 1);
 
   auto V = V0;
+
+  if(id == pshHyperbug) {
+    ShadowV(V, cgi.shBugBody);
+    if(!mmspatial && !footphase)
+      queuepoly(VABODY, cgi.shBugBody, fc(0, cs.skincolor, 0));
+    else {
+      animallegs(VALEGS, moBug0, fc(500, cs.dresscolor, 4), footphase);
+      queuepoly(VABODY, cgi.shBugAntenna, fc(150, cs.skincolor, 2));
+      }
+    queuepoly(VABODY, cgi.shBugArmor, fc(400, cs.haircolor, 5));
+    }
 
   if(id == pshBunny) {
     auto z2 = WDIM == 3 ? 0 : GDIM == 3 ? -abs(sin(footphase * TAU)) * cgi.human_height/3 : geom3::lev_to_factor(abs(sin(footphase * TAU)) * cgi.human_height * 2);
