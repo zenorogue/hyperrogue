@@ -5468,3 +5468,12 @@ Mostly bugfixes:
 - fixed file dialog closing incorrectly
 - fixed Orb of Sword blocking strong wind
 https://zenorogue.blogspot.com/2025/08/hyperrogue-131.html
+
+2025-08-17 21:03 Update 13.1a:
+- improved selection of player shape: four new shapes, save/load customized characters, the character is centered correctly
+- fixed slaying + discord graphics
+- other active orbs now extend the duration of Orb of Recall
+- fixed CR5 and MCR not appearing in PTM
+- alt unlock condition for CR6
+- fixed the floor graphics in dual tilings
+- finding the music file in some installations should be fixed
