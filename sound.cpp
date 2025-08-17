@@ -201,7 +201,7 @@ EX bool loadMusicInfo(string dir) {
 
 EX bool loadMusicInfo() {
   return
-    loadMusicInfo(find_file(musicfile))
+    (musicfile[0] && loadMusicInfo(find_file(musicfile)))
     || loadMusicInfo(find_file("hyperrogue-music.txt") )
     || loadMusicInfo(find_file("music/hyperrogue-music.txt") )
 #ifdef FHS
