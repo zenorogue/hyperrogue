@@ -711,6 +711,7 @@ EX vector<landtacinfo> land_tac = {
   {laDice, 5, 2}, {laCursed, 5, 2},
   
   {laCrossroads, 10, 1}, {laCrossroads2, 10, 1}, {laCrossroads3, 10, 1}, {laCrossroads4, 10, 1}, {laCrossroads5, 5, 2},
+  {laCrossroads6, 10, 1}, {laMasterCrossroads, 10, 1},
   
   {laCamelot, 1, 100},
   {laWildWest, 10, 1},
