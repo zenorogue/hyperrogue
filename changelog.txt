@@ -5477,3 +5477,7 @@ https://zenorogue.blogspot.com/2025/08/hyperrogue-131.html
 - alt unlock condition for CR6
 - fixed the floor graphics in dual tilings
 - finding the music file in some installations should be fixed
+
+2025-08-17 23:00 Update 13.1b:
+- fixed Orb of Recall appearing incorrectly
+- finding geodesic and paper model data in some installations should be fixed
