@@ -3624,11 +3624,12 @@ EX void load_customchar(charstyle& cs, const string& fname) {
   FILE *f = fopen(fname.c_str(), "rt");
   if(!f) throw hstream_exception();
   int vernum;
-  fscanf(f, "%x", &vernum);
+  if(!fscanf(f, "%x", &vernum)) throw hstream_exception();
   int lh;
-  fscanf(f, "%d %d\n%08x %08x %08x %08x %08x %08x %08x %08x %08x\n",
+  if(!fscanf(f, "%d %d\n%08x %08x %08x %08x %08x %08x %08x %08x %08x\n",
     &cs.charid, &lh,
-    &cs.skincolor, &cs.haircolor, &cs.dresscolor, &cs.swordcolor, &cs.dresscolor2, &cs.uicolor, &cs.eyecolor, &cs.bowcolor, &cs.bowcolor2);
+    &cs.skincolor, &cs.haircolor, &cs.dresscolor, &cs.swordcolor, &cs.dresscolor2, &cs.uicolor, &cs.eyecolor, &cs.bowcolor, &cs.bowcolor2))
+    throw hstream_exception();
   cs.lefthanded = lh;
   fclose(f);
   }
