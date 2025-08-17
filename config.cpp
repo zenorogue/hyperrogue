@@ -3623,7 +3623,7 @@ EX void save_customchar(charstyle& cs, const string& fname) {
 EX void load_customchar(charstyle& cs, const string& fname) {
   FILE *f = fopen(fname.c_str(), "rt");
   if(!f) throw hstream_exception();
-  int vernum;
+  unsigned int vernum;
   if(!fscanf(f, "%x", &vernum)) throw hstream_exception();
   int lh;
   if(!fscanf(f, "%d %d\n%08x %08x %08x %08x %08x %08x %08x %08x %08x\n",
