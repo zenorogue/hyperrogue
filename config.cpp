@@ -997,11 +997,7 @@ EX string csnameid(int id) {
   if(id == 1) return XLAT("female");
   if(id == 2) return XLAT("Prince");
   if(id == 3) return XLAT("Princess");
-  if(id == 4 || id == 5) return XLAT("cat");
-  if(id == 6 || id == 7) return XLAT("dog");
-  if(id == 8 || id == 9) return XLATN("Familiar");
-  if(id == 10 || id == 11) return XLATN("spaceship");
-  return XLAT("none");
+  return XLAT(playershapes[id >> 1].name);
   }
 
 EX string csname(charstyle& cs) {
@@ -3566,6 +3562,29 @@ EX void switchcolor(unsigned int& c, unsigned int* cs) {
 double cc_footphase;
 int lmousex, lmousey;
 
+EX void pick_player_shape() {
+  cmode = sm::SIDE | sm::MAYDARK;
+  gamescreen();
+  dialog::init(XLAT("Choose character"));
+  charstyle& cs = getcs();
+  for(int i=0; i<pshGUARD; i++) {
+    dialog::addBoolItem(XLAT(playershapes[i].name), i == (cs.charid>>1), 'a'+i);
+    dialog::add_action([i, &cs] {
+      if(i == pshPrincess) {
+        if(!princess::everSaved && !autocheat && !unlock_all) {
+          addMessage(XLAT("Save %the1 first!", moPrincess));
+          return;
+          }
+        }
+      cs.charid = (cs.charid & 1) | (i << 1);
+      });
+    }
+  dialog::addSelItem("variant", XLAT((cs.charid & 1) ? "female" : "male"), 'x');
+  dialog::add_action([&cs] { cs.charid ^= 1; });
+  dialog::addBack();
+  dialog::display();
+  }
+
 EX void showCustomizeChar() {
 
   cc_footphase += hypot(mousex - lmousex, mousey - lmousey);
@@ -3577,6 +3596,7 @@ EX void showCustomizeChar() {
   
   if(shmup::on || multi::players) multi::cpid = multi::cpid_edit % multi::players;
   charstyle& cs = getcs();
+  auto id = ePlayershape(cs.charid >> 1);
   
   dialog::addSelItem(XLAT("character"), csname(cs), 'g');
   dialog::addColorItem(XLAT("skin color"), cs.skincolor, 's');
@@ -3588,7 +3608,7 @@ EX void showCustomizeChar() {
     dialog::addColorItem(XLAT("bowstring color"), cs.bowcolor2, 'c');
     }
   
-  if(cs.charid >= 1) dialog::addColorItem(XLAT("dress color"), cs.dresscolor, 'd');
+  if(id != pshRogue) dialog::addColorItem(XLAT("dress color"), cs.dresscolor, 'd');
   else dialog::addBreak(100);
   if(cs.charid == 3) dialog::addColorItem(XLAT("dress color II"), cs.dresscolor2, 'f');
   else dialog::addBreak(100);
@@ -3624,11 +3644,7 @@ EX void showCustomizeChar() {
     charstyle& cs = getcs();
     bool cat = cs.charid >= 4;
     if(uni == 'a') { multi::cpid_edit++; multi::cpid_edit %= 60; }
-    else if(uni == 'g') {
-      cs.charid++;
-      if(cs.charid == 2 && !princess::everSaved && !autocheat) cs.charid = 4;
-      cs.charid %= 12;
-      }
+    else if(uni == 'g') pushScreen(pick_player_shape);
     else if(uni == 'p') vid.samegender = !vid.samegender;
     else if(uni == 's') switchcolor(cs.skincolor, cat ? haircolors : skincolors);
     else if(uni == 'h') switchcolor(cs.haircolor, haircolors);
@@ -4471,10 +4487,19 @@ EX void set_char_by_name(charstyle& cs, const string& s) {
     cs.eyecolor = 0x500040FF;
     cs.swordcolor = 0x808080FF;
     }
+  else if(s == "felix") {
+    cs.charid = 12;
+    cs.skincolor = 0xD0D0D0FF;
+    cs.haircolor = 0xF0F0F0FF;
+    cs.dresscolor =0xF0F0F0FF;
+    cs.eyecolor = 0xFF0000FF;
+    cs.swordcolor = 0x808080FF;
+    }
   else {
     cs.charid = atoi(s.c_str());
-    cs.lefthanded = cs.charid >= 10;
-    cs.charid %= 10;
+    cs.lefthanded = cs.charid >= 100;
+    cs.charid %= 100;
+    cs.charid %= (2 * pshGUARD);
     }
   }
 

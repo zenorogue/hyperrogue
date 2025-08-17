@@ -386,7 +386,9 @@ hpcshape
 
   hpcshape shChristmasLight, shSmallPike;
 
-  hpcshape shReserved[8];
+  hpcshape shBunnyBody, shBunnyHead, shBunnyEar, shBunnyTail;
+
+  hpcshape shReserved[16];
   
   int orb_inner_ring; //< for shDisk* shapes, the number of vertices in the inner ring
   int res1, res2;
