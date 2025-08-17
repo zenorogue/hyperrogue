@@ -6148,6 +6148,7 @@ EX void drawscreen() {
   if(nohelp != 1) {
     int size = vid.fsize;
     while(size > 3 && textwidth(size, mouseovers) > vid.xres) size--;
+    poly_outline = (backcolor << 8) | 0xFF;
     displayfr(vid.xres/2, vid.fsize,   2, size, mouseovers, col, 8);
     }
 #endif
