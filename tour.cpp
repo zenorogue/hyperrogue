@@ -119,6 +119,9 @@ EX void enable_canvas_backup(ccolor::data *canv) {
   slide_backup(specialland, laCanvas);
   slide_backup(land_structure);
   slide_backup(randomPatternsMode);
+  slide_backup(geometry);
+  slide_backup(variation);
+  slide_backup(pmodel);
   enable_canvas();
   }
 
