@@ -82,14 +82,18 @@ EX int intensify(int val) {
   return inv::on ? 2 * val : val * 6 / 5;
   }
 
+int orbs_drained;
+
 EX bool reduceOrbPower(eItem it, int cap) {
   if(items[it] && markOrb(itCurseDraining)) {
+    orbs_drained++;
     items[it] -= (markOrb(itOrbEnergy) ? 1 : 2) * multi::activePlayers();
     if(items[it] < 0) items[it] = 0;
     if(items[it] == 0 && it == itOrbLove) 
       princess::bringBack();
     }
   if(items[it] && (lastorbused[it] || (it == itOrbShield && items[it]>3) || !markOrb(itOrbTime))) {
+    orbs_drained++;
     items[it] -= multi::activePlayers();
     if(isHaunted(cwt.at->land)) 
       fail_survivalist();
@@ -106,6 +110,7 @@ EX bool reduceOrbPower(eItem it, int cap) {
 
 EX void reduceOrbPowerAlways(eItem it) {
   if(items[it]) {
+    orbs_drained++;
     items[it] -= multi::activePlayers();
     if(items[it] < 0) items[it] = 0;
     }
@@ -125,6 +130,8 @@ EX void reverse_curse(eItem curse, eItem orb, bool cancel) {
   }
 
 EX void reduceOrbPowers() {
+
+  orbs_drained = 0;
 
   reverse_curse(itCurseWeakness, itOrbSlaying, true);
   reverse_curse(itCurseFatigue, itOrbSpeed, false); // OK
@@ -183,7 +190,6 @@ EX void reduceOrbPowers() {
   reduceOrbPower(itOrbSword2, 100 + 20 * multi::activePlayers());
   reduceOrbPower(itOrbStone, 120);
   reduceOrbPower(itOrbNature, 120);
-  reduceOrbPower(itOrbRecall, 77);
   reduceOrbPower(itOrbBull, 120);
   reduceOrbPower(itOrbHorns, 77);
   reduceOrbPower(itOrbLava, 80);
@@ -213,6 +219,10 @@ EX void reduceOrbPowers() {
   #if CAP_COMPLEX2
   mine::auto_teleport_charges();
   #endif
+
+  if(orbs_drained && items[itOrbRecall] <= 10) 
+    items[itOrbRecall] = 11;
+  reduceOrbPower(itOrbRecall, 77);
 
   whirlwind::calcdirs(cwt.at); 
   items[itStrongWind] = !items[itOrbAether] && whirlwind::qdirs == 1;

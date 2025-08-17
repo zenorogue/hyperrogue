@@ -426,6 +426,9 @@ EX string generateHelpForItem(eItem it) {
   if(it == itOrbIntensity && inv::on)
     help += XLAT("\n\nIn the Orb Strategy Mode, the effect is increased to +100%.");
 
+  if(it == itOrbRecall)
+    help += XLAT("\n\nOther active orbs extend the duration of this orb.");
+
   if(it == itOrbEmpathy) {
     int cnt = 0;
     for(int i=0; i<ittypes; i++) {

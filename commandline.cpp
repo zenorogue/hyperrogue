@@ -327,10 +327,12 @@ int arg::readCommon() {
     }
 
   else if(argis("-save-mode")) {
+    PHASEFROM(2);
     save_mode_to_file(shift_args());
     }
 
   else if(argis("-load-mode")) {
+    PHASEFROM(2);
     try {
       load_mode_from_file(shift_args());
       }
