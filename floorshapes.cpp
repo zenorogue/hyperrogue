@@ -423,6 +423,7 @@ void geometry_information::generate_floorshapes_for(int id, cell *c) {
     if(fake::in()) data = FPIU(cgi.gpdata);
     siid = data->id_to_params[id][0] == 1;
     sidir = data->id_to_params[id][1];
+    if(INVERSE) siid = 1;
     }
 
   else if(PURE && geometry != gBinaryTiling && geosupport_football() < 2) {
