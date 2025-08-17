@@ -467,14 +467,14 @@ EX void drawPlayer_humanoid(eMonster m, cell *where, const shiftmatrix& V, color
     }
   else if(items[itOrbThorns])
     queuepoly(VWPN, cgi.shHedgehogBladePlayer, items[itOrbDiscord] ? watercolor(0) : 0x00FF00FF);
-  else if(!shmup::on && items[itOrbDiscord])
-    queuepoly(VWPN, cs.charid >= 2 ? cgi.shSabre : cgi.shPSword, watercolor(0));
   else if(items[itRevolver])
     queuepoly(VWPN, cgi.shGunInHand, fc(314, cs.swordcolor, 3)); // 3 not colored
   else if(items[itOrbSlaying]) {
     queuepoly(VWPN, cgi.shFlailTrunk, items[itOrbDiscord] ? watercolor(0) : fc(314, cs.swordcolor, 3));
     queuepoly(VWPN, cgi.shHammerHead, items[itOrbDiscord] ? watercolor(50) : fc(314, cs.swordcolor, 3));
     }
+  else if(!shmup::on && items[itOrbDiscord])
+    queuepoly(VWPN, cs.charid >= 2 ? cgi.shSabre : cgi.shPSword, watercolor(0));
   else if(items[itCurseWeakness]) {
     /* no weapon shown */
     }
