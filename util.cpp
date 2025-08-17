@@ -27,6 +27,26 @@ EX int SDL_GetTicks() {
 #endif
 #endif
 
+#if HDR
+template<class T>
+class span {
+  T *begin_ = nullptr;
+  T *end_ = nullptr;
+
+  public:
+  explicit span() = default;
+  explicit span(T *p, int n) : begin_(p), end_(p + n) {}
+  T *begin() const { return begin_; }
+  T *end() const { return end_; }
+  };
+
+template<class Map, class Key>
+hr::span<const shiftmatrix> span_at(const Map& map, const Key& key) {
+  auto it = map.find(key);
+  return (it == map.end()) ? hr::span<const shiftmatrix>() : hr::span<const shiftmatrix>(it->second.data(), it->second.size());
+  }
+#endif
+
 EX long double sqr(long double x) { return x*x; }
 
 EX ld round_nearest(ld x) { if(x > 0) return int(x+.5); else return -int(.5-x); }
