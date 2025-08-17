@@ -84,8 +84,7 @@ EX namespace sn {
   
   void tabled_inverses::load() {
     if(loaded) return;
-    FILE *f = fopen(fname.c_str(), "rb");
-    if(!f) f = fopen((rsrcdir + fname).c_str(), "rb");
+    FILE *f = fopen(find_file(fname).c_str(), "rb");
     if(!f) { addMessage(XLAT("geodesic table missing")); pmodel = mdPerspective; return; }
     hr::ignore(fread(&PRECX, 4, 1, f));
     hr::ignore(fread(&PRECY, 4, 1, f));

@@ -140,7 +140,7 @@ EX namespace netgen {
   
   void loadData() {
 
-    fhstream f("papermodeldata.txt", "rt");
+    fhstream f(find_file("papermodeldata.txt"), "rt");
     if(!f.f) return;
 
     if(!scan(f, CELLS, SX, SY, PX, PY, nscale, BASE, el, created)) return;
