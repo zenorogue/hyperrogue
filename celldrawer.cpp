@@ -2190,6 +2190,8 @@ void celldrawer::draw_cellstat() {
     shstream ss; print(ss, c);
     queuestr(V, mapfontscale / 200, ss.s, 0xFFFFFFFF);    
     queuepoly(V * ddspin(c, 0), cgi.shAsymmetric, darkena(0x000000, 0, 0xC0));
+    if(c->bardir < c->type)
+      queuepoly(V * ddspin(c, c->bardir), cgi.shAsymmetric, darkena(0xC00000, 0, 0xC0));
     }
   }
 
