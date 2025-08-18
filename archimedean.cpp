@@ -433,6 +433,8 @@ void archimedean_tiling::compute_geometry() {
     if(gg.kind == gcEuclid) arr[gArchimedean].g = arr[gEuclid].g;
     if(gg.kind == gcHyperbolic) arr[gArchimedean].g = arr[gNormal].g;
     set_flag(arr[gArchimedean].flags, qCLOSED, gg.kind == gcSphere);
+    // all spherical Archimedean tilings are small
+    set_flag(arr[gArchimedean].flags, qSMALL, gg.kind == gcSphere);
     }
 
   DEBB(DF_GEOM, (hr::format("euclidean_angle_sum = %f\n", float(euclidean_angle_sum))));
