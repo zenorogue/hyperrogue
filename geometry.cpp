@@ -632,6 +632,12 @@ void geometry_information::prepare_basics() {
   heptshape = nullptr;
 
   xp_order = 0;
+
+  if(arcm::in()) {
+    auto& ac = arcm::current_or_fake();
+    if(fake::in_ext()) ac = arcm::current;
+    ac.compute_geometry();
+    }
   
   emb = make_embed();
   bool geuclid = euclid;
