@@ -1357,7 +1357,7 @@ EX land_validity_t& land_validity(eLand l) {
     return some0;
   
   // horocycle-based lands, not available in bounded geometries nor in Chaos mode
-  if(l == laWhirlpool || l == laCamelot || l == laCaribbean || l == laTemple || l == laHive) {
+  if(l == laWhirlpool || l == laCamelot || l == laCaribbean || l == laTemple) {
     if(ls::any_chaos()) {
       if(l == laTemple || l == laHive) 
         return special_chaos;
@@ -1366,6 +1366,11 @@ EX land_validity_t& land_validity(eLand l) {
     if(arcm::in() || aperiodic) return not_implemented;
     if(closed_or_bounded) return unbounded_only;
     if(INVERSE) return not_implemented;
+    }
+
+  if(l == laHive) {
+    if(ls::any_chaos()) return special_chaos;
+    if(closed_or_bounded) return unbounded_only;
     }
 
   // this pattern does not work on elliptic and small spheres
