@@ -421,6 +421,8 @@ EX void drawPlayer_humanoid(eMonster m, cell *where, const shiftmatrix& V, color
 
   queuepoly(VBODY * VBS, body, fc(0, cs.skincolor, 0));
 
+  if(id == pshRatling) queuepoly(VLEG, cgi.shRatTail, fc(100, cs.dresscolor2, 5));
+
   if(cs.charid&1)
     queuepoly(VBODY1 * VBS, cgi.shFemaleDress, fc(500, cs.dresscolor, 4));
 
@@ -693,6 +695,7 @@ EX void drawMimic(eMonster m, cell *where, const shiftmatrix& V, color_t col, do
       queuepoly(VBODY2 * VBS, cgi.shPrinceDress,  darkena(col, 1, 0XC0));
     if(cs.charid == 3)
       queuepoly(VBODY2 * VBS, cgi.shPrincessDress,  darkena(col, 1, 0XC0));
+    if(id == pshRatling) queuepoly(VLEG, cgi.shRatTail, darkena(col, 1, 0xC0));
 
     humanoid_eyes(V,  0xFF, darkena(col, 0, 0x40));
     }

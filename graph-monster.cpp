@@ -525,6 +525,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
         queuepoly(VHEAD, cgi.shSkullEyes, darkena(0x202020, 0, 0xFF));
         }
       else queuepoly(VHEAD, cgi.shPFace,  facecolor);
+      if(id == pshRatling) queuepoly(VLEG, cgi.shRatTail, darkena(col, 0, 0xFF));
       humanoid_eyes(V, evil ? 0x0000C0FF : 0x00C000FF, facecolor);
       return true;
       }
