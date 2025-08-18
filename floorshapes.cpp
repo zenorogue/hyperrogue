@@ -423,7 +423,6 @@ void geometry_information::generate_floorshapes_for(int id, cell *c) {
     if(fake::in()) data = FPIU(cgi.gpdata);
     siid = data->id_to_params[id][0] == 1;
     sidir = data->id_to_params[id][1];
-    if(INVERSE) siid = 1;
     }
 
   else if(PURE && geometry != gBinaryTiling && geosupport_football() < 2) {
@@ -865,16 +864,17 @@ EX namespace gp {
         sidir = 0;
         }
       else {
-        siid = 0;
+        siid = 1;
         sidir = 0;
         }
       };
     if(INVERSE && gp::variation_for(gp::param) == eVariation::goldberg) {
       c1 = gp::get_mapped(c);
       UIU(f());
+      siid = 1; sidir = 0;
       }
     else if(INVERSE) {
-      siid = 0;
+      siid = 1;
       sidir = 0;
       }
     else f();
