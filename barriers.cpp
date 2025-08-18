@@ -93,7 +93,6 @@ EX int get_valence(cellwalker bb, int dir, bool& ok) {
 EX void set_and_wall(cell *c, eLand l) {
   setland(c, l);
   if(c->bardir == NODIR) {
-    c->barleft = NOWALLSEP_USED;
     c->bardir = NOBARRIERS;
     }
   }
