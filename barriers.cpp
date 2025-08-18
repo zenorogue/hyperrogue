@@ -430,6 +430,11 @@ EX void extendBarrierBack(cell *c) {
   extendBarrier(bb.at);
   }
 
+EX bool barrier_land(eLand l) {
+  return among(l, laBarrier, laElementalWall, laHauntedWall, laOceanWall, laMirrorWall, laMirrorWall2, laMercuryRiver);
+  }
+
+
 EX void general_barrier_extend(cell *c) {
 
   eLand ws = c->barleft;
@@ -438,7 +443,6 @@ EX void general_barrier_extend(cell *c) {
   c->barleft = NOWALLSEP_USED;
   eLand l1 = c->land;
   eLand l2 = c->barright;
-
   if(!on_wall(ws)) {
     if(c->bardir == NODIR) {
       println(hlog, "error: NODIR barrier at ", c);
@@ -574,12 +578,8 @@ EX void extendBarrier(cell *c) {
 
   extendcheck(c);
   
-  // printf("build barrier at %p", hr::voidp(c));
-  if(c->land == laBarrier || c->land == laElementalWall || c->land == laHauntedWall || c->land == laOceanWall || 
-    c->land == laMirrorWall || c->land == laMirrorWall2 || c->land == laMercuryRiver) { 
-    // printf("-> ready\n");
-    return;
-    }
+  if(barrier_land(c->land)) return;
+
 //  if(c->wall == waWaxWall) return;
   if(c->mpdist > BARLEV) {
     // printf("-> too far\n");
