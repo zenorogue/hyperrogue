@@ -1000,6 +1000,7 @@ EX void load(const string& fname, bool load_as_slided IS(false), bool keep_slide
       ginf[gArbitrary].g = curv > 0 ? giSphere2 : curv < 0 ? giHyperb2 : giEuclid2;
       ginf[gArbitrary].sides = 7;
       set_flag(ginf[gArbitrary].flags, qCLOSED, curv > 0);
+      set_flag(ginf[gArbitrary].flags, qSMALL, curv > 0);
       set_flag(ginf[gArbitrary].flags, qAFFINE, false);
       geom3::apply_always3();
       }
@@ -1007,6 +1008,7 @@ EX void load(const string& fname, bool load_as_slided IS(false), bool keep_slide
       ginf[gArbitrary].g = giEuclid2;
       ginf[gArbitrary].sides = 7;
       set_flag(ginf[gArbitrary].flags, qCLOSED, false);
+      set_flag(ginf[gArbitrary].flags, qSMALL, false);
       set_flag(ginf[gArbitrary].flags, qAFFINE, false);
       geom3::apply_always3();
       }
@@ -1014,6 +1016,7 @@ EX void load(const string& fname, bool load_as_slided IS(false), bool keep_slide
       ginf[gArbitrary].g = giEuclid2;
       ginf[gArbitrary].sides = 7;
       set_flag(ginf[gArbitrary].flags, qCLOSED, false);
+      set_flag(ginf[gArbitrary].flags, qSMALL, false);
       set_flag(ginf[gArbitrary].flags, qAFFINE, true);
       affine_limit = 200;
       geom3::apply_always3();
@@ -1022,6 +1025,7 @@ EX void load(const string& fname, bool load_as_slided IS(false), bool keep_slide
       ginf[gArbitrary].g = giHyperb2;
       ginf[gArbitrary].sides = 7;
       set_flag(ginf[gArbitrary].flags, qCLOSED, false);
+      set_flag(ginf[gArbitrary].flags, qSMALL, false);
       set_flag(ginf[gArbitrary].flags, qAFFINE, false);
       geom3::apply_always3();
       }
@@ -1029,8 +1033,14 @@ EX void load(const string& fname, bool load_as_slided IS(false), bool keep_slide
       ginf[gArbitrary].g = giSphere2;
       ginf[gArbitrary].sides = 5;
       set_flag(ginf[gArbitrary].flags, qCLOSED, true);
+      set_flag(ginf[gArbitrary].flags, qSMALL, true);
       set_flag(ginf[gArbitrary].flags, qAFFINE, false);
       geom3::apply_always3();
+      }
+    else if(ep.eat("small(")) {
+      int i = ep.iparse();
+      set_flag(ginf[gArbitrary].flags, qSMALL, i);
+      ep.force_eat(")");
       }
     else if(ep.eat("star.")) {
       c.is_star = true;
