@@ -403,6 +403,7 @@ EX void initgame() {
 
     tortoise::last21tort = 0;
     cheater = 0;
+    if(!autocheat) reptilecheat = false;
     if(autocheat) cheater = 1;
     if(!wfc::use_eclectic) cheater = 1;
     if(!autocheat && !cheater && geometry == gNormal) patterns::whichShape = 0;
