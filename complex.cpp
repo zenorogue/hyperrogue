@@ -843,6 +843,15 @@ EX namespace clearing {
       }
     }
   
+  bool goes_below(cell *c, int d, int steps) {
+    if(pseudohept(c)) return false;
+    if(celldistAlt(c) < d) return true;
+    if(celldistAlt(c) > d) return false;
+    if(steps == 0) return false;
+    forCellIdCM(c2, i, c) if(goes_below(c2, d, steps-1)) return true;
+    return false;
+    }
+
   int plantdir(cell *c) {
     if(have_alt(c))
       gen_alt_around(c);
@@ -888,8 +897,12 @@ EX namespace clearing {
       if((d & 7) < 4) i = (i+2) % c->type;
       return i;
       }
-    printf("error in plantdir\n");
-    return 1;
+    for(int steps=0; steps<60; steps++)
+      forCellIdCM(c2, i2, c)
+        if(goes_below(c2, d, steps))
+          return i2;
+    println(hlog, "error in plantdir, quseful = ", quseful);
+    return -1;
     }
 
   vector<cell*> onpath;
@@ -957,6 +970,7 @@ EX namespace clearing {
         steps++;
         onpath.push_back(c); pdir.push_back(d);
         // printf("c [%4d] %p -> %p\n", celldistAlt(c), c, c->move(d));
+        if(d == -1) break;
         c = c->move(d);
         }
       else {
