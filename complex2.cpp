@@ -952,6 +952,8 @@ EX namespace dice {
         highest_hardness = max(highest_hardness, hardness[i]);
       }
     };
+
+  EX int get_facesides(struct die_structure* ds) { return ds->facesides; }
   
   die_structure d20(5, {
     {13-1, 7-1, 19-1}, {20-1, 12-1, 18-1}, {19-1, 17-1, 16-1}, {14-1, 18-1, 11-1}, {13-1, 18-1, 15-1}, 
@@ -981,7 +983,7 @@ EX namespace dice {
   struct die_data {
     struct die_structure *which;
     int val; /* the current face value */
-    int dir; /* which direction is the first side (which->sides[val][0]) of the current face */
+    int dir; /* which direction is the first side (which->sides[val][0]) of the current face, multipled by facesides */
     bool mirrored;
     int happy();
     };
@@ -1016,9 +1018,9 @@ EX namespace dice {
     for(int j=0; j<c->type; j++) if(can_roll(ds->facesides, i, movei(c, j)))
       dirs.push_back(i);
     if(dirs.empty())
-      dd.dir = hrand(c->type);
+      dd.dir = hrand(c->type) * ds->facesides;
     else
-      dd.dir = hrand_elt(dirs);
+      dd.dir = hrand_elt(dirs) * ds->facesides;
     vector<int> sides;
     for(int i=0; i<ds->faces; i++) 
       if(ds->hardness[i] >= min_hardness && ds->hardness[i] <= max_hardness)
@@ -1036,8 +1038,8 @@ EX namespace dice {
     }
 
   EX bool can_roll(int sides, int cur, movei mi) {
-    if(mi.t->type % sides) return false;
-    if((cur - mi.d) % (mi.s->type / sides)) return false;
+    if(gcd(mi.t->type, sides) == 1) return false;
+    if((cur - mi.d * sides) % mi.s->type) return false;
     return true;
     }
   
@@ -1122,7 +1124,7 @@ EX namespace dice {
     else if(pct2 < 40 + hard) {
       c->monst = moAnimatedDie;
       generate_specific(c, &d20, 0, 99);
-      }    
+      }
     }
 
   EX die_data roll_effect(movei mi, die_data dd) {
@@ -1139,9 +1141,9 @@ EX namespace dice {
     
     int si = dw->facesides;
     
-    if(t % si) { println(hlog, "error: bad roll"); return dd; }
+    if(gcd(t, si) == 1) { println(hlog, "error: bad roll ", tie(t, si)); return dd; }
     
-    int sideid = gmod((rdir - dir) * (dd.mirrored?-1:1) * si / t, si);
+    int sideid = gmod((rdir * si - dir) * (dd.mirrored?-1:1) / t, si);
     
     int val1 = dw->sides[val][sideid];
     
@@ -1150,15 +1152,15 @@ EX namespace dice {
     int sideid1 = dw->spins[val][sideid];
     
     int t1 = cto->type;
-    if(t1 % si1) { println(hlog, "error: bad roll target"); return dd; }
+    if(gcd(t1, si1) == 1) { println(hlog, "error: bad roll target"); return dd; }
     
     int rdir1 = mi.rev_dir_force();
     
     bool mirror1 = dd.mirrored ^ mi.mirror();
+
+    int dir1 = rdir1 * si1 - (mirror1?-1:1) * sideid1 * t1;
     
-    int dir1 = rdir1 - (mirror1?-1:1) * sideid1 * t1 / si1;
-    
-    dir1 = gmod(dir1, t1);
+    dir1 = gmod(dir1, t1 * si1);
     
     dd.mirrored = mirror1;
     dd.val = val1;
@@ -1239,16 +1241,22 @@ EX namespace dice {
     else if(!lmouseover_distant || !on(lmouseover_distant)) if(CAP_EXTFONT || vid.usingGL == false) {
       queuestr(V, .5, its(val+1), 0xFFFFFFFF);
       auto& side = dw->sides[val];
+      auto fs = isize(side);
       for(int i=0; i<si; i++) {
-        int d = dir + c->type * i / isize(side);
-        d = gmod(d, c->type);
+        int d = dir + c->type * i;
+        int err = d % fs;
+        d = gmod(d / fs, c->type);
         hyperpoint nxt = tC0(currentmap->adj(c, d));
+        if(err) {
+          auto nxt1 = tC0(currentmap->adj(c, (d+1) % c->type));
+          nxt = normalize(nxt * (fs - err) + nxt1 * err);
+          }
         hyperpoint mid = normalize(C0 * 1.3 + nxt * -.3);
-        queuestr(V * rgpushxto0(mid), .25, its(side[i]+1), 0xFFFFFFFF);
+        queuestr(V * rgpushxto0(mid), .25, its(side[i]+1), 0xFFFFFF);
         }
       }
     
-    shiftmatrix V1 = V * ddspin(c, dir, M_PI);
+    shiftmatrix V1 = V * ddspin(c, 0, M_PI - TAU * dir / c->type / si);
     if(dd.mirrored) V1 = V1 * MirrorY;
     
     // loop:

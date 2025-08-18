@@ -1037,7 +1037,10 @@ EX namespace mapstream {
         auto& dat = dice::data[c];        
         dat.which = dice::get_by_id(f.read_char());
         dat.val = f.read_char();
-        dat.dir = fixspin(rspin, f.read_char(), c->type, f.vernum);
+        dat.dir = f.read_char();
+        auto fs = get_facesides(dat.which);
+        if(f.vernum < 0xAA23) dat.dir *= fs;
+        dat.dir = fixspin(rspin, dat.dir / fs, c->type, f.vernum) * fs + (dat.dir % fs);
         if(f.vernum >= 0xA902)
           dat.mirrored = f.read_char();
         }
