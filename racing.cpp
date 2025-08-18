@@ -904,7 +904,7 @@ EX string racetimeformat(int t) {
 extern int playercfg;
 
 EX void load_official_track() {
-  fhstream f("officials.data", "rb");
+  fhstream f(find_file("officials.data"), "rb");
   hread(f, f.vernum);
   map<eLand, string> tracks;
   hread(f, tracks);
