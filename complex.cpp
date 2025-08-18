@@ -1996,7 +1996,7 @@ EX namespace hive {
     for(int i=0; i<c->type; i++) {
       if(c->move(i) && c->move(i)->mpdist < c->mpdist) gdir = i;
       }
-    if(!gdir) return;
+    if(gdir == -1) return;
     cellwalker bf(c, gdir);
     int radius = 9;
     if(getDistLimit() <= 6) radius = 6;
