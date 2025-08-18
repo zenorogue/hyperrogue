@@ -896,7 +896,7 @@ void geometry_information::make_3d_models() {
       &shEagle, &shFemaleBody, &shFlailMissile, &shGadflyWing, &shGargoyleWings, &shHawk, &shJiangShi, &shKnife,
       &shPBody, &shPHead, &shRaiderBody, &shReptileBody, &shSkeletonBody, &shTongue, &shTrapArrow, &shTrylobite,
       &shWaterElemental, &shWolfBody, &shYeti, &shWormHead, &shWormHead, &shDragonHead, &shDragonSegment, &shDragonTail,
-      &shTentacleX, &shTentHead, &shILeaf[0], &shILeaf[1], &shWormSegment, &shSmallWormSegment,
+      &shTentHead, &shILeaf[0], &shILeaf[1], &shWormSegment, &shSmallWormSegment,
       &shWormTail, &shSmallWormTail, &shFrogBody })
       make_shadow(*sh);
     

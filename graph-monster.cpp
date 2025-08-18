@@ -1355,7 +1355,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
     }
   else if(isMagneticPole(m)) {
     if(m == moNorthPole)
-      queuepolyat(VBODY * spin180(), cgi.shTentacle, 0x000000C0, PPR::TENTACLE1);
+      queuepolyat(VBODY * spin180(), cgi.lash_default.shIBranch, 0x000000C0, PPR::TENTACLE1);
     queuepolyat(VBODY, cgi.shDisk, darkena(col, 0, 0xFF), PPR::MONSTER_BODY);
     }
   else if(isMetalBeast(m) || m == moBrownBug) {
@@ -1555,7 +1555,8 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
           return false;
 
         if(isIvy(c) || isMutantIvy(c) || c->monst == moFriendlyIvy) {
-          queuepoly(Vb, cgi.shIBranch, (col << 8) + 0xFF);
+          auto& lash = (geometry == gNormal && BITRUNCATED) ? cgi.lash_default : cgi.get_lash(hdist0(currentmap->adj(c, c->mondir) * C0));
+          queuepoly(Vb, lash.shIBranch, (col << 8) + 0xFF);
           christmas_lights(c, Vb);
           }
 
@@ -1574,11 +1575,6 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
             drawMonsterType(moGhost, c, Vs, col, footphase, asciicol);
             col = minf[moTentacletail].color;
             }
-          /*
-          queuepoly(at_smart_lof(Vb, cgi.ABODY), cgi.shTentacleX, 0xFFFFFFFF);
-          queuepoly(at_smart_lof(Vb, cgi.ABODY), cgi.shTentacle, (col << 8) + 0xFF);
-          ShadowV(Vb, cgi.shTentacleX, PPR::GIANTSHADOW);
-          */
           bool hexsnake = c->monst == moHexSnake || c->monst == moHexSnakeTail;
           bool thead = c->monst == moTentacle || c->monst == moTentaclewait || c->monst == moTentacleEscaping;
           hpcshape& sh = hexsnake ? cgi.shWormSegment : cgi.shSmallWormSegment;

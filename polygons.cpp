@@ -156,13 +156,7 @@ void geometry_information::extra_vertices() {
 
 transmatrix geometry_information::ddi(int a, ld x) { return xspinpush(a * S_step, x); }
 
-void geometry_information::drawTentacle(hpcshape &h, ld rad, ld var, ld divby) {
-  double tlength = max(crossf, hexhexdist);
-  if(geometry == gBinaryTiling) tlength *= 0.7;
-  if(geometry == gBinary4) tlength *= 0.45;
-  #if CAP_ARCM
-  if(arcm::in()) tlength = arcm::current.scale();
-  #endif
+void geometry_information::drawTentacle(ld rad, ld var, ld divby, ld tlength) {
   int max = int(20 * pow(2, vid.linequality));
   for(ld i=0; i<=max; i++)
     hpcpush(ddi(S21, rad + var * sin(i * M_PI/divby)) * ddi(0, tlength * i/max) * C0);
@@ -1167,6 +1161,17 @@ void geometry_information::configure_floorshapes() {
   for(int i=0; i<3; i++) shRedRockFloor[i].scale = .9 - .1 * i;
   }
 
+length_adjusted_shapes& geometry_information::get_lash(ld len) {
+  int id = int(len * 100 + .5);
+  if(lash.count(id)) return lash[id];
+  auto& res = lash[id];
+  bshape(res.shIBranch, PPR::TENTACLE1);
+  drawTentacle(crossf * .1, crossf * .2, 5, len);
+  finishshape();
+  extra_vertices();
+  return res;
+  }
+
 void geometry_information::prepare_shapes() {
   require_basics();
   if(cgflags & qRAYONLY) return;
@@ -1343,12 +1348,15 @@ void geometry_information::prepare_shapes() {
   wormscale = WDIM == 3 ? 3 : 1;
 
   // first layer monsters
-  bshape(shTentacleX, PPR::TENTACLE0);
-  drawTentacle(shTentacleX, crossf * .25, crossf * .1, 10);
-  bshape(shIBranch, PPR::TENTACLE1);
-  drawTentacle(shIBranch, crossf * .1, crossf * .2, 5);
-  bshape(shTentacle, PPR::TENTACLE1);
-  drawTentacle(shTentacle, crossf * .2, crossf * .1, 10);
+  bshape(lash_default.shIBranch, PPR::TENTACLE1);
+  double tlength = max(crossf, hexhexdist);
+  if(geometry == gBinaryTiling) tlength *= 0.7;
+  if(geometry == gBinary4) tlength *= 0.45;
+  #if CAP_ARCM
+  if(arcm::in()) tlength = arcm::current.scale();
+  #endif
+  drawTentacle(crossf * .1, crossf * .2, 5, tlength);
+
   copyshape(shJoint, shDisk, PPR::ONTENTACLE);
   bshape(shTentHead, PPR::ONTENTACLE, scalefactor * wormscale, 79);
   bshape(shWormHead, PPR::ONTENTACLE, scalefactor * wormscale, 80);
