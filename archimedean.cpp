@@ -551,6 +551,11 @@ ld archimedean_tiling::scale() {
   if(real_faces == 0 && N == 2) return 90._deg;
   if(real_faces == 2) return 90._deg;
   if(real_faces == 0) return TAU / N;
+  if(PURE) {
+    ld mcr = HUGE_VAL;
+    for(int i=0; i<N; i++) mcr = min(mcr, circumradius[i]);
+    return mcr * 3.0308847; // correct for (7,6,6)
+    }
   return edgelength;
   }
 
