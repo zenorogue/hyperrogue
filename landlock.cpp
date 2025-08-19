@@ -232,6 +232,41 @@ EX int variant_unlock_value() {
   return inv::on ? 75 : 30;
   }
 
+EX bool landAccessibleFromIngame(eLand l) {
+  if(!ls::any_order()) return true;
+
+  back:
+
+  switch(l) {
+    #define LAND(a,b,c,d,e,f,g) case c:
+    #define REQ(x) x return true;
+    #define REQAS(x,y) l = x; goto back;
+    #define GOLD(x) ;
+    #define ITEMS(kind, number) ;
+    #define NEVER ;
+    #define ALWAYS ;
+    #define KILLS(x) ;
+    #define KILL(x, where) ;
+    #define AKILL(x, where) ;
+    #define ORD(a, b) a b
+    #define NUMBER(val, required, description) ;
+    #define COND(x,y) ;
+    #define ITEMS_TOTAL(list, z) ;
+    #define ACCONLY(x) if(!isLandIngame(x)) return false;
+    #define ACCONLY2(x,y) if(!isLandIngame(x) && !isLandIngame(y)) return false;
+    #define ACCONLY3(x,y,z) if(!isLandIngame(x) && !isLandIngame(y) && !isLandIngame(z)) return false;
+    #define ACCONLY4(a,b,c,d) if(!isLandIngame(a) && !isLandIngame(b) && !isLandIngame(c) && !isLandIngame(d)) return false;
+    #define ACCONLY5(a,b,c,d,e) if(!isLandIngame(a) && !isLandIngame(b) && !isLandIngame(c) && !isLandIngame(d) && !isLandIngame(e)) return false;
+    #define ACCONLYF(x) if(!isLandIngame(x)) return false;
+    #define IFINGAME(land, ok, fallback) if(isLandIngame(land)) { ok } else { fallback }
+    #define INMODE(x) ;
+    #include "content.cpp"
+
+    case landtypes: return false;
+    }
+  return false;
+  }
+
 EX bool landUnlocked(eLand l) {
   if(randomPatternsMode) {
     return landUnlockedRPM(l);
@@ -802,7 +837,8 @@ EX bool isLandIngame(eLand l) {
   if(dual::state == 2 && !dual::check_side(l)) return false;
   if((eubinary || sol) && isCyclic(l) && l != specialland) return false;
   if(l == laCamelot && hyperbolic && WDIM == 3) return false;
-  return land_validity(l).flags & lv::appears_in_full;
+  if(!(land_validity(l).flags & lv::appears_in_full)) return false;
+  return landAccessibleFromIngame(l);
   }
 
 EX bool landUnlockedIngame(eLand l) {
