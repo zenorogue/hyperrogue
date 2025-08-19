@@ -887,7 +887,7 @@ EX namespace clearing {
         }
       }
     if(quseful == 1) return tuseful2;
-    if(quseful == 2) {
+    if(quseful == 2 && geometry == gNormal) {
       int i;
       if(tuseful == (1<<3)+(1<<5)) i = 3;
       if(tuseful == (1<<5)+(1<<1)) i = 5;
