@@ -2096,6 +2096,7 @@ EX void convert() {
   arb::compute_vertex_valence(ac);
 
   ac.have_ph = geosupport_football() ? 1 : 0;
+  ac.is_football_colorable = geosupport_football() >= 2;
   arb::check_football_colorability(ac);
   }
 

@@ -408,6 +408,7 @@ void geometry_information::generate_floorshapes_for(int id, cell *c) {
     auto& c = arb::current;
     siid = c.shapes[id].football_type >= 2;
     sidir = c.shapes[id].football_type == 1;
+    if(!c.is_football_colorable) siid = 1;
     }
   
   else if(geometry == gBinary4) {
