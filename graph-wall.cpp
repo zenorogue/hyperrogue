@@ -5,6 +5,7 @@
 namespace hr {
 
 EX bool camelotcheat;
+EX bool shadingcheat;
 
 EX colortable minecolors = {
   0xFFFFFF, 0xF0, 0xF060, 0xF00000, 

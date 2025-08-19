@@ -3342,6 +3342,9 @@ EX namespace mapeditor {
       }
     else dialog::addBreak(100);
 
+    dialog::addBoolItem_action(XLAT("shading cheat"), shadingcheat, 'h');
+    dialog::addInfo(XLAT("(useful in Camelot, Caribbean, and Haunted Woods)"));
+
     dialog::addBoolItem_action(XLAT("simple pattern generation"), reptilecheat, 'p');
     dialog::addInfo(XLAT("(e.g. pure Reptile pattern)"));
 
