@@ -96,6 +96,7 @@ EX colortable westwall_colors = { 0x211F6F, 0x413F8F };
 EX colortable endorian_colors = { 0x202010, 0x404030, 0x0000D0 };
 EX colortable canopy_colors = { 0x60C060, 0x489048 };
 EX colortable camelot_cheat_colors = { 0x606060, 0xC0C0C0 };
+EX colortable haunted_cheat_colors = { 0x609F60, 0xC0FFC0, 0x003F00 };
 
 /** return the special colortable for the given cell -- color menu uses this to know that a colortable should be edited */
 EX colortable* special_colortable_for(cell *c) {
@@ -105,7 +106,8 @@ EX colortable* special_colortable_for(cell *c) {
   if(c->land == laWestWall) return &westwall_colors;
   if(c->land == laEndorian && !c->wall) return &endorian_colors;
   if(c->land == laEndorian && c->wall == waCanopy) return &canopy_colors;
-  if(c->land == laCamelot && camelotcheat) return &camelot_cheat_colors;
+  if(c->land == laCamelot && (camelotcheat || shadingcheat)) return &camelot_cheat_colors;
+  if(isHaunted(c->land) && shadingcheat) return &haunted_cheat_colors;
   return nullptr;
   }
 
@@ -275,6 +277,8 @@ void celldrawer::setcolors() {
     case laCaribbean: 
       if(c->wall != waCIsland && c->wall != waCIsland2)
         fcol = floorcolors[c->land];
+      else if(shadingcheat)
+        fcol = celldistAlt(c) % 2 ? winf[waCIsland].color : winf[waCIsland2].color;
       break;
 
     case laReptile:
@@ -429,11 +433,10 @@ void celldrawer::setcolors() {
       int d = ((eubinary||c->master->alt) ? celldistAltRelative(c) : 0);
   #if CAP_TOUR
       if(!tour::on) camelotcheat = false;
-      if(camelotcheat) 
-        fcol = get_color_auto3(d, camelot_cheat_colors);
-      else 
   #endif
-      if(d < 0) {
+      if(camelotcheat || shadingcheat)
+        fcol = get_color_auto3(d, camelot_cheat_colors);
+      else if(d < 0) {
         fcol = floorcolors[c->land];
         }
       else {
@@ -512,18 +515,24 @@ void celldrawer::setcolors() {
         if(c->wall == waSmallTree) wcol = 0x608000;
         }  
       if(isHaunted(c->land)) {
-        int itcolor = 0;
-        for(int i=0; i<c->type; i++) if(c->move(i) && c->move(i)->item)
-          itcolor = 1;
-        if(c->item) itcolor |= 2;
-        fcol = floorcolors[laHaunted] + 0x202020 * itcolor;
-    
-        forCellEx(c2, c) if(c2->monst == moFriendlyGhost)
-          fcol = gradient(fcol, fghostcolor(c2), 0, .25, 1);
-    
-        if(c->monst == moFriendlyGhost) 
-          fcol = gradient(fcol, fghostcolor(c), 0, .5, 1);
-    
+        if(shadingcheat) {
+          int d = getHauntedDepth(c);
+          if(d == 0) fcol = haunted_cheat_colors[2];
+          else fcol = get_color_auto3(d, haunted_cheat_colors, 1);
+        } else {
+          int itcolor = 0;
+          for(int i=0; i<c->type; i++) if(c->move(i) && c->move(i)->item)
+            itcolor = 1;
+          if(c->item) itcolor |= 2;
+          fcol = floorcolors[laHaunted] + 0x202020 * itcolor;
+
+          forCellEx(c2, c) if(c2->monst == moFriendlyGhost)
+            fcol = gradient(fcol, fghostcolor(c2), 0, .25, 1);
+
+          if(c->monst == moFriendlyGhost)
+            fcol = gradient(fcol, fghostcolor(c), 0, .5, 1);
+        }
+
         if (!higher_contrast) {
           if(c->wall == waSmallTree) wcol = 0x004000;
           else if(c->wall == waBigTree) wcol = 0x008000;

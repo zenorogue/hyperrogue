@@ -409,6 +409,7 @@ EX void initgame() {
     if(!autocheat && !cheater && geometry == gNormal) patterns::whichShape = 0;
     hauntedWarning = false;
     if(!autocheat) {
+      shadingcheat = false;
       timerghost = true;
       gen_wandering = true;
       }
