@@ -5481,3 +5481,23 @@ https://zenorogue.blogspot.com/2025/08/hyperrogue-131.html
 2025-08-17 23:00 Update 13.1b:
 - fixed Orb of Recall appearing incorrectly
 - finding geodesic and paper model data in some installations should be fixed
+
+2025-08-19 11:06 Update 13.1c:
+- fixed the player Ratlings not having tails
+- fixed the floor graphics in some tilings
+- fixed Clearing in bitruncated {8,3}
+- if a land is only accessible from ones that aren't in-game, it's not in-game
+- the simplified pattern cheat is now disabled when you stop cheating
+- more interesting dice in alt tilings
+- fixed generalized Great Walls (which tended to stop generating from some point)
+- fix unlock_all for land selection
+- Hive no longer requires horocycle support to be generated in other tilings
+- use 'small' generation for arbitrary and Archimedean spherical tilings
+- also fixed a crash in spherical arbitrary tilings
+- made ivy branches look better in alt tilings (they can now adjust to the distances between tiles)
+- fixed the default sizes of stuff in Archimedean pure tilings
+- added official races to the GitHub repo
+- the Orb of Safety in the Haunted Woods forbidden instead of dangerous (thanks to josephcsible)
+- the Hyperstone Quest cheat gives only the relevant treasures (thanks to josephcsible)
+- a shading cheat (thanks to josephcsible)
+- only messages about lands that are in-game are shown (thanks to josephcsible)
