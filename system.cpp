@@ -176,9 +176,23 @@ EX bool ineligible_starting_land;
 
 EX int easy_specialland;
 
+EX void reset_cheats() {
+  if(autocheat) {
+    cheater = 1;
+    return;
+    }
+  cheater = 0;
+  reptilecheat = false;
+  shadingcheat = false;
+  timerghost = true;
+  gen_wandering = true;
+  }
+
 /** \brief initialize the game */
 EX void initgame() {
   DEBBI(DF_INIT, ("initGame"));
+  if(!safety) reset_cheats();
+
   callhooks(hooks_initgame);
 
   modecode(1);
@@ -402,17 +416,9 @@ EX void initgame() {
     loadcount = 0; current_loadcount = 0; load_branching = 0;
 
     tortoise::last21tort = 0;
-    cheater = 0;
-    if(!autocheat) reptilecheat = false;
-    if(autocheat) cheater = 1;
     if(!wfc::use_eclectic) cheater = 1;
     if(!autocheat && !cheater && geometry == gNormal) patterns::whichShape = 0;
     hauntedWarning = false;
-    if(!autocheat) {
-      shadingcheat = false;
-      timerghost = true;
-      gen_wandering = true;
-      }
     truelotus = 0;
     asteroids_generated = 0;
     asteroid_orbs_generated = 0;
