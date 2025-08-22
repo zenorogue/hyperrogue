@@ -3163,13 +3163,17 @@ bool celldrawer::draw_shmup_monster() {
           col = (mirrorcolor(det(view.T) < 0) << 8) | 0xFF;
         else
           col = (minf[m->get_parenttype()].color << 8) | 0xFF;
-        if(getcs().charid >= 10) {
-          queuepoly(at_missile_level(view), cgi.shMissile, col);
-          ShadowV(view, cgi.shMissile);
-          }
-        else if(getcs().charid >= 4) {
+
+        int id = ePlayershape(getcs().charid >> 1);
+
+        if(playershapes[id].is_animal) {
           queuepoly(at_missile_level(view), cgi.shPHead, col);
           ShadowV(view, cgi.shPHead);
+          }
+        else if(!playershapes[id].is_humanoid) {
+           // this means it is a spaceship
+          queuepoly(at_missile_level(view), cgi.shMissile, col);
+          ShadowV(view, cgi.shMissile);
           }
         else if(peace::on) {
           queuepolyat(at_missile_level(view), cgi.shDisk, col, PPR::MISSILE);
