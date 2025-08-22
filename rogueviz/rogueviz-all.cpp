@@ -87,6 +87,7 @@
 
 #include "sag/sag.cpp"
 
+#include "watcher.cpp"
 
 // the following comments are read by mymake so that it knows that the files include other files there:
 // hidden dependencies: rogueviz/nilrider/
