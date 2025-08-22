@@ -144,7 +144,9 @@ slide relhell_tour[] = {
   {"Intro", 10, LEGAL::ANY | QUICKGEO | NOTITLE, 
     "Relative Hell is a game taking place in relativistic analogs of spherical and hyperbolic geometries. "
     "Here is Space Rocks, a clone of the classic game Asteroids. It is based on Newtonian physics: "
-    "if you accelerate, you move forever in that direction, unless you deaccelerate.", 
+    "if you accelerate, you move forever in that direction, unless you deaccelerate.\n\n"
+    "Note: Our video 'Non-Euclidean Game + Relativity = ?' is based on this tour, or in other words, the tour "
+    "is an interactive version of the video.",
     [] (presmode mode) {
       kills[moAsteroid] = 0;
       setCanvas(mode, &ccolor::plain, [] {
@@ -163,6 +165,9 @@ slide relhell_tour[] = {
         tour::slide_backup(shmup::on, true);
         tour::slide_backup(pconf.scale, 0.5);
         });
+      slide_url(mode, 'y', "YouTube link", "https://youtu.be/PxnoSsjMrck");
+
+      if(mode == pmKey) open_url("https://youtu.be/PxnoSsjMrck");
       }
     },
 
@@ -858,7 +863,8 @@ slide relhell_tour[] = {
     "Let us focus on three-dimensional Euclidean geometry. "
     "We need to define what points are in our space, and how to compute distances between them. "
     "This, in turns, let us define 'isometries' (rotations, etc.) which are basically transformations of "
-    "the space that keep the distance.\n\nThis template will be also used in other geometries.",
+    "the space that keep the distance.\n\nThis template will be also used in other geometries\n\n"
+    "Press 5 to animate a rotation. (Note: the further slides also have similar animations.)",
     [] (presmode mode) {
       setCanvas(mode, &ccolor::chessboard, [] { set_geometry(gEuclidSquare); set_variation(eVariation::pure); });
       latex_slide(mode, defs+R"=(
@@ -1331,7 +1337,7 @@ int pohooks =
       });
     arg::shift(); howmany = arg::argi();
     })
-  + addHook_slideshows(100, [] (tour::ss::slideshow_callback cb) {
+  + addHook_slideshows(80, [] (tour::ss::slideshow_callback cb) {
     cb(XLAT("Relative Hell guided tour"), &relhell_tour[0], 'S');
     });
 
