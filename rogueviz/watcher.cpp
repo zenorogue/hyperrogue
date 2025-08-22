@@ -4,7 +4,7 @@
 // adds a menu item that allows to select one of multiple visualizations based on a command file
 // (we use this for the visualization of SAG connectomes -- it should be made more general)
 
-#include "../../rogueviz.h"
+#include "rogueviz.h"
 
 namespace rogueviz {
 
