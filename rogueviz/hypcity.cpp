@@ -137,6 +137,7 @@ auto hypcity_ah = arg::add3("-hypcity", enable)
                 if(dim == 2) slide_backup(vid.depth, 0);
                 slide_backup(context_fog, false);
                 setter();
+                mouseover = nullptr;
                 });
               if(mode == pmStart) enable();
               non_game_slide_scroll(mode);
