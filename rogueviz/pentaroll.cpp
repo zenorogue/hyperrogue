@@ -90,15 +90,10 @@ void animate() {
   b = spintox(a) * b;
   a = spintox(a) * a;
   b[3] = 0;
-  println(hlog, "a = ", a);
-  println(hlog, "b = ", b);
 
   b /= hypot_d(3, b);
   ld angle = acos(b[0]);
 
-  println(hlog, "b = ", b);
-  println(hlog, "angle = ", angle / degree, " deg");
-  
   ld tf = t - floor(t);
   
   /* make it more smooth */
