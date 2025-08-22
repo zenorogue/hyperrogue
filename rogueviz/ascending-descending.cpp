@@ -289,6 +289,7 @@ void enable() {
 
 auto plyhook = 
   arg::add3("-asd", enable) + 
+  arg::add3("-asd-where", [] { arg::shift(); staircase.path = arg::args(); arg::shift(); staircase.fname = arg::args(); }) +
   addHook(hooks_configfile, 100, [] {
     param_b(animated, "ad_animated");
     });
