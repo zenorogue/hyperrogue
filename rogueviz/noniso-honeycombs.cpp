@@ -196,10 +196,10 @@ tour::slide *gen_noniso_demo() {
   noniso_slides.clear();
   using namespace tour;
   noniso_slides.emplace_back(
-    slide{"Non-isotropic geometry demo", 999, LEGAL::NONE | QUICKSKIP | QUICKGEO, 
-      "This is a presentation of non-isotropic geometries.",
+    slide{"Anisotropic geometry demo", 999, LEGAL::NONE | QUICKSKIP | QUICKGEO, 
+      "This is a presentation of anisotropic geometries.",
       [] (presmode mode) {
-        slide_url(mode, 'p', "paper about non-isotropic geometries", "https://arxiv.org/abs/2002.09533");
+        slide_url(mode, 'p', "paper about anisotropic geometries", "https://arxiv.org/abs/2002.09533");
         setCanvas(mode, &ccolor::random, [] {
           set_geometry(gCubeTiling);
           });
@@ -218,7 +218,7 @@ auto hooks  = addHook_rvslides(163, honey)
     if(noniso_slides.empty()) 
       gen_noniso_demo();
 
-    cb(XLAT("non-isotropic geometries"), &noniso_slides[0], 'n');
+    cb(XLAT("Anisotropic Geometries"), &noniso_slides[0], 'n');
     });
 
 } }

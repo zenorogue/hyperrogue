@@ -640,7 +640,7 @@ auto fifteen_hook =
     param_b(fifteen3, "fifteen_3d")
     -> editable("3D Fifteen tile effects", '3');
     })
-+ addHook_slideshows(120, [] (tour::ss::slideshow_callback cb) {
++ addHook_slideshows(95, [] (tour::ss::slideshow_callback cb) {
 
     using namespace rogueviz::pres;
     static vector<slide> fifteen_slides;
@@ -683,7 +683,7 @@ auto fifteen_hook =
       add_end(fifteen_slides);
       }
 
-    cb(XLAT("variants of the fifteen puzzle"), &fifteen_slides[0], 'f');
+    cb(XLAT("Variants of the Fifteen Puzzle"), &fifteen_slides[0], 'f');
     });
 #endif
 

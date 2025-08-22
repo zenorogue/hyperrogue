@@ -1814,8 +1814,8 @@ auto embchess_ah =
   ;
 
 auto embchess_show =
-  addHook_slideshows(100, [] (tour::ss::slideshow_callback cb) {
-    cb(XLAT("non-Euclidean third dimension"), &embchess_slides[0], '3');
+  addHook_slideshows(40, [] (tour::ss::slideshow_callback cb) {
+    cb(XLAT("Non-Euclidean Third Dimension"), &embchess_slides[0], '3');
     });
 
 }

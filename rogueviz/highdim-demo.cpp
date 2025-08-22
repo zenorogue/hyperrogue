@@ -663,7 +663,7 @@ auto highdim_hooks  =
   
     if(high_slides.empty()) gen_high_demo();
 
-    cb(XLAT("visualizing higher-dimensional spaces"), &high_slides[0], 'h');
+    cb(XLAT("Visualizing Higher-dimensional Spaces"), &high_slides[0], 'h');
     });
 
 }

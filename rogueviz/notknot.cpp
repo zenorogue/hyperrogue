@@ -1426,7 +1426,7 @@ void portal_slideshow(tour::ss::slideshow_callback cb) {
 
   if(portal_slides.empty()) {
 
-    portal_slides.emplace_back(slide{"portal collection", 100, LEGAL::NONE | QUICKSKIP,
+    portal_slides.emplace_back(slide{"Portal Collection", 100, LEGAL::NONE | QUICKSKIP,
        "This is a collection of portals. We start with knotted portals in Euclidean geometry, "
        "then we visit portals in other geometries, and finally, we explore portals between different "
        "geometries.\n\nLoading these may take some time, so you need to press 'r' to run them. In most slides you can also press '5' to change various parameters.",
@@ -1588,7 +1588,7 @@ auto shot_hooks = addHook(hooks_initialize, 100, create_notknot)
     param_i(loop_any, "nk_loopany");
     })
 #ifndef NOTKNOT
-+ addHook_slideshows(120, portal_slideshow)
++ addHook_slideshows(20, portal_slideshow)
 #endif
   ;
 
