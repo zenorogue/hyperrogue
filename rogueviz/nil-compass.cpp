@@ -39,21 +39,22 @@ struct shape {
   hpcshape sh;
   };
 
-vector<shape> shapes;
-
 bool known;
 
 int zeroticks;
 
-void reset() {
-  known = false;
-  shapes.clear();
-  }
+struct nil_data : gi_extension {
+  vector<shape> shapes;
+  };
+
+bool auto_hilite = false;
 
 bool draw_compass(cell *c, const shiftmatrix& V) {
 
-  if(!known) {
-    known = true;
+  auto& md = (unique_ptr<nil_data>&) cgi.ext[fname];
+
+  if(!md) {
+    md = std::make_unique<nil_data> ();
 
     for(int i=0; i<3; i++) for(int is=-1; is<2; is+=2) 
     for(int js=-1; js<2; js+=2) 
@@ -68,15 +69,15 @@ bool draw_compass(cell *c, const shiftmatrix& V) {
         }
       if(is == -1) part(col, j+1) = part(col, i+1);
       
-      shapes.emplace_back(shape{col, i, is, hpcshape()});
+      md->shapes.emplace_back(shape{col, i, is, hpcshape()});
       
-      auto& sh = shapes.back().sh;
+      auto& sh = md->shapes.back().sh;
       
       cgi.bshape(sh, PPR::LINE);
   
-      hyperpoint p1 = C0 + ctangent(i, is * .4);
-      hyperpoint p2 = C0 + ctangent(j, js * .15);
-      hyperpoint p3 = C0 + ctangent(k, ks * .15);
+      hyperpoint p1 = C0 + ctangent(i, is * .4 * vid.creature_scale);
+      hyperpoint p2 = C0 + ctangent(j, js * .15 * vid.creature_scale);
+      hyperpoint p3 = C0 + ctangent(k, ks * .15 * vid.creature_scale);
       
       for(int i=0; i<10; i++) cgi.hpcpush(to_heis(lerp(p1, p2, i/10.)));
       for(int i=0; i<10; i++) cgi.hpcpush(to_heis(lerp(p2, p3, i/10.)));
@@ -90,9 +91,11 @@ bool draw_compass(cell *c, const shiftmatrix& V) {
     }
 
   poly_outline = 0;
-  for(const auto& s: shapes) {
+  for(const auto& s: md->shapes) {
 
     ld t = 36 + (ticks - zeroticks) / 1000.;
+
+    if(!auto_hilite) t = 0;
     
     auto remap = [&] (int _i, int _is) {
       auto col = s.col;
