@@ -845,6 +845,11 @@ int read_cheat_args() {
     glhr::debug_gl = true;
     #endif
     }
+  else if(argis("-dsgl")) {
+    #if CAP_GL
+    detailed_shader = true;
+    #endif
+    }
   else if(argis("-mgen-off")) {
     PHASEFROM(3);
     cheat();

@@ -510,8 +510,8 @@ EX void set_modelview(const glmatrix& modelview) {
   auto& cur = current_glprogram;
   if(!cur) return;
 
-  if(detailed_shader) println(hlog, "\n*** ENABLING MODELVIEW:\n", modelview.as_stdarray());
-  if(detailed_shader) println(hlog, "\n*** ENABLING PROJECTION:\n", projection.as_stdarray());
+  if(detailed_shader) println(hlog, "*** ENABLING MODELVIEW:", kz(modelview.as_stdarray()));
+  if(detailed_shader) println(hlog, "*** ENABLING PROJECTION:", kz(projection.as_stdarray()));
 
   if(using_eyeshift) {
     glmatrix mvp = modelview * eyeshift;
