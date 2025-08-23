@@ -481,6 +481,7 @@ hpcshape
   void prepare_compute3();
   void prepare_shapes();
   void prepare_usershapes();
+  void generate_faces();
 
   void hpcpush(hyperpoint h);
   void hpc_connect_ideal(hyperpoint a, hyperpoint b);
@@ -624,6 +625,23 @@ EX bool is_reg3_variation(eVariation var) {
 
 EX bool special_fake() {
   return fake::in() && (BITRUNCATED || (GOLDBERG && S3 == 4 && gp::param.first == 1 && gp::param.second == 1) || (UNRECTIFIED && gp::param.first == 1 && gp::param.second == 1));
+  }
+
+EX hookset<bool(geometry_information*)> hooks_generate_faces;
+
+void geometry_information::generate_faces() {
+  if(callhandlers(false, hooks_generate_faces, this)) return;
+  #if MAXMDIM >= 4
+  else if(reg3::in()) reg3::generate();
+  else if(euc::in(3)) euc::generate();
+  #if CAP_SOLV
+  else if(sn::in()) sn::create_faces();
+  #endif
+  #if CAP_BT
+  else if(bt::in()) bt::create_faces();
+  #endif
+  else if(nil && !mtwisted) nilv::create_faces();
+  #endif
   }
 
 void geometry_information::prepare_basics() {
@@ -800,17 +818,8 @@ void geometry_information::prepare_basics() {
   if(geometry == gHoroRec || kite::in() || sol || nil || nih) hexvdist = rhexf = .5, tessf = .5, scalefactor = .5, crossf = hcrossf7/2;
   if(bt::in()) scalefactor *= min<ld>(vid.binary_width, 1), crossf *= min<ld>(vid.binary_width, 1);
   #endif
-  #if MAXMDIM >= 4
-  if(reg3::in()) reg3::generate();
-  if(euc::in(3)) euc::generate();
-  #if CAP_SOLV
-  else if(sn::in()) sn::create_faces();
-  #endif
-  #if CAP_BT
-  else if(bt::in()) bt::create_faces();
-  #endif
-  else if(nil && !mtwisted) nilv::create_faces();
-  #endif
+  
+  generate_faces();
   
   scalefactor = crossf / hcrossf7;
   orbsize = crossf;

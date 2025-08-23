@@ -1113,6 +1113,18 @@ struct hrmap_notknot : hrmap {
     return adj(c->master, i);
     }
     
+  int shvid(cell *c) override {
+    dynamicval<eGeometry> g(geometry, base);
+    dynamicval<hrmap*> m(currentmap, euc);
+    return currentmap->shvid(all[indices[c->master]]->where->c7);
+    }
+
+  subcellshape& get_cellshape(cell* c) override {
+    dynamicval<eGeometry> g(geometry, base);
+    dynamicval<hrmap*> m(currentmap, euc);
+    return currentmap->get_cellshape(all[indices[c->master]]->where->c7);
+    }
+
   ~hrmap_notknot() {
     for(auto uc: all) {
       if(uc && uc->result) {
@@ -1587,6 +1599,12 @@ auto shot_hooks = addHook(hooks_initialize, 100, create_notknot)
     ->set_reaction(regenerate);
     param_i(loop_any, "nk_loopany");
     })
+  + addHook(hooks_generate_faces, 100, [] (geometry_information *gi) {
+      if(geometry != gNotKnot) return false;
+      dynamicval<eGeometry> b(geometry, base);
+      gi->generate_faces();
+      return true;
+      })
 #ifndef NOTKNOT
 + addHook_slideshows(20, portal_slideshow)
 #endif
