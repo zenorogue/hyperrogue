@@ -727,12 +727,7 @@ bool on;
 local_parameter_set lps_nilrider("nilrider:");
 
 void nilrider_keys() {
-  #if CAP_SDL2
-  multi::change_default_key(lps_nilrider, SDL_SCANCODE_LCTRL, 16 + nrFineControl);
-  #else
-  multi::change_default_key(lps_nilrider, SDLK_LCTRL, 16 + nrFineControl);
-  #endif
-
+  multi::change_default_key(lps_nilrider, SDL12(SDLK_LCTRL, SDL_SCANCODE_LCTRL), 16 + nrFineControl);
   multi::change_default_key(lps_nilrider, SDL12('p', SDL_SCANCODE_P), 16 + nrPause);
   multi::change_default_key(lps_nilrider, SDL12('b', SDL_SCANCODE_B), 16 + nrReverseTime);
   multi::change_default_key(lps_nilrider, SDL12('r', SDL_SCANCODE_R), 16 + nrViewSimulation);
