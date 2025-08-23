@@ -452,7 +452,7 @@ EX void drawPlayer_humanoid(eMonster m, cell *where, const shiftmatrix& V, color
       queuepoly(VWPN, cgi.shTrophy, racing::trophy[multi::cpid]);
 #endif
     }
-  else if(bow::crossbow_mode() && cs.charid < 4) {
+  else if(bow::crossbow_mode()) {
     queuepoly(VWPN, cgi.shCrossbow, fc(314, cs.bowcolor, 3));
     int ti = items[itCrossbow];
     if(shmup::on) {
