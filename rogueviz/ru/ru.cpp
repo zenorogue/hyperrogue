@@ -93,7 +93,7 @@ void editmap_frame() {
     dialog::display();
     });
   if(keypressed('f')) floodfill_pick(mousepx / block_x, mousepy / block_y);
-  if(keypressed('t')) { m.where = xy(mousepx, mousepy); m.vel = xy(0, 0); current_room->edited = true; }
+  if(keypressed('t')) { m.where = xy(mousepx, mousepy); m.vel = xy(0, 0); current_room->edited = true; m.existing = true; m.hp = m.max_hp(); }
   }
 
 /* new w, velocity multiplier, neighbor id */
