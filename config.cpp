@@ -899,7 +899,7 @@ EX shared_ptr<custom_parameter> param_colortable(colortable& val, const paramete
   u->custom_save = [&val] {
     bool first = true;
     string str;
-    for(auto v: val) { if(first) first = false; else str += ","; str += itsh(v); }
+    for(auto v: val) { if(first) first = false; else str += ","; str += itsh6(v); }
     return str;
     };
   u->custom_do_save = [dft, &val] { return val != dft; };
