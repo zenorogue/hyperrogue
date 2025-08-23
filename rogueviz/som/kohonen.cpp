@@ -1408,7 +1408,7 @@ bool draw_heatmap() {
       queuecurve(atscreenpos(0,0), 0, darkena(heatmap(ilerp(width, vid.yres-width, y+pixstep/2.)), 0, 0xFF), PPR::LINE);
       }
     for(int p=0; p<=10; p++) {
-      ld y = lerp(width, vid.yres-width, p / 10.);
+      ld y = hr::lerp(width, vid.yres-width, p / 10.);
       curvepoint(eupoint(width*2, y));
       curvepoint(eupoint(width*3, y));
       queuecurve(atscreenpos(0,0), 0xFFFFFFFF, 0, PPR::LINE);

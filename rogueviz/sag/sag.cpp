@@ -198,8 +198,8 @@ void auto_orth(bool set_colors) {
     applymodel(M*p, ret);
     auto& col = vdata[i].cp.color1;
     for(int j=0; j<3; j++) {
-      println(hlog, "coloring ", tie(i,j), ret[j], " -> ", ilerp(pmin[j], pmax[j], ret[j]), " -> ", lerp(0, 255, ilerp(pmin[j], pmax[j], ret[j])));
-      part(col, j+1) = lerp(0, 255, ilerp(pmin[j], pmax[j], ret[j]));
+      println(hlog, "coloring ", tie(i,j), ret[j], " -> ", ilerp(pmin[j], pmax[j], ret[j]), " -> ", hr::lerp(0, 255, ilerp(pmin[j], pmax[j], ret[j])));
+      part(col, j+1) = hr::lerp(0, 255, ilerp(pmin[j], pmax[j], ret[j]));
       }
     vdata[i].cp.color2 = col;
     }
