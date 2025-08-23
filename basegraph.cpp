@@ -776,9 +776,12 @@ EX void resetGL() {
     airbuf = nullptr;
     }
   #endif
+
   compiled_programs.clear();
   matched_programs.clear();
   glhr::current_glprogram = nullptr;
+  glhr::flags_become(0);
+
   check_cgi();
   if(currentmap) cgi.require_shapes();
   cgi.initPolyForGL();

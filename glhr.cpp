@@ -460,8 +460,8 @@ GLprogram::GLprogram(string vsh, string fsh) {
 
 GLprogram::~GLprogram() {
   glDeleteProgram(_program);
-  if(vertShader) glDeleteShader(vertShader), vertShader = 0;
-  if(fragShader) glDeleteShader(fragShader), fragShader = 0;
+  if(vertShader) glDeleteShader(vertShader);
+  if(fragShader) glDeleteShader(fragShader);
   }
 
 EX void set_index_sl(ld x) {
@@ -566,22 +566,12 @@ EX void colorClear(color_t color) {
   glClearColor(part(color, 3) / 255.0, part(color, 2) / 255.0, part(color, 1) / 255.0, part(color, 0) / 255.0);
 }
 
-EX void full_enable(shared_ptr<GLprogram> p) {
-  auto& cur = current_glprogram;
-  flagtype oldflags = cur ? cur->shader_flags : 0;
-  if(p == cur) return;
-  if(!vid.usingGL) return;
-  cur = p;
-  GLERR("pre_switch_mode");
-  WITHSHADER({
-    if(detailed_shader) println(hlog, "\n*** ENABLING VERTEX SHADER:\n", cur->_vsh, "\n\nENABLING FRAGMENT SHADER:\n", cur->_fsh, "\n");
-    glUseProgram(cur->_program);
-    GLERR("after_enable");
-    }, {
-    });
-  reset_projection();
-  flagtype newflags = cur->shader_flags;
-  tie(oldflags, newflags) = make_pair(oldflags & ~newflags, newflags & ~oldflags);
+EX flagtype cur_shader_flags;
+
+EX void flags_become(flagtype f) {
+  flagtype oldflags = cur_shader_flags & ~f;
+  flagtype newflags = f & ~cur_shader_flags;
+  cur_shader_flags = f;
 
   if(newflags & GF_TEXTURE) {
     GLERR("xsm");
@@ -651,6 +641,23 @@ EX void full_enable(shared_ptr<GLprogram> p) {
   if(oldflags & GF_LIGHTFOG) {
     WITHSHADER({}, {glDisable(GL_FOG);})
     }
+  }
+
+
+EX void full_enable(shared_ptr<GLprogram> p) {
+  auto& cur = current_glprogram;
+  if(p == cur) return;
+  if(!vid.usingGL) return;
+  cur = p;
+  GLERR("pre_switch_mode");
+  WITHSHADER({
+    if(detailed_shader) println(hlog, "\n*** ENABLING VERTEX SHADER:\n", cur->_vsh, "\n\nENABLING FRAGMENT SHADER:\n", cur->_fsh, "\n");
+    glUseProgram(cur->_program);
+    GLERR("after_enable");
+    }, {
+    });
+  reset_projection();
+  flags_become(cur->shader_flags);
   WITHSHADER({
     glUniform1f(cur->uFogBase, 1); fogbase = 1;
     }, {})
