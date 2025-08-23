@@ -542,7 +542,7 @@ EX void generateTreasureIsland(cell *c) {
     if(c->wall == waCTree) return;
     }
   vector<cell*> ctab;
-  int qlo, qhi;
+  int qlo = 0, qhi = 0; /* set to 0 to silence warning */
   for(int i=0; i<c->type; i++) {
     cell *c2 = createMov(c, i);
     if(!eubinary) currentmap->extend_altmap(c2->master);

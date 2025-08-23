@@ -116,7 +116,7 @@ void launch(int seed, int elimit, int hlimit) {
 
   pair<cell*, cell*> worst;
   if(1) {
-    int wdist = -1, wdcount;
+    int wdist = -1, wdcount = 0; /* set to silence warning */
     for(cell* x0: cl0) for(cell *x1: cl1) {
       int x = 9999;
       for(int d=0; d<4; d++) 
@@ -133,7 +133,7 @@ void launch(int seed, int elimit, int hlimit) {
   
   while(true) {
     int wdist = -1, wdcount = 0;
-    cell *worst_block;
+    cell *worst_block = nullptr; /* set to silence warning */
     for(cell *c: clboth) if(c->wall == waNone && c != c0 && c != c1) {
       c->wall = waSea;
       solve(start);

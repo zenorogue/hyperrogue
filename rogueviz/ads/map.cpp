@@ -30,7 +30,7 @@ void compute_life(cell *c, transmatrix S1, const worldline_visitor& wv) {
     auto last_w = cur_w;
     auto next_w = cur_w;
     transmatrix next_S1;
-    ld next_t;
+    ld next_t = 0; /* set to 0 to silence warning */
     ld last_time = t;
     cell *next_c = nullptr;
     binsearch(t, t+90._deg, [&] (ld t1) {

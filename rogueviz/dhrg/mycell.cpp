@@ -124,7 +124,7 @@ void generate_root() {
   mroot->leftsibling = mroot->rightsibling = mroot;
   mroot->leftparent = mroot->rightparent = NULL;
   
-  mycell *child;
+  mycell *child = nullptr; /* silence warning */
   bool first = true;
   for(int c: cgi.expansion->children[origtype]) {
     if(first) {   

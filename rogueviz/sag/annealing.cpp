@@ -175,7 +175,7 @@ void dofullsa_iterations(long long saiter) {
 
   // println(hlog, "before dofullsa_iterations, cost = ", double(sag::cost), " iterations = ", fts(saiter));
 
-  ld last_ratio;
+  ld last_ratio = 0;
 
   int lpct = 0;
 

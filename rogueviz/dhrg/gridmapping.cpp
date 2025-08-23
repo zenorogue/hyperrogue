@@ -46,7 +46,7 @@ void do_analyze_grid(int maxv) {
   
   println(hlog, "log(gamma) = ", log(cgi.expansion->get_growth()));
   
-  ld lE, dif, lwE;
+  ld lE = 0, dif = 0, lwE;
   for(int d=0; d<32; d++) if(stats[d][0]) {
     int q = stats[d][0];
     if(q != cgi.expansion->get_descendants(d).approx_int()) continue; 

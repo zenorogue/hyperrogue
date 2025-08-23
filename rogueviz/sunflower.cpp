@@ -70,7 +70,7 @@ bool overlay = false;
 bool sunflower_cell(cell *c, shiftmatrix V) {
   density = zdensity / 100;
   
-  ld qd;
+  ld qd = 1;
   
   if(sphere) {
     if(infer == 'r') 

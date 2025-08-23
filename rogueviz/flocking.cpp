@@ -508,7 +508,7 @@ bool drawVertex(const shiftmatrix &V, cell *c, shmup::monster *m) {
         }
       }
     
-    ld angle;
+    ld angle = 0;
     if(swarm) angle = hrand(1000);
 
     printf("setting up...\n");

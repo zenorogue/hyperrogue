@@ -261,7 +261,7 @@ void compute_skyvertices(const vector<sky_item>& sky) {
         
         int k = isize(vertices);
   
-        color_t ccolor;
+        color_t ccolor = 0;
         for(int i=0; i<k; i++) ccolor = gradient(ccolor, vcolors[i], 0, 1, i+1);
         
         hyperpoint ctr = Hypc;

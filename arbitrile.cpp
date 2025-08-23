@@ -912,7 +912,7 @@ EX void add_connection(arbi_tiling& c, int ai, int as, int bi, int bs, int m) {
   auto& ash = c.shapes[ai];
   auto& bsh = c.shapes[bi];
   add_connection_sub(c, ai, as, bi, bs, m);
-  int as1, bs1;
+  int as1 = 0, bs1 = 0; /* set to 0 to silence warning */
   if(ash.symmetric_value) {
     as1 = ash.reflect(as);
     add_connection_sub(c, ai, as1, bi, bs, !m);

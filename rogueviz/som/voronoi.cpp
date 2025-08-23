@@ -125,7 +125,7 @@ vector<pair<int, int> > compute_voronoi_edges(manifold& m) {
   /* project all the net[ni].net on the manifold */
   for(int ni=0; ni<N; ni++) {
     kohvec best;
-    int best_tri;
+    int best_tri = 0; /* set to silence warning */
     ld best_dist = HUGE_VAL;
     reaction_t better = [] {};
     set<int> triangles_to_visit;

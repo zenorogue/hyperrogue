@@ -945,7 +945,7 @@ EX namespace clearing {
     
     int steps = 0;
     
-    int ds;
+    int ds = 0; /* set to 0 to silence warning */
     
     int stepcount = 0;
     while(true) {
