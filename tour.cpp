@@ -479,6 +479,8 @@ EX namespace ss {
     }
   
   EX void slideshow_menu() {
+    cmode = sm::VR_MENU | sm::NOSCR;
+    gamescreen();
     dialog::init(XLAT("slideshows"), forecolor, 150, 100);
     for_all_slideshows([] (string title, slide *sl, char ch) {
       dialog::addBoolItem(title, wts == sl, ch);
@@ -490,6 +492,9 @@ EX namespace ss {
   
   EX void showMenu() {
     if(!wts) wts = slides; 
+
+    cmode = sm::VR_MENU | sm::NOSCR;
+    gamescreen();
 
     dialog::init(XLAT("slides"), forecolor, 150, 100);
     

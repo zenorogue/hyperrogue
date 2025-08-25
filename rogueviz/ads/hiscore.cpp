@@ -109,8 +109,7 @@ void load_hiscores() {
 int hi_sort_by = 3;
 
 void hiscore_menu() {
-  cmode = sm::VR_MENU;
-  emptyscreen();
+  cmode = sm::VR_MENU | sm::NOSCR; gamescreen();
   dialog::init("High scores");
   fill_gamedata();
   vector<gamedata*> v;

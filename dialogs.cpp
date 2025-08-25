@@ -1094,7 +1094,7 @@ EX namespace dialog {
   void color_dialog::draw() {
     cmode = sm::NUMBER | dialogflags;
     if(cmode & sm::SIDE) gamescreen();
-    else emptyscreen();
+    else stillscreen = true, emptyscreen();
 
     dcenter = vid.xres/2;
     dwidth = vid.xres;

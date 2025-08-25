@@ -319,7 +319,7 @@ void model_data::render(const shiftmatrix& V) {
   }
 
 void model_settings() {
-  emptyscreen();
+  cmode = sm::VR_MENU | sm::NOSCR; gamescreen();
   dialog::init();
   add_edit(prec);
   dialog::addBack();

@@ -1193,8 +1193,8 @@ EX named_functionality get_o_key() {
   if(isize(res) == 1) return res[0];
   
   return named_dialog(res[0].first + "/...", [res] {
-    cmode = sm::VR_MENU;
-    emptyscreen();
+    cmode = sm::VR_MENU | sm::NOSCR;
+    gamescreen();
     dialog::init();
     char id = 'o';
     for(auto& r: res) {
