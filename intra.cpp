@@ -833,6 +833,8 @@ EX void show_portals() {
     }
   else dialog::addBreak(100);
 
+  dialog::addBoolItem_action(XLAT("build on walls"), mapeditor::building_mode, 'B');
+
   walking::add_options();
 
   dialog::addHelp();
