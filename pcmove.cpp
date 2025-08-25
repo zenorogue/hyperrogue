@@ -754,6 +754,7 @@ void apply_chaos() {
   }
   
 bool pcmove::actual_move() {
+  eMonster pushedMonster = moNone;
 
   origd = d;
   if(d >= 0) {
@@ -805,6 +806,7 @@ bool pcmove::actual_move() {
     if(mip.proper()) {
       auto tgt = roll_effect(mip, dice::data[c2]);
       if(tgt.happy() > 0) {
+        pushedMonster = c2->monst;
         changes.ccell(c2);
         c2->monst = moNone;
         c2->wall = waRichDie;
@@ -840,7 +842,8 @@ bool pcmove::actual_move() {
       return false;
       }
     nextmovetype = lmMove;
-    addMessage(XLAT("You push %the1.", c2->wall));
+    if(pushedMonster == moNone) addMessage(XLAT("You push %the1.", c2->wall));
+    else addMessage(XLAT("You push %the1.", pushedMonster));
     lastmovetype = lmPush; lastmove = cwt.at;
     pushThumper(mip);
     changes.push_push(mip.t);
