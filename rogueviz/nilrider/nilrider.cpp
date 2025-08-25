@@ -225,6 +225,7 @@ void toggle_replay() {
 
 void run() {
   cmode = sm::PANNING | sm::NORMAL;
+  emptyscreen();
   clearMessages();
   dialog::init();
   if(view_replay && !paused) {
@@ -333,6 +334,8 @@ string fname = "horizontal.nrl";
 ld total_stars = 0;
 
 void pick_level() {
+  cmode = sm::VR_MENU;
+  emptyscreen();
   dialog::init(XLAT("select the track"), 0xC0C0FFFF, 150, 100);
   ld cur_stars = 0;
   for(auto l: all_levels) {
@@ -385,6 +388,8 @@ void pick_level() {
 
 void layer_selection_screen() {
   poly_outline = 0xFF;
+  cmode = sm::VR_MENU;
+  emptyscreen();
   dialog::init(XLAT("layer selection"), 0xC0C0FFFF, 150, 100);
   dialog::addBreak(50);
   auto layers = curlev->gen_layer_list();
@@ -399,6 +404,8 @@ void layer_selection_screen() {
 
 void pick_game() {
   clearMessages();
+  cmode = sm::VR_MENU;
+  emptyscreen();
   dialog::init();
   poly_outline = 0xFF;
   dialog::addBigItem(curlev->name, 't');
@@ -449,6 +456,8 @@ void nil_set_perspective() {
   }
 
 void nil_projection() {
+  cmode = sm::VR_MENU;
+  emptyscreen();
   dialog::init(XLAT("projection of Nil"), 0xC0C0FFFF, 150, 100);
   dialog::addBoolItem("geodesics", pmodel == mdGeodesic, 'g');
   dialog::add_action([] { popScreen(); nil_set_geodesic(); });
@@ -463,6 +472,8 @@ void nil_projection() {
   }
 
 void settings() {
+  cmode = sm::VR_MENU;
+  emptyscreen();
   dialog::init(XLAT("settings"), 0xC0C0FFFF, 150, 100);
   add_edit(aimspeed_key_x);
   add_edit(aimspeed_key_y);
@@ -519,6 +530,8 @@ template<class T, class U, class V> void replays_of_type(vector<T>& v, const U& 
     dialog::addItem(r.name, 'a');
     dialog::add_action([&v, i, loader, ghost_loader] {
       pushScreen([&v, i, loader, ghost_loader] {
+        cmode = sm::VR_MENU;
+        emptyscreen();
         dialog::init(XLAT(planning_mode ? "saved plan" : "replay"), 0xC0C0FFFF, 150, 100);
         dialog::addInfo(v[i].name);
 
@@ -554,6 +567,8 @@ template<class T, class U, class V> void replays_of_type(vector<T>& v, const U& 
 #if CAP_SAVE
 
 void replays() {
+  cmode = sm::VR_MENU;
+  emptyscreen();
   dialog::init(XLAT(planning_mode ? "saved plans" : "replays"), 0xC0C0FFFF, 150, 100);
   if(!planning_mode) replays_of_type(curlev->manual_replays, [] (manual_replay& r) {
     view_replay = false;
@@ -651,7 +666,9 @@ void help_instruments() {
 
 void main_menu() {
   clearMessages();
+  cmode = sm::VR_MENU;
   poly_outline = 0xFF;
+  emptyscreen();
   dialog::init(XLAT("Nil Rider"), 0xC0C0FFFF, 150, 100);
 
   dialog::addItem("continue", 'c');

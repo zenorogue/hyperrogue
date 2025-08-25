@@ -2160,6 +2160,8 @@ EX void menuitem_sightrange_style(key_type c IS('c')) {
     c
     );
   dialog::add_action_push([] {
+    cmode = sm::VR_MENU;
+    emptyscreen();
     dialog::init(XLAT("draw range based on"));
     dialog::addBoolItem(XLAT("draw range based on distance"), vid.use_smart_range == 0, 'd');
     dialog::add_action([] () { vid.use_smart_range = 0; popScreen(); edit_sightrange(); });
@@ -3886,6 +3888,8 @@ EX void show_color_dialog() {
 
 #if CAP_CONFIG
 EX void resetConfigMenu() {
+  cmode = sm::VR_MENU;
+  emptyscreen();
   dialog::init(XLAT("reset all configuration"));
   dialog::addInfo("Are you sure?");
   dialog::addItem("yes, and delete the config file", 'd');

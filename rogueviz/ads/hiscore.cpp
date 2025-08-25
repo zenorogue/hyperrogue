@@ -109,6 +109,7 @@ void load_hiscores() {
 int hi_sort_by = 3;
 
 void hiscore_menu() {
+  cmode = sm::VR_MENU;
   emptyscreen();
   dialog::init("High scores");
   fill_gamedata();
@@ -129,6 +130,7 @@ void hiscore_menu() {
   for(auto ad: v) {
     dialog::addSelItem(ad->myname + " (" + ad->deathreason + ")", main_rock ? fts(getval(ad)) : its(getval(ad)), dialog::list_fake_key++);
     dialog::add_action_push([ad] {
+      cmode = sm::VR_MENU;
       emptyscreen();
       dialog::init(ad->myname);
       if(!main_rock) {
