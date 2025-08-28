@@ -758,6 +758,7 @@ void ds_restart() {
   pick_textures();
   init_rsrc();
   init_gamedata();
+  in_replay = false;
   }
 
 void run_ds_game_hooks() {

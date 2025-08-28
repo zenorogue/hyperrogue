@@ -78,6 +78,8 @@ void ads_sub_restart() {
 
   ci_at.clear();
   displayed.clear();
+  history.clear();
+  in_replay = false;
 
   gen_terrain(vctr, ci_at[vctr], -2);
   forCellEx(c1, vctr) ci_at[c1].type = wtNone;
