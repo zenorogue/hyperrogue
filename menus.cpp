@@ -344,10 +344,12 @@ EX void showCreative() {
   dialog::addItem(XLAT("drawing tool"), 'd');
   dialog::add_action([] {
     dialog::cheat_if_confirmed([] {
+      cheater++;
       mapeditor::drawing_tool = true;
       mapeditor::intexture = false;
       pushScreen(mapeditor::showDrawEditor);
       mapeditor::initdraw(cwt.at);
+      addMessage(XLAT("You activate your imagination powers!"));
       });
     });
 #endif
