@@ -37,9 +37,17 @@ undo_state current_state() {
   return u;
   }
 
+bool is_solved() {
+  for(cell *c: celllist) if(c->wall == waCrateCrate) return false;
+  return true;
+  }
+
 void sb_hooks();
+void soko_play();
+bool already_solved;
 
 void run_sb() {
+  already_solved = false;
   showstartmenu = false;
   crystal::compass_probability = 0;
   stop_game();
@@ -99,6 +107,7 @@ void run_sb() {
   peace::on = true;
 
   sb_hooks();
+  pushScreen(soko_play);
   }
 
 void save_undo() {
@@ -118,13 +127,28 @@ void restore_undo() {
 
 bool sokomap2() {
 
-  if(undos.back().where != cwt.at) save_undo();
+  if(undos.back().where != cwt.at) {
+    save_undo();
+    if(!already_solved && is_solved()) {
+      already_solved = true;
+      addMessage("Solved. Congratulations!");
+      #if RVCOL
+      rogueviz::rv_achievement("CRYSTALSOKOBAN");
+      #endif
+      }
+    }
 
   if(1) {
     glflush();
     dynamicval<eGeometry> g(geometry, gEuclidSquare);
     check_cgi();
-    cgi.require_shapes();
+    if(!(cgi.state & 2)) {
+      auto m = euc::new_map();
+      dynamicval<hrmap*> dm(currentmap, m);
+      cgi.require_shapes();
+      ensure_floorshape_generated(0, currentmap->gamestart());
+      ensure_floorshape_generated(1, currentmap->gamestart());
+      }
     initquickqueue();
     
     if(1) {
@@ -156,6 +180,45 @@ bool sokomap2() {
   
   return true;
   }
+
+void soko_play() {
+  getcstat = '-';
+  cmode = sm::PANNING | sm::CENTER;
+  gamescreen();
+  // stillscreen = true;
+
+  dialog::init();
+  sokomap2();
+
+  displayButton(vid.xres - vid.fsize, vid.yres - vid.fsize, "(v) quit", 'v', 16);
+  dialog::add_key_action('v', [] { quitmainloop = true; });
+
+  displayButton(vid.xres - vid.fsize, vid.yres - 3 * vid.fsize, "(u) undo", 'u', 16);
+  dialog::add_key_action('u', [] { restore_undo(); });
+
+  displayButton(vid.xres - vid.fsize, vid.yres - 5 * vid.fsize, "(s) settings", 's', 16);
+  dialog::add_key_action('s', [] { pushScreen(showSettings); });
+
+  displayButton(vid.xres - vid.fsize, vid.yres - 7 * vid.fsize, "(h) help", 'h', 16);
+  dialog::add_key_action('h', [] {
+    gotoHelp(
+      "This is a three-dimensional Sokoban puzzle, visualized using a hyperbolic plane.\n\n"
+      "Push all crates (red circles) onto targets (places with green borders).\n\n"
+      "The puzzle is designed so that all three dimensions matter.\n\n"
+      );
+    });
+
+  keyhandler = [] (int sym, int uni) {
+    handlePanning(sym, uni);
+    handle_movement(sym, uni);
+    if(sym == '-' || sym == PSEUDOKEY_WHEELDOWN) {
+      actonrelease = false;
+      mousemovement();
+      }
+    dialog::handleNavigation(sym, uni);
+    };
+  }
+
 
 bool soko_key(int sym, int uni) {
   if((cmode & sm::NORMAL) && (uni == SDLK_BACKSPACE || uni == 'r') && isize(undos) != 1) {
