@@ -3887,6 +3887,8 @@ EX void show_color_dialog() {
   }
 
 #if CAP_CONFIG
+EX bool allow_reset_config = true;
+
 EX void resetConfigMenu() {
   cmode = sm::VR_MENU | sm::NOSCR;
   gamescreen();
@@ -4217,8 +4219,10 @@ EX void showSettings() {
   dialog::addItem(XLAT("save the current config"), 's');
   dialog::add_action(saveConfig);
 
-  dialog::addItem(XLAT("reset all configuration"), 'R');
-  dialog::add_action_push(resetConfigMenu);
+  if(allow_reset_config) {
+    dialog::addItem(XLAT("reset all configuration"), 'R');
+    dialog::add_action_push(resetConfigMenu);
+    }
 #endif  
   
   if(getcstat == 's') mouseovers = XLAT("Config file: %1", conffile);
