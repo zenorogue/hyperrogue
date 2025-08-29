@@ -115,6 +115,7 @@ void save_undo() {
   }
 
 void restore_undo() {
+  if(undos.empty()) return;
   undos.pop_back();
   auto& u = undos.back();
   cwt.at = u.where;
