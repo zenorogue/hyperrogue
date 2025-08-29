@@ -5501,3 +5501,11 @@ https://zenorogue.blogspot.com/2025/08/hyperrogue-131.html
 - the Hyperstone Quest cheat gives only the relevant treasures (thanks to josephcsible)
 - a shading cheat (thanks to josephcsible)
 - only messages about lands that are in-game are shown (thanks to josephcsible)
+
+2025-08-29 08:44 Update 13.1d:
+- fixed a potential crash when reseting OpenGL (might help people who could not run the game?)
+- fixed new humanoid player shapes not displaying the crossbow, and the missiles for new character shapes
+- fixed a bug when saving colortables, causing a crash when loading them (thanks to josephcsible)
+- drawing tool now actually does enable the cheat mode
+- fix pushing an Animated Die saying "You push the Unhappy Die." (thanks to josephcsible)
+- fixed some menus in VR, and the bugh with the walking mode hotkey; added 'build on walls' to the portal construction menu so it is easier to create portals in the air
