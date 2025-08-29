@@ -1059,7 +1059,7 @@ void seuphorica_screen() {
   keyhandler = [] (int sym, int uni) {
     handlePanning(sym, uni);
     dialog::handleNavigation(sym, uni);
-    if(uni == SDLK_ESCAPE) popScreen();
+    if(uni == SDLK_ESCAPE) pushScreen(seuphorica_menu);
     if(uni == PSEUDOKEY_RELEASE && hold_mode == 4 && tile_moved) {
       swap(*tile_moved, drawn[0]);
       cast_spell(tile_boxid);
