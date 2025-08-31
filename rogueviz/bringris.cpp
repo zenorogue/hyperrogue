@@ -1766,6 +1766,7 @@ void run() {
 
     dialog::handleNavigation(sym, uni);
     if(in_menu && sym == 'q' && !ISWEB) {
+      if(cur.bricks > 0) save();
       in_bringris = false;
       quitmainloop = true;
       }
