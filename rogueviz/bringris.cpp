@@ -2288,10 +2288,16 @@ void save(const gamedata& sd) {
   #endif
   }
 
+void update_stars(bgeometry& g, const gamedata &gd) {
+  if(g.name == gd.bgeom_name && g.default_max_piece == gd.max_piece)
+    g.stars = max(g.stars, (gd.pro_game ? 5 : 1) * gd.completed * gd.levelsize);
+  }
+
 void save() {
   fill_gamedata();
   save(cur);
   allsaves.push_back(cur);
+  update_stars(bgeoms[bgeom], cur);
   }
 
 void load() {
@@ -2312,8 +2318,7 @@ void load() {
       gd.pro_game = gd.score >= 0;
       for(int i=0; i<=gd.well_size; i++) gd.lmap.push_back(scanline_noblank(f));
       allsaves.push_back(gd);
-      for(auto& g: bgeoms) if(g.name == gd.bgeom_name && g.default_max_piece == gd.max_piece)
-        g.stars = max(g.stars, (gd.pro_game ? 5 : 1) * gd.completed * gd.levelsize);
+      for(auto& g: bgeoms) update_stars(g, gd);
       }
     }
   }
