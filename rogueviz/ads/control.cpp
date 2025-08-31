@@ -167,7 +167,7 @@ bool ads_turn(int idelta) {
 
   auto& act = multi::action_states[1];
 
-  if(act[multi::pcFire].pressed() && !paused) fire();
+  if(act[multi::pcFire].pressed() && !paused && !game_over) fire();
   if(act[pcPause].pressed()) switch_pause();
   if(act[pcDisplayTimes].pressed()) view_proper_times = !view_proper_times;
   if(act[pcSwitchSpin].pressed()) auto_rotate = !auto_rotate;
