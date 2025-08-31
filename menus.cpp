@@ -551,6 +551,7 @@ EX void show_custom() {
   dialog::display();
   }
 
+#ifndef RVCOL
 EX void mode_higlights() {
   cmode = sm::NOSCR;
   gamescreen();
@@ -716,7 +717,8 @@ EX void mode_higlights() {
   dialog::addBreak(100);
   dialog::addBack();
   dialog::display();
-  }  
+  }
+#endif
 
 EX eLandStructure default_land_structure() {
   if(closed_or_bounded) return lsSingle;
@@ -828,8 +830,10 @@ EX void showChangeMode() {
   show_achievement_eligibility();
 
   dialog::addBreak(50);
+  #ifndef RVCOL
   dialog::addItem(XLAT("highlights & achievements"), 'h');
   dialog::add_action_push(mode_higlights);
+  #endif
   dialog::addItem(XLAT("custom mode manager"), 'm');
   dialog::add_action(prepare_custom);
   dialog::addBack();
