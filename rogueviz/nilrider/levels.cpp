@@ -1,3 +1,6 @@
+// Nil Rider levels
+// Copyright (C) 2022-2025 Zeno Rogue, see '../../hyper.cpp' for details
+
 namespace nilrider {
 
 bool all(checkerparam c) { return c.t->collected_triangles == Flag(isize(c.l->triangles))-1; }

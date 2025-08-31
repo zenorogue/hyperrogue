@@ -1,4 +1,5 @@
-/* underlying/spacetime views, and also replaying */
+// Relative Hell: underlying/spacetime views, and also replaying
+// Copyright (C) 2022-2025 Zeno Rogue, see '../../hyper.cpp' for details
 
 namespace hr {
 

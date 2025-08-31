@@ -2,6 +2,8 @@
 // Copyright (C) 2025 Zeno Rogue, see 'hyper.cpp' for details
 // the Seuphorica repo (seuphorica.cpp and dictionary files) needs to be placed in the 'seuphorica' subdirectory
 
+// compile with: ./mymake -O3 rogueviz/seuphorica.cpp and then launch with -seuphorica
+
 #include "rogueviz.h"
 #include <fstream>
 

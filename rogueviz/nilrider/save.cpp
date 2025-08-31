@@ -1,3 +1,6 @@
+// Nil Rider: saves
+// Copyright (C) 2022-2025 Zeno Rogue, see '../../hyper.cpp' for details
+
 namespace nilrider {
 
 const string ver = "2.0";

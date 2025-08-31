@@ -1,3 +1,6 @@
+// Relative Hell: implemetation of the de Sitter game
+// Copyright (C) 2022-2025 Zeno Rogue, see '../../hyper.cpp' for details
+
 namespace hr {
 
 namespace ads_game {

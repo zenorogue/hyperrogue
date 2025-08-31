@@ -1,3 +1,6 @@
+// Nil Rider: planning mode
+// Copyright (C) 2022-2025 Zeno Rogue, see '../../hyper.cpp' for details
+
 namespace nilrider {
 
 hyperpoint get_spline(ld t);

@@ -1,3 +1,6 @@
+// Relative Hell: guided tour
+// Copyright (C) 2025-2025 Zeno Rogue, see '../../hyper.cpp' for details
+
 namespace hr {
 
 namespace ads_game {

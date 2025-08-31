@@ -1,3 +1,6 @@
+// Nil Rider statues
+// Copyright (C) 2022-2025 Zeno Rogue, see '../../hyper.cpp' for details
+
 namespace hr {
 namespace bricks {
 

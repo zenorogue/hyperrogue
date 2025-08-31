@@ -1,6 +1,7 @@
 /* Main file of Relative Hell. */
 /* Compile with mymake -O3 -rv rogueviz/ads/ads-game */
 /* Best run with -ads-menu; more detailed options are available too */
+/* You can also add -DRELHELL for standalone Relative Hell */
 
 #define VER_RH "1.1"
 

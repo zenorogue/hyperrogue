@@ -1,3 +1,6 @@
+// Relative Hell: specification of the lands in the anti-de Sitter game
+// Copyright (C) 2024-2025 Zeno Rogue, see '../../hyper.cpp' for details
+
 namespace hr {
 
 namespace ads_game {

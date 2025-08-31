@@ -1,5 +1,8 @@
 // non-Euclidean falling block game, implemented using the HyperRogue engine
-// Copyright (C) 2011-2021 Zeno Rogue, see 'hyper.cpp' for details
+// Copyright (C) 2011-2021 Zeno Rogue, see '../hyper.cpp' for details
+
+// compile with: ./mymake -O3 rogueviz/bringris.cpp rogueviz/subquotient.cpp and then launch with -bringris
+// add -DBRINGRIS for standalone Bringris
 
 #define BRINGRIS_VER "2.0"
 
