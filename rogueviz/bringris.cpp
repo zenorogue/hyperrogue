@@ -1295,7 +1295,7 @@ void geometry_menu(bool for_scores) {
   int total_stars = 0;
   for(int i=0; i<isize(bgeoms); i++) total_stars += bgeoms[i].stars;
   for(int i=0; i<isize(bgeoms); i++) {
-    if(total_stars >= bgeoms[i].stars_needed || !stars_enabled) {
+    if(total_stars >= bgeoms[i].stars_needed || !stars_enabled || unlock_all) {
       dialog::addTitle(bgeoms[i].name, i == c_geom ? 0xFF00 : 0xFF0000, 150);
       dialog::items.back().key = 'a' + i;
       dialog::add_action([i, for_scores] {

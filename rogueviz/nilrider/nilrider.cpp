@@ -357,7 +357,7 @@ void pick_level() {
       }
     cur_stars += score_here;
 
-    if(l->stars_needed > total_stars) {
+    if(l->stars_needed > total_stars && !unlock_all) {
       dialog::addSelItem(l->name, "stars needed: " + its(l->stars_needed), l->hotkey);
       }
     else {
