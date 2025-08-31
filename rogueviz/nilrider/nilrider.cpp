@@ -1,7 +1,7 @@
 // Nil Rider
 // Copyright (C) 2022-2025 Zeno Rogue, see '../../hyper.cpp' for details
 
-// compile with: ./mymake -O3 rogueviz/nilrider/nilrider.cpp and then launch with -nilrider
+// compile with: ./mymake -O3 -rv rogueviz/nilrider/nilrider.cpp and then launch with -nilrider
 // add -DNILRIDER for standalone Nil Rider
 
 #if NILRIDER
