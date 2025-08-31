@@ -2223,6 +2223,7 @@ void default_config() {
   lps_add(lps_bringris_explore, mouseaim_sensitivity, 0.01);
   lps_add(lps_bringris_explore, camera_speed, 2);
   lps_add(lps_bringris_explore, smooth_scrolling, true);
+  lps_add(lps_bringris_explore, game_keys_scroll, true);
 
   lps_add(lps_bringris_play, mouseaim_sensitivity, 0);
 
