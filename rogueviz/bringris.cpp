@@ -1287,7 +1287,7 @@ int score_bgeom, score_max_piece;
 
 void geometry_menu(bool for_scores) {
   auto& c_geom = for_scores ? score_bgeom : bgeom;
-  auto& c_max = for_scores ? score_max_piece : bgeom;
+  auto& c_max = for_scores ? score_max_piece : cur.max_piece;
   clearMessages();
   cmode = sm::VR_MENU | sm::NOSCR; gamescreen();
   dialog::init(for_scores ? "highscores for..." : "Bringris geometries");
