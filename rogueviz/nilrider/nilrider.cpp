@@ -234,7 +234,7 @@ void run() {
   emptyscreen();
   clearMessages();
   dialog::init();
-  if(view_replay && !paused) {
+  if(view_replay && !paused && !isize(curlev->history)) {
     int ttick = gmod(ticks - simulation_start_tick, isize(curlev->history));
     curlev->current = curlev->history[ttick];  
     curlev->current.centerview(curlev);
