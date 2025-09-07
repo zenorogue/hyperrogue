@@ -425,6 +425,16 @@ cld exp_parser::parse(int prio) {
     else if(number == "last_c") res = anims::last_anim_vars[2];
     else if(number == "last_d") res = anims::last_anim_vars[3];
     else if(number == "illegal_moves") res = illegal_moves;
+    else if(number == "lshift") res = lshiftclick;
+    else if(number == "rshift") res = rshiftclick;
+    else if(number == "lctrl") res = lctrlclick;
+    else if(number == "rctrl") res = rctrlclick;
+    else if(number == "capslock") res = (SDL_GetModState() & KMOD_CAPS) ? 1 : 0;
+    else if(number == "numlock") res = (SDL_GetModState() & KMOD_NUM) ? 1 : 0;
+#if SDLVER >= 2
+    else if(number == "scrolllock") res = (SDL_GetModState() & KMOD_SCROLL) ? 1 : 0;
+#endif
+    else if(number == "holdmouse") res = holdmouse ? 1 : 0;
     else if(number == "mousexs") {
       if(!inHighQual) bmousexs = (1. * mousex - current_display->xcenter) / current_display->radius;
       res = bmousexs;
