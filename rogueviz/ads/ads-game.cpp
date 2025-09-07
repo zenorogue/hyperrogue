@@ -342,6 +342,8 @@ auto shot_hooks =
     -> editable(0, 100, 1, "tiles to generate per frame", "reduce if the framerate is low", 'G');
     param_i(draw_per_frame, "ads_draw_per_frame")
     -> editable(0, 3000, 0.1, "tiles to draw per frame", "reduce if the framerate is low", 'D');
+    param_i(draw_per_frame, "ads_draw_per_frame_equal")
+    -> editable(0, 3000, 0.1, "tiles to draw per frame -- extra tiles to draw when distances are equal", "reduce if the framerate is low", 'D');
 
     param_f(time_scale, "rh_time_scale")
     -> editable(0, 1, 0.1, "Relative Hell time label scale", "scaling factor for the time labels", 'T');

@@ -114,6 +114,7 @@ cell *starting_point;
 
 int max_gen_per_frame = 3;
 int draw_per_frame = 200;
+int draw_per_frame_equal = 200;
 
 bool simple_ship = false;
 
