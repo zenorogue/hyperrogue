@@ -541,7 +541,7 @@ void level::draw_level(const shiftmatrix& V) {
       }
     }
 
-  if(true) {
+  if(isize(castle_tinf.tvertices)) {
     auto& poly = queuepoly(V, shCastle, 0xC02020FF);
     poly.tinf = &castle_tinf;
     castle_tinf.texture_id = castle_texture->textureid;
