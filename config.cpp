@@ -1627,7 +1627,7 @@ EX void initConfig() {
   ld emul = 1;
   
   param_b(dialog::onscreen_keyboard, "onscreen_keyboard")
-  ->editable("onscreen keyboard", 'k');
+  ->editable("onscreen keyboard", 'K');
   
   param_b(context_fog, "coolfog");
 
