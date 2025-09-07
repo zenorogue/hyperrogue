@@ -10,7 +10,7 @@ namespace hr {
 
 EX bool quitsaves() { 
   if(casual) return false;
-  return (items[itOrbSafety] && CAP_SAVE && !arcm::in()); 
+  return (items[itOrbSafety] && CAP_SAVE);
   }
 
 EX bool needConfirmationEvenIfSaved() {
