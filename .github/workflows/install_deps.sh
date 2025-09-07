@@ -18,6 +18,7 @@ if [[ "$GH_HYP_PNG" == "png_1" ]]; then
 fi
 
 if [[ "$GH_OS" == "ubuntu-latest" ]]; then
+  sudo apt-get update
   sudo apt-get -y install $GH_DEPS_UBUNTU
 elif [[ "$GH_OS" == "macos-latest" ]]; then
   brew update
