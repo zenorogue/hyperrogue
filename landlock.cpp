@@ -400,6 +400,7 @@ EX bool incompatible1(eLand l1, eLand l2) {
   if(l1 == laBull && l2 == laTerracotta) return true;
   if(l1 == laReptile && l2 == laTerracotta) return true;
   if(l1 == laBull && l2 == laDeadCaves) return true;
+  if(l1 == laMinefield && l2 == laZebra) return true;
   if(isElemental(l1) && isElemental(l2)) return true;
   return false;
   }
