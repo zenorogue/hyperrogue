@@ -68,8 +68,17 @@ map<int, int> genstats;
 
 int gen_budget;
 
+void setdist_rec(cell *c, int val) {
+  forCellCM(c1, c) if(c1->mpdist <= val) { setdist(c, val, c1); return; }
+  forCellCM(c1, c) if(celldist(c1) < celldist(c)) {
+    setdist_rec(c1, val);
+    setdist(c, val, c1);
+    return;
+    }
+  }
+
 void gen_terrain(cell *c, cellinfo& ci, int level = 0) {
-  if(level == 0) setdist(c, 7, nullptr);
+  if(level == 0) setdist_rec(c, 7);
   if(level >= ci.mpd_terrain) return;
   if(!hyperbolic) { println(hlog, "wrong geometry detected in gen_terrain!");  exit(1); }
 
@@ -111,7 +120,7 @@ void add_rock(cell *c, cellinfo& ci, const ads_matrix& T) {
 
   bool fail = false;
   compute_life(hybrid::get_at(c, 0), unshift(T), [&] (cell *c, ld t) {
-    hybrid::in_underlying_geometry([c] { setdist(c, 7, nullptr); });
+    hybrid::in_underlying_geometry([c] { setdist_rec(c, 7); });
     if(c->land == laBarrier) fail = true;
     return false;
     });
