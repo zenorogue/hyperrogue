@@ -224,9 +224,9 @@ void level::draw_planning_screen() {
       current_surface = hi.on_surface;
       curvepoint(hpxy(h[0], h[1]));
       }
-    i++; if(i < isize(history)) i = min(i + plan_precision - 1, isize(history)-1);
     ld dist = sqhypot_d(2, h - mousept);
     if(dist < closest_dist) closest_dist = dist, current = history[i];
+    i++; if(i < isize(history)) i = min(i + plan_precision - 1, isize(history)-1);
     }
   queuecurve(T, surface_color(), 0, PPR::LIZEYE);
   vid.linewidth /= 3;
