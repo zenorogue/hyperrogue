@@ -400,6 +400,7 @@ EX bool incompatible1(eLand l1, eLand l2) {
   if(l1 == laBull && l2 == laTerracotta) return true;
   if(l1 == laReptile && l2 == laTerracotta) return true;
   if(l1 == laBull && l2 == laDeadCaves) return true;
+  if(l1 == laMinefield && l2 == laZebra) return true;
   if(isElemental(l1) && isElemental(l2)) return true;
   return false;
   }
@@ -416,8 +417,9 @@ EX int elementalKills() {
   }
 
 EX eLand randomElementalLandWeighted() {
-  if(all_unlocked) return pick(laEAir, laEWater, laEEarth, laEFire);
-  int i = hrand(elementalKills());
+  int ek = elementalKills();
+  if(ek == 0 || all_unlocked) return pick(laEAir, laEWater, laEEarth, laEFire);
+  int i = hrand(ek);
   i -= kills[moAirElemental]; if(i<0) return laEAir;
   i -= kills[moWaterElemental]; if(i<0) return laEWater;
   i -= kills[moEarthElemental]; if(i<0) return laEEarth;
