@@ -1321,9 +1321,9 @@ EX void apply() {
       reflect_view();
       rotate_view(rot_inverse(movement_angle.get()));
       if(GDIM == 2)
-        View = bt::parabolic(parabolic_length * t / period) * View;
+        rotate_view(bt::parabolic(parabolic_length * t / period));
       else
-        View = bt::parabolic3(parabolic_length * t / period, 0) * View;
+        rotate_view(bt::parabolic3(parabolic_length * t / period, 0));
       rotate_view(movement_angle.get());
       moved();
       break;
@@ -1332,7 +1332,7 @@ EX void apply() {
       rotate_view(rot_inverse(movement_angle.get()));
       centerover = rotation_center;
       ld alpha = circle_spins * TAU * ticks / period;
-      View = spin(-cos_auto(circle_radius)*alpha) * xpush(circle_radius) * spin(alpha) * rotation_center_View;
+      rotate_view(spin(-cos_auto(circle_radius)*alpha) * xpush(circle_radius) * spin(alpha) * rotation_center_View * inverse(View));
       rotate_view(movement_angle.get());
       moved();
       break;
