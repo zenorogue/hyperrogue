@@ -413,6 +413,16 @@ struct manual_celllister {
     return true;
     }
 
+  /** \brief remove a cell from the list */
+  bool remove(cell *c) {
+    if(!listed(c)) return false;
+    int i = c->listindex;
+    c->listindex = tmps[i];
+    tmps.erase(tmps.begin() + i);
+    lst.erase(lst.begin() + i);
+    return true;
+    }
+
   ~manual_celllister() {     
     for(int i=0; i<isize(lst); i++) lst[i]->listindex = tmps[i];
     }  

@@ -1194,6 +1194,7 @@ EX vector<cell*> gun_targets(cell *c) {
       if(passable(c2, c1, P_BULLET | P_FLYING | P_MONSTER))
         if(cl.add(c2)) dists.push_back(dists[i] + 1);
     }
+  cl.remove(c);
   return cl.lst;
   }
 
