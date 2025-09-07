@@ -58,8 +58,8 @@ struct timestamp {
   bool out_of_surface(level*);
   void be_consistent();
 
-  bool check_crashes_rec(level*, hyperpoint owhere, hyperpoint oflyvel, ld timeleft);
-  bool check_crashes(level*, hyperpoint owhere, hyperpoint oflyvel, ld timeleft);
+  bool check_crashes_rec(level*, level*, hyperpoint owhere, hyperpoint oflyvel, ld timeleft);
+  bool check_crashes(level*, level*, hyperpoint owhere, hyperpoint oflyvel, ld timeleft);
   };
 
 struct planpoint {
