@@ -698,7 +698,7 @@ EX namespace models {
     bool shaderside_projection = get_shader_flags() & SF_DIRECT;
     if(vid.consider_shader_projection && !shaderside_projection)
       dialog::lastItem().value = XLAT("N/A");
-    if(vid.consider_shader_projection && shaderside_projection && vpmodel)
+    if(vid.consider_shader_projection && shaderside_projection && (get_shader_flags() & SF_NONSPATIAL))
       dialog::lastItem().value += XLAT(" (2D only)");
     dialog::add_action([] { vid.consider_shader_projection = !vid.consider_shader_projection; });
     #endif

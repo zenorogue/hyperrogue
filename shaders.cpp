@@ -34,6 +34,7 @@ constexpr flagtype SF_ZFOG         = 65536;
 constexpr flagtype SF_ODSBOX       = (1<<17);
 
 constexpr flagtype SF_SEMIDIRECT   = (1<<18);
+constexpr flagtype SF_NONSPATIAL   = (1<<19);
 #endif
 
 EX bool solv_all;
@@ -296,12 +297,12 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
     treset = true;
     }
   else if(pmodel == mdConformalSquare && pconf.model_transition == 1) {
-    shader_flags |= SF_ORIENT | SF_DIRECT;
+    shader_flags |= SF_ORIENT | SF_DIRECT | SF_NONSPATIAL;
     coordinator += "t = uPP * t;", vsh += "uniform mediump mat4 uPP;";
     coordinator += "t = to_square(t);";
     }
   else if(pmodel == mdBand && hyperbolic) {
-    shader_flags |= SF_BAND | SF_ORIENT | SF_BOX | SF_DIRECT;
+    shader_flags |= SF_BAND | SF_ORIENT | SF_BOX | SF_DIRECT | SF_NONSPATIAL;
     coordinator += "t = uPP * t;", vsh += "uniform mediump mat4 uPP;";
     if(dim2) coordinator += "mediump float zlev = zlevel(t); t /= zlev;\n";
     if(dim3) coordinator += "mediump float r = sqrt(t.y*t.y+t.z*t.z); float ty = asinh(r);\n";
@@ -312,7 +313,7 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
     if(dim3) shader_flags |= SF_ZFOG;
     }
   else if(pmodel == mdHalfplane && hyperbolic) {
-    shader_flags |= SF_HALFPLANE | SF_ORIENT | SF_BOX | SF_DIRECT;
+    shader_flags |= SF_HALFPLANE | SF_ORIENT | SF_BOX | SF_DIRECT | SF_NONSPATIAL;
     if(dim2) shader_flags |= SF_USE_ALPHA;
     coordinator += "t = uPP * t;", vsh += "uniform mediump mat4 uPP;";
     if(dim2) coordinator += 

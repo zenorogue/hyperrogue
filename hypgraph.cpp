@@ -35,7 +35,7 @@ EX bool non_spatial_model() {
   if(pmodel == mdSpiral && euclid)
     return true;
   #if CAP_GL
-  return pmodel && vid.consider_shader_projection && (get_shader_flags() & SF_DIRECT);
+  return pmodel && vid.consider_shader_projection && (get_shader_flags() & SF_DIRECT) && (get_shader_flags() & SF_NONSPATIAL);
   #else
   return false;
   #endif
