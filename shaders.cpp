@@ -312,6 +312,14 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
     if(dim3) coordinator += "t[0] = tx; t[1] = ty*t.y/r; t[2] = ty*t.z/r; t[3] = 1.0;\n";
     if(dim3) shader_flags |= SF_ZFOG;
     }
+  else if(pmodel == mdEquidistant && hyperbolic) {
+    shader_flags |= SF_BAND | SF_ORIENT | SF_BOX | SF_DIRECT | SF_NONSPATIAL;
+    coordinator += "t = uPP * t;", vsh += "uniform mediump mat4 uPP;";
+    if(dim2) coordinator += "mediump float zlev = zlevel(t); t /= zlev;\n";
+    if(dim2) coordinator += "mediump float r = length(t.xy); if(r > 0.) t.xy *= asinh(r) / r / 2.; t[2] = 0.; t[3] = 1.;\n";
+    if(dim3) coordinator += "mediump float r = length(t.xyz); if(r > 0.) t.xyz *= asinh(r) / r / 2.; t[3] = 1.;\n";
+    if(dim3) shader_flags |= SF_ZFOG;
+    }
   else if(pmodel == mdHalfplane && hyperbolic) {
     shader_flags |= SF_HALFPLANE | SF_ORIENT | SF_BOX | SF_DIRECT | SF_NONSPATIAL;
     if(dim2) shader_flags |= SF_USE_ALPHA;
