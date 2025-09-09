@@ -1953,6 +1953,9 @@ EX namespace dialog {
     string u2;
     if(DKEY == SDLK_LEFT) editpos -= utfsize_before(es, editpos);
     else if(DKEY == SDLK_RIGHT) editpos += utfsize(es[editpos]);
+    else if(uni == '\t') {
+      es = ""; editpos = 0;
+      }
     else if(uni == 8) {
       if(editpos == 0) return true;
       int len = utfsize_before(es, editpos);
