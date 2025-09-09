@@ -709,6 +709,8 @@ EX namespace dialog {
     #endif
     }
 
+  EX string keyboard_what;
+
   EX void display() {
 
     callhooks(hooks_display_dialog);
@@ -925,6 +927,14 @@ EX namespace dialog {
           if(in) {
             if(c == 1) getcstat = SDLK_LEFT;
             else if(c == 2) getcstat = SDLK_RIGHT;
+            else if(c == 3) {
+              getcstat = PSEUDOKEY_ONSCREEN_KEYBOARD;
+              keyboard_what = "pi";
+              }
+            else if(c >= 32) {
+              getcstat = PSEUDOKEY_ONSCREEN_KEYBOARD;
+              keyboard_what = ""; keyboard_what += c;
+              }
             else getcstat = c;
             }
           displayfr(xpos, mid, 2, dfsize * I.scale/100, s, dialogcolor_over(in), 8);
@@ -1465,14 +1475,7 @@ EX namespace dialog {
     
     keyhandler = [this, &ne] (int sym, int uni) {
       handleNavigation(sym, uni);
-      if((uni >= '0' && uni <= '9') || among(uni, '.', '+', '-', '*', '/', '^', '(', ')', ',', '|', ' ', '=', 3) || (uni >= 'a' && uni <= 'z')) {
-        #if SDLVER == 1
-        if(uni == 3) ne.s += "pi";
-        else ne.s += uni;
-        apply_edit();
-        #endif
-        }
-      else if(uni == '\b' || uni == '\t') {
+      if(uni == '\b' || uni == '\t') {
         ne.s = ne.s. substr(0, isize(ne.s)-utfsize_before(ne.s, isize(ne.s)));
         sscanf(ne.s.c_str(), LDF, ne.editwhat);
         apply_edit();
@@ -1519,6 +1522,18 @@ EX namespace dialog {
         *ne.editwhat = val;
           
         apply_slider();
+        }
+      else if(uni == PSEUDOKEY_ONSCREEN_KEYBOARD) {
+        ne.s += keyboard_what;
+        apply_edit();
+        }
+      else if(uni >= 32) {
+        #if SDLVER < 2
+        if((uni >= '0' && uni <= '9') || among(uni, '.', '+', '-', '*', '/', '^', '(', ')', ',', '|', ' ', '=') || (uni >= 'a' && uni <= 'z')) {
+          ne.s += uni;
+          apply_edit();
+          }
+        #endif
         }
       else if(doexiton(sym, uni)) ne.popfinal();
       };
