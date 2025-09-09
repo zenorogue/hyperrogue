@@ -1415,10 +1415,13 @@ EX void initConfig() {
   -> editable("flat, not equidistant", 'F')
   -> set_reaction(geom3::apply_settings_full);
 
-  param_enum(geom3::spatial_embedding, "spatial_embedding", geom3::seDefault)
-  ->editable(geom3::spatial_embedding_options, "3D embedding method", 'E')
-  ->set_reaction(geom3::apply_settings_full);
-  
+  param_custom_int(geom3::want_spatial_embedding, "spatial_embedding", menuitem_spatial_embedding, 'E')
+  ->set_reaction([] {
+    if(geom3::want_spatial_embedding != shown_spatial_embedding())
+      invoke_embed(geom3::want_spatial_embedding);
+    })
+  ->help_text = "3D embedding method|3D style";
+
   param_b(memory_saving_mode, "memory_saving_mode", (ISMOBILE || ISPANDORA || ISWEB) ? 1 : 0);
   param_i(reserve_limit, "memory_reserve", 128);
   param_b(show_memory_warning, "show_memory_warning");
@@ -2864,7 +2867,7 @@ EX void edit_levellines(char c) {
     });
   }
 
-geom3::eSpatialEmbedding shown_spatial_embedding() {
+EX geom3::eSpatialEmbedding shown_spatial_embedding() {
   if(GDIM == 2) return geom3::seNone;
   return geom3::spatial_embedding;
 }
@@ -3000,6 +3003,11 @@ EX void show_spatial_embedding() {
   dialog::display();
   }
 
+EX void menuitem_spatial_embedding(key_type key) {
+  dialog::addSelItem(XLAT("3D style"), XLAT(geom3::spatial_embedding_options[shown_spatial_embedding()].first), key);
+  dialog::add_action_push(show_spatial_embedding);
+  }
+
 EX void show3D_height_details() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen();
@@ -3062,8 +3070,7 @@ EX void show3D() {
 
 #if MAXMDIM >=4
   if(WDIM == 2) {
-    dialog::addSelItem(XLAT("3D style"), XLAT(geom3::spatial_embedding_options[shown_spatial_embedding()].first), 'E');
-    dialog::add_action_push(show_spatial_embedding);
+    add_edit(geom3::want_spatial_embedding);
 
     display_embedded_errors();
     dialog::addBreak(50);

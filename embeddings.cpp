@@ -96,6 +96,7 @@ EX namespace geom3 {
     }
 
   EX eSpatialEmbedding spatial_embedding = seDefault;
+  EX eSpatialEmbedding want_spatial_embedding = seNone;
   EX ld euclid_embed_scale = 1;
   EX ld euclid_embed_scale_y = 1;
   EX ld euclid_embed_rotate = 0;
@@ -1369,7 +1370,7 @@ EX void invoke_embed(geom3::eSpatialEmbedding se) {
   if(GDIM == 3) { if(geom3::auto_configure) geom3::switch_fpp(); else geom3::switch_always3(); }
   if(in_tpp()) geom3::switch_tpp();
   if(se != geom3::seNone) {
-    geom3::spatial_embedding = se;
+    geom3::want_spatial_embedding = geom3::spatial_embedding = se;
     if(geom3::auto_configure) geom3::switch_fpp(); else geom3::switch_always3();
     delete_sky();
     if(vid.usingGL) resetGL();
