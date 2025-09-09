@@ -313,7 +313,7 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
     if(dim3) shader_flags |= SF_ZFOG;
     }
   else if(pmodel == mdEquidistant && hyperbolic) {
-    shader_flags |= SF_BAND | SF_ORIENT | SF_BOX | SF_DIRECT;
+    shader_flags |= SF_BOX | SF_DIRECT;
     coordinator += "t = uPP * t;", vsh += "uniform mediump mat4 uPP;";
     if(dim3) {
       coordinator += "mediump float d = length(t.xyz); if(d > 0.) t.xyz *= asinh(d) / d / 2.; t[3] = 1.;\n";
