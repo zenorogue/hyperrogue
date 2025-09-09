@@ -751,6 +751,8 @@ EX void mainloopiter() { printf("(compiled without SDL -- no action)\n"); quitma
 /* visualization only -- the HyperRogue movement keys should move the camera */
 EX bool game_keys_scroll;
 
+EX bool currently_scrolling;
+
 #if CAP_SDL
 
 // Warning: a very long function! todo: refactor
@@ -785,8 +787,6 @@ EX bool mouseaiming(bool shmupon) {
 EX purehookset hooks_control;
 
 EX bool stillscreen;
-
-EX bool currently_scrolling;
 
 EX void mainloopiter() {
   GLWRAP;
