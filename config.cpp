@@ -117,6 +117,7 @@ struct parameter : public std::enable_shared_from_this<parameter> {
   parameter *set_sets(const reaction_t& s) { sets = s; return this; }
   parameter *set_extra(const reaction_t& r);
   parameter *set_reaction(const reaction_t& r);
+  parameter *set_pre_reaction(const reaction_t& r);
   virtual ~parameter() = default;
   virtual bool load_from_animation(const string& s) {
     load(s); return false;
@@ -130,6 +131,7 @@ struct parameter : public std::enable_shared_from_this<parameter> {
   virtual void set_cld_raw(cld x) { throw param_exception("parameter has no complex value", this); }
   virtual void set_cld(cld value) {
     auto bak = get_cld();
+    if(value != bak && pre_reaction) pre_reaction();
     set_cld_raw(value);
     if(value != bak && reaction) reaction();
     }
@@ -163,6 +165,10 @@ parameter *parameter::set_extra(const reaction_t& r) {
 
 parameter *parameter::set_reaction(const reaction_t& r) {
   reaction = r; return this;
+  }
+
+parameter *parameter::set_pre_reaction(const reaction_t& r) {
+  pre_reaction = r; return this;
   }
 
 #if HDR
