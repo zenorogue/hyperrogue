@@ -5509,3 +5509,22 @@ https://zenorogue.blogspot.com/2025/08/hyperrogue-131.html
 - drawing tool now actually does enable the cheat mode
 - fix pushing an Animated Die saying "You push the Unhappy Die." (thanks to josephcsible)
 - fixed some menus in VR, and the bugh with the walking mode hotkey; added 'build on walls' to the portal construction menu so it is easier to create portals in the air
+
+2025-09-09 20:35 Update 13.1e:
+- conformal egg model (like in the game Innards)
+- nicer help for number dialogs
+- fixed a bug with some projections not using 3D (when they were able to) or using 3D (when they were not able to)
+- azimuthal equidistant faster now (implemented on GPU)
+- fixed some bugs related to changing the 3D style
+- fixed the disconnect between scrolling speed and movement speed in Euclidean mode
+- fixed onscreen keyboard (in SDL2)
+- fixed some crashes thanks to josephcsible
+- for the expression parser, added some variables related to keyboard/mouse states
+- fixed drawing horocycles using parabolic movement
+- Warn before collecting potentially-dangerous orbs (thanks to josephcsible)
+- fix crash when the Elemental Planes is unlocked with 0 kills (thanks to josephcsible)
+- stop Outlaws from shooting themselves when Orb of Discord is active (thanks to josephcsible)
+- remove incorrect message about saving in Archimedean (thanks to josephcsible)
+- mark Minefield and Zebra as incompatible (thanks to josephcsible)
+- fixed missing sound files in the itchio versions
+- Android version updated
