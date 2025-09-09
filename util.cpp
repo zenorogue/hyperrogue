@@ -429,10 +429,12 @@ cld exp_parser::parse(int prio) {
     else if(number == "rshift") res = rshiftclick;
     else if(number == "lctrl") res = lctrlclick;
     else if(number == "rctrl") res = rctrlclick;
+#if !ISMOBILE
     else if(number == "capslock") res = (SDL_GetModState() & KMOD_CAPS) ? 1 : 0;
     else if(number == "numlock") res = (SDL_GetModState() & KMOD_NUM) ? 1 : 0;
 #if SDLVER >= 2
     else if(number == "scrolllock") res = (SDL_GetModState() & KMOD_SCROLL) ? 1 : 0;
+#endif
 #endif
     else if(number == "holdmouse") res = holdmouse ? 1 : 0;
     else if(number == "mousexs") {
