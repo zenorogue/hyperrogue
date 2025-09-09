@@ -1643,8 +1643,8 @@ bool vr_keys(int sym, int uni) {
     callhooks(vr_quickmenu_extensions);
     if(dialog::key_actions.count(uni)) { dialog::key_actions[uni](); return true; }
     }
-  return false;
   #endif
+  return false;
   }
 
 auto hookvr = addHook(vr_quickmenu_extensions, 100, [] {
