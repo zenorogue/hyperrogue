@@ -306,7 +306,7 @@ struct GLprogram {
   GLint uFog, uFogColor, uColor, tTexture, tInvExpTable, tAirMap, uMV, uProjection, uAlpha, uFogBase, uPP;
   GLint uPRECX, uPRECY, uPRECZ, uIndexSL, uIterations, uLevelLines, uSV, uRadarTransform;
   GLint uRotSin, uRotCos, uRotNil;
-  GLint uDepthScaling, uCamera, uDepth;
+  GLint uDepthScaling, uCamera, uDepth, uModelTrans;
   
   flagtype shader_flags;
   
@@ -377,7 +377,7 @@ GLprogram::GLprogram(string vsh, string fsh) {
     uAlpha = -1;
     uLevelLines = -1;
     uFogColor = -1;
-    uDepthScaling = uCamera = uDepth = -1;
+    uDepthScaling = uCamera = uDepth = uModelTrans = -1;
     
     uColor = tTexture = tInvExpTable = tAirMap = -1;
     uFogBase = -1;
@@ -443,6 +443,7 @@ GLprogram::GLprogram(string vsh, string fsh) {
   uDepth = glGetUniformLocation(_program, "uDepth");
   uDepthScaling = glGetUniformLocation(_program, "uDepthScaling");
   uCamera = glGetUniformLocation(_program, "uCamera");
+  uModelTrans = glGetUniformLocation(_program, "uModelTrans");
 
   uPRECX = glGetUniformLocation(_program, "PRECX");
   uPRECY = glGetUniformLocation(_program, "PRECY");

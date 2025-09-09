@@ -837,6 +837,9 @@ void display_data::set_projection(int ed, ld shift) {
   if(selected->uDepth != -1)
     glUniform1f(selected->uDepth, vid.depth);
 
+  if(selected->uModelTrans != -1)
+    glUniform1f(selected->uModelTrans, pconf.model_transition);
+
   if(selected->uCamera != -1)
     glUniform1f(selected->uCamera, vid.camera);
 
