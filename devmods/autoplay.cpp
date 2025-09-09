@@ -389,7 +389,7 @@ void autoplay(int num_moves = 1000000000) {
     noteUnusualSituations();
     stopIfBug();
 
-    if(turncount >= num_moves) return;
+    if(turncount >= num_moves || break_autoplay) return;
     }
   }
 
