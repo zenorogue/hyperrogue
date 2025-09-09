@@ -8447,8 +8447,8 @@ S("Animations:", "Animations : ")
 S("a..b -- animate linearly from a to b", "a..b -- anime linéairement de a à b")
 S("a..b..|c..d -- animate from a to b, then from c to d", "a..b..|c..d -- anime de a à b, puis de c à d")
 S("a../x..b../y -- change smoothly, x and y are derivatives", "a../x..b../y -- change doucement, x et y sont dérivées")
-S("Parameter names, e.g. '%1'", "Noms des paramètres, par exemple '%1'")
-S("Parameter names", "Noms des paramètres")
+S("parameter names, e.g. '%1'", "noms des paramètres, par exemple '%1'")
+S("parameter names", "noms des paramètres")
 S("These can be combined, e.g. %1", "Ceux là peuvent être combinés, par exemple %1")
 
 // manifolds

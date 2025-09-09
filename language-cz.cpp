@@ -8833,8 +8833,8 @@ S("Animations:", "Animace:")
 S("a..b -- animate linearly from a to b", "a..b -- animovat lineárně od a do b")
 S("a..b..|c..d -- animate from a to b, then from c to d", "a..b..|c..d -- animovat od a do b, potom od c do d")
 S("a../x..b../y -- change smoothly, x and y are derivatives", "a../x..b../y -- hladká změna; x a y jsou derivace")
-S("Parameter names, e.g. '%1'", "Názvy parametrů, např. '%1'")
-S("Parameter names", "Názvy parametrů")
+S("parameter names, e.g. '%1'", "názvy parametrů, např. '%1'")
+S("parameter names", "názvy parametrů")
 S("These can be combined, e.g. %1", "Je možné je kombinovat, např. %1")
 
 // manifolds

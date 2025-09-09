@@ -7734,8 +7734,8 @@ S("Animations:", "动态化：")
 S("a..b -- animate linearly from a to b", "a..b——从a至b线性动态化")
 S("a..b..|c..d -- animate from a to b, then from c to d", "a..b..|c..d——从a至b，然后从c至d动态化")
 S("a../x..b../y -- change smoothly, x and y are derivatives", "a../x..b../y——平滑改变，x与y为导数")
-S("Parameter names, e.g. '%1'", "参数名称，如“%1”")
-S("Parameter names", "参数名称")
+S("parameter names, e.g. '%1'", "参数名称，如“%1”")
+S("parameter names", "参数名称")
 S("These can be combined, e.g. %1", "这些可以互相结合，如%1")
 
 // manifolds

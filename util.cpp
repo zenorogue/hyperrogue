@@ -720,8 +720,17 @@ EX string available_functions() {
   }
 
 EX string available_constants() {
+  return
+    "e, i, pi, tau, phi, deg [degree]";
+  }
+
+EX string available_variables() {
   return 
-    "e, i, pi, s, ms, mousex, mousey, mousez, shot [1 if taking screenshot/animation]";
+    "Keyboard and mouse:\n\n"
+    "mousex, mousey, mousez, lshift, rshift, lctrl, rctrl, capslock, numlock, scrolllock, holdmouse, random, mousexs, mouseys\n\n"
+    "Time:\n\n"
+    "s [seconds], ms [milliseconds], turncount, framecount, gametime\n\n"
+    "Other:\n\nshot [1 if taking screenshot/animation], illegal_moves";
   }
 
 #if HDR
