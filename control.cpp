@@ -752,6 +752,7 @@ EX void mainloopiter() { printf("(compiled without SDL -- no action)\n"); quitma
 EX bool game_keys_scroll;
 
 EX bool currently_scrolling;
+EX bool stillscreen;
 
 #if CAP_SDL
 
@@ -785,8 +786,6 @@ EX bool mouseaiming(bool shmupon) {
   }
 
 EX purehookset hooks_control;
-
-EX bool stillscreen;
 
 EX void mainloopiter() {
   GLWRAP;
