@@ -54,6 +54,16 @@ int readArgs() {
     
     if(errors) exit(1);
     }
+  else if(argis("-test-gp")) {
+    for(int a=0; a<9; a++)
+    for(int b=0; b<9; b++) {
+      println(hlog, tie(a, b));
+      stop_game();
+      if(!gp::check_whirl_set(gp::loc{a, b})) continue;
+      start_game();
+      println(hlog, tie(a,b), " successful as ", full_geometry_name());
+      }
+    }
   else if(argis("-test-bt")) {
     PHASEFROM(3);
     for(int i=0; i<gGUARD; i++) {
@@ -104,7 +114,7 @@ int readArgs() {
     if(errors) exit(1);
     }
 
-  else if(argis("-partest", [] {
+  else if(argis("-partest")) {
     hyperpoint h = point31(.01, .05, 0);
     if(LDIM == 3) h[2] = .015;
     println(hlog, "h = ", h);
@@ -116,7 +126,47 @@ int readArgs() {
       println(hlog, "min Ph = ", bt::bt_to_minkowski(h));
       println(hlog, "min DPh = ", test_eq(h, bt::minkowski_to_bt(bt::bt_to_minkowski(h))));
       }
-    });
+    }
+
+  else if(argis("-nil-test")) {
+    hyperpoint h1 = point31(4, 2, 1);
+    hyperpoint r1 = inverse_exp(shiftless(h1));
+    hyperpoint h2 = direct_exp(r1);
+    println(hlog, "log/exp test: ", test_eq(h1, h2));
+    if(errors) exit(1);
+    }
+
+  else if(argis("-nil-test-mc")) {
+    hyperpoint h1 = point31(1, 2, 4);
+    hyperpoint h2 = point31(16, 8, 6);
+    ld disp = 1;
+    nilv::model_used = 0;
+    auto r1 = nilv::convert(nisot::translate(h1) * h2, nilv::model_used, disp);
+    nilv::model_used = 1;
+    nilv::convert_ref(h1, 0, 1);
+    nilv::convert_ref(h2, 0, 1);
+    auto r2 = nilv::convert(nisot::translate(h1) * h2, nilv::model_used, disp);
+    println(hlog, "model change test: ", test_eq(r1, r2));
+    if(errors) exit(1);
+    }
+
+  else if(argis("-test-twist")) {
+    int invalid = 0;
+    vector<string> descs;
+    for(cell *c: currentmap->allcells()) {
+      auto c1 = c;
+      if(nilv::get_nsi() == 0) c1 = c->cmove(0)->cmove(1)->cmove(3)->cmove(4)->cmove(2);
+      if(nilv::get_nsi() == 2) c1 = c->cmove(0)->cmove(2)->cmove(4)->cmove(7);
+      if(nilv::get_nsi() == -2) c1 = c->cmove(0)->cmove(1)->cmove(2)->cmove(3)->cmove(5); // only 4x4 -7
+      if(c1 != c) invalid++;
+      if(c1 != c && nilv::get_nsi() == 0) descs.push_back(lalign(0, nilv::get_coord(c->master), nilv::get_coord(c1->master)));
+      if(c1 != c && nilv::get_nsi() == 2) descs.push_back(lalign(0, nilv::get_coord(c->master), nilv::get_coord(c1->master)));
+      }
+    println(hlog, "invalid: ", invalid, " out of ", isize(currentmap->allcells()));
+    sort(descs.begin(), descs.end());
+    for(auto d: descs) println(hlog, d);
+    if(nilv::get_nsi() == -2) println(hlog, "gamestart = ", hybrid::get_where(currentmap->gamestart()));
+    }
 
   else return 1;
   return 0;
