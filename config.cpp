@@ -95,7 +95,7 @@ struct parameter : public std::enable_shared_from_this<parameter> {
   bool menu_item_name_modified;
   string help_text;
   reaction_t pre_reaction, reaction;
-  char default_key;
+  key_type default_key;
   bool is_editable;
   bool needs_confirm;
   virtual bool available() { if(restrict) return restrict(); return true; }
@@ -171,8 +171,6 @@ using paramlist = map<string, std::shared_ptr<parameter>>;
 
 EX paramlist params;
 
-EX void show_edit_option_enum(char* value, const string& name, const vector<pair<string, string>>& options, char key, parameter *s);
-
 #if HDR
 struct list_parameter : parameter {
   reaction_t manual_reaction;
@@ -180,7 +178,7 @@ struct list_parameter : parameter {
   virtual void set_value(int i) = 0;
   vector<pair<string, string> > options;
   reaction_t extras;
-  list_parameter* editable(const vector<pair<string, string> >& o, string menu_item_name, char key) {
+  list_parameter* editable(const vector<pair<string, string> >& o, string menu_item_name, key_type key) {
     is_editable = true;
     options = o;
     this->menu_item_name = menu_item_name;
@@ -240,7 +238,7 @@ template<class T> struct enum_parameter : list_parameter {
     anims::animate_parameter(this, s);
     }
 
-  enum_parameter<T>* editable(const vector<pair<string, string> >& o, string menu_item_name, char key) {
+  enum_parameter<T>* editable(const vector<pair<string, string> >& o, string menu_item_name, key_type key) {
     list_parameter::editable(o, menu_item_name, key);
     return this;
     }
@@ -302,7 +300,7 @@ template<class T> struct val_parameter : public parameter {
 struct float_parameter : public val_parameter<ld> {
   ld min_value, max_value, step;
   string unit;
-  float_parameter *editable(ld min_value, ld max_value, ld step, string menu_item_name, string help_text, char key) {
+  float_parameter *editable(ld min_value, ld max_value, ld step, string menu_item_name, string help_text, key_type key) {
     is_editable = true;
     this->min_value = min_value;
     this->max_value = max_value;
@@ -335,7 +333,7 @@ struct int_parameter : public val_parameter<int> {
   function<void(int_parameter*)> modify_me;
   int_parameter *modif(const function<void(int_parameter*)>& r) { modify_me = r; return this; }
   void show_edit_option(key_type key) override;
-  int_parameter *editable(int min_value, int max_value, ld step, string menu_item_name, string help_text, char key) {
+  int_parameter *editable(int min_value, int max_value, ld step, string menu_item_name, string help_text, key_type key) {
     this->is_editable = true;
     this->min_value = min_value;
     this->max_value = max_value;
@@ -370,7 +368,7 @@ struct string_parameter: public val_parameter<string> {
   void show_edit_option(key_type key) override;
   string_parameter* set_standard_editor(bool direct);
   string_parameter* set_file_editor(string ext);
-  string_parameter* editable(string cap, string help, char key ) {
+  string_parameter* editable(string cap, string help, key_type key ) {
     is_editable = true;
     menu_item_name = cap;
     default_key = key;
@@ -392,7 +390,7 @@ struct char_parameter : public val_parameter<char> {
 struct bool_parameter : public val_parameter<bool> {
   string save() override { return (*value) ? "yes" : "no"; }
   reaction_t switcher;
-  bool_parameter* editable(string cap, char key ) {
+  bool_parameter* editable(string cap, key_type key ) {
     is_editable = true;
     menu_item_name = cap; default_key = key;
     menu_item_name_modified = true;
@@ -417,7 +415,7 @@ struct bool_parameter : public val_parameter<bool> {
 struct color_parameter : public val_parameter<color_t> {
   bool has_alpha;
   void show_edit_option(key_type key) override;
-  color_parameter *editable(string menu_item_name, string help_text, char key) {
+  color_parameter *editable(string menu_item_name, string help_text, key_type key) {
     this->is_editable = true;
     this->menu_item_name = menu_item_name;
     menu_item_name_modified = true;
@@ -456,7 +454,7 @@ struct matrix_parameter : public val_parameter<matrix_eq> {
 
   int dim;
   void show_edit_option(key_type key) override;
-  matrix_parameter *editable(string menu_item_name, string help_text, char key) {
+  matrix_parameter *editable(string menu_item_name, string help_text, key_type key) {
     this->is_editable = true;
     this->menu_item_name = menu_item_name;
     menu_item_name_modified = true;
@@ -846,7 +844,7 @@ shared_ptr<parameter> float_parameter::clone(struct local_parameter_set& lps, vo
 
 #if HDR
 template<class T>
-shared_ptr<custom_parameter> param_custom_int(T& val, const parameter_names& n, function<void(key_type)> menuitem, char key) {
+shared_ptr<custom_parameter> param_custom_int(T& val, const parameter_names& n, function<void(key_type)> menuitem, key_type key) {
   shared_ptr<custom_parameter> u ( new custom_parameter );
   u->setup(n);
   int dft = (int) val;
@@ -865,7 +863,7 @@ shared_ptr<custom_parameter> param_custom_int(T& val, const parameter_names& n, 
   }
 #endif
 
-EX shared_ptr<custom_parameter> param_custom_ld(ld& val, const parameter_names& n, function<void(key_type)> menuitem, char key) {
+EX shared_ptr<custom_parameter> param_custom_ld(ld& val, const parameter_names& n, function<void(key_type)> menuitem, key_type key) {
   shared_ptr<custom_parameter> u ( new custom_parameter );
   u->setup(n);
   ld dft = val;
@@ -890,7 +888,7 @@ EX shared_ptr<custom_parameter> param_colortable(colortable& val, const paramete
   u->setup(n);
   colortable dft = val;
   u->last_value = -1;
-  u->custom_viewer = [] (char key) {};
+  u->custom_viewer = [] (key_type key) {};
   u->custom_value = [] () { return -1; };
   u->custom_affect = [&val] (void *v) { return &val == v; };
   u->custom_load = [&val] (const string& s) {
@@ -2063,7 +2061,7 @@ EX void menuitem_sightrange_bonus(key_type c) {
     });
   }
 
-EX void edit_sightrange_3d(char key, bool fog) {
+EX void edit_sightrange_3d(key_type key, bool fog) {
   dialog::addSelItem(fog ? XLAT("3D sight range for the fog effect") : ("3D sight range"), fts(sightranges[geometry]), key);
   dialog::add_action([] {
     dialog::editNumber(sightranges[geometry], 0, TAU, 0.5, M_PI, XLAT("3D sight range"),
@@ -2723,7 +2721,7 @@ EX void edit_fov_screen() {
     };
   }
 
-EX void add_edit_fov(char key IS('f')) {
+EX void add_edit_fov(key_type key IS('f')) {
 
   string sfov = fts(vid.fov) + "°";
   if(get_stereo_param()) {
@@ -3226,7 +3224,7 @@ namespace ccolor { struct data; }
 EX shared_ptr<custom_parameter> param_ccolor(ccolor::data*& val, const parameter_names& n) {
   shared_ptr<custom_parameter> u ( new custom_parameter );
   u->setup(n);
-  u->custom_viewer = [] (char key) {};
+  u->custom_viewer = [] (key_type key) {};
   u->custom_value = [&val] { for(int i=0; i<isize(ccolor::all); i++) if(ccolor::all[i] == val) return i; return -1; };
   u->last_value = u->custom_value();
   u->custom_affect = [&val] (void *v) { return &val == v; };
@@ -4057,7 +4055,7 @@ EX void add_edit_ptr(void *val) {
   if(found != 1) println(hlog, "found = ", found);
   }
 
-EX void add_edit_ptr(void *val, char key) {
+EX void add_edit_ptr(void *val, key_type key) {
   int found = 0;
   for(auto& fs: params) {
     fs.second->check_change();
@@ -4072,7 +4070,7 @@ template<class T> void add_edit(T& val) {
   add_edit_ptr(&val);
   }
 
-template<class T> void add_edit(T& val, char key) {
+template<class T> void add_edit(T& val, key_type key) {
   add_edit_ptr(&val, key);
   }
 #endif
