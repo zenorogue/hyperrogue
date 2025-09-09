@@ -1000,17 +1000,17 @@ EX namespace geom3 {
     return tanh(abslev) / tanh(vid.camera);
     }
   
-  ld projection_to_abslev(ld proj) {
+  EX ld projection_to_abslev(ld proj) {
     if(sphere || euclid) return proj-vid.camera;
     // tanh(abslev) / tanh(camera) = proj
     return atanh(proj * tanh(vid.camera));
     }
   
-  ld lev_to_projection(ld lev) {
+  EX ld lev_to_projection(ld lev) {
     return abslev_to_projection(vid.depth - lev);
     }
   
-  ld projection_to_factor(ld proj) {
+  EX ld projection_to_factor(ld proj) {
     return lev_to_projection(0) / proj;
     }
   
