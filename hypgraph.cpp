@@ -771,6 +771,23 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
       for(int d=0; d<GDIM; d++) ret[d] /= r;
       return;
       }
+
+    case mdConformalEgg: {
+      H /= H[GDIM] + 1;
+      models::scr_to_ori(H);
+
+      ld mul = pconf.model_transition / 9;
+
+      auto a = H[0], b = H[1];
+      auto A = a*a;
+      auto B = b*b;
+      ret[0] = a + a * (A - 3*B) * mul;
+      ret[1] = b + b * (3*A - B) * mul;
+
+      models::ori_to_scr(ret);
+      if(GDIM == 2) ret[2] = 0; if(MAXMDIM == 4) ret[3] = 1;
+      return;
+      }
     
     case mdHalfplane: {
       if(mproduct) {

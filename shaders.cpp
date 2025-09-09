@@ -345,6 +345,27 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
       "t.xyz /= -rads; t[3] = 1.0;\n";        
     if(dim3) shader_flags |= SF_ZFOG;
     }
+  else if(pmodel == mdConformalEgg && hyperbolic) {
+    shader_flags |= SF_ORIENT | SF_BOX | SF_DIRECT;
+    coordinator += "t = uPP * t; ", vsh += "uniform mediump mat4 uPP;";
+    coordinator += dim2 ? "t /= 1. + t.z;\n" : "t /= 1. + t.w;\n";
+    if(pconf.model_transition == 1)
+    coordinator +=
+      "mediump float mul = 1./9.;\n";
+    else {
+      vsh += "uniform mediump float uModelTrans;";
+      coordinator +=
+        "mediump float mul = (1./9.) * uModelTrans;\n";
+      }
+    coordinator +=
+      "mediump float txx = t.x * t.x;\n"
+      "mediump float tyy = t.y * t.y;\n"
+      "t.x = t.x + t.x * (txx - 3.*tyy) * mul;\n"
+      "t.y = t.y + t.y * (3.*txx - tyy) * mul;\n"
+      "t.w = 1.;\n";
+    if(dim2) coordinator += "t.z = 0.;\n";
+    if(dim3) shader_flags |= SF_ZFOG;
+    }
   else if(pmodel == mdLiePerspective) {
     shader_flags |= SF_PERS3 | SF_DIRECT;
     if(hyperbolic) {

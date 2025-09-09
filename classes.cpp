@@ -1035,7 +1035,7 @@ enum eModel : int {
   // 39..48
   mdPoorMan, mdPanini, mdRetroCraig, mdRetroLittrow, mdRetroHammer, mdThreePoint, mdLiePerspective, mdLieOrthogonal, mdRelPerspective, mdRelOrthogonal,
   // 49..53
-  mdHorocyclicEqa, mdConformalSquare, mdFisheye2, mdPolar,
+  mdHorocyclicEqa, mdConformalSquare, mdFisheye2, mdPolar, mdConformalEgg,
   // 54..
   mdGUARD, mdPixel, mdHyperboloidFlat, mdPolynomial, mdManual
   };
@@ -1101,6 +1101,7 @@ EX vector<modelinfo> mdinf = {
   {X3("conformal square"), mf::orientation | mf::broken | mf::transition},
   {X3("variant fisheye"), 0},
   {X3("polar coordinates"), mf::orientation},
+  {X3("conformal egg"), mf::orientation | mf::transition},
   {X3("guard"), mf::technical},
   {X3("pixel"), mf::technical},
   {X3("hypflat"), mf::technical},
