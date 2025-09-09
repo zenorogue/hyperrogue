@@ -79,7 +79,7 @@ struct hrmap_testproto : hrmap {
 
   transmatrix adj(heptagon *h, int dir) override {
     if(h->move(dir) == &oob || h == &oob) return Id;
-    return arb::get_adj(arb::current_or_slided(), shvid(h->c7), dir, -1, h->c.move(dir) ? h->c.spin(dir) : -1);
+    return arb::get_adj(arb::current_or_slided(), shvid(h->c7), dir, -1, h->c.move(dir) ? h->c.spin(dir) : -1, false);
     }
 
   hyperpoint get_corner(cell *c, int cid, ld cf) override {
@@ -530,6 +530,14 @@ void view_seq_stats() {
   start_game();
   println(hlog, "SEQ rules  ", seq_as_stringlist());
   println(hlog, "SEQ verify ", gen_actual_seq(100000));
+  auto& e = cgi.expansion;
+  for(int t=0; t<e->N; t++) {
+    for(int i=100; i<102; i++) {
+      auto u = e->get_descendants(i, t);
+      auto v = e->get_descendants(i-1, t);
+      println(hlog, tie(t, i), " : ", (u + 1000 - v - v - v - v - v).get_str(1000));
+      }
+    }
   if(true) {
     stop_game();
     reg3::consider_rules = 0;
@@ -1450,7 +1458,7 @@ void animate_draw() {
   for(auto& p: ad.data) {
     if(p.type == 0) ad.where[p.tw.at] = ggmatrix(cwt.at); // shiftless(Id);
     else if(p.type == 1) {
-      transmatrix T = arb::get_adj(arb::current_or_slided(), p.tw.peek()->id, (p.tw+wstep).spin, -1, p.tw.spin);
+      transmatrix T = arb::get_adj(arb::current_or_slided(), p.tw.peek()->id, (p.tw+wstep).spin, -1, p.tw.spin, false);
       transmatrix prespin = rspintox(tC0(T));
       T = spintox(tC0(T)) * T;
       ld length = hdist0(tC0(T));
@@ -1492,7 +1500,7 @@ void animate_draw() {
     }
   for(auto& w: ad.where) {
     int id = w.first->id;
-    color_t col = colortables['A'][id];
+    color_t col = ccolor::shape.ctab[id];
     if(marked.count(w.first)) col = marked[w.first];
     col <<= 8; col |= 0xFF;
     queuepolyat(w.second, cgi.shFullFloor.b[id], col, PPR::WALL);
