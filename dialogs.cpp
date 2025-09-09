@@ -1370,7 +1370,6 @@ EX namespace dialog {
     };
 
   void number_dialog_help :: operator() () {
-    auto ne = *ptr;
     init("number dialog help");
     dialog::addBreak(100);
     dialog::addHelp(XLAT("You can enter formulas in this dialog."));
@@ -1380,7 +1379,7 @@ EX namespace dialog {
     dialog::addBreak(100);
     dialog::addHelp(XLAT("Constants and variables available:"));
     addHelp(available_constants());
-    if(ptr && ne.animatable) {
+    if(ptr && ptr->animatable) {
       dialog::addBreak(100);
       dialog::addHelp(XLAT("Animations:"));
       dialog::addHelp(XLAT("a..b -- animate linearly from a to b"));
@@ -1395,7 +1394,7 @@ EX namespace dialog {
     
     #if CAP_ANIMATIONS
     dialog::addBreak(50);
-    auto f = find_edit(!ptr ? nullptr : ne.intval ? (void*) ne.intval : (void*) ne.editwhat);
+    auto f = find_edit(!ptr ? nullptr : ptr->intval ? (void*) ptr->intval : (void*) ptr->editwhat);
     if(f)
       dialog::addHelp(XLAT("Parameter names, e.g. '%1'", f->name));
     else
