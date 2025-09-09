@@ -301,7 +301,7 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
     coordinator += "t = uPP * t;", vsh += "uniform mediump mat4 uPP;";
     coordinator += "t = to_square(t);";
     }
-  else if(pmodel == mdBand && hyperbolic) {
+  else if(pmodel == mdBand && hyperbolic && pconf.model_transition == 1) {
     shader_flags |= SF_BAND | SF_ORIENT | SF_BOX | SF_DIRECT | SF_NONSPATIAL;
     coordinator += "t = uPP * t;", vsh += "uniform mediump mat4 uPP;";
     if(dim2) coordinator += "mediump float zlev = zlevel(t); t /= zlev;\n";
@@ -635,6 +635,7 @@ void display_data::set_projection(int ed, ld shift) {
   if(in_s2xe()) id |= 2;
   if(WDIM == 2 && GDIM == 3 && hyperbolic && context_fog && cgi.emb->is_same_in_same()) id |= 1;
   id <<= 1; id |= (spatial_graphics ? 1 : 0);
+  id <<= 1; id |= (pconf.model_transition == 1) ? 0 : 1;
   shared_ptr<glhr::GLprogram> selected;
 
   if(matched_programs.count(id)) selected = matched_programs[id];
