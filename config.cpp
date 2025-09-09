@@ -3191,6 +3191,8 @@ EX void show3D() {
     }
   #endif
 
+  current_display->set_all(0, 0);
+
   if(0);
   #if CAP_RUG
   else if(rug::rugged && !rug::spatial_rug)

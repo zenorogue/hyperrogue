@@ -1399,6 +1399,8 @@ EX void drawthemap() {
   
   mmhigh = vid.highlightmode >= 1;
   if(hiliteclick) mmhigh = !mmhigh;
+
+  current_display->set_all(0, 0); /* so that non_spatial_model works correctly */
   
   spatial_graphics = wmspatial || mmspatial;
   spatial_graphics = spatial_graphics && GDIM == 2;

@@ -29,6 +29,10 @@ EX void camrotate(ld& hx, ld& hy) {
   hx = p[0] / p[2], hy = p[1] / p[2];
   }
 
+/** Does the current model support 3D
+ *  Warning: since it depends on get_shader_flags(), you may need to current_display->set_all(0,0) for it to work correctly.
+ */
+
 EX bool non_spatial_model() {
   if(among(pmodel, mdRotatedHyperboles, mdJoukowsky, mdJoukowskyInverted, mdPolygonal, mdPolynomial))
     return true;
