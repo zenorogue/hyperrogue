@@ -2258,6 +2258,10 @@ EX vector<transmatrix*> move_affected_matrices(int flag) {
   return res;
   }
 
+EX void adjust_aspeed(ld& aspd, ld R) {
+  aspd *= euclid ? (2+3*R*R) : (1+R+(shmup::on?1:0));
+  }
+
 EX void centerpc(ld aspd) {
 
   if(subscreens::split([=] () {centerpc(aspd);})) return;
@@ -2341,7 +2345,7 @@ EX void centerpc(ld aspd) {
     }
   
   else {
-    aspd *= euclid ? (2+3*R*R) : (1+R+(shmup::on?1:0));
+    adjust_aspeed(aspd, R);
 
     if(R < aspd) fix_whichcopy_if_near();
     

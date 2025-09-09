@@ -158,7 +158,7 @@ EX bool applyAnimation(cell *c, shiftmatrix& V, double& footphase, int layer) {
     R = hdist(a.attackat * TC0, a.wherenow * TC0);
   else
     R = hdist(a.wherenow * TC0, TC0);
-  aspd *= (1+R+(shmup::on?1:0));
+  adjust_aspeed(aspd, R);
 
   if(a.attacking == 3 && aspd > R) aspd = R;
 
