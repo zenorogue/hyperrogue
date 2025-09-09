@@ -1466,7 +1466,7 @@ EX namespace dialog {
     
     keyhandler = [this, &ne] (int sym, int uni) {
       handleNavigation(sym, uni);
-      if((uni >= '0' && uni <= '9') || among(uni, '.', '+', '-', '*', '/', '^', '(', ')', ',', '|', 3) || (uni >= 'a' && uni <= 'z')) {
+      if((uni >= '0' && uni <= '9') || among(uni, '.', '+', '-', '*', '/', '^', '(', ')', ',', '|', ' ', '=', 3) || (uni >= 'a' && uni <= 'z')) {
         #if SDLVER == 1
         if(uni == 3) ne.s += "pi";
         else ne.s += uni;
