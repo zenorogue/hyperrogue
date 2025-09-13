@@ -259,7 +259,7 @@ EX bool earthWall(cell *c) {
     c->wall = waChasm;
     return true;
     }
-  if(c->wall == waNone && among(c->land, laTerracotta, laMercuryRiver) {
+  if(c->wall == waNone && among(c->land, laTerracotta, laMercuryRiver)) {
     c->wall = waMercury;
     return true;
     }
