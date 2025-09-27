@@ -1987,7 +1987,7 @@ EX void drawscreen() {
       its(hive::bugcount[k]), minf[moBug0+k].color, 8);
     
   bool minefieldNearby = false;
-  int mines[MAXPLAYER], tmines=0;
+  unsigned mines[MAXPLAYER], tmines=0;
   for(int p=0; p<numplayers(); p++) {
     mines[p] = 0;
     cell *c = playerpos(p);
@@ -2013,7 +2013,7 @@ EX void drawscreen() {
       displayfr(vid.xres * (p+.5) / numplayers(),
         current_display->ycenter - current_display->radius * 3/4, 2,
         vid.fsize, 
-        mines[p] > 7 ? its(mines[p]) : XLAT(minetexts[mines[p]]), minecolors[mines[p]], 8);
+        mines[p] > sizeof(minetexts) / sizeof(minetexts[0]) ? its(mines[p]) : XLAT(minetexts[mines[p]]), minecolors[mines[p]], 8);
 
     if(minefieldNearby && !shmup::on && cwt.at->land != laMinefield && cwt.peek()->land != laMinefield && !dont_display_minecount) {
       displayfr(vid.xres/2, current_display->ycenter - current_display->radius * 3/4 - vid.fsize*3/2, 2,
