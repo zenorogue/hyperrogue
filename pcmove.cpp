@@ -1474,7 +1474,10 @@ EX bool warningprotection(const string& s) {
   return true;
   }
 
+EX int warn_before_killing_friends;
+
 EX bool warningprotection_hit(eMonster m) {
+  if(warn_before_killing_friends < (m == moTameBomberbird ? 1 : 2)) return false;
   if(m && warningprotection(XLAT("Are you sure you want to hit %the1?", m)))
     return true;
   return false;

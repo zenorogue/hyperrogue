@@ -3522,6 +3522,9 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
   ->set_sets([] { dialog::bound_low(1); })
   ->set_reaction([] { if(game_active) { stop_game(); start_game(); } });
 
+  param_enum(warn_before_killing_friends, "warn_before_killing_friends", 2)
+  ->editable({{"OFF", "never warn"}, {"TAME_BOMBERBIRDS", "warn only for Tame Bomberbirds"}, {"ON", "always warn"}}, "warn before killing friendly monsters", 'W');
+
   param_i(curse_percentage, "curse_percentage")->editable(0, 100, 1,
     "curse percentage",
     "The percentage of towers in Cursed Walls mode to be manned by Canyon Hags", 'R')
