@@ -239,7 +239,6 @@ void return_geometry() {
   gamestack::pop();
   pconf.scale = 1; pconf.alpha = 1;
   presentation(pmGeometryReset);
-  addMessage(XLAT("Returned to your game."));
   }
 
 EX void return_geometries() {
@@ -259,7 +258,10 @@ EX bool next_slide() {
   popScreenAll();
   if(gamestack::pushed()) {
     return_geometry();
-    if(!(flags & QUICKGEO)) return true;
+    if(!(flags & QUICKGEO)) {
+      addMessage(XLAT("Returned to your game."));
+      return true;
+      }
     }
   if(flags & FINALSLIDE) return true;
   presentation(pmStop);
