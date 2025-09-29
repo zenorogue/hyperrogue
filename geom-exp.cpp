@@ -1211,18 +1211,30 @@ EX eGeometry readGeo(const string& ss) {
   return gNormal;
   }
 
+EX map<unsigned, string> solution_cache;
+
 EX void field_quotient_3d(int p, unsigned hash) {
   check_cgi();
   cgi.require_basics();
   stop_game_and_switch_mode(rg::nothing);
   fieldpattern::field_from_current();
   set_geometry(gFieldQuotient);
-  for(;; p++) { 
-    println(hlog, "trying p = ", p);
-    currfp.Prime = p; currfp.force_hash = hash;
-    if(!currfp.solve()) break;
+  auto& cache = solution_cache[hash];
+  if(cache == "") {
+    for(;; p++) {
+      println(hlog, "trying p = ", p);
+      currfp.Prime = p; currfp.force_hash = hash;
+      if(!currfp.solve()) break;
+      }
+    shstream outs;
+    hwrite_fpattern(outs, currfp);
+    cache = outs.s;
     }
-  println(hlog, "set prime = ", currfp.Prime);
+  else {
+    println(hlog, "using the cached solution");
+    shstream ins(cache);
+    hread_fpattern(ins, currfp);
+    }
   }
 
 EX void field_quotient_3d(string code) {
