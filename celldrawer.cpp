@@ -879,6 +879,7 @@ EX bool pick_for_grid(cell *c, int t) {
   cell *c1 = c->move(t);
   if(!c1) return false;
   // removed: if(WDIM == 3 && bt::in() && !sn::in()) return !among(t, 5, 6, 8);
+  if(c == c1 && t <= c->c.spin(t)) return true;
   return c < c1 || isWarped(c->move(t)) || fake::split();
   }
 
