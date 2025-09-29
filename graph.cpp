@@ -1843,6 +1843,7 @@ EX void normalscreen() {
   if(GDIM == 3 || !outofmap(mouseh.h)) getcstat = '-';
   cmode = sm::NORMAL | sm::DOTOUR | sm::CENTER;
   if(viewdists && show_distance_lists) cmode |= sm::SIDE | sm::MAYDARK;
+  if(tour::on && (tour::slides[tour::currentslide].flags & tour::SIDE)) cmode |= sm::SIDE;
   gamescreen(); drawStats();
 
   show_menu_button();

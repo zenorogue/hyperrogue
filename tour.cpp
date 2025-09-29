@@ -76,6 +76,8 @@ static constexpr flagtype USE_SLIDE_NAME = 128;
 static constexpr flagtype NOTITLE = 256;
 /** \brief always display the text, even if going back or texts are disabled */
 static constexpr flagtype ALWAYS_TEXT = 256;
+/** \brief add a sidescreen to a normal screen */
+static constexpr flagtype SIDE = 512;
 #endif
 
 EX vector<reaction_t> restorers;
