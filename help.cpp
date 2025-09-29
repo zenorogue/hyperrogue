@@ -1141,8 +1141,13 @@ EX void describeMouseover() {
   if(tour::on && !tour::texts) {
     if(tour::slides[tour::currentslide].flags & tour::NOTITLE)
       mouseovers = "";
-    else
+    else {
       mouseovers = XLAT(tour::slides[tour::currentslide].name);
+      auto posf = mouseovers.find("//");
+      if(posf != string::npos) mouseovers = mouseovers.substr(0, posf);
+      posf = mouseovers.rfind("/");
+      if(posf != string::npos) mouseovers = mouseovers.substr(posf+1);
+      }
     }
   #endif
   }
