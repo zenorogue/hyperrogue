@@ -2667,7 +2667,7 @@ EX namespace linepatterns {
       )
     );
   
-  linepattern patHepta("Gray Raider moves", 0xC0C0C000, if_pseudohept,
+  EX linepattern patHepta = linepattern("Gray Raider moves", 0xC0C0C000, if_pseudohept,
     ALLCELLS(
       forCellIdEx(c2, i, c) if(way(c,i)) if(pseudohept(c) == pseudohept(c2)) 
         gridlinef(V, C0, V * currentmap->adj(c, i), C0, col, 2 + vid.linequality);
