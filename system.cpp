@@ -184,6 +184,7 @@ EX void reset_cheats() {
   cheater = 0;
   reptilecheat = false;
   shadingcheat = false;
+  cheat_items_enabled = false;
   timerghost = true;
   gen_wandering = true;
   }

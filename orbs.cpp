@@ -50,7 +50,7 @@ EX void useupOrb(eItem it, int qty) {
   }
 
 EX void drainOrb(eItem it, int target IS(0)) {
-  if(items[it] > target) useupOrb(it, items[it] - target);
+  if(!cheat_items_enabled && items[it] > target) useupOrb(it, items[it] - target);
   }
 
 EX void empathyMove(const movei& mi) {  
@@ -233,6 +233,14 @@ EX void reduceOrbPowers() {
     else
       items[itCrossbow]--;
     }
+  if(cheat_items_enabled)
+    for(int i=0; i<ittypes; i++) {
+      if(i == itOrbSpeed) {
+        if(items[i] < cheat_items[i]) items[i] = cheat_items[i] + 1; // Orb of Speed always needs to alternate between an odd and even number to work right
+        }
+      else if(itemclass(eItem(i)) == IC_ORB && i != itOrbSafety)
+        items[i] = cheat_items[i];
+      }
   }
 
 eWall orig_wall;

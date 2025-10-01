@@ -14,6 +14,9 @@ EX int currentLocalTreasure;
 /** for treasures, the number collected; for orbs, the number of charges */
 EX array<int, ittypes> items;
 
+EX array<int, ittypes> cheat_items;
+EX bool cheat_items_enabled;
+
 EX map<modecode_t, array<int, ittypes> > hiitems;
 
 EX bool pickable_from_water(eItem it) {
