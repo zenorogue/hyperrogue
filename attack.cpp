@@ -189,12 +189,12 @@ EX bool petrify(cell *c, eWall walltype, eMonster m) {
   
   if(c->land == laWestWall) return false;
   
+  if(do_not_touch_this_wall(c)) return false;
+  
   if(isWateryOrBoat(c) && c->land == laWhirlpool) {
     c->wall = waSea;
     return false;
     }
-  
-  if(c->wall == waRoundTable) return false;
   
   if(walltype == waGargoyle && cellUnstableOrChasm(c)) 
     walltype = waGargoyleFloor;
