@@ -2569,6 +2569,7 @@ EX void configureInterface() {
   if(hr_hud_enabled) {
     add_edit(glyphsortorder);
     add_edit(vid.graphglyph);
+    add_edit(orb_treasure_gap);
     add_edit(less_in_landscape);
     add_edit(less_in_portrait);
     add_edit(display_yasc_codes);
