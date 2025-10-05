@@ -1207,6 +1207,14 @@ EX void initConfig() {
 
   param_b(keybd_subdir_enabled, "keybd_subdir_enabled", 0)->editable("control the pushing direction with TAB", 'P')->help("If set, you control the off-heptagon pushing direction with TAB. Otherwise, you control it by rotating the screen.");
 
+  param_str(pinnedglyphs, "pinned_glyphs", "")
+  ->set_standard_editor(true)
+  ->editable("pinned glyphs",
+     "A list of glyphs to always sort at the front, "
+     "and reserve space for even when they're not being displayed.",
+     'p')
+  ->set_reaction(updateglyphpinned);
+
   param_enum(glyphsortorder, parameter_names("glyph_sort", "glyph sort order"), glyphsortorder)
     ->editable({
       {"first on top", ""},

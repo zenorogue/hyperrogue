@@ -181,6 +181,11 @@ EX void showOverview() {
       }
     else if(udiv == 2 && umod < ittypes) {
       gotoHelp(generateHelpForItem(eItem(umod)));
+      help_extensions.push_back(help_extension{'p', glyphpinned[umod] ? XLAT("unpin from HUD") : XLAT("pin to HUD"), [umod] () {
+        glyphpinned[umod] ^= true;
+        updatepinnedglyphs();
+        popScreen();
+        }});
       if(cheater) {
         dialog::helpToEdit(items[umod], 0, 200, 10, 10);
         dialog::get_ne().reaction = [] () {
