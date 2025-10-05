@@ -462,7 +462,7 @@ EX void draw_crosshair() {
   return;
   }
 
-EX bool less_in_portrait, less_in_landscape;
+EX bool less_in_portrait, less_in_landscape, orb_treasure_gap;
 
 EX string mode_description() {
   string md;
@@ -629,6 +629,7 @@ EX void drawStats() {
       rows = rowspace / buttonsize; if(!rows) return;
       int coltaken = 0;
       for(int z=0; z<4; z++) {
+        if(z == 1 && orb_treasure_gap) coltaken++;
         if(z == 2 && !portrait) {
           if(coltaken > columns) { vid.killreduction++; continue; }
           coltaken = 0;

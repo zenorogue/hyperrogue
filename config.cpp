@@ -1224,6 +1224,11 @@ EX void initConfig() {
       {"icons", ""},
       }, "orb display mode", 'o');
 
+  param_b(orb_treasure_gap, "orb_treasure_gap", false)
+  ->editable("gap between orbs and treasures", 'G')
+  -> help("If set, a gap row will be left between orbs and treasures in the HUD")
+  -> set_reaction([] { vid.killreduction = 0; });
+
   param_b(less_in_landscape, "less_in_landscape", false)
   ->editable("less items/kills in landscape", 'L')
   -> help("If set, only the important items and kills will be shown")
