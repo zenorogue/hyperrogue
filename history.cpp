@@ -194,7 +194,7 @@ EX namespace history {
 
   void handleKeyC(int sym, int uni);
   
-  int lastprogress;
+  EX int lastprogress;
   
   EX void progress_screen() {
     gamescreen();

@@ -134,6 +134,7 @@
 #include "intra.cpp"
 #include "crossbow.cpp"
 #include "fundamental.cpp"
+#include "arbiquotient.cpp"
 
 #if CAP_ROGUEVIZ
 #include "rogueviz/rogueviz-all.cpp"
