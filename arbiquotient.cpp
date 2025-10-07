@@ -419,10 +419,7 @@ vector<int> quotient_data;
 
 void enable_by_id(int id) {
   if(id >= isize(all_found)) throw hr_exception("not that many AQ quotients known");
-  stop_game();
-  cgflags |= qANYQ | qCLOSED;
-  quotient_data = all_found[id].connections;
-  start_game();
+  enable_quotient_data(all_found[id]);
   }
 
 struct hrmap_autoquotient : hrmap {
@@ -521,6 +518,22 @@ void show_auto_dialog() {
   // todo actually prevent backing
   }
 
+EX void enable_quotient_data(const struct qdata& q) {
+  stop_game();
+  cgflags |= qANYQ | qCLOSED;
+  quotient_data = q.connections;
+  ginf[geometry].quotient_name = q.name;
+  start_game();
+  }
+
+EX void disable_quotient_data() {
+  stop_game();
+  cgflags &=~ qANYQ;
+  if(!sphere) cgflags &=~ qCLOSED;
+  quotient_data = {};
+  start_game();
+  }
+
 EX void show_dialog() {
   cmode = sm::SIDE | sm::DIALOG_STRICT_X;
   gamescreen();
@@ -530,13 +543,7 @@ EX void show_dialog() {
   
   for(auto& q: all_found) {
     dialog::addBoolItem(q.name, q.connections == quotient_data, dialog::list_fake_key++);
-    dialog::add_action([q] {
-      stop_game();
-      cgflags |= qANYQ | qCLOSED;
-      quotient_data = q.connections;
-      ginf[geometry].quotient_name = q.name;
-      start_game();
-      });
+    dialog::add_action([q] { enable_quotient_data(q); });
     }
   dialog::end_list();
 
@@ -545,13 +552,7 @@ EX void show_dialog() {
   dialog::add_action_push(show_auto_dialog);
   if(cgflags & qANYQ) {
     dialog::addItem("disable", 'd');
-    dialog::add_action([] {
-      stop_game();
-      cgflags &=~ qANYQ;
-      if(!sphere) cgflags &=~ qCLOSED;
-      quotient_data = {};
-      start_game();
-      });
+    dialog::add_action([] { disable_quotient_data(); });
     }
   else dialog::addBreak(100);
   dialog::addBack();
