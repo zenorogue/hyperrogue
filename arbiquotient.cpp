@@ -30,7 +30,8 @@ struct aqdata {
   cellwalker parent;
   int size;
   int id;
-  aqdata(cell *c) : where(c), parent(c) { id = next_id++; size = 1; closed = false; }
+  bool unified_to_start;
+  aqdata(cell *c) : where(c), parent(c) { id = next_id++; size = 1; closed = false; unified_to_start = false; }
   };
 
 /* the stack of known unifications */
@@ -364,12 +365,14 @@ void recurse() {
   for(auto li: active) if(li != cw0.at) {
 
     auto tryout = [&] (cellwalker cw1) {
+      aq.at(cw1.at).unified_to_start = true;
       unifications.emplace_back(cw0, cw1);
       bool b = apply_uni();
       if(b) recurse();
       else unifications.clear();
       auto backup_iterator = backup.begin();
       for(auto p: allaq) p->parent = *(backup_iterator++);
+      aq.at(cw1.at).unified_to_start = false;
       };
 
     auto oshvid = shvid(li);
@@ -468,6 +471,25 @@ struct hrmap_autoquotient : hrmap {
     }
   };
 
+bool aq_drawcell(cell *c, const shiftmatrix& V) {
+  auto p = at_or_null(aq, c);
+  if(!p) return false;
+  if(c == currentmap->gamestart()) {
+    queuepoly(V * ddspin(c, 0), cgi.shAsymmetric, 0xFFFF00FF);
+    }
+  if(p->unified_to_start) {
+    auto cw = cellwalker(c);
+    auto cw1 = ufind(cw);
+    auto cw2 = cw_add_diff(cw, currentmap->gamestart(), cw1);
+    queuepoly(V * ddspin(c, cw2.spin) * (cw2.mirrored?Mirror:Id), cgi.shAsymmetric, 0x0000FFFF);
+    }
+  if(p->parent.at == c)
+    queuepoly(V, cgi.shDisk, 0xFFFFFFF);
+   else
+    queuepoly(V, cgi.shDisk, 0x202020FF);
+  return false;
+  }
+
 void show_auto_dialog() {
   cmode = sm::SIDE | sm::DIALOG_STRICT_X;
   gamescreen();
@@ -482,12 +504,13 @@ void show_auto_dialog() {
   add_edit(dedup_mirror);
   dialog::addBoolItem(XLAT("running"), running, 'r');
   dialog::add_action([] { 
-    println(hlog, "action");
     if(!running) {
+      int p = addHook(hooks_drawcell, 100, aq_drawcell);
       running = true;
       displaying = true;
       all_found.clear();
       auto_create(aq_max);
+      delHook(hooks_drawcell, p);
       }
     running = false;
     });
