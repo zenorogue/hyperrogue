@@ -38,24 +38,13 @@ struct hr_precision_error : hr_exception { hr_precision_error() : hr_exception("
 struct aq_overflow : hr_exception { aq_overflow(): hr_exception("autoquotient overflow") {} };
 struct aq_unsupported : hr_exception { aq_unsupported(): hr_exception("unsupported orbifold") {} };
 
-cellwalker rezero(cellwalker cw, cellwalker base) {
-  if(base.mirrored) cw += wmirror; cw -= base.spin;
-  return cw;
-  }
-
-cellwalker dezero(cellwalker cw, cellwalker base) {
-  cw += base.spin; if(base.mirrored) cw += wmirror; 
-  return cw;
-  }
-
 cellwalker ufind(cellwalker cw) {
   auto& d = aq.at(cw.at);
   if(d.where != cw.at) throw hr_exception("where incorrect");
   if(d.parent == cw.at) return cw;
   auto f = ufind(d.parent);
-  if(f.at != d.parent.at)
-    d.parent = f;
-  return dezero(f, cw);
+  if(f.at != d.parent.at) d.parent = f;
+  return cw_add_diff(f, cw, cw.at);
   }
 
 void enlist(cell *c) {
@@ -92,7 +81,7 @@ bool apply_uni() {
     auto d2 = &aq.at(cw2.at);
     if(d1->id > d2->id) { swap(cw1, cw2); swap(d1, d2); }
     d1->size += d2->size;
-    d2->parent = rezero(cw1, cw2);
+    d2->parent = cw_add_diff(cw1, cw2.at, cw2);
     if(cw2.at->item == itGold) cw2.at->item = itRuby;
     for(int i=0; i<cw1.at->type; i++) {
       auto m1 = cw1 + i + wstep;
