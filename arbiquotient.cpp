@@ -7,6 +7,12 @@ namespace hr {
 
 EX namespace arbiquotient {
 
+int aq_max = 100;
+bool running = false;
+bool displaying = false;
+bool block_selfedges = true;
+bool block_cones = true;
+
 map<cell*, cellwalker> aqs;
 
 int next_id;
@@ -128,6 +134,52 @@ vector<int> quotient_output(int dir) {
   return output;
   }
 
+string statstring() {
+  int selfedges = 0;
+  int tiles = 0;
+  int goodedges = 0;
+  map<int, ld> verts;
+  for(auto p: allaq) {
+    auto ref = ufind(p->where);
+    if(ref.at == p->where) {
+      tiles++;
+      for(int i=0; i<p->where->type; i++) {
+        cellwalker cw(p->where, i);
+        if(cw == ufind(cw+wstep)) selfedges++;
+        else goodedges++;
+        if(arb::current.have_valence) {
+          auto& sh = arb::current.shapes[shvid(cw.at)];
+          int val = sh.vertex_valence[i];
+          int steps = 0;
+          auto cw1 = cw;
+          do {
+            println(hlog, "at ", cw1);
+            cw1 += wstep; cw1++; steps++;
+            cw1 = ufind(cw1);
+            }
+          while(cw1 != cw);
+          println(hlog, "looped back to ", cw);
+          if(val % steps) throw hr_exception("divisibility error");
+          verts[val / steps] += 1. / steps;
+          }
+        }
+      }
+    }
+  shstream s;
+  println(hlog, verts);
+  print(s, "F:", tiles, " ");
+  if(goodedges % 2) throw hr_exception("divisibility error III");
+  print(s, "E:", goodedges/2, " ");
+  if(!block_selfedges) print(s, "e:", selfedges, " ");
+  for(auto p: verts) {
+    auto v = p.second + 1e-6;
+    auto fl = floor(v);
+    if(v - fl > 2e-6) throw hr_exception("divisibility error II");
+    print(s, p.first, ":", int(fl), " ");
+    }
+  return s.s;
+  }
+
 set<buckethash_t> seen_outputs;
 
 struct qdata {
@@ -181,10 +233,6 @@ void create() {
 
   }
 
-int aq_max = 100;
-bool running = false;
-bool displaying = false;
-
 set<buckethash_t> seen_hashes;
 
 void recurse() {
@@ -208,6 +256,29 @@ void recurse() {
     if(p->parent.at == p->where) {
       active.push_back(p->where);
       if(!p->closed) numopen++;
+
+      if(block_selfedges) for(int i=0; i<p->where->type; i++) {
+        cellwalker cw(p->where, i);
+        auto cw1 = cw + wstep;
+        if(aq.count(cw1.at) && cw == ufind(cw1)) return;
+        }
+
+      if(block_cones && arb::current.have_valence && p->closed) for(int i=0; i<p->where->type; i++) {
+        cellwalker cw(p->where, i);
+        auto& sh = arb::current.shapes[shvid(cw.at)];
+        int val = sh.vertex_valence[i];
+        int steps = 0;
+        auto cw1 = cw;
+        do {
+          cw1 += wstep; cw1++; steps++;
+          if(!aq.count(cw1.at)) goto skip;
+          cw1 = ufind(cw1);
+          if(steps > val) goto skip; /* may happen sometimes */
+          }
+        while(cw1 != cw);
+        if(val != steps) return;
+        skip: ;
+        }
       }
     }
   if(seen_hashes.count(hash)) return;
@@ -231,7 +302,7 @@ void recurse() {
     if(seen_outputs.count(vhash)) return;
     seen_outputs.insert(vhash);
     println(hlog, "[", isize(all_found), "] ", bqo);
-    all_found.push_back(qdata{format("%016lX", (long) vhash), bqo});
+    all_found.push_back(qdata{statstring() + format("%016lX", (long) vhash), bqo});
     if(!(cgflags & qCLOSED)) return;
     }
   indenter ind(2);
@@ -337,6 +408,8 @@ void show_auto_dialog() {
   gamescreen();
   dialog::init(XLAT("auto-generate quotients"));
   add_edit(aq_max);
+  add_edit(block_selfedges);
+  add_edit(block_cones);
   dialog::addBoolItem(XLAT("running"), running, 'r');
   dialog::add_action([] { 
     println(hlog, "action");
@@ -399,6 +472,10 @@ auto aqhook =
 + addHook(hooks_configfile, 100, [] {
     param_i(aq_max, "aq_max")
     -> editable(1, 500, 10, "limit on the quotient size", "", 'm');
+    param_b(block_cones, "aq_block_cones")
+    -> editable("block cone points", 'c');
+    param_b(block_selfedges, "aq_block_selfedges")
+    -> editable("block self-edges", 'e');
     })
 + addHook(hooks_newmap, 0, [] {
     if(geometry == gArbitrary && quotient) {
