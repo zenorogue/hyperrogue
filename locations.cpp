@@ -476,6 +476,23 @@ inline cellwalker operator+ (heptspin hs, cth_t) { return cellwalker(hs.at->c7, 
 
 EX bool proper(cell *c, int d) { return d >= 0 && d < c->type; }
 
+/** return b-a, as in, a number x such that a+x == b. */
+EX int cwdiff(cellwalker b, cellwalker a) {
+  return a.mirrored ? a.spin - b.spin : b.spin - a.spin;
+  }
+
+/** like cwdiff but normalize to [0..type-1) */
+EX int cwdiff_fixed(cellwalker b, cellwalker a) {
+  return gmod(cwdiff(b, a), b.at->type);
+  }
+
+/** return c+(b-a) */
+EX cellwalker cw_add_diff(cellwalker c, cellwalker b, cellwalker a) {
+  c += cwdiff(b, a);
+  if(a.mirrored != b.mirrored) c += wmirror;
+  return c;
+  }
+
 #if HDR
 
 constexpr int STRONGWIND = 199;
