@@ -95,6 +95,8 @@ struct shape {
   int reflect(int id) {
     return gmod(symmetric_value - id, size() - (apeirogonal ? 2 : 0));
     }
+  /** id of the mirrored tile */
+  int mirrored_id;
   };
 
 struct slider {
@@ -373,6 +375,7 @@ EX void load_tile(exp_parser& ep, arbi_tiling& c, bool unit) {
   cc.flags = 0;
   cc.repeat_value = 1;
   cc.apeirogonal = false;
+  cc.mirrored_id = -1;
   bool is_symmetric = false;
   while(ep.next() != ')') {
     cld dist = 1;
@@ -489,11 +492,11 @@ EX void unmirror(arbi_tiling& c) {
   if(!mirror_rules) return;
   auto& sh = c.shapes;
   int s = isize(sh);
-  vector<int> mirrored_id(s, -1);
   for(int i=0; i<s; i++)
     if(!sh[i].symmetric_value) {
-      mirrored_id[i] = isize(sh);
+      sh[i].mirrored_id = isize(sh);
       sh.push_back(sh[i]);
+      sh.back().mirrored_id = i;
       }
   int ss = isize(sh);
   for(int i=0; i<ss; i++) {
@@ -525,13 +528,13 @@ EX void unmirror(arbi_tiling& c) {
     for(auto& co: sh[i].connections) {
       bool mirr = co.mirror ^ (i >= s);
       co.mirror = false;
-      if(mirr && mirrored_id[co.sid] == -1) {
+      if(mirr && sh[co.sid].mirrored_id == -1) {
         if(sh[co.sid].reflectable(co.eid)) {
           co.eid = sh[co.sid].reflect(co.eid);
           }
         }
       else if(mirr) {
-        co.sid = mirrored_id[co.sid];
+        co.sid = sh[co.sid].mirrored_id;
         co.eid = isize(sh[co.sid].angles) - 1 - co.eid;
         if(sh[co.sid].apeirogonal)
           co.eid = gmod(co.eid - 2, isize(sh[co.sid].angles));
