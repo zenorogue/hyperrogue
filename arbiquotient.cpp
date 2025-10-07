@@ -517,6 +517,7 @@ EX void show_dialog() {
     }
   dialog::end_list();
 
+  dialog::addBreak(100);
   dialog::addItem("auto-generate", 'g');
   dialog::add_action_push(show_auto_dialog);
   if(cgflags & qANYQ) {
