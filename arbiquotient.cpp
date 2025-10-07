@@ -7,11 +7,18 @@ namespace hr {
 
 EX namespace arbiquotient {
 
-int aq_max = 100;
+int aq_max = 10;
 bool running = false;
 bool displaying = false;
-bool block_selfedges = true;
-bool block_cones = true;
+bool block_selfedges = false;
+bool block_cones = false;
+bool block_mirrors = false;
+
+bool dedup_rotation = true;
+bool dedup_mirror = true;
+bool dedup_focus = true;
+
+bool allow_nonorientable = false;
 
 map<cell*, cellwalker> aqs;
 
@@ -93,7 +100,7 @@ bool apply_uni() {
   return true;
   }
 
-vector<int> quotient_output(int dir) {
+vector<int> quotient_output(int dir, bool mirrored) {
   vector<int> output;
   int next_offset = 0;
   map<cell*, pair<int, cellwalker>> offsets;
@@ -110,9 +117,9 @@ vector<int> quotient_output(int dir) {
     auto &tmp = offsets[cw.at];
     auto ofs = tmp.first;
     auto cw1 = tmp.second;
-    return ofs + gmod(cw.spin - cw1.spin, cw.at->type);
+    return ofs + cwdiff_fixed(cw, cw1) + (cw.mirrored != cw1.mirrored ? quotientspace::symmask : 0);
     };
-  assign_id(cellwalker(currentmap->gamestart(), dir));
+  assign_id(cellwalker(currentmap->gamestart(), dir, mirrored));
   for(int i=0; i<isize(listorder); i++) {
     cell *c = listorder[i];
     // auto [ofs, cw] = offsets[c];
@@ -123,48 +130,72 @@ vector<int> quotient_output(int dir) {
   return output;
   }
 
+/** \brief return the statistical information about the current orbifold
+ *  in case of incorrect identification, may also return ERROR
+ */
 string statstring() {
   int selfedges = 0;
+  int mirrors = 0;
   int tiles = 0;
   int goodedges = 0;
   map<int, ld> verts;
+  map<int, ld> mverts;
   for(auto p: allaq) {
     auto ref = ufind(p->where);
     if(ref.at == p->where) {
       tiles++;
       for(int i=0; i<p->where->type; i++) {
         cellwalker cw(p->where, i);
+        println(hlog, cw, " vs ", ufind(cw+wstep));
         if(cw == ufind(cw+wstep)) selfedges++;
+        else if(cw == ufind(cw+wstep+wmirror)) mirrors++;
         else goodedges++;
-        if(arb::current.have_valence) {
+        if(arb::current.have_valence) for(bool mirr: {false, true}) {
           auto& sh = arb::current.shapes[shvid(cw.at)];
-          int val = sh.vertex_valence[i];
+          int val = sh.vertex_valence[mirr ? gmod(i-1, cw.at->type) : i];
           int steps = 0;
-          auto cw1 = cw;
+          bool has_mirror = false;
+          auto cwc = cw; if(mirr) cwc += wmirror;
+          auto cw1 = cwc;
           do {
             println(hlog, "at ", cw1);
-            cw1 += wstep; cw1++; steps++;
+            cw1 += wstep;  cw1 = ufind(cw1);
+            println(hlog, "   ", cw1);
+            if(cw1 == cwc+wmirror) has_mirror = true;
+            cw1++; steps++;
             cw1 = ufind(cw1);
+            if(steps > 100) { return "ERROR"; }
             }
-          while(cw1 != cw);
-          println(hlog, "looped back to ", cw);
-          if(val % steps) throw hr_exception("divisibility error");
-          verts[val / steps] += 1. / steps;
+          while(cw1 != cwc);
+          println(hlog, "looped back to ", cwc, has_mirror ? " (m)" : "");
+          if(val % steps) return "ERROR";
+          if(has_mirror) mverts[val / steps] += 1. / steps;
+          else verts[val / steps] += 0.5 / steps;
           }
         }
       }
     }
   shstream s;
-  println(hlog, verts);
-  print(s, "F:", tiles, " ");
-  if(goodedges % 2) throw hr_exception("divisibility error III");
-  print(s, "E:", goodedges/2, " ");
-  if(!block_selfedges) print(s, "e:", selfedges, " ");
-  for(auto p: verts) {
-    auto v = p.second + 1e-6;
-    auto fl = floor(v);
-    if(v - fl > 2e-6) throw hr_exception("divisibility error II");
-    print(s, p.first, ":", int(fl), " ");
+  println(hlog, tie(goodedges, selfedges, mirrors));
+  println(hlog, "verts = ", verts, " mverts = ", mverts);
+  print(s, "F:", tiles);
+  if(goodedges % 2) return "ERROR";
+  print(s, " E:", goodedges/2);
+  if(!block_selfedges) print(s, " e:", selfedges);
+  if(!block_mirrors) print(s, " M:", mirrors);
+  for(bool star: {false, true}) {
+    bool first = true;
+    for(auto p: (star ? mverts : verts)) {
+      auto v = p.second + 1e-6;
+      auto fl = int(floor(v));
+      if(v - fl > 2e-6) return "ERROR";
+      if(first) {
+        print(s, star ? " *" : " ");
+        first = false;
+        }
+      if(fl <= 3) for(int i=0; i<fl; i++) print(s, p.first);
+      else print(s, p.first, "[", fl, "]");
+      }
     }
   return s.s;
   }
@@ -241,6 +272,7 @@ void recurse() {
     auto ref = ufind(p->where);
     hashmix(hash, aq.at(ref.at).id);
     hashmix(hash, ref.spin);
+    hashmix(hash, ref.mirrored);
     backup.push_back(p->parent);
     if(p->parent.at == p->where) {
       active.push_back(p->where);
@@ -249,6 +281,12 @@ void recurse() {
       if(block_selfedges) for(int i=0; i<p->where->type; i++) {
         cellwalker cw(p->where, i);
         auto cw1 = cw + wstep;
+        if(aq.count(cw1.at) && cw == ufind(cw1)) return;
+        }
+
+      if(block_mirrors) for(int i=0; i<p->where->type; i++) {
+        cellwalker cw(p->where, i);
+        auto cw1 = cw + wstep + wmirror;
         if(aq.count(cw1.at) && cw == ufind(cw1)) return;
         }
 
@@ -276,14 +314,39 @@ void recurse() {
   cellwalker cw0 = currentmap->gamestart();
 
   println(hlog, "active ", isize(active), " numopen = ", numopen, " actives = ", active);
+
+  int shid = shvid(cw0.at);
+  auto& sh = arb::current.shapes[shid];
+  int cl = sh.cycle_length;
+
   if(numopen == 0) {
     println(hlog, "closed found!");
-    int shid = shvid(cw0.at);
-    vector<int> bqo = {999};
-    int cl = arb::current.shapes[shid].cycle_length;
-    for(int i=0; i<cw0.at->type; i+=cl) {
-      auto qo = quotient_output(i);
-      if(qo < bqo) bqo = qo;
+    vector<int> bqo = {999 | quotientspace::symmask};
+
+    for(auto li: active) {
+      auto oshvid = shvid(li);
+      bool mirr = arb::current.shapes[oshvid].is_mirrored;
+      oshvid = arb::current.shapes[oshvid].orig_id;
+      if(oshvid != shid) continue;
+      if(!mirr) {
+         for(int i=0; i<cw0.at->type; i+=cl) {
+          auto qo = quotient_output(i, false);
+          if(qo < bqo) bqo = qo;
+          if(sh.symmetric_value && dedup_mirror) {
+            auto qo = quotient_output(sh.reflect(i), true);
+            if(qo < bqo) bqo = qo;
+            }
+          if(!dedup_rotation) break;
+          }
+        if(!dedup_focus) break;
+        }
+      if(mirr && dedup_mirror) {
+        for(int i=0; i<cw0.at->type; i+=cl) {
+          auto qo = quotient_output(cw0.at->type-i-1, true);
+          if(qo < bqo) bqo = qo;
+          if(!dedup_rotation) break;
+          }
+        }
       }
 
     buckethash_t vhash = 0;
@@ -291,24 +354,38 @@ void recurse() {
     if(seen_outputs.count(vhash)) return;
     seen_outputs.insert(vhash);
     println(hlog, "[", isize(all_found), "] ", bqo);
-    all_found.push_back(qdata{statstring() + format("%016lX", (long) vhash), bqo});
+    auto ss = statstring();
+    if(ss == "ERROR") return;
+    all_found.push_back(qdata{ss + format(" %016lX", (long) vhash), bqo});
     if(!(cgflags & qCLOSED)) return;
     }
   indenter ind(2);
 
-  int shid = shvid(cw0.at);
-  int cl = arb::current.shapes[shid].cycle_length;
-
   for(auto li: active) if(li != cw0.at) {
-    if(shvid(li) != shid) continue;
-    for(int ro=0; ro<cw0.at->type; ro+=cl) {
-      unifications.emplace_back(cw0, cellwalker(li, ro));
+
+    auto tryout = [&] (cellwalker cw1) {
+      unifications.emplace_back(cw0, cw1);
       bool b = apply_uni();
       if(b) recurse();
       else unifications.clear();
+      auto backup_iterator = backup.begin();
+      for(auto p: allaq) p->parent = *(backup_iterator++);
+      };
+
+    auto oshvid = shvid(li);
+    bool mirr = arb::current.shapes[oshvid].is_mirrored;
+    oshvid = arb::current.shapes[oshvid].orig_id;
+    if(oshvid != shid) continue;
+
+    if(allow_nonorientable && mirr) {
+      for(int ro=0; ro<cw0.at->type; ro+=cl) tryout(cellwalker(li, cw0.at->type-1-ro, true));
       }
-    auto backup_iterator = backup.begin();
-    for(auto p: allaq) p->parent = *(backup_iterator++);
+    if(!mirr) for(int ro=0; ro<cw0.at->type; ro+=cl) {
+      tryout(cellwalker(li, ro));
+      if(allow_nonorientable && sh.symmetric_value) {
+        tryout(cellwalker(li, sh.reflect(ro), true));
+        }
+      }
     }
   }
 
@@ -321,7 +398,7 @@ void auto_create(int num) {
   enlist(cw0.at);
 
   int id = 0;
-  while(id < num) {
+  while(id < num && id < isize(allaq)) {
     auto aqd = allaq[id++];
     cell *c = aqd->where;
     forCellCM(c1, c) if(!aq.count(c1)) enlist(c1);
@@ -365,9 +442,8 @@ struct hrmap_autoquotient : hrmap {
     get_conn(0, 0);
     for(int i=0; i<isize(connections); i++) {
       auto co = connections[i];
-      auto co2 = get_conn(quotient_data[i], arb::current.shapes[co.first->zebraval].connections[co.second].sid);
-      println(hlog, "connectng ", co, " to ", co2);
-      co.first->c.connect(co.second, co2.first, co2.second, 0);
+      auto co2 = get_conn(quotient_data[i] &~ quotientspace::symmask, arb::current.shapes[co.first->zebraval].connections[co.second].sid);
+      co.first->c.connect(co.second, co2.first, co2.second, (quotient_data[i] & quotientspace::symmask));
       }
     println(hlog, "connections created");
     }
@@ -377,7 +453,7 @@ struct hrmap_autoquotient : hrmap {
     }
 
   transmatrix adj(heptagon *h, int dir) override {
-    return arb::get_adj(arb::current_or_slided(), h->zebraval, dir, h->move(dir)->zebraval, h->c.spin(dir), false);
+    return arb::get_adj(arb::current_or_slided(), h->zebraval, dir, h->move(dir)->zebraval, h->c.spin(dir), h->c.mirror(dir));
     }
 
   int shvid(cell *c) override {
@@ -399,6 +475,11 @@ void show_auto_dialog() {
   add_edit(aq_max);
   add_edit(block_selfedges);
   add_edit(block_cones);
+  add_edit(block_mirrors);
+  add_edit(allow_nonorientable);
+  add_edit(dedup_rotation);
+  add_edit(dedup_focus);
+  add_edit(dedup_mirror);
   dialog::addBoolItem(XLAT("running"), running, 'r');
   dialog::add_action([] { 
     println(hlog, "action");
@@ -465,6 +546,16 @@ auto aqhook =
     -> editable("block cone points", 'c');
     param_b(block_selfedges, "aq_block_selfedges")
     -> editable("block self-edges", 'e');
+    param_b(block_mirrors, "aq_block_mirrors")
+    -> editable("block mirrors", 'm');
+    param_b(allow_nonorientable, "aq_allow_nonorientable")
+    -> editable("allow nonorientable", 'n');
+    param_b(dedup_rotation, "aq_dedup_rotation")
+    -> editable("dedup rotation", 's');
+    param_b(dedup_focus, "aq_dedup_focus")
+    -> editable("dedup focus", 'f');
+    param_b(dedup_mirror, "aq_dedup_mirror")
+    -> editable("dedup mirror", 'o');
     })
 + addHook(hooks_newmap, 0, [] {
     if(geometry == gArbitrary && quotient) {
