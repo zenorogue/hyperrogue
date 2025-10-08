@@ -1683,7 +1683,7 @@ EX namespace hybrid {
         });
       return spin(alpha) * twist::uxpush(tf) * twist::uypush(he) * twist::uzpush(lev) * C0;
       #else
-      throw hr_exception();
+      throw hr_exception("get_corner but MAXMDIM<4");
       #endif
       }
     }

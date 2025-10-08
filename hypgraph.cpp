@@ -1321,7 +1321,7 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
     #if MAXMDIM >= 4
       threepoint_projection(H, ret);
     #else
-      throw hr_exception();
+      throw hr_exception("three-point projection but MAXMDIM<4");
     #endif
       break;
     

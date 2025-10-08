@@ -211,7 +211,7 @@ string hr_polygon_error::generate_error() {
 struct connection_debug_request : hr_exception {
   int id;
   eGeometryClass c;
-  connection_debug_request(int i): id(i), c(cgclass) {}
+  connection_debug_request(int i): hr_exception("connection_debug_request"), id(i), c(cgclass) {}
   };
 
 struct connection_error : hr_exception {
