@@ -77,6 +77,8 @@ struct shape {
   int cycle_length;
   /** list of valences of vertices in the tesfile convention */
   vector<int> vertex_valence;
+  /** like vertex_valence but glue sub-apeirogons */
+  vector<int> vertex_valence_gluesub;
   /** list of periods of vertices in the tesfile convention */
   vector<int> vertex_period;
   /** list of angles at vertices in the tesfile convention */
@@ -610,11 +612,12 @@ EX bool compute_vertex_valence_flat(arb::arbi_tiling& ac) {
     int n = sh.size();
     int i = sh.id;
     sh.vertex_valence.resize(n);
+    sh.vertex_valence_gluesub.resize(n);
     sh.vertex_period.resize(n);
     sh.vertex_angles.resize(n);
     for(int k=0; k<n; k++) {
       ld total = 0;
-      int qty = 0, pqty = 0;
+      int qty = 0, pqty = 0, subqty = 0;
       connection_t at = {i, k, false};
       connection_t at1 = at;
       vector<ld> anglelist;
@@ -628,6 +631,7 @@ EX bool compute_vertex_valence_flat(arb::arbi_tiling& ac) {
         anglelist.push_back(a);
         qty++;
         pqty++;
+        if(ac.shapes[at.sid].apeirogonal && at.eid >= ac.shapes[at.sid].size() - 2) subqty++;
 
         at.eid++;
         if(at.eid == isize(ac.shapes[at.sid].angles)) at.eid = 0;
@@ -643,6 +647,7 @@ EX bool compute_vertex_valence_flat(arb::arbi_tiling& ac) {
         return true;
         }
       sh.vertex_valence[k] = qty;
+      sh.vertex_valence_gluesub[k] = qty == OINF ? OINF : qty - subqty;
       sh.vertex_period[k] = pqty;
       sh.vertex_angles[k] = std::move(anglelist);
       }
@@ -658,10 +663,11 @@ EX bool compute_vertex_valence_generic(arb::arbi_tiling& ac) {
     int n = sh.size();
     int i = sh.id;
     sh.vertex_valence.resize(n);
+    sh.vertex_valence_gluesub.resize(n);
     for(int k=0; k<n; k++) {
       connection_t at = {i, k, false};
       transmatrix T = Id;
-      int qty = 0;
+      int qty = 0, subqty = 0;
       do {
         if(qty && at.sid == i) {
           auto co1 = at;
@@ -690,9 +696,11 @@ EX bool compute_vertex_valence_generic(arb::arbi_tiling& ac) {
         T = T * get_adj(ac, at0.sid, at0.eid, at.sid, at.eid, at.mirror);
         at.mirror ^= at0.mirror;
         qty++;
+        if(ac.shapes[at.sid].apeirogonal && at.eid >= ac.shapes[at.sid].size() - 2) subqty++;
         }
       while(qty < OINF);
       sh.vertex_valence[k] = qty;
+      sh.vertex_valence_gluesub[k] = qty == OINF ? OINF : qty - subqty;
       }
     if(debugflags & DF_GEOM)
       println(hlog, "computed vertex_valence of ", i, " as ", ac.shapes[i].vertex_valence);
@@ -731,7 +739,8 @@ EX bool extended_football = true;
 
 EX void check_football_colorability(arbi_tiling& c) {
   if(!c.have_valence) return;
-  for(auto&sh: c.shapes) for(auto v: sh.vertex_valence)
+
+  for(auto&sh: c.shapes) for(auto v: sh.vertex_valence_gluesub)
     if(v % 3) return;
 
   for(int i=0; i<3; i++) {
