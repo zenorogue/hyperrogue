@@ -1232,6 +1232,11 @@ EX void initConfig() {
       {"icons", ""},
       }, "orb display mode", 'o');
 
+  param_b(orb_treasure_gap, "orb_treasure_gap", false)
+  ->editable("gap between orbs and treasures", 'G')
+  -> help("If set, a gap row will be left between orbs and treasures in the HUD")
+  -> set_reaction([] { vid.killreduction = 0; });
+
   param_b(less_in_landscape, "less_in_landscape", false)
   ->editable("less items/kills in landscape", 'L')
   -> help("If set, only the important items and kills will be shown")
@@ -2572,6 +2577,7 @@ EX void configureInterface() {
   if(hr_hud_enabled) {
     add_edit(glyphsortorder);
     add_edit(vid.graphglyph);
+    add_edit(orb_treasure_gap);
     add_edit(less_in_landscape);
     add_edit(less_in_portrait);
     add_edit(display_yasc_codes);
