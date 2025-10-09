@@ -1876,40 +1876,40 @@ EX cfunction current_screen_cfunction() {
 
 #if HDR
 namespace sm {
-  static constexpr int NORMAL = 1;
-  static constexpr int MISSION = 2;
-  static constexpr int HELP = 4;
-  static constexpr int MAP = 8;
-  static constexpr int DRAW = 16;
-  static constexpr int NUMBER = 32;
-  static constexpr int SHMUPCONFIG = 64;
-  static constexpr int OVERVIEW = 128;
-  static constexpr int SIDE = 256;
-  static constexpr int DOTOUR = 512;
-  static constexpr int CENTER = 1024;
-  static constexpr int ZOOMABLE = 4096;
-  static constexpr int TORUSCONFIG = 8192;
-  static constexpr int MAYDARK = 16384; // use together with SIDE; if the screen is not wide or centered_menus is set, it will disable SIDE and instead darken the screen
-  static constexpr int DIALOG_STRICT_X = 32768; // do not interpret dialog clicks outside of the X region
-  static constexpr int EXPANSION = (1<<16);
-  static constexpr int HEXEDIT = (1<<17);
-  static constexpr int VR_MENU = (1<<18); // always show the menu in VR
-  static constexpr int SHOWCURSOR = (1<<19); // despite MAP/DRAW always show the cursor, no panning
-  static constexpr int PANNING = (1<<20); // smooth scrolling works
-  static constexpr int DARKEN = (1<<21); // darken the game background
-  static constexpr int NOSCR = (1<<22); // do not show the game background
-  static constexpr int AUTO_VALUES = (1<<23); // automatic place for values
-  static constexpr int NARROW_LINES = (1<<24); // do make the lines narrower if we needed to reduce width
-  static constexpr int EDIT_BEFORE_WALLS = (1<<25); // mouseover targets before walls
-  static constexpr int EDIT_INSIDE_WALLS = (1<<26); // mouseover targets inside walls
-  static constexpr int DIALOG_WIDE = (1<<27); // make dialogs wide
-  static constexpr int MOUSEAIM = (1<<28); // mouse aiming active here
-  static constexpr int DIALOG_OFFMAP = (1<<29); // try hard to keep dialogs off the map
-  static constexpr int NO_EXIT = (1<<30); // do not allow to exit the current dialog
+  static constexpr flagtype NORMAL = 1;
+  static constexpr flagtype MISSION = 2;
+  static constexpr flagtype HELP = 4;
+  static constexpr flagtype MAP = 8;
+  static constexpr flagtype DRAW = 16;
+  static constexpr flagtype NUMBER = 32;
+  static constexpr flagtype SHMUPCONFIG = 64;
+  static constexpr flagtype OVERVIEW = 128;
+  static constexpr flagtype SIDE = 256;
+  static constexpr flagtype DOTOUR = 512;
+  static constexpr flagtype CENTER = 1024;
+  static constexpr flagtype ZOOMABLE = 4096;
+  static constexpr flagtype TORUSCONFIG = 8192;
+  static constexpr flagtype MAYDARK = 16384; // use together with SIDE; if the screen is not wide or centered_menus is set, it will disable SIDE and instead darken the screen
+  static constexpr flagtype DIALOG_STRICT_X = 32768; // do not interpret dialog clicks outside of the X region
+  static constexpr flagtype EXPANSION = Flag(16);
+  static constexpr flagtype HEXEDIT = Flag(17);
+  static constexpr flagtype VR_MENU = Flag(18); // always show the menu in VR
+  static constexpr flagtype SHOWCURSOR = Flag(19); // despite MAP/DRAW always show the cursor, no panning
+  static constexpr flagtype PANNING = Flag(20); // smooth scrolling works
+  static constexpr flagtype DARKEN = Flag(21); // darken the game background
+  static constexpr flagtype NOSCR = Flag(22); // do not show the game background
+  static constexpr flagtype AUTO_VALUES = Flag(23); // automatic place for values
+  static constexpr flagtype NARROW_LINES = Flag(24); // do make the lines narrower if we needed to reduce width
+  static constexpr flagtype EDIT_BEFORE_WALLS = Flag(25); // mouseover targets before walls
+  static constexpr flagtype EDIT_INSIDE_WALLS = Flag(26); // mouseover targets inside walls
+  static constexpr flagtype DIALOG_WIDE = Flag(27); // make dialogs wide
+  static constexpr flagtype MOUSEAIM = Flag(28); // mouse aiming active here
+  static constexpr flagtype DIALOG_OFFMAP = Flag(29); // try hard to keep dialogs off the map
+  static constexpr flagtype NO_EXIT = Flag(30); // do not allow to exit the current dialog
   }
 #endif
 
-EX int cmode;
+EX flagtype cmode;
 
 EX bool dont_display_minecount = false;
 

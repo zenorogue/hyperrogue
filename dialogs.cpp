@@ -50,7 +50,7 @@ EX namespace dialog {
   /** extendable dialog */
   struct extdialog : funbase {
     string title, help;
-    int dialogflags;
+    flagtype dialogflags;
     reaction_t reaction;
     reaction_t reaction_final;
     reaction_t extra_options;

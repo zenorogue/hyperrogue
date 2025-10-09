@@ -802,7 +802,7 @@ EX void take(string fname, const function<void()>& what IS(default_screenshot_co
   dynamicval<bool> v2(inHighQual, true);
   dynamicval<bool> v6(auraNOGL, true);
   dynamicval<videopar> v(vid, vid);
-  dynamicval<int> v7(cmode, 0);
+  dynamicval<flagtype> v7(cmode, 0);
 
   vid.smart_range_detail *= multiplier;
   darken = 0;
