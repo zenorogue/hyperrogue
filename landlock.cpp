@@ -221,11 +221,15 @@ EX bool landUnlockedRPM(eLand n) {
   }
 
 EX int lands_for_hell() {
-  return casual ? 40 : 9;
+  int desired = casual ? 40 : 9;
+  int available = std::count_if(land_over.begin(), land_over.end(), [] (eLand l) { return !among(l, laHell, laCocytus, laPower) && !isCrossroads(l) && isLandIngame(l); });
+  return min(desired, available);
   }
 
 EX int lands_for_cr3() {
-  return casual ? 20 : 9;
+  int desired = casual ? 20 : 9;
+  int available = std::count_if(land_over.begin(), land_over.end(), [] (eLand l) { return !isCrossroads(l) && isLandIngame(l); });
+  return min(desired, available);
   }
 
 EX int variant_unlock_value() {
