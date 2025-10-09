@@ -184,6 +184,7 @@ EX void ShadowV(const shiftmatrix& V, const hpcshape& bp, PPR prio IS(PPR::MONST
 #define VLEG at_smart_lof(V, cgi.LEG)
 #define VGROIN at_smart_lof(V, cgi.GROIN)
 #define VBODY at_smart_lof(V, cgi.BODY)
+#define VRAT (GDIM == 2 ? VHEAD : V * lzpush(cgi.AHEAD - zc(0.4) - zc(0.98) + cgi.HEAD))
 #define VBODY1 at_smart_lof(V, cgi.BODY1)
 #define VBODY2 at_smart_lof(V, cgi.BODY2)
 #define VBODY3 at_smart_lof(V, cgi.BODY3)
@@ -500,7 +501,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       if(m == moRoseLady) {
   //    queuepoly(V, girl ? cgi.shGoatHead : cgi.shDemon,  0x800000FF);
         // make her hair a bit darker to stand out in 3D
-        queuepoly(VHEAD1, hair,  evil ? 0x500050FF : GDIM == 3 ? 0x666A64FF : 0x332A22FF);
+        queuepoly(&hair == &cgi.shRatHead ? VRAT : VHEAD1, hair,  evil ? 0x500050FF : GDIM == 3 ? 0x666A64FF : 0x332A22FF);
         }
       else if(m == moRoseBeauty) {
         if(girl) {
@@ -514,19 +515,20 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
           }
         }
       else {
-        queuepoly(VHEAD1, hair, evil ? 0xC00000FF : 0x332A22FF);
+        queuepoly(&hair == &cgi.shRatHead ? VRAT : VHEAD1, hair, evil ? 0xC00000FF : 0x332A22FF);
         }
       if(&hair == &cgi.shRatHead) {
-        queuepoly(VHEAD, cgi.shWolf1, 0x008000FF);
-        queuepoly(VHEAD, cgi.shWolf2, 0x008000FF);
-        queuepoly(VHEAD, cgi.shWolf3, darkena(0x202020, 0, 0xFF));
+        auto V1 = VRAT;
+        queuepoly(V1, cgi.shWolf1, 0x008000FF);
+        queuepoly(V1, cgi.shWolf2, 0x008000FF);
+        queuepoly(V1, cgi.shWolf3, darkena(0x202020, 0, 0xFF));
         }
       else if(&hair == &cgi.shSkull) {
         queuepoly(VHEAD, cgi.shSkullEyes, darkena(0x202020, 0, 0xFF));
         }
       else queuepoly(VHEAD, cgi.shPFace,  facecolor);
       if(id == pshRatling) queuepoly(VLEG, cgi.shRatTail, darkena(col, 0, 0xFF));
-      humanoid_eyes(V, evil ? 0x0000C0FF : 0x00C000FF, facecolor);
+      if(id != pshRatling) humanoid_eyes(V, evil ? 0x0000C0FF : 0x00C000FF, facecolor);
       return true;
       }
   
@@ -1079,7 +1081,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
         }
 #if MAXMDIM >= 4
       else {
-        shiftmatrix V1 = V * lzpush(cgi.AHEAD - zc(0.4) - zc(0.98) + cgi.HEAD); // * cpush(0, cgi.scalefactor * (-0.1));
+        shiftmatrix V1 = VRAT;
         queuepoly(V1, cgi.shRatHead, darkena(col, 0, 0xFF));
 
         /*
