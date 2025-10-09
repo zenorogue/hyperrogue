@@ -175,7 +175,7 @@ string statstring() {
   if(goodedges % 2) return "ERROR";
   print(s, " E:", goodedges/2);
   if(!block_selfedges) print(s, " e:", selfedges);
-  if(!block_mirrors) print(s, " M:", mirrors);
+  if(!block_mirrors && allow_nonorientable) print(s, " M:", mirrors);
   for(bool star: {false, true}) {
     bool first = true;
     for(auto p: (star ? mverts : verts)) {
