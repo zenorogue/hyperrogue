@@ -503,6 +503,8 @@ EX bool export_tes(string fname) {
     for(int j=0; j<shs[i].cycle_length; j++) {
       auto& co = shs[i].connections[j];
       println(f, "c(", i, ",", j, ",", co.sid, ",", co.eid, ",", co.mirror, ")");
+      if(shs[i].stretch_shear[j] != make_pair<ld,ld>(1, 0))
+        println(f, "stretch_shear(", format("%.15f,%.15f,", shs[i].stretch_shear[j].first, shs[i].stretch_shear[j].second), ",", i, ",", j, ")");
       }
     }
   for(auto& af: all_found) {
