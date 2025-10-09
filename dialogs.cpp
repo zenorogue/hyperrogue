@@ -207,7 +207,7 @@ EX namespace dialog {
   EX void handler(int sym, int uni) {
     if(cmode & sm::PANNING) handlePanning(sym, uni);
     dialog::handleNavigation(sym, uni);
-    if(doexiton(sym, uni)) popScreen();
+    if(doexiton(sym, uni) && !(cmode & sm::NO_EXIT)) popScreen();
     }
 
   EX int list_size_min, list_size_max, list_fake_key;

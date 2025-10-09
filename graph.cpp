@@ -1905,6 +1905,7 @@ namespace sm {
   static constexpr int DIALOG_WIDE = (1<<27); // make dialogs wide
   static constexpr int MOUSEAIM = (1<<28); // mouse aiming active here
   static constexpr int DIALOG_OFFMAP = (1<<29); // try hard to keep dialogs off the map
+  static constexpr int NO_EXIT = (1<<30); // do not allow to exit the current dialog
   }
 #endif
 
