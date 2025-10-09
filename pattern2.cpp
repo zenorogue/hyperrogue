@@ -1369,6 +1369,7 @@ EX int pattern_threecolor(cell *c) {
     }
   if(meuclid) {
     if(a4 && PURE) return eupattern4(c);
+    if(a4 && BITRUNCATED) return eupattern4(c) % 3;
     if(euc::in(2,6) && !BITRUNCATED) return eupattern(c) % 3;
     return c == c->master->c7 ? 0 : (c->c.spin(0)&1) ? 1 : 2;
     }
