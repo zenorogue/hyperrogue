@@ -1618,7 +1618,7 @@ EX eItem targetRangedOrb(orbAction a) {
   if(items[itOrbPsi] && shmup::mousetarget && sqdist(mouseh, shmup::mousetarget->pat*C0) < SCALE2 * .1) {
     if(a == roCheck) return itOrbPsi;
     addMessage(XLAT("You kill %the1 with a mental blast!", mousetarget->type));
-    killMonster(mousetarget, moNone);
+    killMonster(mousetarget, moPlayer);
     items[itOrbPsi] -= 30;
     if(items[itOrbPsi]<0) items[itOrbPsi] = 0;
     return itOrbPsi;
