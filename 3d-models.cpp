@@ -896,7 +896,7 @@ void geometry_information::make_3d_models() {
       &shEagle, &shFemaleBody, &shFlailMissile, &shGadflyWing, &shGargoyleWings, &shHawk, &shJiangShi, &shKnife,
       &shPBody, &shPHead, &shRaiderBody, &shReptileBody, &shSkeletonBody, &shTongue, &shTrapArrow, &shTrylobite,
       &shWaterElemental, &shWolfBody, &shYeti, &shWormHead, &shWormHead, &shDragonHead, &shDragonSegment, &shDragonTail,
-      &shTentHead, &shILeaf[0], &shILeaf[1], &shWormSegment, &shSmallWormSegment, &shBunnyBody,
+      &shTentHead, &shILeaf[0], &shILeaf[1], &shWormSegment, &shSmallWormSegment, &shBunnyBody, &shSpaceship,
       &shWormTail, &shSmallWormTail, &shFrogBody })
       make_shadow(*sh);
     
@@ -1004,6 +1004,8 @@ void geometry_information::make_3d_models() {
   // make_ahead_3d(shCatHead);
   make_revolution_cut(shCatBody, 30, +g);
   make_revolution_cut(shCatHead, 180, AHEAD - ABODY +g, 0.055 * scalefactor);
+
+  make_revolution_cut(shSpaceshipBase, 180, 0);
 
   make_revolution_cut(shBunnyBody, 30, +g);
   make_revolution_cut(shBunnyHead, 180, AHEAD - ABODY +g, 0.055 * scalefactor);
