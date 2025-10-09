@@ -1264,6 +1264,8 @@ EX int geosupport_threecolor() {
   if(arcm::in() && BITRUNCATED) return arcm::current.support_threecolor_bitruncated();
   if(arcm::in() && DUAL) return 0; // it sometimes does support threecolor, but it can be obtained in other ways then
   #endif
+  if(euc::in(2, 4) && BITRUNCATED) return 2;
+  if(a46 && BITRUNCATED) return 2;
   if(INVERSE) return 0;
   if(BITRUNCATED && S3 == 3) {
     if(S7 % 2) return 1;
