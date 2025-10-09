@@ -751,7 +751,7 @@ EX bool jumpTo(orbAction a, cell *dest, eItem byWhat, int bonuskill, jumpdata jd
     movecost(from, dest, 2);
     from = NULL;
     }
-  if(cwt.at->item != itOrbYendor && cwt.at->item != itHolyGrail) {
+  if(cwt.at->item != itOrbYendor && cwt.at->item != itHolyGrail && !cantGetGrimoire(cwt.at, true)) {
     auto c = collectItem(cwt.at, from, true);
     if(c) {
       return true;
