@@ -21,7 +21,7 @@ bool dedup_focus = true;
 
 bool allow_nonorientable = false;
 
-map<cell*, cellwalker> aqs;
+set<cellwalker> preunify;
 
 int next_id;
 
@@ -60,15 +60,6 @@ void enlist(cell *c) {
   aq.emplace(c, c);
   aqdata& ref = aq.at(c);
   allaq.push_back(&ref);
-  }
-
-void default_list() {
-  cellwalker cw0 = currentmap->gamestart();
-  aqs.clear();
-  auto cw1 = cw0; for(int i=0; i<10; i++) cw1 = cw1 + wstep + 2;
-  auto cw2 = cw0+1; for(int i=0; i<10; i++) cw2 = cw2 + wstep + 2; cw2 = cw2 - 1;
-  aqs[cw1.at] = cw1;
-  aqs[cw2.at] = cw2;
   }
 
 void clear_all() {
@@ -205,50 +196,6 @@ string statstring() {
 set<buckethash_t> seen_outputs;
 
 auto& all_found = arb::current.quotients;
-
-void create() {
-  clear_all();
-
-  cellwalker cw0 = currentmap->gamestart();
-
-  enlist(cw0.at);
-
-  int loop_id = 0;
-
-  while(true) {
-
-    if(!apply_uni()) throw aq_unsupported();
-
-    if(loop_id == isize(allaq)) break;
-
-    cell *c = allaq[loop_id++]->where;
-    cellwalker cw(c);
-    auto cw1 = ufind(cw);
-    if(cw1 != cw) continue;
-    c->item = itGold;
-
-    for(int i=0; i<cw.at->type; i++) {
-      cellwalker cw2 = cw + i + wstep;
-      if(!aq.count(cw2.at)) {
-        enlist(cw2.at);
-        if(aqs.count(cw2.at)) unifications.emplace_back(cw0, aqs[cw2.at]);
-        }
-      else {
-        auto cw3 = ufind(cw2);
-        auto cw4 = cw3 + wstep - i;
-        if(aq.count(cw4.at)) unifications.emplace_back(cw4, cw);
-        }
-      }
-
-    if(next_id > 10000) throw aq_overflow();
-    }
-
-  /* vector<cell*> masters;
-  for(auto& data: aq) if(data.first == data.second.parent.at) masters.push_back(data.first);
-
-  println(hlog, "masters size = ", isize(masters)); */
-
-  }
 
 set<buckethash_t> seen_hashes;
 
@@ -408,6 +355,16 @@ void auto_create(int num) {
     aqd->closed = true;
     }
 
+  for(auto p: preunify) {
+    unifications.emplace_back(cw0, p);
+    aq.at(p.at).unified_to_start = true;
+    }
+  if(!apply_uni()) {
+    unifications.clear();
+    addMessage("invalid preunify");
+    return;
+    }
+
   println(hlog, "calling recurse");
   indenter ind(2);
   recurse();
@@ -469,11 +426,16 @@ struct hrmap_autoquotient : hrmap {
   };
 
 bool aq_drawcell(cell *c, const shiftmatrix& V) {
-  auto p = at_or_null(aq, c);
-  if(!p) return false;
   if(c == currentmap->gamestart()) {
     queuepoly(V * ddspin(c, 0), cgi.shAsymmetric, 0xFFFF00FF);
     }
+  if(!running) {
+    for(auto cw: preunify) if(cw.at == c)
+      queuepoly(V * ddspin(c, cw.spin) * (cw.mirrored?Mirror:Id), cgi.shAsymmetric, 0x0000FFFF);
+    return false;
+    }
+  auto p = at_or_null(aq, c);
+  if(!p) return false;
   if(p->unified_to_start) {
     auto cw = cellwalker(c);
     auto cw1 = ufind(cw);
@@ -529,9 +491,37 @@ EX bool export_tes(string fname) {
 void show_auto_dialog() {
   cmode = sm::SIDE | sm::DIALOG_STRICT_X;
   if(running) cmode |= sm::NO_EXIT;
+  int p = addHook(hooks_drawcell, 100, aq_drawcell);
   gamescreen();
+  delHook(hooks_drawcell, p);
   dialog::init(XLAT("auto-generate quotients"));
   add_edit(aq_max);
+
+  cell *c0 = currentmap->gamestart();
+  if(cwt.at != c0) {
+    auto& ac = arb::current;
+    auto oshvid = shvid(cwt.at);
+    bool mirr = ac.shapes[oshvid].is_mirrored;
+    oshvid = ac.shapes[oshvid].orig_id;
+    auto cl = ac.shapes[0].cycle_length;
+
+    if(oshvid == 0) {
+
+      char key = '1';
+      auto add_option = [&] (bool b) {
+        cellwalker cw(cwt.at, cwt.spin, b);
+        dialog::addBoolItem(b ? XLAT("preunify mirrored start") : XLAT("preunify start"), preunify.count(cw), key++);
+        dialog::add_action([cw] {
+          if(preunify.count(cw)) preunify.erase(cw); else preunify.insert(cw);
+          });
+        };
+
+      if(gmod(cwt.spin, cl) == 0) add_option(false);
+      if(mirr && gmod(cwt.spin - (c0->type-1), cl) == 0) add_option(true);
+      if(ac.shapes[0].symmetric_value && gmod(cwt.spin - ac.shapes[0].reflect(0), cl) == 0) add_option(true);
+      }
+    }
+
   add_edit(block_selfedges);
   add_edit(block_cones);
   add_edit(block_mirrors);
@@ -543,12 +533,10 @@ void show_auto_dialog() {
   dialog::addBoolItem(XLAT("running"), running, 'r');
   dialog::add_action([] { 
     if(!running) {
-      int p = addHook(hooks_drawcell, 100, aq_drawcell);
       running = true;
       displaying = true;
       all_found.clear();
       auto_create(aq_max);
-      delHook(hooks_drawcell, p);
       }
     running = false;
     });
@@ -606,8 +594,7 @@ EX void show_dialog() {
   }
 
 auto aqhook =
-  arg::add3("-aq-test", [] { try { default_list(); create(); } catch(aq_overflow&) { println(hlog, "AQ overflow"); } })
-+ arg::add3("-aq-auto", [] { displaying = false; running = true; arg::shift(); auto_create(arg::argi()); })
+  arg::add3("-aq-auto", [] { displaying = false; running = true; arg::shift(); auto_create(arg::argi()); })
 + arg::add3("-aq-enable", [] { arg::shift(); enable_by_id(arg::argi()); })
 + arg::add3("-aq-export", [] { arg::shift(); export_tes(arg::args()); })
 + arg::add3("-d:aq", [] { arg::launch_dialog(show_dialog); })
@@ -631,6 +618,7 @@ auto aqhook =
     param_b(dedup_mirror, "aq_dedup_mirror")
     -> editable("dedup mirror", 'o');
     })
++ addHook(hooks_clearmemory, 0, [] { preunify.clear(); })
 + addHook(hooks_newmap, 0, [] {
     if(geometry == gArbitrary && quotient) {
       return (hrmap*) new hrmap_autoquotient;
