@@ -262,10 +262,6 @@ EX bool haveRangedOrb() {
     items[itOrbMorph] || items[itOrbPhasing];
   }
 
-EX bool isFriendlyGhost(eMonster m) {
-  return m == moFriendlyGhost || (markEmpathy(itOrbAether) && isFriendly(m));
-  }
-
 EX bool isGhostAether(eMonster m) {
   return isGhost(m) || checkOrb(m, itOrbAether);
   }

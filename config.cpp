@@ -1207,6 +1207,14 @@ EX void initConfig() {
 
   param_b(keybd_subdir_enabled, "keybd_subdir_enabled", 0)->editable("control the pushing direction with TAB", 'P')->help("If set, you control the off-heptagon pushing direction with TAB. Otherwise, you control it by rotating the screen.");
 
+  param_str(pinnedglyphs, "pinned_glyphs", "")
+  ->set_standard_editor(true)
+  ->editable("pinned glyphs",
+     "A list of glyphs to always sort at the front, "
+     "and reserve space for even when they're not being displayed.",
+     'p')
+  ->set_reaction(updateglyphpinned);
+
   param_enum(glyphsortorder, parameter_names("glyph_sort", "glyph sort order"), glyphsortorder)
     ->editable({
       {"first on top", ""},
@@ -1223,6 +1231,11 @@ EX void initConfig() {
       {"types", ""},
       {"icons", ""},
       }, "orb display mode", 'o');
+
+  param_b(orb_treasure_gap, "orb_treasure_gap", false)
+  ->editable("gap between orbs and treasures", 'G')
+  -> help("If set, a gap row will be left between orbs and treasures in the HUD")
+  -> set_reaction([] { vid.killreduction = 0; });
 
   param_b(less_in_landscape, "less_in_landscape", false)
   ->editable("less items/kills in landscape", 'L')
@@ -2564,6 +2577,7 @@ EX void configureInterface() {
   if(hr_hud_enabled) {
     add_edit(glyphsortorder);
     add_edit(vid.graphglyph);
+    add_edit(orb_treasure_gap);
     add_edit(less_in_landscape);
     add_edit(less_in_portrait);
     add_edit(display_yasc_codes);
@@ -3521,6 +3535,9 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
     "Then, we find a cell of the bitruncated cubic honeycomb at these cordinates, and this cell determines which land it is. The bigger the value, the larger the lands.", 'R')
   ->set_sets([] { dialog::bound_low(1); })
   ->set_reaction([] { if(game_active) { stop_game(); start_game(); } });
+
+  param_enum(warn_before_killing_friends, "warn_before_killing_friends", 2)
+  ->editable({{"OFF", "never warn"}, {"TAME_BOMBERBIRDS", "warn only for Tame Bomberbirds"}, {"ON", "always warn"}}, "warn before killing friendly monsters", 'W');
 
   param_i(curse_percentage, "curse_percentage")->editable(0, 100, 1,
     "curse percentage",

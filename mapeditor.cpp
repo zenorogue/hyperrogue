@@ -1096,7 +1096,7 @@ EX namespace mapstream {
 
     if(shmup::on) shmup::init();
 
-    timerstart = time(NULL); turncount = 0; 
+    timerstart = time(NULL); turncount = 0; lastexplore = 0;
     sagephase = 0; hardcoreAt = 0;
     timerstopped = false;
     savecount = 0; savetime = 0;

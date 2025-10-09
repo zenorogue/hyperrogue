@@ -844,16 +844,18 @@ EX bool buildBarrier6(cellwalker cw, eLand m0, eLand m1) {
     setland((b[d+1]-2).cpeek(), m1);
     setland((b[d+1]+2).cpeek(), m0);
     }
-  int cp = curse_percentage;
-  if(m0 == laCrossroads6 || m1 == laCrossroads6) {
-    cp = 25;
-    if(m0 == laCursed || m1 == laCursed) cp = 100;
-    }
-  if(hrand(100) < cp) {
-    setland(cw.at, laCursed);
-    cw.at->wall = waRubble;
-    cw.at->monst = moHexer;
-    cw.at->item = random_curse();
+  if(isLandIngame(laCursed)) {
+    int cp = curse_percentage;
+    if(m0 == laCrossroads6 || m1 == laCrossroads6) {
+      cp = 25;
+      if(m0 == laCursed || m1 == laCursed) cp = 100;
+      }
+    if(hrand(100) < cp) {
+      setland(cw.at, laCursed);
+      cw.at->wall = waRubble;
+      cw.at->monst = moHexer;
+      cw.at->item = random_curse();
+      }
     }
 
   return true;

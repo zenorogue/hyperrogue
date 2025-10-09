@@ -184,6 +184,7 @@ EX void reset_cheats() {
   cheater = 0;
   reptilecheat = false;
   shadingcheat = false;
+  cheat_items_enabled = false;
   timerghost = true;
   gen_wandering = true;
   }
@@ -407,7 +408,7 @@ EX void initgame() {
 
   if(!safety) {
     usedSafety = false;
-    timerstart = time(NULL); turncount = 0; rosewave = 0; rosephase = 0;
+    timerstart = time(NULL); turncount = 0; lastexplore = 0; rosewave = 0; rosephase = 0;
     tickstart = ticks;
     noiseuntil = 0;
     sagephase = 0; hardcoreAt = 0;

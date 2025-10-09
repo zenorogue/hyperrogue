@@ -1,0 +1,3 @@
+[submodule "rogueviz/seuphorica"]
+	path = rogueviz/seuphorica
+	url = https://github.com/zenorogue/seuphorica.git

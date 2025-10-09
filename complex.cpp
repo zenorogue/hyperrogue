@@ -2721,7 +2721,7 @@ EX namespace dragon {
       c->monst = moNone;
       if(checkOrb(who, itOrbUndeath)) 
         c->monst = moFriendlyGhost;
-      if(checkOrb(who, itOrbStone)) 
+      if(!do_not_touch_this_wall(c) && checkOrb(who, itOrbStone)) 
         c->wparam = m, c->wall = waPetrified;
       else if(c->wall == waFire) {
         if(delay) delay = false;
@@ -2993,13 +2993,13 @@ EX namespace kraken {
     if(checkOrb(who, itOrbUndeath)) c->monst = moFriendlyGhost;
     if(c->land == laKraken && !c->item) c->item = itKraken;
     kills[moKrakenH]++;
-    if(checkOrb(who, itOrbStone)) c->wall = waNone;
+    if(!do_not_touch_this_wall(c) && checkOrb(who, itOrbStone)) c->wall = waNone;
     forCellEx(c1, c) 
       if(c1->monst == moKrakenT) {
         changes.ccell(c1);        
         drawParticles(c, minf[moKrakenT].color, 16);
         c1->monst = moNone;
-        if(checkOrb(who, itOrbStone)) {
+        if(!do_not_touch_this_wall(c1) && checkOrb(who, itOrbStone)) {
           if(isWatery(c1))
             c1->wall = waNone;
           else

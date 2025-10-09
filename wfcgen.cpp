@@ -220,7 +220,7 @@ EX void invoke() {
         c->wall = p.first[0];
         c->wparam = p.first[0];
         forCellEx(c1, c) {
-          if(c1->wall != waBarrier) 
+          if(c1->wall != waBarrier && c1->land == c->land)
             c1->wparam = c1->wall = p.first[idx];
           idx++;
           }

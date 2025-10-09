@@ -123,6 +123,18 @@ vector<cheatkey> cheats = {
     kills[moCultist] = qkills;
     kills[moTroll] = qkills;
     }},
+  cheatkey{'H', "toggle hold of orb powers", [] {
+    if(cheat_items_enabled) {
+      cheat_items_enabled = false;
+      addMessage(XLAT("Hold of orb powers disabled!"));
+      }
+    else {
+      cheat_items = items;
+      cheat_items_enabled = true;
+      cheater++;
+      addMessage(XLAT("Hold of orb powers enabled!"));
+      }
+    }},
   cheatkey{'M', "deplete orb powers", [] {
     for(int i=0; i<ittypes; i++) 
       if(itemclass(eItem(i)) == IC_ORB) 
