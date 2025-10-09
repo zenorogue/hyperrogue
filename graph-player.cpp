@@ -389,8 +389,9 @@ EX void drawPlayer_animal(eMonster m, cell *where, const shiftmatrix& V0, color_
     }
 
   if(id == pshBunny) {
-    queuepoly(VAHEAD, cgi.shBunnyEar, fc(150, cs.haircolor, 2));
-    queuepoly(VAHEAD * MirrorY, cgi.shBunnyEar, fc(150, cs.haircolor, 2));
+    auto EAR = GDIM == 2 ? VAHEAD : V * lzpush(cgi.AHEAD + cgi.human_height * -0.15);
+    queuepoly(EAR, cgi.shBunnyEar, fc(150, cs.haircolor, 2));
+    queuepoly(EAR * MirrorY, cgi.shBunnyEar, fc(150, cs.haircolor, 2));
     }
 
   if(id == pshDog) {
