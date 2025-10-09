@@ -13,6 +13,7 @@ bool displaying = false;
 bool block_selfedges = false;
 bool block_cones = false;
 bool block_mirrors = false;
+int min_distance = 1;
 
 bool dedup_rotation = true;
 bool dedup_mirror = true;
@@ -303,6 +304,8 @@ void recurse() {
         skip: ;
         }
       }
+
+    else if(min_distance > 1 && celldistance(p->parent.at, p->where) < min_distance) return;
     }
   if(seen_hashes.count(hash)) return;
   seen_hashes.insert(hash);
@@ -358,6 +361,8 @@ void recurse() {
   indenter ind(2);
 
   for(auto li: active) if(li != cw0.at) {
+
+    if(min_distance > 1 && celldistance(li, cw0.at) < min_distance) continue;
 
     auto tryout = [&] (cellwalker cw1) {
       aq.at(cw1.at).unified_to_start = true;
@@ -530,6 +535,7 @@ void show_auto_dialog() {
   add_edit(block_selfedges);
   add_edit(block_cones);
   add_edit(block_mirrors);
+  add_edit(min_distance);
   add_edit(allow_nonorientable);
   add_edit(dedup_rotation);
   add_edit(dedup_focus);
@@ -607,7 +613,9 @@ auto aqhook =
 + arg::add3("-d:aq", [] { arg::launch_dialog(show_dialog); })
 + addHook(hooks_configfile, 100, [] {
     param_i(aq_max, "aq_max")
-    -> editable(1, 500, 10, "limit on the quotient size", "", 'm');
+    -> editable(1, 500, 10, "limit on the quotient size", "", 'l');
+    param_i(min_distance, "aq_min_distance", 1)
+    -> editable(1, 10, 1, "minimum distance between identified tiles", "", 'd');
     param_b(block_cones, "aq_block_cones")
     -> editable("block cone points", 'c');
     param_b(block_selfedges, "aq_block_selfedges")
