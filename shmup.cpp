@@ -1247,8 +1247,11 @@ void movePlayer(monster *m, int delta) {
       cwt.at = c2; afterplayermoved();
       if(c2->item && c2->land == laAlchemist) c2->wall = m->base->wall;
       #if CAP_COMPLEX2
-      if(m->base->wall == waRoundTable)
+      if(m->base->wall == waRoundTable) {
+        cwt.at = m->base;
         camelot::roundTableMessage(c2);
+        cwt.at = c2;
+        }
       #endif
       if(c2->wall == waCloud || c2->wall == waMirror) {
         visibleFor(500);
