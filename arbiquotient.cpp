@@ -489,6 +489,7 @@ bool aq_drawcell(cell *c, const shiftmatrix& V) {
 
 void show_auto_dialog() {
   cmode = sm::SIDE | sm::DIALOG_STRICT_X;
+  if(running) cmode |= sm::NO_EXIT;
   gamescreen();
   dialog::init(XLAT("auto-generate quotients"));
   add_edit(aq_max);
@@ -515,7 +516,6 @@ void show_auto_dialog() {
   if(running) dialog::addBreak(100);
   else dialog::addBack();
   dialog::display();
-  // todo actually prevent backing
   }
 
 EX void enable_quotient_data(const struct qdata& q) {
