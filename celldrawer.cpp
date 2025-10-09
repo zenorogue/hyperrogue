@@ -2361,7 +2361,7 @@ void celldrawer::draw_wall_full() {
       auto col = fcol;
       if(patterns::whichShape == '^') poly_outline = darkena(fcol, fd, flooralpha);
       if(sha.top == SIDE::WALL) col = wcol_star;
-      else if(sha.top >= SIDE::RED1) col = wcol;
+      else if(sha.top >= SIDE::RED1 && wmspatial) col = wcol;
 
       auto sf = sha.top; if(!wmspatial) sf = SIDE::FLOOR;
 
