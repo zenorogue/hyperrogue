@@ -117,6 +117,11 @@ struct intslider {
   int max;
   };
 
+struct quotient_data {
+  string name;
+  vector<int> connections;
+  };
+
 struct arbi_tiling {
 
   int order;
@@ -162,6 +167,8 @@ struct arbi_tiling {
   eGeometryClass get_class() { return get_geometry().kind; }
 
   ld scale();
+
+  vector<quotient_data> quotients;
   };
 #endif
 
@@ -961,6 +968,7 @@ EX void set_defaults(arb::arbi_tiling& c, bool keep_sliders, string fname) {
     c.sliders.clear();
     c.intsliders.clear();
     }
+  c.quotients.clear();
   }
 
 EX void load(const string& fname, bool load_as_slided IS(false), bool keep_sliders IS(false)) {
@@ -986,6 +994,7 @@ EX void load(const string& fname, bool load_as_slided IS(false), bool keep_slide
     c.shapes[ai].flags |= f;
     ep.force_eat(")");
     };
+  string quotname = "unnamed";
   while(true) {
 
     ep.extra_params["distunit"] = distunit;
@@ -995,6 +1004,7 @@ EX void load(const string& fname, bool load_as_slided IS(false), bool keep_slide
     if(ep.next() == 0) break;
     if(ep.eat("#")) {
       bool doubled = ep.eat("#");
+      bool is_quotname = ep.eat("/");
       while(ep.eat(" ")) ;
       string s = "";
       while(ep.next() >= 32) s += ep.next(), ep.at++;
@@ -1005,6 +1015,7 @@ EX void load(const string& fname, bool load_as_slided IS(false), bool keep_slide
           c.comment += "\n";
           }
         }
+      if(is_quotname) quotname = s;
       }
     else if(ep.eat("c2(")) {
       ld curv = ep.rparse(0);
@@ -1235,6 +1246,17 @@ EX void load(const string& fname, bool load_as_slided IS(false), bool keep_slide
       verify_index(i, c.shapes, ep);
       ep.force_eat(")");
       throw connection_debug_request(i);
+      }
+    else if(ep.eat("quotient(")) {
+      c.quotients.emplace_back(quotient_data{quotname, {}});
+      auto& con = c.quotients.back().connections;
+      con.push_back(ep.iparse(0));
+      while(true) {
+        if(ep.eat("^")) con.back() ^= quotientspace::symmask;
+        else if(ep.eat(",")) con.push_back(ep.iparse(0));
+        else if(ep.eat(")")) break;
+        else throw hr_parse_exception("expecing ), ^ or comma, " + ep.where());
+        }
       }
     else if(ep.eat("stretch_shear(")) {
       ld stretch = ep.rparse(0);

@@ -203,12 +203,7 @@ string statstring() {
 
 set<buckethash_t> seen_outputs;
 
-struct qdata {
-  string name;
-  vector<int> connections;
-  };
-
-vector<qdata> all_found;
+auto& all_found = arb::current.quotients;
 
 void create() {
   clear_all();
@@ -357,7 +352,7 @@ void recurse() {
     println(hlog, "[", isize(all_found), "] ", bqo);
     auto ss = statstring();
     if(ss == "ERROR") return;
-    all_found.push_back(qdata{ss + format(" %016lX", (long) vhash), bqo});
+    all_found.push_back(arb::quotient_data{ss + format(" %016lX", (long) vhash), bqo});
     if(!(cgflags & qCLOSED)) return;
     }
   indenter ind(2);
@@ -487,6 +482,43 @@ bool aq_drawcell(cell *c, const shiftmatrix& V) {
   return false;
   }
 
+string export_filename = "tessellations/exported.tes";
+
+EX bool export_tes(string fname) {
+  fhstream f(fname, "wt");
+  if(!f.f) return false;
+  auto& ac = arb::current_or_slided();
+  println(f, "## ", ac.name, " (exported)");
+  println(f, (cgflags & qAFFINE) ? "a2." : hyperbolic ? "h2." : euclid ? "e2." : "s2.");
+  auto& shs = ac.shapes;
+  for(int i=0; i<isize(shs); i++) {
+    print(f, "tile(");
+    for(int j=0; j<shs[i].cycle_length; j++)
+      print(f, format("%.15f,%.15f,", shs[i].edges[j], shs[i].angles[j]));
+    print(f, "*", shs[i].size() / shs[i].cycle_length);
+    if(shs[i].symmetric_value) print(f, ",|", shs[i].symmetric_value);
+    println(f, ")");
+    }
+  for(int i=0; i<isize(shs); i++) {
+    for(int j=0; j<shs[i].cycle_length; j++) {
+      auto& co = shs[i].connections[j];
+      println(f, "c(", i, ",", j, ",", co.sid, ",", co.eid, ",", co.mirror, ")");
+      }
+    }
+  for(auto& af: all_found) {
+    println(f, "#/ ", af.name);
+    print(f, "quotient(");
+    int ct = 0;
+    for(auto v: af.connections) {
+      if(ct++) print(f, ",");
+      print(f, v &~ quotientspace::symmask);
+      if(v & quotientspace::symmask) print(f, "^");
+      }
+    println(f, ")");
+    }
+  return true;
+  }
+
 void show_auto_dialog() {
   cmode = sm::SIDE | sm::DIALOG_STRICT_X;
   if(running) cmode |= sm::NO_EXIT;
@@ -512,13 +544,19 @@ void show_auto_dialog() {
       }
     running = false;
     });
-  dialog::addSelItem(XLAT("quotients found"), its(isize(all_found)), 'n');
+  dialog::addSelItem(XLAT("export the quotients found"), its(isize(all_found)), 'E');
+  dialog::add_action([] {
+    dialog::openFileDialog(export_filename, XLAT("export to file:"), ".tes",
+      [] () {
+        return export_tes(export_filename);
+        });
+    });
   if(running) dialog::addBreak(100);
   else dialog::addBack();
   dialog::display();
   }
 
-EX void enable_quotient_data(const struct qdata& q) {
+EX void enable_quotient_data(const struct arb::quotient_data& q) {
   stop_game();
   cgflags |= qANYQ | qCLOSED;
   quotient_data = q.connections;
@@ -563,6 +601,7 @@ auto aqhook =
   arg::add3("-aq-test", [] { try { default_list(); create(); } catch(aq_overflow&) { println(hlog, "AQ overflow"); } })
 + arg::add3("-aq-auto", [] { displaying = false; running = true; arg::shift(); auto_create(arg::argi()); })
 + arg::add3("-aq-enable", [] { arg::shift(); enable_by_id(arg::argi()); })
++ arg::add3("-aq-export", [] { arg::shift(); export_tes(arg::args()); })
 + arg::add3("-d:aq", [] { arg::launch_dialog(show_dialog); })
 + addHook(hooks_configfile, 100, [] {
     param_i(aq_max, "aq_max")
