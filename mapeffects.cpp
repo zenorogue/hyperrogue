@@ -160,7 +160,7 @@ EX bool earthFloor(cell *c) {
   if(c->monst) return false;
   if(c->wall == waDeadwall) { c->wall = waDeadfloor; return true; }
   if(c->wall == waDune) { c->wall = waNone; return true; }
-  if(c->wall == waStone && c->land != laTerracotta) { c->wall = waNone; return true; }
+  if(c->wall == waStone && !among(c->land, laTerracotta, laMercuryRiver, laVariant)) { c->wall = waNone; return true; }
   if(c->wall == waAncientGrave || c->wall == waFreshGrave || c->wall == waRuinWall) {
     c->wall = waNone;
     return true;
@@ -259,11 +259,11 @@ EX bool earthWall(cell *c) {
     c->wall = waChasm;
     return true;
     }
-  if(c->wall == waNone && c->land == laTerracotta) {
+  if(c->wall == waNone && among(c->land, laTerracotta, laMercuryRiver)) {
     c->wall = waMercury;
     return true;
     }
-  if(c->wall == waArrowTrap && c->land == laTerracotta) {
+  if(c->wall == waArrowTrap && among(c->land, laTerracotta, laMercuryRiver)) {
     destroyTrapsOn(c);
     c->wall = waMercury;
     return true;
