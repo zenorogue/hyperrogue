@@ -33,6 +33,8 @@ EX bool canPickupItemWithMagnetism(cell *c, cell *from) {
     return false;
   if(c->item == itCompass && from->item) 
     return false;
+  if(saved_tortoise_on(c))
+    return false;
   return true;
   }
 
@@ -44,7 +46,7 @@ EX bool doPickupItemsWithMagnetism(cell *c) {
       cw += wstep;
       for(int j=1; j<c3->type; j++) {
         cell *c4 = (cw+j).peek();
-        if(!isNeighbor(c, c4) && c3->item && !c4->item && passable(c4, c3, ZERO)) {
+        if(!isNeighbor(c, c4) && c3->item && !c4->item && !saved_tortoise_on(c3) && passable(c4, c3, ZERO)) {
           changes.ccell(c3);
           changes.ccell(c4);
           moveItem(c3, c4, false);
