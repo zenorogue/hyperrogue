@@ -1272,6 +1272,20 @@ bool alchMayDuplicate(eWall w) {
   return !isDie(w) && w != waBoat && w != waArrowTrap;
 }
 
+EX bool winter_collect(cell *c2) {
+  int qty = 0;
+  if(items[itOrbWinter])
+    forCellEx(c3, c2) if(c3->wall == waIcewall && c3->item) {
+      changes.ccell(c3);
+      markOrb(itOrbWinter);
+      eItem it = c3->item;
+      if(collectItem(c3, cwt.at)) qty++;
+      if(!c3->item)
+        animate_item_throw(c3, c2, it);
+      }
+  return qty;
+  }
+
 bool pcmove::perform_actual_move() {
   cell*& c2 = mi.t;
   changes.at_commit([&] {
@@ -1327,17 +1341,8 @@ bool pcmove::perform_actual_move() {
     invismove = false;
     cwt.at->wall = waIcewall;
     }
-  
-  if(items[itOrbWinter])
-    forCellEx(c3, c2) if(c3->wall == waIcewall && c3->item) {
-      changes.ccell(c3);
-      markOrb(itOrbWinter);
-      eItem it = c3->item;
-      if(collectItem(c3, cwt.at))
-        return true;
-      if(!c3->item)
-        animate_item_throw(c3, c2, it);
-      }
+
+  if(winter_collect(c2)) return true;
   
   movecost(cwt.at, c2, 2);
 

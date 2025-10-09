@@ -1294,6 +1294,7 @@ void movePlayer(monster *m, int delta) {
         firetraplist.emplace(ticks + 800, c2);
         }
   
+      winter_collect(c2);
       if(c2->item == itOrbYendor && !peace::on) yendor::check(c2);
       collectItem(c2, m->base);
       movecost(m->base, c2, 2);
