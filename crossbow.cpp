@@ -448,6 +448,7 @@ EX void shoot() {
 
     if(!canAttack(cf, who, c, m, attackflags)) {
       if(among(m, moSleepBull, moHerdBull)) {
+        changes.ccell(c);
         addMessage(XLAT("%The1 is enraged!", m));
         c->monst = moRagingBull;
         hit_anything = true;
