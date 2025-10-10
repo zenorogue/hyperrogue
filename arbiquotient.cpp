@@ -356,6 +356,12 @@ void auto_create(int num) {
     }
 
   for(auto p: preunify) {
+    if(!aq.count(p.at)) {
+      unifications.clear();
+      addMessage("preunify outside of the searched region");
+      return;
+      }
+
     unifications.emplace_back(cw0, p);
     aq.at(p.at).unified_to_start = true;
     }
