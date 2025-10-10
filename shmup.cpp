@@ -1428,7 +1428,7 @@ void movePlayer(monster *m, int delta) {
       }
     
     playerfire[cpid] = true;
-    m->nextshot = curtime + (250 + 250 * players) * (bow::crossbow_mode() ? 4 : 1);
+    m->nextshot = curtime + (250 + 250 * players) * (bow::crossbow_mode() ? 4 : 1) / (items[itOrbSpeed] ? 2 : 1);
     
     turncount++;    
     shootBullet(m);
@@ -2600,6 +2600,8 @@ EX int pvp_delay = 2000;
 EX int count_pauses;
 EX bool in_pause;
 
+EX int speed_saving;
+
 EX void turn(int delta) {
 
   if(split_screen && subscreens::split( [delta] () { turn(delta); })) return;
@@ -2653,6 +2655,11 @@ EX void turn(int delta) {
   collisions.clear();
 
   curtime += delta;
+  if(items[itOrbSpeed]) {
+    curtime += speed_saving / 2;
+    speed_saving += delta;
+    curtime -= speed_saving / 2;
+    }
 
   handleInput(delta);
   
@@ -2763,7 +2770,7 @@ EX void turn(int delta) {
       if(items[itOrbBull]) for(int p=0; p<players; p++) 
         if(bulltime[p] < curtime - 600) orbbull::gainBullPowers();
         
-      if(!((items[itOrbSpeed]/players) & 1)) {
+      if(true) {
         if(havewhat&HF_KRAKEN) kraken::attacks(), groupmove(moKrakenH, 0);     
         moveworms();
         moveivy();
@@ -2952,6 +2959,7 @@ EX void clearMemory() {
   clearMonsters();
   while(!traplist.empty()) traplist.pop();
   curtime = 0;
+  speed_saving = 0;
   nextmove = 0;
   nextdragon = 0;
   visibleAt = 0;
