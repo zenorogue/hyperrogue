@@ -1081,6 +1081,8 @@ EX void menu() {
         dialog::add_action([] { centering = eCentering::edge; fullcenter(); });
         dialog::addBoolItem(XLAT("vertex"), centering == eCentering::vertex, 'V');
         dialog::add_action([] { centering = eCentering::vertex; fullcenter(); });
+        dialog::addItem(XLAT("exhaustive list of viewpoints"), 'L');
+        dialog::add_action(generate_viewpoints);
         };
       });
     }
@@ -1114,6 +1116,73 @@ EX void menu() {
     });
   dialog::addBack();
   dialog::display();
+  }
+
+EX vector<cellwalker> viewpoints;
+
+EX set<size_t> ids_seen;
+
+EX size_t get_id(cell *c) {
+  if(is_highly_symmetric(geometry)) return shvid(c);
+  if(closed_manifold) return (size_t) c;
+  return shvid(c);
+  }
+
+EX int num_directions(cell *c) {
+  vector<int> nid;
+  for(int i=0; i<c->type; i++) nid.push_back(get_id(c->cmove(i)));
+  for(int a=1; a<c->type; a++) {
+    bool ok = true;
+    for(int b=a; b<c->type; b++) if(nid[b] != nid[b-a]) ok = false;
+    if(ok) return a;
+    }
+  return c->type;
+  }
+
+int viewpoint_id;
+
+EX void generate_viewpoints() {
+  vector<cellwalker> vqueue;
+  viewpoints.clear();
+  vqueue.clear();
+  ids_seen.clear();
+  auto enqueue = [&] (cellwalker cw) {
+    auto id = get_id(cw.at);
+    println(hlog, cw, " has id ", int(id));
+    if(ids_seen.count(id)) return;
+    ids_seen.insert(id);
+    vqueue.push_back(cw);
+    };
+  enqueue(cwt);
+  for(int i=0; i<isize(vqueue); i++) {
+    cellwalker cw = vqueue[i];
+    int num = num_directions(cw.at);
+    println(hlog, cw, " has ", num);
+    for(int j=0; j<num; j++) {
+      cellwalker cw1 = cw + j;
+      viewpoints.push_back(cw1);
+      println(hlog, "enqueueing ", cw1+wstep);
+      enqueue(cw1+wstep);
+      }
+    }
+  if(viewpoints.empty()) {
+    addMessage("No viewpoints found.");
+    return;
+    }
+  viewpoint_id = 0;
+  println(hlog, "viewpoints = ", viewpoints);
+  dialog::editNumber(viewpoint_id, 0, isize(viewpoints) * 3, 1, 1, XLAT("viewpoints"),
+    XLAT("You can pick the viewpoint."));
+  dialog::get_di().reaction = [] {
+    auto bak = cwt;
+    auto v = viewpoint_id;
+    if(gmod(v, 3) == 0) centering = eCentering::face;
+    if(gmod(v, 3) == 1) centering = eCentering::edge;
+    if(gmod(v, 3) == 2) centering = eCentering::vertex;
+    cwt = viewpoints[gmod(v/3, isize(viewpoints))];
+    fullcenter();
+    cwt = bak;
+    };
   }
 
 EX }
