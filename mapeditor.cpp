@@ -562,6 +562,10 @@ EX namespace mapstream {
         }
       else
         f.write(arb::current.filename);
+      int qid = -1;
+      auto& quo = arb::current.quotients;
+      for(int id=0; id<isize(quo); id++) if(arbiquotient::quotient_data == quo[id].connections) qid = id;
+      f.write(qid);
       }
     if(geometry == gNil) {
       f.write(S7);
@@ -689,6 +693,11 @@ EX namespace mapstream {
         stop_game();
         }
       if(rk) rulegen::prepare_rules();
+
+      if(vernum >= 0xAA26) {
+        int qid; f.read(qid);
+        if(qid >= 0) arbiquotient::enable_by_id(qid);
+        }
       }
     #if CAP_ARCM
     if(geometry == gArchimedean) {
