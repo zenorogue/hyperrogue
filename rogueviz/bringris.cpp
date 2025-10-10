@@ -1294,6 +1294,17 @@ void geometry_menu(bool for_scores) {
   dialog::addBreak(100);
   int total_stars = 0;
   for(int i=0; i<isize(bgeoms); i++) total_stars += bgeoms[i].stars;
+
+  #if RVCOL
+  bool all_unlocked = true;
+  static bool just_once = true;
+  for(int i=0; i<isize(bgeoms); i++) if(total_stars < bgeoms[i].stars_needed) all_unlocked = false;
+  if(all_unlocked && just_once) {
+    rogueviz::rv_achievement("SECRETGEOMETRY");
+    just_once = false;
+    }
+  #endif
+
   for(int i=0; i<isize(bgeoms); i++) {
     if(total_stars >= bgeoms[i].stars_needed || !stars_enabled || unlock_all) {
       dialog::addTitle(bgeoms[i].name, i == c_geom ? 0xFF00 : 0xFF0000, 150);
