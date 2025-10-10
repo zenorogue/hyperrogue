@@ -1848,11 +1848,11 @@ EX int orbcharges(eItem it) {
   }
 
 EX bool isShmupLifeOrb(eItem it) {
-  return 
-    it == itOrbLife || it == itOrbFriend ||
-    it == itOrbNature || it == itOrbEmpathy ||
-    it == itOrbUndeath || it == itOrbLove ||
-    it == itOrbDomination || it == itOrbGravity; 
+  return among(it,
+    itOrbLife, itOrbFriend, itOrbNature, itOrbEmpathy,
+    itOrbUndeath, itOrbLove, itOrbDomination, itOrbGravity,
+    itOrbWoods, itOrbChaos, itOrbImpact
+    );
   }
 
 EX void makelava(cell *c, int i) {
