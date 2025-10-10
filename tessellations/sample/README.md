@@ -110,6 +110,28 @@ enable "configure FPP automatically", and also "make the tiles flat"; then leave
 * If the tessellation is invalid, HyperRogue will invoke a debugger, which lets you see the tiles you have defined and move according to their connections. You can also invoke this debugger
   maually with `debug(tile_index)`.
 
+# Quotient orbifolds
+
+You can also play on quotient orbifolds by using the "quotient space" option in the "experiment with geometry" menu. These quotient orbifolds can be loaded from the tes file, or generated
+using the "auto-generate" option.
+
+Mathematically, these orbifolds are obtained by picking a subgroup of the group of isometries of the tiling, and identifying the orbits of tiles as single tiles. It is not allowed to
+create cone points and mirrors in the centers of faces (in other words, identify a tile with another rotation/symmetry of itself -- HyperRogue does not know how to deal with that), but
+cone points on edge centers and vertices are allowed.
+
+In the auto-generate menu, you can configure the limit on the search algorithm, "block" various kinds of singularities if you do not want them, disallow non-orientable quotients or
+ones which identify tiles which are too close, disable deduplication (which removes duplicates which differ only by irrelevant aspects), and export the quotients obtained to a file.
+If you move a bit before going into this menu, you can also "preunify" the tile and orientation the player character is currently on.
+
+The exported file will include a copy of the definition of shapes, although it may look different due to listing all the numbers as floating point values, and include copies of shapes
+(HyperRogue generates such copies to make football colorings work and avoid using reflections). Replace with the original definitions should be fine.
+
+You can see the files `44.tes` and `73.tes` as examples of the format. The format consists of a line starting with `#/ description`, and then list all the connections of the first tile
+in the orbifold, then all the connections of the second tile, and so on. Connections are indexed from 0, and every connection is simply the index of another edge it connects to.
+If a connection is mirrored, the symbol `^` appears after the index. The first tile is always of the first type listed in the file, and the other tiles are always listed in the order
+of appearance -- thus, for example, the second tile will be always the first connection of the first tile that does not connect to itself. This way, there is no need to list the types
+of tiles.
+
 # How to make the tessellations look good
 
 Normally, when you choose to load a tes file, a game of HyperRogue is run on the tiling selected. Which might be not what you wanted. Here are some hints for making nice pictures.

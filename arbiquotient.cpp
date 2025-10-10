@@ -595,6 +595,8 @@ EX void show_dialog() {
     dialog::add_action([] { disable_quotient_data(); });
     }
   else dialog::addBreak(100);
+  dialog::addItem("help", 'h');
+  dialog::add_action([] { open_url("https://github.com/zenorogue/hyperrogue/blob/master/tessellations/sample/README.md"); });
   dialog::addBack();
   dialog::display();
   }
