@@ -487,7 +487,7 @@ EX bool export_tes(string fname) {
     for(auto v: af.connections) {
       if(ct++) print(f, ",");
       print(f, v &~ quotientspace::symmask);
-      if(v & quotientspace::symmask) print(f, "^");
+      if(v & quotientspace::symmask) print(f, "$");
       }
     println(f, ")");
     }

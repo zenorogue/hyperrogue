@@ -128,7 +128,7 @@ The exported file will include a copy of the definition of shapes, although it m
 
 You can see the files `44.tes` and `73.tes` as examples of the format. The format consists of a line starting with `#/ description`, and then list all the connections of the first tile
 in the orbifold, then all the connections of the second tile, and so on. Connections are indexed from 0, and every connection is simply the index of another edge it connects to.
-If a connection is mirrored, the symbol `^` appears after the index. The first tile is always of the first type listed in the file, and the other tiles are always listed in the order
+If a connection is mirrored, the symbol `$` appears after the index. The first tile is always of the first type listed in the file, and the other tiles are always listed in the order
 of appearance -- thus, for example, the second tile will be always the first connection of the first tile that does not connect to itself. This way, there is no need to list the types
 of tiles.
 

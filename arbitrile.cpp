@@ -1252,7 +1252,7 @@ EX void load(const string& fname, bool load_as_slided IS(false), bool keep_slide
       auto& con = c.quotients.back().connections;
       con.push_back(ep.iparse(0));
       while(true) {
-        if(ep.eat("^")) con.back() ^= quotientspace::symmask;
+        if(ep.eat("$")) con.back() ^= quotientspace::symmask;
         else if(ep.eat(",")) con.push_back(ep.iparse(0));
         else if(ep.eat(")")) break;
         else throw hr_parse_exception("expecing ), ^ or comma, " + ep.where());
