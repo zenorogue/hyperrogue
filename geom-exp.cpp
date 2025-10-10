@@ -459,6 +459,13 @@ EX string dim_name() {
   return " (" + its(WDIM) + "D)";
   }
 
+EX bool is_highly_symmetric(eGeometry g) {
+  if(among(g, gFieldQuotient, gBolza, gKleinQuartic, gBolza2, gMacbeath, gSeifertWeber, gHomologySphere, gSeifertCover)) return true;
+  if(quotient && among(g, gArnoldCat, gNil)) return true;
+  if(mhybrid) return PIU(is_highly_symmetric(g));
+  return false;
+  }
+
 #if CAP_THREAD && MAXMDIM >= 4
 EX void showQuotientConfig3() {
 
