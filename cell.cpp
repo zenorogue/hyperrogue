@@ -1758,6 +1758,7 @@ EX int auto_compute_range(cell *c) {
     println(hlog, "previous ball size = ", z);
     }
   if(isize(cl.dists) * z > expected_count * expected_count) d--;
+  if(d <= 0) d = 1;
   return ginf[geometry].distlimit[0] = cgi.base_distlimit = d;
   }
 
