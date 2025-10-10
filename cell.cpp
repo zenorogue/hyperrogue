@@ -1752,7 +1752,7 @@ EX int auto_compute_range(cell *c) {
   int z = isize(cl.dists);
   int d = cl.dists.back();
   while(cl.dists[z-1] == d) z--;
-  if(true) { // if(cgflags & DF_GEOM) {
+  if(cgflags & DF_GEOM) {
     println(hlog, "last distance = ", cl.dists.back());
     println(hlog, "ball size = ", isize(cl.dists));
     println(hlog, "previous ball size = ", z);
