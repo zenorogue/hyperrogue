@@ -608,15 +608,15 @@ auto aqhook =
 + arg::add3("-d:aq", [] { arg::launch_dialog(show_dialog); })
 + addHook(hooks_configfile, 100, [] {
     param_i(aq_max, "aq_max")
-    -> editable(1, 500, 10, "limit on the quotient size", "", 'l');
+    -> editable(1, 500, 10, "number of tiles to search in", "", 'l');
     param_i(min_distance, "aq_min_distance", 1)
     -> editable(1, 10, 1, "minimum distance between identified tiles", "", 'd');
     param_b(block_cones, "aq_block_cones")
-    -> editable("block cone points", 'c');
+    -> editable("block cone points on vertices", 'c');
     param_b(block_selfedges, "aq_block_selfedges")
-    -> editable("block self-edges", 'e');
+    -> editable("block cone points on edge centers", 'e');
     param_b(block_mirrors, "aq_block_mirrors")
-    -> editable("block mirrors", 'm');
+    -> editable("block mirrors on edges", 'm');
     param_b(allow_nonorientable, "aq_allow_nonorientable")
     -> editable("allow nonorientable", 'n');
     param_b(dedup_rotation, "aq_dedup_rotation")
