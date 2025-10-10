@@ -462,7 +462,7 @@ level longtrack(
     // the solver[0.25] result is 1:08.56 (reduced to 1:08.45 by removing some points)
     goal{0xFFD500, "Collect the triangle in below 1:15", basic_check(75, 999), "LONGTRACK", "", award_stars(100, 70, 75)},
     // the solver[0.25] + some manual modifications achieves 1:37.44
-    goal{0xFF4040, "Stop where the triangle is in below 1:45", fullstop_check(75, 999), "LONGTRACKSTOP", "", award_stars(100, 100, 105)},
+    goal{0xFF4040, "Stop where the triangle is in below 1:45", fullstop_check(105, 999), "LONGTRACKSTOP", "", award_stars(100, 100, 105)},
     // the solver[0.25] result is 1:45.52
     goal{0x303030, "Reach the triangle without going on the right side of the road below 2:00", yplus_check(120, 999), "LONGTRACKLEFT", "", award_stars(100, 105, 120)},
 
