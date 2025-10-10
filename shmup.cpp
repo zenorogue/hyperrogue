@@ -1623,16 +1623,14 @@ EX eItem targetRangedOrb(orbAction a) {
     if(a == roCheck) return itOrbPsi;
     addMessage(XLAT("You kill %the1 with a mental blast!", mousetarget->type));
     killMonster(mousetarget, moPlayer);
-    items[itOrbPsi] -= 30;
-    if(items[itOrbPsi]<0) items[itOrbPsi] = 0;
+    useupOrb(itOrbPsi, 30);
     return itOrbPsi;
     }
   
   if(items[itOrbStunning] && shmup::mousetarget && sqdist(mouseh, shmup::mousetarget->pat*C0) < SCALE2 * .1) {
     if(a == roCheck) return itOrbStunning;
     mousetarget->stunoff = curtime + 1000;
-    items[itOrbStunning] -= 10;
-    if(items[itOrbStunning]<0) items[itOrbStunning] = 0;
+    useupOrb(itOrbStunning, 10);
     return itOrbStunning;
     }
   
