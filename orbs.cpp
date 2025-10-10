@@ -1851,7 +1851,7 @@ EX bool isShmupLifeOrb(eItem it) {
   return among(it,
     itOrbLife, itOrbFriend, itOrbNature, itOrbEmpathy,
     itOrbUndeath, itOrbLove, itOrbDomination, itOrbGravity,
-    itOrbWoods, itOrbChaos, itOrbImpact
+    itOrbWoods, itOrbChaos, itOrbImpact, itOrbPlague
     );
   }
 
