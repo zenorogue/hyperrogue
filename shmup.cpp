@@ -1634,6 +1634,22 @@ EX eItem targetRangedOrb(orbAction a) {
     return itOrbStunning;
     }
   
+  if(items[itOrbMorph] && shmup::mousetarget && sqdist(mouseh, shmup::mousetarget->pat*C0) < SCALE2 * .1) {
+    if(a == roCheck) return itOrbMorph;
+
+    auto orig = mousetarget->type;
+    auto target = pick_poly_monster(orig);
+    addMessage(XLAT("You polymorph %the1 into %the2!", orig, target));
+    mousetarget->type = target;
+    mousetarget->parent = nullptr; /* if we morph a missile */
+    useupOrb(itOrbMorph, 3);
+    if(orig == moPlayer) {
+      achievement_final(true);
+      showMissionScreen();
+      }
+    return itOrbMorph;
+    }
+
   if(on && items[itOrbDragon]) {
     if(a == roCheck) return itOrbDragon;
     shoot(itOrbDragon, wpc);
