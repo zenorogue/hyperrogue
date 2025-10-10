@@ -167,6 +167,9 @@ bool turn(int delta) {
     for(int i=0; i<delta * simulation_speed; i++) {
       curlev->history.push_back(curlev->current);
       curlev->current.be_consistent();
+      #if RVCOL
+      auto goals = curlev->current.goals;
+      #endif
       bool b = curlev->current.tick(curlev);
       running = b;
       if(!b) {
@@ -175,7 +178,6 @@ bool turn(int delta) {
         break;
         }
       #if RVCOL
-      auto goals = curlev->current.goals;
       if(b) {
         goals = curlev->current.goals &~goals;
         int gid = 0;
