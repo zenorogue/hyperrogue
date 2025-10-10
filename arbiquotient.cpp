@@ -378,9 +378,9 @@ void auto_create(int num) {
   println(hlog, "solutions found: ", isize(all_found));
   }
 
-vector<int> quotient_data;
+EX vector<int> quotient_data;
 
-void enable_by_id(int id) {
+EX void enable_by_id(int id) {
   if(id >= isize(all_found)) throw hr_exception("not that many AQ quotients known");
   enable_quotient_data(all_found[id]);
   }
