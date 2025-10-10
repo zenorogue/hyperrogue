@@ -868,6 +868,8 @@ void movePlayer(monster *m, int delta) {
     }
   #endif
   
+  bool stunned = m->stunoff > curtime;
+
   playerturn[cpid] = mturn * delta / 150.0;
   
   godir[cpid] = 0;
@@ -986,6 +988,8 @@ void movePlayer(monster *m, int delta) {
   
   if(playergo[cpid] && markOrb(itOrbDash)) playergo[cpid] *= 1.5;
   if(playergo[cpid] && markOrb(itCurseFatigue)) playergo[cpid] *= 0.75;
+
+  if(playergo[cpid] && stunned) playergo[cpid] *= -0.5;
 
   bool go = false; 
   
@@ -1402,7 +1406,7 @@ void movePlayer(monster *m, int delta) {
     }
   #endif
   
-  if(shotkey && canmove && curtime >= m->nextshot) {
+  if(shotkey && canmove && curtime >= m->nextshot && !stunned) {
 
     visibleFor(500);
     if(items[itOrbFlash]) {
@@ -3133,6 +3137,8 @@ bool celldrawer::draw_shmup_monster() {
           if(mapeditor::drawplayer) {
             if(m->fragoff > curtime)
               drawShield(view, itWarning);
+            if(m->stunoff > curtime)
+              drawStunStars(view, 1 + (m->stunoff - curtime-1)/300);
             drawMonsterType(moPlayer, c, view, 0xFFFFFFC0, m->footphase, 0xFFFFFFC0);
             }
           }
