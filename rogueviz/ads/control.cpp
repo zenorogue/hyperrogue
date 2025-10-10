@@ -112,7 +112,7 @@ ld read_movement() {
   auto& axes = multi::axes_for(0);
 
   ld mdx = axes[0]/30000.;
-  ld mdy = axes[1]/30000.;
+  ld mdy = -axes[1]/30000.;
   #if CAP_VR
   if(vrhr::active()) {
     mdy -= vrhr::vrgo_y;
