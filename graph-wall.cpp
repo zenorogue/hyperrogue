@@ -17,7 +17,7 @@ EX colortable distcolors = {
   0xA0A000, 0xA000A0, 0x00A0A0, 0xFFD500
   };
 
-EX const char* minetexts[8] = {
+EX const char* minetexts[15] = {
   "No mines next to you.",
   "A mine is next to you!",
   "Two mines next to you!",
@@ -25,7 +25,14 @@ EX const char* minetexts[8] = {
   "Four mines next to you!",
   "Five mines next to you!",
   "Six mines next to you!",
-  "Seven mines next to you!"
+  "Seven mines next to you!",
+  "Eight mines next to you!",
+  "Nine mines next to you!",
+  "Ten mines next to you!",
+  "Eleven mines next to you!",
+  "Twelve mines next to you!",
+  "Thirteen mines next to you!",
+  "Fourteen mines next to you!"
   };
 
 EX map<cell*, int> fake_minecount;

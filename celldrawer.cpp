@@ -1433,6 +1433,8 @@ EX void draw_mine_numbers(int mines, const shiftmatrix& V, int ct6) {
   if(mines == 0 && mine_zero_display < (WDIM == 3 ? 1 : 2)) return;
   if(numerical_minefield) {
     string label = its(mines);
+    dynamicval<color_t> dc(poly_outline);
+    if(mines >= isize(minecolors)) poly_outline = darkena(minecolors[mines/isize(minecolors)], 0, 0xFF);
     queuestr(V, (mines >= 10 ? .5 : 1) * mapfontscale / 100, label, darkened(minecolors[mines]), 8);
     }
   else {
