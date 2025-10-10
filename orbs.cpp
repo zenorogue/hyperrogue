@@ -1136,9 +1136,7 @@ void stun_attack(cell *dest) {
   checkmoveO();
   }
 
-void poly_attack(cell *dest) {
-  playSound(dest, "orb-ranged");
-  eMonster orig = dest->monst;
+EX eMonster pick_poly_monster(eMonster orig) {
   auto polymonsters = {
     moYeti, moRunDog, moRanger,
     moMonkey, moCultist,
@@ -1149,11 +1147,18 @@ void poly_attack(cell *dest) {
   int ssf = 0;
   eMonster target = *(polymonsters.begin() + hrand(isize(polymonsters)));
   for(eMonster m: polymonsters)
-    if(kills[m] && m != dest->monst) {
+    if(kills[m] && m != orig) {
       ssf += kills[m];
       if(hrand(ssf) < kills[m])
         target = m;
       }
+  return target;
+  }
+
+void poly_attack(cell *dest) {
+  playSound(dest, "orb-ranged");
+  eMonster orig = dest->monst;
+  eMonster target = pick_poly_monster(orig);
   addMessage(XLAT("You polymorph %the1 into %the2!", dest->monst, target));
   dest->monst = target;
   if(!dest->stuntime) dest->stuntime = 1;
