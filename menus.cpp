@@ -329,7 +329,7 @@ EX void showCreative() {
     dialog::cheat_if_confirmed([] {
       cheater++;
       pushScreen(mapeditor::showMapEditor);
-      lastexplore = turncount;
+      lastexplore = shmup::on ? shmup::curtime : turncount;
       addMessage(XLAT("You activate your terraforming powers!"));
       });
     });
