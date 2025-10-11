@@ -5528,3 +5528,47 @@ https://zenorogue.blogspot.com/2025/08/hyperrogue-131.html
 - mark Minefield and Zebra as incompatible (thanks to josephcsible)
 - fixed missing sound files in the itchio versions
 - Android version updated
+
+2025-10-11 09:08 Update 13.1f:
+
+New features:
+
+- arbiquotient feature
+- show all viewpoints feature
+
+Bug fixes:
+
+- fixed frogging grimoires
+- fixed the 3D models for spaceship, bunny, and player ratling
+- fixed Red Rock graphical bug
+- fixed the three-coloring of bitruncated {4,4}
+- bitruncated {4,4} and {4,6} are now known to be three-colored
+- fixed the bug with the bulls being too enraged about crossbows
+- fixed a rare bug with apeirogonal tes files falsely pretending to be football colorable
+- make the Orb of Earth/Earth Elemental not remove limestone walls in Irradiated Field and the Mercury River subland, and make OoEarth create a trail of mercury in the mercury river subland (thanks to ohlordhebacc)
+
+Shmup fixes:
+
+- the player can now be stunned now (using Orb of Stunning)
+- fixed the bug with Phasing deleting monsters
+- the killer is now stated correctly when killing yourself with Orb of Mind
+- Orb of Winter now correnctly collects ice-encased items
+- fixed the Camelot message (and cape reward) on exit
+- fixed some inconsistencies with Orb of Speed
+- fixed Orb of Energy not improving some orbs
+- Orb of Change should work now
+- orbs that did nothing now add extra lives (Woods, Plague, Chaos, Impact)
+
+Thanks to josephcsible:
+
+- add support for pinning glyphs to a consistent spot in the HUD
+- improve Minefield display when there are more than seven mines
+- make Orb of Magnetism and Curse of Repulsion leave saved tortoises alone
+- (in custom land lists) lower the land unlock requirements if they're mathematically impossibly high
+- stop WFC generation from spilling 1 tile into neighboring lands
+- never generate Cursed Canyon in CR6 if it isn't in-game
+- add a cheat to hold orb powers at their current level
+- add a setting for a gap between orbs and treasures
+- add a setting to disable the warning before killing a friendly monster
+- fix getting rid of Great Walls by killing Ghosts with OotStone
+- reset "last exploration" when starting a new run
