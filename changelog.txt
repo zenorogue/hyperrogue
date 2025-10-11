@@ -5533,8 +5533,8 @@ https://zenorogue.blogspot.com/2025/08/hyperrogue-131.html
 
 New features:
 
-- arbiquotient feature
-- show all viewpoints feature
+- a new feature to create quotient orbifolds for tessellations loaded from tes files (or converted into that format) (experiment with geometry -> quotient)
+- in screenshots->centering, list all viewpoints
 
 Bug fixes:
 
