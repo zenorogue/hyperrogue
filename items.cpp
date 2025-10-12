@@ -314,7 +314,7 @@ EX bool collectItem(cell *c2, cell *last, bool telekinesis IS(false)) {
     int q_el = items[itElemental];
 
     if(c2->item == itBarrow) 
-      for(int i=0; i<c2->landparam; i++) gainItem(c2->item);
+      for(int i=0; i<barrowCount(c2); i++) gainItem(c2->item);
     else if(c2->item) gainItem(c2->item);
 
     if(c2->item && items[c2->item] > q && (vid.bubbles_all || (threshold_met(items[c2->item]) > threshold_met(q) && vid.bubbles_threshold))) {
@@ -742,7 +742,7 @@ EX void collectMessage(cell *c2, eItem which) {
     addMessage(XLAT("A castle in the Crossroads..."));
   else if(which == itShard) ;
   else {
-    int qty = (which == itBarrow) ? c2->landparam : 1;
+    int qty = (which == itBarrow) ? barrowCount(c2) : 1;
     string t;
     if(which == itBarrow && items[which] < 25 && items[which] + qty >= 25)
       t = XLAT("Your energy swords get stronger!");
@@ -756,6 +756,14 @@ EX void collectMessage(cell *c2, eItem which) {
 EX bool itemHiddenFromSight(cell *c) {
   return isWatery(c) && !items[itOrbInvis] && !(items[itOrbFish] && playerInWater())
     && !(shmup::on && shmup::boatAt(c)) && !(c->cpdist <= 1 && playerInWater());
+  }
+
+EX int barrowCount(cell *c) {
+  // This should always be 2 or 3.
+  // Clamping to exactly that would make bugs go unnoticed.
+  // Not clamping at all would lead to freezes when it's absurdly large.
+  // Clamping to [1,4] means any incorrect values will be apparent but not game-breaking.
+  return min(max(c->landparam, 1), 4);
   }
 
 }
