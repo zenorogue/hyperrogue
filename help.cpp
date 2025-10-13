@@ -1084,7 +1084,7 @@ EX void describeMouseover() {
     if(c->item && !itemHiddenFromSight(c)) {
       out += ", "; 
       out += XLAT1(iinf[c->item].name); 
-      if(c->item == itBarrow) out += " (x" + its(c->landparam) + ")";
+      if(c->item == itBarrow) out += " (x" + its(barrowCount(c)) + ")";
       #if CAP_COMPLEX2
       if(c->land == laHunting) {      
         int i = ambush::size(c, c->item);
