@@ -1504,7 +1504,7 @@ LAND( 0x306030, "Snake Nest", laSnakeNest, ZERO, itSnake, RESERVED, NODESCYET)
   NATIVE(m == moHexSnake ? 2 : among(m, moRedTroll, moMiner, moSkeleton, moBomberbird) ? 1 : 0)
   REQ(GOLD(R90))
 
-LAND( 0x80FF00, "Docks", laDocks, ZERO | LF_SEA, itDock, RESERVED, NODESCYET)
+LAND( 0x80FF00, "Docks", laDocks, ZERO | LF_SEA | LF_COASTAL, itDock, RESERVED, NODESCYET)
   NATIVE(among(m, moRatling, moPirate, moCShark, moAlbatross, moFireFairy) ? 2 : 0)
   REQAS(laOcean,)
 
