@@ -1046,10 +1046,11 @@ EX void customize_land_list() {
 
   if(use_custom_land_list) {
     dialog::addItem("disable/enable all", 'D');
-    dialog::add_action([] {
+    std::vector<eLand> ll(landlist);
+    dialog::add_action([ll] {
       int qty = 0;
-      for(int i=0; i<landtypes; i++) if(custom_land_list[i]) qty++;
-      for(int i=0; i<landtypes; i++) custom_land_list[i] = !qty;
+      for(eLand l: ll) if(custom_land_list[l]) qty++;
+      for(eLand l: ll) custom_land_list[l] = !qty;
       });
     }
   else dialog::addBreak(100);
