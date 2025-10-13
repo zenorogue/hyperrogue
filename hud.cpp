@@ -88,8 +88,13 @@ EX void updateglyphpinned() {
     exp_parser ep;
     ep.s = pinnedglyphs;
     do {
-      int i = ep.iparse();
-      if(i >= 0 && i < glyphs) glyphpinned[i] = true;
+      try {
+        int i = ep.iparse();
+        if(i >= 0 && i < glyphs) glyphpinned[i] = true;
+        }
+      catch(hr_parse_exception&) {
+        continue;
+        }
       } while(ep.eat(","));
     }
   }
