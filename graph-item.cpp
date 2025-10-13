@@ -256,8 +256,8 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
     }
 
   else if(it == itBarrow && c) {
-    for(int i = 0; i<c->landparam; i++)
-      queuepolyat(Vit * spin(TAU * i / c->landparam) * xpush(.15 * cgi.scalefactor) * spinptick(1500, 0), *xsh, darkena(icol, 0, hidden ? 0x40 :
+    for(int i = 0; i<barrowCount(c); i++)
+      queuepolyat(Vit * spin(TAU * i / barrowCount(c)) * xpush(.15 * cgi.scalefactor) * spinptick(1500, 0), *xsh, darkena(icol, 0, hidden ? 0x40 :
         (highwall(c) && wmspatial) ? 0x60 : 0xFF),
         PPR::HIDDEN);
     }

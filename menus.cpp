@@ -103,24 +103,26 @@ EX void showOverview() {
       displayfrZ(1, i0, 1, vf-4, "*", forecolor, 0);
     if(displayfrZH(xr*1, i0, 1, vf-4, XLAT1(linf[l].name), col, 0))
       getcstat = 1000 + l;
+    int c8 = (vf+2)/3;
     eItem it = treasureType(l);
     int lv = items[it] * landMultiplier(l);
-    if(lv >= 25) col = 0xFFD500;
-    else if(lv && it == itSavedPrincess) col = 0xFFD500;
-    else if(lv >= 10) col = 0x00D500;
-    else if(items[it]) col = 0xC0C0C0;
-    else col = BLACKISH;
-    int c8 = (vf+2)/3;
-    if(displayfrZH(xr*24-c8*6, i0, 1, vf-4, (required_for_hyperstones(it) ? "" : "*") + its(items[it]), col, 16))
-      getcstat = 2000+it;
-    if(!cheater)
-    if(displayfrZH(xr*24, i0, 1, vf-4, its(hiitems[modecode()][it]), col, 16))
-      getcstat = 2000+it;
-    if(items[it]) col = iinf[it].color; else col = BLACKISH;
-    if(displayfrZH(xr*24+c8*4, i0, 1, vf-4, s0 + iinf[it].glyph, col, 16))
-      getcstat = 2000+it;
-    if(displayfrZH(xr*24+c8*5, i0, 1, vf-4, XLAT1(iinf[it].name), col, 0))
-      getcstat = 2000+it;
+    if(it) {
+      if(lv >= 25) col = 0xFFD500;
+      else if(lv && it == itSavedPrincess) col = 0xFFD500;
+      else if(lv >= 10) col = 0x00D500;
+      else if(items[it]) col = 0xC0C0C0;
+      else col = BLACKISH;
+      if(displayfrZH(xr*24-c8*6, i0, 1, vf-4, (required_for_hyperstones(it) ? "" : "*") + its(items[it]), col, 16))
+        getcstat = 2000+it;
+      if(!cheater)
+      if(displayfrZH(xr*24, i0, 1, vf-4, its(hiitems[modecode()][it]), col, 16))
+        getcstat = 2000+it;
+      if(items[it]) col = iinf[it].color; else col = BLACKISH;
+      if(displayfrZH(xr*24+c8*4, i0, 1, vf-4, s0 + iinf[it].glyph, col, 16))
+        getcstat = 2000+it;
+      if(displayfrZH(xr*24+c8*5, i0, 1, vf-4, XLAT1(iinf[it].name), col, 0))
+        getcstat = 2000+it;
+      }
     eItem io = nativeOrbType(l);
     if(io == itShard) {
       if(items[it] >= 10) col = winf[waMirror].color; else col = BLACKISH;
@@ -329,7 +331,7 @@ EX void showCreative() {
     dialog::cheat_if_confirmed([] {
       cheater++;
       pushScreen(mapeditor::showMapEditor);
-      lastexplore = turncount;
+      lastexplore = shmup::on ? shmup::curtime : turncount;
       addMessage(XLAT("You activate your terraforming powers!"));
       });
     });

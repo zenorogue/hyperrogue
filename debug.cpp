@@ -168,7 +168,7 @@ vector<cheatkey> cheats = {
   cheatkey{'R'-64, "advance the rose wave", buildRosemap},
   #if CAP_EDIT
   cheatkey{'A', "start the Map Editor", [] {
-    lastexplore = turncount;
+    lastexplore = shmup::on ? shmup::curtime : turncount;
     pushScreen(mapeditor::showMapEditor);
     }},
   cheatkey{'A'-64, "start the Vector Graphics Editor", [] {
@@ -246,8 +246,14 @@ vector<cheatkey> cheats = {
   cheatkey{'G'-64, "switch ghost timer", [] {
     timerghost = !timerghost;
     cheater++; 
-    addMessage(XLAT("turn count = %1 last exploration = %2 ghost timer = %3",
-      its(turncount), its(lastexplore), ONOFF(timerghost)));
+		if(shmup::on) {
+			addMessage(XLAT("in-game time = %1 last exploration = %2 ghost timer = %3",
+				its(shmup::curtime), its(lastexplore), ONOFF(timerghost)));
+			}
+		else {
+			addMessage(XLAT("turn count = %1 last exploration = %2 ghost timer = %3",
+				its(turncount), its(lastexplore), ONOFF(timerghost)));
+			}
     }},
   cheatkey{'G', "edit cell values", push_debug_screen},
   cheatkey{'L'-64, "cell info", [] {

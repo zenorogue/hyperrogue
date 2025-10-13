@@ -47,6 +47,7 @@ EX int subclass(int i) {
 #define GLYPH_INSQUARE   1024
 #define GLYPH_INLANDSCAPE 2048
 #define GLYPH_ACTIVE 4096
+#define GLYPH_CIRCLE 8192
 
 #if HDR
 enum eGlyphsortorder {
@@ -88,8 +89,13 @@ EX void updateglyphpinned() {
     exp_parser ep;
     ep.s = pinnedglyphs;
     do {
-      int i = ep.iparse();
-      if(i >= 0 && i < glyphs) glyphpinned[i] = true;
+      try {
+        int i = ep.iparse();
+        if(i >= 0 && i < glyphs) glyphpinned[i] = true;
+        }
+      catch(hr_parse_exception&) {
+        continue;
+        }
       } while(ep.eat(","));
     }
   }
@@ -192,6 +198,7 @@ int glyphflags(int gid) {
       if(itemclass(i) == IC_ORB && items[i] < 10) f |= GLYPH_RUNOUT;
       }
     if(i == orbToTarget) f |= GLYPH_TARGET;
+    if(orbToTarget == itOrbSpace && mouseover && i == mouseover->item) f |= GLYPH_CIRCLE;
     if(!less_in_portrait) f |= GLYPH_INPORTRAIT;
     if(!less_in_landscape) f |= GLYPH_INLANDSCAPE;
     }
@@ -307,6 +314,8 @@ bool displayglyph(int cx, int cy, int buttonsize, char glyph, color_t color, int
   else
     displaychr(cx + buttonsize/2, cy, 0, glsize, glyph, darkenedby(color, b?0:1));
   
+  if(flags & GLYPH_CIRCLE) drawCircle(cx + buttonsize/2, cy, buttonsize/2, darkena(color, 0, 0xFF));
+
   string fl = "";
   string str = its(qty);
 
