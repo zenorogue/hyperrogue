@@ -429,6 +429,12 @@ EX bool is_in_disk(cell *c) {
   return *it == c;
   }
 
+EX int disk_index(cell *c) {
+  auto it = lower_bound(all_disk_cells_sorted.begin(), all_disk_cells_sorted.end(), c);
+  if(it == all_disk_cells_sorted.end() || *it != c) return isize(all_disk_cells_sorted);
+  return it - all_disk_cells_sorted.begin();
+  }
+
 bool sierpinski3(gp::loc g) {
   int x = g.first;
   int y = g.second;

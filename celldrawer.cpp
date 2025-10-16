@@ -880,7 +880,9 @@ EX bool pick_for_grid(cell *c, int t) {
   if(!c1) return false;
   // removed: if(WDIM == 3 && bt::in() && !sn::in()) return !among(t, 5, 6, 8);
   if(c == c1 && t <= c->c.spin(t)) return true;
-  return c < c1 || isWarped(c->move(t)) || fake::split();
+  bool order = c < c1;
+  if(disksize) order = disk_index(c) < disk_index(c1);
+  return order || isWarped(c->move(t)) || fake::split();
   }
 
 void celldrawer::draw_grid() {
