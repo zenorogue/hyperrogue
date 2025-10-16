@@ -1882,7 +1882,7 @@ void moveBullet(monster *m, int delta) {
         m2->type == moVizier || isMetalBeast(m2->type) || m2->type == moTortoise || m2->type == moBrownBug || 
         m2->type == moReptile || m2->type == moSalamander || m2->type == moTerraWarrior) && m2->hitpoints > 1 && !slayer) {
         m2->rebasePat(spin_towards(m2->pat, m->ori, nat0 * C0, 0, 1), m2->base);
-        if(m2->type != moSkeleton && !isMetalBeast(m2->type) && m2->type != moReptile && m2->type != moSalamander && m2->type != moBrownBug) {
+        if(!among(m2->type, moSkeleton, moReptile, moSalamander, moBrownBug, moTortoise) && !isMetalBeast(m2->type)) {
           if(!(bow::crossbow_mode() && m2->stunoff > curtime))
             m2->hitpoints--;
           }
