@@ -1623,7 +1623,7 @@ EX vector<adj_data> adj_minefield_cells_full(cell *c) {
     forCellIdCM(c2, i, c) res.emplace_back(adj_data{c2, c->c.mirror(i), currentmap->adj(c, i)});
     }
   else if(WDIM == 2) {
-    cellwalker cw(c, 0);
+    cellwalker cw(c, 0); cw.cpeek();
     transmatrix T = Id;
     T = T * currentmap->adj(c, 0);
     cw += wstep;
@@ -1631,6 +1631,7 @@ EX vector<adj_data> adj_minefield_cells_full(cell *c) {
     cellwalker cw1 = cw;
     do {
       res.emplace_back(adj_data{cw.at, cw.mirrored, T});
+      cw.cpeek();
       T = T * currentmap->adj(cw.at, cw.spin);
       cw += wstep;
       cw++;
