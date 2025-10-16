@@ -39,7 +39,8 @@ void normalize() {
       sum += s.val[k],
       sqsum += s.val[k] * s.val[k];
     double variance = sqsum/samples - sqr(sum/samples);
-    weights[k] = 1 / sqrt(variance);
+    if(variance == 0) weights[k] = 1;
+    else weights[k] = 1 / sqrt(variance);
     }
   }
 
