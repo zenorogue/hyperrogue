@@ -402,7 +402,7 @@ EX void init_disk_cells() {
     while(isize(tiles)) {
       auto ti = tiles.top();
       tiles.pop();
-      println(hlog, "dist=", ti.dist, " for c=", ti.c);
+      // println(hlog, "dist=", ti.dist, " for c=", ti.c, " T = ", kz(ti.T), " vs ", ok);
       if(seen.count(ti.c)) continue;
       seen.insert(ti.c);
       if(ti.dist > last_dist + 1e-6 && isize(all_disk_cells) >= disksize) break;
@@ -414,7 +414,7 @@ EX void init_disk_cells() {
         next.T = ti.T * p.T;
         if(diskshape == dshVertices) next.dist = ti.dist + 1;
         else next.dist = hdist0(tC0(next.T));
-        println(hlog, ti.c, " -> ", p.c, " at ", next.dist);
+        // println(hlog, ti.c, " -> ", p.c, " at ", next.dist, " got T= ", kz(p.T));
         tiles.push(next);
         }
       }
