@@ -184,7 +184,14 @@ EX void showOverview() {
     else if(udiv == 2 && umod < ittypes) {
       gotoHelp(generateHelpForItem(eItem(umod)));
       help_extensions.push_back(help_extension{'p', glyphpinned[umod] ? XLAT("unpin from HUD") : XLAT("pin to HUD"), [umod] () {
-        glyphpinned[umod] ^= true;
+        if(glyphpinned[umod]) {
+          revglyphpinned.erase(std::remove_if(revglyphpinned.begin(), revglyphpinned.end(), [umod] (int x) { return x == umod; }), revglyphpinned.end());
+          glyphpinned[umod] = 0;
+          }
+        else {
+          revglyphpinned.push_back(umod);
+          glyphpinned[umod] = revglyphpinned.size();
+          }
         updatepinnedglyphs();
         popScreen();
         }});

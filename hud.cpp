@@ -60,7 +60,8 @@ enum eGlyphsortorder {
 
 EX eGlyphsortorder glyphsortorder;
 EX string pinnedglyphs;
-EX bool glyphpinned[int(ittypes) + int(motypes)];
+EX vector<int> revglyphpinned;
+EX unsigned glyphpinned[int(ittypes) + int(motypes)];
   
 int zero = 0;
 
@@ -84,14 +85,19 @@ int glyphphase[glyphs];
 int glyph_lastticks;
 
 EX void updateglyphpinned() {
-  for(int i=0; i<glyphs; i++) glyphpinned[i] = false;
+  revglyphpinned.clear();
+  for(int i=0; i<glyphs; i++) glyphpinned[i] = 0;
   if(!pinnedglyphs.empty()) {
+    unsigned n = 0;
     exp_parser ep;
     ep.s = pinnedglyphs;
     do {
       try {
         int i = ep.iparse();
-        if(i >= 0 && i < glyphs) glyphpinned[i] = true;
+        if(i >= 0 && i < glyphs) {
+          revglyphpinned.push_back(i);
+          glyphpinned[i] = ++n;
+          }
         }
       catch(hr_parse_exception&) {
         continue;
@@ -102,8 +108,8 @@ EX void updateglyphpinned() {
 
 EX void updatepinnedglyphs() {
   std::stringstream ss;
-  for(int i=0; i<glyphs; i++) {
-    if(glyphpinned[i]) ss << i << ",";
+  for(auto& i: revglyphpinned) {
+    ss << i << ",";
     }
   pinnedglyphs = ss.str();
   if(!pinnedglyphs.empty()) pinnedglyphs.pop_back();
@@ -153,7 +159,7 @@ int glyphcorner(int i) {
 
 bool glyphsort(int i, int j) {
   if(glyphpinned[i] != glyphpinned[j])
-    return glyphpinned[i] > glyphpinned[j];
+    return glyphpinned[i] - 1 < glyphpinned[j] - 1; // We subtract 1 from both sides to make 0 wrap around, so that it compares greater than any positive value
   if(subclass(i) != subclass(j))
     return subclass(i) < subclass(j);
   if(glyphsortorder == gsoFirstTop)
