@@ -1742,7 +1742,7 @@ int readArgs() {
     }
   else if(argis("-somclassify0")) {
     PHASE(3);
-    shift(); kohonen::do_classify();
+    kohonen::do_classify();
     }
   else if(argis("-somclassify")) {
     PHASE(3);
