@@ -877,6 +877,7 @@ void initialize_samples_to_show() {
     vdata.emplace_back();
     auto &vd = vdata.back();
     vd.name = data[s].name;
+    labeler[data[s].name] = vdid;
     vd.cp = dftcolor;
     createViz(vdid, cwt.at, Id);
     storeall(vdid);
@@ -936,6 +937,7 @@ void describe_cell(cell *c) {
   h += ", u-matrix = " + fts(n->udist);
   h += "\n";
   vector<pair<double, int>> v;
+  if(!whowon.empty())
   for(int s=0; s<samples; s++) if(whowon[s] == n) v.emplace_back(vnorm(n->net, data[s].val), s);
   for(int i=1; i<isize(v); i++) swap(v[i], v[rand() % (i+1)]);
   sort(v.begin(), v.end(), [] (pair<double,int> a, pair<double,int> b) { return a.first < b.first; });
@@ -1635,6 +1637,7 @@ int readArgs() {
   
   if(argis("-som")) {
     PHASE(3);
+    initialize_rv();
     shift(); kohonen::loadsamples(args());
     }
 
@@ -1688,6 +1691,10 @@ int readArgs() {
   else if(argis("-somlearn")) {
     // this one can be changed at any moment
     shift_arg_formula(learning_factor);
+    }
+
+  else if(argis("-som-random-initial")) {
+    set_neuron_initial();
     }
 
   else if(argis("-som-analyze")) {
