@@ -754,7 +754,7 @@ bool rogueviz_hud() {
     queuestr(int(x-rad), int(y), 0, rad*(svg::in?5:3)/4, t->name, legend_color, 0, 16);
     }
   
-  quickqueue();
+  quickqueue(); glflush();
   return true;
   }
 
