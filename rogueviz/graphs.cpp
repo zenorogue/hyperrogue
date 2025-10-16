@@ -454,6 +454,10 @@ void queuedisk(const shiftmatrix& V, const colorpair& cp, bool legend, const str
     case 's': queuepoly(V1, cgi.shDiskS, darken_a(cp.color2)); return;
     case 'q': queuepoly(V1, cgi.shDiskSq, darken_a(cp.color2)); return;
     case 'm': queuepoly(V1, cgi.shDiskM, darken_a(cp.color2)); return;
+    case 'h': queuepoly(V1, cgi.shHalfDisk, darken_a(cp.color2)); return;
+    case 'c': queuepoly(V1, cgi.shMoonDisk, darken_a(cp.color2)); return;
+    case 'S': queuepoly(V1, cgi.shDiskSegment, darken_a(cp.color2)); return;
+    case 'e': queuepoly(V1, cgi.shEccentricDisk, darken_a(cp.color2)); return;
     case 'b': queuepoly(V1, GDIM == 3 ? cgi.shAnimatedTinyEagle[wingphase(200)] : cgi.shTinyBird, darken_a(cp.color2)); return;
     case 'f': queuepoly(V1, cgi.shTinyShark, darken_a(cp.color2)); return;
     case 'g': queuepoly(V1, cgi.shMiniGhost, darken_a(cp.color2)); return;
