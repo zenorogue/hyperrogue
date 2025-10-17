@@ -1330,7 +1330,8 @@ EX namespace mapeditor {
 #if CAP_EDIT
   int paintwhat = 0;
   int paintwhat_alt_wall = 0;
-  int painttype = 0;
+  enum class ePainttype { monsters, items, lands, walls, copy, boundary, paint, select, teleport };
+  ePainttype painttype = ePainttype::monsters;
   int paintstatueid = 0;
   int radius = 0;
   string paintwhat_str = "clear monster";
@@ -1465,8 +1466,8 @@ EX namespace mapeditor {
 
     if(anyshiftclick) {
       dialog::addInfo(
-        (painttype == 6 && (GDIM == 3)) ? "wall" :
-        painttype == 3 ? XLATN(winf[paintwhat_alt_wall].name) : "clear");
+        (painttype == ePainttype::paint && (GDIM == 3)) ? "wall" :
+        painttype == ePainttype::walls ? XLATN(winf[paintwhat_alt_wall].name) : "clear");
       }
     else
       dialog::addInfo(paintwhat_str);
@@ -1476,39 +1477,39 @@ EX namespace mapeditor {
     dialog::add_action([] {
       dialog::editNumber(radius, 0, 9, 1, 1, XLAT("radius"), "");
       });
-    dialog::addBoolItem(XLAT("boundary"), painttype == 5, 'b');
-    dialog::add_action([] { painttype = 5, paintwhat_str = XLAT("boundary"); });
-    dialog::addBoolItem(XLAT("monsters"), painttype == 0, 'm');
-    dialog::add_action([] { pushScreen(showList), painttype = 0, dialog::infix = ""; });
-    dialog::addBoolItem(XLAT("items"), painttype == 1, 'i');
-    dialog::add_action([] { pushScreen(showList), painttype = 1, dialog::infix = ""; });
-    dialog::addBoolItem(XLAT("lands"), painttype == 2, 'l');
-    dialog::add_action([] { pushScreen(showList), painttype = 2, dialog::infix = ""; });
-    dialog::addBoolItem(XLAT("walls"), painttype == 3, 'w');
-    dialog::add_action([] { pushScreen(showList), painttype = 3, dialog::infix = ""; });
-    dialog::addBoolItem(XLAT("paint"), painttype == 6, 'w');
+    dialog::addBoolItem(XLAT("boundary"), painttype == ePainttype::boundary, 'b');
+    dialog::add_action([] { painttype = ePainttype::boundary, paintwhat_str = XLAT("boundary"); });
+    dialog::addBoolItem(XLAT("monsters"), painttype == ePainttype::monsters, 'm');
+    dialog::add_action([] { pushScreen(showList), painttype = ePainttype::monsters, dialog::infix = ""; });
+    dialog::addBoolItem(XLAT("items"), painttype == ePainttype::items, 'i');
+    dialog::add_action([] { pushScreen(showList), painttype = ePainttype::items, dialog::infix = ""; });
+    dialog::addBoolItem(XLAT("lands"), painttype == ePainttype::lands, 'l');
+    dialog::add_action([] { pushScreen(showList), painttype = ePainttype::lands, dialog::infix = ""; });
+    dialog::addBoolItem(XLAT("walls"), painttype == ePainttype::walls, 'w');
+    dialog::add_action([] { pushScreen(showList), painttype = ePainttype::walls, dialog::infix = ""; });
+    dialog::addBoolItem(XLAT("paint"), painttype == ePainttype::paint, 'w');
     dialog::add_action([] {
-      painttype = 6;
+      painttype = ePainttype::paint;
       paintwhat_str = "paint";
-      dialog::openColorDialog((unsigned&)(paintwhat = (painttype ==6 ? paintwhat : 0x808080)));
+      dialog::openColorDialog((unsigned&)(paintwhat = (painttype == ePainttype::paint ? paintwhat : 0x808080)));
       });
-    dialog::addBoolItem(XLAT("copy"), painttype == 4, 'c');
+    dialog::addBoolItem(XLAT("copy"), painttype == ePainttype::copy, 'c');
     dialog::add_action([] {
-      if(mouseover) { copysource = mouseover_cw(true); painttype = 4; paintwhat_str = XLAT("copying"); }
-      else { painttype = 7; paintwhat_str = XLAT("select area to copy"); }
+      if(mouseover) { copysource = mouseover_cw(true); painttype = ePainttype::copy; paintwhat_str = XLAT("copying"); }
+      else { painttype = ePainttype::select; paintwhat_str = XLAT("select area to copy"); }
       });
-    dialog::addBoolItem(XLAT("teleport player"), painttype == 8, 't');
+    dialog::addBoolItem(XLAT("teleport player"), painttype == ePainttype::teleport, 't');
     dialog::add_action([] {
       if(mouseover) {
         playermoved = true;
         cwt = mouseover_cw(true);
         }
-      else { painttype = 8; paintwhat_str = XLAT("teleport where"); }
+      else { painttype = ePainttype::teleport; paintwhat_str = XLAT("teleport where"); }
       });
-    if(painttype == 4) {
+    if(painttype == ePainttype::copy) {
       dialog::addBoolItem_action(XLAT("flip"), copysource.mirrored, 'f');
       }
-    else if(painttype == 3) {
+    else if(painttype == ePainttype::walls) {
       dialog::addItem(XLAT("set Shift+click"), 'z');
       dialog::add_action([] { paintwhat_alt_wall = paintwhat; });
       }
@@ -1660,8 +1661,8 @@ EX namespace mapeditor {
     if(!show_menu) {
       if(anyshiftclick) {
         displayfr(8, 8 + fs, 2, vid.fsize,
-          (painttype == 6 && (GDIM == 3)) ? "wall" :
-          painttype == 3 ? XLATN(winf[paintwhat_alt_wall].name) : "clear",
+          (painttype == ePainttype::paint && (GDIM == 3)) ? "wall" :
+          painttype == ePainttype::walls ? XLATN(winf[paintwhat_alt_wall].name) : "clear",
           forecolor, 0);
         }
       else
@@ -1705,7 +1706,7 @@ EX namespace mapeditor {
     int cdir = where.first.spin;
     saveUndo(c);
     switch(painttype) {
-      case 0: {
+      case ePainttype::monsters: {
         if(anyshiftclick) { c->monst = moNone; mirror::destroyKilled(); break; }
         eMonster last = c->monst;
         c->monst = eMonster(paintwhat);
@@ -1736,7 +1737,7 @@ EX namespace mapeditor {
         mirror::destroyKilled();
         break;
         }
-      case 1: {
+      case ePainttype::items: {
         if(anyshiftclick) { c->item = itNone; break; }
         eItem last = c->item;
         c->item = eItem(paintwhat);
@@ -1744,7 +1745,7 @@ EX namespace mapeditor {
           tortoise::babymap[c] = getBits(c) ^ (last == itBabyTortoise ? tortoise::getRandomBits() : 0);
         break;
         }
-      case 2: {
+      case ePainttype::lands: {
         if(anyshiftclick) { c->land = laNone; c->wall = waNone; map_version++; break; }
         eLand last = c->land;
         c->land = eLand(paintwhat);
@@ -1760,7 +1761,7 @@ EX namespace mapeditor {
           c->landparam = 0;
         break;
         }
-      case 3: {
+      case ePainttype::walls: {
         eWall last = c->wall;
         c->wall = eWall(anyshiftclick ? paintwhat_alt_wall : paintwhat);
         map_version++;
@@ -1785,7 +1786,7 @@ EX namespace mapeditor {
 
         break;
         }
-      case 5:
+      case ePainttype::boundary:
         map_version++;
         c->land = laNone;
         c->wall = waNone;
@@ -1794,13 +1795,13 @@ EX namespace mapeditor {
         c->landparam = 0;
         // c->tmp = -1;
         break;
-      case 6:
+      case ePainttype::paint:
         map_version++;
         c->land = laCanvas;
         c->wall = ((GDIM == 3) ^ anyshiftclick) ? waWaxWall : waNone;
         c->landparam = paintwhat >> 8;
         break;
-      case 4: {
+      case ePainttype::copy: {
         map_version++;
         cell *copywhat = where.second.at;
         c->wall = copywhat->wall;
@@ -1816,14 +1817,14 @@ EX namespace mapeditor {
         else c->mondir = gmod((where.first.mirrored == where.second.mirrored ? 1 : -1) * (copywhat->mondir - where.second.spin) + cdir, c->type);
         break;
         }
-      case 7:
+      case ePainttype::select:
         if(c) {
           copysource = c;
-          painttype = 4;
+          painttype = ePainttype::copy;
           paintwhat_str = XLAT("copying");
           }
         break;
-      case 8:
+      case ePainttype::teleport:
         playermoved = true;
         cwt = c;
         break;
@@ -1836,7 +1837,7 @@ EX namespace mapeditor {
   void list_spill(cellwalker tgt, cellwalker src, manual_celllister& cl) {
     spill_list.clear(); 
     spill_list.emplace_back(tgt, src);
-    if(painttype == 7) return;
+    if(painttype == ePainttype::select) return;
     int crad = 0, nextstepat = 0;
     for(int i=0; i<isize(spill_list); i++) {
       if(i == nextstepat) {
@@ -1859,13 +1860,13 @@ EX namespace mapeditor {
 
   void editAt(cellwalker where, manual_celllister& cl) {
 
-    if(painttype == 4 && radius) {
+    if(painttype == ePainttype::copy && radius) {
       if(where.at->type != copysource.at->type) return;
       if(where.spin<0) where.spin=0;
       if(BITRUNCATED && !ctof(mouseover) && ((where.spin&1) != (copysource.spin&1)))
         where += 1;
       }
-    if(painttype != 4) copysource.at = NULL;
+    if(painttype != ePainttype::copy) copysource.at = NULL;
     list_spill(where, copysource, cl);
     
     for(auto& st: spill_list)
@@ -1958,9 +1959,9 @@ EX namespace mapeditor {
   EX void showList() {
     string caption;
     dialog::v.clear();
-    if(painttype == 4) painttype = 0;
+    if(painttype == ePainttype::copy) painttype = ePainttype::monsters;
     switch(painttype) {
-      case 0: 
+      case ePainttype::monsters:
         caption = "monsters";
         for(int i=0; i<motypes; i++) {
           eMonster m = eMonster(i);
@@ -1975,15 +1976,15 @@ EX namespace mapeditor {
           else dialog::vpush(i, minf[i].name);
           }
         break;
-      case 1:
+      case ePainttype::items:
         caption = "items";
         for(int i=0; i<ittypes; i++) dialog::vpush(i, iinf[i].name);
         break;
-      case 2:
+      case ePainttype::lands:
         caption = "lands";
         for(int i=0; i<landtypes; i++) dialog::vpush(i, linf[i].name);
         break;
-      case 3:
+      case ePainttype::walls:
         caption = "walls";
         for(int i=0; i<walltypes; i++) if(i != waChasmD) dialog::vpush(i, winf[i].name);
         break;
@@ -2008,7 +2009,7 @@ EX namespace mapeditor {
         mousepressed = false;
         popScreen();
 
-        if(painttype == 3 && paintwhat == waEditStatue)
+        if(painttype == ePainttype::walls && paintwhat == waEditStatue)
           dialog::editNumber(paintstatueid, 0, 127, 1, 1, XLAT1("editable statue"), 
             XLAT("These statues are designed to have their graphics edited in the Vector Graphics Editor. Each number has its own, separate graphics.")
             );
@@ -3087,8 +3088,8 @@ EX namespace mapeditor {
     }
 
   auto hooks = addHook(hooks_clearmemory, 0, [] () {
-    if(mapeditor::painttype == 4) 
-      mapeditor::painttype = 0, mapeditor::paintwhat = 0,
+    if(mapeditor::painttype == ePainttype::copy)
+      mapeditor::painttype = ePainttype::monsters, mapeditor::paintwhat = 0,
       mapeditor::paintwhat_str = "clear monster";
     mapeditor::copysource.at = NULL;
     mapeditor::undo.clear();
