@@ -1988,6 +1988,12 @@ EX namespace mapeditor {
         caption = "walls";
         for(int i=0; i<walltypes; i++) if(i != waChasmD) dialog::vpush(i, winf[i].name);
         break;
+      case ePainttype::copy:
+      case ePainttype::boundary:
+      case ePainttype::paint:
+      case ePainttype::select:
+      case ePainttype::teleport:
+        break;
       }
     // sort(v.begin(), v.end());
     
