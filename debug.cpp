@@ -23,11 +23,18 @@ void add_debugflag(const string& s, debugflag *d) {
   (*all_debugflags)[s] = d;
   }
 
+/** generic errors */
 EX debugflag debug_errors = {"error", true};
+/** generic warnings */
 EX debugflag debug_warnings = {"warning", true};
+/** generic memory logs */
 EX debugflag debug_memory = {"memory"};
+/** generic initialization logs */
 EX debugflag debug_init = {"init", true};
+/** generic progress logs */
 EX debugflag debug_progress = {"progress", true};
+/** log the results of executed commands */
+EX debugflag debug_info = {"info", true};
 
 #if HDR
 template<class... T>
