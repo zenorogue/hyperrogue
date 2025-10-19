@@ -467,6 +467,7 @@ vector<legacy_flag> legacy_flags = {
   legacy_flag{'f', 2, &fieldpattern::debug_field},
   // GEOM
   legacy_flag{'g', 2, &debug_geometry},
+  legacy_flag{'g', 2, &debug_map_create},
   legacy_flag{'g', 4, &arcm::debug_archimedean_map},
   // MEMORY
   legacy_flag{'b', 4, &debug_memory},
