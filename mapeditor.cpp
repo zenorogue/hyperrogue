@@ -1335,6 +1335,7 @@ EX namespace mapeditor {
   int paintstatueid = 0;
   int radius = 0;
   string paintwhat_str = "clear monster";
+  bool preserveparams = false;
   
   cellwalker copysource;
   
@@ -1749,7 +1750,10 @@ EX namespace mapeditor {
         if(anyshiftclick) { c->land = laNone; c->wall = waNone; map_version++; break; }
         eLand last = c->land;
         c->land = eLand(paintwhat);
-        if(isIcyLand(c) && isIcyLand(last))
+        if(preserveparams) {
+           // do nothing
+           }
+        else if(isIcyLand(c) && isIcyLand(last))
            HEAT(c) += spillinc() / 100.;
         else if(last == laDryForest && c->land == laDryForest)
           c->landparam += spillinc();
@@ -1766,7 +1770,10 @@ EX namespace mapeditor {
         c->wall = eWall(anyshiftclick ? paintwhat_alt_wall : paintwhat);
         map_version++;
         
-        if(last != c->wall) {
+        if(preserveparams) {
+          // do nothing
+          }
+        else if(last != c->wall) {
           if(hasTimeout(c))
             c->wparam = 10;
           else if(c->wall == waWaxWall)
@@ -1776,7 +1783,7 @@ EX namespace mapeditor {
           c->wparam += spillinc();
         
         if(c->wall == waEditStatue) {
-          c->wparam = paintstatueid;
+          if(!preserveparams) c->wparam = paintstatueid;
           c->mondir = cdir;
           }
 
@@ -3388,6 +3395,9 @@ EX namespace mapeditor {
 
     dialog::addItem(XLAT("change the pattern/color of new Canvas cells"), 'c');
     dialog::add_action_push(patterns::showPrePatternNoninstant);
+
+    dialog::addBoolItem_action(XLAT("preserve parameters when editing walls and lands"), preserveparams, 'P');
+    dialog::addInfo(XLAT("(unexpected parameter values may cause undesired behavior)"));
 
     dialog::addItem(XLAT("configure WFC"), 'W');
     dialog::add_action_push(wfc::wfc_menu);
