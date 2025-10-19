@@ -3736,7 +3736,7 @@ EX namespace windmap {
       tries++;
       if(tries < maxtries) goto tryagain;
       }
-    println(hlog, "windmap: tries = ", tries, " N = ", N);
+    if(debug_geometry) println(hlog, "windmap: tries = ", tries, " N = ", N);
     if(tries >= maxtries && maxtries >= 20) {
       addMessage("Failed to generate an interesting wind/lava pattern.");
       }
