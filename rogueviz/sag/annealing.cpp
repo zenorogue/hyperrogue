@@ -68,7 +68,8 @@ void saiter() {
   if(should_good) {
     auto dcost = cost;
     compute_cost();
-    println(hlog, "dcost=", dcost, " change=", change, " cost=", cost, " error = ", dcost + change - cost);
+    if(debug_progress)
+      println(hlog, "dcost=", dcost, " change=", change, " cost=", cost, " error = ", dcost + change - cost);
     if(abs(dcost + change - cost) > .1) throw hr_exception("dcost fail");
     cost = dcost;
     }
@@ -116,7 +117,6 @@ int hillclimb() {
 int checkmark_hillclimb() {
   compute_cost();
   if(cost > checkmark_cost) {
-    println(hlog, "checkmark failed");
     throw hr_exception("checkmark failed");
     return 0;
     }
@@ -144,7 +144,7 @@ void dofullsa(ld satime) {
     
     if(t2 - tl > view_each * .98) {
       tl = t2;
-      println(hlog, format("it %12lld temp %7.4f [1/e at %13.6f] cost = %f ",
+      if(debug_progress) println(hlog, format("it %12lld temp %7.4f [1/e at %13.6f] cost = %f ",
         numiter, double(sag::temperature), (double) exp(sag::temperature),
         double(sag::cost)));
       }
@@ -205,22 +205,11 @@ void dofullsa_iterations(long long saiter) {
 
     if(cpct > lpct && output_fullsa) {
       lpct = cpct;
+      if(debug_progress)
       println(hlog, format("it %12lld ratio %6.3f temp %8.4f step %9.3g cost %9.2f R=%8.4f T=%8.4f",
         numiter, last_ratio, double(sag::temperature), (double) exp(sag::temperature), cost, lgsag.R, lgsag.T));
       }
-
-    /* if(numiter % 10000 == 0) {
-      auto t2 = SDL_GetTicks();
-      if(int(t2 - t1) > view_each) {
-        t1 = t2;
-        println(hlog, format("it %12Ld temp %6.4f [1/e at %13.6f] cost = %f ",
-          numiter, double(sag::temperature), (double) exp(sag::temperature),
-          double(sag::cost)));
-        }
-      } */
     }
-
-  // println(hlog, "after dofullsa_iterations, cost = ", double(sag::cost));
 
   temperature = -5;
   sagmode = sagOff;

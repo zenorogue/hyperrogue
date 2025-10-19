@@ -37,7 +37,7 @@ void compute_cost();
 
 void prepare_graph() {
   int DN = isize(sagid);
-  println(hlog, "prepare_graph with DN = ", DN);
+  DEBBI(debug_init_sag, ("prepare_graph with DN = ", DN));
 
   set<pair<int, int>> alledges;
   for(auto e: sagedges) {
@@ -134,8 +134,9 @@ void create_viz() {
 /** save the SAG solution (sagid) */
 void save_sag_solution(const string& fname) {
   if(!(state & SS_DATA)) throw hr_exception("save_sag_solution with no data");
+  DEBBI(debug_init_sag, ("Saving the sag solution to: ", fname));
   FILE *f = fopen(fname.c_str(), "wt");
-  if(!f) throw hr_exception("failed to save SAG solution");
+  if(!f) return file_error(fname);
   for(int i=0; i<isize(sagid); i++)
     fprintf(f, "%s;%d\n", vdata[i].name.c_str(), sagid[i]);
   fclose(f);
@@ -144,9 +145,9 @@ void save_sag_solution(const string& fname) {
 /** load the SAG solution (sagid) */
 void load_sag_solution(const string& fname) {
   if(!(state & SS_DATA)) throw hr_exception("load_sag_solution with no data");
-  printf("Loading the sag from: %s\n", fname.c_str());
+  DEBBI(debug_init_sag, ("Loading the sag solution from: ", fname));
   FILE *sf = fopen(fname.c_str(), "rt");
-  if(!sf) throw hr_exception("failed to load SAG solution");
+  if(!sf) return file_error(fname);
   int SN = isize(sagcells);
   if(sf) while(true) {
     string lab;
@@ -177,10 +178,12 @@ void load_sag_solution(const string& fname) {
 
 void load_sag_solution_basic(const string& fname) {
   if(!(state & SS_DATA)) throw hr_exception("load_sag_solution_basic with no data");
+  DEBBI(debug_init_sag, ("Loading the sag solution (basic) from: ", fname));
   FILE *f = fopen(fname.c_str(), "rt");
-  for(auto& i: sagid) if(fscanf(f, "%d", &i) < 1) throw hr_exception("read error in load_sag_solution_basic");
+  if(!f) return file_error(fname);
+  for(auto& i: sagid) if(fscanf(f, "%d", &i) < 1) return file_format_error(fname);
   fclose(f);
-  println(hlog, "loaded sagid = ", sagid);
+  if(debug_init_sag) println(hlog, "loaded sagid = ", sagid);
 
   prepare_graph();
   create_viz();
@@ -205,12 +208,13 @@ void after_data() {
 void read_weighted(const char *fname) {
 
   if(state & SS_DATA) return;
+  DEBBI(debug_init_sag, ("Loading the weighted daga for sag from: ", fname));
   state |= SS_WEIGHTED;
   init_cells();
 
   maxweight = 0;
   fhstream f(fname, "rt");
-  if(!f.f) throw hr_exception("readsag_weighted: failed to open");
+  if(!f.f) return file_error(fname);
 
   while(!feof(f.f)) {
     string l1, l2;
@@ -238,7 +242,6 @@ void read_weighted(const char *fname) {
     }
 
   after:
-  println(hlog, "weighted graph ", fname, " read successfully");
   after_data();
   }
 
@@ -246,10 +249,11 @@ void read_weighted(const char *fname) {
 void read_unweighted(const char *fname) {
 
   if(state & SS_DATA) return;
+  DEBBI(debug_init_sag, ("Loading the unweighted daga for sag from: ", fname));
   init_cells();  
 
   fhstream f(fname, "rt");
-  if(!f.f) throw hr_exception("readsag_weighted: failed to open");
+  if(!f.f) return file_error(fname);
 
   scanline(f);
   set<pair<int, int> > edges;
@@ -272,17 +276,16 @@ void read_unweighted(const char *fname) {
     sagedges.push_back(ei);
     }
 
-  println(hlog, "unweighted graph ", fname, " read successfully");
   println(hlog, "N = ", isize(vdata), " edges = ", good, "/", all);
   after_data();
   }
   
 void read_hubs(const string& fname) {
   if(!(state & SS_DATA)) throw hr_exception("read_hubs with no data");
+  DEBBI(debug_init_sag, ("Loading the hub daga for sag from: ", fname));
   hubval.resize(isize(vdata), -1);
   fhstream f(fname, "rt");
-  if(!f.f) { printf("Failed to open hub file: %s\n", fname.c_str()); exit(1); }
-  println(hlog, "loading hubs: ", fname);
+  if(!f.f) return file_error(fname);
   while(!feof(f.f)) {
     string l1, l2;
     while(true) {
@@ -301,7 +304,7 @@ void read_hubs(const string& fname) {
       }
     if(!id_known(l1)) {
       printf("label unknown: %s\n", l1.c_str());
-      exit(1);
+      throw hr_exception("unknown label in read_hubs");
       }
     hubval[getid(l1)] = atoi(l2.c_str());
     }
@@ -309,6 +312,7 @@ void read_hubs(const string& fname) {
 
 void generate_fake_data(int n, int m) {
   if(state & SS_DATA) return;
+  DEBBI(debug_init_sag, ("Generating fake data ", tie(n, m)));
   init_cells();
   state |= SS_WEIGHTED;
 

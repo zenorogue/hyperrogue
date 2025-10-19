@@ -189,9 +189,9 @@ void sag_test_mul() {
   }
 
 void write_colors(string s) {
-  auto_orth(true);
-  if(s == "-") return;
+  DEBBI(debug_init_sag, ("writing SAG colors to ", s));
   fhstream f(s, "wt");
+  if(!f.f) return file_error(s);
   for(int i=0; i<isize(vdata); i++) {
     println(f, vdata[i].name, ",", format("%8x", vdata[i].cp.color1));
     }
@@ -267,9 +267,13 @@ int exp_read_args() {
     method = smLogistic;
     lgsag.R = max_sag_dist;
     lgsag.T = 1;
-    opt_debug = true;
+    debug_opt.enabled = true;
     twoway = true; allow_doubles = true;
     optimize_sag_loglik_auto();
+    }
+
+  else if(argis("-sag-opt-debug")) {
+    debug_opt.enabled = true;
     }
 
   else if(argis("-sagstats-logid")) {

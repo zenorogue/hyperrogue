@@ -34,6 +34,9 @@ extern vector<int> sagid;
 void init();
 void clear();
 
+debugflag debug_sag("sag");
+debugflag debug_init_sag("init_sag", true);
+
 }
 }
 

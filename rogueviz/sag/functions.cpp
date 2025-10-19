@@ -26,7 +26,7 @@ vector<ld> loglik_tab_y, loglik_tab_n;
 
 dhrg::logistic best;
 
-bool opt_debug = false;
+debugflag debug_opt("sag_opt");
 
 bool should_good = false;
 
@@ -136,7 +136,7 @@ void optimize_sag_loglik_logistic() {
       pedge[sagdist[sagid[ei.i]][sagid[ei.j]] * mul]++;
     }
   
-  if(opt_debug) for(int d=0; d<max_sag_dist; d++) 
+  if(debug_opt) for(int d=0; d<max_sag_dist; d++)
     if(indist[d])
       printf("%2d: %7d/%7d %7.3lf\n", 
         d, pedge[d], indist[d], double(pedge[d] * 100. / indist[d]));
@@ -147,11 +147,11 @@ void optimize_sag_loglik_logistic() {
     int q = pq - p;
     if(p && q) {
       loglik += p * log(p) + q * log(q) - pq * log(pq);
-      if(opt_debug) println(hlog, tie(d, p, q), loglik);
+      if(debug_opt) println(hlog, tie(d, p, q), loglik);
       }
     }
   
-  if(opt_debug) println(hlog, "loglikelihood best = ", fts(loglik));
+  if(debug_opt) println(hlog, "loglikelihood best = ", fts(loglik));
   
   auto logisticf = [&] (dhrg::logistic&  l) {
     ld loglik = 0;
@@ -163,16 +163,16 @@ void optimize_sag_loglik_logistic() {
     return loglik;
     };
 
-  if(opt_debug) println(hlog, "cost = ", cost, " logisticf = ", logisticf(lgsag), " R= ", lgsag.R, " T= ", lgsag.T);
+  if(debug_opt) println(hlog, "cost = ", cost, " logisticf = ", logisticf(lgsag), " R= ", lgsag.R, " T= ", lgsag.T);
   if(should_good && abs(cost + logisticf(lgsag)) > 0.1) throw hr_exception("computation error");
   
   dhrg::fast_loglik_cont(lgsag, logisticf, nullptr, 1, 1e-5);
-  if(opt_debug) println(hlog, "loglikelihood logistic = ", logisticf(lgsag), " R= ", lgsag.R, " T= ", lgsag.T);    
+  if(debug_opt) println(hlog, "loglikelihood logistic = ", logisticf(lgsag), " R= ", lgsag.R, " T= ", lgsag.T);
   
   if(method == smLogistic) {
     compute_loglik_tab();
     compute_cost();
-    if(opt_debug) println(hlog, "cost = ", cost);
+    if(debug_opt) println(hlog, "cost = ", cost);
     }
   }
 
@@ -190,7 +190,7 @@ void optimize_sag_loglik_match() {
   match_a = solution[0];
   match_b = solution[1];
 
-  println(hlog, "got a = ", match_a, " b = ", match_b);
+  if(debug_opt) println(hlog, "got a = ", match_a, " b = ", match_b);
   if(method == smMatch)
     prepare_graph();
   }
@@ -244,7 +244,7 @@ pair<ld, ld> compute_mAP() {
 
 ld kendall;
 void compute_kendall() {
-  compute_cost(); println(hlog, "cost = ", cost);
+  compute_cost();
   vector<vector<ld> > weights;
   int DN = isize(sagid);
   weights.resize(DN);
