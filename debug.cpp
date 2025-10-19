@@ -27,6 +27,7 @@ EX debugflag debug_errors = {"error", true};
 EX debugflag debug_warnings = {"warning", true};
 EX debugflag debug_memory = {"memory"};
 EX debugflag debug_init = {"init", true};
+EX debugflag debug_progress = {"progress", true};
 
 #if HDR
 template<class... T>
