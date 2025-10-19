@@ -5,6 +5,10 @@
 
 namespace rogueviz { namespace kohonen {
 
+debugflag debug_kohonen("kohonen", true);
+debugflag debug_kohonen_dispersion("kohonen_dispersion");
+debugflag debug_kohonen_error("kohonen_error", true);
+
 int columns;
 
 vector<sample> data;
@@ -65,19 +69,13 @@ bool noshow = false;
 vector<int> samples_to_show;
 
 void loadsamples(const string& fname) {
+  DEBBI(debug_kohonen, ("Loading samples: ", fname));
   data.clear();
   samples_to_show.clear();
   clear();
   fhstream f(fname, "rt");
-  if(!f.f) {
-    fprintf(stderr, "Could not load samples: %s\n", fname.c_str());
-    return;
-    }
-  if(!scan(f, columns)) { 
-    printf("Bad format: %s\n", fname.c_str());
-    return; 
-    }
-  printf("Loading samples: %s\n", fname.c_str());
+  if(!f.f) return file_error(fname);
+  if(!scan(f, columns)) return file_format_error(fname);
   while(true) {
     sample s;
     bool shown = false;
@@ -509,7 +507,7 @@ void buildcellcrawler(cell *c, cellcrawler& cr, int dir) {
     
     d.clear();
     
-    // DEBBI(DF_LOG, ("Building dispersion, precision = ", dispersion_precision, " end_at = ", dispersion_end_at, "...\n"));
+    DEBBI(debug_kohonen_dispersion, ("Building dispersion, precision = ", dispersion_precision, " end_at = ", dispersion_end_at, "...\n"));
     
     for(iter=0; dispersion_count ? true : vmax > vmin * dispersion_end_at; iter++) {
       if(iter % dispersion_each == 0) {
@@ -535,13 +533,14 @@ void buildcellcrawler(cell *c, cellcrawler& cr, int dir) {
       }
     if(!dispersion_count) {
       if(!dispersion_long) dispersion_count = isize(d);
-      DEBB(DF_LOG, ("Dispersion count = ", isize(d), " celldist = ", celldist(c)));
+      DEBB(debug_kohonen_dispersion, ("Dispersion count = ", isize(d), " celldist = ", celldist(c)));
       }
-    /*
-    println(hlog, "dlast = ", d.back());
-    println(hlog, "dlast2 = ", d[d.size()-2]);
-    println(hlog, "vmin=", vmin, " vmax=",vmax, " end_at=", dispersion_end_at);
-    */
+
+    if(debug_kohonen_dispersion) {
+      println(hlog, "dlast = ", d.back());
+      println(hlog, "dlast2 = ", d[d.size()-2]);
+      println(hlog, "vmin=", vmin, " vmax=",vmax, " end_at=", dispersion_end_at);
+      }
     }
   }
 
@@ -607,20 +606,22 @@ void verify_crawlers() {
   
   int uniq = 0, failures = 0;
   
-  printf("Verifying crawlers...\n");  
+  if(debug_kohonen) printf("Verifying crawlers...\n");  
   for(cell *c: allcells) {
     auto id = get_cellcrawler_id(c);
     if(allcrawlers.count(id.first)) {
       bool b = verify_crawler(allcrawlers[id.first], cellwalker(c, id.second));
       if(!b) {
-        printf("cell %p: type = %d id = %d dir = %d / earlier crawler failed\n", hr::voidp(c), c->type, id.first, id.second);
+        if(debug_kohonen_dispersion)
+          printf("cell %p: type = %d id = %d dir = %d / earlier crawler failed\n", hr::voidp(c), c->type, id.first, id.second);
         failures++;
         }
       }
     else {
       for(int i=0; i<c->type; i++)
       for(auto& cc: allcrawlers) if(verify_crawler(cc.second, cellwalker(c, i))) {
-        printf("cell %p: type = %d id = %d dir = %d / also works id %d in direction %d\n", hr::voidp(c), c->type, id.first, id.second, cc.first, i);
+        if(debug_kohonen_dispersion)
+          printf("cell %p: type = %d id = %d dir = %d / also works id %d in direction %d\n", hr::voidp(c), c->type, id.first, id.second, cc.first, i);
         uniq--;
         goto breakcheck;
         }
@@ -631,9 +632,10 @@ void verify_crawlers() {
       uniq++;
       }
     }
-  printf("Crawlers constructed: %d (%d unique, %d failures)\n", isize(allcrawlers), uniq, failures);
+  if(debug_kohonen)
+    printf("Crawlers constructed: %d (%d unique, %d failures)\n", isize(allcrawlers), uniq, failures);
   setindex(false);
-  if(failures) exit(1);
+  if(failures) throw hr_exception("verify_crawler error");
   }
   
 bool finished() { return t == 0; }
@@ -809,7 +811,8 @@ vector<cell*> gen_neuron_cells() {
     while(at < isize(allcells) && hdist0(tC0(ggmatrix(allcells[at]))) < dist + 1e-6) at++;
     int at1 = kohrestrict;
     while(at1 > 0 && hdist0(tC0(ggmatrix(allcells[at1-1]))) > dist - 1e-6) at1--;
-    printf("Cells numbered [%d,%d) are in the same distance\n", at1, at);
+    if(debug_kohonen)
+      println(hlog, "Cells numbered [", at1, ",", at, ") are in the same distance");
     allcells.resize(kohrestrict);
     for(int i=kohrestrict; i<isize(allcells); i++) {
       setdist(allcells[i], 0, nullptr);
@@ -823,14 +826,12 @@ vector<cell*> gen_neuron_cells() {
 void create_neurons() {
   initialize_rv();
   
-  if(!samples) {
-    fprintf(stderr, "Error: SOM without samples\n");
-    exit(1);
-    }
+  if(!samples)
+    throw hr_exception("SOM without samples");
   
   weight_label = "quantity";
   
-  DEBBI(DF_LOG, ("Creating neurons"));
+  DEBBI(debug_kohonen, ("Creating neurons"));
   
   auto allcells = gen_neuron_cells();
 
@@ -844,12 +845,12 @@ void create_neurons() {
     }
     
   for(neuron& n: net) for(int d=BARLEV; d>=7; d--) setdist(n.where, d, NULL);
-  DEBB(DF_LOG, ("number of neurons = ", cells));
+  DEBB(debug_kohonen, ("number of neurons = ", cells));
   }
 
 void set_neuron_initial() {
   initialize_neurons();
-  DEBBI(DF_LOG, ("Setting initial neuron values"));
+  DEBBI(debug_kohonen, ("Setting initial neuron values"));
   for(int i=0; i<cells; i++) {
     alloc(net[i].net);
     for(int k=0; k<columns; k++)
@@ -870,7 +871,7 @@ void initialize_samples_to_show() {
   if(state & KS_SAMPLES) return;
   if(noshow) return;
 
-  DEBBI(DF_LOG, ("Initializing samples-to-show (", isize(samples_to_show), " samples", ")"));
+  DEBBI(debug_kohonen, ("Initializing samples-to-show (", isize(samples_to_show), " samples", ")"));
   if(!noshow) for(int s: samples_to_show) {
     int vdid = isize(vdata);
     sample_vdata_id[s] = vdid;
@@ -892,36 +893,36 @@ void initialize_dispersion() {
   
   initialize_neurons();
 
-  DEBBI(DF_LOG, ("Initializing dispersion"));
+  DEBBI(debug_kohonen, ("Initializing dispersion"));
 
   if(gaussian || true) {
-    DEBB(DF_LOG, ("dist = ", fts(mydistance(net[0].where, net[1].where))));
+    DEBB(debug_kohonen, ("dist = ", fts(mydistance(net[0].where, net[1].where))));
     cell *c1 = net[cells/2].where;
     vector<double> mapdist;
     for(neuron &n2: net) mapdist.push_back(mydistance(c1,n2.where));
     sort(mapdist.begin(), mapdist.end());
     maxdist = mapdist[isize(mapdist)*5/6] * distmul;
-    DEBB(DF_LOG, ("maxdist = ", fts(maxdist)));
+    DEBB(debug_kohonen, ("maxdist = ", fts(maxdist)));
     }
 
   dispersion_count = 0;  
 
   if(!gaussian)
-    DEBB(DF_LOG, ("dispersion precision = ", dispersion_precision, " end_at = ", dispersion_end_at, "...\n"));
+    DEBB(debug_kohonen, ("dispersion precision = ", dispersion_precision, " end_at = ", dispersion_end_at, "...\n"));
 
-  DEBB(DF_LOG, ("building crawlers...\n"));
+  DEBB(debug_kohonen, ("building crawlers...\n"));
 
   scc.clear();
   for(int i=0; i<cells; i++) {
     cell *c = net[i].where;
     auto cid = get_cellcrawler_id(c);
     if(!scc.count(cid.first)) {
-      // DEBB(DF_LOG, ("Building cellcrawler id = ", itsh(cid.first)));
+      DEBB(debug_kohonen_dispoersion, ("Building cellcrawler id = ", itsh(cid.first)));
       buildcellcrawler(c, scc[cid.first], cid.second);
       }
     }
 
-  DEBB(DF_LOG, ("crawlers constructed = ", isize(scc), "\n"));
+  DEBB(debug_kohonen, ("crawlers constructed = ", isize(scc), "\n"));
 
   lpct = -46130;
   state |= KS_DISPERSION;
@@ -1081,12 +1082,10 @@ namespace levelline {
   }
 
 void ksave(const string& fname) {
+  DEBBI(debug_kohonen, ("ksave"));
   initialize_neurons_initial();
   FILE *f = fopen(fname.c_str(), "wt");
-  if(!f) {
-    fprintf(stderr, "Could not save the network\n");
-    return;
-    }
+  if(!f) return file_error(fname);
   fprintf(f, "%d %d\n", cells, t);
   for(neuron& n: net) {
     for(int k=0; k<columns; k++)
@@ -1097,21 +1096,16 @@ void ksave(const string& fname) {
   }
 
 void kload(const string& fname) {
+  DEBBI(debug_kohonen, ("kload"));
   initialize_neurons();
   int xcells;
   fhstream f(fname.c_str(), "rt");
-  if(!f.f) {
-    fprintf(stderr, "Could not load the network: %s\n", fname.c_str());
-    return;
-    }
-  if(!scan(f, xcells, t)) {
-    fprintf(stderr, "Bad network format: %s\n", fname.c_str());
-    return;
-    }
-  printf("Loading the network %s...\n", fname.c_str());
+  if(!f.f) return file_error(fname);
+  if(!scan(f, xcells, t)) return file_format_error(fname);
   if(xcells != cells) {
-    fprintf(stderr, "Error: bad number of cells (x=%d c=%d)\n", xcells, cells);
-    exit(1);
+    if(debug_kohonen_error)
+      println(hlog, "Error: bad number of cells ", tie(xcells, cells));
+    throw hr_exception("bad number of SOM cells");
     }
   for(neuron& n: net) {
     for(int k=0; k<columns; k++) if(!scan(f, n.net[k])) return;
@@ -1120,23 +1114,19 @@ void kload(const string& fname) {
   }
 
 void ksavew(const string& fname) {
+  DEBBI(debug_kohonen, ("Saving the network weights to ", fname));
   FILE *f = fopen(fname.c_str(), "wt");
-  if(!f) {
-    fprintf(stderr, "Could not save the weights: %s\n", fname.c_str());
-    return;
-    }
-  printf("Saving the network to %s...\n", fname.c_str());
+  if(!f) return file_error(fname);
   for(int i=0; i<columns; i++)
     fprintf(f, "%s=%.9lf\n", colnames[i].c_str(), weights[i]);
   fclose(f);
   }
 
 void kloadw(const string& fname) {
+  if(debug_kohonen)
+    println(hlog, "Loading the network weights from ", fname);
   FILE *f = fopen(fname.c_str(), "rt");
-  if(!f) {
-    fprintf(stderr, "Could not load the weights\n");
-    return;
-    }
+  if(!f) return file_error(fname);
   for(int i=0; i<columns; i++) {
     string s1, s2;
     char kind = 0;

@@ -101,8 +101,11 @@ EX hookset<void(eLand&)> hooks_sync_music;
 
 EX bool music_out_of_focus = false;
 
+EX debugflag debug_music = {"music"};
+EX debugflag debug_music_error = {"music_error"};
+
 EX void handlemusic() {
-  DEBBI(DF_GRAPH, ("handle music"));
+  indenter_finish hm(debug_music, "handlemusic");
   if(audio && musicvolume) {
     eLand id = getCurrentLandForMusic();
     if(callhandlers(false, hooks_music, id)) return;
@@ -120,7 +123,7 @@ EX void handlemusic() {
       if(!music[id]) {
         memory_for_lib();
         music[id] = Mix_LoadMUS(musfname[id].c_str());
-        if(!music[id]) {
+        if(!music[id] && debug_music_error) {
            printf("Mix_LoadMUS: %s\n", Mix_GetError());
            }
         }
@@ -159,8 +162,10 @@ EX void resetmusic() {
 constexpr eLand mfcode(const char* buf) { return eLand((buf[0] - '0') * 10 + buf[1] - '0'); }
 #endif
 
+EX debugflag debug_init_music = {"init_music", true};
+
 EX bool loadMusicInfo(string dir) {
-  DEBBI(DF_INIT, ("load music info"));
+  indenter_finish hm(debug_init_music, "loadMusicInfo");
   if(dir == "") return false;
   FILE *f = fopen(dir.c_str(), "rt");
   if(f) {
@@ -178,7 +183,7 @@ EX bool loadMusicInfo(string dir) {
           else musfname[id] = buf+5;
           music_available = true;
           }
-        else {
+        else if(debug_music_error) {
           fprintf(stderr, "warning: bad soundtrack id, use the following format:\n");
           fprintf(stderr, "[##] */filename\n");
           fprintf(stderr, "where ## are two digits, and */ is optional and replaced by path to the music\n");

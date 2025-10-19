@@ -3594,9 +3594,9 @@ auto ccm = addHook(hooks_clearmemory, 0, [] () {
     eliminate_if(heat::offscreen_fire, is_cell_removed);
     eliminate_if(princess::infos, [] (princess::info*& i) { 
       if(is_cell_removed(i->princess) || is_cell_removed(i->prison)) { 
-        DEBB(DF_MEMORY, ("removing a princess"))
+        DEBB(debug_memory, ("removing a princess"))
         if(i->princess && !is_cell_removed(i->princess)) {
-          DEBB(DF_MEMORY, ("faking a princess"))
+          DEBB(debug_memory, ("faking a princess"))
           princess::newFakeInfo(i->princess);
           }
         delete i; 

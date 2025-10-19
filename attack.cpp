@@ -476,7 +476,7 @@ EX bignum ivy_total() {
 
 EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
   eMonster m = c->monst;
-  DEBBI(DF_TURN, ("killmonster ", dnameof(m)));
+  DEBBI(debug_turn, ("killmonster ", dnameof(m)));
   
   if(!m) return;
   

@@ -8,6 +8,8 @@
 #include "hyper.h"
 namespace hr {
 
+EX debugflag debug_geometry = {"geometry"};
+
 #if HDR
 struct usershapelayer {
   vector<hyperpoint> list;
@@ -646,7 +648,7 @@ void geometry_information::generate_faces() {
 
 void geometry_information::prepare_basics() {
 
-  DEBBI(DF_INIT | DF_POLY | DF_GEOM, ("prepare_basics"));
+  indenter_finish dif(debug_geometry, "prepare_basics");
   
   hexshift = 0;
 
@@ -790,9 +792,9 @@ void geometry_information::prepare_basics() {
     if(BITRUNCATED) plevel_twisted = (M_PI - 2 * alpha6 - alpha7) * fake::around * 2;
     }
   
-  DEBB(DF_GEOM | DF_POLY,
-    (hr::format("S7=%d S6=%d hexf = " LDF" hcross = " LDF" tessf = " LDF" hexshift = " LDF " hexhex = " LDF " hexv = " LDF "\n", S7, S6, hexf, hcrossf, tessf, hexshift, 
-    hexhexdist, hexvdist)));  
+  if(debug_geometry) println(hlog,
+    hr::format("S7=%d S6=%d hexf = " LDF" hcross = " LDF" tessf = " LDF" hexshift = " LDF " hexhex = " LDF " hexv = " LDF "\n", S7, S6, hexf, hcrossf, tessf, hexshift, 
+    hexhexdist, hexvdist));
   
   hybrid_finish:
   
@@ -831,7 +833,6 @@ void geometry_information::prepare_basics() {
     geometry = gFake;
     ld our = xpush0(hcrossf)[0] / xpush0(hcrossf)[GDIM];
     fake::scale = our / orig;
-    // if(debugflags & DF_GEOM) 
     }
 
   if(fake::in() && WDIM == 3) {
@@ -918,7 +919,8 @@ void geometry_information::prepare_basics() {
       if(inv) psl_steps = 2 * S3;
       if(single_step < 0) single_step = -single_step;
       }
-    DEBB(DF_GEOM | DF_POLY, ("steps = ", psl_steps, " / ", single_step));
+
+    if(debug_geometry) println(hlog, "steps = ", psl_steps, " / ", single_step);
     plevel = M_PI * single_step / psl_steps;
     if(hybrid::underlying == gFake) {
       auto s3 = fake::around;
@@ -1067,7 +1069,7 @@ EX namespace geom3 {
   
   void geometry_information::prepare_compute3() {
     using namespace geom3;
-    DEBBI(DF_INIT | DF_POLY | DF_GEOM, ("geom3::compute"));
+    indenter_finish dig(debug_geometry, "prepare_compute3");
     // tanh(depth) / tanh(camera) == pconf.alpha
     
     if(GDIM == 3 || flipped || changing_embedded_settings);
@@ -1462,7 +1464,8 @@ EX void check_cgi() {
     for(auto& t: cgis) if(!t.second.use_count) timestamps.emplace_back(-t.second.timestamp, t.first);
     sort(timestamps.begin(), timestamps.end());
     while(isize(timestamps) > limit && timestamps.back().first != -ntimestamp) {
-      DEBB(DF_GEOM, ("erasing geometry ", timestamps.back().second));
+      if(debug_geometry)
+        println(hlog, "erasing geometry ", timestamps.back().second);
       cgis.erase(timestamps.back().second);
       timestamps.pop_back();
       }

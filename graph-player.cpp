@@ -752,9 +752,11 @@ EX void draw_movement_arrows(cell *c, const transmatrix& V, int df) {
   if(keylist != "") queuestr(shiftless(V), keysize * mapfontscale / 100, keylist, col >> 8, 1);
   }
 
+debugflag debug_movestar = {"graph_movestar"};
+
 EX void drawmovestar(double dx, double dy) {
 
-  DEBBI(DF_GRAPH, ("draw movestar"));
+  indenter_finish(debug_movestar, "drawmovestar");
   if(viewdists) return;
   if(GDIM == 3) return;
 

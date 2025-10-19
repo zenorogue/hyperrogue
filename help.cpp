@@ -89,7 +89,7 @@ EX hookset<bool()> hooks_build_help;
 
 EX void buildHelpText() {
   if(callhandlers(0, hooks_build_help)) return;
-  DEBBI(DF_GRAPH, ("buildHelpText"));
+  DEBBI(debug_graph, ("buildHelpText"));
 
   help = XLAT("Welcome to HyperRogue");
 #if ISANDROID  
@@ -911,7 +911,7 @@ template<class T> void set_help_to(T t) {
   }
 
 EX void describeMouseover() {
-  DEBBI(DF_GRAPH, ("describeMouseover"));
+  DEBBI(debug_graph, ("describeMouseover"));
 
   if(callhandlers(0, hooks_global_mouseover)) return;
 

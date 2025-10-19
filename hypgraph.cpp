@@ -2327,7 +2327,6 @@ EX void centerpc(ld aspd) {
   
   if(ors::mode == 2 && vid.sspeed < 5) return;
   if(vid.sspeed >= 4.99) aspd = 1000;
-  DEBBI(DF_GRAPH, ("center pc"));
 
   auto mam = move_affected_matrices(0);
   for(auto pV: mam) ors::unrotate(*pV);
@@ -2458,7 +2457,7 @@ void ballgeometry() {
   }
 
 EX void resetview() {
-  DEBBI(DF_GRAPH, ("reset view"));
+  indenter_finish dif(debug_graph, "resetview");
   // EUCLIDEAN
   decide_lpu();
   NLP = Id;

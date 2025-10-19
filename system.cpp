@@ -191,7 +191,7 @@ EX void reset_cheats() {
 
 /** \brief initialize the game */
 EX void initgame() {
-  DEBBI(DF_INIT, ("initGame"));
+  DEBBI(debug_init, ("initGame"));
   if(!safety) reset_cheats();
 
   callhooks(hooks_initgame);
@@ -1095,7 +1095,7 @@ scores::score scorebox;
 EX bool save_cheats;
 
 EX void saveStats(bool emergency IS(false)) {
-  DEBBI(DF_INIT, ("saveStats [", scorefile, "]"));
+  DEBBI(debug_init, ("saveStats [", scorefile, "]"));
 
   if(autocheat && !save_cheats) return;
   if(scorefile == "") return;
@@ -1232,7 +1232,7 @@ EX void saveStats(bool emergency IS(false)) {
   fprintf(f, "\n\n\n");
 
 #if !ISMOBILE
-  DEBB(DF_INIT, ("Game statistics saved to ", scorefile));
+  DEBB(debug_init, ("Game statistics saved to ", scorefile));
   addMessage(XLAT("Game statistics saved to %1", scorefile));
 #endif
   fclose(f);
@@ -1247,7 +1247,7 @@ EX void loadsave() {
 #if CAP_TOUR
   if(tour::on) return;
 #endif
-  DEBBI(DF_INIT, ("loadSave"));
+  DEBBI(debug_init, ("loadSave"));
 
   FILE *f = fopen(scorefile.c_str(), "rt");
   havesave = f;
@@ -1440,7 +1440,7 @@ EX void load_last_save() {
 EX void stop_game() {
   if(!game_active) return;
   if(dual::split(stop_game)) return;
-  DEBBI(DF_INIT, ("stop_game"));
+  DEBBI(debug_init, ("stop_game"));
   achievement_final(true);
   save_if_needed();
   for(int i=0; i<ittypes; i++) items[i] = 0;
@@ -1557,7 +1557,7 @@ EX void set_variation(eVariation target) {
   }
 
 EX void switch_game_mode(char switchWhat) {
-  DEBBI(DF_INIT, ("switch_game_mode ", switchWhat));
+  DEBBI(debug_init, ("switch_game_mode ", switchWhat));
   switch(switchWhat) {
     case rg::peace:
       peace::on = !peace::on;
@@ -1688,7 +1688,7 @@ EX void switch_game_mode(char switchWhat) {
 
 EX void start_game() {
   if(game_active) return;
-  DEBBI(DF_INIT, ("start_game"));
+  DEBBI(debug_init, ("start_game"));
   if(dual::state == 1) dual::assign_landsides();
   if(dual::split(start_game)) return;
   restart:

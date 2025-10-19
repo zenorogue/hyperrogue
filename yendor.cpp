@@ -709,7 +709,7 @@ EX namespace yendor {
     }) + addHook(hooks_removecells, 0, [] () {
     eliminate_if(yendor::yi, [] (yendorinfo& i) {
       for(int j=0; j<YDIST; j++) if(is_cell_removed(i.path[j])) {
-        DEBB(DF_MEMORY, ("removing a Yendor"));
+        DEBB(debug_memory, ("removing a Yendor"));
         if(&yi[yii] == &i) yii = NOYENDOR;
         return true;
         }

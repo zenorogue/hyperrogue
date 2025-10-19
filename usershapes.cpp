@@ -76,7 +76,7 @@ void geometry_information::pushShape(usershapelayer& ds) {
 void geometry_information::prepare_usershapes() {
   hpc.resize(prehpc);
   last = NULL;
-  DEBB(DF_POLY, ("hpc = ", prehpc));
+  DEBB(debug_poly, ("hpc = ", prehpc));
 
   user_triangles_texture.tvertices.clear();
   
@@ -92,7 +92,7 @@ void geometry_information::prepare_usershapes() {
   
   static int qhpc0;
   int qhpc = isize(hpc);
-  if(qhpc != qhpc0 && (debugflags & (DF_GEOM | DF_POLY))) {
+  if(qhpc != qhpc0 && debug_poly) {
     println(hlog, "qhpc = ", qhpc0=qhpc, " (", prehpc, "+", qhpc-prehpc, ")");
     println(hlog, "shapes = ", isize(allshapes));
     int inve=0, issi=0, vcon=0, ccon=0;

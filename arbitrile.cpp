@@ -275,7 +275,7 @@ void shape::build_from_angles_edges(bool is_comb) {
   vector<transmatrix> matrices;
   for(int i=0; i<n; i++) {
     matrices.push_back(at);
-    if(debugflags & DF_GEOM) println(hlog, "at = ", at);
+    if(debug_geometry) println(hlog, "at = ", at);
     ctr += tC0(at);
     at = at * lxpush(in_edges[i]) * spin(in_angles[i]+M_PI);
     }
@@ -287,12 +287,12 @@ void shape::build_from_angles_edges(bool is_comb) {
   if(sqhypot_d(3, ctr) < 1e-2) {
     // this may happen for some spherical tilings
     // try to move towards the center
-    if(debugflags & DF_GEOM) println(hlog, "special case encountered");
+    if(debug_geometry) println(hlog, "special case encountered");
     for(int i=0; i<n; i++) {
       ctr += at * lxpush(in_edges[i]) * spin((in_angles[i]+M_PI)/2) * lxpush0(.01);
       at = at * lxpush(in_edges[i]) * spin(in_angles[i]);
       }
-    if(debugflags & DF_GEOM) println(hlog, "ctr = ", ctr);
+    if(debug_geometry) println(hlog, "ctr = ", ctr);
     }
   hyperpoint inf_point;
   if(apeirogonal) {
@@ -526,9 +526,9 @@ EX void unmirror(arbi_tiling& c) {
     if(sh[i].apeirogonal) {
       cycle(sh[i].edges);
       cycle(sh[i].vertices);
-      if(debugflags & DF_GEOM) println(hlog, "angles before = ", sh[i].angles);
+      if(debug_geometry) println(hlog, "angles before = ", sh[i].angles);
       cycle(sh[i].angles);
-      if(debugflags & DF_GEOM) println(hlog, "angles now = ", sh[i].angles);
+      if(debug_geometry) println(hlog, "angles now = ", sh[i].angles);
       cycle(sh[i].connections);
       }
     }
@@ -597,7 +597,7 @@ EX void compute_vertex_valence_prepare(arb::arbi_tiling& ac) {
         mirror_connection(ac, co);
         reduce_gcd(sh.cycle_length, k-co.eid);
         }
-      if(debugflags & DF_GEOM) 
+      if(debug_geometry)
         println(hlog, "tile ", i, " cycle_length = ", sh.cycle_length, " / ", n);
       }
     
@@ -658,7 +658,7 @@ EX bool compute_vertex_valence_flat(arb::arbi_tiling& ac) {
       sh.vertex_period[k] = pqty;
       sh.vertex_angles[k] = std::move(anglelist);
       }
-    if(debugflags & DF_GEOM) 
+    if(debug_geometry)
       println(hlog, "computed vertex_valence of ", i, " as ", ac.shapes[i].vertex_valence);
     }
   return false;
@@ -709,7 +709,7 @@ EX bool compute_vertex_valence_generic(arb::arbi_tiling& ac) {
       sh.vertex_valence[k] = qty;
       sh.vertex_valence_gluesub[k] = qty == OINF ? OINF : qty - subqty;
       }
-    if(debugflags & DF_GEOM)
+    if(debug_geometry)
       println(hlog, "computed vertex_valence of ", i, " as ", ac.shapes[i].vertex_valence);
     }
   return false;
@@ -899,7 +899,7 @@ EX void check_football_colorability(arbi_tiling& c) {
             }
 
           if((sh.cycle_length&1) && (t < 2) && !sh.apeirogonal) sh.cycle_length *= 2;
-          if(debugflags & DF_GEOM)
+          if(debug_geometry)
             println(hlog, tie(i,t), " becomes ", ni, " with connections ", sh.connections, " and cycle length = ", sh.cycle_length);
           }
 
@@ -1129,7 +1129,7 @@ EX void load(const string& fname, bool load_as_slided IS(false), bool keep_slide
       string tok = ep.next_token();
       ep.force_eat("=");
       ep.extra_params[tok] =ep.parsepar();
-      if(debugflags & DF_GEOM)
+      if(debug_geometry)
         println(hlog, "let ", tok, " = ", ep.extra_params[tok]);
       }
     else if(ep.eat("unittile(")) load_tile(ep, c, true);
@@ -1220,7 +1220,7 @@ EX void load(const string& fname, bool load_as_slided IS(false), bool keep_slide
             ld dist = hdist(sh.vertices[i], sh.vertices[j]);
             if(abs(dist - d) < eps) {
               sh.sublines.emplace_back(i, j);
-              if(debugflags & DF_GEOM) println(hlog, "add subline ", i, "-", j);
+              if(debug_geometry) println(hlog, "add subline ", i, "-", j);
               }
             }
         }
@@ -1996,7 +1996,7 @@ EX void convert_minimize(int N, vector<int>& old_shvids, map<int, int>& old_to_n
   
   int chg = 1;
   while(chg) {
-    if(debugflags & DF_GEOM) {
+    if(debug_geometry) {
       println(hlog, "current table of equals:");
       int eqid = 0;
       for(auto& eq: equal) {
@@ -2117,7 +2117,7 @@ EX void convert() {
       cyclefix(alpha, 0);
       sh.angles.push_back(alpha);
       }
-    if(debugflags & DF_GEOM) {
+    if(debug_geometry) {
       println(hlog, "shape ", i, ":");
       indenter indp(2);
       println(hlog, "vertices=", sh.vertices);

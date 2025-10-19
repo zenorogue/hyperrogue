@@ -1031,6 +1031,14 @@ EX string find_file(string s) {
   return s;
   }
 
+EX void file_error(const char* fname) {
+  throw hr_exception("missing file error");
+  }
+
+EX void file_format_error(const char* fname) {
+  throw hr_exception("file format error");
+  }
+
 EX void open_url(string s) {
   #if ISWEB
   EM_ASM_({

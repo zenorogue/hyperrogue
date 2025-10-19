@@ -251,6 +251,8 @@ EX vector<pair<string, string>> font_names = {
 EX int last_font_id = 0;
 EX int font_id = 0;
 
+EX debugflag debug_init_font = {"init_font", true};
+
 #ifdef FONTCONFIG
 TTF_Font* findfont(int siz) {
 
@@ -289,7 +291,7 @@ TTF_Font* findfont(int siz) {
   FcPatternDestroy(pat);
   FcFini();
   cfont->use_fontconfig = false;
-  if(debugflags & DF_INIT) println(hlog, "fontpath is: ", cfont->filename);
+  if(debug_init_font) println(hlog, "fontpath is: ", cfont->filename);
   return TTF_OpenFont(cfont->filename.c_str(), siz);
   }
 #endif
@@ -410,7 +412,7 @@ EX bool model_needs_depth() {
   }
 
 EX void setGLProjection(color_t col IS(backcolor)) {
-  DEBBI(DF_GRAPH, ("setGLProjection"));
+  DEBBI(debug_graph, ("setGLProjection"));
   GLERR("pre_setGLProjection");
 
   glClearColor(part(col, 2) / 255.0, part(col, 1) / 255.0, part(col, 0) / 255.0, 1);
@@ -568,7 +570,7 @@ void sdltogl(SDL_Surface *txt, glfont_t& f, int ch) {
   
 EX void init_glfont(int size) {
   if(cfont->glfont[size]) return;
-  DEBBI(DF_GRAPH, ("init GL font: ", size));
+  DEBBI(debug_init_font, ("init GL font: ", size));
   
 #if !CAP_TABFONT
   loadfont(size);
@@ -755,7 +757,7 @@ bool gl_print(int x, int y, int shift, int size, const char *s, color_t color, i
 EX purehookset hooks_resetGL;
 
 EX void resetGL() {
-  DEBBI(DF_INIT | DF_GRAPH, ("reset GL"))
+  DEBBI(debug_init_graph, ("reset GL"))
   callhooks(hooks_resetGL);
 #if CAP_GLFONT
   for(auto& cf: fontdatas)
@@ -1015,9 +1017,11 @@ void addMessageToLog(msginfo& m, vector<msginfo>& log) {
 
 EX void clearMessages() { msgs.clear(); }
 
+EX debugflag debug_messages = {"messages", true};
+
 EX void addMessage(string s, char spamtype) {
   LATE( addMessage(s, spamtype); )
-  DEBB(DF_MSG, ("addMessage: ", s));
+  DEBB(debug_messages, ("addMessage: ", s));
 
   msginfo m;
   m.msg = s; m.spamtype = spamtype; m.flashout = false; m.stamp = ticks;
@@ -1097,7 +1101,7 @@ EX void drawmessage(const string& s, int& y, color_t col) {
   }
 
 EX void drawmessages() {
-  DEBBI(DF_GRAPH, ("draw messages"));
+  DEBBI(debug_graph, ("draw messages"));
   int i = 0;
   int t = ticks;
   for(int j=0; j<isize(msgs); j++) {
@@ -1348,7 +1352,7 @@ EX int current_window_flags = -1;
 
 EX void setvideomode() {
 
-  DEBBI(DF_INIT | DF_GRAPH, ("setvideomode"));
+  DEBBI(debug_graph || debug_init, ("setvideomode"));
   
   vid.full = vid.want_fullscreen;
   
@@ -1631,16 +1635,14 @@ EX void init_graph() {
 
 EX void initialize_all() {
 
-  DEBBI(DF_INIT | DF_GRAPH, ("initgraph"));
+  DEBBI(debug_init || debug_graph, ("initialize_all"));
   
-  DEBB(DF_INIT, ("initconfig"));
   initConfig();
 
 #if CAP_SDLJOY
   joyx = joyy = 0; joydir.d = -1;
 #endif
   
-  DEBB(DF_INIT, ("restartGraph"));
   restartGraph();
   
   if(noGUI) {
@@ -1650,14 +1652,11 @@ EX void initialize_all() {
     return;
     }
 
-  DEBB(DF_INIT, ("preparesort"));
   preparesort();
 #if CAP_CONFIG
-  DEBB(DF_INIT, ("loadConfig"));
   loadConfig();
 #endif
 #if CAP_ARCM
-  DEBB(DF_INIT, ("parse symbol"));
   arcm::current.parse();
 #endif
   if(mhybrid) geometry = hybrid::underlying;
@@ -1666,14 +1665,10 @@ EX void initialize_all() {
   arg::read(2);
 #endif
 
-  DEBB(DF_INIT | DF_GRAPH, ("init graph"));
   init_graph();
-  DEBB(DF_INIT | DF_POLY, ("check CGI"));
   check_cgi();
-  DEBB(DF_INIT | DF_POLY, ("require basic"));
   cgi.require_basics();
   
-  DEBB(DF_INIT | DF_GRAPH, ("init font"));
   init_font();
 
 #if CAP_SDLJOY  
@@ -1681,15 +1676,12 @@ EX void initialize_all() {
 #endif
 
 #if CAP_SDLAUDIO
-  DEBB(DF_INIT, ("init audio"));
   initAudio();
 #endif
-
-  DEBB(DF_INIT, ("initialize_all done"));
   }
 
 EX void quit_all() {
-  DEBBI(DF_INIT, ("clear graph"));
+  DEBBI(debug_init, ("quit_all"));
 #if CAP_SDLJOY
   closeJoysticks();
 #endif

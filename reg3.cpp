@@ -161,7 +161,7 @@ EX namespace reg3 {
         ld f0 = 0.5;
         ld f1 = binsearch(0.5, 1, [&] (ld d) {
           hyperpoint c = lerp(b, a, d);
-          if(debugflags & DF_GEOM) 
+          if(debug_geometry)
             println(hlog, "d=", d, " c= ", c, " material = ", material(c));
           return material(c) <= 0;
           });
@@ -174,7 +174,7 @@ EX namespace reg3 {
         for(int it=0; it<100; it++) {
           ld fa = (f0*2+f1) / 3;
           ld fb = (f0*1+f1*2) / 3;
-          if(debugflags & DF_GEOM) 
+          if(debug_geometry)
             println(hlog, "f(", fa, ") = ", f(fa), " f(", fb, ") = ", f(fb));
           if(f(fa) > f(fb)) f0 = fa;
           else f1 = fb;
@@ -234,10 +234,10 @@ EX namespace reg3 {
     cgi.adjmoves[0] = cpush(0, between_centers) * cspin180(0, 2);
     for(int i=1; i<S7; i++) cgi.adjmoves[i] = spins[i] * cgi.adjmoves[0];
 
-    for(int a=0; a<S7; a++)
-      DEBB(DF_GEOM, ("center of ", a, " is ", kz(tC0(cgi.adjmoves[a]))));
-
-    DEBB(DF_GEOM, ("doublemove = ", kz(tC0(cgi.adjmoves[0] * cgi.adjmoves[0]))));
+    if(debug_geometry) {
+      for(int a=0; a<S7; a++) println(hlog, "center of ", a, " is ", kz(tC0(cgi.adjmoves[a])));
+      println(hlog, "doublemove = ", kz(tC0(cgi.adjmoves[0] * cgi.adjmoves[0])));
+      }
 
     cgi.adjcheck = hdist(tC0(cgi.adjmoves[0]), tC0(cgi.adjmoves[1])) * 1.0001;
 
@@ -269,7 +269,7 @@ EX namespace reg3 {
     if(S7 == 20) mid = 5;
     /* icosahedron not implemented */
     loop = ginf[geometry].tiling_name[5] - '0';
-    DEBB(DF_GEOM, ("face = ", face, " loop = ", loop, " S7 = ", S7));    
+    if(debug_geometry) println(hlog, "face = ", face, " loop = ", loop, " S7 = ", S7);
     
     ld angle_between_faces, hcrossf;
     
@@ -341,7 +341,7 @@ EX namespace reg3 {
     for(int i=0; i<face; i++) midface += cspin(1, 2, TAU * i/face) * v2;
     midface = normalize(midface);
     ld between_centers = 2 * hdist0(midface);
-    DEBB(DF_GEOM, ("between_centers = ", between_centers));
+    if(debug_geometry) println(hlog, "between_centers = ", between_centers);
 
     build_regular_spins(between_centers, angle_between_faces);
     
@@ -1135,10 +1135,11 @@ EX namespace reg3 {
     
     
     void create_patterns() {
-      DEBB(DF_GEOM, ("creating pattern = ", isize(allh)));
+      indenter_finish(debug_geometry, "creating pattern = " + its(isize(allh)));
       
       if(!PURE) {
-         println(hlog, "create_patterns not implemented");
+         if(debug_errors || debug_geometry)
+           println(hlog, "create_patterns not implemented");
          return;
          }
 
@@ -1174,7 +1175,7 @@ EX namespace reg3 {
         
         // Vineyard in 435
         make_plane(cellwalker(gamestart(), 0));
-        DEBB(DF_GEOM, ("plane size = ", isize(plane)));
+        if(debug_geometry) println(hlog, "plane size = ", isize(plane));
         
         set<int> plane_indices;
         for(auto cw: plane) plane_indices.insert(cw.at->master->fieldval);
@@ -1255,10 +1256,10 @@ EX namespace reg3 {
       
       for(int index = 5; index >= 0; index--) {
         for(auto k: boundaries) println(hlog, k);
-        DEBB(DF_GEOM, ("simplifying..."));
+        if(debug_geometry) println(hlog, "simplifying...");
         
         for(auto by: boundaries) if(among(by[index], 1, -1)) {
-          DEBB(DF_GEOM, ("simplifying by ", by));
+          if(debug_geometry) println(hlog, "simplifying by ", by);
           periods.push_back(by);
           set<coord> nb;
       
@@ -1266,7 +1267,8 @@ EX namespace reg3 {
             if(v == by) ;
             else if(v[index] % by[index] == 0)
               nb.insert(v - by * (v[index] / by[index]));
-            else println(hlog, "error");    
+            else if(debug_errors || debug_geometry)
+              println(hlog, "simplification error");
           
           boundaries = std::move(nb);
           break;
@@ -1935,7 +1937,7 @@ EX namespace reg3 {
       for(int i=0; i<qty; i++) 
         bfs.emplace_back(i, root[i]);
       int qstate = isize(childpos) - 1;
-      DEBB(DF_GEOM, ("qstate = ", qstate));
+      DEBB(debug_geometry, ("qstate = ", qstate));
       for(int i=0; i<isize(bfs); i++) {
         address last = bfs[i];
         int state = last.second;
@@ -1976,7 +1978,7 @@ EX namespace reg3 {
           }
         }
       
-      DEBB(DF_GEOM, ("removed cases = ", isize(bfs)));
+      DEBB(debug_geometry, ("removed cases = ", isize(bfs)));
 
       /* remove non-branching states */
 

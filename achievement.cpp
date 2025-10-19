@@ -909,12 +909,14 @@ EX void check_total_victory() {
   hadtotalvictory = true;
   achievement_gain("TOTALVICTORY");
   }
-  
+
+EX debugflag debug_achievements = {"steam_achievements"};
+
 /** gain the victory achievements. 
  *  @param hyper true for the Hyperstone victory, and false for the Orb of Yendor victory.
  */
 EX void achievement_victory(bool hyper) {
-  DEBBI(DF_STEAM, ("achievement_victory"))
+  if(debug_achievements) println(hlog, "achievement_victory");
   if(offlineMode) return;
 #if CAP_ACHIEVE
   if(cheater) return;
@@ -931,7 +933,8 @@ EX void achievement_victory(bool hyper) {
   if(ineligible_starting_land) return;
   if(use_custom_land_list) return;
   LATE( achievement_victory(hyper); )
-  DEBB(DF_STEAM, ("after checks"))
+
+  if(debug_achievements) println(hlog, "after checks");
 
   int t = getgametime();
   
@@ -982,7 +985,8 @@ EX void achievement_victory(bool hyper) {
       }
     }
   
-  DEBB(DF_STEAM, ("uploading scores"))
+  if(debug_achievements) println(hlog, "uploading scores");
+
   upload_score(ih1, t);
   upload_score(ih2, turncount);
 #endif

@@ -75,6 +75,8 @@ EX int btspin(int id, int d) {
   return groupspin(id, d, S7);
   }
 
+EX debugflag debug_field = {"geometry_field"};
+
 #if HDR
 
 static constexpr int ERR = -99;
@@ -529,7 +531,8 @@ bool fpattern::generate_all3() {
     if(isize(matrices) >= limitv) { println(hlog, "limitv exceeded"); return false; }
     }
   hashv = compute_hash();
-  DEBB(DF_FIELD, ("all = ", isize(matrices), "/", local_group, " = ", isize(matrices) / local_group, " hash = ", hashv, " count = ", ++hash_found[hashv]));
+  if(debug_field)
+    println(hlog, "all = ", isize(matrices), "/", local_group, " = ", isize(matrices) / local_group, " hash = ", hashv, " count = ", ++hash_found[hashv]);
   
   if(use_quotient_fp) 
     generate_quotientgroup();  
@@ -604,9 +607,11 @@ EX purehookset hooks_solve3;
 
 int fpattern::solve3() {
 
+  indenter_finish(debug_field, "fpattern::solve3");
+
   reg3::generate_fulls();
   
-  DEBB(DF_FIELD, ("generating isometries for ", Field));
+  if(debug_field) println(hlog, "generating isometries for ", Field);
   
   auto iso3 = generate_isometries();
   auto iso4 = generate_isometries3();
@@ -625,7 +630,8 @@ int fpattern::solve3() {
     if(check_order(M, 2)) 
       possible_P.push_back(M);
     
-  DEBB(DF_FIELD, ("field = ", Field, " #P = ", isize(possible_P), " #X = ", isize(possible_X), " #R = ", isize(possible_R), " r_order = ", cgi.r_order, " xp_order = ", cgi.xp_order));
+  if(debug_field)
+    println(hlog, "field = ", Field, " #P = ", isize(possible_P), " #X = ", isize(possible_X), " #R = ", isize(possible_R), " r_order = ", cgi.r_order, " xp_order = ", cgi.xp_order);
                                                                                                                                
   for(auto& xX: possible_X)
   for(auto& xP: possible_P) if(check_order(mmul(xP, xX), cgi.xp_order)) 
@@ -653,7 +659,8 @@ int fpattern::solve3() {
 
   ok:
 
-  DEBB(DF_FIELD, ("cmb = ", cmb, " for field = ", Field));
+  if(debug_field)
+    println(hlog, "cmb = ", cmb, " for field = ", Field);
   
   return cmb;
   }
@@ -802,8 +809,9 @@ vector<triplet_info> fpattern::find_triplets() {
     
     return transcript;
     };
-  
-  DEBB(DF_FIELD, ("looking for alternate solutions"));
+
+  if(debug_field) println(hlog, "looking for alternate solutions");
+
   auto orig_transcript = compute_transcript(1, S7);
   
   set<vector<int>> transcripts_seen;
@@ -824,7 +832,7 @@ vector<triplet_info> fpattern::find_triplets() {
     cc.push_back(i);
     }    
   
-  DEBB(DF_FIELD, ("conjugacy_classes = ", cc));
+  if(debug_field) println(hlog, "conjugacy_classes = ", cc);
   
   vector<triplet_info> tinf;
   triplet_info ti;
@@ -832,7 +840,7 @@ vector<triplet_info> fpattern::find_triplets() {
   tinf.push_back(ti);
   
   for(int i: conjugacy_classes) if(gorder(i) == S7) {
-    DEBB(DF_FIELD, ("checking i=", i));
+    if(debug_field) println(hlog, "checking i=", i);
     for(int j=1; j<N; j++) if(gorder(j) == 2 && gorder(gmul(i, j)) == S3) {
       auto t = compute_transcript(i, j);    
       if(!transcripts_seen.count(t)) {
@@ -844,7 +852,7 @@ vector<triplet_info> fpattern::find_triplets() {
       }
     }
   
-  DEBB(DF_FIELD, ("solutions found = ", isize(transcripts_seen)));
+  if(debug_field) println(hlog, "solutions found = ", isize(transcripts_seen));
   return tinf;
   }
 
@@ -879,10 +887,10 @@ void fpattern::build() {
     connections.push_back(matcode[PM]);
     }
 
-  DEBB(DF_FIELD, ("Computing inverses...\n"));
+  if(debug_field) println(hlog, "Computing inverses...\n");
   int N = isize(matrices);
 
-  DEBB(DF_FIELD, ("Number of heptagons: %d\n", N));
+  if(debug_field) println(hlog, "Number of heptagons: %d\n", N);
   
   if(WDIM == 3) return;
 
@@ -911,7 +919,7 @@ void fpattern::build() {
     if(i%S7 == S7-1) printf("\n");       
     }
   
-  DEBB(DF_FIELD, ("triplet_id = ", triplet_id, " N = ", N));
+  if(debug_field) println(hlog, "triplet_id = ", triplet_id, " N = ", N);
   if(triplet_id) {  
     auto triplets = find_triplets();
     if(triplet_id >= 0 && triplet_id < isize(triplets)) {
@@ -920,12 +928,12 @@ void fpattern::build() {
       P = matrices[ti.j];
       dynamicval<int> t(triplet_id, 0);
       build();
-      DEBB(DF_FIELD, ("triplet built successfully"));
+      if(debug_field) println(hlog, "triplet built successfully");
       return;
       }
     }
   
-  DEBB(DF_FIELD, ("Built.\n"));
+  if(debug_field) println(hlog, "Built.\n");
   }
 
 int fpattern::getdist(pair<int,bool> a, vector<char>& dists) {
@@ -991,7 +999,7 @@ void fpattern::analyze() {
       }
     }
     
-  DEBB(DF_FIELD, ("variation = %d\n", int(variation)));
+  if(debug_field) println(hlog, "variation = %d\n", int(variation));
   int N = isize(connections);
   
   markers.resize(N);
@@ -1039,7 +1047,7 @@ void fpattern::analyze() {
     if(disthep[connections[i]] < disthep[i] && disthep[connections[btspin(i,u)]] < disthep[i])
       circrad = disthep[i];
 
-  DEBB(DF_FIELD, ("maxdist = %d otherpole = %d circrad = %d\n", maxdist, otherpole, circrad));
+  if(debug_field) println(hlog, "maxdist = %d otherpole = %d circrad = %d\n", maxdist, otherpole, circrad);
   
   matrix PRRR = strtomatrix("PRRR");
   matrix PRRPRRRRR = strtomatrix("PRRPRRRRR");
@@ -1051,7 +1059,7 @@ void fpattern::analyze() {
   wallorder = order(Wall);
   wallid = matcode[Wall];
   
-  DEBB(DF_FIELD, ("wall order = %d\n", wallorder));
+  if(debug_field) println(hlog, "wall order = %d\n", wallorder);
 
 #define SETDIST(X, d, it) {int c = matcode[X]; indist[d].push_back(c); if(it == itNone) ; else if(markers[c] && markers[c] != it) markers[c] = itBuggy; else markers[c] = it; }
   
@@ -1067,8 +1075,7 @@ void fpattern::analyze() {
     }
   
   int walldist = dijkstra(distwall, indist);
-  DEBB(DF_FIELD, ("wall dist = %d\n", walldist));
-  
+  if(debug_field) println(hlog, "wall dist = %d\n", walldist);
   
   W = strtomatrix("RRRRPR");
   for(int j=0; j<wallorder; j++) {
@@ -1089,7 +1096,7 @@ void fpattern::analyze() {
     int ipush = gmul(rpushid, i);
     for(int k=0; k<wallorder; k++) {
       if(ipush == j) {
-        DEBB(DF_FIELD, ("River found at %d:%d\n", i, k));
+        if(debug_field) println(hlog, "River found at %d:%d\n", i, k);
         riverid = i;
         goto riveridfound;
         }
@@ -1131,7 +1138,7 @@ void fpattern::analyze() {
     W = mmul(W, Wall);
     }
   int riverdist = dijkstra(PURE ? distflower : distriver, indist);
-  DEBB(DF_FIELD, ("river dist = %d\n", riverdist));
+  if(debug_field) println(hlog, "river dist = %d\n", riverdist);
   
   for(int i=0; i<isize(matrices); i++)
     if(distflower[i] == 0) {
@@ -1194,8 +1201,8 @@ void fpattern::analyze() {
     dijkstra(distriverright, indist);
     }
 
-  DEBB(DF_FIELD, ("wall-river distance = %d\n", distwall[riverid]));
-  DEBB(DF_FIELD, ("river-wall distance = %d\n", distriver[0]));
+  if(debug_field) println(hlog, "wall-river distance = %d\n", distwall[riverid]);
+  if(debug_field) println(hlog, "river-wall distance = %d\n", distriver[0]);
   }
 
 int fpattern::orderstats() {
@@ -1229,7 +1236,7 @@ void fpattern::findsubpath() {
     if(gpow(i, Prime) == 0) {
       subpathid = i;
       subpathorder = Prime;
-      DEBB(DF_FIELD, ("Subpath found: %s\n", decodepath(i).c_str()));
+      if(debug_field) println(hlog, "Subpath found: %s\n", decodepath(i).c_str());
       return;
       }
   }
@@ -1416,7 +1423,7 @@ EX struct fpattern& getcurrfp() {
     static fpattern fp(0);
     if(fp.Prime) return fp;
     for(int p=2; p<20; p++) { fp.Prime = p; if(!fp.solve()) break; }
-    DEBB(DF_FIELD, ("set prime = ", fp.Prime));
+    if(debug_field) println(hlog, "set prime = ", fp.Prime);
     return fp;
     }
   if(S7 == 8 && S3 == 3 && !bt::in()) {

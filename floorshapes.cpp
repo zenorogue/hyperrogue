@@ -232,7 +232,8 @@ void geometry_information::bshape2(hpcshape& sh, PPR prio, int shapeid, matrixli
   T = spin(m.o.bspi) * T;
   for(auto &pp: lst) pp = T * pp;
   
-  if(osym % rots && rots % osym && (debugflags & DF_GEOM)) printf("warning: rotation oddity (shapeid %d, osym=%d rots=%d)\n", shapeid, osym, rots);
+  if(osym % rots && rots % osym && debug_geometry)
+    printf("warning: rotation oddity (shapeid %d, osym=%d rots=%d)\n", shapeid, osym, rots);
 
   if(rots > osym && rots % osym == 0) {
     int rep = rots / osym;
@@ -260,7 +261,8 @@ void geometry_information::bshape2(hpcshape& sh, PPR prio, int shapeid, matrixli
           nh = m.second[r] * z, mapped++;
           }
         }
-      if(mapped == 0 && (debugflags & DF_GEOM)) printf("warning: not mapped (shapeid %d)\n", shapeid);
+      if(mapped == 0 && debug_geometry)
+        println(hlog, "warning: not mapped shapeid = ", shapeid);
       if(invalid) {
         apeirogonal = true;        
         for(auto h: head) tail.push_back(h);
@@ -395,7 +397,7 @@ void geometry_information::generate_floorshapes_for(int id, cell *c) {
 
   #if CAP_IRR
   else if(IRREGULAR) {
-    DEBBI(DF_POLY, ("generate_floorshapes: irregular"));
+    DEBBI(debug_poly, ("generate_floorshapes: irregular"));
 
     auto& vs = irr::cells[id];
     siid = vs.is_pseudohept;
@@ -444,7 +446,7 @@ void geometry_information::generate_floorshapes_for(int id, cell *c) {
     }
   #endif
 
-  DEBBI(DF_POLY, ("generate_floorshapes_for ", id));
+  DEBBI(debug_poly, ("generate_floorshapes_for ", id));
 
   for(auto pfsh: all_plain_floorshapes) {
     auto& fsh = *pfsh;
@@ -1383,7 +1385,7 @@ void geometry_information::make_floor_textures_here() {
 
 EX void make_floor_textures() {
   if(noGUI || !vid.usingGL) return;
-  DEBBI(DF_POLY, ("make_floor_textures"));
+  DEBBI(debug_poly, ("make_floor_textures"));
   dynamicval<euc::torus_config_full> geu(euc::eu, euc::eu);
   dynamicval<eGeometry> g(geometry, gEuclidSquare);
   dynamicval<eModel> gm(pmodel, mdDisk);

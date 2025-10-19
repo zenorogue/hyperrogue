@@ -1082,6 +1082,8 @@ EX void font_reaction() {
 
 EX void initConfig() {
   
+  DEBBI(debug_init_config, ("initconfig"));
+
   // basic config
   param_i(vid.flashtime, "flashtime", 8);
 
@@ -1939,8 +1941,11 @@ EX void resetConfig() {
 #endif
 
 #if CAP_CONFIG
+
+EX debugflag debug_init_config = {"init_config", true};
+
 EX void saveConfig() {
-  DEBB(DF_INIT, ("save config\n"));
+  indenter_finish(debug_init_config, "saveConfig");
   FILE *f = fopen(conffile, "wt");
   if(!f) {
     addMessage(s0 + "Could not open the config file: " + conffile);
@@ -2012,7 +2017,7 @@ EX void loadNewConfig(FILE *f) {
 
 EX void loadConfig() {
  
-  DEBB(DF_INIT, ("load config"));
+  indenter_finish(debug_init_config, "loadConfig");
   vid.xres = 9999; vid.yres = 9999; vid.framelimit = 999;
   FILE *f = fopen(conffile, "rt");
   if(f) {
@@ -2029,7 +2034,8 @@ EX void loadConfig() {
       }
   
     fclose(f);
-    DEBB(DF_INIT, ("Loaded configuration: %s\n", conffile));
+    if(debug_init_config)
+      println(hlog, "Loaded configuration: ", conffile);
     }
 
   geom3::apply_always3();

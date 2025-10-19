@@ -765,9 +765,7 @@ EX namespace bt {
       t[10] = it * t[6] * t[2];
       t[11] = it * t[1];
 
-      if(debugflags & DF_GEOM)
-        for(int a=0; a<12; a++) 
-          println(hlog, t[a]);
+      if(debug_geometry) for(int i=0; i<12; i++) println(hlog, "direct_tmatrix[", i, "] is ", t[i]);
 
       use_direct >>= 1;
       }

@@ -17,6 +17,8 @@ extern hrmap *currentmap;
 
 EX namespace gp {
 
+  EX debugflag debug_gp = {"graph_gp"};
+
   #if HDR
   struct loc : pair<int, int> {
     loc() {}
@@ -214,7 +216,7 @@ EX namespace gp {
       if(peek(wcw)) {
         auto wcw1 = get_localwalk(wc1, dir1);
         if(wcw + wstep != wcw1) {
-          DEBB(DF_GP, (at1, " : ", (wcw+wstep), " / ", wcw1, " (pull error from ", at, " :: ", wcw, ")") );
+          DEBB(debug_gp, (at1, " : ", (wcw+wstep), " / ", wcw1, " (pull error from ", at, " :: ", wcw, ")") );
           exit(1);
           }
         if(do_adjm) wc1.adjm = wc.adjm * get_adj(wcw.at, wcw.spin);
@@ -223,7 +225,7 @@ EX namespace gp {
       }
     if(peek(wcw)) {
       set_localwalk(wc1, dir1, wcw + wstep);
-      DEBB(DF_GP, (at1, " :", wcw+wstep, " (pulled from ", at, " :: ", wcw, ")"));
+      DEBB(debug_gp, (at1, " :", wcw+wstep, " (pulled from ", at, " :: ", wcw, ")"));
       if(do_adjm) wc1.adjm = wc.adjm * get_adj(wcw.at, wcw.spin);
       return true;
       }
@@ -236,12 +238,12 @@ EX namespace gp {
     auto& wc = get_mapping(at);
     auto wcw = get_localwalk(wc, dir);
     auto& wc1 = get_mapping(at + eudir(dir));
-    DEBB0(DF_GP, (hr::format("  md:%02d s:%d", wc.mindir, wc.cw.spin)); )
-    DEBB0(DF_GP, ("  connection ", at, "/", dir, " ", wc.cw+dir, "=", wcw, " ~ ", at+eudir(dir), "/", dir1, " "); )
+    DEBB0(debug_gp, (hr::format("  md:%02d s:%d", wc.mindir, wc.cw.spin)); )
+    DEBB0(debug_gp, ("  connection ", at, "/", dir, " ", wc.cw+dir, "=", wcw, " ~ ", at+eudir(dir), "/", dir1, " "); )
     if(!wc1.cw.at) {
       wc1.start = wc.start;
       if(peek(wcw)) {
-        DEBB0(DF_GP, (" (pulled) "); )
+        DEBB0(debug_gp, (" (pulled) "); )
         set_localwalk(wc1, dir1, wcw + wstep);
         if(do_adjm) wc1.adjm = wc.adjm * get_adj(wcw.at, wcw.spin);
         }
@@ -251,27 +253,25 @@ EX namespace gp {
         set_localwalk(wc1, dir1, wcw + wstep);
         if(do_adjm) wc1.adjm = wc.adjm;
         spawn++;
-        DEBB0(DF_GP, (" (created) "); )
+        DEBB0(debug_gp, (" (created) "); )
         }
       }
-    DEBB0(DF_GP, (wc1.cw+dir1, " "));
+    DEBB0(debug_gp, (wc1.cw+dir1, " "));
     auto wcw1 = get_localwalk(wc1, dir1);
     if(peek(wcw)) {
       if(wcw+wstep != wcw1) {
-        DEBB(DF_GP, ("FAIL: ", wcw, " connected to ", wcw+wstep, " not to ", wcw1); exit(1); )
+        DEBB(debug_gp, ("FAIL: ", wcw, " connected to ", wcw+wstep, " not to ", wcw1); exit(1); )
         }
       else {
-        DEBB(DF_GP, ("(was there)"));
+        DEBB(debug_gp, ("(was there)"));
         }
       }
     else {
-      DEBB(DF_GP, ("ok"));
+      DEBB(debug_gp, ("ok"));
       peek(wcw) = wcw1.at;
       wcw.at->c.setspin(wcw.spin, wcw1.spin, wcw.mirrored != wcw1.mirrored);
-      if(wcw+wstep != wcw1) {
-        DEBB(DF_GP | DF_ERROR, ("assertion failed"));
-        exit(1);
-        }
+      if(wcw+wstep != wcw1)
+        throw hr_exception("assertion failed in gp::conn1");
       }
     if(do_adjm) {
       get_adj(wcw.at, wcw.spin) = inverse(wc.adjm) * wc1.adjm;
@@ -295,18 +295,18 @@ EX namespace gp {
     auto& ac0 = get_mapping(at);
     ac0.cw = cellwalker(hs.at->c7, hs.spin, hs.mirrored);
     ac0.start = at;
-    DEBB(DF_GP, (at, " : ", ac0.cw));
+    DEBB(debug_gp, (at, " : ", ac0.cw));
     return ac0;
     }
 
   EX void extend_map(cell *c, int d) {
-    DEBB(DF_GP, ("EXTEND ",c, " ", d));
+    DEBB(debug_gp, ("EXTEND ",c, " ", d));
     indenter ind(2);
     if(c->master->c7 != c) {
       auto c1 = c;
       auto d1 = d;
       while(c->master->c7 != c) {
-        DEBB(DF_GP, (c, " direction 0 corresponds to ", c->move(0), " direction ", c->c.spin(0)); )
+        DEBB(debug_gp, (c, " direction 0 corresponds to ", c->move(0), " direction ", c->c.spin(0)); )
         d = c->c.spin(0);
         c = c->move(0);
         }
@@ -465,13 +465,13 @@ EX namespace gp {
     for(int i=0; i<S3; i++) {
       loc start = vc[i];
       loc end = vc[(i+1)%S3];
-      DEBB(DF_GP, ("from ", start, " to ", end); )
+      DEBB(debug_gp, ("from ", start, " to ", end); )
       loc rel = param;
       auto build = [&] (loc& at, int dx, bool forward) {
         int dx0 = fixg6(dx + SG2*i);
         auto at1 = at + eudir(dx0);
         auto dx1 = fixg6(dx0 + SG3);
-        DEBB(DF_GP, (at, " .. ", make_pair(at1, dx1)));
+        DEBB(debug_gp, (at, " .. ", make_pair(at1, dx1)));
         conn(at, dx0);
         if(forward) { get_mapping(at).rdir = dx0; get_mapping(at1).rdir1 = dx1; }
         else { get_mapping(at).rdir1 = dx0; get_mapping(at1).rdir = dx1; }
@@ -506,8 +506,11 @@ EX namespace gp {
         }
       for(int k=0; k<SG6; k++)
         if(start + eudir(k+SG2*i) == end)
-          build(start, k, true);                         
-      if(start != end) { DEBB(DF_GP | DF_ERROR, ("assertion failed: start ", start, " == end ", end)); exit(1); }
+          build(start, k, true);
+      if(start != end) {
+        DEBB(debug_gp || debug_errors, ("assertion failed: start ", start, " == end ", end));
+        throw hr_exception("assertion failed in extend_map");
+        }
       }
 
     // now we can fill the interior of our big equilateral triangle
@@ -533,7 +536,7 @@ EX namespace gp {
         visit(at1);
         }
       }
-    DEBB(DF_GP, ("DONE"))
+    DEBB(debug_gp, ("DONE"))
     }
   
   EX hyperpoint loctoh_ort(loc at) {
@@ -719,7 +722,7 @@ EX namespace gp {
 //    spin = spintox(next);
 //    ispin = rspintox(next);
       cgi.gpdata->alpha = -atan2(next[1], next[0]) * 6 / S7;
-      DEBB(DF_GEOM | DF_POLY, ("scale = ", scale));
+      DEBB(debug_geometry, ("scale = ", scale));
       }
     }
 

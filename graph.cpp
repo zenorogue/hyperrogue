@@ -289,8 +289,12 @@ void sumaura(int v) {
 vector<glhr::colored_vertex> auravertices;
 #endif
 
+EX debugflag debug_graph = {"graph"};
+
+EX debugflag debug_aura = {"graph_aura"};
+
 EX void drawaura() {
-  DEBBI(DF_GRAPH, ("draw aura"));
+  indenter_finish(debug_aura, "drawaura");
   if(!haveaura()) return;
   if(vid.stereo_mode) return;
   double rad = current_display->radius;
@@ -1359,11 +1363,13 @@ EX void center_multiplayer_map(const vector<hyperpoint>& hs) {
     }
   }
 
+EX debugflag debug_map = {"graph_map"};
+
 EX void drawthemap() {
+  indenter_finish(debug_map, "drawthemap");
+
   check_cgi();
   cgi.require_shapes();
-
-  DEBBI(DF_GRAPH, ("draw the map"));
   
   last_firelimit = firelimit;
   firelimit = 0;
@@ -1546,9 +1552,11 @@ EX ld get_stereo_param() {
   return 0;
   }
 
+EX debugflag debug_calcparam = {"graph_param"};
+
 EX void calcparam() {
 
-  DEBBI(DF_GRAPH, ("calc param"));
+  indenter_finish(debug_calcparam, "calcparam");
   auto cd = current_display;
   
   cd->xtop = vid.xres * cd->xmin;
@@ -1623,9 +1631,8 @@ EX function<void()> wrap_drawfullmap = drawfullmap;
 bool force_sphere_outline = false;
 
 EX void drawfullmap() {
+  indenter_finish(debug_map, "drawfullmap");
 
-  DEBBI(DF_GRAPH, ("draw full map"));
-    
   check_cgi();
   cgi.require_shapes();
 
@@ -1916,7 +1923,7 @@ EX color_t titlecolor;
 
 EX void drawscreen() {
 
-  DEBBI(DF_GRAPH, ("drawscreen"));
+  indenter_finish(debug_map, "drawscreen");
   #if CAP_GL
   GLWRAP;
   #endif
@@ -2025,7 +2032,7 @@ EX void drawscreen() {
   // SDL_UnlockSurface(s);
 
   glflush();
-  DEBB(DF_GRAPH, ("swapbuffers"));
+  if(debug_map) println(hlog, "swapbuffers");
 
   #if CAP_VR
   vrhr::submit();
@@ -2042,15 +2049,19 @@ EX void drawscreen() {
 //printf("\ec");
   }
 
+EX debugflag debug_init_graph = {"init_graph"};
+
 EX void restartGraph() {
-  DEBBI(DF_INIT, ("restartGraph"));
+  indenter_finish di(debug_init_graph, "restartGraph");
   
   if(!autocheat) linepatterns::clearAll();
   if(currentmap) resetview();
   }
 
+EX debugflag debug_graph_memory = {"graph_memory"};
+
 auto graphcm = addHook(hooks_clearmemory, 0, [] () {
-  DEBBI(DF_MEMORY, ("clear graph memory"));
+  indenter_finish di(debug_graph_memory, "graph_memory");
   mouseover = centerover = lmouseover = NULL;  
   gmatrix.clear(); gmatrix0.clear(); current_display->all_drawn_copies.clear();
   clearAnimations();

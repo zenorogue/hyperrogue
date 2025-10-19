@@ -204,6 +204,8 @@ tuple<ld,bool,ld> quality(bantar_config cp) {
 
 int notry = 0;
 
+debugflags debug_bantar = {"demo_bantar"};
+
 void bantar() {
   if(!on) return;
   cwt = cellwalker(currentmap->gamestart(), 0);
@@ -234,8 +236,8 @@ void bantar() {
       bool tres = test_uniq(cwt, -1, 15, NULL);
       auto q = quality(bc);
       if(tres) {
-        DEBB(DF_LOG, ("gens = ", gens));
-        DEBB(DF_LOG, ("testing quality ", q, " ", make_pair(celldist(bc.first), celldist(bc.second)), ", result = ", tres));
+        DEBB(debug_bantar, ("gens = ", gens));
+        DEBB(debug_bantar, ("testing quality ", q, " ", make_pair(celldist(bc.first), celldist(bc.second)), ", result = ", tres));
         lnotry--; if(lnotry <= 0) goto picked;
         }
       // if(tres) goto picked;

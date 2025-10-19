@@ -950,6 +950,24 @@ static inline void set_flag(flagtype& f, flagtype which, bool b) {
   else f &= ~which;
   }
 
+void add_debugflag(const string& s, struct debugflag *d);
+
+/** Flags to enable debugging.
+ *  A debugflag can be defined with e.g.: debugflag memory_cell("memory_cell")
+ *  and used as in: if(memory_cell) { ... output debugging info ... }
+ *  Then a commandline parameter '-debug memory' will enable all flags with 'memory' in its name
+ */
+
+struct debugflag {
+  bool enabled;
+  debugflag(string s, bool initial = false) {
+    add_debugflag(s, this);
+    enabled = initial;
+    }
+  operator bool() { return enabled; }
+  void flip() { enabled = !enabled; }
+  };
+
 }
 
 /** this macro is used to delay performing the action in case if everything is rolled back */

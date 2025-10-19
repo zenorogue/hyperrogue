@@ -15,6 +15,19 @@ EX bool debug_cellnames = false;
 
 EX vector<cell*> buggycells;
 
+map<string, struct debugflag*> *all_debugflags;
+
+void add_debugflag(const string& s, debugflag *d) {
+  if(!all_debugflags) all_debugflags = new map<string, struct debugflag*>;
+  if(all_debugflags->count(s)) printf("warning: duplicate debugflag: %s\n", s.c_str());
+  (*all_debugflags)[s] = d;
+  }
+
+EX debugflag debug_errors = {"error", true};
+EX debugflag debug_warnings = {"warning", true};
+EX debugflag debug_memory = {"memory"};
+EX debugflag debug_init = {"init", true};
+
 #if HDR
 template<class... T>
 void limitgen(T... args) {
@@ -872,6 +885,35 @@ int read_cheat_args() {
     PHASEFROM(3);
     cheat();
     gen_wandering = false;
+    }
+  else if(argis("-log")) {
+    shift(); auto s = args();
+    if(debug_init) println(hlog, "logging: '", s, "'");
+    for(auto& w: *all_debugflags) if(w.first.find(s) != string::npos) w.second->enabled = true;
+    }
+  else if(argis("-log-all")) {
+    if(debug_init) println(hlog, "logging all");
+    for(auto& w: *all_debugflags) w.second->enabled = true;
+    }
+  else if(argis("-no-log")) {
+    shift(); auto s = args();
+    if(debug_init) println(hlog, "not logging: '", s, "'");
+    for(auto& w: *all_debugflags) if(w.first.find(s) != string::npos) w.second->enabled = false;
+    }
+  else if(argis("-log-none")) {
+    for(auto& w: *all_debugflags) w.second->enabled = false;
+    }
+  else if(argis("-log-to")) {
+    shift();
+    if(debug_init) println(hlog, "writing to ", argcs());
+    if(debugfile) fclose(debugfile);
+    debugfile = fopen(argcs(), "wt");
+    }
+  else if(argis("-log-append")) {
+    shift();
+    if(debug_init) println(hlog, "writing to ", argcs());
+    if(debugfile) fclose(debugfile);
+    debugfile = fopen(argcs(), "at");
     }
   else if(argis("-canvasfloor")) {
     shift(); canvasfloor = argi();

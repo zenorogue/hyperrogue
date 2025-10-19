@@ -10,6 +10,8 @@
 
 namespace hr {
 
+EX debugflag debug_poly = {"graph_poly"};
+
 #if HDR
 static constexpr ld NEWSHAPE = (-13.5);
 #endif
@@ -1185,7 +1187,7 @@ void geometry_information::prepare_shapes() {
 
   symmetriesAt.clear();
   allshapes.clear();
-  DEBBI(DF_POLY, ("buildpolys"));
+  DEBBI(debug_poly, ("buildpolys"));
 
   if(WDIM == 3 && !mhybrid) {
     if(sphere) SD3 = 3, SD7 = 5;

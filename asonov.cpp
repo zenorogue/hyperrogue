@@ -88,7 +88,7 @@ EX void prepare() {
   lambda[0] = b + sqrt(b*b-1);
   lambda[1] = b - sqrt(b*b-1);
   
-  DEBB(DF_GEOM, ("b = ", b, " lambda = ", lambda));
+  if(debug_geometry) println(hlog, "asonov: b = ", b, " lambda = ", lambda);
   
   transmatrix eigen = Id;
   
@@ -103,7 +103,7 @@ EX void prepare() {
   ty = point3(ieigen[0][1], ieigen[1][1], 0) * vid.binary_width;
   tz = -point3(0, 0, log(lambda[0]));
   
-  DEBB(DF_GEOM, ("tx = ", tx, " ty = ", ty, " tz = ", tz));
+  if(debug_geometry) println(hlog, "tx = ", tx, " ty = ", ty, " tz = ", tz);
   
   straighten = inverse(build_matrix(asonov::tx/2, asonov::ty/2, asonov::tz/2, C0));
   }

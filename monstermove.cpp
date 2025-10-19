@@ -1698,11 +1698,11 @@ EX void movegolems(flagtype flags) {
 
       auto recorduse = orbused;
 
-      DEBB(DF_TURN, ("stayval"));
+      DEBB(debug_turn, ("stayval"));
       int bestv = stayvalue(m, c);
       vector<int> bdirs;
 
-      DEBB(DF_TURN, ("moveval"));
+      DEBB(debug_turn, ("moveval"));
       for(int k=0; k<c->type; k++) if(c->move(k)) {
         int val = movevalue(m, c, k, flags);
 
@@ -1752,7 +1752,7 @@ EX void movegolems(flagtype flags) {
         }
       else {
         passable_for(m, c2, c, P_DEADLY);
-        DEBB(DF_TURN, ("move"));
+        DEBB(debug_turn, ("move"));
         moveMonster(mi);
         if(m != moTameBomberbird && m != moFriendlyGhost) 
           moveBoatIfUsingOne(mi);
@@ -1769,7 +1769,7 @@ EX void movegolems(flagtype flags) {
 
         empathyMove(mi);
         }
-      DEBB(DF_TURN, ("other"));
+      DEBB(debug_turn, ("other"));
       }
     }
   achievement_count("GOLEM", qg, 0);
@@ -2048,7 +2048,7 @@ EX void movemonsters() {
   ambush::distance = 0;
   #endif
 
-  DEBB(DF_TURN, ("lava1"));
+  DEBB(debug_turn, ("lava1"));
   orboflava(1);
   
   #if CAP_COMPLEX2
@@ -2060,80 +2060,80 @@ EX void movemonsters() {
 
   specialMoves();
 
-  DEBB(DF_TURN, ("jumpers"));
+  DEBB(debug_turn, ("jumpers"));
   if(havewhat & HF_JUMP) {
     groupmove(moFrog, 0);
     groupmove(moVaulter, 0);
     groupmove(moPhaser, 0);
     }
 
-  DEBB(DF_TURN, ("ghosts"));
+  DEBB(debug_turn, ("ghosts"));
   moveghosts();
     
-  DEBB(DF_TURN, ("butterflies"));
+  DEBB(debug_turn, ("butterflies"));
   moveButterflies();
 
-  DEBB(DF_TURN, ("normal"));
+  DEBB(debug_turn, ("normal"));
   moveNormals(moYeti);
 
-  DEBB(DF_TURN, ("slow"));
+  DEBB(debug_turn, ("slow"));
   if(havewhat & HF_SLOW) moveNormals(moTortoise);
   
   if(sagefresh) sagephase = 0;
   
-  DEBB(DF_TURN, ("ivy"));
+  DEBB(debug_turn, ("ivy"));
   moveivy();
-  DEBB(DF_TURN, ("slimes"));
+  DEBB(debug_turn, ("slimes"));
   groupmove(moSlime, 0);
-  DEBB(DF_TURN, ("sharks"));
+  DEBB(debug_turn, ("sharks"));
   if(havewhat & HF_SHARK) groupmove(moShark, 0);
-  DEBB(DF_TURN, ("eagles"));
+  DEBB(debug_turn, ("eagles"));
   if(havewhat & HF_BIRD) groupmove(moEagle, 0);
   if(havewhat & HF_EAGLES) groupmove(moEagle, MF_NOATTACKS | MF_ONLYEAGLE);
-  DEBB(DF_TURN, ("eagles"));
+  DEBB(debug_turn, ("eagles"));
   if(havewhat & HF_REPTILE) groupmove(moReptile, 0);
-  DEBB(DF_TURN, ("air"));
+  DEBB(debug_turn, ("air"));
   if(havewhat & HF_AIR) {
     airmap.clear();
     groupmove(moAirElemental, 0); 
     buildAirmap();
     }
-  DEBB(DF_TURN, ("earth"));
+  DEBB(debug_turn, ("earth"));
   if(havewhat & HF_EARTH) groupmove(moEarthElemental, 0);
-  DEBB(DF_TURN, ("water"));
+  DEBB(debug_turn, ("water"));
   if(havewhat & HF_WATER) groupmove(moWaterElemental, 0);
-  DEBB(DF_TURN, ("void"));
+  DEBB(debug_turn, ("void"));
   if(havewhat & HF_VOID) groupmove(moVoidBeast, 0);
-  DEBB(DF_TURN, ("leader"));
+  DEBB(debug_turn, ("leader"));
   if(havewhat & HF_LEADER) groupmove(moPirate, 0);
-  DEBB(DF_TURN, ("mutant"));
+  DEBB(debug_turn, ("mutant"));
   if((havewhat & HF_MUTANT) || (closed_or_bounded && among(specialland, laOvergrown, laClearing))) movemutant();
-  DEBB(DF_TURN, ("bugs"));
+  DEBB(debug_turn, ("bugs"));
   if(havewhat & HF_BUG) hive::movebugs();
-  DEBB(DF_TURN, ("whirlpool"));
+  DEBB(debug_turn, ("whirlpool"));
   if(havewhat & HF_WHIRLPOOL) whirlpool::move();
-  DEBB(DF_TURN, ("whirlwind"));
+  DEBB(debug_turn, ("whirlwind"));
   if(havewhat & HF_WHIRLWIND) whirlwind::move();
   #if CAP_COMPLEX2
-  DEBB(DF_TURN, ("westwall"));
+  DEBB(debug_turn, ("westwall"));
   if(havewhat & HF_WESTWALL) westwall::move();
   #endif
   for(cell *pc: player_positions())
     if(pc->item == itOrbSafety) 
       return;
-  DEBB(DF_TURN, ("river"));
+  DEBB(debug_turn, ("river"));
   if(havewhat & HF_RIVER) prairie::move();
-  /* DEBB(DF_TURN, ("magnet"));
+  /* DEBB(debug_turn, ("magnet"));
   if(havewhat & HF_MAGNET) 
     groupmove(moSouthPole, 0),
     groupmove(moNorthPole, 0); */
-  DEBB(DF_TURN, ("bugs"));
+  DEBB(debug_turn, ("bugs"));
   if(havewhat & HF_HEXD) groupmove(moHexDemon, 0);
   if(havewhat & HF_DICE) groupmove(moAnimatedDie, 0);    
   if(havewhat & HF_ALT) groupmove(moAltDemon, 0);
   if(havewhat & HF_MONK) groupmove(moMonk, 0);
 
-  DEBB(DF_TURN, ("worm"));
+  DEBB(debug_turn, ("worm"));
   cell *savepos[MAXPLAYER];
   
   for(int i=0; i<numplayers(); i++)
@@ -2147,22 +2147,22 @@ EX void movemonsters() {
   if(havewhat & HF_DRAGON) groupmove(moDragonHead, MF_NOFRIEND);
   if(haveMount()) groupmove(moDragonHead, MF_MOUNT);
 
-  DEBB(DF_TURN, ("golems"));
+  DEBB(debug_turn, ("golems"));
   movegolems(0);
   
-  DEBB(DF_TURN, ("fresh"));
+  DEBB(debug_turn, ("fresh"));
   moverefresh();
   
-  DEBB(DF_TURN, ("lava2"));
+  DEBB(debug_turn, ("lava2"));
   orboflava(2);
 
-  DEBB(DF_TURN, ("shadow"));
+  DEBB(debug_turn, ("shadow"));
   moveshadow();
   
-  DEBB(DF_TURN, ("wandering"));
+  DEBB(debug_turn, ("wandering"));
   wandering();
   
-  DEBB(DF_TURN, ("rosemap"));
+  DEBB(debug_turn, ("rosemap"));
   if(havewhat & HF_ROSE) buildRosemap();
 
   for(int i=0; i<numplayers(); i++)

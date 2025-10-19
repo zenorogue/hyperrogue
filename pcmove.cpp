@@ -9,6 +9,8 @@
 
 namespace hr {
 
+EX debugflag debug_turn = {"turn"};
+
 EX int illegal_moves;
 
 EX bool keepLightning = false;
@@ -366,7 +368,7 @@ bool pcmove::movepcto() {
     flipplayer = false;
     if(multi::players > 1) multi::flipped[multi::cpid] = false;
     }
-  DEBBI(checkonly ? 0 : DF_TURN, ("movepc"));
+  DEBBI(checkonly ? 0 : debug_turn, ("movepc"));
   if(!checkonly) invismove = false;  
   boatmove = false;
   
@@ -486,7 +488,7 @@ bool pcmove::after_move() {
     achievement_gain("SEVENMINE");
     }
 
-  DEBB(DF_TURN, ("done"));
+  DEBB(debug_turn, ("done"));
   return true;
   }
 

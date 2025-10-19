@@ -146,7 +146,7 @@ EX int keybd_subdir = 1;
 EX bool keybd_subdir_enabled = 0;
 
 EX void movepckeydir(int d) {
-  DEBB(DF_GRAPH, ("movepckeydir\n"));
+  if(debug_graph) println(hlog, "movepckeydir(", d, ")");
   // EUCLIDEAN
   
   if(protect_memory()) return;
@@ -251,8 +251,12 @@ EX void initJoysticks_async() {
   #endif
   }
 
+EX debugflag debug_init_joy = {"init_joy"};
+EX debugflag debug_joy_error = {"joy_error"};
+EX debugflag debug_joy = {"joy"};
+
 EX void countJoysticks() {
-  DEBB(DF_INIT, ("opening joysticks"));
+  indenter_finish(debug_init_joy, "countJoysticks");
   #if SDLVER <= 2
   numsticks = SDL_NumJoysticks();
   #else
@@ -272,12 +276,11 @@ EX void countJoysticks() {
 
 EX void initJoysticks() {
 
-  DEBBI(DF_INIT, ("init joystick"));
+  indenter_finish(debug_init_joy, "initJoysticks");
 
-  DEBB(DF_INIT, ("init joystick subsystem"));
   if (SDL_error_in(SDL_InitSubSystem(SDL_INIT_JOYSTICK)))
   {
-    printf("Failed to initialize joysticks.\n");
+    if(debug_joy_error) println(hlog, "Failed to initialize joysticks.");
     numsticks = 0;
     return;
   }
@@ -287,7 +290,7 @@ EX void initJoysticks() {
   }
 
 EX void closeJoysticks() {
-  DEBB(DF_INIT, ("close joysticks"));
+  indenter_finish(debug_init_joy, "closeJoysticks");
   for(int i=0; i<numsticks; i++) {
     SDL_CloseJoystick(sticks[i]), sticks[i] = NULL;
     }
@@ -298,7 +301,7 @@ int joytime;
 EX bool joy_ignore_next = false;
 
 EX void checkjoy() {
-  DEBB(DF_GRAPH, ("check joy"));
+  indenter_finish(debug_joy, "checkjoy");
   if(!DEFAULTCONTROL) return;
   ld joyvalue1 = sqr(vid.joyvalue);
   ld joyvalue2 = sqr(vid.joyvalue2);
@@ -787,9 +790,11 @@ EX bool mouseaiming(bool shmupon) {
 
 EX purehookset hooks_control;
 
+EX debugflag debug_control = {"control"};
+
 EX void mainloopiter() {
+  indenter_finish(debug_control, "mainloopiter");
   GLWRAP;
-  DEBB(DF_GRAPH, ("main loop\n"));
 
   #if !CAP_SDLGFX && !CAP_GL 
   vid.wallmode = 0;
@@ -956,7 +961,8 @@ EX void mainloopiter() {
 #endif
   apply_memory_reserve();
   SDL_Event ev;
-  DEBB(DF_GRAPH, ("polling for events\n"));
+
+  if(debug_control) println(hlog, "polling for events");
   
   #if CAP_VR
   if(vrhr::active() && !shmup::on) {
@@ -1096,7 +1102,7 @@ EX bool need_refresh;
 
 EX void handle_event(SDL_Event& ev) {
   bool normal = cmode & sm::NORMAL;
-    DEBB(DF_GRAPH, ("got event type #%d\n", ev.type));
+    indenter_finish(debug_control, "got event type #" + its(ev.type));
     int sym = 0;
     int uni = 0;
     shiftmul = 1;

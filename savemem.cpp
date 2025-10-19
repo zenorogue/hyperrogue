@@ -69,13 +69,13 @@ void recursive_delete(heptagon *h, int i) {
     if(h2->move(i) && h2->move(i)->move(0) == h2)
       recursive_delete(h2, i); }
   if(h2->alt && h2->alt->alt == h2->alt) {
-    DEBB(DF_MEMORY, ("destroying alternate map ", h2->alt));
+    DEBB(debug_memory, ("destroying alternate map ", h2->alt));
     for(hrmap *& hm: allmaps) {
       if(hm->getOrigin() == h2->alt) {
         delete hm;
         hm = allmaps.back();
         allmaps.pop_back();
-        DEBB(DF_MEMORY, ("map found (", isize(allmaps), " altmaps total)"));
+        DEBB(debug_memory, ("map found (", isize(allmaps), " altmaps total)"));
         break;
         }
       }
@@ -155,7 +155,7 @@ EX void save_memory() {
   if(last_cleared && celldist(at->c7) < celldist(last_cleared->c7))
     return;
 
-  DEBB(DF_MEMORY, ("celldist = ", make_pair(celldist(cwt.at), celldist(at->c7))));
+  DEBB(debug_memory, ("celldist = ", make_pair(celldist(cwt.at), celldist(at->c7))));
   
   heptagon *at1 = at;
   while(at != last_cleared && at != orig) {
@@ -168,7 +168,7 @@ EX void save_memory() {
     }
   
   last_cleared = at1;
-  DEBB(DF_MEMORY, ("current cellcount = ", cellcount));
+  DEBB(debug_memory, ("current cellcount = ", cellcount));
   
   sort(removed_cells.begin(), removed_cells.end());
   callhooks(hooks_removecells);

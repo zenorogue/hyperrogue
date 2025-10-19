@@ -833,11 +833,11 @@ EX void monstersTurn() {
   reset_spill();
   checkSwitch();
   mirror::breakAll();
-  DEBB(DF_TURN, ("bfs"));
+  DEBB(debug_turn, ("bfs"));
   bfs();
-  DEBB(DF_TURN, ("charge"));
+  DEBB(debug_turn, ("charge"));
   if(elec::havecharge) elec::act();
-  DEBB(DF_TURN, ("mmo"));
+  DEBB(debug_turn, ("mmo"));
   int phase2 = (1 & items[itOrbSpeed]);
   if(!phase2) movemonsters();
 
@@ -858,11 +858,11 @@ EX void monstersTurn() {
       refreshFriend(dcal[i]);
       }
     }
-  DEBB(DF_TURN, ("rop"));
+  DEBB(debug_turn, ("rop"));
   if(!dual::state) reduceOrbPowers();
   int phase1 = (1 & items[itOrbSpeed]);
   if(dual::state && items[itOrbSpeed]) phase1 = !phase1;
-  DEBB(DF_TURN, ("lc"));
+  DEBB(debug_turn, ("lc"));
   if(!phase1) livecaves();
   if(!phase1) ca::simulate();
   if(!phase1) heat::processfires();
@@ -885,7 +885,7 @@ EX void monstersTurn() {
   crush_now = std::move(crush_next);
   crush_next.clear();
   
-  DEBB(DF_TURN, ("heat"));
+  DEBB(debug_turn, ("heat"));
   heat::processheat();
   // if(elec::havecharge) elec::drawcharges();
 
@@ -899,7 +899,7 @@ EX void monstersTurn() {
     for(cell *pc: player_positions())
       checkFreedom(pc);
 
-  DEBB(DF_TURN, ("check"));
+  DEBB(debug_turn, ("check"));
   checkmove();
   if(canmove) elec::checklightningfast();
 

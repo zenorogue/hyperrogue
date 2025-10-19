@@ -428,6 +428,65 @@ int read_legacy_args() {
   return 0;
   }
 
+struct legacy_flag {
+  char key;
+  int level;
+  debugflag *df;
+  };
+
+vector<legacy_flag> legacy_flags = {
+  // INIT
+  legacy_flag{'i', 1, &debug_init},
+  legacy_flag{'i', 1, &debug_init_music},
+  legacy_flag{'i', 1, &debug_init_graph},
+  legacy_flag{'i', 1, &debug_init_joy},
+  legacy_flag{'i', 1, &debug_init_cells},
+  legacy_flag{'i', 1, &debug_init_config},
+  legacy_flag{'i', 1, &debug_init_font},
+  // MSG
+  legacy_flag{'m', 1, &debug_messages},
+  // WARN
+  legacy_flag{'w', 1, &debug_warnings},
+  legacy_flag{'w', 1, &debug_map_warnings},
+  // ERROR
+  legacy_flag{'e', 1, &debug_errors},
+  legacy_flag{'e', 1, &debug_music_error},
+  legacy_flag{'e', 1, &debug_joy_error},
+  // STEAM
+  legacy_flag{'s', 3, &debug_achievements},
+  // GRAPH
+  legacy_flag{'x', 4, &debug_aura},
+  legacy_flag{'x', 4, &debug_map},
+  legacy_flag{'x', 4, &debug_calcparam},
+  legacy_flag{'x', 4, &debug_graph},
+  legacy_flag{'x', 4, &debug_joy},
+  legacy_flag{'x', 4, &debug_control},
+  // TURN
+  legacy_flag{'u', 3, &debug_turn},
+  // FIELD
+  legacy_flag{'f', 2, &fieldpattern::debug_field},
+  // GEOM
+  legacy_flag{'g', 2, &debug_geometry},
+  legacy_flag{'g', 4, &arcm::debug_archimedean_map},
+  // MEMORY
+  legacy_flag{'b', 4, &debug_memory},
+  legacy_flag{'b', 4, &debug_graph_memory},
+  legacy_flag{'b', 4, &debug_memory_cell},
+  // TIME
+  legacy_flag{'t', 9, &debug_stamps},
+  // GP
+  legacy_flag{'o', 2, &gp::debug_gp},
+  // POLY
+  legacy_flag{'p', 2, &debug_poly},
+  // VERTEX
+  legacy_flag{'v', 9, &debug_vertex}
+  };
+
+void set_legacy_flags(char key = 0, int level = 0, bool val = true) {
+  for(auto& lf: legacy_flags) if((!key || lf.key == key) && lf.level <= level && lf.df)
+    lf.df->enabled = val;
+  }
+
 int read_legacy_args_anim() {
   using namespace anims;
   using namespace arg;
@@ -528,6 +587,33 @@ int read_legacy_args_anim() {
     shift_arg_formula(vid.stereo_param);
     #endif
     vid.stereo_mode = sStereographic;
+    }
+  else if(argis("-debf")) {
+    shift();
+    string s = args();
+    for(char c: s) {
+      if(c >= 'a' && c <= 'z')
+        set_legacy_flags(c, 0, true);
+      else if(c >= '0' && c <= '9') {
+        set_legacy_flags(0, 8, false);
+        set_legacy_flags(0, c - '0', true);
+        }
+      else if(c == '+') {
+        if(debugfile) fclose(debugfile);
+        shift();
+        println(hlog, "writing to ", argcs());
+        debugfile = fopen(argcs(), "at");
+        }
+      else if(c == '@') {
+        if(debugfile) fclose(debugfile);
+        shift();
+        println(hlog, "writing to ", argcs());
+        debugfile = fopen(argcs(), "wt");
+        }
+      }
+    }
+  else if(argis("-no-stamp")) {
+    debug_stamps.flip();
     }
   else return 1;
   return 0;

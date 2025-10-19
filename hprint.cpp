@@ -10,27 +10,6 @@ namespace hr {
 
 EX FILE *debugfile;
 
-#if HDR
-#define DF_INIT              1 // always display these
-#define DF_MSG               2 // always display these
-#define DF_WARN              4 // always display these
-#define DF_ERROR             8 // always display these
-#define DF_STEAM            16
-#define DF_GRAPH            32
-#define DF_TURN             64
-#define DF_FIELD           128
-#define DF_GEOM            256
-#define DF_MEMORY          512
-#define DF_TIME           1024 // a flag to display timestamps
-#define DF_GP             2048
-#define DF_POLY           4096
-#define DF_LOG            8192
-#define DF_VERTEX        16384
-#define DF_KEYS "imwesxufgbtoplv"
-#endif
-
-EX int debugflags = DF_INIT | DF_ERROR | DF_WARN | DF_MSG | DF_TIME | DF_LOG;
-
 EX string s0;
 
 EX string its(int i) { return hr::format("%d", i); }
@@ -321,15 +300,23 @@ struct indenter_finish : indenter {
     indenter tmp(-2);
     println(hlog, s);
     }
+  explicit indenter_finish(bool b, string s): indenter(b ? 2 : 0) {
+    if(b) {
+      indenter tmp(-2);
+      println(hlog, s);
+      }
+    }
   ~indenter_finish() { if(hlog.indentation != ind.backup) println(hlog, "(done)"); }
   };
 
 #endif
 
+EX debugflag debug_stamps = {"stamps", true};
+
 void logger::write_char(char c) { 
   if(doindent) { 
     doindent = false; 
-    if(debugflags & DF_TIME) { 
+    if(debug_stamps) {
       string s = get_stamp(); 
       if(s != "") { for(char c: s) special_log(c); special_log(' '); }
       }
@@ -538,9 +525,9 @@ EX string as_nice_cstring(string o) {
 #define DEBB0(r,x)
 #define DEBBI(r,x)
 #else
-#define DEBB(r,x) { if(debugflags & (r)) { println_log x; } }
-#define DEBB0(r,x) { if(debugflags & (r)) { print_log x; } }
-#define DEBBI(r,x) { if(debugflags & (r)) { println_log x; } } indenter_finish _debbi(debugflags & (r));
+#define DEBB(r,x) { if(r) { println_log x; } }
+#define DEBB0(r,x) { if(r) { print_log x; } }
+#define DEBBI(r,x) { if(r) { println_log x; } } indenter_finish _debbi(r);
 #endif
 #endif
 

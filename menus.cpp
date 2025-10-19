@@ -22,8 +22,8 @@ int PREC(ld x) {
   }
 
 EX void showOverview() {
-  cmode = sm::ZOOMABLE | sm::OVERVIEW;  
-  DEBBI(DF_GRAPH, ("show overview"));
+  cmode = sm::ZOOMABLE | sm::OVERVIEW;
+  indenter_finish dif(debug_graph, "show overview");
 
   if(dialog::infix != "")
     mouseovers = dialog::infix;
@@ -1254,7 +1254,7 @@ EX string gettimestamp(msginfo& m) {
   }
   
 EX void showMessageLog() {
-  DEBBI(DF_GRAPH, ("show message log"));
+  indenter_finish dif(debug_graph, "showMessageLog");
 
   int lines = vid.yres / vid.fsize - 2;
   int maxpos = isize(gamelog) - lines;
