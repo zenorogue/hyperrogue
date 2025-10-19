@@ -227,7 +227,7 @@ int read_args() {
     }
   else if(argis("-svgshot")) {
     PHASE(3); shift(); start_game();
-    printf("saving SVG screenshot to %s\n", argcs());
+    if(debug_info) printf("saving SVG screenshot to %s\n", argcs());
     shot::format = shot::screenshot_format::svg;
     shot::take(argcs());
     }
@@ -844,7 +844,7 @@ int png_read_args() {
   using namespace arg;
   if(argis("-pngshot")) {
     PHASE(3); shift(); start_game();
-    printf("saving PNG screenshot to %s\n", argcs());
+    if(debug_info) printf("saving PNG screenshot to %s\n", argcs());
     format = screenshot_format::png;
     shot::take(argcs());
     }
@@ -911,13 +911,13 @@ int png_read_args() {
   #if CAP_WRL
   else if(argis("-modelshot")) {
     PHASE(3); shift(); start_game();
-    printf("saving WRL model to %s\n", argcs());
+    if(debug_info) printf("saving WRL model to %s\n", argcs());
     shot::format = screenshot_format::wrl; wrl::print = false;
     shot::take(argcs());
     }
   else if(argis("-printshot")) {
     PHASE(3); shift(); start_game();
-    printf("saving 3D printable model to %s\n", argcs());
+    if(debug_info) printf("saving 3D printable model to %s\n", argcs());
     shot::format = screenshot_format::wrl; wrl::print = true;
     shot::take(argcs());
     }
@@ -1148,7 +1148,6 @@ EX void generate_viewpoints() {
   ids_seen.clear();
   auto enqueue = [&] (cellwalker cw) {
     auto id = get_id(cw.at);
-    println(hlog, cw, " has id ", int(id));
     if(ids_seen.count(id)) return;
     ids_seen.insert(id);
     vqueue.push_back(cw);
@@ -1157,11 +1156,9 @@ EX void generate_viewpoints() {
   for(int i=0; i<isize(vqueue); i++) {
     cellwalker cw = vqueue[i];
     int num = num_directions(cw.at);
-    println(hlog, cw, " has ", num);
     for(int j=0; j<num; j++) {
       cellwalker cw1 = cw + j;
       viewpoints.push_back(cw1);
-      println(hlog, "enqueueing ", cw1+wstep);
       enqueue(cw1+wstep);
       }
     }
@@ -1170,7 +1167,6 @@ EX void generate_viewpoints() {
     return;
     }
   viewpoint_id = 0;
-  println(hlog, "viewpoints = ", viewpoints);
   dialog::editNumber(viewpoint_id, 0, isize(viewpoints) * 3, 1, 1, XLAT("viewpoints"),
     XLAT("You can pick the viewpoint."));
   dialog::get_di().reaction = [] {
@@ -1219,7 +1215,6 @@ cell *rotation_center;
 transmatrix rotation_center_View;
 
 EX void ma_reaction() {
-  println(hlog, "ma_reaction called");
   if(ma == maCircle) start_game();
   rotation_center = centerover;
   rotation_center_View = View;
@@ -1278,13 +1273,19 @@ EX void get_parameter_animation(parameter *p, string &s) {
 
 EX void animate_parameter(ld &x, string f) {
   auto par = find_param(&x);
-  if(!par) { println(hlog, "parameter not animatable"); return; }
+  if(!par) {
+    if(debug_warnings) println(hlog, "parameter not animatable");
+    return;
+    }
   deanimate(par);
   aps.emplace_back(animated_parameter{par, f});
   }
 
 EX void animate_parameter(parameter *par, string f) {
-  if(!par) { println(hlog, "parameter not animatable"); return; }
+  if(!par) {
+    if(debug_warnings) println(hlog, "parameter not animatable");
+    return;
+    }
   deanimate(par);
   aps.emplace_back(animated_parameter{par, f});
   }
@@ -1471,7 +1472,8 @@ EX bool record_animation_of(reaction_t content) {
   for(int i=0; i<noframes; i++) {
     record_frame_id = i;
     if(i < min_frame || i > max_frame) continue;
-    println(hlog, "record frame ",i, "/", noframes, " of ", videofile);
+    if(debug_progress)
+      println(hlog, "record frame ",i, "/", noframes, " of ", videofile);
     callhooks(hooks_record_anim, i, noframes);
     int newticks = i * period / noframes;
     if(time_formula != "-") {
@@ -1482,7 +1484,8 @@ EX bool record_animation_of(reaction_t content) {
         newticks = ep.iparse();
         }
       catch(hr_parse_exception& e) {
-        println(hlog, "warning: failed to parse time_formula, ", e.s);
+        if(debug_warnings)
+          println(hlog, "warning: failed to parse time_formula, ", e.s);
         }
       }
     cmode = (env_shmup ? sm::NORMAL : 0);
@@ -1527,7 +1530,6 @@ EX bool record_video(string fname IS(videofile), bool_reaction_t rec IS(record_a
     addMessage(hr::format("Error: %s", strerror(errno)));
     return false;
     }
-  println(hlog, "tab = ", tab);
   
   int pid = fork();
   if(pid == 0) {
