@@ -11,6 +11,12 @@
 namespace hr {
 
 EX debugflag debug_map_warnings = {"map_warnings", true};
+EX debugflag debug_map_errors = {"map_errors", true};
+
+EX debugflag debug_map_details = {"map_details"};
+EX debugflag debug_map_numerical = {"map_numerical"};
+EX debugflag debug_map_create = {"map_create"};
+
 
 #if HDR
 extern int default_levs();

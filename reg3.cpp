@@ -300,7 +300,7 @@ EX namespace reg3 {
       hyperpoint u = C0 + (h012 + h013) * d / 2;
 
       if(material(u) <= 0) {
-        println(hlog, "klein_scale = ", d, " bad");
+        if(debug_geometry) println(hlog, "d=", d, " immaterial");
         return true;
         }
 
@@ -323,7 +323,7 @@ EX namespace reg3 {
     
       ld loop2 = 360 / (90 + atan(y/x) / degree);
       
-      println(hlog, "d=", d, " loop2= ", loop2);
+      if(debug_geometry) println(hlog, "d=", d, " loop2= ", loop2);
       
       if(sphere) return loop2 < loop;
       return loop2 > loop;
@@ -682,7 +682,7 @@ EX namespace reg3 {
           ss.faces.push_back({pt(0,1,0,.5), pt(0,1,.5,0), pt(0,.5,1,0), pt(0,0,1,.5), pt(0,0,.5,1), pt(0,.5,0,1)});
           for(int d=0; d<3; d++)
             co1[d] += sgn[d], sgn[d] *= -1;
-          println(hlog, ss.faces);
+          if(debug_geometry) println(hlog, ss.faces);
           }
         }
       }
@@ -725,7 +725,7 @@ EX namespace reg3 {
 
     for(auto& ss: cgi.subshapes) ss.compute_sub();
 
-    println(hlog, "subcells generated = ", isize(cgi.subshapes));
+    if(debug_geometry) println(hlog, "subcells generated = ", isize(cgi.subshapes));
     }
 
   void binary_rebase(heptagon *h, const transmatrix& V) {
@@ -910,7 +910,8 @@ EX namespace reg3 {
         }
       }
     
-    println(hlog, "found ", isize(acells), " cells, ", by_sides);
+    if(debug_map_create)
+      println(hlog, "found ", isize(acells), " cells, ", by_sides);
 
     tmatrices_cell.resize(isize(acells));
     move_sequences.resize(isize(acells));
@@ -989,7 +990,7 @@ EX namespace reg3 {
                           num++;
                       if(num == 2) sd[i1] = j1, found_strafe++;
                       }
-                    if(found_strafe != 1) println(hlog, "found_strafe = ", found_strafe);
+                    if(found_strafe != 1 && debug_warnings) println(hlog, "warning: found_strafe = ", found_strafe);
                     }
                   }
                 
@@ -1012,7 +1013,8 @@ EX namespace reg3 {
                       sd[i1] = j1;
                       found_strafe++;
                       }
-                  if(found_strafe != 1) println(hlog, "found_strafe = ", found_strafe, " (second order)");
+                  if(found_strafe != 1 && debug_warnings)
+                    println(hlog, "found_strafe = ", found_strafe, " (second order)");
                   }
                 }
               foundtab_ids.emplace_back(va.h_id, id1, j);
@@ -1028,9 +1030,9 @@ EX namespace reg3 {
         foundtab.push_back(found);
         if(found != 1) failures++;
         }
-      if(testing_subconnections) println(hlog, "foundtab = ", foundtab);
+      if(testing_subconnections && debug_map_create) println(hlog, "foundtab = ", foundtab);
       }
-    println(hlog, "total failures = ", failures);
+    if(debug_map_create || (failures && debug_errors)) println(hlog, "total failures = ", failures);
     if(failures && !testing_subconnections) throw hr_exception("hrmap_closed3 failures");
     }
 
@@ -1040,10 +1042,12 @@ EX namespace reg3 {
 
     for(int a=0; a<c1->type; a++) if(hr::celldistance(c2, c1->move(a)) < d)
       return adj(c1, a) * relative_matrix(c2, c1->move(a), hint);
-      
-    for(int a=0; a<c1->type; a++) println(hlog, "d=", d, " vs ", hr::celldistance(c2, c1->move(a)));
-    
-    println(hlog, "error in hrmap_quotient3:::relative_matrix");
+
+    if(debug_map_errors) {
+      println(hlog, "error in hrmap_quotient3:::relative_matrix");
+      for(int a=0; a<c1->type; a++) println(hlog, "d=", d, " vs ", hr::celldistance(c2, c1->move(a)));
+      }
+
     return Id;
     }
     
@@ -1135,10 +1139,10 @@ EX namespace reg3 {
     
     
     void create_patterns() {
-      indenter_finish(debug_geometry, "creating pattern = " + its(isize(allh)));
+      indenter_finish(debug_map_create, "creating pattern = " + its(isize(allh)));
       
       if(!PURE) {
-         if(debug_errors || debug_geometry)
+         if(debug_errors || debug_map_create)
            println(hlog, "create_patterns not implemented");
          return;
          }
@@ -1175,7 +1179,7 @@ EX namespace reg3 {
         
         // Vineyard in 435
         make_plane(cellwalker(gamestart(), 0));
-        if(debug_geometry) println(hlog, "plane size = ", isize(plane));
+        if(debug_map_create) println(hlog, "plane size = ", isize(plane));
         
         set<int> plane_indices;
         for(auto cw: plane) plane_indices.insert(cw.at->master->fieldval);
@@ -1255,11 +1259,11 @@ EX namespace reg3 {
       periods.clear();
       
       for(int index = 5; index >= 0; index--) {
-        for(auto k: boundaries) println(hlog, k);
-        if(debug_geometry) println(hlog, "simplifying...");
+        if(debug_map_create) println(hlog, "simplifying...");
+        if(debug_map_create) for(auto k: boundaries) println(hlog, k);
         
         for(auto by: boundaries) if(among(by[index], 1, -1)) {
-          if(debug_geometry) println(hlog, "simplifying by ", by);
+          if(debug_map_create) println(hlog, "simplifying by ", by);
           periods.push_back(by);
           set<coord> nb;
       
@@ -1267,7 +1271,7 @@ EX namespace reg3 {
             if(v == by) ;
             else if(v[index] % by[index] == 0)
               nb.insert(v - by * (v[index] / by[index]));
-            else if(debug_errors || debug_geometry)
+            else if(debug_errors || debug_map_create)
               println(hlog, "simplification error");
           
           boundaries = std::move(nb);
@@ -1472,7 +1476,7 @@ EX namespace reg3 {
       }
 
     hrmap_h3() {
-      println(hlog, "generating hrmap_h3");
+      if(debug_map_create) println(hlog, "generating hrmap_h3");
       origin = init_heptagon(S7);
       heptagon& h = *origin;
       h.s = hsOrigin;
@@ -1555,18 +1559,14 @@ EX namespace reg3 {
         }
       }
     
-    #define DEB 0
-    
     heptagon *counterpart(heptagon *h) {
       return quotient_map->allh[h->fieldval];
       }
 
     void verify_neighbors(heptagon *alt, int steps, const hyperpoint& hT) {
       ld err;
-      for(auto& p2: altmap[alt]) if((err = intval(tC0(p2.second), hT)) < 1e-3) {
-        println(hlog, "FAIL");
-        exit(3);
-        }
+      for(auto& p2: altmap[alt]) if((err = intval(tC0(p2.second), hT)) < 1e-3)
+        throw hr_exception("hrmap_h3 verify_neighbors failure");
       #if CAP_BT
       if(steps) { 
         dynamicval<eGeometry> g(geometry, gBinary3);
@@ -1579,7 +1579,7 @@ EX namespace reg3 {
 
     heptagon *create_step(heptagon *parent, int d) override {
       auto& p1 = reg_gmatrix[parent];
-      if(DEB) println(hlog, "creating step ", parent, ":", d, ", at ", p1.first, tC0(p1.second));
+      if(debug_map_details) println(hlog, "creating step ", parent, ":", d, ", at ", p1.first, tC0(p1.second));
       heptagon *alt = p1.first;
       #if CAP_FIELD
       transmatrix T = p1.second * (quotient_map ? quotient_map->tmatrices[parent->fieldval][d] : cgi.adjmoves[d]);
@@ -1597,16 +1597,17 @@ EX namespace reg3 {
       fixmatrix(T);
       auto hT = tC0(T);
       
-      if(DEB) println(hlog, "searching at ", alt, ":", hT);
-
-      if(DEB) for(auto& p2: altmap[alt]) println(hlog, "for ", tC0(p2.second), " intval is ", intval(tC0(p2.second), hT));
+      if(debug_map_details) {
+        println(hlog, "searching at ", alt, ":", hT);
+        for(auto& p2: altmap[alt]) println(hlog, "for ", tC0(p2.second), " intval is ", intval(tC0(p2.second), hT));
+        }
       
       ld err;
       
       for(auto& p2: altmap[alt]) if((err = intval(tC0(p2.second), hT)) < 1e-3) {
-        if(err > worst_error1) println(hlog, hr::format("worst_error1 = %lg", double(worst_error1 = err)));
+        if(err > worst_error1 && debug_map_numerical) println(hlog, hr::format("worst_error1 = %lg", double(worst_error1 = err)));
         // println(hlog, "YES found in ", isize(altmap[alt]));
-        if(DEB) println(hlog, "-> found ", p2.first);
+        if(debug_map_details) println(hlog, "-> found ", p2.first);
         int fb = 0;
         hyperpoint old = tC0(p1.second);;
         #if CAP_FIELD
@@ -1619,7 +1620,7 @@ EX namespace reg3 {
         for(int d2=0; d2<S7; d2++) {
           hyperpoint back = p2.second * tC0(cgi.adjmoves[d2]);
           if((err = intval(back, old)) < 1e-3) {
-            if(err > worst_error2) println(hlog, hr::format("worst_error2 = %lg", double(worst_error2 = err)));
+            if(err > worst_error2 && debug_map_numerical) println(hlog, hr::format("worst_error2 = %lg", double(worst_error2 = err)));
             if(p2.first->move(d2)) println(hlog, "error: repeated edge");
             p2.first->c.connect(d2, parent, d, false);
             fix_distances(p2.first, parent);
@@ -1627,10 +1628,12 @@ EX namespace reg3 {
             }
           }
         if(fb != 1) { 
-          println(hlog, "found fb = ", fb); 
-          println(hlog, old);
-          for(int d2=0; d2<S7; d2++) {
-            println(hlog, p2.second * tC0(cgi.adjmoves[d2]), " in distance ", intval(p2.second * tC0(cgi.adjmoves[d2]), old));
+          if(debug_map_details) {
+            println(hlog, "found fb = ", fb);
+            println(hlog, old);
+            for(int d2=0; d2<S7; d2++) {
+              println(hlog, p2.second * tC0(cgi.adjmoves[d2]), " in distance ", intval(p2.second * tC0(cgi.adjmoves[d2]), old));
+              }
             }
           parent->c.connect(d, parent, d, false);
           return parent;
@@ -1640,7 +1643,7 @@ EX namespace reg3 {
       
       if(extra_verification) verify_neighbors(alt, extra_verification, hT);
       
-      if(DEB) println(hlog, "-> not found");
+      if(debug_map_details) println(hlog, "-> not found");
       int d2 = 0, fv = isize(reg_gmatrix);
       #if CAP_FIELD
       if(quotient_map) {
@@ -1900,7 +1903,8 @@ EX namespace reg3 {
       hread(ins, other);
       hread(ins, childpos);
 
-      println(hlog, "roots = ", isize(root), " states = ", isize(childpos)-1, " hashv = ", fp.hashv);
+      if(debug_map_create)
+        println(hlog, "roots = ", isize(root), " states = ", isize(childpos)-1, " hashv = ", fp.hashv);
       }
 
     /** \brief address = (fieldvalue, state) */
@@ -1937,7 +1941,7 @@ EX namespace reg3 {
       for(int i=0; i<qty; i++) 
         bfs.emplace_back(i, root[i]);
       int qstate = isize(childpos) - 1;
-      DEBB(debug_geometry, ("qstate = ", qstate));
+      DEBB(debug_map_create, ("qstate = ", qstate));
       for(int i=0; i<isize(bfs); i++) {
         address last = bfs[i];
         int state = last.second;
@@ -1978,7 +1982,7 @@ EX namespace reg3 {
           }
         }
       
-      DEBB(debug_geometry, ("removed cases = ", isize(bfs)));
+      DEBB(debug_map_create, ("removed cases = ", isize(bfs)));
 
       /* remove non-branching states */
 
@@ -2014,14 +2018,14 @@ EX namespace reg3 {
         a.second = goods;
         }
 
-      println(hlog, "to_cut = ", to_cut, " from ", isize(bad), " bad cases");
+      if(debug_map_create) println(hlog, "to_cut = ", to_cut, " from ", isize(bad), " bad cases");
 
       // just the number of FV's
       int pstable = 0;
       for(auto& p: nonlooping_earlier_states)
         pstable = max(pstable, p.first.first+1);
       
-      println(hlog, "pstable size = ", pstable, " (states: ", qstate, ")");
+      if(debug_map_create) println(hlog, "pstable size = ", pstable, " (states: ", qstate, ")");
       
       possible_states.resize(pstable);
       for(auto& p: nonlooping_earlier_states)
@@ -2062,8 +2066,8 @@ EX namespace reg3 {
       generate_cellrotations();
       auto& cr = cgi.cellrotations;
       if(evmemo.empty()) {
+        DEBBI(debug_map_create, ("starting find_emeraldval"));
         crsize = isize(cr);
-        println(hlog, "starting");
         map<int, int> matrix_hashtable;
         auto matrix_hash = [] (const transmatrix& M) {
           return bucketer(M[0][0]) 
@@ -2096,7 +2100,7 @@ EX namespace reg3 {
             evmemo.push_back(eid1 * isize(cr) + k1); 
             }
           }
-        println(hlog, "generated ", isize(evmemo));
+        if(debug_map_create) println(hlog, "generated ", isize(evmemo));
         }
       int memo_id = parent->emeraldval;
       memo_id = memo_id * isize(qmap->allh) + parent_fieldval;
@@ -2115,7 +2119,7 @@ EX namespace reg3 {
 
     hrmap_h3_rule() {
 
-      println(hlog, "generating hrmap_h3_rule");
+      DEBBI(debug_map_create, ("generating hrmap_h3_rule"));
 
       load_ruleset_new(get_rule_filename(false));
       quotient_map = gen_quotient_map(minimize_quotient_maps, fp);
@@ -2142,8 +2146,6 @@ EX namespace reg3 {
       return origin;
       }
 
-    #define DEB 0
-
     heptagon *counterpart(heptagon *h) {
       return quotient_map->allh[h->fieldval];
       }
@@ -2168,7 +2170,8 @@ EX namespace reg3 {
         int kk = pos;
         string s;
         while(other[kk] != ',') s += other[kk++];
-        println(hlog, "id=", id, " d=", d, " d2=", d2, " id1=", id1, " pos=", pos, " s = ", s);
+        if(debug_map_details)
+          println(hlog, "id=", id, " d=", d, " d2=", d2, " id1=", id1, " pos=", pos, " s = ", s);
         }
         
       if(id1 != -1) {
@@ -2199,7 +2202,6 @@ EX namespace reg3 {
         heptagon *at = parent;
         while(other[pos] != ',') {
           int dir = (other[pos++] & 31) - 1;
-          // println(hlog, "from ", at, " go dir ", dir);
           at = at->cmove(dir);
           }
         res = at;
@@ -2207,7 +2209,7 @@ EX namespace reg3 {
       
       if(!res) throw hr_exception("res missing");
       
-      if(res->move(d2)) println(hlog, "res conflict");
+      if(res->move(d2) && debug_map_warnings) println(hlog, "res conflict");
 
       res->c.connect(d2, parent, d, false);
       return res;
@@ -2271,12 +2273,13 @@ EX namespace reg3 {
           }
 
         int goal = min(mindist, maxdist-1);
-        println(hlog, "mindist = ", mindist, " maxdist = ", maxdist, " goal = ", goal);
+        if(debug_map_create) println(hlog, "mindist = ", mindist, " maxdist = ", maxdist, " goal = ", goal);
 
         int id = 0;
         for(auto& c: v) {
           while(c->distance > goal) {
-            println(hlog, c, " distance is ", c->distance);
+            if(debug_map_create)
+              println(hlog, c, " distance is ", c->distance);
             int d = find_parent(c);
             paths[id].push_back(c->c.spin(d));
             c = c->move(d);
@@ -2286,15 +2289,15 @@ EX namespace reg3 {
         }
       for(auto& p: paths) reverse(p.begin(), p.end());
       hs.push_back(heptspin(v[0], find_parent(v[0])));
-      for(auto h: hs) {
+      if(debug_map_create) for(auto h: hs) {
         println(hlog, h, " : dist = ", h.at->distance, " id = ", h.at->fiftyval, " qid = ", h.at->fieldval);
         }
-      println(hlog, "paths = ", paths);
+      if(debug_map_create) println(hlog, "paths = ", paths);
       }
 
     hrmap_h3_subrule() {
 
-      println(hlog, "loading a subrule ruleset");
+      DEBBI(debug_map_create, ("loading a subrule ruleset"));
 
       load_ruleset_new(get_rule_filename(true));
       quotient_map = gen_quotient_map(minimize_quotient_maps, fp);
@@ -2340,7 +2343,7 @@ EX namespace reg3 {
         int i = 0;
         vector<heptspin> cut;
         for(auto s: starts) if(i++ >= isize(starts)/2) cut.push_back(s);
-        println(hlog, "cycle detected is ", cut);
+        if(debug_map_errors) println(hlog, "cycle detected is ", cut);
         explain_conflict(cut);
         throw hr_exception("create_step cycle detected");
         }
@@ -2402,7 +2405,8 @@ EX namespace reg3 {
         heptspin a(res, d2);
         heptspin b = a + wstep;
         heptspin c(parent, d);
-        println(hlog, "res conflict: ", a, " already connected to ", b, " and should be connected to ", c);
+        if(debug_map_details)
+          println(hlog, "res conflict: ", a, " already connected to ", b, " and should be connected to ", c);
         explain_conflict({a, b, c});
         }
 
@@ -2415,12 +2419,14 @@ EX namespace reg3 {
       int pos = childpos[id];
       for(int i=0; i<childpos[id+1]-childpos[id]; i++)
         if(other[otherpos[pos+i]] == 'A'+i && other[otherpos[pos+i]+1] == ',') {
-          println(hlog, "find_parent returns ", i, " for ", h);
+          if(debug_map_details) println(hlog, "find_parent returns ", i, " for ", h);
           return i;
           }
-      println(hlog, "find_parent fails for ", h);
-      println(hlog, "aid size = ", isize(quotient_map->acells));
-      println(hlog, "roots size = ", isize(root));
+      if(debug_map_warnings) {
+        println(hlog, "find_parent fails for ", h);
+        println(hlog, "aid size = ", isize(quotient_map->acells));
+        println(hlog, "roots size = ", isize(root));
+        }
       return 0;
       }
 
@@ -2543,7 +2549,6 @@ EX namespace reg3 {
     };
 
 EX hrmap *new_alt_map(heptagon *o) {
-  println(hlog, "new_alt_map called");
   return new hrmap_h3_rule_alt(o);
   }
 
@@ -2908,7 +2913,7 @@ EX void generate_fulls() {
   cgi.xp_order = matrix_order(cgi.full_X * cgi.full_P);
   cgi.r_order = matrix_order(cgi.full_R);
   cgi.rx_order = matrix_order(cgi.full_R * cgi.full_X);
-  println(hlog, "orders = ", tie(cgi.rx_order, cgi.r_order, cgi.xp_order));
+  if(debug_geometry) println(hlog, "orders = ", tie(cgi.rx_order, cgi.r_order, cgi.xp_order));
   }
 
 eVariation target_variation;
