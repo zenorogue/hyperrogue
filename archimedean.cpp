@@ -903,7 +903,7 @@ struct hrmap_archimedean : hrmap {
 
 EX hrmap *new_map() { return new hrmap_archimedean; }
 
-EX debugflag debug_archimedean_map = {"archimedean_map"};
+EX debugflag debug_archimedean_map = {"archimedean_map_details"};
 
 heptagon *build_child(heptspin p, pair<int, int> adj) {
   indenter ind;
