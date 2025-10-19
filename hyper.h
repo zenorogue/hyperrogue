@@ -787,6 +787,10 @@ template<class T, class V, class... U> V callhandlers(V zero, const hookset<T>& 
 
 void popScreen();
 
+extern vector< function<void()> > screens;
+
+template<class T> void pushScreen(const T& x) { screens.push_back(x); }
+
 template<class T, class U> void hook_in_subscreen(hookset<T>& m, int prio, U&& hook) {
   int v = m.add(prio, static_cast<U&&>(hook));
   pushScreen([&m, v] {
