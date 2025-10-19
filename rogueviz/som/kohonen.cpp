@@ -917,7 +917,7 @@ void initialize_dispersion() {
     cell *c = net[i].where;
     auto cid = get_cellcrawler_id(c);
     if(!scc.count(cid.first)) {
-      DEBB(debug_kohonen_dispoersion, ("Building cellcrawler id = ", itsh(cid.first)));
+      DEBB(debug_kohonen_dispersion, ("Building cellcrawler id = ", itsh(cid.first)));
       buildcellcrawler(c, scc[cid.first], cid.second);
       }
     }

@@ -204,7 +204,7 @@ tuple<ld,bool,ld> quality(bantar_config cp) {
 
 int notry = 0;
 
-debugflags debug_bantar = {"demo_bantar"};
+debugflag debug_bantar = {"demo_bantar"};
 
 void bantar() {
   if(!on) return;

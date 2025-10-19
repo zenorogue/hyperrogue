@@ -8,6 +8,8 @@ namespace rogueviz {
 
 transmatrix& memo_relative_matrix(cell *c1, cell *c2);
 
+namespace kohonen { extern debugflag debug_kohonen; }
+
 namespace kohonen_test {
 
 using namespace kohonen;
@@ -321,7 +323,7 @@ int qenergy = 0;
 double tot_energy = 0;
 
 bool check(bool deb) {
-  dynamicval dd(debugflags, 0);
+  dynamicval<bool> dd(debug_kohonen.enabled, false);
   set_neuron_initial();
   t = tmax;
   dynamicval dp(qpct, 0);
@@ -414,7 +416,7 @@ void som_table() {
       set_parameters(cnt);
       do {
         tries[cnt].second++;
-        dynamicval dd(debugflags, 0); 
+        dynamicval<bool> dd(debug_kohonen.enabled, false);
         bool chk = check(false);
         if(chk)
           tries[cnt].first++;

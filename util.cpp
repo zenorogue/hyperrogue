@@ -1031,11 +1031,11 @@ EX string find_file(string s) {
   return s;
   }
 
-EX void file_error(const char* fname) {
+EX void file_error(const string& fname) {
   throw hr_exception("missing file error");
   }
 
-EX void file_format_error(const char* fname) {
+EX void file_format_error(const string& fname) {
   throw hr_exception("file format error");
   }
 
