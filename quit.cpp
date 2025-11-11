@@ -661,6 +661,10 @@ EX void handleKeyQuit(int sym, int uni) {
     scores::load();
     }
   #endif
+
+#if CAP_TOUR
+  else if(tour::on && tour::handleKeyTour(sym, uni)) ;
+#endif
   
   else if(doexiton(sym, uni) && !didsomething) {
     popScreen();

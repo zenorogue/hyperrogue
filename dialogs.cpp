@@ -716,7 +716,7 @@ EX namespace dialog {
   EX int display_keys = 1;
 
   EX bool actual_display_keys() {
-    if(display_keys > 1) return true;
+    if(display_keys == 2) return true;
     if(display_keys == 1) return !mousing;
     return false;
     }
@@ -981,7 +981,7 @@ EX namespace dialog {
       highlight_text = "//missing";
       return;
       }
-    if(uni == '\n' || uni == '\r' || DIRECTIONKEY == SDLK_KP5) {
+    if(uni == '\n' || uni == '\r' || DIRECTIONKEY == SDLK_KP5 || uni == '`') {
       for(int i=0; i<isize(items); i++) 
         if(isitem(items[i]))
           if(is_highlight(items[i])) {

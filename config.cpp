@@ -1099,7 +1099,7 @@ EX void initConfig() {
         defaultjoy = false;
         dialog::onscreen_keyboard = true;
         dialog::dialog_font_scale = 3;
-        dialog::display_keys = 0;
+        dialog::display_keys = 3;
         }
       }
     }
@@ -1223,7 +1223,7 @@ EX void initConfig() {
   #endif
 
   param_enum(dialog::display_keys, "dialog_display_keys")
-    ->editable({{"never", ""}, {"when using keyboard", ""}, {"always", ""}}, "display keys in dialogs", 'K'); 
+    ->editable({{"never", ""}, {"when using keyboard", ""}, {"always", ""}, {"SteamDeck controls", ""}}, "display keys in dialogs", 'K');
 
   param_enum(vid.faraway_highlight, parameter_names("faraway_highlight", "highlight faraway monsters"), tlNoThreat)
     ->editable({{"off", ""}, {"spam", ""}, {"normal monsters", ""}, {"high-threat monsters only", ""}}, "highlight faraway monsters", 'h');

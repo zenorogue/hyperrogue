@@ -169,6 +169,14 @@ EX void buildHelpText() {
     "numbers displayed to get their meanings.\n"
     );
 #else
+  if(DEFAULTCONTROL && dialog::display_keys == 3)
+    help += XLAT(
+      "To move, aim with the left joystick then press A. Press B for menu, X for keyboard, Y to center. R1 to highlight important things on the map.\n\n"
+      "For ranged attacks, use the DPad to aim, then push the left joystick to target an orb or the right joystick to target a ranged weapon. "
+      "Alternatively, you can also use the right trackpad.\n\n"
+      "Press L5 to drop a dead orb. R4/R5 to rotate the screen.\n\n"
+      );
+  else
   if(DEFAULTCONTROL && !game_keys_scroll)
     help += XLAT(
       "Move with mouse, num pad, qweadzxc, or hjklyubn. Wait by pressing 's' or '.'. Spin the world with arrows, PageUp/Down, and Space. "

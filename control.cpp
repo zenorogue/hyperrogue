@@ -623,7 +623,7 @@ EX void handleKeyNormal(int sym, int uni) {
       sym = 0; uni = 0;
       }
     if(sym == 'f') bow::switch_fire_mode();
-    if(sym == SDLK_RETURN) {
+    if(sym == '`') {
       flashMessages();
       movepcto(joydir);
       joy_ignore_next = true;
