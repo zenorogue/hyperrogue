@@ -2354,6 +2354,54 @@ EX void show_vector_settings() {
   dialog::display();
   }
 
+void show_animation_speed_settings() {
+  cmode = vid.xres > vid.yres * 1.4 ? sm::SIDE : sm::MAYDARK;
+  gamescreen();
+
+  dialog::init(XLAT("animation speed"));
+
+  dialog::addSelItem(XLAT("scrolling speed"), fts(vid.sspeed), 'a');
+  dialog::add_action([] {
+    dialog::editNumber(vid.sspeed, -5, 5, 1, 0,
+      XLAT("scrolling speed"),
+      XLAT("+5 = center instantly, -5 = do not center the map")
+      + "\n\n" +
+      XLAT("press Space or Home to center on the PC"));
+    });
+
+  dialog::addSelItem(XLAT("camera movement speed"), fts(camera_speed), 'c');
+  dialog::add_action([] {
+    dialog::editNumber(camera_speed, -10, 10, 0.1, 1, XLAT("camera movement speed"),
+      "This affects:\n\nin 2D: scrolling with arrow keys and Wheel Up\n\nin 3D: camera movement with Home/End."
+      );
+    });
+  dialog::addSelItem(XLAT("camera rotation speed"), fts(camera_rot_speed), 'r');
+  dialog::add_action([] {
+    dialog::editNumber(camera_rot_speed, -10, 10, 0.1, 1, XLAT("camera rotation speed"),
+      "This affects view rotation with Page Up/Down, and in 3D, camera rotation with arrow keys or mouse."
+      );
+    });
+
+  dialog::addSelItem(XLAT("movement animation speed"), fts(vid.mspeed), 'm');
+  dialog::add_action([] {
+    dialog::editNumber(vid.mspeed, -5, 5, 1, 0,
+      XLAT("movement animation speed"),
+      XLAT("+5 = move instantly"));
+    });
+
+  dialog::addSelItem(XLAT("idle animation speed"), fts(vid.ispeed), 'i');
+  dialog::add_action([] {
+    dialog::editNumber(vid.ispeed, 0, 4, 0.1, 1,
+      XLAT("idle animation speed"),
+      "0 = disable\n\nThis affects non-movement animations such as orb effects, item rotation, and more."
+      );
+    });
+
+  dialog::addBreak(50);
+  dialog::addBack();
+  dialog::display();
+  }
+
 EX void showGraphConfig() {
   cmode = vid.xres > vid.yres * 1.4 ? sm::SIDE : sm::MAYDARK;
   gamescreen();
@@ -2431,11 +2479,6 @@ EX void showGraphConfig() {
   else
     dialog::addBreak(200);  
 
-  add_edit(vid.relative_font);
-  if(vid.relative_font) 
-    add_edit(vid.fontscale);
-  else
-    add_edit(vid.abs_fsize);
   add_edit(mapfontscale);
 
   dialog::addSelItem(XLAT("vector settings"), XLAT("width") + " " + fts(vid.linewidth), 'w');
@@ -2447,30 +2490,8 @@ EX void showGraphConfig() {
     mouseovers = XLAT("Reduce the framerate limit to conserve CPU energy");
   #endif
   
-  dialog::addSelItem(XLAT("scrolling speed"), fts(vid.sspeed), 'a');
-
-  dialog::addSelItem(XLAT("camera movement speed"), fts(camera_speed), 'c');
-  dialog::add_action([] { 
-    dialog::editNumber(camera_speed, -10, 10, 0.1, 1, XLAT("camera movement speed"), 
-      "This affects:\n\nin 2D: scrolling with arrow keys and Wheel Up\n\nin 3D: camera movement with Home/End."
-      );
-    });
-  dialog::addSelItem(XLAT("camera rotation speed"), fts(camera_rot_speed), 'r');
-  dialog::add_action([] { 
-    dialog::editNumber(camera_rot_speed, -10, 10, 0.1, 1, XLAT("camera rotation speed"), 
-      "This affects view rotation with Page Up/Down, and in 3D, camera rotation with arrow keys or mouse."
-      );
-    });
-    
-  dialog::addSelItem(XLAT("movement animation speed"), fts(vid.mspeed), 'm');
-  
-  dialog::addSelItem(XLAT("idle animation speed"), fts(vid.ispeed), 'i');
-  dialog::add_action([] {
-    dialog::editNumber(vid.ispeed, 0, 4, 0.1, 1, 
-      XLAT("idle animation speed"),
-      "0 = disable\n\nThis affects non-movement animations such as orb effects, item rotation, and more."
-      );
-    });
+  dialog::addItem(XLAT("animation speed settings"), 'a');
+  dialog::add_action_push(show_animation_speed_settings);
 
   add_edit(vid.flasheffects);
 
@@ -2489,16 +2510,6 @@ EX void showGraphConfig() {
     
     if(xuni == 'u') pushScreen(showSpecialEffects);
 
-    else if(xuni == 'a') dialog::editNumber(vid.sspeed, -5, 5, 1, 0, 
-      XLAT("scrolling speed"),
-      XLAT("+5 = center instantly, -5 = do not center the map")
-      + "\n\n" +
-      XLAT("press Space or Home to center on the PC"));
-  
-    else if(xuni == 'm') dialog::editNumber(vid.mspeed, -5, 5, 1, 0, 
-      XLAT("movement animation speed"),
-      XLAT("+5 = move instantly"));
-  
   #if CAP_FRAMELIMIT    
     else if(xuni == 'l') {
       dialog::editNumber(vid.framelimit, 5, 300, 10, 300, XLAT("framerate limit"), "");
@@ -2575,6 +2586,65 @@ EX void configureOther() {
   dialog::display();
   }
 
+EX void configure_dialogs() {
+  cmode = sm::SIDE | sm::MAYDARK;
+  gamescreen();
+  dialog::init(XLAT("dialogs"));
+
+  add_edit(menu_darkening);
+  add_edit(centered_menus);
+  add_edit(dialog::dialog_font_scale);
+  add_edit(lands_per_page);
+  add_edit(use_bool_dialog);
+
+  dialog::addBreak(50);
+  dialog::addBack();
+  
+  dialog::display();
+  }
+
+EX void configure_hud() {
+  cmode = sm::SIDE | sm::MAYDARK;
+  gamescreen();
+
+  dialog::init(XLAT("HUD settings"));
+
+  dialog::addSelItem(XLAT("message flash time"), its(vid.flashtime), 't');
+  dialog::add_action([] {
+    dialog::editNumber(vid.flashtime, 0, 64, 1, 8, XLAT("message flash time"),
+      XLAT("How long should the messages stay on the screen."));
+    dialog::bound_low(0);
+    });
+
+  dialog::addSelItem(XLAT("limit messages shown"), its(vid.msglimit), 'z');
+  dialog::add_action([] {
+    dialog::editNumber(vid.msglimit, 0, 64, 1, 5, XLAT("limit messages shown"),
+      XLAT("Maximum number of messages on screen."));
+    dialog::bound_low(0);
+    });
+
+  add_edit(nohelp);
+  add_edit(menu_format);
+  
+  add_edit(vid.msgleft);
+  
+  if(hr_hud_enabled) {
+    add_edit(glyphsortorder);
+    add_edit(vid.graphglyph);
+    add_edit(orb_treasure_gap);
+    add_edit(less_in_landscape);
+    add_edit(less_in_portrait);
+    add_edit(display_yasc_codes);
+    if(casual) add_edit(display_semicasual);
+    add_edit(vid.orbmode);
+    }
+
+  dialog::addBreak(50);
+  dialog::addBack();
+  
+  dialog::display();
+  }
+
 EX void configureInterface() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen();
@@ -2592,35 +2662,6 @@ EX void configureInterface() {
   dialog::addSelItem(XLAT("player character"), numplayers() > 1 ? "" : csname(vid.cs), 'g');
   dialog::add_action_push(showCustomizeChar);
   if(getcstat == 'g') mouseovers = XLAT("Affects looks and grammar");
-
-  dialog::addSelItem(XLAT("message flash time"), its(vid.flashtime), 't');
-  dialog::add_action([] {
-    dialog::editNumber(vid.flashtime, 0, 64, 1, 8, XLAT("message flash time"),
-      XLAT("How long should the messages stay on the screen."));
-    dialog::bound_low(0);
-    });
-
-  dialog::addSelItem(XLAT("limit messages shown"), its(vid.msglimit), 'z');
-  dialog::add_action([] {
-    dialog::editNumber(vid.msglimit, 0, 64, 1, 5, XLAT("limit messages shown"),
-      XLAT("Maximum number of messages on screen."));
-    dialog::bound_low(0);
-    });
-
-  add_edit(nohelp);
-  
-  add_edit(vid.msgleft);
-  
-  if(hr_hud_enabled) {
-    add_edit(glyphsortorder);
-    add_edit(vid.graphglyph);
-    add_edit(orb_treasure_gap);
-    add_edit(less_in_landscape);
-    add_edit(less_in_portrait);
-    add_edit(display_yasc_codes);
-    if(casual) add_edit(display_semicasual);
-    add_edit(vid.orbmode);
-    }
 
   add_edit(zh_ascii);
 
@@ -2641,13 +2682,19 @@ EX void configureInterface() {
       };
     });
 
-  add_edit(menu_format);
-  add_edit(menu_darkening);
-  add_edit(centered_menus);
-  add_edit(dialog::dialog_font_scale);
-  add_edit(lands_per_page);
   add_edit(startanims::enabled);
-  add_edit(use_bool_dialog);
+
+  add_edit(vid.relative_font);
+  if(vid.relative_font)
+    add_edit(vid.fontscale);
+  else
+    add_edit(vid.abs_fsize);
+
+  dialog::addItem("configure dialogs", 'd');
+  dialog::add_action_push(configure_dialogs);
+
+  dialog::addItem("configure HUD", 'h');
+  dialog::add_action_push(configure_hud);
    
   dialog::addBreak(50);
   dialog::addBack();
