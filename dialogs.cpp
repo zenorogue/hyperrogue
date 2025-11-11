@@ -13,7 +13,7 @@ EX const char* COLORBAR = "###";
 EX namespace dialog {
 
 #if HDR
-  #define IFM(x) (actual_display_keys()?"":x)
+  #define IFM(x) (dialog::actual_display_keys()?"":x)
 
   static constexpr int DONT_SHOW = 16;
 
