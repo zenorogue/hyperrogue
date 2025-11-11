@@ -623,6 +623,13 @@ EX void handleKeyNormal(int sym, int uni) {
       sym = 0; uni = 0;
       }
     if(sym == 'f') bow::switch_fire_mode();
+    if(sym == SDLK_RETURN) {
+      flashMessages();
+      movepcto(joydir);
+      joy_ignore_next = true;
+      joytime = -1;
+      checkjoy();
+      }
     }
 
   if(sym == SDLK_KP5 && DEFAULTCONTROL && !game_keys_scroll) movepcto(-1, 1);
