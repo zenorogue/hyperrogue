@@ -43,8 +43,6 @@ EX void showOverview() {
       mouseovers += XLAT(" Hell: %1/%2", its(orbsUnlocked()), its(lands_for_hell()));
     }
   
-  bool pages = false;
-  
   {
   dynamicval<int> ds(dual::state, dual::state ? 2 : 0);
   generateLandList(isLandIngame);
@@ -155,7 +153,7 @@ EX void showOverview() {
       }
     }
 
-  dialog::displayPageButtons(3, pages, numpages);
+  dialog::displayPageButtons(3, numpages);
   
   keyhandler = [numpages] (int sym, int uni) {
     int umod = uni % 1000;

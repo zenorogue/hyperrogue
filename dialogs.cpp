@@ -1626,7 +1626,7 @@ EX namespace dialog {
     return ret;
     }
   
-  EX void displayPageButtons(int i, bool pages, int numpages) {
+  EX void displayPageButtons(int i, int numpages) {
     int i0 = vid.yres - vid.fsize;
     int xr = vid.xres / 80;
 

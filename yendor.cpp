@@ -917,7 +917,7 @@ EX namespace tactic {
         }
       }
     
-    dialog::displayPageButtons(3, dialog::infix == "", numpages);
+    dialog::displayPageButtons(3, numpages);
 
     uploadScore();
     if(on) unrecord(specialland);
