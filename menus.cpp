@@ -79,7 +79,6 @@ EX void showOverview() {
   int numpages = (nl-1) / lands_per_page + 1;
 
   if(numpages > 1) {
-    pages = true;
     lstart += dialog::handlePage(nl, nlm, lands_per_page, numpages);
     }
   else nlm = nl;
