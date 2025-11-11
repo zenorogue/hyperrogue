@@ -13,7 +13,7 @@ EX const char* COLORBAR = "###";
 EX namespace dialog {
 
 #if HDR
-  #define IFM(x) (mousing?"":x)
+  #define IFM(x) (actual_display_keys()?"":x)
 
   static constexpr int DONT_SHOW = 16;
 
@@ -713,6 +713,14 @@ EX namespace dialog {
 
   EX ld dialog_font_scale = 1;
 
+  EX int display_keys = 1;
+
+  EX bool actual_display_keys() {
+    if(display_keys > 1) return true;
+    if(display_keys == 1) return !mousing;
+    return false;
+    }
+
   EX void display() {
 
     callhooks(hooks_display_dialog);
@@ -861,7 +869,7 @@ EX namespace dialog {
           displayfr(dcenter, mid, 2, dfsize * I.scale/100, I.body, I.color, 8);
           }
         else {
-          if(!mousing)
+          if(actual_display_keys())
             displayfr(keyx, mid, 2, dfsize * I.scale/100, keyname(I.key), I.colork, 16);
           displayfr(itemx, mid, 2, dfsize * I.scale/100, I.body, I.color, 0);
 
