@@ -21,6 +21,8 @@ int PREC(ld x) {
   return int(shiftmul * x);
   }
 
+EX int lands_per_page = 24;
+
 EX void showOverview() {
   cmode = sm::ZOOMABLE | sm::OVERVIEW;
   indenter_finish dif(debug_graph, "show overview");
@@ -75,10 +77,12 @@ EX void showOverview() {
   int nl = isize(displayed_landlist), nlm;
   
   int lstart = 0;
-  
-  if(nl > 30) {
+
+  int numpages = (nl-1) / lands_per_page + 1;
+
+  if(numpages > 1) {
     pages = true;
-    lstart += dialog::handlePage(nl, nlm, (nl+1)/2);
+    lstart += dialog::handlePage(nl, nlm, lands_per_page, numpages);
     }
   else nlm = nl;
   
@@ -151,9 +155,9 @@ EX void showOverview() {
       }
     }
 
-  dialog::displayPageButtons(3, pages);
+  dialog::displayPageButtons(3, pages, numpages);
   
-  keyhandler = [] (int sym, int uni) {
+  keyhandler = [numpages] (int sym, int uni) {
     int umod = uni % 1000;
     int udiv = uni / 1000;
     if(udiv == 1 && umod < landtypes) {
@@ -217,7 +221,7 @@ EX void showOverview() {
       "Cheaters can click to move between lands, and use the "
       "mousewheel to gain or lose treasures and orbs quickly (Ctrl = precise, Shift = reverse)."
       );
-    else if(dialog::handlePageButtons(uni)) ;
+    else if(dialog::handlePageButtons(sym, uni, true, numpages)) ;
     else if(dialog::editInfix(uni)) dialog::list_skip = 0;
     else if(doexiton(sym, uni)) popScreen();
     };

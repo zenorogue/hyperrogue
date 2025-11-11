@@ -711,12 +711,14 @@ EX namespace dialog {
 
   EX string keyboard_what;
 
+  EX ld dialog_font_scale = 3;
+
   EX void display() {
 
     callhooks(hooks_display_dialog);
     if(just_refreshing) return;
     int N = items.size();
-    dfsize = vid.fsize;
+    dfsize = vid.fsize * dialog_font_scale;
     #if ISMOBILE || ISPANDORA
     dfsize *= 3;
     #endif
@@ -1602,13 +1604,14 @@ EX namespace dialog {
   int nlpage = 1;
   int wheelshift = 0;
   
-  EX int handlePage(int& nl, int& nlm, int perpage) {
+  EX int handlePage(int& nl, int& nlm, int perpage, int maxpage IS(2)) {
     nlm = nl;
     int onl = nl;
     int ret = 0;
     if(nlpage) {
       nl = nlm = perpage; 
-      if(nlpage == 2) ret = nlm;
+      if(nlpage > maxpage) nlpage = maxpage;
+      if(nlpage > 1) ret = nlm * (nlpage - 1);
       int w = wheelshift;
       int realw = 0;
       while(w<0 && ret) {
@@ -1623,15 +1626,24 @@ EX namespace dialog {
     return ret;
     }
   
-  EX void displayPageButtons(int i, bool pages) {
+  EX void displayPageButtons(int i, bool pages, int numpages) {
     int i0 = vid.yres - vid.fsize;
     int xr = vid.xres / 80;
-    if(pages) if(displayfrZH(xr*8, i0, 1, vid.fsize, IFM("1 - ") + XLAT("page") + " 1", nlpage == 1 ? 0xD8D8C0 : dialogcolor, 8))
+
+    if(numpages == 2) if(displayfrZH(xr*8, i0, 1, vid.fsize, IFM("1 - ") + XLAT("page") + " 1", nlpage == 1 ? 0xD8D8C0 : dialogcolor, 8))
       getcstat = '1';
-    if(pages) if(displayfrZH(xr*24, i0, 1, vid.fsize, IFM("2 - ") + XLAT("page") + " 2", nlpage == 1 ? 0xD8D8C0 : dialogcolor, 8))
+    if(numpages == 2) if(displayfrZH(xr*24, i0, 1, vid.fsize, IFM("2 - ") + XLAT("page") + " 2", nlpage == 1 ? 0xD8D8C0 : dialogcolor, 8))
       getcstat = '2';
-    if(pages) if(displayfrZH(xr*40, i0, 1, vid.fsize, IFM("3 - ") + XLAT("all"), nlpage == 1 ? 0xD8D8C0 : dialogcolor, 8))
+    if(numpages == 2) if(displayfrZH(xr*40, i0, 1, vid.fsize, IFM("3 - ") + XLAT("all"), nlpage == 0 ? 0xD8D8C0 : dialogcolor, 8))
       getcstat = '3';
+
+    if(numpages > 2) if(displayfrZH(xr*8, i0, 1, vid.fsize, IFM("1 - ") + XLAT("last page"), nlpage == 1 ? 0xD8D8C0 : dialogcolor, 8))
+      getcstat = '1';
+    if(numpages > 2) if(displayfrZH(xr*24, i0, 1, vid.fsize, IFM("2 - ") + XLAT("next page"), nlpage == numpages ? 0xD8D8C0 : dialogcolor, 8))
+      getcstat = '2';
+    if(numpages > 2) if(displayfrZH(xr*40, i0, 1, vid.fsize, nlpage ? its(nlpage) + "/" + its(numpages) : IFM("3 - ") + XLAT("all"), nlpage == 0 ? 0xD8D8C0 : dialogcolor, 8))
+      getcstat = '3';
+
     if(i&1) if(displayfrZH(xr*56, i0, 1, vid.fsize, IFM(keyname(SDLK_ESCAPE) + " - ") + XLAT("go back"), dialogcolor, 8))
       getcstat = '0';
     if(i&2) if(displayfrZH(xr*72, i0, 1, vid.fsize, IFM("F1 - ") + XLAT("help"), dialogcolor, 8))
@@ -1640,12 +1652,14 @@ EX namespace dialog {
       getcstat = '1';
     }
   
-  EX bool handlePageButtons(int uni) {
-    if(uni == '1') nlpage = 1, wheelshift = 0;
-    else if(uni == '2') nlpage = 2, wheelshift = 0;
+  EX bool handlePageButtons(int sym, int uni, bool dkeys, int numpages) {
+    if(uni == '1') nlpage = max(nlpage-1, 1), wheelshift = 0;
+    else if(uni == '2') nlpage++, wheelshift = 0;
     else if(uni == '3') nlpage = 0, wheelshift = 0;
     else if(uni == PSEUDOKEY_WHEELUP) wheelshift--;
     else if(uni == PSEUDOKEY_WHEELDOWN) wheelshift++;
+    else if(dkeys && DKEY == SDLK_UP && nlpage > 1) nlpage--;
+    else if(dkeys && DKEY == SDLK_DOWN) nlpage++;
     else return false;
     return true;
     }

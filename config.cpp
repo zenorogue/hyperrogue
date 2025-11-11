@@ -1292,6 +1292,14 @@ EX void initConfig() {
   -> set_sets([] { dialog::bound_low(0); dialog::bound_up(8); dialog::get_di().dialogflags |= sm::DARKEN; });
   param_b(centered_menus, "centered_menus", false)
   -> editable("centered menus in widescreen", 'c');
+  param_f(dialog::dialog_font_scale, "dialog_font_scale")
+  -> editable(1, 5, 0.25, "dialog font scale",
+    "allow larger font in dialogs",
+    'D');
+  param_i(lands_per_page, "lands_per_page")
+  -> editable(10, 60, 5, "lands per page",
+    "lands per page shown in the World Overview",
+    'L');
 
   param_b(startanims::enabled, "startanim", true)
   -> editable("start animations", 's');
@@ -2619,6 +2627,8 @@ EX void configureInterface() {
   add_edit(menu_format);
   add_edit(menu_darkening);
   add_edit(centered_menus);
+  add_edit(dialog::dialog_font_scale);
+  add_edit(lands_per_page);
   add_edit(startanims::enabled);
   add_edit(use_bool_dialog);
    

@@ -850,10 +850,18 @@ EX namespace tactic {
     }
     
     int nl = isize(landlist);
-
     int nlm = nl;
-    int ofs = dialog::infix != "" ? 0 : dialog::handlePage(nl, nlm, (nl+1)/2);
-            
+
+    int ofs = 0;
+    int numpages = 1;
+
+    if(dialog::infix == "") {
+      numpages = (nl-1) / lands_per_page + 1;
+
+      if(numpages > 1)
+         ofs += dialog::handlePage(nl, nlm, lands_per_page, numpages);
+      }
+
     int vf = nlm ? min((vid.yres-4*vid.fsize) / (nlm+1), vid.xres/40) : vid.xres/40;
     
     int xr = vid.xres / 64;
@@ -909,7 +917,7 @@ EX namespace tactic {
         }
       }
     
-    dialog::displayPageButtons(3, dialog::infix == "");
+    dialog::displayPageButtons(3, dialog::infix == "", numpages);
 
     uploadScore();
     if(on) unrecord(specialland);
@@ -926,7 +934,7 @@ EX namespace tactic {
       displayScore(scorehere, xr * 50);
       }
      
-    keyhandler = [land_for] (int sym, int uni) {
+    keyhandler = [land_for, numpages] (int sym, int uni) {
       if(land_for.count(uni)) {
         eLand ll = landlist[land_for.at(uni)];
         dialog::do_if_confirmed([ll] {
@@ -967,7 +975,7 @@ EX namespace tactic {
         
         "Good luck, and have fun!"
         );
-      else if(dialog::infix == "" && dialog::handlePageButtons(uni)) ;
+      else if(dialog::infix == "" && dialog::handlePageButtons(sym, uni, true, numpages)) ;
       else if(dialog::editInfix(uni)) dialog::list_skip = 0;
       else if(doexiton(sym, uni)) popScreen();
       };
