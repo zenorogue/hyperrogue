@@ -1027,6 +1027,8 @@ EX int lang() {
 
 EX bool autojoy = false;
 
+EX bool defaultjoy = true;
+
 EX void paramset(charstyle& cs, string s) {
   param_i(cs.charid, s + ".charid");
   param_color(cs.skincolor, s + ".skincolor", true, cs.skincolor);
@@ -1462,6 +1464,9 @@ EX void initConfig() {
   param_f(vid.joypanspeed, "vid.joypanspeed", ISPANDORA ? 0.0001 : 0);
   param_b(autojoy, "autojoy")
   -> editable("joystick moves automatically", 'J');
+  param_b(defaultjoy, "defaultjoy")
+  -> editable("apply joystick movements", 'H')
+  -> help("Disable this on Steam controllers, which also send key events, to avoid duplicated input.");
   #endif
     
   vid.killreduction = 0;
@@ -2646,6 +2651,7 @@ EX void showJoyConfig() {
   dialog::addSelItem(XLAT("second joystick: pan threshold"), its(vid.joypanthreshold), 'c');
   dialog::addSelItem(XLAT("second joystick: panning speed"), fts(vid.joypanspeed * 1000), 'd');
   dialog::addSelItem(XLAT("smoothen"), its(vid.joysmooth) + " ms", 'e');
+  add_edit(defaultjoy);
 
   dialog::addBreak(50);
   dialog::addBack();

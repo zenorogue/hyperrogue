@@ -1178,21 +1178,22 @@ EX void handle_event(SDL_Event& ev) {
     
     if(joyhandler && joyhandler(ev)) ;
 
-    else if(ev.type == SDL_EVENT_JOYSTICK_HAT_MOTION && !normal) {
+    else if(ev.type == SDL_EVENT_JOYSTICK_HAT_MOTION && !normal && defaultjoy) {
       if(ev.jhat.value == SDL_HAT_UP) sym = SDLK_UP;
       if(ev.jhat.value == SDL_HAT_DOWN) sym = SDLK_DOWN;
       if(ev.jhat.value == SDL_HAT_LEFT) sym = SDLK_LEFT;
       if(ev.jhat.value == SDL_HAT_RIGHT) sym = SDLK_RIGHT;
       }
 
-    else if(ev.type == SDL_EVENT_JOYSTICK_BUTTON_DOWN && normal && DEFAULTCONTROL) {
+    else if(ev.type == SDL_EVENT_JOYSTICK_BUTTON_DOWN && normal && DEFAULTCONTROL && defaultjoy) {
       flashMessages();
       movepcto(joydir);
       joy_ignore_next = true;
+      joytime = -1;
       checkjoy();
       }
 
-    else if(ev.type == SDL_EVENT_JOYSTICK_BUTTON_DOWN && !normal) {
+    else if(ev.type == SDL_EVENT_JOYSTICK_BUTTON_DOWN && !normal && defaultjoy) {
       sym = uni = SDLK_RETURN;
       }
 #endif
