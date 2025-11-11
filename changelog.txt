@@ -5572,3 +5572,31 @@ Thanks to josephcsible:
 - add a setting to disable the warning before killing a friendly monster
 - fix getting rid of Great Walls by killing Ghosts with OotStone
 - reset "last exploration" when starting a new run
+
+2025-11-11 19:10 Update 13.1g:
+
+Added some improvements for the SteamDeck:
+- the RETURN key now moves in the current direction
+- reorganized some setting menus so that there is not too many options on the screen
+- added a "dialog font scale" option to display larger menus
+- added an option to not automatically interpret joystick buttons as movement commands
+- the autojoy option is now off by default
+- fixed a crash in some situations
+- add an option to never/always display keyboard help in dialogs
+- better default settings on the SteamDeck
+
+Other changes:
+- new system for debug logs
+- in shmup, tortoise no longer die after 3 hits
+- fixed shHalfDisk and shDiskSegment shapes in spherical geometry
+- fix the "lastexplore" value getting set to the turn/knives thrown count instead of "shmup::curtime" when enabling the map editor in shmup, and when playing the fifteen+4 puzzle in shmup (thanks to ohlordhebacc)
+
+
+Thanks to josephcsible:
+- add a setting to preserve wparam and landparam when changing walls and lands with the map editor
+- fix edge cases in Hell/CR3 unlock
+- in shmup, tortoise no longer die after 3 hits
+- circle the item the Orb of Space is about to collect
+- make the "switch ghost timer" cheat display shmup::curtime instead of the turn/knives thrown count in shmup
+- fix freeze if Ancient Jewelry ends up on a tile with a large landparam
+- fix a crash
