@@ -666,6 +666,7 @@ void display_data::set_projection(int ed, ld shift) {
     }
 
   if(glhr::current_glprogram != selected) full_enable(selected);
+  if(!vid.usingGL) return;
 
   shader_flags = selected->shader_flags;
   auto cd = current_display;
