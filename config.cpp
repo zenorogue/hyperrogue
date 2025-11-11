@@ -1086,6 +1086,23 @@ EX void initConfig() {
   
   DEBBI(debug_init_config, ("initconfig"));
 
+  #if ISLINUX
+  if(1) {
+    fhstream f("/sys/devices/virtual/dmi/id/board_name", "rt");
+    if(f.f) {
+      string s = scanline_noblank(f);
+      println(hlog, "got '", s, "'");
+      bool deck = s.find("Jupiter") != string::npos;
+      if(deck) {
+        centered_menus = true;
+        lands_per_page = 18;
+        defaultjoy = false;
+        dialog::onscreen_keyboard = true;
+        }
+      }
+    }
+  #endif
+
   // basic config
   param_i(vid.flashtime, "flashtime", 8);
 
