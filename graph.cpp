@@ -143,13 +143,14 @@ EX transmatrix at_smart_lof(const transmatrix& V, ld lev) {
 EX shiftmatrix at_smart_lof(const shiftmatrix& V, ld lev) { return shiftless(at_smart_lof(V.T, lev), V.shift); }
 
 EX color_t kind_outline(eItem it) {
-  int k = itemclass(it);
-  if(k == IC_TREASURE)
-    return OUTLINE_TREASURE;
-  else if(k == IC_ORB)
-    return OUTLINE_ORB;
-  else
-    return OUTLINE_OTHER;
+  switch(itemclass(it)) {
+    case IC_TREASURE:
+      return OUTLINE_TREASURE;
+    case IC_ORB:
+      return OUTLINE_ORB;
+    default:
+      return OUTLINE_OTHER;
+    }
   }
 
 /** should objects fly slightly up and down in product/twisted product geometries */
@@ -195,15 +196,8 @@ EX int cellcolor(cell *c) {
   
   if(c->wall == waMirror) return c->land == laMirror ? OUTLINE_TREASURE : OUTLINE_ORB;
 
-  if(c->item && !itemHiddenFromSight(c)) {
-    int k = itemclass(c->item);
-    if(k == IC_TREASURE)
-      return OUTLINE_TREASURE;
-    else if(k == IC_ORB)
-      return OUTLINE_ORB;
-    else
-      return OUTLINE_OTHER;
-    }
+  if(c->item && !itemHiddenFromSight(c))
+    return kind_outline(c->item);
 
   return OUTLINE_NONE;
   } 
