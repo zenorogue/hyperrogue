@@ -1098,6 +1098,7 @@ EX void initConfig() {
         lands_per_page = 18;
         defaultjoy = false;
         dialog::onscreen_keyboard = true;
+        dialog::dialog_font_scale = 3;
         }
       }
     }

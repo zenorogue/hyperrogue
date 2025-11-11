@@ -711,7 +711,7 @@ EX namespace dialog {
 
   EX string keyboard_what;
 
-  EX ld dialog_font_scale = 3;
+  EX ld dialog_font_scale = 1;
 
   EX void display() {
 
