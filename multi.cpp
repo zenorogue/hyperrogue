@@ -414,7 +414,7 @@ struct shmup_configurer {
 
   void operator()() {
   #if CAP_SDL
-    cmode = sm::SHMUPCONFIG | sm::SIDE | sm::DARKEN;
+    cmode = sm::SHMUPCONFIG | sm::SIDE | sm::MAYDARK;
     gamescreen();
     dialog::init(XLAT("keyboard & joysticks"));
     auto& cmdlist = shmup::on ? (WDIM == 3 ? playercmds_shmup3 : playercmds_shmup) : playercmds_turn;
