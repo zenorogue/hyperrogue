@@ -1025,7 +1025,7 @@ EX int lang() {
   return default_language;
   }
 
-EX bool autojoy = true;
+EX bool autojoy = false;
 
 EX void paramset(charstyle& cs, string s) {
   param_i(cs.charid, s + ".charid");
