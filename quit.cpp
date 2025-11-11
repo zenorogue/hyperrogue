@@ -619,7 +619,7 @@ EX void handleKeyQuit(int sym, int uni) {
     sym = 0;
 #endif
 
-  if(sym == SDLK_RETURN || sym == SDLK_KP_ENTER || sym == SDLK_F10) {
+  if(sym == SDLK_F10) {
     if(needConfirmation()) pushScreen([] { 
       dialog::confirm_dialog(
         XLAT("This will exit HyperRogue without saving your current game. Are you sure?") + "\n\n" +
