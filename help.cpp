@@ -1030,7 +1030,7 @@ EX void describeMouseover() {
       }
     #endif
       
-    if(c->wall && !(c->wall == waChasm && c->land == laDual && ctof(c)) &&
+    if(c->wall && !(c->land == laDual && pseudohept(c)) &&
       !(c->land == laMemory) &&
       !((c->wall == waFloorA || c->wall == waFloorB) && c->item)) { 
 

@@ -143,6 +143,8 @@ EX bool anti_alchemy(cell *w, cell *from) {
 EX bool passable(cell *w, cell *from, flagtype flags) {
   bool vrevdir = bool(flags&P_VOID);
 
+  if(w->land == laDual && pseudohept(w) && !F(P_BULLET)) return false;
+
   if(from && from != w && nonAdjacent(from, w) && !F(P_IGNORE37 | P_BULLET)) return false;
   
   if((isWateryOrBoat(w) || w->wall == waShallow) && F(P_WATERCURSE))
@@ -169,7 +171,6 @@ EX bool passable(cell *w, cell *from, flagtype flags) {
     if(airdist(w) < 3) return false;
     if(againstWind(w,from)) return false;
     if(isGravityLand(w)) return false;
-    if(w->wall == waChasm && w->land == laDual) return false;
     }
 
   if(from && strictlyAgainstGravity(w, from, vrevdir, flags)
