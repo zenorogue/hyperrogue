@@ -5590,13 +5590,11 @@ Other changes:
 - in shmup, tortoise no longer die after 3 hits
 - fixed shHalfDisk and shDiskSegment shapes in spherical geometry
 - fix the "lastexplore" value getting set to the turn/knives thrown count instead of "shmup::curtime" when enabling the map editor in shmup, and when playing the fifteen+4 puzzle in shmup (thanks to ohlordhebacc)
-
+- make the "switch ghost timer" cheat display shmup::curtime instead of the turn/knives thrown count in shmup (thanks to ohlordhebacc)
 
 Thanks to josephcsible:
 - add a setting to preserve wparam and landparam when changing walls and lands with the map editor
 - fix edge cases in Hell/CR3 unlock
-- in shmup, tortoise no longer die after 3 hits
 - circle the item the Orb of Space is about to collect
-- make the "switch ghost timer" cheat display shmup::curtime instead of the turn/knives thrown count in shmup
 - fix freeze if Ancient Jewelry ends up on a tile with a large landparam
 - fix a crash
