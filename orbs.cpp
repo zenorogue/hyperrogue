@@ -865,9 +865,11 @@ void telekinesis(cell *dest) {
   eItem it = cwt.at->item;
   bool saf = it == itOrbSafety;
   collectItem(cwt.at, cwt.at, true);
-  if(cwt.at->item == it)
+  if(saf)
+    ;
+  else if(cwt.at->item == it)
     animateMovement(match(dest, cwt.at), LAYER_BOAT);
-  else if(!saf)
+  else
     animate_item_throw(dest, cwt.at, it);
 
   useupOrb(itOrbSpace, cost.first);
