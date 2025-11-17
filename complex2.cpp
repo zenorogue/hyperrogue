@@ -224,7 +224,7 @@ EX namespace westwall {
   void build(vector<cell*>& whirlline, int d) {
     again: 
     cell *at = whirlline[isize(whirlline)-1];
-    cell *prev = whirlline[isize(whirlline)-2];
+    cell *prev = isize(whirlline) >= 2 ? whirlline[isize(whirlline)-2] : NULL;
     if(looped(whirlline)) return;
     for(int i=0; i<at->type; i++) 
       if(at->move(i) && coastvalEdge1(at->move(i)) == d && at->move(i) != prev) {
