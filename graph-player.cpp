@@ -111,7 +111,11 @@ EX void drawWinter(const shiftmatrix& V, ld hdir, color_t col) {
   float ds = ptick(300);
   col = darkena(col, 0, 0xFF);
   for(int u=0; u<20; u++) {
-    ld rad = sin(ds+u * TAU / 20) * M_PI / S7;
+    ld rad;
+    if(vid.flasheffects)
+      rad = sin(ds+u * TAU / 20) * M_PI / S7;
+    else
+      rad = sin((ds+u) * TAU / 20) * M_PI / S7;
     shiftmatrix V1 = chei(V, u, 20);
     queueline(V1*xspinpush0(M_PI+hdir+rad, cgi.hexf*.5), V1*xspinpush0(M_PI+hdir+rad, cgi.hexf*3), col, 2 + vid.linequality);
     }
