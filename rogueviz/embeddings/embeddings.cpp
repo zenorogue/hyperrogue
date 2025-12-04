@@ -60,7 +60,6 @@ void read_edgelist(const string& fname) {
   }
 
 void write_edgelist(const string &fname) {
-  DEBBI(debug_init_sag, ("Writing edgelist to: ", fname));
   FILE *f = fopen(fname.c_str(), "wt");
   if(!f) return file_error(fname);
   for(auto& e: edgeinfos) {
