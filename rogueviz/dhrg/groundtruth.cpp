@@ -9,6 +9,8 @@ bool is(char *where, const char *what) {
   }
 
 void ground_truth_test(string s) {
+  throw hr_exception("this test is currently not implemented to work after the structural changes");
+#if 0
 
   logistic cont;
 
@@ -38,8 +40,6 @@ if(1) {
   origcoords();
   build_disttable();
 
-  cont.setRT(graph_R, graph_T);
-
   report("gz", loglik_cont(cont));
   fix_logistic_parameters(cont, loglik_cont, "lcont", 1e-3);
   report("grc", loglik_cont(cont));
@@ -51,7 +51,6 @@ if(1) {
   report("gcm", loglikopt_mono());
   report("gcrt", loglik_logistic());
 
-  cont.setRT(graph_R, graph_T);
   report("gcz", loglik_cont(cont));
   fix_logistic_parameters(cont, loglik_cont, "lcont", 1e-3);
   report("gcrc", loglik_cont(cont));
@@ -65,7 +64,6 @@ if(1) {
   cellcoords();
   build_disttable();
 
-  cont.setRT(graph_R, graph_T);
   fix_logistic_parameters(cont, loglik_cont, "lcont", 1e-3);  
   report("gerc", loglik_cont(cont));
 
@@ -81,7 +79,6 @@ if(1) {
   dhrg_init(); read_graph_full("data/sime-" + s);
   origcoords();
   build_disttable();
-  cont.setRT(graph_R, graph_T);
   report("ez", loglik_cont(cont));
   fix_logistic_parameters(cont, loglik_cont, "lcont", 1e-3);
   report("erc", loglik_cont(cont));
@@ -93,7 +90,6 @@ if(1) {
   cellcoords();
   build_disttable();
 
-  cont.setRT(graph_R, graph_T);
   report("ecz", loglik_cont(cont));
   fix_logistic_parameters(cont, loglik_cont, "lcont", 1e-3);
   report("ecrc", loglik_cont(cont));
@@ -110,12 +106,12 @@ if(1) {
   cellcoords();
   build_disttable();
 
-  cont.setRT(graph_R, graph_T);
   fix_logistic_parameters(cont, loglik_cont, "lcont", 1e-3);  
   report("eerc", loglik_cont(cont));
 
   print(hlog, "HDR;", separated(";", reps), ";TIME;N;GROWTH\n");
   print(hlog, "RES'", separated(";", logliks), ";", int(tim), ";", N, ";", cgi.expansion->get_growth());
+#endif
   }
 
 }

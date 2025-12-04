@@ -54,7 +54,7 @@ void show_likelihood() {
   dialog::add_action([] () { 
     embedder_loop(1); 
     ts_vertices = ts_rbase;
-    place_rogueviz_vertices();
+    rogueviz::embeddings::reenable_embedding();
     });
   
   dialog::addBack();
@@ -83,6 +83,7 @@ void show_likelihood() {
 
     handlePanning(sym, uni);
     if(uni == '-' && held_id == -1) {
+      int N = isize(rogueviz::vdata);
       for(int i=0; i<N; i++) if(rogueviz::vdata[i].m->base == mouseover)
         held_id = i;
       return;
@@ -100,7 +101,7 @@ bool dhrg_animate(int sym, int uni) {
     if(ts_rbase > ts_vertices) {
       dhrg_init(); graph_from_rv(); 
       ts_vertices = ts_rbase;
-      place_rogueviz_vertices();
+      rogueviz::embeddings::reenable_embedding();
       }    
     pushScreen(show_likelihood);
 

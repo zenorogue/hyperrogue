@@ -8,7 +8,7 @@ namespace sag {
 
 int recover_from;
 
-vector<pair<dhrg::logistic, ld>> results;
+vector<pair<embeddings::logistic, ld>> results;
 
 ld bestcost;
 
@@ -228,9 +228,9 @@ void output_stats() {
   println(hlog, "solution: ", sagid);
   int DN = isize(sagid);
   auto [mAP, MeanRank] = compute_mAP();
-  dhrg::iddata routing_result;
-  if(!known_pairs) { known_pairs = true; dhrg::prepare_pairs(DN, [] (int i) { return edges_yes[i]; }); }
-  dhrg::greedy_routing(routing_result, [] (int i, int j) { return sagdist[sagid[i]][sagid[j]]; });
+  embeddings::iddata routing_result;
+  if(!known_pairs) { known_pairs = true; embeddings::prepare_pairs(); }
+  embeddings::greedy_routing(routing_result);
   print(hlog, "CSV;", logid++, ";", isize(sagnode), ";", DN, ";", isize(edgeinfos), ";", lgsag_pre.R, ";", lgsag_pre.T, ";", lgsag.R, ";", lgsag.T, ";", cost, ";", mAP, ";", MeanRank, ";", routing_result.suc / routing_result.tot, ";", routing_result.routedist / routing_result.bestdist);
   if(lastmethod) print(hlog, ";", lastmethod);
   if(mul_used) print(hlog, ";", mul_used);

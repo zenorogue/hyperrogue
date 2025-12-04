@@ -1,28 +1,29 @@
 #include "../rogueviz.h"
+#include "embeddings.h"
 
 namespace rogueviz {
 
-unique_ptr<embedding> current_embedding;
-
 namespace embeddings {
+
+std::shared_ptr<embedding> current;
 
 vector<vector<int> > directed_edges;
 
 rogueviz::edgetype *any;
 
-struct rv_embedding : public embedding {
-  hyperpoint as_hyperpoint(int id) override {
-    return currentmap->relative_matrix(vdata[id].m->base, currentmap->gamestart(), C0) * (vdata[id].m->at * C0);
+struct rv_embedding : public tiled_embedding {
+  pair<cell*, hyperpoint> as_location(int id) override {
+    return { vdata[id].m->base, vdata[id].m->at * C0 };
     }
   };
 
-void read_edgelist(string fname) {
+void read_edgelist(const string& fname) {
 
   rogueviz::init(RV_GRAPH);
 
   rv_hook(hooks_clearmemory, 100, [] {
     directed_edges.clear();
-    current_embedding = nullptr;
+    current = nullptr;
     });
 
   any = rogueviz::add_edgetype("embedded edges");
@@ -54,12 +55,34 @@ void read_edgelist(string fname) {
   if(rogueviz::rv_quality >= 0) {
     for(auto& v: vdata) 
       v.be(all[gmod(id++, isize(all))], Id);
-    current_embedding = std::make_unique<rv_embedding> ();
+    current = std::make_shared<rv_embedding> ();
     }
   }
 
-int a = arg::add3("-edgelist", [] { arg::shift(); read_edgelist(arg::args()); });
+void reenable_embedding() {
+  if(rogueviz::rv_quality >= 0)
+    for(auto& v: vdata) {
+      auto p = current->as_location(v.id);
+      v.be(p.first, rgpushxto0(p.second));
+      }
+  }
+
+void enable_embedding(std::shared_ptr<embedding> pe) {
+  current = std::move(pe);
+  reenable_embedding();
+  }
+
+void store_gamedata(struct hr::gamedata* gd) { gd->store(current); }
+
+int a = arg::add3("-edgelist", [] { arg::shift(); read_edgelist(arg::args()); })
+  + addHook(hooks_gamedata, 230, store_gamedata);
+
 
 }
 
 }
+
+#include "polar.cpp"
+#include "loglik.cpp"
+#include "routing.cpp"
+

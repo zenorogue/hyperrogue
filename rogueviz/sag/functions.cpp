@@ -3,7 +3,7 @@
 
 #include "../rogueviz.h"
 
-#include "../dhrg/dhrg.h"
+#include "../embeddings/embeddings.h"
 #include "../statistics.cpp"
 
 namespace rogueviz {
@@ -20,11 +20,13 @@ int method_count = 3;
 ld match_a = 1, match_b = 0;
 
 /* parameters for smLogistic */
-dhrg::logistic lgsag(1, 1), lgsag_pre(1, 1);
+embeddings::logistic lgsag(1, 1), lgsag_pre(1, 1);
+
+ld yes_for(ld d) { return lgsag.yes(d); }
 
 vector<ld> loglik_tab_y, loglik_tab_n;
 
-dhrg::logistic best;
+embeddings::logistic best;
 
 debugflag debug_opt("sag_opt");
 
@@ -152,7 +154,7 @@ void optimize_sag_loglik_logistic() {
   
   if(debug_opt) println(hlog, "loglikelihood best = ", fts(loglik));
   
-  auto logisticf = [&] (dhrg::logistic&  l) {
+  auto logisticf = [&] (embeddings::logistic&  l) {
     ld loglik = 0;
     for(int d=0; d<max_sag_dist; d++) {
       int p = pedge[d], pq = indist[d];
@@ -165,7 +167,7 @@ void optimize_sag_loglik_logistic() {
   if(debug_opt) println(hlog, "cost = ", cost, " logisticf = ", logisticf(lgsag), " R= ", lgsag.R, " T= ", lgsag.T);
   if(should_good && abs(cost + logisticf(lgsag)) > 0.1) throw hr_exception("computation error");
   
-  dhrg::fast_loglik_cont(lgsag, logisticf, nullptr, 1, 1e-5);
+  embeddings::fast_loglik_cont(lgsag, logisticf, nullptr, 1, 1e-5);
   if(debug_opt) println(hlog, "loglikelihood logistic = ", logisticf(lgsag), " R= ", lgsag.R, " T= ", lgsag.T);
   
   if(method == smLogistic) {

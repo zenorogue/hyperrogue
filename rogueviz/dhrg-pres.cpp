@@ -1,27 +1,16 @@
 // -noscr -slides DHRG rv_latex=1 -slide-textoff -title c000
 
 #include "rogueviz.h"
+#include "embeddings/embeddings.h"
+#include "dhrg/dhrg.h"
 
 #if CAP_RVSLIDES
-namespace dhrg {
-  void graphv(std::string s);
-  extern double graph_R;
-  extern int N;
-  extern int iterations;
-  void unsnap();
-  bool dhrg_animate(int sym, int uni);
-  void rvcoords();
-  void clear();
-  
-  void prepare_pairs();
-  std::vector<int> path(int src);
-  int get_actual(int src);
-  void prepare_goal(int goal);
-  }
-
 namespace hr {
 
 using namespace rogueviz::pres;
+using namespace rogueviz::embeddings;
+
+shared_ptr<embedding> dhrg_embedding;
 
 int find_vertex(string name) { 
   int id = 0;
@@ -50,12 +39,12 @@ int me, them;
 void greedy_test() {
   me = find_vertex("Eryk_Kopczynski");
   auto me2 = find_vertex("Erich_Grädel");
-  dhrg::prepare_pairs();  
-  dhrg::rvcoords();
+  prepare_pairs();  
+  reenable_embedding();
   them = find_vertex(dhrg::iterations ? "Florian_Willich" : "Stéphane_Chrétien");
-  for(int goal=0; goal<dhrg::N; goal++) {
-    dhrg::prepare_goal(goal);
-    auto p = dhrg::path(me2);
+  for(int goal=0; goal<isize(rogueviz::vdata); goal++) {
+    prepare_goal(goal);
+    auto p = path(me2);
     if(p.back() == goal) {
       println(hlog, "actual = ", dhrg::get_actual(me), " p = ", p, " ~ ", rogueviz::vdata[p.back()].name);
       }
@@ -69,7 +58,10 @@ void greedy_test() {
 void launch_sea() {
   enable_canvas_backup(&ccolor::plain);
   start_game();
-  dhrg::graphv("rogueviz/dhrg-data/sea-ppl");      
+  read_edgelist("rogueviz/dhrg-data/sea-ppl-links.txt");
+  read_polar("rogueviz/dhrg-data/sea-ppl-coordinates.txt");
+  dhrg_embedding = current;
+  dhrg::graph_from_rv();
   resetview();
   }
 
@@ -192,7 +184,7 @@ void graph_visuals(presmode mode) {
 void swap_snap() {
   snapped = !snapped;
   if(snapped) { for(auto& v: rogueviz::vdata) v.be(v.m->base, Id); }
-  if(!snapped) dhrg::unsnap();
+  if(!snapped) enable_embedding(dhrg_embedding);
   }
 
 void dhrg_hooks() {

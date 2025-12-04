@@ -2,6 +2,7 @@
 #define _DHRG_H_
 #define DHRGVER "7.1"
 #include "../rogueviz.h"
+#include "../embeddings/embeddings.h"
 
 #define LONG_BRACKETS
 
@@ -28,53 +29,13 @@ extern vector<ld> disttable0, disttable1;
 
 void memoryInfo();
 
-void cellcoords();
-void origcoords();
-void build_disttable();
-
 void dhrg_init();
 bool dhrg_animate(int sym, int uni);
 
-/* implemented in loglik.cpp: */
+extern int iterations;
 
-/* for logistic regression */
-struct logistic {
-  ld R, T;
-  ld yes1(ld d) { return 1/(1 + exp(d)); }
-  ld no1(ld d) { return 1/(1 + exp(-d)); }
-  ld nor(ld d) { return (d-R) / 2 / T; }
-  ld yes(ld d) { return yes1(nor(d)); }
-  ld no(ld d) { return no1(nor(d)); }
-  ld lyes(ld d) { d = nor(d); return d > 200 ? -d : log(yes1(d)); }
-  ld lno(ld d) { d = nor(d); return d < -200 ? d : log(no1(d)); }
-  logistic() {}
-  logistic(ld _R, ld _T) : R(_R), T(_T) {}  
-  void setRT(ld _R, ld _T) { R = _R; T = _T; }
-  };
+void clear();
 
-extern ld llcont_approx_prec;
-extern vector<array<ll, 2>> disttable_approx;
-
-using logisticfun = std::function<ld(logistic&)>;
-
-extern logistic current_logistic;
-
-ld loglik_cont_approx(logistic& l = current_logistic);
-
-void fast_loglik_cont(logistic& l, const logisticfun& f, const char *name, ld start, ld eps);
-
-/* greedy routing */
-
-struct iddata {
-  ld tot, suc, routedist, bestdist;
-  iddata() { tot = suc = routedist = bestdist = 0; }
-  };
-
-using neighborhoodfun = std::function<vector<int> (int)>;
-using distfun = std::function<ld(int a, int b)>;
-
-void prepare_pairs(int N, const neighborhoodfun& nei);
-void greedy_routing(iddata& d, const distfun& distance_function);
-
+void graph_from_rv();
 }
 #endif

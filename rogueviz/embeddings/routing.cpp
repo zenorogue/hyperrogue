@@ -1,7 +1,9 @@
 
 //	$(VARIANT) -nogui -dhrg embedded-graphs/facebook_combined_result -contll -iterate 99 -contll -esave > $@
 
-namespace dhrg {
+namespace rogueviz {
+
+namespace embeddings {
 
 struct pairdata { ld success, route_length; };
 
@@ -14,12 +16,8 @@ vector<pairdata> pairs;
 vector<int> last_goal;
 vector<int> next_stop;
 
-int gr_N;
-
-using neighborhoodfun = std::function<vector<int> (int)>;
-
-void prepare_pairs(int N, const neighborhoodfun& nei) {
-  gr_N = N;
+void prepare_pairs() {
+  int N = isize(rogueviz::vdata);
   pairs.resize(N);
   actual.resize(N);
   for(int i=0; i<N; i++) actual[i].resize(N, NOYET);
@@ -35,25 +33,14 @@ void prepare_pairs(int N, const neighborhoodfun& nei) {
     visit(i, 0);
     for(int k=0; k<isize(bfsqueue); k++) {
       int a = bfsqueue[k];
-      for(auto b: nei(a))
-        visit(b, p[a] + 1);
+      for(auto ed: rogueviz::vdata[a].edges)
+        visit(ed.first, p[a] + 1);
       }
     }
   last_goal.clear();
   last_goal.resize(N, -1);
   next_stop.clear();
   next_stop.resize(N, -1);
-  }
-
-void prepare_pairs() {
-  prepare_pairs(N, [] (int a) {
-    vector<int> res;
-    for(auto ed: rogueviz::vdata[a].edges) {
-      int b = ed.second->i ^ ed.second->j ^ a;
-      res.push_back(b);
-      }
-    return res;
-    });
   }
 
 void route_from(int src, int goal, const vector<ld>& distances_from_goal) {
@@ -70,8 +57,8 @@ void route_from(int src, int goal, const vector<ld>& distances_from_goal) {
     indent += 2; */
 
     vector<int> candidates;
-    for(auto ed: rogueviz::vdata[src].edges) {
-      int e = ed.second->i ^ ed.second->j ^ src;
+    for(auto& ed: rogueviz::vdata[src].edges) {
+      int e = ed.first;
       ld d = e == goal ? -1 : distances_from_goal[e];
       if(d < bestd) bestd = d, candidates.clear();
       if(d == bestd) candidates.push_back(e);
@@ -92,14 +79,15 @@ void route_from(int src, int goal, const vector<ld>& distances_from_goal) {
   last_goal[src] = goal;
   }
 
-void greedy_routing_to(iddata& d, int goal, const distfun& distance_function) {
-  vector<ld> distances_from_goal(gr_N);
-  for(int src=0; src<gr_N; src++)
-    distances_from_goal[src] = distance_function(goal, src);
-  for(int src=0; src<gr_N; src++)
+void greedy_routing_to(iddata& d, int goal) {
+  int N = isize(rogueviz::vdata);
+  vector<ld> distances_from_goal(N);
+  for(int src=0; src<N; src++)
+    distances_from_goal[src] = current->distance(goal, src);
+  for(int src=0; src<N; src++)
     route_from(src, goal, distances_from_goal);
 
-  for(int j=0; j<gr_N; j++) if(j != goal){
+  for(int j=0; j<N; j++) if(j != goal){
     d.tot++;
     ld p = pairs[j].success;
     d.suc += p;
@@ -108,10 +96,12 @@ void greedy_routing_to(iddata& d, int goal, const distfun& distance_function) {
     }
   }
 
-void greedy_routing(iddata& d, const distfun& distance_function) {
-  for(int goal=0; goal<gr_N; goal++) greedy_routing_to(d, goal, distance_function);
+void greedy_routing(iddata& d) {
+  int N = isize(rogueviz::vdata);
+  for(int goal=0; goal<N; goal++) greedy_routing_to(d, goal);
   }
 
+#if 0
 void routing_test(string s) {
 
   iddata datas[6];
@@ -163,11 +153,12 @@ void routing_test(string s) {
   println(hlog, "HDR;", separated(";", reps), ";N;GROWTH\n");
   println(hlog, "RES;", separated(";", values), ";", N, ";", cgi.expansion->get_growth());
   }
+#endif
 
 int current_goal;
 iddata prepared;
 void prepare_goal(int goal) {
-  greedy_routing_to(prepared, current_goal = goal, [] (int i, int j) { return hdist(vertexcoords[i], vertexcoords[j]); });
+  greedy_routing_to(prepared, current_goal = goal);
   }
 
 vector<int> path(int src) {
@@ -183,4 +174,18 @@ int get_actual(int src) {
   return actual[src][current_goal];
   }
 
+int routing_args() {
+  using namespace arg;
+
+  if(argis("-routing")) {
+    // shift(); routing_test(args());
+    }
+  else return 1;
+
+  return 0;
+  }
+
+auto arou = addHook(hooks_args, 50, routing_args);
+
+}
 }

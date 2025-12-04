@@ -16,13 +16,11 @@ namespace rogueviz { extern string fname; }
 #include "tests.cpp"
 #include "betweenness.cpp"
 #include "groundtruth.cpp"
-#include "routing.cpp"
 
 namespace dhrg {
 
 int M;
 vector<struct mycell*> vertices;
-vector<ld> disttable0, disttable1;
 
 void memoryInfo() {
   string s = "";
@@ -48,17 +46,9 @@ void debugtally() {
   println(hlog, " .. %", loglikopt()); 
   }
 
-void place_rogueviz_vertices() {
-  progressbar pb(N, "place_rogueviz_vertices");
-  // transmatrix In = inverse(ggmatrix(currentmap->gamestart()));
-  using namespace rogueviz;
-  for(int i=0; i<N; i++) vdata[i].be(vertices[i]->ascell(), Id);
-  }
-
 int destroy;
 
 void clear() {
-  coords.clear();  
   // destroytallies();
   //  todo: correct cleanup!
   for(int i=0; i<MAXDIST; i++) tally[i] = 0;
@@ -90,35 +80,16 @@ int ts_coords;
 int ts_vertices;
 bool stored;
 
-void graphv(string s) {
-  dhrg_init(); read_graph(s);
-  next_timestamp++;
-  ts_rogueviz = next_timestamp;
-  ts_rbase = next_timestamp;
-  stored = true;
-  }
-
 int dhrgArgs() {
   using namespace arg;
            
   if(argis("-dhrg")) {
-    PHASE(3); shift(); dhrg_init(); read_graph_full(args());
+    PHASE(3); dhrg_init(); graph_from_rv();
     next_timestamp++;
     ts_rogueviz = next_timestamp;
     ts_vertices = next_timestamp;
     }
     
-  else if(argis("-graph")) {
-    PHASE(3); shift(); dhrg_init(); read_graph(args());
-    next_timestamp++;
-    ts_rogueviz = next_timestamp;
-    // stored = true;
-    }
-
-  else if(argis("-graphv")) {
-    PHASE(3); shift(); graphv(args());
-    }
-  
   else if(argis("-analyze_grid")) {
     PHASE(3); shift(); dhrg_init(); do_analyze_grid(argi());
     }
@@ -129,36 +100,6 @@ int dhrgArgs() {
 
   else if(argis("-test_paths")) {
     PHASE(3); dhrg_init(); shift(); test_paths(argi());
-    }
-
-  else if(argis("-contll")) {
-    if(ts_rogueviz >= ts_rbase && ts_rogueviz >= ts_vertices && ts_rogueviz > ts_coords) {
-      origcoords();
-      build_disttable_approx();
-      ts_coords = ts_rogueviz;
-      }
-    else if(ts_rbase >= ts_vertices && ts_rbase > ts_coords) {
-      ts_coords = ts_rbase;
-      rvcoords();
-      build_disttable_approx();
-      }
-    else if(ts_vertices > ts_coords) {
-      ts_coords = ts_vertices;
-      cellcoords();
-      build_disttable_approx();
-      }
-    logistic cont;
-    cont.setRT(graph_R, graph_T);
-    fast_loglik_cont(cont, loglik_cont_approx, "lcont", 1, 1e-6);
-    // return loglik_cont();
-    }
-
-  else if(argis("-dhrgview")) {
-    if(ts_vertices > ts_rbase) {
-      place_rogueviz_vertices();
-      ts_rbase = ts_vertices;
-      }
-    mainloop(); quitmainloop = false;
     }
 
   else if(argis("-iterate")) {
@@ -209,10 +150,6 @@ int dhrgArgs() {
     shift(); ground_truth_test(args());
     }
 
-  else if(argis("-routing")) {
-    shift(); routing_test(args());
-    }
-
   else if(argis("-esaveas")) {
     shift(); save_embedding(args());
     }
@@ -237,7 +174,6 @@ void store_gamedata(struct hr::gamedata* gd) {
   if(true) {
     for(auto& t: tally) gd->store(t);
     for(auto& t: edgetally) gd->store(t);
-    gd->store(coords);
 #ifdef BUILD_ON_HR
     gd->store(mymap);
 #else

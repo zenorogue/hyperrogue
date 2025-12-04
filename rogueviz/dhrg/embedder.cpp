@@ -22,6 +22,7 @@ int lastmoves;
 
 int movearound() {
   indenter_finish im("movearound");
+  int N = isize(rogueviz::vdata);
   int total = 0;
   if(smartmove) for(bool b: tomove) if(b) total++;
   if(total == 0) {
@@ -90,6 +91,8 @@ int move_restart() {
   for(int a=0; a<2; a++) for(int b=0; b<128; b++) distances_map[a][b] = 0;
   int moves = 0;
 //  int im = 0;
+
+  int N = isize(rogueviz::vdata);
   
   {progressbar pb(N, "move_restart");
   for(int i=0; i<N; i++) {
@@ -165,6 +168,7 @@ void preparegraph() {
   indenter_finish im("preparegraph");
   using namespace rogueviz;
   M = 0;
+  int N = isize(rogueviz::vdata);
   vertices.resize(N);
 
   if(1) {
@@ -178,8 +182,6 @@ void preparegraph() {
 
   memoryInfo();
   
-  cont_logistic.setRT(graph_R, graph_T);
-
   counttallies();
   
   memoryInfo();
@@ -189,7 +191,7 @@ void preparegraph() {
   if(1) {
     indenter_finish im("optimizing parameters"); 
     ld factor = 1/log(cgi.expansion->get_growth());
-    current_logistic.setRT(factor * graph_R, factor * graph_T);
+    current_logistic.setRT(factor * rogueviz::embeddings::cont_logistic.R, factor * rogueviz::embeddings::cont_logistic.T);
     saved_logistic = current_logistic; 
 
     // for(int u=0; u<MAXDIST; u++) iprintf("%d/%lld\n", edgetally[u], tally[u]);
@@ -209,17 +211,28 @@ void preparegraph() {
   println(hlog, "Using distlimit = ", distlimit);
   }
 
-void read_graph_full(const string& fname) {
+struct dhrg_embedding : public rogueviz::embeddings::tiled_embedding {
+
+  pair<cell*, hyperpoint> as_location(int id) override {
+    return { vertices[id]->ascell(), C0 };
+    }
+
+  ld distance(int i, int j) override {
+    return quickdist(vertices[i], vertices[j]);
+    }
+
+  ld zero_distance(int i) override {
+    return vertices[i]->lev;
+    }
+  };
+
+void graph_from_rv() {
   using namespace rogueviz;
   
   memoryInfo();
 
   if(true) {
-    indenter_finish im("Read graph");
-  
-    // N = isize(vdata);
-  
-    read_graph(fname);
+    int N = isize(rogueviz::vdata);
     vertices.resize(N);
     progressbar pb(N, "Translating to cells");
 
@@ -239,29 +252,9 @@ void read_graph_full(const string& fname) {
     }
 
   recycle_compute_map();
-  preparegraph();  
-  }
-
-void graph_from_rv() {
-  using namespace rogueviz;
-  
-  memoryInfo();
-  
-  vertices.resize(N);
-  progressbar pb(N, "converting RogueViz to DHRG");
-
-  for(int i=0; i<N; i++) {
-#if BUILD_ON_HR    
-    vertices[i] = find_mycell(vdata[i].m->base);
-#else
-    auto path1 = computePath(vdata[i].m->base);
-    vertices[i] = find_mycell_by_path(path1);
-#endif
-    vdata[i].m->at = Id;
-    pb++;
-    }    
-
   preparegraph();
+
+  rogueviz::embeddings::enable_embedding(std::make_shared<dhrg_embedding>());
   }
 
 bool iteration() {
@@ -293,6 +286,7 @@ void embedder_loop(int max) {
 
 void save_embedding(const string s) {
   FILE *f = fopen(s.c_str(), "wt");
+  int N = isize(rogueviz::vdata);
   for(int i=0; i<N; i++) {
     string p = get_path(vertices[i]);
     if(p == "") p = "X";
@@ -301,22 +295,17 @@ void save_embedding(const string s) {
   fclose(f);
   }
 
-void load_embedded(const string s) {
-  if(true) {
-    read_graph(s);
-    indenter_finish im("Read graph");
-    }
-
-  string t = rogueviz::fname + "-dhrg.txt";
+void load_embedded(const string& s) {
       
   if(true) {
+    int N = isize(rogueviz::vdata);
     progressbar pb(N, "reading embedding");
     vertices.resize(N, NULL);
     
     map<string, int> ids;
     for(int i=0; i<N; i++) ids[rogueviz::vdata[i].name] = i;
 
-    FILE *f = fopen(t.c_str(), "rt");
+    FILE *f = fopen(s.c_str(), "rt");
     while(true) {
       char who[500], where[500];
       who[0] = 0;
@@ -336,6 +325,7 @@ void load_embedded(const string s) {
       }
     }
   preparegraph();
+  rogueviz::embeddings::enable_embedding(std::make_shared<dhrg_embedding>());
   }
 
 }
