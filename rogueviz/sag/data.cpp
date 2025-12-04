@@ -346,6 +346,51 @@ void generate_fake_data(int n, int m) {
     }
   }
 
+/** Generate an unweighted graph, with edges determined by logistic. Prepare with -sagrt <R> <T> first */
+void generate_unweighted(int DN) {
+
+  if(state & SS_DATA) return;
+  init_cells();
+
+  int N = isize(sagcells);
+
+  sagid.resize(DN);
+  for(int i=0; i<DN; i++) sagid[i] = hrand(N);
+
+  // todo : what if not allow_doubles?
+
+  resize_vertices(DN);
+  for(int i=0; i<DN; i++)
+    vdata[i].name = its(i) + "@" + its(sagid[i]);
+
+  vector<int> colors;
+
+  if(colorpartite) {
+    colors.resize(DN);
+    for(int i=0; i<DN; i++) colors[i] = hrand(2);
+    }
+
+  for(int i=0; i<DN; i++)
+  for(int j=i+1; j<DN; j++) {
+    if(colorpartite && colors[i] == colors[j]) continue;
+    ld d = sagdist[sagid[i]][sagid[j]];
+    ld prob = yes_for(d);
+    if(chance(prob)) addedge(i, j, 1, ensure_sag_edge());
+    }
+
+  create_viz();
+  for(int i=0; i<DN; i++) {
+    color_t col =
+      colorpartite
+      ? rainbow_color(.5, colors[i] * 1./2)
+      : ccolor::formula(sagcells[sagid[i]].first);
+    col <<= 8;
+    col |= 0xFF;
+    vdata[i].cp.color1 = vdata[i].cp.color2 = col;
+    }
+  prepare_graph();
+  }
+
 int data_read_args() {
 #if CAP_COMMANDLINE
   using namespace arg;
@@ -371,6 +416,10 @@ int data_read_args() {
   else if(argis("-sag-unweighted")) {
     PHASE(3); 
     shift(); sag::read_unweighted(argcs());
+    }
+  else if(argis("-sag-generate-unweighted")) {
+    PHASE(3);
+    shift(); sag::generate_unweighted(argi());
     }
   else if(argis("-saghubs")) {
     PHASE(3); 
