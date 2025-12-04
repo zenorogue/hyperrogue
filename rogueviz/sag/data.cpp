@@ -2,6 +2,7 @@
 // Copyright (C) 2011-24 Zeno Rogue, see 'hyper.cpp' for details
 
 #include "../rogueviz.h"
+#include "../embeddings/embeddings.h"
 
 namespace rogueviz {
 namespace sag {
@@ -46,6 +47,36 @@ edgetype *ensure_sag_edge() {
   return sag_edge;
   }
 
+vector<int> qon, qsf;
+
+struct sag_embedding : public rogueviz::embeddings::tiled_embedding {
+
+  pair<cell*, hyperpoint> as_location(int id) override {
+
+    ld rad = .25 * cgi.scalefactor;
+    if(isize(subcell_points) > 1) rad /= pow(isize(subcell_points), WDIM);
+
+    int ci = sag::sagid[id];
+    hyperpoint h = C0;
+
+    if(allow_doubles && qon.size() && qon[ci] > 1) h =
+      spin(TAU*qsf[ci] / qon[ci]) * xpush0(rad * (qon[ci]-1) / qon[ci]);
+
+    if(isize(subcell_points) > 1)
+      h = rgpushxto0(subcell_points[sagcells[ci].second]) * h;
+
+    return { sagcells[ci].first, h };
+    }
+
+  ld distance(int i, int j) override {
+    return sagdist[sagid[i]][sagid[j]];
+    }
+
+  ld zero_distance(int i) override {
+    return sagdist[sagid[i]][0];
+    }
+  };
+
 void prepare_graph() {
   int DN = isize(sagid);
   DEBBI(debug_init_sag, ("prepare_graph with DN = ", DN));
@@ -88,25 +119,13 @@ void set_inverse();
 
 void place_correctly() {
   int DN = isize(sagid);
-  vector<int> qon(isize(sagcells), 0);
-  for(int i=0; i<DN; i++) qon[sagid[i]]++;
-  vector<int> qsf(isize(sagcells), 0);
-
-  ld rad = .25 * cgi.scalefactor;
-  if(isize(subcell_points) > 1) rad /= pow(isize(subcell_points), WDIM);
-
+  qon.clear(); qon.resize(isize(sagcells), 0);
+  qsf.clear(); qsf.resize(isize(sagcells), 0);
   for(int i=0; i<DN; i++) {
-    int ci = sag::sagid[i];
-    transmatrix T = Id;
-
-    if(allow_doubles) T = 
-      spin(TAU*(qsf[ci]++) / qon[ci]) * xpush(rad * (qon[ci]-1) / qon[ci]);
-
-    if(isize(subcell_points) > 1)
-      T = rgpushxto0(subcell_points[sagcells[ci].second]) * T;
-
-    vdata[i].be(sagcells[ci].first, T);
+    qsf[i] = qon[sagid[i]];
+    qon[sagid[i]]++;
     }
+  enable_embedding(make_shared<sag_embedding>());
   }
 
 bool visualization_active;
@@ -218,6 +237,7 @@ void read_weighted(const char *fname) {
   if(state & SS_DATA) return;
   DEBBI(debug_init_sag, ("Loading the weighted daga for sag from: ", fname));
   state |= SS_WEIGHTED;
+  rogueviz::init(RV_GRAPH | RV_WHICHWEIGHT | RV_AUTO_MAXWEIGHT | RV_HAVE_WEIGHT);
   init_cells();
 
   maxweight = 0;
@@ -249,41 +269,6 @@ void read_weighted(const char *fname) {
   after_data();
   }
 
-/** load edges, in  */
-void read_unweighted(const char *fname) {
-
-  if(state & SS_DATA) return;
-  DEBBI(debug_init_sag, ("Loading the unweighted daga for sag from: ", fname));
-  init_cells();  
-
-  fhstream f(fname, "rt");
-  if(!f.f) return file_error(fname);
-
-  scanline(f);
-  set<pair<int, int> > edges;
-  
-  int all = 0, good = 0;
-  while(!feof(f.f)) {        
-    string l1 = scan<string>(f);
-    string l2 = scan<string>(f);
-    if(l1 == "") continue;
-    if(l2 == "") continue;
-
-    int i = getid(l1), j = getid(l2);
-    if(i > j) swap(i, j);
-
-    all++;
-    if(edges.count({i, j})) continue;
-    good++;
-    edges.emplace(i, j);
-
-    addedge(i, j, 1, ensure_sag_edge());
-    }
-
-  println(hlog, "N = ", isize(vdata), " edges = ", good, "/", all);
-  after_data();
-  }
-  
 void read_hubs(const string& fname) {
   if(!(state & SS_DATA)) throw hr_exception("read_hubs with no data");
   DEBBI(debug_init_sag, ("Loading the hub daga for sag from: ", fname));
@@ -317,6 +302,7 @@ void read_hubs(const string& fname) {
 void generate_fake_data(int n, int m) {
   if(state & SS_DATA) return;
   DEBBI(debug_init_sag, ("Generating fake data ", tie(n, m)));
+  rogueviz::init(RV_GRAPH | RV_WHICHWEIGHT | RV_AUTO_MAXWEIGHT | RV_HAVE_WEIGHT);
   init_cells();
   state |= SS_WEIGHTED;
 
@@ -413,9 +399,10 @@ int data_read_args() {
     PHASE(3); 
     shift(); sag::read_weighted(argcs());
     }
-  else if(argis("-sag-unweighted")) {
+  else if(argis("-sag-init")) {
     PHASE(3); 
-    shift(); sag::read_unweighted(argcs());
+    init_cells();
+    after_data();
     }
   else if(argis("-sag-generate-unweighted")) {
     PHASE(3);
