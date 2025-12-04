@@ -68,6 +68,16 @@ EX ld randf_from(std::mt19937& r) {
 
 EX ld hrandf() { return randf_from(hrngen); }
 
+/** returns true with probability p */
+EX bool chance(double p) {
+  p *= double(hrngen.max()) + 1;
+  auto l = hrngen();
+  auto pv = (decltype(l)) p;
+  if(l < pv) return true;
+  if(l == pv) return chance(p-pv);
+  return false;
+  }
+
 /** Returns an integer corresponding to the current state of \link hrngen \endlink.
  */
 EX int hrandstate() {

@@ -20,15 +20,6 @@ long long numiter = 0;
 int vizsa_start;
 int vizsa_len = 5;
   
-bool chance(double p) {
-  p *= double(hrngen.max()) + 1;
-  auto l = hrngen();
-  auto pv = (decltype(l)) p;
-  if(l < pv) return true;
-  if(l == pv) return chance(p-pv);
-  return false;
-  }
-
 bool twoway = false;
 int moves, nomoves;
 
