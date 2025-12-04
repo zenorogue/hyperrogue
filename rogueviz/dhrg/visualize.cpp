@@ -55,8 +55,6 @@ void show_likelihood() {
     embedder_loop(1); 
     ts_vertices = ts_rbase;
     place_rogueviz_vertices();
-    if(!stored) rogueviz::storeall(), stored = true;
-    else shmup::fixStorage();
     });
   
   dialog::addBack();
@@ -65,9 +63,8 @@ void show_likelihood() {
   if(held_id >= 0) {
     if(!mousepressed) held_id = -1;
     else if(mouseover) {    
-      rogueviz::vdata[held_id].m->base = mouseover;
-      shmup::fixStorage();
-      dhrg::fixedges(); 
+      auto& vd = rogueviz::vdata[held_id];
+      vd.be(mouseover, vd.m->at);
 
       auto& mc = vertices[held_id];
       tallyedgesof(held_id, -1, mc);
@@ -104,8 +101,6 @@ bool dhrg_animate(int sym, int uni) {
       dhrg_init(); graph_from_rv(); 
       ts_vertices = ts_rbase;
       place_rogueviz_vertices();
-      if(!stored) rogueviz::storeall(), stored = true;
-      else shmup::fixStorage();
       }    
     pushScreen(show_likelihood);
 

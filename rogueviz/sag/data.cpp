@@ -24,7 +24,6 @@ ld hub_penalty;
 string hub_filename;
 vector<int> hubval;
 
-vector<edgeinfo> sagedges;  
 vector<vector<int>> edges_yes, edges_no;
 vector<vector<pair<int, double>>> edge_weights;
 
@@ -35,15 +34,27 @@ ld edgepower=1, edgemul=1;
 void init();
 void compute_cost();
 
+bool colorpartite;
+
+bool take(int i, int j) {
+  if(colorpartite) return vdata[i].cp != vdata[j].cp;
+  return i != j;
+  }
+
+edgetype *ensure_sag_edge() {
+  if(!sag_edge) sag_edge = add_edgetype("SAG edge");
+  return sag_edge;
+  }
+
 void prepare_graph() {
   int DN = isize(sagid);
   DEBBI(debug_init_sag, ("prepare_graph with DN = ", DN));
 
   set<pair<int, int>> alledges;
-  for(auto e: sagedges) {
-    if(e.i == e.j) continue;
-    alledges.emplace(e.i, e.j);
-    alledges.emplace(e.j, e.i);
+  for(auto e: edgeinfos) {
+    if(e->i == e->j) continue;
+    alledges.emplace(e->i, e->j);
+    alledges.emplace(e->j, e->i);
     }
   
   edges_yes.clear(); edges_yes.resize(DN);
@@ -51,7 +62,7 @@ void prepare_graph() {
 
   fixed_position.clear(); fixed_position.resize(DN);
   
-  for(int i=0; i<DN; i++) for(int j=0; j<DN; j++) if(i != j) {
+  for(int i=0; i<DN; i++) for(int j=0; j<DN; j++) if(take(i, j)) {
     if(alledges.count({i, j}))
       edges_yes[i].push_back(j);
     else
@@ -59,11 +70,11 @@ void prepare_graph() {
     }          
 
   edge_weights.clear(); edge_weights.resize(DN);
-  for(auto& e: sagedges) {
-    if(e.i == e.j) continue;
-    e.weight2 = pow((double) e.weight, (double) edgepower) * edgemul;
-    edge_weights[e.i].emplace_back(e.j, e.weight2);
-    edge_weights[e.j].emplace_back(e.i, e.weight2);
+  for(auto& e: edgeinfos) {
+    if(e->i == e->j) continue;
+    e->weight2 = pow((double) e->weight, (double) edgepower) * edgemul;
+    edge_weights[e->i].emplace_back(e->j, e->weight2);
+    edge_weights[e->j].emplace_back(e->i, e->weight2);
     }
 
   sagnode.clear();
@@ -86,14 +97,15 @@ void place_correctly() {
 
   for(int i=0; i<DN; i++) {
     int ci = sag::sagid[i];
-    vdata[i].m->base = sagcells[ci].first;
-    vdata[i].m->at = Id;
+    transmatrix T = Id;
 
-    if(allow_doubles) vdata[i].m->at = 
+    if(allow_doubles) T = 
       spin(TAU*(qsf[ci]++) / qon[ci]) * xpush(rad * (qon[ci]-1) / qon[ci]);
 
     if(isize(subcell_points) > 1)
-      vdata[i].m->at = rgpushxto0(subcell_points[sagcells[ci].second]) * vdata[i].m->at;
+      T = rgpushxto0(subcell_points[sagcells[ci].second]) * T;
+
+    vdata[i].be(sagcells[ci].first, T);
     }
   }
 
@@ -112,7 +124,6 @@ void create_viz() {
   state |= SS_GRAPH;
 
   if(!vact) for(int i=0; i<DN; i++) vdata[i].data = 0;
-  if(!vact) for(auto& e: sagedges) addedge0(e.i, e.j, &e);
 
   if(sagcells[0].first == nullptr) return;
 
@@ -120,13 +131,10 @@ void create_viz() {
   if(!vact) for(int i=0; i<DN; i++) {
     vertexdata& vd = vdata[i];
     vd.cp = colorpair(dftcolor);
-
-    rogueviz::createViz(i, sagcells[sagid[i]].first, Id);
+    vd.be(sagcells[sagid[i]].first, Id);
     }
 
   place_correctly();
-  if(!vact) storeall();
-  if(vact) shmup::fixStorage();
   set_inverse();
   vact = true;  
   }
@@ -234,11 +242,7 @@ void read_weighted(const char *fname) {
       }
     ld wei;
     if(!scan(f, wei)) continue;
-    edgeinfo ei(sag_edge);
-    ei.i = getid(l1);
-    ei.j = getid(l2);
-    ei.weight = wei;
-    sagedges.push_back(ei);
+    addedge(getid(l1), getid(l2), wei, ensure_sag_edge());
     }
 
   after:
@@ -264,16 +268,16 @@ void read_unweighted(const char *fname) {
     string l2 = scan<string>(f);
     if(l1 == "") continue;
     if(l2 == "") continue;
-    edgeinfo ei(sag_edge);
-    ei.i = getid(l1);
-    ei.j = getid(l2);
-    if(ei.i > ei.j) swap(ei.i, ei.j);
+
+    int i = getid(l1), j = getid(l2);
+    if(i > j) swap(i, j);
+
     all++;
-    if(edges.count({ei.i, ei.j})) continue;
+    if(edges.count({i, j})) continue;
     good++;
-    edges.emplace(ei.i, ei.j);
-    ei.weight = 1;
-    sagedges.push_back(ei);
+    edges.emplace(i, j);
+
+    addedge(i, j, 1, ensure_sag_edge());
     }
 
   println(hlog, "N = ", isize(vdata), " edges = ", good, "/", all);
@@ -322,19 +326,13 @@ void generate_fake_data(int n, int m) {
   if(m > n || m < 0) throw hr_exception("generate_fake_data parameters incorrect");
   sagid.resize(m);
   int DN = isize(sagid);
-  vdata.resize(DN);
+  resize_vertices(DN);
   for(int i=0; i<DN; i++)
     vdata[i].name = its(i) + "@" + its(sagid[i]);
 
-  sag_edge = add_edgetype("SAG edge");
   for(int i=0; i<DN; i++)
-  for(int j=i+1; j<DN; j++) {
-    edgeinfo ei(sag_edge);
-    ei.i = i;
-    ei.j = j;
-    ei.weight = 1. / sagdist[sagid[i]][sagid[j]];
-    sagedges.push_back(ei);
-    }
+  for(int j=i+1; j<DN; j++) 
+    addedge(i, j, 1. / sagdist[sagid[i]][sagid[j]], ensure_sag_edge());
 
   after_data();
 

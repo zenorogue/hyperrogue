@@ -219,7 +219,7 @@ void read_graph_full(const string& fname) {
   
     // N = isize(vdata);
   
-    read_graph(fname, false, false, false);
+    read_graph(fname);
     vertices.resize(N);
     progressbar pb(N, "Translating to cells");
 
@@ -303,7 +303,7 @@ void save_embedding(const string s) {
 
 void load_embedded(const string s) {
   if(true) {
-    read_graph(s, false, false, false);
+    read_graph(s);
     indenter_finish im("Read graph");
     }
 

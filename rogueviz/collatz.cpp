@@ -19,15 +19,13 @@ namespace collatz {
     init(RV_GRAPH);
     collatz1 = add_edgetype("1");
     collatz2 = add_edgetype("2");
-    vdata.resize(1);
-    vertexdata& vd = vdata[0];
-    createViz(0, cwt.at, xpush(cshift));
+    vertexdata& vd = add_vertex();
+    vd.be(cwt.at, xpush(cshift));
     virtualRebase(vd.m);
     vd.cp = dftcolor;
     vd.data = 0;
-    addedge(0, 0, 1, false, collatz::collatz1);
+    addedge(0, 0, 1, collatz::collatz1);
     vd.name = "1";
-    storeall();
 
     T2 = spin(collatz::s2) * xpush(collatz::p2);
     T3 = spin(collatz::s3) * xpush(collatz::p3);
@@ -108,16 +106,12 @@ namespace collatz {
       string s = vd.name;
       colorpair cp = vd.cp;
       vd.data = 20;
-      int i0 = isize(vdata);
-      vdata.resize(i0+1);
-      vertexdata& vdn = vdata[i0];
-      createViz(i0, m->base, m->at * collatz::T2);
+      vertexdata& vdn = add_vertex();
+      vdn.be(m->base, m->at * collatz::T2);
       
-      virtualRebase(vdn.m);
       vdn.cp = perturb(cp);
       vdn.data = 0;
-      addedge(i, i0, 1, false, collatz::collatz1);
-      vdn.m->store();
+      addedge(i, vdn.id, 1, collatz::collatz1);
       int carry = 0;
       string s2 = s;
       for(int i=isize(s2)-1; i>=0; i--) {
@@ -133,14 +127,12 @@ namespace collatz {
       for(int i=0; i<isize(s); i++) m3 += s[i] - '0';
       
       if(m3 % 3 == 2 && s != "2" && s != "1") {
-        vdata.resize(i0+2);
-        vertexdata& vdn = vdata[i0+1];
-        createViz(i0+1, m->base, m->at * collatz::T3);
+        vertexdata& vdn = add_vertex();
+        vdn.be(m->base, m->at * collatz::T3);
         virtualRebase(vdn.m);
         vdn.cp = perturb(cp);
         vdn.data = 0;
-        addedge(i, i0+1, 1, false, collatz::collatz2);
-        vdn.m->store();
+        addedge(i, vdn.id, 1, collatz::collatz2);
         int carry = -1;
         string s2 = s;
         for(int i=isize(s2)-1; i>=0; i--) {

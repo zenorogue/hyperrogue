@@ -8,7 +8,6 @@ namespace dhrg {
   extern double graph_R;
   extern int N;
   extern int iterations;
-  void fixedges();
   void unsnap();
   bool dhrg_animate(int sym, int uni);
   void rvcoords();
@@ -192,7 +191,7 @@ void graph_visuals(presmode mode) {
 
 void swap_snap() {
   snapped = !snapped;
-  if(snapped) { for(auto& v: rogueviz::vdata) v.m->at = Id; dhrg::fixedges(); }
+  if(snapped) { for(auto& v: rogueviz::vdata) v.be(v.m->base, Id); }
   if(!snapped) dhrg::unsnap();
   }
 

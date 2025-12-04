@@ -88,21 +88,15 @@ namespace tree {
       vd.m = new shmup::monster;
       vd.m->pid = i;
       vd.data = lv.parent;
-      createViz(i, cwt.at, h);
+      vd.be(cwt.at, h);
       vd.cp = dftcolor; 
       
       if(tol[i].parent >= 0) 
-        addedge(i, tol[i].parent, 1, true, tree_edge);
-      }
-    
-    for(int i=0; i<isize(vdata); i++) {
-      vertexdata& vd = vdata[i];
-      virtualRebase(vd.m);
+        addedge(i, tol[i].parent, 1, tree_edge);
       }
     
     printf("Clearing the TOL data...\n");
     tol.clear();
-    storeall();
     }
 
 int ah = arg::add3("-tree", [] { tree::read(arg::shift_args()); })

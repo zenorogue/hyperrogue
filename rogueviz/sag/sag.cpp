@@ -352,7 +352,6 @@ void init() {
   }
 
 void clear() {
-  sagedges.clear();
   visualization_active = false;
   neighbors.clear();
   sagcells.clear();

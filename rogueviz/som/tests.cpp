@@ -179,7 +179,7 @@ void create_edgedata() {
   
   if(!using_subdata) {
     for(auto e: edges) 
-      addedge(e.first, e.second, 1, false, any);
+      addedge(e.first, e.second, 1, any);
     }
   else {
     vector<int> nearest(isize(orig_data), -1);
@@ -201,7 +201,7 @@ void create_edgedata() {
         subedges.emplace(nearest[e.first], nearest[e.second]);
     // for(auto se: subedges) println(hlog, "subedges = ", se);
     for(auto sube: subedges)
-      addedge(sube.first, sube.second, 1, false, any);
+      addedge(sube.first, sube.second, 1, any);
     }
   
   println(hlog, "edgedata created, ", using_subdata);

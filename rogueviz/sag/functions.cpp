@@ -121,19 +121,18 @@ void optimize_sag_loglik_logistic() {
 
   int N = isize(sagid);
   for(int i=0; i<N; i++)
-  for(int j=0; j<i; j++) {
+  for(int j=0; j<i; j++) if(take(i, j)) {
     int d = sagdist[sagid[i]][sagid[j]];
     indist[d]++;
     }
   
   vector<int> pedge(max_sag_dist, 0);
     
-  for(int i=0; i<isize(sagedges); i++) {
-    edgeinfo& ei = sagedges[i];
+  for(auto& e: edgeinfos) {
     // if(int(sagdist[sagid[ei.i]][sagid[ei.j]] * mul) == 136) printf("E %d,%d\n", ei.i, ei.j);
-    if(ei.i != ei.j)
-    if(ei.weight >= sag_edge->visible_from)
-      pedge[sagdist[sagid[ei.i]][sagid[ei.j]] * mul]++;
+    if(take(e->i, e->j))
+    if(e->weight >= sag_edge->visible_from)
+      pedge[sagdist[sagid[e->i]][sagid[e->j]] * mul]++;
     }
   
   if(debug_opt) for(int d=0; d<max_sag_dist; d++)
@@ -180,9 +179,9 @@ void optimize_sag_loglik_match() {
   if(state &~ SS_WEIGHTED) return;
   stats::leastsquare_solver<2> lsqs;
 
-  for(auto& ei: sagedges) {
-    ld y = sagdist[sagid[ei.i]][sagid[ei.j]];
-    ld x = 1. / ei.weight;
+  for(auto& e: edgeinfos) {
+    ld y = sagdist[sagid[e->i]][sagid[e->j]];
+    ld x = 1. / e->weight;
     lsqs.add_data({{x, 1}}, y);
     }
 
@@ -209,7 +208,7 @@ pair<ld, ld> compute_mAP() {
 
   for(int i=0; i<DN; i++) {
     vector<int> alldist(max_sag_dist, 0);
-    for(int j=0; j<DN; j++) if(i != j) alldist[sagdist[sagid[i]][sagid[j]]]++;
+    for(int j=0; j<DN; j++) if(take(i, j)) alldist[sagdist[sagid[i]][sagid[j]]]++;
     vector<int> edgedist(max_sag_dist, 0);
     for(auto j: edges_yes[i]) edgedist[sagdist[sagid[i]][sagid[j]]]++;
 
@@ -249,7 +248,7 @@ void compute_kendall() {
   int DN = isize(sagid);
   weights.resize(DN);
   for(int i=0; i<DN; i++) weights[i].resize(DN, 0);
-  for(auto& e: sagedges) weights[e.i][e.j] += e.weight2, weights[e.j][e.i] += e.weight2;
+  for(auto& e: edgeinfos) weights[e->i][e->j] += e->weight2, weights[e->j][e->i] += e->weight2;
   vector<pair<int, ld>> kdata;
   for(int i=0; i<DN; i++) for(int j=0; j<i; j++) kdata.emplace_back(sagdist[sagid[i]][sagid[j]], -weights[i][j]);
   kendall = stats::kendall(kdata);

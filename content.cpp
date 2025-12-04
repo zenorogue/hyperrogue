@@ -1780,6 +1780,7 @@ MONSTER( '?', 0xE06000, "Energy Sword", moEnergySword, ZERO | CF_TECHNICAL, RESE
 MONSTER( '!', 0xFF0000, "Warning", moWarning, ZERO | CF_TECHNICAL, RESERVED, moNone, warningdesc)
 MONSTER( '!', 0xFF0000, "arrow trap", moArrowTrap, ZERO | CF_BULLET | CF_TECHNICAL, RESERVED, moNone, arrowtrapdesc)
 MONSTER( '*', 0,        "vertex", moRogueviz, ZERO | CF_TECHNICAL, RESERVED, moNone, "A vertex from rogueviz.")
+MONSTER( '*', 0,        "edge", moRoguevizExtender, ZERO | CF_TECHNICAL, RESERVED, moNone, "An edge extender from rogueviz.")
 
 #undef MONSTER
 #undef LAND

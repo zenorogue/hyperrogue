@@ -739,15 +739,12 @@ int showsample(int id) {
       }
     net[bids[id]].drawn_samples++;
     }
-  int i = vdata.size();
-  sample_vdata_id[id] = i;
-  vdata.emplace_back();
-  auto& v = vdata.back();
+  auto& v = add_vertex();
+  sample_vdata_id[id] = v.id;
   v.name = data[id].name;
   v.cp = dftcolor;
-  createViz(i, bids.size() ? net[bids[id]].where : cwt.at, Id);
-  v.m->store();
-  return i;
+  v.be(bids.size() ? net[bids[id]].where : cwt.at, Id);
+  return v.id;
   }
 
 int showsample(string s) {
@@ -875,13 +872,11 @@ void initialize_samples_to_show() {
   if(!noshow) for(int s: samples_to_show) {
     int vdid = isize(vdata);
     sample_vdata_id[s] = vdid;
-    vdata.emplace_back();
-    auto &vd = vdata.back();
+    auto &vd = add_vertex();
     vd.name = data[s].name;
     labeler[data[s].name] = vdid;
     vd.cp = dftcolor;
-    createViz(vdid, cwt.at, Id);
-    storeall(vdid);
+    vd.be(cwt.at, Id);
     }
   
   samples_to_show.clear();
@@ -1303,7 +1298,7 @@ void load_edges(const string& fname_edges, string edgename, int pick = 0) {
   int i = 0;
   for(auto p: edgedata2)
     if(p.first >= 0 && p.second >= 0)
-      addedge(p.first, p.second, 1 / (i+++.5), true, t);
+      addedge(p.first, p.second, 1 / (i+++.5), t);
     else {
       printf("error reading graph\n");
       exit(1);
@@ -1315,7 +1310,7 @@ void random_edges(int q) {
   vector<int> ssamp;
   for(auto p: sample_vdata_id) ssamp.push_back(p.second);
   for(int i=0; i<q; i++)
-    addedge(ssamp[hrand(isize(ssamp))], ssamp[hrand(isize(ssamp))], 0, true, t);
+    addedge(ssamp[hrand(isize(ssamp))], ssamp[hrand(isize(ssamp))], 0, t);
   }
 
 void klistsamples(const string& fname_samples, bool best, bool colorformat) {
@@ -1588,16 +1583,14 @@ void load_compressed(string name) {
     f.read(d.name);
     int i = vdata.size();
     sample_vdata_id[id] = i;
-    vdata.emplace_back();
-    auto& v = vdata.back();
+    auto& v = add_vertex();
     v.name = data[i].name;
     struct colorpair_old { color_t color1, color2; char shade; } cpo;
     hread_raw(f, cpo);
     v.cp.color1 = cpo.color1;
     v.cp.color2 = cpo.color2;
     v.cp.shade = cpo.shade;
-    createViz(i, cwt.at, Id);
-    v.m->store();
+    v.be(cwt.at, Id);
     id++;
     }
   // load edge types
@@ -1614,7 +1607,7 @@ void load_compressed(string name) {
     int ei = f.get<int>();
     int ej = f.get<int>();
     float w = f.get_raw<float>();
-    addedge(ei, ej, w, true, &*t);
+    addedge(ei, ej, w, &*t);
     }
   analyze();
   }

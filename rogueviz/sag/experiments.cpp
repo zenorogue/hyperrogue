@@ -231,11 +231,12 @@ void output_stats() {
   dhrg::iddata routing_result;
   if(!known_pairs) { known_pairs = true; dhrg::prepare_pairs(DN, [] (int i) { return edges_yes[i]; }); }
   dhrg::greedy_routing(routing_result, [] (int i, int j) { return sagdist[sagid[i]][sagid[j]]; });
-  print(hlog, "CSV;", logid++, ";", isize(sagnode), ";", DN, ";", isize(sagedges), ";", lgsag_pre.R, ";", lgsag_pre.T, ";", lgsag.R, ";", lgsag.T, ";", cost, ";", mAP, ";", MeanRank, ";", routing_result.suc / routing_result.tot, ";", routing_result.routedist / routing_result.bestdist);
+  print(hlog, "CSV;", logid++, ";", isize(sagnode), ";", DN, ";", isize(edgeinfos), ";", lgsag_pre.R, ";", lgsag_pre.T, ";", lgsag.R, ";", lgsag.T, ";", cost, ";", mAP, ";", MeanRank, ";", routing_result.suc / routing_result.tot, ";", routing_result.routedist / routing_result.bestdist);
   if(lastmethod) print(hlog, ";", lastmethod);
   if(mul_used) print(hlog, ";", mul_used);
   if(report_tempi) print(hlog, ";", hightemp,";",lowtemp,";",format("%lld", numiter));
   println(hlog);
+  println(hlog, "R=", lgsag.R, " T=", lgsag.T, " cost=", cost, " mAP=", mAP, " meanrank=", MeanRank);
   }
 
 int exp_read_args() {

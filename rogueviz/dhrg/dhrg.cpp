@@ -53,11 +53,7 @@ void place_rogueviz_vertices() {
   progressbar pb(N, "place_rogueviz_vertices");
   // transmatrix In = inverse(ggmatrix(currentmap->gamestart()));
   using namespace rogueviz;
-/*  for(int i=0; i<N; i++) vdata[i].m->base = currentmap->gamestart();
-  for(int i=0; i<N; i++) vdata[i].m->at = In * shmup::ggmatrix(vertices[i]->ascell()); */
-  for(int i=0; i<N; i++) vdata[i].m->base = vertices[i]->ascell();
-  for(int i=0; i<N; i++) vdata[i].m->at = Id;
-  fixedges(); 
+  for(int i=0; i<N; i++) vdata[i].be(vertices[i]->ascell(), Id);
   }
 
 int destroy;
@@ -96,7 +92,7 @@ int ts_vertices;
 bool stored;
 
 void graphv(string s) {
-  dhrg_init(); read_graph(s, true, true, true);
+  dhrg_init(); read_graph(s);
   next_timestamp++;
   ts_rogueviz = next_timestamp;
   ts_rbase = next_timestamp;
@@ -114,7 +110,7 @@ int dhrgArgs() {
     }
     
   else if(argis("-graph")) {
-    PHASE(3); shift(); dhrg_init(); read_graph(args(), false, false, false);
+    PHASE(3); shift(); dhrg_init(); read_graph(args());
     next_timestamp++;
     ts_rogueviz = next_timestamp;
     // stored = true;
@@ -163,8 +159,6 @@ int dhrgArgs() {
       place_rogueviz_vertices();
       ts_rbase = ts_vertices;
       }
-    if(!stored) rogueviz::storeall(), stored = true;
-    else shmup::fixStorage();
     mainloop(); quitmainloop = false;
     }
 
