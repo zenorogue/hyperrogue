@@ -81,8 +81,16 @@ namespace rogueviz {
   void addedge(int i, int j, double wei, edgetype *t);
   extern vector<int> legend;
   extern vector<cell*> named;
-  
+
   int readLabel(fhstream& f);
+
+  struct embedding {
+    virtual hyperpoint as_hyperpoint(int id) = 0;
+    virtual ld distance(int i, int j) { return hdist(as_hyperpoint(i), as_hyperpoint(j)); }
+    virtual ld zero_distance(int id) { return hdist0(as_hyperpoint(id)); }
+    };
+
+  extern unique_ptr<embedding> current_embedding;
 
   #if CAP_TEXTURE
   struct rvimage {
