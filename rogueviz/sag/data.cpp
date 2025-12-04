@@ -340,7 +340,9 @@ void generate_fake_data(int n, int m) {
     color_t col = ccolor::formula(sagcells[sagid[i]].first);
     col <<= 8;
     col |= 0xFF;
-    vdata[i].cp.color1 = vdata[i].cp.color2 = col;
+    vdata[i].cp.color1 = col;
+    vdata[i].cp.color2 = 0;
+    vdata[i].cp.shade = 0;
     }
   }
 
