@@ -4,7 +4,6 @@
 
 namespace rogueviz { extern string fname; }
 
-#include "readgraph.cpp"
 #include "regular.cpp"
 #include "gridmapping.cpp"
 #include "mycell.cpp"
