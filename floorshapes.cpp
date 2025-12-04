@@ -277,14 +277,6 @@ void geometry_information::bshape2(hpcshape& sh, PPR prio, int shapeid, matrixli
   if(!apeirogonal) hpcpush(starting_point);
   }
 
-template<class T> void sizeto(T& t, int n) {
-  if(isize(t) <= n) t.resize(n+1);
-  }
-
-template<class T, class U> void sizeto(T& t, int n, const U& val) {
-  if(isize(t) <= n) t.resize(n+1, val);
-  }
-
 #if CAP_BT
 void geometry_information::bshape_bt(floorshape &fsh, int id, int sides, ld size, cell *c) {
   

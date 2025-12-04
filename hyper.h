@@ -968,6 +968,14 @@ struct debugflag {
   void flip() { enabled = !enabled; }
   };
 
+template<class T> void sizeto(T& t, int n) {
+  if(isize(t) <= n) t.resize(n+1);
+  }
+
+template<class T, class U> void sizeto(T& t, int n, const U& val) {
+  if(isize(t) <= n) t.resize(n+1, val);
+  }
+
 }
 
 /** this macro is used to delay performing the action in case if everything is rolled back */
