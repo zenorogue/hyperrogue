@@ -273,7 +273,7 @@ int function_read_args() {
   else if(argis("-sagrt")) {
     shift(); sag::lgsag.R = argf();
     shift(); sag::lgsag.T = argf();
-    if(method == smLogistic) compute_loglik_tab();
+    if(method == smLogistic) { compute_loglik_tab(); compute_cost(); }
     }
 
   else if(argis("-sagmatch-ab")) {
