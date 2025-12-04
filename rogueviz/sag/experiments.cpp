@@ -250,6 +250,7 @@ int exp_read_args() {
   else if(argis("-sag-v6")) sag_v6();
   else if(argis("-sag-new-viz")) sag_new_experiment_viz();
   else if(argis("-sag-test-mul")) sag_test_mul();
+  else if(argis("-sag-orth")) auto_orth(true);
   else if(argis("-sag-write-colors")) {
     shift(); write_colors(args());
     }
