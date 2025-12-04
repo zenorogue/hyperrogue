@@ -59,6 +59,19 @@ void read_edgelist(const string& fname) {
     }
   }
 
+void write_edgelist(const string &fname) {
+  DEBBI(debug_init_sag, ("Writing edgelist to: ", fname));
+  FILE *f = fopen(fname.c_str(), "wt");
+  if(!f) return file_error(fname);
+  for(auto& e: edgeinfos) {
+    if(vizflags & RV_HAVE_WEIGHT)
+      fprintf(f, "%s;%s;%.17e\n", vdata[e->i].name.c_str(), vdata[e->j].name.c_str(), e->weight);
+    else
+      fprintf(f, "%s %s\n", vdata[e->i].name.c_str(), vdata[e->j].name.c_str());
+    }
+  fclose(f);
+  }
+
 void reenable_embedding() {
   if(rogueviz::rv_quality >= 0)
     for(auto& v: vdata) {
@@ -75,7 +88,8 @@ void enable_embedding(std::shared_ptr<embedding> pe) {
 void store_gamedata(struct hr::gamedata* gd) { gd->store(current); }
 
 int a = arg::add3("-edgelist", [] { arg::shift(); read_edgelist(arg::args()); })
-  + addHook(hooks_gamedata, 230, store_gamedata);
+  + addHook(hooks_gamedata, 230, store_gamedata)
+  + arg::add3("-write-edges", [] { arg::shift(); write_edgelist(arg::args()); });
 
 
 }
