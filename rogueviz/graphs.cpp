@@ -1196,6 +1196,10 @@ auto hooks  =
     param_f(edgewidth, "rvedgewidth");
     param_f(min_line_splits, "edgeminsplits");
     param_f(max_line_splits, "edgemaxsplits");
+
+    param_f(extenders_over, "extenders_over");
+    param_i(extender_levels, "extender_levels");
+    param_i(rv_quality, "rv_quality");
     }) +
  0;
 
