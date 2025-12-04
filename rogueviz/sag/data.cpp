@@ -462,6 +462,10 @@ int data_read_args() {
     create_viz();
     }
 
+  else if(argis("-sag-colorpartite")) {
+    colorpartite = true;
+    if(state & SS_DATA) prepare_graph();
+    }
 
   else return 1;  
 #endif
