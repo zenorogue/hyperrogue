@@ -72,13 +72,13 @@ namespace rogueviz {
     cell *orig;
     int lastdraw;
     edgetype *type;
+    int edge_id;
     edgeinfo(edgetype *t) { orig = NULL; lastdraw = -1; type = t; }
+    vector<shmup::monster*> extenders;
     };
 
   extern vector<edgeinfo*> edgeinfos;
-  void addedge0(int i, int j, edgeinfo *ei);
-  void addedge(int i, int j, edgeinfo *ei);
-  void addedge(int i, int j, double wei, bool subdiv, edgetype *t);
+  void addedge(int i, int j, double wei, edgetype *t);
   extern vector<int> legend;
   extern vector<cell*> named;
   
@@ -101,26 +101,34 @@ namespace rogueviz {
     shared_ptr<rvimage> img;
     #endif
     colorpair(color_t col = 0xC0C0C0FF) { shade = 0; color1 = color2 = col; }
+    bool operator == (const colorpair& cp) {
+      return tie(color1, color2, shade, img) == tie(cp.color1, cp.color2, cp.shade, cp.img);
+      }
+    bool operator != (const colorpair& cp) { return !(self == cp); }
     };
   
   struct vertexdata {
+    int id;
     vector<pair<int, edgeinfo*> > edges;
     string name;
     colorpair cp;
-    edgeinfo *virt;
     bool special;
     int data;
     vector<string> urls;
     vector<string> infos;
     color_t spillcolor;
     shmup::monster *m;
-    vertexdata() { virt = NULL; m = NULL; special = false; spillcolor = DEFAULT_COLOR; }
+    vertexdata() { m = NULL; special = false; spillcolor = DEFAULT_COLOR; }
+    void be_nowhere();
+    void be(cell *c, transmatrix at);
     };
   
   extern vector<vertexdata> vdata;
+  vertexdata& add_vertex();
+  void resize_vertices(int n);
+
+  extern int rv_quality;
  
-  void storeall(int from = 0);
-  
   extern bool showlabels;
 
   extern bool rog3;
@@ -254,8 +262,6 @@ function<void(presmode)> roguevizslide_action(char c, const T& t, const U& act) 
   hyperpoint p2(ld x, ld y);
 #endif
   }
-
-  void createViz(int id, cell *c, transmatrix at);
 
   extern map<string, int> labeler;
   bool id_known(const string& s);
