@@ -190,7 +190,7 @@ void vertexdata::be_nowhere() {
 
 ld extenders_over = 4;
 int extender_levels = 3;
-int rv_quality = 3;
+int rv_quality = 4;
 
 void vertexdata::be(cell *c, transmatrix at) {
   be_nowhere();
@@ -200,9 +200,9 @@ void vertexdata::be(cell *c, transmatrix at) {
   m->base = c;
   m->at = at;
   m->isVirtual = false;
-  if(rv_quality >= 2) virtualRebase(m);
-  if(rv_quality >= 1) m->store();
-  if(rv_quality >= 3) for(auto& ei: edges) redo_extenders(ei.second);
+  if(rv_quality >= 3) virtualRebase(m);
+  if(rv_quality >= 2) m->store();
+  if(rv_quality >= 4) for(auto& ei: edges) redo_extenders(ei.second);
   }
 
 void notimpl() {
@@ -250,7 +250,7 @@ void clear_extenders(edgeinfo *ei) {
 void redo_extenders(edgeinfo *ei) {
   clear_extenders(ei);
 
-  if(rv_quality < 3 || !vdata[ei->i].m || !vdata[ei->j].m) return;
+  if(rv_quality < 4 || !vdata[ei->i].m || !vdata[ei->j].m) return;
 
   int i = ei->i, j = ei->j;
   cell *base = confusingGeometry() ? vdata[i].m->base : currentmap->gamestart();
