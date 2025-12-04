@@ -230,6 +230,12 @@ int anneal_read_args() {
   else if(argis("-sagfull")) {
     shift(); sag::dofullsa(argf());
     }
+
+  else if(argis("-sag-adtw")) {
+    shift(); allow_doubles = argi();
+    shift(); twoway = argi();
+    }
+
   else if(argis("-sagfulli")) {
     shift(); sag::dofullsa_iterations(argll());
     }
