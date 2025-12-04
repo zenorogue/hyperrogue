@@ -84,12 +84,18 @@ void enable_embedding(std::shared_ptr<embedding> pe) {
   reenable_embedding();
   }
 
+void esave(string fname) {
+  fhstream f(arg::args(), "wt");
+  if(!f.f) file_error(fname);
+  current->save(f);
+  }
+
 void store_gamedata(struct hr::gamedata* gd) { gd->store(current); }
 
 int a = arg::add3("-edgelist", [] { arg::shift(); read_edgelist(arg::args()); })
   + addHook(hooks_gamedata, 230, store_gamedata)
-  + arg::add3("-write-edges", [] { arg::shift(); write_edgelist(arg::args()); });
-
+  + arg::add3("-write-edges", [] { arg::shift(); write_edgelist(arg::args()); })
+  + arg::add3("-esaveas", [] { arg::shift(); esave(arg::args()); });
 
 }
 

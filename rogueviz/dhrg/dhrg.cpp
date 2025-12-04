@@ -150,14 +150,6 @@ int dhrgArgs() {
     shift(); ground_truth_test(args());
     }
 
-  else if(argis("-esaveas")) {
-    shift(); save_embedding(args());
-    }
-
-  else if(argis("-esave")) {
-    save_embedding(rogueviz::fname + "-dhrg.txt");
-    }
-
   else if(argis("-eload")) {
     PHASE(3); shift(); dhrg_init(); load_embedded(args());
     next_timestamp++;

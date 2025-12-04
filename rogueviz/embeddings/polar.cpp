@@ -32,11 +32,30 @@ namespace embeddings {
       return acosh(v);
       }
 
+    void save(fhstream& f) override {
+      println(f, "n R alpha t");
+      println(f, isize(vdata), " ", cont_logistic.R, " ", graph_alpha, " ", cont_logistic.T);
+      int i = 0;
+      for(auto& co: coords)
+        println(f, vdata[i++].name, format(" %.20lf %.20lf", co.r, co.theta / degree));
+      }
+
     };
 
   /** read polar coordinates, in the format returned by the BFKL embdder. */
 
   void read_polar(const string& fn) {
+
+    if(fn == "-") {
+      auto pe = std::make_shared<polar_embedding> ();
+      int N = isize(vdata);
+      pe->coords.resize(N);
+      for(int i=0; i<N; i++) {
+        auto h = current->as_hyperpoint(i);
+        pe->coords[i] = { hdist0(h), atan2(h) };
+        }
+      return enable_embedding(pe);
+      }
 
     fhstream f(fn, "rt");
     if(!f.f) return file_error(fn);
@@ -67,7 +86,7 @@ namespace embeddings {
       pe->coords[id] = polar_point{.r = r, .theta = theta * degree};
       }
     
-    enable_embedding(std::move(pe));
+    enable_embedding(pe);
     }
 
   int a_polar =
