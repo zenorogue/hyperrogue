@@ -31,6 +31,8 @@ extern flagtype state;
 
 extern vector<int> sagid;
 
+extern ld yes_for(ld d);
+
 void init();
 void clear();
 
