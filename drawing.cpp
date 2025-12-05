@@ -2121,6 +2121,10 @@ void dqi_poly::draw() {
   
   #if CAP_SVG
     if(svg::in) {
+      bool bad = false;
+      for(int i=0; i<polyi; i++) if(isnan(glcoords[i][0]) || isnan(glcoords[i][1]) || isnan(glcoords[i][2])) bad = true;
+      if(bad) continue;
+
       coords_to_poly();
       color_t col = color;
       if(poly_flags & POLY_INVERSE) col = 0;
