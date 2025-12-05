@@ -402,13 +402,7 @@ bool coloring_3d(cell *c, const shiftmatrix& V) {
   return false;
   }
 
-// traditionally Gaussian blur is used in the Kohonen algoritm
-// but it does not seem to make much sense in hyperbolic geometry
-// especially wrapped one.
-// GAUSSIAN==1: use the Gaussian blur, on celldistance
-// GAUSSIAN==2: use the Gaussian blur, on true distance
-// GAUSSIAN==0: simulate the dispersion on our network
-
+// see the comment in `param_enum(gaussian, ...)`
 int gaussian = 0;
 
 double mydistance(cell *c1, cell *c2) {
@@ -1471,6 +1465,36 @@ void shift_color(int i) {
   coloring();
   }
 
+void som_settings() {
+
+  cmode |= sm::MAYDARK | sm::SIDE;
+  gamescreen();
+  dialog::init("SOM settings");
+
+  add_edit(precise_placement);
+  add_edit(show_rings);
+  add_edit(animate_dispersion);
+  if(animate_dispersion)
+    add_edit(heatmap_width);
+  else dialog::addBreak(100);
+  add_edit(analyze_each);
+  add_edit(dispersion_precision);
+  add_edit(tmax);
+  add_edit(learning_factor);
+  add_edit(gaussian);
+  if(gaussian) {
+    add_edit(dispersion_end_at);
+    add_edit(dispersion_long);
+    }
+  else {
+    add_edit(distmul);
+    dialog::addBreak(100);
+    }
+
+  dialog::addBack();
+  dialog::display();
+  }
+
 void showMenu() {
   string parts[3] = {"red", "green", "blue"};
   for(int i=0; i<3; i++) {
@@ -1492,8 +1516,21 @@ void showMenu() {
     
   dialog::addItem("level lines", '4');
   dialog::add_action_push(levelline::show);
+
+  dialog::addBoolItem("run", animate_once, '5');
+  dialog::items.back().value += " " + its(t) + "/" + its(tmax);
+  dialog::add_action([] {
+    animate_once = !animate_once;
+    if(animate_once && t == 0) {
+      initialize_rv();
+      set_neuron_initial();
+      t = tmax;
+      analyze();
+      }
+    });
   
-  add_edit(precise_placement);
+  dialog::addItem("SOM settings", '6');
+  dialog::add_action_push(som_settings);
   }
 
 void save_compressed(string name) {
@@ -1857,14 +1894,36 @@ auto hooks4 = addHook(hooks_clearmemory, 100, clear)
     param_f(precise_placement, "koh_placement")
     -> editable(0, 2, .2, "precise placement", "0 = make all visible, 1 = place ideally, n = place 1/n of the distance from center to ideal placement", 'p')
     -> set_reaction([] { if((state & KS_NEURONS) && (state & KS_SAMPLES)) distribute_neurons(); });
-    param_b(show_rings, "som_show_rings");
+    param_b(show_rings, "som_show_rings") -> editable("show rings in 3D", 'r');
     param_b(animate_once, "som_animate_once");
     param_b(animate_loop, "som_animate_loop");
-    param_b(animate_dispersion, "som_animate_dispersion");
-    param_f(analyze_each, "som_analyze_each");
-    param_i(heatmap_width, "som_heatmap_width");
-    param_f(dispersion_precision, "som_dispersion")
+    param_b(animate_dispersion, "som_animate_dispersion") -> editable("animate dispersion", 'a');
+    param_f(analyze_each, "som_analyze_each") -> editable(0, 1000000, 100, "analyze each", "", 'b');
+    param_i(heatmap_width, "som_heatmap_width") -> editable(0, 256, 1, "heatmap width", "", 'h');
+    param_f(dispersion_precision, "som_dispersion") -> editable(1e-6, 1, 0.1, "dispersion precision", "", 'r') -> set_sets([] { dialog::scaleLog(); })
     -> set_reaction([] { state &=~ KS_DISPERSION; });
+
+    param_f(dispersion_end_at, "som_dispersion_end_at")
+    -> editable(1, 2, 0.1, "dispersion end", "", 'e')
+    -> set_reaction([] { state &=~ KS_DISPERSION; });
+
+    param_b(dispersion_long, "som_dispersion_long")
+    -> editable("dispersion long", 'l')
+    -> set_reaction([] { state &=~ KS_DISPERSION; });
+
+    param_i(tmax, "som_iterations") -> editable(1, 30000, 0.1, "SOM iterations", "number of iterations in SOM", 'i') -> set_sets([] { dialog::scaleLog(); });
+    param_f(distmul, "som_distmul") -> editable(0.1, 10, 0.1, "SOM distance multiplier", "", 'm') -> set_sets([] { dialog::scaleLog(); })
+    -> set_reaction([] { state &=~ KS_DISPERSION; });
+    param_f(learning_factor, "som_learning") -> editable(1e-6, 1, 0.1, "SOM learning factor", "", 'l') -> set_sets([] { dialog::scaleLog(); });
+
+    // Traditionally Gaussian blur is used in the Kohonen algoritm. But, it does not seem to make much sense in hyperbolic geometry, especially wrapped one.
+    param_enum(gaussian, "gaussian", gaussian)
+      -> editable({
+        {"simulated", "simulate the dispersion on our network"},
+        {"cgaussian", "use the Gaussian blur, on celldistance"},
+        {"ggaussian", "use the Gaussian blur, on true distance"}},
+        "dispersion method", 'd')
+      -> set_reaction([] { state &=~ KS_DISPERSION; });
     });
 
 bool mark(cell *c) {
