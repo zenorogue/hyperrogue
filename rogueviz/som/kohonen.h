@@ -63,6 +63,8 @@ extern vector<string> colnames;
 
 extern vector<int> sample_sequence;
 
+extern vector<neuron*> whowon;
+
 void initialize_neurons();
 void initialize_neurons_initial();
 void initialize_dispersion();
