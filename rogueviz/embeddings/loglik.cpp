@@ -68,8 +68,6 @@ vector<array<ll, 2>> disttable_approx;
 
 ld llcont_approx_prec = 10000;
 
-int threads = 32;
-
 void build_disttable_approx() {
   indenter_finish im("build_disttable_approx");
 
