@@ -180,6 +180,12 @@ int routing_args() {
   if(argis("-routing")) {
     // shift(); routing_test(args());
     }
+  else if(argis("-gr")) {
+    iddata result;
+    prepare_pairs();
+    greedy_routing(result);
+    println(hlog, "success = ", result.suc / result.tot, " stretch = ", result.routedist / result.bestdist);
+    }
   else return 1;
 
   return 0;
