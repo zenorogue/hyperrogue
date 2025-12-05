@@ -107,6 +107,7 @@ extern void get_coordinates(kohvec& v, cell *c, cell *c0);
 extern vector<cell*> signposts;
 
 extern map<cellwalker, kohvec> delta_at;
+extern kohvec& get_landscape_at(cell *h);
 
 }
 
