@@ -1091,7 +1091,6 @@ EX void initConfig() {
     fhstream f("/sys/devices/virtual/dmi/id/board_name", "rt");
     if(f.f) {
       string s = scanline_noblank(f);
-      println(hlog, "got '", s, "'");
       bool deck = s.find("Jupiter") != string::npos;
       if(deck) {
         centered_menus = true;
