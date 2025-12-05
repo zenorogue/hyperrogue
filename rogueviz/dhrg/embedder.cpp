@@ -161,7 +161,7 @@ void verifycs() {
     edgecs += edgetally[u] * u*u,
     totalcs += tally[u] * u*u;
   
-  print(hlog, "edgecs=", hr::format("%lld", edgecs), " totalcs=", hr::format("%lld", totalcs));
+  println(hlog, "edgecs=", hr::format("%lld", edgecs), " totalcs=", hr::format("%lld", totalcs));
   }
 
 void preparegraph() {
