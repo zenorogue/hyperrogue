@@ -114,6 +114,7 @@ int a = arg::add3("-edgelist", [] { arg::shift(); read_edgelist(arg::args()); })
 }
 
 #include "polar.cpp"
+#include "coords.cpp"
 #include "loglik.cpp"
 #include "routing.cpp"
 
