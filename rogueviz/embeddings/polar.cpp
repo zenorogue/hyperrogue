@@ -66,10 +66,10 @@ namespace embeddings {
 
     int N;
 
-    printf("Reading coordinates...\n");
+    println(hlog, "Reading coordinates...\n");
     string ignore;
     if(!scan(f, ignore, ignore, ignore, ignore, N, graph_R, graph_alpha, graph_T)) {
-      printf("Error: incorrect format of the first line\n"); exit(1);
+      println(hlog, "Error: incorrect format of the first line\n"); exit(1);
       }
 
     if(graph_R && graph_T) cont_logistic.setRT(graph_R, graph_T);
@@ -86,7 +86,7 @@ namespace embeddings {
       int id = rogueviz::labeler.at(s);
 
       double r, theta;
-      if(!scan(f, r, theta)) { printf("Error: incorrect format of r/alpha\n"); exit(1); }
+      if(!scan(f, r, theta)) { println(hlog, "Error: incorrect format of r/alpha\n"); exit(1); }
       pe->coords[id] = polar_point{.r = r, .theta = theta * degree};
       }
     
