@@ -1653,7 +1653,7 @@ int readArgs() {
 
   // #1: load the samples
   
-  if(argis("-som")) {
+  if(argis("-som-samples")) {
     PHASE(3);
     initialize_rv();
     shift(); kohonen::loadsamples(args());
@@ -1847,6 +1847,15 @@ int readArgs() {
   else if(argis("-som-load-compressed")) {
     shift(); 
     load_compressed(args());
+    }
+
+  else if(argis("-som")) {
+    PHASE(3);
+    initialize_rv();
+    shift(); kohonen::loadsamples(args());
+    set_neuron_initial();
+    t = last_analyze_step = tmax;
+    showbestsamples();
     }
 
   else return 1;
