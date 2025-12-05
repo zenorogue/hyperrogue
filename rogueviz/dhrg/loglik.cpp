@@ -195,20 +195,4 @@ template<class T> auto parallelize(long long N, T action) -> decltype(action(0,0
 #endif
   }
 
-ld precise_hdist(hyperpoint vi, hyperpoint vj) {
-  ld da = acosh(vi[2]);
-  ld db = acosh(vj[2]);
-  
-  ld phia = atan2(vi[0], vi[1]);
-  ld phib = atan2(vj[0], vj[1]);
-
-  ld co = sinh(da) * sinh(db) * (1 - cos(phia-phib));
-  // - (vi[0]*vj[0] + vi[1]*vj[1]);
-  
-  ld v = cosh(da - db) + co;
-  if(v < 1) return 0;
-  
-  return acosh(v);
-  }
-
 }

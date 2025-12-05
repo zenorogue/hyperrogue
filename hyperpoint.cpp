@@ -1395,6 +1395,27 @@ EX ld hdist(const shiftpoint& h1, const shiftpoint& h2) {
   return hdist(h1.h, unshift(h2, h1.shift));
   }
 
+EX ld precise_hdist(hyperpoint vi, hyperpoint vj) {
+  int n = MDIM-1;
+  hassert(n == 2 || n == 3);
+
+  ld da = acosh(vi[n]);
+  ld db = acosh(vj[n]);
+
+  ld rs = sqhypot_d(n, vi) * sqhypot_d(n, vj);
+  if(!rs) return da + db;
+
+  ld cosphi = 0;
+  for(int i=0; i<n; i++) cosphi += vi[i] * vj[i];
+  cosphi /= sqrt(rs);
+
+  ld co = sinh(da) * sinh(db) * (1 - cosphi);
+
+  ld v = cosh(da - db) + co;
+  if(v < 1) return 0;
+  return acosh(v);
+  }
+
 /** like orthogonal_move but fol may be factor (in 2D graphics) or level (elsewhere) */
 EX hyperpoint orthogonal_move_fol(const hyperpoint& h, double fol) {
   if(GDIM == 2) return scale_point(h, fol);
