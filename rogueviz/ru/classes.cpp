@@ -199,6 +199,7 @@ template<class T> struct statarray : array<T, qstat> {
   };
 
 struct entity {
+  string name;
   virtual ~entity() {}
   virtual xy siz() = 0;
   xy where, vel;
@@ -441,7 +442,6 @@ struct timed_orb : public entity {
 
 struct npc_or_trader : public entity {
   string text;
-  string name;
   int talk_on;
   xy siz() override { return {12, 12}; }
   void act() override;

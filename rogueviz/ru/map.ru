@@ -229,8 +229,8 @@ MAP
 #b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b
 ################################################################################
 #b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b
-BOAR 256 60
-BOAR 113 255
+BOAR Peppo 256 60
+BOAR Pempo 113 255
 ITEM 279 65
 furry ring
 Someone lost a small, weird ring here. Hopefully it will be useful to you.
@@ -286,7 +286,7 @@ MAP
 #b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b
 ################################################################################
 #b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b
-BOAR 348 202
+BOAR Pepf 348 202
 OK
 
 MOVE 1 Climbing the Hill
@@ -439,14 +439,14 @@ What a shiny crystal ball!
 ITEM 75 200 20
 gold
 You found 20 gold pieces
-KESTREL 85 66 15 15
-KESTREL 527 65 20 10
-KESTREL 309 211 10 20
-KESTREL 100 190 25 5
-KESTREL 561 198 25 5
-SNAKE 111 220 1
-SNAKE 549 234 1
-SNAKE 493 135 1
+KESTREL Magpie 85 66 15 15
+KESTREL Loon 527 65 20 10
+KESTREL Emu 309 211 10 20
+KESTREL Ostrich 100 190 25 5
+KESTREL Nandu 561 198 25 5
+SNAKE Ss 111 220 1
+SNAKE Sss 549 234 1
+SNAKE Ssss 493 135 1
 OK
 
 MOVE 2 Dungeon Entrance
@@ -1180,17 +1180,17 @@ MAP
 #b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b
 ################################################################################
 #b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b
-GRIDBUG 259 138
-GRIDBUG 260 130
-GRIDBUG 260 122
-GRIDBUG 260 22
-GRIDBUG 260 30
-GRIDBUG 260 38
-SNAKE 555 51 1
-SNAKE 311 265 1
-BAT 61 83
-BAT 48 62
-BAT 94 112
+GRIDBUG Ax 259 138
+GRIDBUG Ex 260 130
+GRIDBUG Ix 260 122
+GRIDBUG Ox 260 22
+GRIDBUG Ux 260 30
+GRIDBUG Yx 260 38
+SNAKE Suss 555 51 1
+SNAKE Susss 311 265 1
+BAT Laff 61 83
+BAT Kaff 48 62
+BAT Eff 94 112
 ITEM 566 60 15
 gold
 Why is there always gold lying in these mazes...
@@ -1259,21 +1259,21 @@ PENDULUM 200 208 303 235 6 0
 PENDULUM 344 229 513 231 5 0
 PENDULUM 551 215 554 70 6 0
 PENDULUM 510 60 60 60 5 0
-BAT 100 100
-BAT 200 100
-BAT 300 100
-BAT 400 100
-BAT 500 100
-BAT 100 160
-BAT 200 160
-BAT 300 160
-BAT 400 160
-BAT 500 160
-BAT 100 220
-BAT 200 220
-BAT 300 220
-BAT 400 220
-BAT 500 220
+BAT Archi 100 100
+BAT Barchi 200 100
+BAT Carchi 300 100
+BAT Darchi 400 100
+BAT Earchi 500 100
+BAT Farchi 100 160
+BAT Garchi 200 160
+BAT Harchi 300 160
+BAT Irchi 400 160
+BAT Jarchi 500 160
+BAT Karchi 100 220
+BAT Larchi 200 220
+BAT Marchi 300 220
+BAT Narchi 400 220
+BAT Orchi 500 220
 OK
 
 MOVE 2 Bat Cave
@@ -1369,10 +1369,10 @@ MAP
 #b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b
 ################################################################################
 #b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b
-FROG 245 154
-FROG 345 154
-FROG 445 154
-GIANTFROG 145 154
+FROG Froggie 245 154
+FROG Froggy 345 154
+FROG Froggo 445 154
+GIANTFROG Doomleap 145 154
 LOOT 1
 fire
 The giant frog extract will let you produce fire! But you need to take it to a magic fountain first.
@@ -1436,21 +1436,21 @@ DEADLY TRAPS AHEAD
 NPC 73 252 0
 @Floor Engraving
 Ad Aerarium
-VTRAP 145 56
-VTRAP 160 56
-VTRAP 175 56
-VTRAP 200 56
-VTRAP 210 56
-VTRAP 220 56
-VTRAP 230 56
-VTRAP 280 56
-VTRAP 290 56
-VTRAP 300 56
-VTRAP 310 56
-VTRAP 400 56
-VTRAP 410 56
-VTRAP 420 56
-VTRAP 430 56
+VTRAP TA1 145 56
+VTRAP TA2 160 56
+VTRAP TA3 175 56
+VTRAP TA4 200 56
+VTRAP TA5 210 56
+VTRAP TA6 220 56
+VTRAP TA7 230 56
+VTRAP TA8 280 56
+VTRAP TB1 290 56
+VTRAP TB2 300 56
+VTRAP TB3 310 56
+VTRAP TB4 400 56
+VTRAP TB5 410 56
+VTRAP TB6 420 56
+VTRAP TB7 430 56
 OK
 
 MOVE 4 Bouncy Spike Maze
@@ -1557,10 +1557,10 @@ MAP
 ################################################################################
 #b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b
 ROPE 300 0 0.7 50 5 0 60
-ICICLE 60 60
-ICICLE 552 63
-ICICLE 597 118
-ICICLE 577 151
+ICICLE Ia 60 60
+ICICLE Ib 552 63
+ICICLE Ic 597 118
+ICICLE Id 577 151
 OK
 
 MOVE 1 Swinging Rope Room
@@ -2299,15 +2299,15 @@ MAP
 #b#b#b#b#b#b#b........................................^b..................^b^b^b
 ##############------------------------................^^........................
 #b#b#b#b#b#b#b-b-b-b-b-b-b-b-b-b-b-b-b................^b........................
-SNAKE 258 199 -1
-SNAKE 336 204 -1
-SNAKE 405 209 -1
-SNAKE 290 199  1
-SNAKE 370 204 -1
-SNAKE 385 209  1
-BAT 380 140
-BAT 380 140
-BAT 380 140
+SNAKE Ssh 258 199 -1
+SNAKE Sssh 336 204 -1
+SNAKE Ssssh 405 209 -1
+SNAKE Sssssh 290 199  1
+SNAKE Ssssssh 370 204 -1
+SNAKE Sssssssh 385 209  1
+BAT Highfly 380 140
+BAT Farfly 380 140
+BAT Bigfly 380 140
 OK
 
 MOVE 1 Long Rope II
@@ -2598,22 +2598,22 @@ MAP
 #b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#bAb..#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b
 ############################################..AA################################
 #b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b..Ab#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b
-GUINEAPIG 190 24 .25 1
-GUINEAPIG 207 92 .25 1
-GUINEAPIG 204 164 .25 1
-GUINEAPIG 265 41 .25 1
-GUINEAPIG 275 154 .25 1
-GUINEAPIG 275 204 .25 1
-GUINEAPIG 350 24 .25 1
-GUINEAPIG 327 73 .25 1
-GUINEAPIG 332 191 .25 1
-GUINEAPIG 389 99 .25 1
-GUINEAPIG 376 165 .25 1
-GUINEAPIG 440 90 .25 1
-GUINEAPIG 487 87 .25 1
-GUINEAPIG 449 27 .25 1
-GUINEAPIG 455 186 .25 1
-GUINEAPIG 404 229 .25 1
+GUINEAPIG Bas 190 24 .25 1
+GUINEAPIG Cas 207 92 .25 1
+GUINEAPIG Das 204 164 .25 1
+GUINEAPIG Eas 265 41 .25 1
+GUINEAPIG Fas 275 154 .25 1
+GUINEAPIG Gas 275 204 .25 1
+GUINEAPIG Has 350 24 .25 1
+GUINEAPIG Ias 327 73 .25 1
+GUINEAPIG Jas 332 191 .25 1
+GUINEAPIG Kas 389 99 .25 1
+GUINEAPIG Las 376 165 .25 1
+GUINEAPIG Mas 440 90 .25 1
+GUINEAPIG Nas 487 87 .25 1
+GUINEAPIG Oas 449 27 .25 1
+GUINEAPIG Pas 455 186 .25 1
+GUINEAPIG Qas 404 229 .25 1
 OK
 
 MOVE 0 Guinea Pig Pen
@@ -2663,17 +2663,17 @@ MAP
 #b#b#b#b#b#b-b-b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b
 ############----################################################################
 #b#b#b#b#b#b-b-b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b
-GUINEAPIG 122 23 .25 1
-GUINEAPIG 143 221 .25 1
-GUINEAPIG 183 25 .25 1
-GUINEAPIG 221 169 .25 1
-GUINEAPIG 245 62 .25 1
-GUINEAPIG 310 21 .25 1
-GUINEAPIG 295 183 .25 1
-GUINEAPIG 326 100 .25 1
-GUINEAPIG 360 60 .25 1
-GUINEAPIG 395 105 .25 1
-GUINEAPIG 448 23 .25 1
-GUINEAPIG 463 104 .25 1
-GUINEAPIG 418 259 .25 1
+GUINEAPIG Buy 122 23 .25 1
+GUINEAPIG Cuy 143 221 .25 1
+GUINEAPIG Duy 183 25 .25 1
+GUINEAPIG Euy 221 169 .25 1
+GUINEAPIG Fuy 245 62 .25 1
+GUINEAPIG Guy 310 21 .25 1
+GUINEAPIG Huy 295 183 .25 1
+GUINEAPIG Juy 326 100 .25 1
+GUINEAPIG Kuy 360 60 .25 1
+GUINEAPIG Luy 395 105 .25 1
+GUINEAPIG Muy 448 23 .25 1
+GUINEAPIG Nuy 463 104 .25 1
+GUINEAPIG Puy 418 259 .25 1
 OK

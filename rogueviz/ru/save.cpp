@@ -135,6 +135,11 @@ void load_room(fhstream& f, cell *c) {
     if(pos != string::npos) {
       string cap = s.substr(0, pos);
       string param = s.substr(pos+1);
+      auto nam = [&] (entity& b) {
+        if(param == "") { println(hlog, "got nothing"); b.name = "NOTHING"; return; }
+        if(param[0] >= '0' && param[0] <= '9') { println(hlog, "error: expecting a name, got ", param); b.name = "UNNAMED"; return; }
+        pos = param.find(" "); b.name = param.substr(0, pos); param = param.substr(pos + 1);
+        };
       if(cap == "START") {
         fountain_room = current_room = &r;
         sscanf(param.c_str(), "%lf%lf", &m.where.x, &m.where.y);
@@ -148,7 +153,7 @@ void load_room(fhstream& f, cell *c) {
         b->id = -1;
         for(int i=0; i<isize(powers); i++) if(powers[i].name == s) b->id = i;
         if(b->id == -1) println(hlog, "error: unknown item name ", s), b->id = 0;
-        b->pickup_message = scanline_noblank(f);
+        b->name = b->pickup_message = scanline_noblank(f);
         r.entities.emplace_back(std::move(b)); 
         }
       else if(cap == "LOOT") {
@@ -161,7 +166,7 @@ void load_room(fhstream& f, cell *c) {
         b->where = xy(320, 200);
         for(int i=0; i<isize(powers); i++) if(powers[i].name == s) b->id = i;
         if(b->id == -1) println(hlog, "error: unknown loot name ", s), b->id = 0;
-        b->pickup_message = scanline_noblank(f);
+        b->name = b->pickup_message = scanline_noblank(f);
         b->existing = false; b->dropped = false;
         r.entities.emplace_back(std::move(b));
         println(hlog, "loot pushed");
@@ -174,7 +179,7 @@ void load_room(fhstream& f, cell *c) {
         b->id = -1;
         for(int i=0; i<isize(powers); i++) if(powers[i].name == s) b->id = i;
         if(b->id == -1) println(hlog, "error: unknown item name ", s), b->id = 0;
-        b->pickup_message = scanline_noblank(f);
+        b->name = b->pickup_message = scanline_noblank(f);
         r.entities.emplace_back(std::move(b));
         }
       else if(cap == "NPC") {
@@ -194,52 +199,52 @@ void load_room(fhstream& f, cell *c) {
         r.entities.emplace_back(std::move(b));
         }
       else if(cap == "BOAR") {
-        auto b = std::make_unique<boar>();
+        auto b = std::make_unique<boar>(); nam(*b);
         sscanf(param.c_str(), "%lf%lf", &b->where.x, &b->where.y);
         b->respawn = b->where; b->postfix();
         r.entities.emplace_back(std::move(b));
         }
       else if(cap == "GIANTFROG") {
-        auto b = std::make_unique<giantfrog>();
+        auto b = std::make_unique<giantfrog>(); nam(*b);
         sscanf(param.c_str(), "%lf%lf", &b->where.x, &b->where.y);
         b->respawn = b->where; b->postfix();
         r.entities.emplace_back(std::move(b));
         }
       else if(cap == "FROG") {
-        auto b = std::make_unique<frog>();
+        auto b = std::make_unique<frog>(); nam(*b);
         sscanf(param.c_str(), "%lf%lf", &b->where.x, &b->where.y);
         b->respawn = b->where; b->postfix();
         r.entities.emplace_back(std::move(b));
         }
       else if(cap == "TIMEORB") {
-        auto b = std::make_unique<timed_orb>();
+        auto b = std::make_unique<timed_orb>(); nam(*b);
         ld dur = 0;
         sscanf(param.c_str(), "%lf%lf%lf", &b->where.x, &b->where.y, &dur);
         b->duration = dur * game_fps;
         r.entities.emplace_back(std::move(b));
         }
       else if(cap == "BAT") {
-        auto b = std::make_unique<bat>();
+        auto b = std::make_unique<bat>(); nam(*b);
         sscanf(param.c_str(), "%lf%lf", &b->where.x, &b->where.y);
         b->respawn = b->where; b->postfix();
         r.entities.emplace_back(std::move(b));
         }
       else if(cap == "GUINEAPIG") {
-        auto b = std::make_unique<guineapig>();
+        auto b = std::make_unique<guineapig>(); nam(*b);
         sscanf(param.c_str(), "%lf%lf%lf%d", &b->where.x, &b->where.y, &b->pigvel, &b->spindir);
         b->pigvel /= game_fps; b->falling = true; b->vel = xy{0,0};
         b->respawn = b->where; b->respawn_spindir = b->spindir; b->postfix();
         r.entities.emplace_back(std::move(b));
         }
       else if(cap == "ICICLE") {
-        auto b = std::make_unique<icicle>();
+        auto b = std::make_unique<icicle>(); nam(*b);
         sscanf(param.c_str(), "%lf%lf", &b->where.x, &b->where.y);
         b->state = 0; b->vel = xy{0,0};
         b->respawn = b->where; b->postfix();
         r.entities.emplace_back(std::move(b));
         }
       else if(cap == "VTRAP") {
-        auto b = std::make_unique<vtrap>();
+        auto b = std::make_unique<vtrap>(); nam(*b);
         sscanf(param.c_str(), "%lf%lf", &b->where.x, &b->where.y);
         auto dat = b->get_dat();
         b->vel.x = 0; b->vel.y = 150 * 0.005 * dat.modv * dat.d;
@@ -248,20 +253,20 @@ void load_room(fhstream& f, cell *c) {
         r.entities.emplace_back(std::move(b));
         }
       else if(cap == "GRIDBUG") {
-        auto b = std::make_unique<gridbug>();
+        auto b = std::make_unique<gridbug>(); nam(*b);
         sscanf(param.c_str(), "%lf%lf", &b->where.x, &b->where.y);
         b->respawn = b->where; b->postfix();
         r.entities.emplace_back(std::move(b));
         }
       else if(cap == "KESTREL") {
-        auto b = std::make_unique<kestrel>();
+        auto b = std::make_unique<kestrel>(); nam(*b);
         sscanf(param.c_str(), "%lf%lf%lf%lf", &b->where.x, &b->where.y, &b->vel.x, &b->vel.y);
         b->vel *= xy(block_x, block_y) / game_fps;
         b->respawn = b->where; b->respawn_vel = b->vel; b->postfix();
         r.entities.emplace_back(std::move(b));
         }
       else if(cap == "SNAKE") {
-        auto b = std::make_unique<snake>();
+        auto b = std::make_unique<snake>(); nam(*b);
         sscanf(param.c_str(), "%lf%lf%d", &b->where.x, &b->where.y, &b->dir);
         b->respawn = b->where; b->respawn_dir = b->dir; b->postfix();
         r.entities.emplace_back(std::move(b));
