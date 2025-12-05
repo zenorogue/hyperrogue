@@ -765,7 +765,7 @@ struct bignum {
     }
   
   ld log_approx() const {
-    return log(leading()) * log(BASE) * (isize(digits) - 1);
+    return log(leading()) + log(BASE) * (isize(digits) - 1);
     }
   
   ld approx_div(const bignum& b) const {
