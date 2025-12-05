@@ -49,6 +49,8 @@ edgetype *ensure_sag_edge() {
 
 vector<int> qon, qsf;
 
+void save_sag_solution(const fhstream& f);
+
 struct sag_embedding : public rogueviz::embeddings::tiled_embedding {
 
   pair<cell*, hyperpoint> as_location(int id) override {
@@ -74,6 +76,12 @@ struct sag_embedding : public rogueviz::embeddings::tiled_embedding {
 
   ld zero_distance(int i) override {
     return sagdist[sagid[i]][0];
+    }
+
+  void save(const fhstream& f) {
+    if(!(state & SS_DATA)) throw hr_exception("save_sag_solution with no data");
+    for(int i=0; i<isize(sagid); i++)
+    println(f, vdata[i].name, ";", sagid[i]);
     }
   };
 
@@ -160,18 +168,17 @@ void create_viz() {
 
 /** save the SAG solution (sagid) */
 void save_sag_solution(const string& fname) {
-  if(!(state & SS_DATA)) throw hr_exception("save_sag_solution with no data");
   DEBBI(debug_init_sag, ("Saving the sag solution to: ", fname));
-  FILE *f = fopen(fname.c_str(), "wt");
-  if(!f) return file_error(fname);
-  for(int i=0; i<isize(sagid); i++)
-    fprintf(f, "%s;%d\n", vdata[i].name.c_str(), sagid[i]);
-  fclose(f);
+  fhstream f(fname, "wt");
+  if(!f.f) return file_error(fname);
+  sag_embedding e;
+  e.save(f);
   }
 
 /** load the SAG solution (sagid) */
 void load_sag_solution(const string& fname) {
   if(!(state & SS_DATA)) throw hr_exception("load_sag_solution with no data");
+  if(fname == "-") throw hr_exception("load_sag_solution from RogueViz not implemented");
   DEBBI(debug_init_sag, ("Loading the sag solution from: ", fname));
   FILE *sf = fopen(fname.c_str(), "rt");
   if(!sf) return file_error(fname);
