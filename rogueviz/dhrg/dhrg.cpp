@@ -2,8 +2,6 @@
 
 #include "dhrg.h"
 
-namespace rogueviz { extern string fname; }
-
 #include "regular.cpp"
 #include "gridmapping.cpp"
 #include "mycell.cpp"
@@ -175,3 +173,5 @@ auto hook =
 #endif
 
 }
+
+#include "legacy.cpp"
