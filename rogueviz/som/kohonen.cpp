@@ -105,8 +105,6 @@ int tmax = 30000;
 double distmul = 1;
 double learning_factor = .1;
 
-int qpct = 100;
-
 int t, lpct, cells;
 double maxdist;
 
@@ -1645,9 +1643,6 @@ int readArgs() {
   else if(argis("-somggauss")) {
     gaussian = 2; 
     state &=~ KS_DISPERSION;
-    }
-  else if(argis("-sompct")) {
-    shift(); qpct = argi();
     }
   else if(argis("-sompower")) {
     shift_arg_formula(ttpower);

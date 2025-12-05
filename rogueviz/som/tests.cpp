@@ -296,7 +296,6 @@ bool kst_key(int sym, int uni) {
   else if((cmode & sm::NORMAL) && uni == 'r') {
     set_neuron_initial();
     t = tmax;
-    dynamicval ks(qpct, 0);
     while(!finished()) kohonen::step();
     println(hlog, "check result = ", check(true));
     check_energy();
@@ -326,7 +325,6 @@ bool check(bool deb) {
   dynamicval<bool> dd(debug_kohonen.enabled, false);
   set_neuron_initial();
   t = tmax;
-  dynamicval dp(qpct, 0);
   while(!finished()) kohonen::step();
   analyze();
   int empty = 0, nonadj = 0, distant = 0;
@@ -440,7 +438,6 @@ void som_table() {
       println(hlog, "suc ", best, " :\n", sucorder[best]);
 
       for(int vv=10; vv>=0; vv--) {
-        dynamicval ks(qpct, 0);
         t = vv ? tmax * vv / 10 : 1;
         step();
         println(hlog, "t=", t);
@@ -1043,7 +1040,6 @@ void all_pairs(bool one) {
           }
 
         t = tmax;
-        dynamicval ks(qpct, 0);
         while(!finished()) kohonen::step();
 
         for(int i=0; i<orig_samples; i++) {
