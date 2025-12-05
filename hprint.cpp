@@ -596,7 +596,7 @@ struct progressbar : indenter_finish {
     fprintf(stderr, "\x1b[K");
     }
 
-  progressbar(int t, string n) : indenter_finish(n) { hlog.indentation -= 2; println(hlog, name); hlog.indentation += 2; total = t; (*this)++; }
+  progressbar(int t, string n) : indenter_finish(n), name(n) { hlog.indentation -= 2; hlog.indentation += 2; total = t; (*this)++; }
   };
 #endif
 
