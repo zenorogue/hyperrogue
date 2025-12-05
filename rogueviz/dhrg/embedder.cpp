@@ -224,6 +224,15 @@ struct dhrg_embedding : public rogueviz::embeddings::tiled_embedding {
   ld zero_distance(int i) override {
     return vertices[i]->lev;
     }
+
+  void save(fhstream& f) override {
+    int N = isize(rogueviz::vdata);
+    for(int i=0; i<N; i++) {
+      string p = get_path(vertices[i]);
+      if(p == "") p = "X";
+      println(f, rogueviz::vdata[i].name.c_str(), " ", p.c_str());
+      }
+    }
   };
 
 void graph_from_rv() {
@@ -237,17 +246,17 @@ void graph_from_rv() {
     progressbar pb(N, "Translating to cells");
 
     for(int i=0; i<N; i++) {
+      hyperpoint T0 = rogueviz::embeddings::current->as_hyperpoint(i);
 #if BUILD_ON_HR    
       cell *c = currentmap->gamestart();
-      hyperpoint T0 = vdata[i].m->at * C0;
       virtualRebase2(vdata[i].m->base, T0, true); 
       vertices[i] = find_mycell(vdata[i].m->base);
 #else
-      vertices[i] = find_mycell_by_path(computePath(vdata[i].m->at));
+      vertices[i] = find_mycell_by_path(computePath(T0));
 #endif
       vdata[i].m->at = Id;
       pb++;
-      // printf("%s\n", computePath(vdata[i].m->base).c_str());
+      // printf("%s %s\n", vdata[i].name.c_str(), computePath(vdata[i].m->base).c_str());
       }    
     }
 
@@ -284,44 +293,28 @@ void embedder_loop(int max) {
     }
   }
 
-void save_embedding(const string s) {
-  FILE *f = fopen(s.c_str(), "wt");
-  int N = isize(rogueviz::vdata);
-  for(int i=0; i<N; i++) {
-    string p = get_path(vertices[i]);
-    if(p == "") p = "X";
-    fprintf(f, "%s %s\n", rogueviz::vdata[i].name.c_str(), p.c_str());
-    }
-  fclose(f);
-  }
-
 void load_embedded(const string& s) {
-      
+
+  if(s == "-") return graph_from_rv();
+
   if(true) {
     int N = isize(rogueviz::vdata);
     progressbar pb(N, "reading embedding");
     vertices.resize(N, NULL);
     
-    map<string, int> ids;
-    for(int i=0; i<N; i++) ids[rogueviz::vdata[i].name] = i;
-
-    FILE *f = fopen(s.c_str(), "rt");
+    fhstream f(s, "rt");
     while(true) {
-      char who[500], where[500];
-      who[0] = 0;
-      if(fscanf(f, "%s%s", who, where) < 0) throw hstream_exception("error loading embedding");
-      if(who[0] == 0) break;
-      if(!ids.count(who)) printf("unknown vertex: %s\n", who);
-      string wh = where;
-      if(wh == "X") wh = "";
-      vertices[ids[who]] = find_mycell_by_path(wh);
+      string who = scan<string>(f);
+      if(who == "") break;
+      string where = scan<string>(f);
+      if(where == "X") where = "";
+      vertices[rogueviz::labeler.at(who)] = find_mycell_by_path(where);
       pb++;
       }
-    fclose(f);
     
     for(int i=0; i<N; i++) if(vertices[i] == NULL) {
       printf("unmapped: %s\n", rogueviz::vdata[i].name.c_str());
-      exit(1);
+      throw hr_exception("unmapped vertex");
       }
     }
   preparegraph();

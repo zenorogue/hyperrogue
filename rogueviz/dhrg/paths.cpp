@@ -37,14 +37,13 @@ void recycle_compute_map() {
     }
   }
 
-string computePath(const transmatrix& T) {
+string computePath(hyperpoint T0) {
   if(recycle_counter >= 1000)
     recycle_compute_map();
   if(!mapptr) mapptr = bt::in() ? bt::new_map() : new hrmap_hyperbolic;
   recycle_counter++;
   dynamicval<hrmap*> dv (currentmap, mapptr);
   cell *c = mapptr->gamestart();
-  hyperpoint T0 = T * C0;
   // call HyperRogue's function virtualRebase: 
   // a point in the hyperbolic plane is given by cell c and point T0 relative to c
   // change c and T0 so that the same point is specified, but with minimal T0

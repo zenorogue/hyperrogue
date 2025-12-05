@@ -65,7 +65,6 @@ void clear() {
 void dhrg_init() {
   if(!mroot) {
     println(hlog, "DHRG version " DHRGVER "\n");
-    rogueviz::init(0);
     rogueviz::rv_hook(hooks_handleKey, 100, dhrg_animate);
     regular_info();
     generate_root();
@@ -82,14 +81,7 @@ bool stored;
 int dhrgArgs() {
   using namespace arg;
            
-  if(argis("-dhrg")) {
-    PHASE(3); dhrg_init(); graph_from_rv();
-    next_timestamp++;
-    ts_rogueviz = next_timestamp;
-    ts_vertices = next_timestamp;
-    }
-    
-  else if(argis("-analyze_grid")) {
+  if(argis("-analyze_grid")) {
     PHASE(3); shift(); dhrg_init(); do_analyze_grid(argi());
     }
 
@@ -149,7 +141,7 @@ int dhrgArgs() {
     shift(); ground_truth_test(args());
     }
 
-  else if(argis("-eload")) {
+  else if(argis("-el-dhrg")) {
     PHASE(3); shift(); dhrg_init(); load_embedded(args());
     next_timestamp++;
     ts_rogueviz = next_timestamp;
