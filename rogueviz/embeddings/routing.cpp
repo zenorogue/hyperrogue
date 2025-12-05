@@ -20,7 +20,9 @@ void prepare_pairs() {
   int N = isize(rogueviz::vdata);
   pairs.resize(N);
   actual.resize(N);
+  for(int i=0; i<N; i++) actual[i].clear();
   for(int i=0; i<N; i++) actual[i].resize(N, NOYET);
+  progressbar pb(N, "prepare pairs");
   for(int i=0; i<N; i++) {
     vector<int> bfsqueue;
     auto& p = actual[i];
@@ -36,6 +38,7 @@ void prepare_pairs() {
       for(auto ed: rogueviz::vdata[a].edges)
         visit(ed.first, p[a] + 1);
       }
+    pb++;
     }
   last_goal.clear();
   last_goal.resize(N, -1);
