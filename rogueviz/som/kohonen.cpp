@@ -1,6 +1,29 @@
 // the general implementation of non-Euclidean self-organizing maps
 // Copyright (C) 2011-2022 Tehora and Zeno Rogue, see 'hyper.cpp' for details
 
+/*
+create a file data.txt in the following format:
+
+4
+5.1 3.5 1.4 0.2 !iris setosa 1
+4.9 3.0 1.4 0.2 !iris setosa 2
+4.7 3.2 1.3 0.2 !iris setosa 3
+[...]
+
+('!' means show this sample on the screen)
+
+example invocation (on Euclidean geometry, disk size 1000, geometric Gaussian blur):
+./hyper -geo 1 disk_size=1000 -somggauss -som data.txt
+
+you can also name columns (save the following as columns.txt and add -somloadw columns.txt):
+
+sepal length=1
+sepal width=1
+petal length=1
+petal width=1
+
+*/
+
 #include "kohonen.h"
 
 namespace rogueviz { namespace kohonen {
