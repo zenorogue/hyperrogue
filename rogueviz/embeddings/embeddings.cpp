@@ -12,6 +12,7 @@ vector<vector<int> > directed_edges;
 rogueviz::edgetype *any;
 
 struct rv_embedding : public tiled_embedding {
+  virtual string name() { return "RogueViz internal representation"; }
   pair<cell*, hyperpoint> as_location(int id) override {
     return { vdata[id].m->base, vdata[id].m->at * C0 };
     }
@@ -91,6 +92,13 @@ void esave(string fname) {
   }
 
 void store_gamedata(struct hr::gamedata* gd) { gd->store(current); }
+
+string embedding::get_space() {
+  shstream ss;
+  ss.write(ss.get_vernum());
+  mapstream::save_geometry(ss);
+  return ss.s;
+  }
 
 int a = arg::add3("-edgelist", [] { arg::shift(); read_edgelist(arg::args()); })
   + addHook(hooks_gamedata, 230, store_gamedata)

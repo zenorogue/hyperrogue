@@ -233,6 +233,8 @@ struct dhrg_embedding : public rogueviz::embeddings::tiled_embedding {
       println(f, rogueviz::vdata[i].name.c_str(), " ", p.c_str());
       }
     }
+
+  virtual string name() { return "DHRG"; }
   };
 
 void graph_from_rv() {

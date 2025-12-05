@@ -12,6 +12,10 @@ namespace embeddings {
   struct polar_embedding : public untiled_embedding {
     vector<polar_point> coords;
 
+    virtual string name() override { return "polar in BFKL format"; }
+
+    virtual int get_dimension() override { return 2; }
+
     hyperpoint as_hyperpoint(int id) override {
       return spin(coords[id].theta) * xpush0(coords[id].r);
       }
