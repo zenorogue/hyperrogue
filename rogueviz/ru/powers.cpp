@@ -215,9 +215,7 @@ int gold_id;
 power *dexmode;
 
 void power_death_revert(power& p) {
-  int q0 = p.qty_filled;
-  int q1 = p.qty_owned;
-  add_revert(death_revert, [&p, q0, q1] { p.qty_filled = q0; p.qty_owned = q1; });
+  add_revert(death_revert, {"ITEM", p.name, its(p.qty_filled), its(p.qty_owned)});
   }
 
 void gen_powers() {
@@ -515,7 +513,7 @@ void gen_powers() {
             addMessage(si->pickup_message);
             power_death_revert(powers[si->id]);
             powers[si->id].qty_owned += si->qty;  powers[si->id].qty_filled += si->qty1;
-            add_revert(death_revert, [si] { si->existing = true; });
+            add_revert(death_revert, {"EXIST", si->name});
             si->existing = false;
             }
           else if(it == 0 && on && si->existing && si->bought) {
@@ -523,7 +521,7 @@ void gen_powers() {
             addMessage("You get some gold.");
             power_death_revert(powers[gold_id]);
             powers[gold_id].qty_owned += si->price;  powers[gold_id].qty_filled += si->price;
-            add_revert(death_revert, [si] { si->existing = true; });
+            add_revert(death_revert, {"EXIST", si->name});
             si->existing = false;
             }
           else if((it ? !done_something : on) && !si->existing && !si->bought) {
@@ -531,7 +529,7 @@ void gen_powers() {
             addMessage("You rethink your purchase.");
             power_death_revert(powers[si->id]);
             powers[si->id].qty_owned -= si->qty;  powers[si->id].qty_filled -= si->qty1;
-            add_revert(death_revert, [si] { si->existing = false; });
+            add_revert(death_revert, {"UNEXIST", si->name});
             si->existing = true;
             }
           else if((it ? !done_something : on) && !si->existing && si->bought) {
@@ -539,7 +537,7 @@ void gen_powers() {
             addMessage("You rethink your actions.");
             power_death_revert(powers[gold_id]);
             powers[gold_id].qty_owned -= si->price;  powers[gold_id].qty_filled -= si->price;
-            add_revert(death_revert, [si] { si->existing = false; });
+            add_revert(death_revert, {"UNEXIST", si->name});
             si->existing = true;
             }
           else if(it == 0 && on_trader && !si->existing && d.p->qty_owned >= si->price) {
@@ -548,7 +546,7 @@ void gen_powers() {
             power_death_revert(powers[gold_id]);
             powers[gold_id].qty_owned -= si->price;  powers[gold_id].qty_filled -= si->price;
             si->existing = true; si->bought = true;
-            add_revert(death_revert, [si] { si->existing = false; si->bought = false; });
+            add_revert(death_revert, {"UNBOUGHT", si->name});
             }
           else if(it == 0 && on_trader && !si->existing && !si->bought) {
             done_something = true;
@@ -627,7 +625,7 @@ void shuffle_all() {
 
 power& find_power(string name) {
   for(auto& p: powers) if(p.name == name) return p;
-  throw hr_exception("unknown power");
+  throw hr_name_error("unknown power");
   }
 
 }

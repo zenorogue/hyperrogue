@@ -151,7 +151,7 @@ struct room {
   void replace_block_frev(int x, int y, eWall w) {
     auto orig = at(x, y);
     replace_block(x, y, w);
-    add_revert(fountain_revert, [this, x, y, orig] { replace_block(x, y, orig); });
+    add_revert(fountain_revert, {"BLOCK", roomname, its(x), its(y), its(orig)});
     }
 
   void replace_block_frev(intxy xy, eWall w) { replace_block_frev(xy.x, xy.y, w); }
@@ -688,9 +688,8 @@ struct item : public entity {
     kino();
     if(intersect(get_pixel_bbox(), m.get_pixel_bbox())) {
       addMessage(pickup_message);
-      int q0 = powers[id].qty_filled;
-      int q1 = powers[id].qty_owned;
-      add_revert(death_revert, [this, q0, q1] { existing = true; powers[id].qty_filled = q0; powers[id].qty_owned = q1; });
+      add_revert(death_revert, {"ITEM", powers[id].name, its(powers[id].qty_filled), its(powers[id].qty_owned)});
+      add_revert(death_revert, {"EXIST", name});
       powers[id].picked_up(qty);
       existing = false;
       }

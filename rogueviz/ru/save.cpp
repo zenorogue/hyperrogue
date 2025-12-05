@@ -313,6 +313,8 @@ void load_room(fhstream& f, cell *c) {
     }
   }
 
+map<string, entity*> entity_by_name;
+
 void load_map(string fname) {
   fhstream f(fname, "r");
   load_room(f, currentmap->gamestart());
@@ -325,6 +327,14 @@ void load_map(string fname) {
       for(auto& [c,r]: rooms) if(r.roomname == roomname) load_room(f, c->move(i));
       }
     else err("load_map", s);
+    }
+  for(auto& [c,r]: rooms)
+  for(auto& e: r.entities) if(e->name != "") {
+    while(entity_by_name.count(e->name)) {
+      println(hlog, "error: double entity name: ", e->name);
+      e->name += "'";
+      }
+    entity_by_name[e->name] = &*e;
     }
   }
 

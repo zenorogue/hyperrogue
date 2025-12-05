@@ -116,12 +116,12 @@ void man::on_kill() {
     addMessage("You die... permanently. You will have to create a new character. Or just press [key:Extra Life] for a narrative cheat.");
   }
 
-void add_revert(revert_stack& s, const reaction_t& what) {
+void add_revert(revert_stack& s, const revert_type& what) {
   s.push_back(what);
   }
 
 void revert_all(revert_stack& s) {
-  while(!s.empty()) { s.back()(); s.pop_back(); }
+  while(!s.empty()) { revert(s.back()); s.pop_back(); }
   }
 
 void man::launch_attack(power *p, int fac, boxfun f) {

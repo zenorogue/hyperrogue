@@ -35,6 +35,7 @@ Have fun!
 #include "save.cpp"
 #include "stats.cpp"
 #include "randeff.cpp"
+#include "reverts.cpp"
 
 namespace rogue_unlike {
 

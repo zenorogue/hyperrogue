@@ -162,11 +162,15 @@ void render_the_map();
 void shuffle_all();
 void assign_potion_powers();
 
-using revert_stack = vector<reaction_t>;
+using revert_type = vector<string>;
+
+using revert_stack = vector<revert_type>;
 
 revert_stack death_revert, fountain_revert;
 
-void add_revert(revert_stack& s, const reaction_t& what);
+void add_revert(revert_stack& s, const revert_type& what);
+
+void revert(const revert_type& r);
 
 void revert_all(revert_stack& s);
 
@@ -177,4 +181,7 @@ struct power& find_power(string name);
 tuple<struct xy, ld, int> get_next_room(struct xy w, room *r, int which = -1);
 
 extern shiftmatrix scrm;
+
+struct hr_name_error : hr_exception { hr_name_error(const char *s) : hr_exception(s) {} };
+
 }
