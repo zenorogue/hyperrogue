@@ -133,11 +133,12 @@ void dofullsa(ld satime) {
       sag::saiter();
       }
     
-    if(t2 - tl > view_each * .98) {
+    if(debug_progress && t2 - tl > view_each * .98) {
       tl = t2;
-      if(debug_progress) println(hlog, format("it %12lld temp %7.4f [1/e at %13.6f] cost = %f ",
+      println(hlog, format("it %12lld temp %7.4f [1/e at %13.6f] cost = %f ",
         numiter, double(sag::temperature), (double) exp(sag::temperature),
         double(sag::cost)));
+      hlog.flush();
       }
     
     }
