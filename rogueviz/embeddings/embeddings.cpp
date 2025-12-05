@@ -53,7 +53,7 @@ void read_edgelist(const string& fname) {
   int id = 0;
   auto all = currentmap->allcells();
 
-  if(rogueviz::rv_quality >= 0) {
+  if(rogueviz::rv_quality >= 1) {
     for(auto& v: vdata) 
       v.be(all[gmod(id++, isize(all))], Id);
     current = std::make_shared<rv_embedding> ();
@@ -80,7 +80,7 @@ void force_rvgraph() {
   }
 
 void reenable_embedding() {
-  if(rogueviz::rv_quality >= 0) force_rvgraph();
+  if(rogueviz::rv_quality >= 1 && among(current->get_dimension(), 2, 3) && current->get_dimension() <= WDIM) force_rvgraph();
   }
 
 void enable_embedding(std::shared_ptr<embedding> pe) {
