@@ -72,12 +72,15 @@ void write_edgelist(const string &fname) {
   fclose(f);
   }
 
+void force_rvgraph() {
+  for(auto& v: vdata) {
+    auto p = current->as_location(v.id);
+    v.be(p.first, rgpushxto0(p.second));
+    }
+  }
+
 void reenable_embedding() {
-  if(rogueviz::rv_quality >= 0)
-    for(auto& v: vdata) {
-      auto p = current->as_location(v.id);
-      v.be(p.first, rgpushxto0(p.second));
-      }
+  if(rogueviz::rv_quality >= 0) force_rvgraph();
   }
 
 void enable_embedding(std::shared_ptr<embedding> pe) {
@@ -103,7 +106,8 @@ string embedding::get_space() {
 int a = arg::add3("-edgelist", [] { arg::shift(); read_edgelist(arg::args()); })
   + addHook(hooks_gamedata, 230, store_gamedata)
   + arg::add3("-write-edges", [] { arg::shift(); write_edgelist(arg::args()); })
-  + arg::add3("-esaveas", [] { arg::shift(); esave(arg::args()); });
+  + arg::add3("-esaveas", [] { arg::shift(); esave(arg::args()); })
+  + arg::add3("-el-rv", [] { if(rogueviz::rv_quality == 0) force_rvgraph(); current = std::make_shared<rv_embedding> (); });
 
 }
 
