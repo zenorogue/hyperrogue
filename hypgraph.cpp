@@ -54,7 +54,7 @@ EX hyperpoint perspective_to_space(hyperpoint h, ld alpha IS(pconf.alpha), eGeom
   ld hr = hx*hx+hy*hy;
   if(LDIM == 3) hr += h[2]*h[2];
   
-  if(hr > .9999 && gc == gcHyperbolic) return Hypc;
+  if(hr >= 1 && gc == gcHyperbolic) return Hypc;
   
   ld A, B, C;
   
