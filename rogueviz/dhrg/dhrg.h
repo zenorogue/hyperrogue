@@ -1,6 +1,6 @@
 #ifndef _DHRG_H_
 #define _DHRG_H_
-#define DHRGVER "7.1"
+#define DHRGVER "7.2"
 #include "../rogueviz.h"
 #include "../embeddings/embeddings.h"
 
