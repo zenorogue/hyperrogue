@@ -562,7 +562,6 @@ struct frog : public enemy {
   };
 
 struct giantfrog : public frog {
-  int jphase, jump_at;
   xy siz() override { return {36, 36}; }
   string get_name() override { return "giant frog"; }
   string get_help() override { return "Beware their jumps."; }
