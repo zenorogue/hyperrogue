@@ -699,6 +699,7 @@ struct hint : public located_entity {
   color_t color() override { return 0; }
   void act() override;
   bool have_help() { return false; }
+  string get_name() override { return "<hint>"; }
   };
 
 struct item : public located_entity {
