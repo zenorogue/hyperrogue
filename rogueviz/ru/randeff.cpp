@@ -53,6 +53,7 @@ randeff trap_snake("Snake Hair", "Lets you create snakes that can be used to dis
   if(d.mode == rev::start || (d.mode == rev::active && d.keystate == 1)) {
     auto d = m.get_dat();
     auto mi = std::make_unique<disnake>();
+    mi->id = "DISNAKE";
     mi->respawn = m.where + xy(m.facing * m.get_scale() * m.siz().y * 0.45, 0);
     mi->hs(fountain_resetter);
     mi->invinc_end = gframeid + 50;
@@ -108,6 +109,7 @@ randeff fire_spit("Fiery Spit", "Lets you spit fire.", "You feel fire in your mo
     for(int i=1; i<10; i++) {
       auto d = m.get_dat();
       auto mi = std::make_unique<fire_missile>();
+      mi->id = "FIREMISSILE";
       mi->hs(fountain_resetter);
       mi->where = m.where + xy(m.facing * m.get_scale() * m.siz().y * 0.45, 0);
       mi->vel = m.vel + xy(m.facing * d.modv * i, d.modv * (10-i) / 5.);

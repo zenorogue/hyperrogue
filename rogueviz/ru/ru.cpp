@@ -37,6 +37,7 @@ Have fun!
 #include "stats.cpp"
 #include "randeff.cpp"
 #include "reverts.cpp"
+#include "save.cpp"
 
 namespace rogue_unlike {
 
@@ -208,7 +209,7 @@ void render_the_map() {
         mousepx = (mousex - current_display->xcenter) * 2 / scale / current_display->radius + screen_x/2;
         mousepy = (mousey - current_display->ycenter) * 2 / scale / current_display->radius + screen_y/2;
         }
-      dialog::add_key_action('v', [] { cmode = mode::menu; });
+      dialog::add_key_action('v', [] { save(); cmode = mode::menu; });
       break;
     case mapmode::poincare:
     case mapmode::klein:

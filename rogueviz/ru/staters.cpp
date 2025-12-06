@@ -20,7 +20,8 @@ struct changeseeker : stater {
   };
 
 struct saver : stater {
-  fhstream f;
+  fhstream& f;
+  saver(fhstream &_f) : f(_f) {}
   stater& act(const string& s, int& i, int _i) override { if(i != _i) println(f, s, "=", i); return self; }
   stater& act(const string& s, ld& d, ld _d) override { if(d != _d) println(f, s, "=", d); return self; }
   stater& act(const string& s, bool& b, bool _b) override { if(b != _b) println(f, s, "=", b); return self; }

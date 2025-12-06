@@ -197,11 +197,14 @@ void power::init() {
   reshuffle = [this] {};
   }
 
+string unspace(const string& s);
+
 power& gen_power(int key, string name, string desc, string glyph, color_t color, powerfun pf) {
   powers.emplace_back();
   auto& p = powers.back();
   p.key = key;
   p.name = name;
+  p.id = unspace(name);
   p.desc = desc;
   p.glyph = glyph;
   p.color = color;
@@ -215,7 +218,7 @@ int gold_id;
 power *dexmode;
 
 void power_death_revert(power& p) {
-  add_revert(death_revert, {"ITEM", p.name, its(p.qty_filled), its(p.qty_owned)});
+  add_revert(death_revert, {"ITEM", p.id, its(p.qty_filled), its(p.qty_owned)});
   }
 
 void gen_powers() {
@@ -247,13 +250,15 @@ void gen_powers() {
 
           if(m.experience >= 50) {
             auto g = std::make_unique<ghost>();
+            g->id = "GHOST";
             g->extra_invinc = 2 * game_fps;
             g->where = w; g->ghost_hp = hp; g->ghost_xp = m.experience/2; m.experience -= g->ghost_xp;
             g->hs(fountain_resetter);
             cr->entities.emplace_back(std::move(g));
             }
 
-          auto bones = std::make_unique<item>();
+          auto bones = std::make_unique<ghost_item>();
+          bones->id = "BONES";
           bones->qty = 10;
           bones->where = stable_where;
           bones->p = &powers[gold_id];
@@ -627,6 +632,11 @@ void shuffle_all() {
 
 power& find_power(string name) {
   for(auto& p: powers) if(p.name == name) return p;
+  throw hr_name_error("unknown power");
+  }
+
+power& find_power_by_id(string id) {
+  for(auto& p: powers) if(p.id == id) return p;
   throw hr_name_error("unknown power");
   }
 

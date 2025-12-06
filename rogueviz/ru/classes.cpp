@@ -30,6 +30,7 @@ enum class mod { burning, freezing, disarming };
 
 struct power {
   int key;
+  string id;
   string name;
   string desc;
   string glyph;
@@ -86,15 +87,19 @@ struct intxy {
 
 struct room {
   // texture::texture_data *room_texture;
-  string roomname;
+  string id, roomname;
   renderbuffer *rbuf;
   cell *where;
   short block_at[room_y][room_x];
   bool fov[room_y][room_x];
   bool which_map_rendered;
-  bool infile, need_rerender;
+
+  bool infile; /* loaded from the map file, or edited */
+  bool edited; /* edited, so it should be saved when saving map */
+  bool save_to_save; /* will be saved to save files */
+  bool need_rerender;
+
   int timed_orb_end;
-  bool edited;
 
   vector<unique_ptr<struct entity>> entities;
 
@@ -114,6 +119,8 @@ struct room {
   
   void initial() {
     edited = false;
+    save_to_save = false;
+    infile = false;
     int ylev = where->master->distance;
     if(ylev <= 0)
       for(int y=room_y-6; y<room_y; y++)
@@ -124,7 +131,7 @@ struct room {
       for(int x=0; x<room_x; x++)
         block_at[y][x] = 8;
 
-    roomname = "UNNAMED-";
+    id = roomname = "UNNAMED-";
     for(int i=0; i<8; i++) roomname += char('A' + rand() % 26);
     println(hlog, "generated roomname as ", roomname);
     }
@@ -151,7 +158,7 @@ struct room {
   void replace_block_frev(int x, int y, eWall w) {
     auto orig = at(x, y);
     replace_block(x, y, w);
-    add_revert(fountain_revert, {"BLOCK", roomname, its(x), its(y), its(orig)});
+    add_revert(fountain_revert, {"BLOCK", id, its(x), its(y), its(orig)});
     }
 
   void replace_block_frev(intxy xy, eWall w) { replace_block_frev(xy.x, xy.y, w); }
@@ -615,6 +622,7 @@ struct disnake : public snake {
   void unact() override { destroyed = true; }
   int bite() override { return 5; }
   void on_fountain() override { destroyed = true; }
+  virtual void hs(stater& s) override { snake::hs(s); s.act("respawn", respawn, {0, 0}); }
   };
 
 struct kestrel : public enemy {
@@ -715,7 +723,7 @@ struct item : public located_entity {
     kino();
     if(intersect(get_pixel_bbox(), m.get_pixel_bbox())) {
       addMessage(pickup_message);
-      add_revert(death_revert, {"ITEM", p->name, its(p->qty_filled), its(p->qty_owned)});
+      add_revert(death_revert, {"ITEM", p->id, its(p->qty_filled), its(p->qty_owned)});
       add_revert(death_revert, {"EXIST", id});
       p->picked_up(qty);
       existing = false;
@@ -767,6 +775,10 @@ struct loot : public item {
   virtual void hs(stater& s) override { s.act("dropped", dropped, false); item::hs(s); }
   };
 
+struct ghost_item : public item {
+  virtual void hs(stater& s) override { item::hs(s); s.act("respawn", respawn, {0, 0}).act("qty", qty, 0); }
+  };
+
 struct missile : public entity {
   int power;
   missile() { destroyed = false; }
@@ -776,7 +788,7 @@ struct missile : public entity {
   void act() override; 
   void hit_wall() override { destroyed = true; }
   struct missile* as_missile() override { return this; }
-  virtual void hs(stater& s) override { entity::hs(s); s.act("power", power, 0); }
+  virtual void hs(stater& s) override { entity::hs(s); s.act("power", power, 0).act("where", where, {0, 0}); }
   void on_fountain() override { destroyed = true; }
   };
 

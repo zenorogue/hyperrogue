@@ -10,7 +10,7 @@ void visit(cell *c, int d) {
   q.push(c);
   }
 
-string unspace(string s) {
+string unspace(const string& s) {
   string t;
   for(char c: s) if(c == ' ') t += "_"; else t += c;
   return t;
@@ -102,9 +102,11 @@ void create_long_rope(room& r, int step, xy w) {
 void load_room(fhstream& f, cell *c) {
   setdist(c, 7, nullptr);
   auto& r = *get_room_at(c);
+  r.save_to_save = true;
   string s = scanline_noblank(f);
   if(s.substr(0, 5) == "ROOM ") r.roomname = s.substr(5);
   else err("load_room name ", s);
+  r.id = unspace(r.roomname);
   println(hlog, "loading room named: ", r.roomname);
   map<char, int> codes;
   while(true) {
