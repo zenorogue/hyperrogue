@@ -113,11 +113,13 @@ void load_room(fhstream& f, cell *c) {
       codes[s[0]] = i;
       break;
       }
+    if(!codes.count(s[0])) println(hlog, "unrecognized: ", t);
     }
   if(1) {
     vector<string> bmap;
     for(int y=0; y<room_y; y++) bmap.push_back(scanline_noblank(f));
     for(int y=0; y<room_y; y++) for(int x=0; x<room_x; x++) {
+      if(bmap[y][x] != 'b' && !codes.count(bmap[y][x])) println(hlog, format("illegal code: %c", bmap[y][x]));
       if(bmap[y][x] == 'b') ;
       else if(y < room_y-1 && bmap[y+1][x] == 'b') ;
       else if(x < room_x-1 && bmap[y][x+1] == 'b') ;
