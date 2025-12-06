@@ -41,8 +41,6 @@ void prepare_tinf() {
 
   cgi.finishshape();
   cgi.extra_vertices();
-
-  println(hlog, "sizes: ", tuple(roomshape_big.e - roomshape_big.s, roomshape.e - roomshape.s));
   }
 
 void room::create_texture() {
