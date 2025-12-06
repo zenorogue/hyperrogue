@@ -240,8 +240,6 @@ struct entity {
   virtual bool default_existing() { return true; }
 
   virtual void hs(stater& s) {
-    println(hlog, "called hs for ", get_name(), " '", name, "' with default_where() of ", make_pair(default_where().x, default_where().y));
-    // println(hlog, name + ": where is ", tie(where.x, where.y), " respawn is ", tie(respawn.x, respawn.y), " default_where is ", make_pair(default_where().x, default_where().y));
     s.act("where", where, default_where())
      .act("vel", vel, default_vel())
      .act("existing", existing, default_existing())
