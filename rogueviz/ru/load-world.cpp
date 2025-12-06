@@ -10,6 +10,12 @@ void visit(cell *c, int d) {
   q.push(c);
   }
 
+string unspace(string s) {
+  string t;
+  for(char c: s) if(c == ' ') t += "_"; else t += c;
+  return t;
+  }
+
 void save_map(string fname) {
   in_queue.clear();
   q = {};
@@ -142,7 +148,7 @@ void load_room(fhstream& f, cell *c) {
         pos = param.find(" "); auto res = param.substr(0, pos); param = param.substr(pos + 1);
         return res;
         };
-      auto nam = [&] (entity& b) { b.name = cutoff("NOTHING"); };
+      auto nam = [&] (entity& b) { b.id = cutoff("NOTHING"); };
       auto get_ld = [&] () { return atof(cutoff("0").c_str()); };
       auto get_int = [&] () { return atoi(cutoff("0").c_str()); };
       auto get_color = [&] () { color_t col; sscanf(cutoff("0").c_str(), "%08x", &col); return col; };
@@ -159,7 +165,7 @@ void load_room(fhstream& f, cell *c) {
         b->qty = param == "" ? 1 : get_int();
         println(hlog, "qty is ", b->qty);
         b->p = &find_power(scanline_noblank(f));
-        b->name = b->pickup_message = scanline_noblank(f);
+        b->id = unspace(b->pickup_message = scanline_noblank(f));
         r.entities.emplace_back(std::move(b)); 
         }
       else if(cap == "LOOT") {
@@ -167,7 +173,7 @@ void load_room(fhstream& f, cell *c) {
         b->owner = &*r.entities.back();
         b->qty = param == "" ? 1 : get_int();
         b->p = &find_power(scanline_noblank(f));
-        b->name = b->pickup_message = scanline_noblank(f);
+        b->id = unspace(b->pickup_message = scanline_noblank(f));
         r.entities.emplace_back(std::move(b));
         }
       else if(cap == "SHOPITEM") {
@@ -177,7 +183,7 @@ void load_room(fhstream& f, cell *c) {
         b->qty = param == "" ? 1 : get_int();
         b->qty1 = param == "" ? 0 : get_int();
         b->p = &find_power(scanline_noblank(f));
-        b->name = b->pickup_message = scanline_noblank(f);
+        b->id = unspace(b->pickup_message = scanline_noblank(f));
         r.entities.emplace_back(std::move(b));
         }
       else if(cap == "NPC") {
@@ -187,6 +193,7 @@ void load_room(fhstream& f, cell *c) {
         s = scanline_noblank(f);
         b->sglyph = s[0];
         b->name = s.substr(1);
+        b->id = unspace(b->name);
         b->text = scanline_noblank(f);
         r.entities.emplace_back(std::move(b));
         }
@@ -195,6 +202,7 @@ void load_room(fhstream& f, cell *c) {
         b->respawn = get_xy();
         b->name = scanline_noblank(f);
         b->text = scanline_noblank(f);
+        b->id = unspace(b->name);
         r.entities.emplace_back(std::move(b));
         }
       else if(cap == "BOAR") {
@@ -299,7 +307,7 @@ void load_room(fhstream& f, cell *c) {
     }
   }
 
-map<string, entity*> entity_by_name;
+map<string, entity*> entity_by_id;
 
 void load_map(string fname) {
   fhstream f(fname, "r");
@@ -317,12 +325,12 @@ void load_map(string fname) {
   for(auto& [c,r]: rooms) {
     for(auto& e: r.entities) {
       e->hs(resetter);
-      if(e->name != "") {
-        while(entity_by_name.count(e->name)) {
-          println(hlog, "error: double entity name: ", e->name);
-          e->name += "'";
+      if(e->id != "") {
+        while(entity_by_id.count(e->id)) {
+          println(hlog, "error: double entity name: ", e->id);
+          e->id += "'";
           }
-        entity_by_name[e->name] = &*e;
+        entity_by_id[e->id] = &*e;
         }
       }
     }

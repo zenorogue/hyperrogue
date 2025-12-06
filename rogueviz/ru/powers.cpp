@@ -515,7 +515,7 @@ void gen_powers() {
             addMessage(si->pickup_message);
             power_death_revert(*si->p);
             si->p->qty_owned += si->qty;  si->p->qty_filled += si->qty1;
-            add_revert(death_revert, {"EXIST", si->name});
+            add_revert(death_revert, {"EXIST", si->id});
             si->existing = false;
             }
           else if(it == 0 && on && si->existing && si->bought) {
@@ -523,7 +523,7 @@ void gen_powers() {
             addMessage("You get some gold.");
             power_death_revert(*si->p);
             powers[gold_id].qty_owned += si->price;  powers[gold_id].qty_filled += si->price;
-            add_revert(death_revert, {"EXIST", si->name});
+            add_revert(death_revert, {"EXIST", si->id});
             si->existing = false;
             }
           else if((it ? !done_something : on) && !si->existing && !si->bought) {
@@ -531,7 +531,7 @@ void gen_powers() {
             addMessage("You rethink your purchase.");
             power_death_revert(*si->p);
             si->p->qty_owned -= si->qty;  si->p->qty_filled -= si->qty1;
-            add_revert(death_revert, {"UNEXIST", si->name});
+            add_revert(death_revert, {"UNEXIST", si->id});
             si->existing = true;
             }
           else if((it ? !done_something : on) && !si->existing && si->bought) {
@@ -539,7 +539,7 @@ void gen_powers() {
             addMessage("You rethink your actions.");
             power_death_revert(*si->p);
             powers[gold_id].qty_owned -= si->price;  powers[gold_id].qty_filled -= si->price;
-            add_revert(death_revert, {"UNEXIST", si->name});
+            add_revert(death_revert, {"UNEXIST", si->id});
             si->existing = true;
             }
           else if(it == 0 && on_trader && !si->existing && d.p->qty_owned >= si->price) {
@@ -548,7 +548,7 @@ void gen_powers() {
             power_death_revert(*si->p);
             powers[gold_id].qty_owned -= si->price;  powers[gold_id].qty_filled -= si->price;
             si->existing = true; si->bought = true;
-            add_revert(death_revert, {"UNBOUGHT", si->name});
+            add_revert(death_revert, {"UNBOUGHT", si->id});
             }
           else if(it == 0 && on_trader && !si->existing && !si->bought) {
             done_something = true;

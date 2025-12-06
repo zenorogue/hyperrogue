@@ -8,7 +8,7 @@ room *find_room(string s) {
   }
 
 entity* find_entity(string s) {
-  auto e = entity_by_name[s];
+  auto e = entity_by_id[s];
   if(!e) throw hr_name_error("find_entity");
   return e;
   }

@@ -210,7 +210,7 @@ struct stater {
   };
 
 struct entity {
-  string name;
+  string id;
   virtual ~entity() {}
   virtual xy siz() = 0;
   xy where, vel;
@@ -456,7 +456,7 @@ struct timed_orb : public located_entity {
   };
 
 struct npc_or_trader : public located_entity {
-  string text;
+  string text, name;
   int talk_on;
   xy siz() override { return {12, 12}; }
   void act() override;
@@ -718,7 +718,7 @@ struct item : public located_entity {
     if(intersect(get_pixel_bbox(), m.get_pixel_bbox())) {
       addMessage(pickup_message);
       add_revert(death_revert, {"ITEM", p->name, its(p->qty_filled), its(p->qty_owned)});
-      add_revert(death_revert, {"EXIST", name});
+      add_revert(death_revert, {"EXIST", id});
       p->picked_up(qty);
       existing = false;
       }
