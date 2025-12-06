@@ -364,7 +364,7 @@ void gen_powers() {
           "but will let you easily map the parts of the world you have seen so far. Contrary to Poincaré's ball, straight lines are "
           "mapped faithfully."),
 
-  gen_power('c', "furry ring",
+  gen_power('u', "furry ring",
     "This strange ring is too small to put on your finger, but maybe you could put it on your small toe?",
     "=", 0xe1cbbeFF,
     [] (data& d) {
