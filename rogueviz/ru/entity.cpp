@@ -17,6 +17,8 @@ bbox entity::get_pixel_bbox_at(xy p, ld scalex, ld scaley) {
   return b;
   }
 
+void entity::on_fountain() { hs(fountain_resetter); }
+
 bool entity::visible(room *r) {
   auto bb = get_intersect(pixel_to_block(get_pixel_bbox()), room_bb);
   for(int y = bb.miny; y < bb.maxy; y++) for(int x = bb.minx; x < bb.maxx; x++) if(r->fov[y][x]) return true;

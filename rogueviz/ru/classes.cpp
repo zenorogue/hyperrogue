@@ -319,6 +319,8 @@ struct entity {
   virtual string get_help() { return "No help about this."; }
 
   virtual bool hit_by_missile(missile *m) { return false; }
+
+  virtual void on_fountain();
   };
 
 struct statdata {
@@ -614,6 +616,7 @@ struct disnake : public snake {
   int max_hp() override { return 1; }
   void unact() override { destroyed = true; }
   int bite() override { return 5; }
+  void on_fountain() override { destroyed = true; }
   };
 
 struct kestrel : public enemy {
@@ -776,6 +779,7 @@ struct missile : public entity {
   void hit_wall() override { destroyed = true; }
   struct missile* as_missile() override { return this; }
   virtual void hs(stater& s) override { entity::hs(s); s.act("power", power, 0); }
+  void on_fountain() override { destroyed = true; }
   };
 
 struct ice_missile : public missile {

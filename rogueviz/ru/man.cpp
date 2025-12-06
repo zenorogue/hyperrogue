@@ -12,7 +12,7 @@ xy stable_where;
 void regenerate_all() {
   m.hs(fountain_resetter);
   for(auto& p: powers) p.refill();
-  for(auto& r: rooms) for(auto& e: r.second.entities) e->hs(fountain_resetter);
+  for(auto& r: rooms) for(auto& e: r.second.entities) e->on_fountain();
   revert_all(fountain_revert);
   current_target = nullptr;
   shuffle_all();
