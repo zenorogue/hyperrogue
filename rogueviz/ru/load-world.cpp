@@ -166,9 +166,7 @@ void load_room(fhstream& f, cell *c) {
         b->qty = param == "" ? 1 : get_int();
         b->p = &find_power(scanline_noblank(f));
         b->name = b->pickup_message = scanline_noblank(f);
-        b->existing = false;
         r.entities.emplace_back(std::move(b));
-        println(hlog, "loot pushed");
         }
       else if(cap == "SHOPITEM") {
         auto b = std::make_unique<shopitem>();
