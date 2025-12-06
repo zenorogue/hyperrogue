@@ -247,14 +247,16 @@ void gen_powers() {
 
           if(m.experience >= 50) {
             auto g = std::make_unique<ghost>();
-            g->where = w; g->hp = hp; g->xp = m.experience/2; m.experience -= g->xp; g->postfix();
+            g->extra_invinc = 2 * game_fps;
+            g->where = w; g->ghost_hp = hp; g->ghost_xp = m.experience/2; m.experience -= g->ghost_xp;
+            g->hs(fountain_resetter);
             cr->entities.emplace_back(std::move(g));
             }
 
           auto bones = std::make_unique<item>();
           bones->qty = 10;
           bones->where = stable_where;
-          bones->id = gold_id;
+          bones->p = &powers[gold_id];
           bones->pickup_message = "You got it back.";
           stable_room->entities.emplace_back(std::move(bones));
           }
@@ -511,15 +513,15 @@ void gen_powers() {
           if(it == 0 && on && si->existing && !si->bought) {
             done_something = true;
             addMessage(si->pickup_message);
-            power_death_revert(powers[si->id]);
-            powers[si->id].qty_owned += si->qty;  powers[si->id].qty_filled += si->qty1;
+            power_death_revert(*si->p);
+            si->p->qty_owned += si->qty;  si->p->qty_filled += si->qty1;
             add_revert(death_revert, {"EXIST", si->name});
             si->existing = false;
             }
           else if(it == 0 && on && si->existing && si->bought) {
             done_something = true;
             addMessage("You get some gold.");
-            power_death_revert(powers[gold_id]);
+            power_death_revert(*si->p);
             powers[gold_id].qty_owned += si->price;  powers[gold_id].qty_filled += si->price;
             add_revert(death_revert, {"EXIST", si->name});
             si->existing = false;
@@ -527,30 +529,30 @@ void gen_powers() {
           else if((it ? !done_something : on) && !si->existing && !si->bought) {
             done_something = true;
             addMessage("You rethink your purchase.");
-            power_death_revert(powers[si->id]);
-            powers[si->id].qty_owned -= si->qty;  powers[si->id].qty_filled -= si->qty1;
+            power_death_revert(*si->p);
+            si->p->qty_owned -= si->qty;  si->p->qty_filled -= si->qty1;
             add_revert(death_revert, {"UNEXIST", si->name});
             si->existing = true;
             }
           else if((it ? !done_something : on) && !si->existing && si->bought) {
             done_something = true;
             addMessage("You rethink your actions.");
-            power_death_revert(powers[gold_id]);
+            power_death_revert(*si->p);
             powers[gold_id].qty_owned -= si->price;  powers[gold_id].qty_filled -= si->price;
             add_revert(death_revert, {"UNEXIST", si->name});
             si->existing = true;
             }
           else if(it == 0 && on_trader && !si->existing && d.p->qty_owned >= si->price) {
             done_something = true;
-            addMessage("You buy the " + powers[si->id].get_name() + ".");
-            power_death_revert(powers[gold_id]);
+            addMessage("You buy the " + si->p->get_name() + ".");
+            power_death_revert(*si->p);
             powers[gold_id].qty_owned -= si->price;  powers[gold_id].qty_filled -= si->price;
             si->existing = true; si->bought = true;
             add_revert(death_revert, {"UNBOUGHT", si->name});
             }
           else if(it == 0 && on_trader && !si->existing && !si->bought) {
             done_something = true;
-            addMessage("You have not enough gold to buy the " + powers[si->id].get_name() + ".");
+            addMessage("You have not enough gold to buy the " + si->p->get_name() + ".");
             }
           }
         if(!done_something) addMessage("You count your gold. You have " + its(d.p->qty_owned) + " gold.");

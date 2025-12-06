@@ -53,11 +53,10 @@ randeff trap_snake("Snake Hair", "Lets you create snakes that can be used to dis
   if(d.mode == rev::start || (d.mode == rev::active && d.keystate == 1)) {
     auto d = m.get_dat();
     auto mi = std::make_unique<disnake>();
-    mi->where = m.where + xy(m.facing * m.get_scale() * m.siz().y * 0.45, 0);
-    mi->vel = m.vel + xy(m.facing * d.modv * 2, -d.modv * 3.5);
-    mi->clearg();
+    mi->respawn = m.where + xy(m.facing * m.get_scale() * m.siz().y * 0.45, 0);
+    mi->hs(fountain_resetter);
     mi->invinc_end = gframeid + 50;
-    mi->postfix();
+    mi->vel = m.vel + xy(m.facing * d.modv * 2, -d.modv * 3.5);
     mi->dir = m.facing * 2;
     current_room->entities.emplace_back(std::move(mi));
     }
@@ -109,9 +108,9 @@ randeff fire_spit("Fiery Spit", "Lets you spit fire.", "You feel fire in your mo
     for(int i=1; i<10; i++) {
       auto d = m.get_dat();
       auto mi = std::make_unique<fire_missile>();
+      mi->hs(fountain_resetter);
       mi->where = m.where + xy(m.facing * m.get_scale() * m.siz().y * 0.45, 0);
       mi->vel = m.vel + xy(m.facing * d.modv * i, d.modv * (10-i) / 5.);
-      mi->clearg();
       mi->index = i; mi->power = m.current.stats[stat::wis] * 2 / 5 + 1e-6;
       current_room->entities.emplace_back(std::move(mi));
       }

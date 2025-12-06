@@ -446,6 +446,7 @@ void frog::attacked(int dmg) {
   }
 
 void ghost::act() {
+  if(gframeid >= invinc_end && extra_invinc) gframeid += extra_invinc, extra_invinc = 0;
   hyperpoint g = to_hyper(where);
   hyperpoint h = to_hyper(m.where);
   ld d = hdist(g, h);
@@ -800,7 +801,6 @@ void icicle::act() {
       kino();
       if(on_floor) break;
       }
-    regenerate();
     }
   if(state == 0) {
     auto w = m.where;

@@ -25,6 +25,7 @@ Have fun!
 
 #include "globals.cpp"
 #include "classes.cpp"
+#include "staters.cpp"
 #include "geometry.cpp"
 #include "entity.cpp"
 #include "man.cpp"
@@ -32,7 +33,7 @@ Have fun!
 #include "render.cpp"
 #include "portals.cpp"
 #include "powers.cpp"
-#include "save.cpp"
+#include "load-world.cpp"
 #include "stats.cpp"
 #include "randeff.cpp"
 #include "reverts.cpp"
@@ -160,7 +161,6 @@ void playing_frame() {
     m.where = w1;
     m.vel *= vmul;
     switch_to_adjacent_room(cr);
-    m.clearg();
     }
   }
 

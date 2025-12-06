@@ -10,9 +10,9 @@ room *stable_room;
 xy stable_where;
 
 void regenerate_all() {
-  m.hp = m.max_hp();
+  m.hs(fountain_resetter);
   for(auto& p: powers) p.refill();
-  for(auto& r: rooms) for(auto& e: r.second.entities) e->regenerate();
+  for(auto& r: rooms) for(auto& e: r.second.entities) e->hs(fountain_resetter);
   revert_all(fountain_revert);
   current_target = nullptr;
   shuffle_all();
@@ -46,6 +46,13 @@ void statdata::reset() {
   rough_detect = 0;
   hallucinating = false;
   mods.clear();
+  }
+
+man::man() {
+  facing = 1; attack_facing = 1;
+  for(auto s: allstats) base_stats[s] = 10;
+  next.reset(); current.reset();
+  hs(fountain_resetter);
   }
 
 void man::act() {

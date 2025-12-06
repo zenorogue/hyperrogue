@@ -198,6 +198,17 @@ template<class T> struct statarray : array<T, qstat> {
   const T& operator [] (stat s) const { return array<T, qstat>::operator[] ((int) s); };
   };
 
+struct stater {
+  virtual stater& act(const string& s, int& i, int _i) = 0;
+  virtual stater& act(const string& s, bool& b, bool _b) = 0;
+  virtual stater& act(const string& s, ld& d, ld _d) = 0;
+  virtual stater& act(const string& s, string& w, const string& _w) = 0;
+  virtual stater& act(const string& s, color_t& c, color_t _c) = 0;
+  virtual stater& act(const string& s, intxy& xy, intxy _xy) { act(s+".x", xy.x, _xy.x); act(s+".y", xy.y, _xy.y); return self; }
+  virtual stater& act(const string& s, xy& p, xy _p) { act(s+".x", p.x, _p.x); act(s+".y", p.y, _p.y); return self; }
+  virtual stater& only_full() { return self; }
+  };
+
 struct entity {
   string name;
   virtual ~entity() {}
@@ -221,25 +232,24 @@ struct entity {
   int invinc_end;
 
   virtual int max_hp() { return 100; }
-  virtual void regenerate() {}
 
   virtual bool visible(room *r);
 
-  void clearg() {
+  virtual xy default_where() { return {screen_x/2., screen_y/2.}; }
+  virtual xy default_vel() { return {0, 0}; }
+  virtual bool default_existing() { return true; }
+
+  virtual void hs(stater& s) {
+    println(hlog, "called hs for ", get_name(), " '", name, "' with default_where() of ", make_pair(default_where().x, default_where().y));
+    // println(hlog, name + ": where is ", tie(where.x, where.y), " respawn is ", tie(respawn.x, respawn.y), " default_where is ", make_pair(default_where().x, default_where().y));
+    s.act("where", where, default_where())
+     .act("vel", vel, default_vel())
+     .act("existing", existing, default_existing())
+     .act("hp", hp, max_hp())
+     .act("invinc_end", invinc_end, -1)
+     .act("destroyed", destroyed, false);
     gwhere = where;
     gvel = vel;
-    }
-
-  entity() {
-    where = xy(screen_x / 2., screen_y / 2.);
-    vel = xy(0, 0);
-    existing = true;
-    destroyed = false; invinc_end = -1;
-    clearg();
-    };
-
-  void postfix() {
-    hp = max_hp();
     }
 
   data get_dat();
@@ -347,12 +357,7 @@ struct man : public entity {
   virtual int max_hp() { return 10 * current.stats[stat::con]; }
 
   bool can_see(entity& e);
-  man() {
-    facing = 1; attack_facing = 1;
-    for(auto s: allstats) base_stats[s] = 10;
-    next.reset(); current.reset();
-    postfix();
-    }
+  man();
   xy siz() override {
     if(morphed) return morphed->siz();
     return {12, 12};
@@ -388,12 +393,14 @@ extern man m;
 struct moving_platform : public entity {
   xy ctr;
   ld radius, shift;
+  ld cur_t;
   virtual int width() { return 3; }
   virtual eWall platform_type() { return wWall; }
   xy siz() override { return {12.*width(), 12}; }
   string glyph() override { return "#"; }
   color_t color() override { return 0xFFFFFFFF; }
   virtual xy location_at(ld t) = 0;
+  virtual xy default_where() override { return location_at(cur_t); }
   void draw() override;
   void act() override;
   virtual moving_platform* as_platform() { return this; }
@@ -426,7 +433,13 @@ struct rope_platform : public moving_platform {
   void draw() override;
   };
 
-struct timed_orb : public entity {
+/* entities with a defined 'respawn' location */
+struct located_entity : public entity {
+  xy respawn;
+  xy default_where() override { return respawn; }
+  };
+
+struct timed_orb : public located_entity {
   int duration;
   xy siz() override { return {18, 18}; }
   string glyph() override { return "O"; }
@@ -440,12 +453,13 @@ struct timed_orb : public entity {
   string get_help() override { return "These orbs activate mechanisms for a limited time."; }
   };
 
-struct npc_or_trader : public entity {
+struct npc_or_trader : public located_entity {
   string text;
   int talk_on;
   xy siz() override { return {12, 12}; }
   void act() override;
   string get_name() override { return name; }
+  virtual void hs(stater& s) override { entity::hs(s); s.act("talk_on", talk_on, 0); }
   };
 
 struct npc : public npc_or_trader {
@@ -466,22 +480,20 @@ struct trader : public npc_or_trader {
   virtual struct trader* as_trader() { return this; }
   };
 
-struct enemy : public entity {
-  xy respawn;
+struct enemy : public located_entity {
   int num_kills;
   void on_kill() override {
     entity::on_kill();
     num_kills++;
     m.experience += (base_xp() * 25 + 24) / (4 + num_kills) / (4 + num_kills);
     }
-  enemy() { num_kills = 0; postfix(); }
+  virtual void hs(stater& s) override { located_entity::hs(s); s.only_full().act("kills", num_kills, 0); }
   void attacked(int s) override;
-  void regenerate() override { where = respawn; vel = xy(0, 0); existing = true; hp = max_hp(); }
   virtual int base_xp() { return 0; }
   bool hit_by_missile(missile *m) override { return true; }
   };
 
-struct vtrap : public entity {
+struct vtrap : public located_entity {
   xy siz() override { return {6, 18}; }
   string glyph() override { return "^"; }
   color_t color() override { return 0xD00000FF; }
@@ -496,6 +508,8 @@ struct cat_color {
   color_t col;
   };
 
+void sact(stater& s, string t, cat_color co) { s.act(t+".name", co.name, "black").act(t+".col", co.col, 0xFFFFFFFF); }
+
 struct cat : public enemy {
   cat_color col;
   cat();
@@ -504,6 +518,7 @@ struct cat : public enemy {
   color_t color() override { return col.col; }
   string get_name() override { return col.name + " cat"; }
   string get_help() override { return "Do not fight cats!"; }
+  virtual void hs(stater& s) override { enemy::hs(s); sact(s, "color", col); }
   int base_xp() { return 10; }
   int max_hp() { return 20; }
   };
@@ -543,6 +558,7 @@ struct frog : public enemy {
   string get_help() override { return "What a nice frog."; }
   int base_xp() { return 30; }
   int max_hp() { return 30; }
+  virtual void hs(stater& s) override { enemy::hs(s); s.act("jphase", jphase, 0).act("jump_at", jump_at, 0); }
   };
 
 struct giantfrog : public frog {
@@ -556,7 +572,7 @@ struct giantfrog : public frog {
   };
 
 struct ghost : public enemy {
-  int xp, hp;
+  int ghost_xp, ghost_hp, extra_invinc;
   bool flipped;
   xy siz() override { return {12, 12}; }
   string glyph() override { return "g"; }
@@ -564,9 +580,14 @@ struct ghost : public enemy {
   void act() override;
   string get_name() override { return "ghost"; }
   string get_help() override { return "This apparition looks strangely like you..."; }
-  int base_xp() { return hp; }
-  int max_hp() { return xp; }
-  void regenerate() override {}
+  int base_xp() { return ghost_hp; }
+  int max_hp() { return ghost_xp; }
+  xy default_where() override { return where; } // do not reset on fountains
+  virtual void hs(stater& s) override {
+    enemy::hs(s);
+    s.act("extra_invinc", extra_invinc, 2 * game_fps).
+    only_full().act("flipped", flipped, false).act("xp", ghost_xp, 50).act("hp", ghost_hp, 100).act("where", where, {0, 0});
+    }
   };
 
 struct snake : public enemy {
@@ -578,10 +599,10 @@ struct snake : public enemy {
   void attacked(int s) override;
   string get_name() override { return "snake"; }
   string get_help() override { return "A nasty dungeon snake."; }
-  void regenerate() override { enemy::regenerate(); dir = respawn_dir; }
   int base_xp() override { return 10; }
   int max_hp() override { return 30; }
   virtual int bite() { return 25; }
+  virtual void hs(stater& s) override { enemy::hs(s); s.act("dir", dir, respawn_dir); }
   };
 
 struct disnake : public snake {
@@ -605,9 +626,9 @@ struct kestrel : public enemy {
   void attacked(int s) override;
   string get_name() override { return "kestrel"; }
   string get_help() override { return "A standard dungeon kestrel."; }
-  void regenerate() override { enemy::regenerate(); vel = respawn_vel; }
   int base_xp() { return 30; }
   int max_hp() { return 30; }
+  xy default_vel() override { return respawn_vel; }
   };
 
 struct gridbug : public enemy {
@@ -620,6 +641,7 @@ struct gridbug : public enemy {
   string get_help() override { return "You are not sure whether this is some kind of insect or some glitch in the fabric of the reality."; }
   int base_xp() { return 10; }
   int max_hp() { return 10; }
+  virtual void hs(stater& s) override { enemy::hs(s); s.act("nextmove", next_move, 0); }
   };
 
 struct bat : public enemy {
@@ -633,6 +655,7 @@ struct bat : public enemy {
   string get_help() override { return "A cave bat."; }
   int base_xp() { return 10; }
   int max_hp() { return 10; }
+  virtual void hs(stater& s) override { enemy::hs(s); s.act("nextchange", next_change, 0); }
   };
 
 struct guineapig : public enemy {
@@ -647,9 +670,9 @@ struct guineapig : public enemy {
   void attacked(int s) override;
   string get_name() override { return "guinea pig"; }
   string get_help() override { return "A standard dungeon guinea pig."; }
-  void regenerate() override { enemy::regenerate(); falling = true; spindir = respawn_spindir; }
   int base_xp() { return 30; }
   int max_hp() { return 30; }
+  virtual void hs(stater& s) override { enemy::hs(s); s.act("falling", falling, true).act("spindir", spindir, respawn_spindir).act("ca", ca, 0); }
   };
 
 struct icicle : public enemy {
@@ -658,14 +681,16 @@ struct icicle : public enemy {
   xy siz() override { return {10, 10}; }
   string glyph() override { return "|"; }
   color_t color() override { return 0xA0A0F0FF; }
+  xy default_vel() override { auto dat = get_dat(); return { 0, 150 * 0.005 * dat.modv * dat.d }; }
   void act() override;
   string get_name() override { return "icicle"; }
   string get_help() override { return "A dangerous looking icicle."; }
   int base_xp() { return 1; }
   int max_hp() { return 1; }
+  virtual void hs(stater& s) override { enemy::hs(s); s.act("state", state, 0); }
   };
 
-struct hint : public entity {
+struct hint : public located_entity {
   string hint_text;
   int state;
   xy size;
@@ -677,25 +702,26 @@ struct hint : public entity {
   bool have_help() { return false; }
   };
 
-struct item : public entity {
-  int id, qty;
+struct item : public located_entity {
+  power *p;
+  int qty;
   string pickup_message;
   xy siz() override { return {12, 12}; }
-  string glyph() override { return powers[id].get_glyph(); }
-  color_t color() override { return powers[id].get_color(); }
+  string glyph() override { return p->get_glyph(); }
+  color_t color() override { return p->get_color(); }
   void act() override {
     stay_on_screen();
     kino();
     if(intersect(get_pixel_bbox(), m.get_pixel_bbox())) {
       addMessage(pickup_message);
-      add_revert(death_revert, {"ITEM", powers[id].name, its(powers[id].qty_filled), its(powers[id].qty_owned)});
+      add_revert(death_revert, {"ITEM", p->name, its(p->qty_filled), its(p->qty_owned)});
       add_revert(death_revert, {"EXIST", name});
-      powers[id].picked_up(qty);
+      p->picked_up(qty);
       existing = false;
       }
     }
-  string get_name() override { return powers[id].name; }
-  string get_help() override { return powers[id].get_desc(); }
+  string get_name() override { return p->name; }
+  string get_help() override { return p->get_desc(); }
   };
 
 struct shopitem : public item {
@@ -716,11 +742,13 @@ struct shopitem : public item {
   string get_name() override { if(bought) return its(price) + " gold"; return item::get_name(); }
   string get_help() override { if(bought) return "You have bought something from this shop. The trader has stored the gold here."; return item::get_help() + "\n\nPrice: " + its(price); }
   shopitem* as_shopitem() override { return this; }
+  virtual void hs(stater& s) override { item::hs(s); s.act("bought", bought, false).act("last_intersect", last_intersect, 0); }
   };
 
 struct loot : public item {
   entity *owner;
   bool dropped;
+  virtual bool default_existing() { return dropped; }
   void act() {
     item::act();
     if(on_floor) {
@@ -735,6 +763,7 @@ struct loot : public item {
       dropped = true; existing = true;
       }
     }
+  virtual void hs(stater& s) override { s.act("dropped", dropped, false); item::hs(s); }
   };
 
 struct missile : public entity {
@@ -746,6 +775,7 @@ struct missile : public entity {
   void act() override; 
   void hit_wall() override { destroyed = true; }
   struct missile* as_missile() override { return this; }
+  virtual void hs(stater& s) override { entity::hs(s); s.act("power", power, 0); }
   };
 
 struct ice_missile : public missile {
