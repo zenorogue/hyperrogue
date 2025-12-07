@@ -184,4 +184,7 @@ extern shiftmatrix scrm;
 
 struct hr_name_error : hr_exception { hr_name_error(const char *s) : hr_exception(s) {} };
 
+string unspace(const string& s);
+string respace(const string& s);
+
 }

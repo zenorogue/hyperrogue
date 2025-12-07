@@ -16,6 +16,12 @@ string unspace(const string& s) {
   return t;
   }
 
+string respace(const string& s) {
+  string t;
+  for(char c: s) if(c == '_') t += " "; else if(c == '@') t += "\n"; else t += c;
+  return t;
+  }
+
 void save_map(string fname) {
   in_queue.clear();
   q = {};

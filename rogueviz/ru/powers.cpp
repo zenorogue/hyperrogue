@@ -179,8 +179,6 @@ void power::init() {
   reshuffle = [this] {};
   }
 
-string unspace(const string& s);
-
 power& gen_power(int key, string name, string desc, string glyph, color_t color, powerfun pf) {
   powers.emplace_back();
   auto& p = powers.back();
