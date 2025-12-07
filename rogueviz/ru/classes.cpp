@@ -25,6 +25,7 @@ struct randeff {
   int qty, a, b, c, d;
   powerfun act;
   randeff (string name, string desc, string effect, powerfun act);
+  void hs(struct stater& s);
   };
 
 enum class mod { burning, freezing, disarming };
@@ -41,7 +42,7 @@ struct power {
   int id_status;
   int qty_filled;
   int qty_owned;
-  flagtype flags;
+  int flags;
   int random_value;
   vector<struct randeff*> randeffs;
   void init();
@@ -64,6 +65,7 @@ struct power {
   power& be_jewelry(string jtype, string desc);
   power& be_potion();
   power& gain(int qf, int qo) { qty_filled += qf; qty_owned += qo; return self; }
+  void hs(struct stater& s);
   };
 
 extern vector<power> powers;
@@ -405,6 +407,8 @@ struct man : public entity {
     }
 
   void launch_attack(power *p, int fac, boxfun f);
+
+  virtual void hs(stater& s);
   };
 
 extern man m;

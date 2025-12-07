@@ -49,10 +49,41 @@ void statdata::reset() {
   }
 
 man::man() {
+  id = "Alchemist";
   facing = 1; attack_facing = 1;
   for(auto s: allstats) base_stats[s] = 10;
   next.reset(); current.reset();
   hs(fountain_resetter);
+  }
+
+void man::hs(stater& s) {
+  entity::hs(s);
+  s.act("facing", facing, 1)
+   .act("attack_facing", attack_facing, 1)
+   .act("attack_when", attack_when, 0)
+   .act("on_floor_when", on_floor_when, 0)
+   .act("xp", experience, 0)
+   .act("last_action", last_action, 0);
+  sact(s, "hair", hair);
+  sact(s, "eyes", eye);
+  string z = unspace(backstory);
+  s.act("backstory", z, "");
+  backstory = respace(z);
+  int prof = (int) profession; s.act("profession", prof, -1); profession = (stat) prof;
+  for(auto st: allstats) s.act(statinfos[st].name, base_stats[st], 10);
+
+  auto sdata = [&s] (statdata& sd, string prefix) {
+    for(auto st: allstats) s.act(prefix + statinfos[st].name, sd.stats[st], 10);
+    s.act(prefix + "jump_control", sd.jump_control, 0);
+    s.act(prefix + "coyote_time", sd.coyote_time, 0);
+    s.act(prefix + "hallucinating", sd.hallucinating, 0);
+    s.act(prefix + "detect_area", sd.detect_area, 0);
+    s.act(prefix + "detect_cross", sd.detect_cross, 0);
+    s.act(prefix + "rough_detect", sd.rough_detect, 0);
+    };
+
+  sdata(current, "curr.");
+  sdata(next, "next.");
   }
 
 void man::act() {
