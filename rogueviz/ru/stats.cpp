@@ -216,7 +216,7 @@ void stat_screen(bool editable) {
       });
 
     dialog::addItem("reroll", 'r');
-    dialog::add_action(randomize_stats);
+    dialog::add_action([] { statseed++; randomize_stats(); });
     }
 
   dialog::display();
