@@ -1067,7 +1067,7 @@ EX void drawmessage(const string& s, int& y, color_t col) {
   if(nomsg) return;
   int rrad = (int) realradius();
   int space;
-  if(dual::state)
+  if(dual::state || nomap || in_perspective())
     space = vid.xres;
   else if(y > current_display->ycenter + rrad * pconf.stretch)
     space = vid.xres;
