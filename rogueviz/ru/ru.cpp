@@ -388,8 +388,10 @@ string parse_markup(string s) {
   }
 
 void enable() {
-  
+
   stop_game();
+  geometry = gBinary4;
+  showstartmenu = false;
   
   set_sval();
   init_scales();
