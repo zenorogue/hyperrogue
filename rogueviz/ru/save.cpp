@@ -38,6 +38,8 @@ void save() {
 
   save_via_stater(f, m, "MAN", false);
 
+  if(m.morphed) save_via_stater(f, *m.morphed, "MORPH", true);
+
   // list current powers
   for(auto& p: powers) {
     save_via_stater(f, p, "POWER", isize(p.randeffs));
