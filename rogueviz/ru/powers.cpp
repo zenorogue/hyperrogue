@@ -252,7 +252,7 @@ void gen_powers() {
         else if(!on_fountain)
           addMessage("For safety, you can only drink " + d.p->get_name() + " at the Magic Fountain.");
         else {
-          fountain_room = current_room; fountain_where = m.where;
+          fountain_room = current_room; fountain_where = m.where; death_revert = {};
           addMessage("You drink the " + d.p->get_name() + " and you feel that nothing will stop you now!");
           d.p->flags |= ACTIVE;
           }
