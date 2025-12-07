@@ -206,6 +206,14 @@ template<class T> struct statarray : array<T, qstat> {
   const T& operator [] (stat s) const { return array<T, qstat>::operator[] ((int) s); };
   };
 
+struct statinfo {
+  char key;
+  string name;
+  string desc;
+  };
+
+extern statarray<statinfo> statinfos;
+
 struct stater {
   virtual stater& act(const string& s, int& i, int _i) = 0;
   virtual stater& act(const string& s, bool& b, bool _b) = 0;

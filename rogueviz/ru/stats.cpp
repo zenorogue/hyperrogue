@@ -72,13 +72,7 @@ void generate_character() {
   randomize_stats();
   }
 
-struct statinfo {
-  char key;
-  string name;
-  string desc;
-  };
-
-statarray<statinfo> statdata;
+statarray<statinfo> statinfos;
 
 string prettystat(ld cur) {
   int curi = cur + 0.01;
@@ -99,10 +93,10 @@ vector<string> professions = { "Warrior", "Morpher", "Sorcerer", "Rogue" };
 
 void stat_screen(bool editable) {
 
-  statdata[stat::str] = {'s', "Strength", "Affects the strength of your physical attacks."};
-  statdata[stat::con] = {'t', "Toughness", "Affects the amount of hitpoints you have."};
-  statdata[stat::wis] = {'w', "Wisdom", "Affects the power of your alchemy."};
-  statdata[stat::dex] = {'d', "Dexterity", "Improves your 'chill time' power."};
+  statinfos[stat::str] = {'s', "Strength", "Affects the strength of your physical attacks."};
+  statinfos[stat::con] = {'t', "Toughness", "Affects the amount of hitpoints you have."};
+  statinfos[stat::wis] = {'w', "Wisdom", "Affects the power of your alchemy."};
+  statinfos[stat::dex] = {'d', "Dexterity", "Improves your 'chill time' power."};
 
   profdata[stat::str] = {'w', "Warrior", "Warriors start with a powerful axe."};
   profdata[stat::con] = {'m', "Morpher", "Morpher start with an ability to transform into small animals."};
@@ -163,12 +157,12 @@ void stat_screen(bool editable) {
     auto cur = m.current.stats[st];
     string s = its(bas);
     if(cur != bas) s += " (" + prettystat(cur) + ")";
-    dialog::addSelItem(statdata[st].name, s, statdata[st].key);
+    dialog::addSelItem(statinfos[st].name, s, statinfos[st].key);
     dialog::add_action_push([st, editable] {
       render_the_map();
       draw_inventory_frame();
-      dialog::init(statdata[st].name, 0xC000C0);
-      dialog::addHelp(statdata[st].desc);
+      dialog::init(statinfos[st].name, 0xC000C0);
+      dialog::addHelp(statinfos[st].desc);
       dialog::addBreak(100);
       dialog::addSelItem("base value", its(m.base_stats[st]), 0);
       dialog::addSelItem("current value", prettystat(m.current.stats[st]), 0);
