@@ -12,7 +12,7 @@ void visit(cell *c, int d) {
 
 string unspace(const string& s) {
   string t;
-  for(char c: s) if(c == ' ') t += "_"; else t += c;
+  for(char c: s) if(c == ' ') t += "_"; else if(c == '\n') t += "@"; else t += c;
   return t;
   }
 
