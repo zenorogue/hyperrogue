@@ -101,7 +101,7 @@ void reset_all() {
     for(auto& e: r.entities) { e->on_reset_all(); e->hs(resetter); }
 
     for(int y=0; y<room_y; y++)
-    for(int x=0; x<room_y; x++) {
+    for(int x=0; x<room_x; x++) {
       r.fov[y][x] = false;
       }
     r.block_at = r.orig_block_at;
@@ -168,7 +168,8 @@ void load_from(string fname) {
         current_room = find_room_by_id(param);
         string code = decompress_string(from_hexstring(scanline_noblank(f)));
         int pos = 0;
-        for(int y=0; y<room_y; y++) for(int x=0; x<room_y; x++) current_room->fov[y][x] = code[pos++] == '1';
+        if(code.size() == room_y * room_x)
+          for(int y=0; y<room_y; y++) for(int x=0; x<room_x; x++) current_room->fov[y][x] = code[pos++] == '1';
         }
       catch(hr_name_error& e) {
         println(hlog, "warning: could not find room: ", param);
