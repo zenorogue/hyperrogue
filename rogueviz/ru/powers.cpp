@@ -52,33 +52,15 @@ power& power::be_resource(string s) {
   return self;
   }
 
-using flavor = pair<string, color_t>;
 int next_potion, next_jewelry;
-
-vector<flavor> jewelry_colors = {
-  {"steel", 0xA0A0C0FF},
-  {"amethyst", 0xC060C0FF},
-  {"ruby", 0xC06060FF},
-  {"sapphire", 0x6060C0FF},
-  {"emerald", 0x60C060FF},
-  };
-
-vector<flavor> potion_colors = {
-  {"bubbling", 0xC0C0C0FF},
-  {"golden", 0xFFD500FF},
-  {"red", 0xC00000FF},
-  {"blue", 0x0000C0FF},
-  {"green", 0x00C000FF},
-  {"white", 0xFFFFFFFF},
-  {"black", 0x303030FF},
-  };
 
 power& power::be_jewelry(string jtype, string xdesc) {
   int nj = next_jewelry++;
+  reshuffle = [this, nj] { fl = jewelry_colors[nj]; };
   picked_up = [this] (int x) { qty_owned += x; qty_filled = max(qty_filled, x);  };
-  get_color = [nj] { return jewelry_colors[nj].second; };
-  get_name = [nj, this, jtype] {
-    string fname = jewelry_colors[nj].first + " " + jtype;
+  get_color = [this] { return fl.col; };
+  get_name = [this, jtype] {
+    string fname = fl.name + " " + jtype;
     if(flags & IDENTIFIED) fname = fname + " of " + name;
     fname = addqof(fname, this);
     return fname;
@@ -120,11 +102,11 @@ string replace_weapon(string s, power *wpn) {
 power& power::be_potion() {
   int np = next_potion++;
   picked_up = [this] (int x) { qty_owned += x; qty_filled = max(qty_filled, x);  };
-  get_color = [np] { return potion_colors[np].second; };
+  get_color = [this] { return fl.col; };
   refill = [this] { qty_filled = qty_owned; };
-  reshuffle = [this] { random_flavor = rand() % 5040; flags &=~ IDENTIFIED; };
-  get_name = [np, this] {
-    string fname = potion_colors[np].first + " potion";
+  reshuffle = [this, np] { fl = potion_colors[np]; flags &=~ IDENTIFIED; };
+  get_name = [this] {
+    string fname = fl.name + " potion";
     if(flags & (PARTIAL | IDENTIFIED)) fname = fname + " of " + name;
     int insq = 0;
     if(flags & IDENTIFIED)

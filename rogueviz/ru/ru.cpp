@@ -24,7 +24,7 @@ Have fun!
 */
 
 #include "globals.cpp"
-#include "namedcolors.cpp"
+#include "flavors.cpp"
 #include "classes.cpp"
 #include "staters.cpp"
 #include "geometry.cpp"

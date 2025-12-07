@@ -34,13 +34,14 @@ struct power {
   string name;
   string desc;
   string glyph;
+  flavor fl;
   color_t color;
   powerfun pf;
   int id_status;
   int qty_filled;
   int qty_owned;
   flagtype flags;
-  int random_flavor;
+  int random_value;
   vector<struct randeff*> randeffs;
   void init();
   vector<pair<mod, int>> mods;
@@ -358,7 +359,7 @@ struct man : public entity {
   int experience;
   stat profession;
   string backstory;
-  namedcolor hair, eye;
+  flavor hair, eye;
 
   statarray<int> base_stats;
   statdata current, next;
@@ -512,10 +513,10 @@ struct vtrap : public located_entity {
   string get_help() override { return "A deadly but invisible trap."; }
   };
 
-void sact(stater& s, string t, namedcolor co) { s.act(t+".name", co.name, "black").act(t+".col", co.col, 0xFFFFFFFF); }
+void sact(stater& s, string t, flavor co) { s.act(t+".name", co.name, "black").act(t+".col", co.col, 0xFFFFFFFF); }
 
 struct cat : public enemy {
-  namedcolor col;
+  flavor col;
   cat();
   xy siz() override { return {5, 5}; }
   string glyph() override { return "f"; }
