@@ -357,6 +357,8 @@ struct man : public entity {
 
   int experience;
   stat profession;
+  string backstory;
+  namedcolor hair, eye;
 
   statarray<int> base_stats;
   statdata current, next;
@@ -510,15 +512,10 @@ struct vtrap : public located_entity {
   string get_help() override { return "A deadly but invisible trap."; }
   };
 
-struct cat_color {
-  string name;
-  color_t col;
-  };
-
-void sact(stater& s, string t, cat_color co) { s.act(t+".name", co.name, "black").act(t+".col", co.col, 0xFFFFFFFF); }
+void sact(stater& s, string t, namedcolor co) { s.act(t+".name", co.name, "black").act(t+".col", co.col, 0xFFFFFFFF); }
 
 struct cat : public enemy {
-  cat_color col;
+  namedcolor col;
   cat();
   xy siz() override { return {5, 5}; }
   string glyph() override { return "f"; }

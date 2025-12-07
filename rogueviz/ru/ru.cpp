@@ -24,6 +24,7 @@ Have fun!
 */
 
 #include "globals.cpp"
+#include "namedcolors.cpp"
 #include "classes.cpp"
 #include "staters.cpp"
 #include "geometry.cpp"
@@ -485,9 +486,10 @@ void add_platf_hooks() {
 
 void start_new_game() {
   enable();
-  randomize_stats();
+  generate_character();
   cmode = mode::menu;
   pushScreen(initial_stats);
+  clearMessages();
   }
 
 auto chk = arg::add3("-ru", enable)

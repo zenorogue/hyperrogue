@@ -1,27 +1,75 @@
 namespace rogue_unlike {
 
+struct backstory_element {
+  string text;
+  reaction_t effect;
+  };
+
+struct backstory_choice {
+  string part;
+  vector<backstory_element> elts;
+  };
+
+stat mainstat;
+
+extern vector<backstory_choice> backstories;
+
+int statseed;
+vector<int> story_choices;
+
 // -1 to downgrade
 int stat_upgrade_cost(stat s, int bonus = 0) {
   return 10 * (m.base_stats[s] + bonus);
+  }
+
+void randomize_stories() {
+  story_choices = {};
+  for(auto& v: backstories)
+    story_choices.push_back(hrand(isize(v.elts)));
+  }
+
+void upgrade(stat s) {
+  auto uc = stat_upgrade_cost(s);
+  if(uc <= m.experience) {
+    m.experience -= uc;
+    m.base_stats[s]++;
+    if(m.base_stats[s] > m.base_stats[mainstat]) mainstat = s;
+    }
   }
 
 void randomize_stats() {
   for(auto s: allstats) while(m.base_stats[s] > 1) {
     m.base_stats[s]--; m.experience += stat_upgrade_cost(s);
     }
-  auto mainstat = stat::str;
+
+  std::mt19937 statgen;
+  statgen.seed(statseed);
+  swap(statgen, hrngen);
+
+  mainstat = stat::str;
+
+  m.backstory = "";
+  for(int i=0; i<isize(backstories); i++) {
+    auto& ch = backstories[i].elts[story_choices[i]];
+    m.backstory += ch.text;
+    ch.effect();
+    }
+
   for(int i=0; i<500; i++) {
     auto s = hrand_elt(allstats);
-    auto uc = stat_upgrade_cost(s);
-    if(uc <= m.experience) {
-      m.experience -= uc;
-      m.base_stats[s]++;
-      if(m.base_stats[s] > m.base_stats[mainstat]) mainstat = s;
-      }
+    upgrade(s);
     }
   m.profession = mainstat;
   for(auto s: allstats)
     m.current.stats[s] = m.base_stats[s];
+
+  swap(statgen, hrngen);
+  }
+
+void generate_character() {
+  statseed = time(NULL);
+  randomize_stories();
+  randomize_stats();
   }
 
 struct statinfo {
@@ -64,6 +112,28 @@ void stat_screen(bool editable) {
   render_the_map();
   draw_inventory_frame();
   dialog::init("the Alchemist", 0xC000C0);
+
+  dialog::addHelp(m.backstory);
+
+  if(editable) {
+    dialog::addItem("customize the character", 'e');
+    dialog::add_action_push([] {
+      dialog::init("the Alchemist backstory", 0xC000C0);
+      dialog::addItem("randomize all", 'r');
+      dialog::add_action([] { randomize_stories(); randomize_stats(); popScreen(); });
+      char key = 'a';
+      for(int i=0; i<isize(backstories); i++) if(backstories[i].part != "") {
+        dialog::addItem(backstories[i].part, key++);
+        dialog::add_action([i] {
+          story_choices[i] = gmod(story_choices[i] + 1, isize(backstories[i].elts));
+          randomize_stats(); popScreen();
+          });
+        }
+      dialog::addBreak(100);
+      dialog::addBack();
+      dialog::display();
+      });
+    }
 
   dialog::addSelItem("class", profdata[m.profession].name, 'c');
   dialog::add_action_push([editable] {
@@ -157,5 +227,100 @@ void stat_screen(bool editable) {
 void initial_stats() { stat_screen(true); }
 
 void draw_stats() { stat_screen(false); }
+
+// -- backstories follow --
+
+vector<backstory_choice> backstories = {
+
+  backstory_choice{ "family",
+    {
+      {"You are the only child from a family of workers. ", [] { upgrade(stat::str); upgrade(stat::str); }},
+
+      {"You come from a family with long traditions in alchemy. ", [] { upgrade(stat::wis); upgrade(stat::wis); }}
+      }
+   },
+
+  backstory_choice{ "hair",
+    {
+      {"You have blonde hair ", [] {}},
+
+      {"You have red hair ", [] {}},
+
+      {"You have dark hair ", [] {}},
+      }
+   },
+
+  backstory_choice{ "eyes",
+    {
+      {"and green eyes. ", [] {}},
+
+      {"and blue eyes. ", [] {}},
+
+      {"and brown eyes. ", [] {}},
+      }
+   },
+
+  backstory_choice{ "childhood stories",
+    {
+      {"As a child, you loved to listen to your grandfather's stories about how he battled demons to find a cure for your mother's illness when she was a child.\n\n",
+      [] { upgrade(stat::wis); upgrade(stat::wis); }},
+
+      {"As a child, you loved to listen to your grandfather's stories about how he found your grandmother, a princess from another world.\n\n",
+      [] { upgrade(stat::str); upgrade(stat::str); }},
+
+      {"As a child, you loved to listen to your grandmother's stories. The coolest one was about how she almost died from a mad magician's scythe attack.\n\n",
+      [] { upgrade(stat::con); upgrade(stat::con); }}
+
+      }
+    },
+
+  backstory_choice{ "motivation for studying alchemy",
+    {
+      {"You chose to study alchemy, believing it may help to cure the sick. ",
+      [] { upgrade(stat::con); upgrade(stat::con); }},
+
+      {"You chose to study alchemy, believing that the more people know, the better for them. ",
+      [] { upgrade(stat::wis); upgrade(stat::wis); }},
+
+      {"You chose to study alchemy. Good alchemists earn lots of money, after all. ",
+      [] { upgrade(stat::dex); upgrade(stat::dex); }},
+
+      {"You chose to study alchemy. Some potions can make you stronger. ",
+      [] { upgrade(stat::str); upgrade(stat::str); }},
+      }
+    },
+
+  backstory_choice{ "motivation for Second Life",
+    {
+      {"During your studies, you started to question the inevitability of death. You started to work on a potion of second life.\n\n",
+      [] { upgrade(stat::con); upgrade(stat::con); }},
+
+      {"But you were bored by your fellow alchemists creating mundane stuff, such as potions of love and dyes. You realized that it should be possible to create a potion of second life.\n\n",
+      [] { upgrade(stat::wis); upgrade(stat::wis); }},
+
+      {"You realized that your potions are easier to sell when more people want them, and started researching something that everyone would want: a potion of second life.\n\n",
+      [] { upgrade(stat::dex); upgrade(stat::dex); }}
+      }
+    },
+
+  backstory_choice{ "motivation for adventuring",
+    {
+      {"But some ingredients could be found only in the magic fountains in Dungeons of Rogorama. The dungeons are full of dangerous creatures that you are eager to fight. ",
+      [] { upgrade(stat::str); }},
+
+      {"But some ingredients could be found only in the magic fountains in the Dungeons of Rogorama. The dungeons are full of legendary artifacts that you are eager to study. ",
+      [] { upgrade(stat::wis); }}
+      }
+    },
+
+  backstory_choice{ "",
+    {
+      {"While almost nobody has ever returned from these dungeons, the fountains are rumored to be easy to find, so you should be able to create a potion of second life quite easily. "
+       "And then, nothing would be able to stop you!\n\nYou wake up in the last inn before entering the dungeons...",
+      [] { }}
+      }
+    }
+
+  };
 
 }

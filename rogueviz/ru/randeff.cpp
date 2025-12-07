@@ -122,7 +122,7 @@ randeff fire_weapon("Fiery Weapon", "Attacks with your [weapon] set things on fi
     m.next.mods.emplace_back(d.re->which_weapon, mod::burning, 2 * m.current.stats[stat::wis] + 1e-6);
   });
 
-cat_color morph_cat_color;
+namedcolor morph_cat_color;
 
 // morph powers
 randeff morph_cat("Cat", "Turns you into a cat.", "You turn into a cat!", [] (data &d) {

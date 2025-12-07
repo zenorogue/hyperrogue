@@ -774,12 +774,6 @@ void bat::attacked(int dmg) {
   if(where.y > m.where.y) vel.y = +abs(vel.y);
   }
 
-vector<cat_color> cat_colors = {
-  cat_color{"red", 0xC04040FF},
-  cat_color{"black", 0x505060FF},
-  cat_color{"white", 0xF0F0F0FF}
-  };
-
 cat::cat() {
   col = hrand_elt(cat_colors);
   }
