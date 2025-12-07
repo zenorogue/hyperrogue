@@ -94,7 +94,7 @@ struct room {
   string id, roomname;
   renderbuffer *rbuf;
   cell *where;
-  short block_at[room_y][room_x];
+  array<array<short, room_x>, room_y> block_at, orig_block_at;
   bool fov[room_y][room_x];
   bool which_map_rendered;
 
@@ -338,6 +338,8 @@ struct entity {
   virtual bool hit_by_missile(missile *m) { return false; }
 
   virtual void on_fountain();
+
+  virtual void on_reset_all() {}
   };
 
 struct statdata {
@@ -605,6 +607,7 @@ struct ghost : public enemy {
     s.act("extra_invinc", extra_invinc, 2 * game_fps).
     only_full().act("flipped", flipped, false).act("xp", ghost_xp, 50).act("hp", ghost_hp, 100).act("where", where, {0, 0});
     }
+  void on_reset_all() override { destroyed = true; }
   };
 
 struct snake : public enemy {
@@ -633,6 +636,7 @@ struct disnake : public snake {
   void unact() override { destroyed = true; }
   int bite() override { return 5; }
   void on_fountain() override { destroyed = true; }
+  void on_reset_all() override { destroyed = true; }
   virtual void hs(stater& s) override { snake::hs(s); s.act("respawn", respawn, {0, 0}); }
   };
 
@@ -788,6 +792,7 @@ struct loot : public item {
 
 struct ghost_item : public item {
   virtual void hs(stater& s) override { item::hs(s); s.act("respawn", respawn, {0, 0}).act("qty", qty, 0); }
+  void on_reset_all() override { destroyed = true; }
   };
 
 struct missile : public entity {
@@ -801,6 +806,7 @@ struct missile : public entity {
   struct missile* as_missile() override { return this; }
   virtual void hs(stater& s) override { entity::hs(s); s.act("power", power, 0).act("where", where, {0, 0}); }
   void on_fountain() override { destroyed = true; }
+  void on_reset_all() override { destroyed = true; }
   };
 
 struct ice_missile : public missile {

@@ -331,6 +331,7 @@ void load_map(string fname) {
     else err("load_map", s);
     }
   for(auto& [c,r]: rooms) {
+    r.orig_block_at = r.block_at;
     for(auto& e: r.entities) {
       e->hs(resetter);
       if(e->id != "") {

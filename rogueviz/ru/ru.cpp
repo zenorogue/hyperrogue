@@ -393,6 +393,7 @@ void enable() {
   geometry = gBinary4;
   showstartmenu = false;
   
+  init_stats();
   set_sval();
   init_scales();
   gen_powers();
@@ -496,6 +497,7 @@ void start_new_game() {
 
 auto chk = arg::add3("-ru", enable)
   + arg::add3("-ru-start", start_new_game)
+  + arg::add3("-ru-load", [] { arg::shift(); enable(); load_from(arg::args()); })
   + arg::add3("-ru-cheat", [] { arg::shift(); load_cheat(arg::args()); })
   + addHook(mapstream::hooks_loadmap, 100, [] (hstream& f, int id) {
     if(id == 67) {

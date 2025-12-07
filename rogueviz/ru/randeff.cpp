@@ -142,6 +142,7 @@ randeff morph_cat("Cat", "Turns you into a cat.", "You turn into a cat!", [] (da
       }
     else {
       auto mcat = new cat;
+      mcat->id = "cat";
       mcat->col = morph_cat_color;
       m.morphed = mcat;
       addMessage("You morph into a " + m.morphed->get_name() + "!");
@@ -156,6 +157,7 @@ randeff morph_capy("Capybara", "Turns you into a capybara.", "You turn into a ca
       }
     else {
       m.morphed = new capybara;
+      m.morphed->id = "capy";
       addMessage("You morph into a lovely capybara!");
       }
     }

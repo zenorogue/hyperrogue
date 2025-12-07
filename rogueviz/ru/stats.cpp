@@ -91,8 +91,7 @@ statarray<statinfo> profdata;
 
 vector<string> professions = { "Warrior", "Morpher", "Sorcerer", "Rogue" };
 
-void stat_screen(bool editable) {
-
+void init_stats() {
   statinfos[stat::str] = {'s', "Strength", "Affects the strength of your physical attacks."};
   statinfos[stat::con] = {'t', "Toughness", "Affects the amount of hitpoints you have."};
   statinfos[stat::wis] = {'w', "Wisdom", "Affects the power of your alchemy."};
@@ -102,6 +101,9 @@ void stat_screen(bool editable) {
   profdata[stat::con] = {'m', "Morpher", "Morpher start with an ability to transform into small animals."};
   profdata[stat::wis] = {'s', "Sorcerer", "Sorcerers start with an ability to cast fire spells."};
   profdata[stat::dex] = {'r', "Rogue", "Rogues start with an ability to detect hidden passages and traps."};
+  }
+
+void stat_screen(bool editable) {
 
   render_the_map();
   draw_inventory_frame();
