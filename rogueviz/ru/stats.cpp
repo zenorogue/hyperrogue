@@ -201,6 +201,8 @@ void stat_screen(bool editable) {
     dialog::add_action([] {
       popScreen();
       cmode = mode::playing;
+      m.current.reset(); m.next.reset();
+      m.hp = m.max_hp();
       switch(m.profession) {
         case stat::str:
           find_power("axe").gain(1, 1);
