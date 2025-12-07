@@ -118,9 +118,9 @@ bool man::can_see(entity& e) {
 void man::on_kill() {
   entity::on_kill();
   if(extra_life->flags & ACTIVE)
-    addMessage("You die... Press [key:Extra Life] to revive.");
+    addMessage(parse_markup("You die... Press [key:Extra Life] to revive."));
   else
-    addMessage("You die... permanently. You will have to create a new character. Or just press [key:Extra Life] for a narrative cheat.");
+    addMessage(parse_markup("You die... permanently. You will have to create a new character. Or just press [key:Extra Life] for a narrative cheat."));
   }
 
 void add_revert(revert_stack& s, const revert_type& what) {
