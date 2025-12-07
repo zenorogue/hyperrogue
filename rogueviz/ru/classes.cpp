@@ -17,13 +17,14 @@ struct data {
 using powerfun = hr::function<void(data&)>;
 
 struct randeff {
+  string id;
   string name;
   string desc;
   string effect;
   power *which_weapon;
   int qty, a, b, c, d;
   powerfun act;
-  randeff (string name, string desc, string effect, powerfun act) : name(name), desc(desc), effect(effect), act(act) {}
+  randeff (string name, string desc, string effect, powerfun act);
   };
 
 enum class mod { burning, freezing, disarming };

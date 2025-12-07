@@ -1,5 +1,14 @@
 namespace rogue_unlike {
 
+map<string, randeff*> *all_effects;
+
+randeff::randeff (string name, string desc, string effect, powerfun act)
+ : name(name), desc(desc), effect(effect), act(act) {
+   id = unspace(name);
+   if(!all_effects) all_effects = new map<string, randeff*>;
+   (*all_effects)[id] = this;
+   }
+
 randeff inc_str("Strength", "Increases your Strength by 50%.", "You feel stronger!", [] (data &d) { m.next.stats[stat::str] += m.current.stats[stat::str] / 3; });
 randeff inc_dex("Dexterity", "Increases your Dexterity by 50%.", "You feel faster!", [] (data &d) { m.next.stats[stat::dex] += m.current.stats[stat::dex] / 3; });
 randeff inc_con("Toughness", "Increases your Toughness by 50%.", "You feel tougher!", [] (data &d) { m.next.stats[stat::con] += m.current.stats[stat::con] / 3; });
