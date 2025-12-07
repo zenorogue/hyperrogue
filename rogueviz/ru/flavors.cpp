@@ -5,6 +5,8 @@ struct flavor {
   color_t col;
   };
 
+flavor default_flavor {"magenta", 0xFF00FFFF};
+
 flavor 
   // cat colors
   cc_red{"red", 0xC04040FF},
