@@ -626,7 +626,7 @@ struct snake : public enemy {
   };
 
 struct disnake : public snake {
-  color_t color() override { return 0x2020F0FF; }
+  color_t color() override { return m.hair.col; }
   void act() override;
   bool is_disarmer() override { return true; }
   string get_name() override { return "hairsnake"; }

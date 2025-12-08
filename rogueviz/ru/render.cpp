@@ -271,7 +271,7 @@ void man::draw() {
       curvepoint(eupush(h.x, h.y) * C0);
       }
     vid.linewidth *= 3;
-    queuecurve(scrm, 0x800080, 0, PPR::LINE);
+    queuecurve(scrm, m.eye.col, 0, PPR::LINE);
     vid.linewidth /= 3;
     current_room->bfs(xy_to_block(m.where), [&] (intxy xy) {
       if(hdist(h0, block_to_hyper(xy)) > r) return false;
@@ -307,7 +307,7 @@ void man::draw() {
         curvepoint(eupush(h.x, h.y) * C0);
         }
       vid.linewidth *= 3;
-      queuecurve(scrm, 0xFF000080, 0, PPR::LINE);
+      queuecurve(scrm, m.eye.col, 0, PPR::LINE);
       vid.linewidth /= 3;
       }
     }
@@ -330,7 +330,7 @@ void man::draw() {
       if(!(walls[what].flags & W_TRANS)) break;
       }
     vid.linewidth *= 3;
-    queuecurve(scrm, 0x800080, 0, PPR::LINE);
+    queuecurve(scrm, m.eye.col, 0, PPR::LINE);
     vid.linewidth /= 3;
     }
   }
