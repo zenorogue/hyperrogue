@@ -969,11 +969,14 @@ namespace levelline {
     color_t color;
     vector<double> values;
     bool modified;
+    ld width;
     };
   
   vector<levelline> levellines;
   
   bool on;
+
+  bool distro_based;
   
   void create() {
     int xlalpha = part(default_edgetype.color, 0);
@@ -983,6 +986,7 @@ namespace levelline {
       lv.column = i;    
       lv.color = ((hrandpos() & 0xFFFFFF) << 8) | xlalpha;
       lv.qty = 0;
+      lv.width = 1;
       }
     }
   
@@ -995,11 +999,20 @@ namespace levelline {
       if(!lv.modified) continue;
       lv.modified = false;
       vector<double> sample;
-      for(int j=0; j<=1024; j++) sample.push_back(data[hrand(samples)].val[lv.column]);
+      int sampsize = 1 << min(lv.qty + 5, 10);
+      for(int j=0; j<=sampsize; j++) sample.push_back(data[hrand(samples)].val[lv.column]);
       sort(sample.begin(), sample.end());
       lv.values.clear();
       lv.values.push_back(-1e10);
-      for(int j=0; j<=1024; j+=1024 >> (lv.qty)) lv.values.push_back(sample[j]);
+      if(!distro_based) {
+        int steps = 1 << (lv.qty-1);
+        for(int r=0; r < steps; r++) lv.values.push_back(lerp(sample[0], sample.back(), (r + .5) / steps));
+        }
+      else {
+        int step = sampsize >> (lv.qty);
+        if(step == 0) step = 1;
+        for(int j=0; j<=sampsize; j+=step) lv.values.push_back(sample[j]);
+        }
       lv.values.push_back(1e10);
       }
     }
@@ -1028,6 +1041,7 @@ namespace levelline {
         if(!n3) continue;
               
         for(auto& l: levellines) {
+          dynamicval<ld> lw(vid.linewidth, vid.linewidth * l.width);
           auto val1 = n1->net[l.column];
           auto val2 = n2->net[l.column];
           auto val3 = n3->net[l.column];
@@ -1056,7 +1070,7 @@ namespace levelline {
     }
 
   void show() {
-    static bool change_color = false;
+    static int mode = 0;
     if(levellines.size() == 0) create();
     cmode = sm::SIDE | sm::MAYDARK;
     gamescreen();
@@ -1064,14 +1078,14 @@ namespace levelline {
     int q = isize(levellines);
     if(q > 20) dialog::start_list(2000, 2000, 'a');
     for(auto &l : levellines) {
-      if(change_color) {
+      if(mode == 1) {
         dialog::addColorItem(colnames[l.column], l.color, dialog::list_fake_key++);
         dialog::add_action([&l] {
           dialog::openColorDialog(l.color, NULL);
           dialog::get_di().dialogflags |= sm::MAYDARK | sm::SIDE;
           });
         }
-      else {
+      if(mode == 0) {
         dialog::addSelItem(colnames[l.column], its(l.qty), dialog::list_fake_key++);
         dialog::lastItem().colorv = l.color >> 8;
         dialog::add_action([&l] {
@@ -1083,11 +1097,27 @@ namespace levelline {
             };
           });
         }
+      if(mode == 2) {
+        dialog::addSelItem(colnames[l.column], fts(l.width), dialog::list_fake_key++);
+        dialog::lastItem().colorv = l.color >> 8;
+        dialog::add_action([&l] {
+          dialog::editNumber(l.width, 0, 10, 0.1, 0, colnames[l.column],
+            XLAT("Controls the width of level lines."));
+          });
+        }
       }
     if(q > 20) dialog::end_list();
     dialog::addBreak(100);
     dialog::addItem("exit menu", '0');
-    dialog::addBoolItem_action("edit colors", change_color, '1');
+    string param[3] = { "quantity", "color", "width" };
+    dialog::addSelItem("edit what", param[mode], '1');
+    dialog::add_action([] { mode = gmod(mode+1, 3);  });
+    dialog::addBoolItem("distribution based", distro_based, '2');
+    dialog::add_action([] {
+      distro_based = !distro_based;
+      for(auto& l: levellines) l.modified = true;
+      build();
+      });
     dialog::display();
     }
 
