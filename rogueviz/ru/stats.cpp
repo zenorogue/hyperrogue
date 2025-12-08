@@ -240,21 +240,21 @@ vector<backstory_choice> backstories = {
 
   backstory_choice{ "hair",
     {
-      {"You have blonde hair ", [] {}},
+      {"You have blonde hair ", [] { m.hair = hc_blonde; }},
 
-      {"You have red hair ", [] {}},
+      {"You have red hair ", [] { m.hair = hc_red; }},
 
-      {"You have dark hair ", [] {}},
+      {"You have dark hair ", [] { m.hair = hc_brownhair; }},
       }
    },
 
   backstory_choice{ "eyes",
     {
-      {"and green eyes. ", [] {}},
+      {"and green eyes. ", [] { m.eye = ec_green; }},
 
-      {"and blue eyes. ", [] {}},
+      {"and blue eyes. ", [] { m.eye = ec_blue; }},
 
-      {"and brown eyes. ", [] {}},
+      {"and brown eyes. ", [] { m.eye = ec_browneye; }},
       }
    },
 
