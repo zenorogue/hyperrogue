@@ -1056,36 +1056,39 @@ namespace levelline {
     }
 
   void show() {
+    static bool change_color = false;
     if(levellines.size() == 0) create();
     cmode = sm::SIDE | sm::MAYDARK;
     gamescreen();
     dialog::init("level lines");
-    char nx = 'a';
+    int q = isize(levellines);
+    if(q > 20) dialog::start_list(2000, 2000, 'a');
     for(auto &l : levellines) {
-      dialog::addSelItem(colnames[l.column], its(l.qty), nx++);
-      dialog::lastItem().colorv = l.color >> 8;
+      if(change_color) {
+        dialog::addColorItem(colnames[l.column], l.color, dialog::list_fake_key++);
+        dialog::add_action([&l] {
+          dialog::openColorDialog(l.color, NULL);
+          dialog::get_di().dialogflags |= sm::MAYDARK | sm::SIDE;
+          });
+        }
+      else {
+        dialog::addSelItem(colnames[l.column], its(l.qty), dialog::list_fake_key++);
+        dialog::lastItem().colorv = l.color >> 8;
+        dialog::add_action([&l] {
+          dialog::editNumber(l.qty, 0, 10, 1, 0, colnames[l.column],
+            XLAT("Controls the number of level lines."))
+          .reaction = [&l] () {
+            l.modified = true;
+            build();
+            };
+          });
+        }
       }
+    if(q > 20) dialog::end_list();
+    dialog::addBreak(100);
     dialog::addItem("exit menu", '0');
-    dialog::addItem("shift+letter to change color", 0);
+    dialog::addBoolItem_action("edit colors", change_color, '1');
     dialog::display();
-    keyhandler = [] (int sym, int uni) {
-      dialog::handleNavigation(sym, uni);
-      if(uni >= 'a' && uni - 'a' + isize(levellines)) {
-        auto& l = levellines[uni - 'a'];
-        dialog::editNumber(l.qty, 0, 10, 1, 0, colnames[l.column], 
-          XLAT("Controls the number of level lines."))
-        .reaction = [&l] () {
-          l.modified = true;
-          build();
-          };
-        }
-      else if(uni >= 'A' && uni - 'A' + isize(levellines)) {
-        auto& l = levellines[uni - 'A'];
-        dialog::openColorDialog(l.color, NULL);
-        dialog::get_di().dialogflags |= sm::MAYDARK | sm::SIDE;
-        }
-      else if(doexiton(sym, uni)) popScreen();
-      };
     }
 
   
