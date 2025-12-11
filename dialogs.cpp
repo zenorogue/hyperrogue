@@ -1569,7 +1569,7 @@ EX namespace dialog {
         ne.s += keyboard_what;
         apply_edit();
         }
-      else if(uni >= 32) {
+      else if(uni >= 32 && uni < 128) {
         #if SDLVER < 2
         if((uni >= '0' && uni <= '9') || among(uni, '.', '+', '-', '*', '/', '^', '(', ')', ',', '|', ' ', '=') || (uni >= 'a' && uni <= 'z')) {
           ne.s += uni;
