@@ -799,6 +799,34 @@ EX purehookset hooks_control;
 
 EX debugflag debug_control = {"control"};
 
+EX bool is_joy_any(int sym) {
+  return (sym & (-PSEUDOKEY_JOY)) == PSEUDOKEY_JOY;
+  }
+
+EX bool is_joy_index(int sym, int index) {
+  return is_joy_any(sym) && (sym & 127) == index;
+  }
+
+#if HDR
+// default meaning of Steam Deck buttons
+
+namespace deck {
+  constexpr int enter = 0; // A, or move
+  constexpr int escape = 1; // B
+  // 'X' key is Show Keyboard
+  constexpr int space = 3; // Y
+  constexpr int alt_enter = 4;
+  constexpr int key_t = 7; // push left joystick
+  constexpr int key_f = 8; // push right joystick
+  constexpr int key_control  = 9; // L1
+  constexpr int key_alt  = 10; // R1
+  constexpr int key_pageup = 12; // R4
+  constexpr int key_pagedown = 14; // R5
+  constexpr int key_g = 15; // L5
+  constexpr int key_shift = 13; // L4
+  }
+#endif
+
 EX void mainloopiter() {
   indenter_finish(debug_control, "mainloopiter");
   GLWRAP;
