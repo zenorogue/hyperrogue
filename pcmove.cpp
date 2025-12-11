@@ -1143,7 +1143,7 @@ void pcmove::tell_why_impassable() {
     if(vmsg(miRESTRICTED, siGRAVITY, c2, moNone))
       addMessage(XLAT("Gravity does not allow this!"));
     }
-  else if(c2->wall == waChasm && c2->land == laDual) {
+  else if(c2->land == laDual && pseudohept(c2)) {
     if(vmsg(miRESTRICTED, siWALL, c2, moNone))
       addMessage(XLAT("You cannot move there!"));
     }
