@@ -762,8 +762,8 @@ EX void initConfig() {
 
   scfg.axeaction[0][0] = 4;
   scfg.axeaction[0][1] = 5;
-  scfg.axeaction[0][3] = 2;
-  scfg.axeaction[0][4] = 3;
+  scfg.axeaction[0][2] = 2;
+  scfg.axeaction[0][3] = 3;
 
   scfg.axeaction[1][0] = 8;
   scfg.axeaction[1][1] = 9;
