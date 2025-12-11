@@ -1571,6 +1571,9 @@ EX namespace dialog {
           
         apply_slider();
         }
+      else if(is_joy_index(sym, deck::show_keyboard)) {
+        onscreen_keyboard = !onscreen_keyboard;
+        }
       else if(uni == PSEUDOKEY_ONSCREEN_KEYBOARD) {
         ne.s += keyboard_what;
         apply_edit();

@@ -814,7 +814,7 @@ EX bool is_joy_index(int sym, int index) {
 namespace deck {
   constexpr int enter = 0; // A, or move
   constexpr int escape = 1; // B
-  // 'X' key is Show Keyboard
+  constexpr int show_keyboard = 2; // X, as in the SteamDeck default config
   constexpr int space = 3; // Y
   constexpr int alt_enter = 4;
   constexpr int key_t = 7; // push left joystick
