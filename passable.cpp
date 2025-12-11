@@ -418,7 +418,8 @@ EX bool canPushStatueOn(cell *c, flagtype flags) {
   return passable(c, NULL, P_MONSTER | flags) && !snakelevel(c) &&
     !isWorm(c->monst) && !isReptile(c->wall) && !peace::on && 
     !cellHalfvine(c) && !isDie(c->wall) &&
-    !among(c->wall, waBoat, waFireTrap, waArrowTrap, waBarrier);
+    !among(c->wall, waBoat, waFireTrap, waArrowTrap) &&
+    !do_not_touch_this_wall(c);
   }
 
 EX void moveBoat(const movei& mi) {
