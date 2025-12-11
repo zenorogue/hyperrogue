@@ -234,7 +234,7 @@ struct dhrg_embedding : public rogueviz::embeddings::tiled_embedding {
       }
     }
 
-  virtual string name() { return "DHRG"; }
+  virtual string name() override { return "DHRG"; }
   };
 
 void graph_from_rv() {

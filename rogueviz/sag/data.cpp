@@ -53,7 +53,7 @@ void save_sag_solution(const fhstream& f);
 
 struct sag_embedding : public rogueviz::embeddings::tiled_embedding {
 
-  virtual string name() { return "SAG"; }
+  virtual string name() override { return "SAG"; }
 
   pair<cell*, hyperpoint> as_location(int id) override {
 
@@ -80,7 +80,7 @@ struct sag_embedding : public rogueviz::embeddings::tiled_embedding {
     return sagdist[sagid[i]][0];
     }
 
-  void save(fhstream& f) {
+  void save(fhstream& f) override {
     if(!(state & SS_DATA)) throw hr_exception("save_sag_solution with no data");
     for(int i=0; i<isize(sagid); i++)
     println(f, vdata[i].name, ";", sagid[i]);
