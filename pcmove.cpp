@@ -970,6 +970,8 @@ void pcmove::tell_why_cannot_attack() {
 bool pcmove::after_escape() {
   cell*& c2 = mi.t;
   
+  bool woods_used = orbused[itOrbWoods];
+
   bool push_behind = c2->wall == waBigStatue || (among(c2->wall, waCTree, waSmallTree, waBigTree, waShrub, waVinePlant) && !c2->monst && markOrb(itOrbWoods));
   
   if(thruVine(c2, cwt.at) && markOrb(itOrbWoods)) push_behind = true;
@@ -977,6 +979,10 @@ bool pcmove::after_escape() {
   if(push_behind && !c2->monst && !nonAdjacentPlayer(c2, cwt.at) && fmsMove) {
     eWall what = c2->wall;
     if(!thruVine(c2, cwt.at) && !canPushStatueOn(cwt.at, P_ISPLAYER)) {
+      if(markOrb(itOrbAether)) {
+        orbused[itOrbWoods] = woods_used;
+        goto normal_aether_movement;
+        }
       if(vmsg(miRESTRICTED, siWALL, c2, moNone)) {
         if(isFire(cwt.at))
           addMessage(XLAT("You have to escape first!"));
@@ -1004,6 +1010,7 @@ bool pcmove::after_escape() {
     return perform_actual_move();
     }
 
+  normal_aether_movement:
   bool attackable;
   attackable = 
     c2->wall == waBigTree ||
