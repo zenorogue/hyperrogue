@@ -14,6 +14,7 @@ struct embedding {
   virtual int get_dimension() { return WDIM; }
   virtual eGeometryClass get_geometry() { return cgclass; }
   virtual string get_space();
+  virtual ~embedding() {}
   };
 
 struct tiled_embedding : embedding {
