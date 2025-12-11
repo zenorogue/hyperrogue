@@ -1,0 +1,43 @@
+## pentagons that tile the plane aperiodically, by toimine
+h2.
+
+slider(a, 1.383623710490773765269419035368675322851830232551, 0.4, 1.5)
+
+let(d = solve(d=0, 3, 
+  a - angle_from_matrix(lxz(d) * ryx(2*a) * lxz(-d) * rxy(4 * a) * lxz(d) * ryx(2*a) * lxz(-d))
+  ))
+
+let(d1 = dist_from_matrix(lxz(d) * ryx(2*a) * lxz(-d) * rxy(4 * a) * lxz(d) * ryx(2*a) * lxz(-d)))
+
+# big angles are twice the size of middle angles
+let(aa = 2*a)
+
+# one small angle + two big ones equal 360 degrees
+let(b = 2*pi-4*a)
+
+tile(d,aa,d,b,d,aa,d,a,d1,a)
+
+# vertex order (treestate 0 for example):
+#   1
+#   ^
+#  / \
+#0/   \2
+# |   |
+# |___|
+#4     3
+
+# connection order
+#   ^
+# 2/ \3
+# /   \
+#L|   |R
+# |___|
+#   P  
+
+treestate(0,LEFT,2,3,RIGHT,PARENT) #0
+treestate(0,6,2,3,RIGHT,PARENT) #1
+treestate(0,RIGHT,PARENT,LEFT,5,0) #2
+treestate(0,4,RIGHT,PARENT,LEFT,1) #3
+treestate(0,RIGHT,RIGHT,PARENT,5,0) #4
+treestate(0,4,PARENT,LEFT,LEFT,0) #5
+treestate(0,RIGHT,PARENT,LEFT,LEFT,0) #6
