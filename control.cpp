@@ -681,7 +681,7 @@ EX void handleKeyNormal(int sym, int uni) {
       fullcenter();
     }
   
-  if(sym == 'v' && DEFAULTNOR(sym)) 
+  if((sym == 'v' || (is_joy_index(sym, deck::alt_enter) && !tour::on)) && DEFAULTNOR(sym))
     showMissionScreen(false);
 
   if(sym == PSEUDOKEY_MENU) 
