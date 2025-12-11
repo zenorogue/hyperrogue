@@ -1290,8 +1290,8 @@ EX void handle_event(SDL_Event& ev) {
       #endif
 
       if(ev.button.x != ui_mousex || ev.button.y != ui_mousey) {
-        mousex = pre_mousex = ev.button.x;
-        mousey = pre_mousey = ev.button.y;
+        mousex = ui_mousex = ev.button.x;
+        mousey = ui_mousey = ev.button.y;
         just_refreshing = true;
         reset_handlers();
         screens.back()();
