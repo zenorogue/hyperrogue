@@ -950,9 +950,6 @@ EX void mainloopiter() {
   rctrlclick = keystate[SDL_SCANCODE_RCTRL];
 
   hiliteclick = keystate[SDL_SCANCODE_LALT] | keystate[SDL_SCANCODE_RALT];
-  if(keystate[SDL_SCANCODE_LSHIFT] || keystate[SDL_SCANCODE_RSHIFT]) getcshift = -1;
-  if(keystate[SDL_SCANCODE_LCTRL] || keystate[SDL_SCANCODE_RCTRL]) getcshift /= 10;
-  if(keystate[SDL_SCANCODE_LALT] || keystate[SDL_SCANCODE_RALT]) getcshift *= 10;
 
   #else
   pandora_rightclick = keystate[SDLK_RCTRL];
@@ -965,14 +962,14 @@ EX void mainloopiter() {
   rctrlclick = keystate[SDLK_RCTRL];
 
   hiliteclick = keystate[SDLK_LALT] | keystate[SDLK_RALT];
-  if(keystate[SDLK_LSHIFT] || keystate[SDLK_RSHIFT]) getcshift = -1;
-  if(keystate[SDLK_LCTRL] || keystate[SDLK_RCTRL]) getcshift /= 10;
-  if(keystate[SDLK_LALT] || keystate[SDLK_RALT]) getcshift *= 10;
-  
   #endif
 
   anyshiftclick = lshiftclick | rshiftclick;
   anyctrlclick = lctrlclick | rctrlclick;
+
+  if(anyshiftclick) getcshift = -1;
+  if(anyctrlclick) getcshift /= 10;
+  if(hiliteclick) getcshift *= 10;
   
   forcetarget = anyshiftclick;
   
