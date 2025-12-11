@@ -1517,7 +1517,7 @@ EX namespace dialog {
     
     keyhandler = [this, &ne] (int sym, int uni) {
       handleNavigation(sym, uni);
-      if(uni == '\b' || uni == '\t') {
+      if(uni == '\b' || uni == '\t' || joy_index(sym, deck::page_up)) {
         ne.s = ne.s. substr(0, isize(ne.s)-utfsize_before(ne.s, isize(ne.s)));
         sscanf(ne.s.c_str(), LDF, ne.editwhat);
         apply_edit();
@@ -1540,7 +1540,7 @@ EX namespace dialog {
         apply_slider();
         }
   #endif
-      else if(sym == SDLK_HOME) {
+      else if(sym == SDLK_HOME || joy_index(sym, deck::space)) {
         *ne.editwhat = ne.dft;
         apply_slider();
         }
