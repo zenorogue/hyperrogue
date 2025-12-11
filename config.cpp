@@ -1086,6 +1086,8 @@ EX void initConfig() {
   
   DEBBI(debug_init_config, ("initconfig"));
 
+  bool qm = !ISPANDORA;
+
   #if ISLINUX
   if(1) {
     fhstream f("/sys/devices/virtual/dmi/id/board_name", "rt");
@@ -1098,6 +1100,7 @@ EX void initConfig() {
         dialog::onscreen_keyboard = true;
         dialog::dialog_font_scale = 3;
         dialog::display_keys = 3;
+        qm = false;
         }
       }
     }
@@ -1500,7 +1503,7 @@ EX void initConfig() {
   vid.killreduction = 0;
   
   param_b(vid.skipstart, "skip the start menu", false);
-  param_b(vid.quickmouse, "quick mouse", !ISPANDORA)
+  param_b(vid.quickmouse, "quick mouse", qm)
   -> help("Buttons activate when they are pressed (by clicking), not when they are released.");
   
   // colors
