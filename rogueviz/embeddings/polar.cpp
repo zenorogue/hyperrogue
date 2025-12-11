@@ -20,9 +20,9 @@ namespace embeddings {
       return spin(coords[id].theta) * xpush0(coords[id].r);
       }
 
-    ld zero_distance(int id) { return coords[id].r; }
+    ld zero_distance(int id) override { return coords[id].r; }
 
-    ld distance(int i, int j) {
+    ld distance(int i, int j) override {
       ld da = coords[i].r;
       ld db = coords[j].r;
       

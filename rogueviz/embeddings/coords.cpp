@@ -16,11 +16,11 @@ namespace embeddings {
       return coords[id];
       }
 
-    virtual string name() { return "coordinates: " + format_names[(int) coord_format]; }
+    virtual string name() override { return "coordinates: " + format_names[(int) coord_format]; }
 
-    ld zero_distance(int id) { return hdist0(coords[id]); }
+    ld zero_distance(int id) override { return hdist0(coords[id]); }
 
-    ld distance(int i, int j) {
+    ld distance(int i, int j) override {
       return precise_hdist(coords[i], coords[j]);
       }
 

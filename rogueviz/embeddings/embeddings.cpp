@@ -12,7 +12,7 @@ vector<vector<int> > directed_edges;
 rogueviz::edgetype *any;
 
 struct rv_embedding : public tiled_embedding {
-  virtual string name() { return "RogueViz internal representation"; }
+  virtual string name() override { return "RogueViz internal representation"; }
   pair<cell*, hyperpoint> as_location(int id) override {
     return { vdata[id].m->base, vdata[id].m->at * C0 };
     }
