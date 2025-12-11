@@ -4228,6 +4228,8 @@ EX void find_parameter() {
   if(dialog::onscreen_keyboard) dialog::setting_keyboard();
 
   dialog::addSelItem(XLAT("matching items"), its(found), 0);
+
+  dialog::addBack();
   dialog::display();
 
   if(dialog::infix != "") mouseovers = dialog::infix;
