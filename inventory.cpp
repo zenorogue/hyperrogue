@@ -481,7 +481,7 @@ EX namespace inv {
     return s;
     }
   
-  EX bool activating;
+  EX bool activating, view_help_only;
 
   /** \brief show the OSM Orb screen */
   EX void show() {
@@ -581,7 +581,7 @@ EX namespace inv {
       dialog::addItem(XLAT("help"), SDLK_F1);
       dialog::addItem(XLAT("return to the game"), 'i');
       dialog::display();
-      which = orbmap[getcstat];
+      if(orbmap.count(getcstat)) which = orbmap[getcstat];
       }
     else {
       if(which == itNone) {
@@ -632,14 +632,17 @@ EX namespace inv {
   
         }
       }
-    dialog::displayPageButtons(7, 0);
+    dialog::displayPageButtons(7 + (view_help_only ? 16 : 8), 0);
     mouseovers = "";
     keyhandler = [] (int sym, int uni) {
       if(plain) dialog::handleNavigation(sym, uni);
       
       if(orbmap.count(uni)) {
         eItem orb = orbmap[uni];
-        if(remaining[orb] <= 0) ;
+        if(view_help_only) {
+          gotoHelp(generateHelpForItem(orb));
+          }
+        else if(remaining[orb] <= 0) ;
         else if(orb == itOrbMirror) {
           mirroring = !mirroring;
           // an amusing message
@@ -690,6 +693,7 @@ EX namespace inv {
         }
       
       else if(uni == '1') plain = !plain;
+      else if(uni == '2') view_help_only = !view_help_only;
       else if(sym == SDLK_F1) 
         gotoHelp(which ? generateHelpForItem(which) : XLAT(helptext));
       else if(doexiton(sym, uni)) {

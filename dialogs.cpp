@@ -1675,6 +1675,10 @@ EX namespace dialog {
       getcstat = SDLK_F1;
     if(i&4) if(displayfrZH(xr*8, i0, 1, vid.fsize, IFM("1 - ") + XLAT("plain"), dialogcolor, 8))
       getcstat = '1';
+    if(i&8) if(displayfrZH(xr*24, i0, 1, vid.fsize, IFM("2 - ") + XLAT("touch to activate"), dialogcolor, 8))
+      getcstat = '2';
+    if(i&16) if(displayfrZH(xr*24, i0, 1, vid.fsize, IFM("2 - ") + XLAT("touch to explain"), dialogcolor, 8))
+      getcstat = '2';
     }
   
   EX bool handlePageButtons(int sym, int uni, bool dkeys, int numpages) {
