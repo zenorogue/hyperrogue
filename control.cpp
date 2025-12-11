@@ -1121,6 +1121,7 @@ EX void mainloopiter() {
   if(((SDL_GetMouseState(NULL, NULL) & SDL_BUTTON_MMASK)) && !mouseout2())
     currently_scrolling = true;
 
+  ui_mousex = mousex, ui_mousey = mousey;
   #if SDLVER >= 2
   if(timetowait > 0) {
     if(SDL_WaitEventTimeout(&ev, timetowait)) handle_event(ev);
@@ -1138,6 +1139,7 @@ EX void mainloopiter() {
   }
 
 EX bool need_refresh;
+EX int ui_mousex, ui_mousey;
 
 EX void handle_event(SDL_Event& ev) {
   bool normal = cmode & sm::NORMAL;
@@ -1287,9 +1289,9 @@ EX void handle_event(SDL_Event& ev) {
       if(ev.type == SDL_EVENT_MOUSE_BUTTON_DOWN && ev.button.which == 255) return;
       #endif
 
-      if(ev.button.x != mousex || ev.button.y != mousey) {
-        mousex = ev.button.x;
-        mousey = ev.button.y;
+      if(ev.button.x != ui_mousex || ev.button.y != ui_mousey) {
+        mousex = pre_mousex = ev.button.x;
+        mousey = pre_mousey = ev.button.y;
         just_refreshing = true;
         reset_handlers();
         screens.back()();
