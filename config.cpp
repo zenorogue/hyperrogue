@@ -4630,6 +4630,13 @@ EX int read_config_args() {
     string s = args();
     set_char_by_name(cs, s);
     }
+  else if(argis("-char-multi")) {
+    shift();
+    auto& cs = multi::scs[gmod(argi(), 7)];
+    shift();
+    string s = args();
+    set_char_by_name(cs, s);
+    }
   else return 1;
   return 0;
   }
