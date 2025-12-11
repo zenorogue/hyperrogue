@@ -400,7 +400,6 @@ cld exp_parser::parse(int prio) {
       dynamicval<cld> d(extra_params[name], res);
       at = bak_at;
       cld result = parsepar();
-      println(hlog, res, " : ", result);
       if(real(result) > 0) maxval = res;
       else minval = res;
       }
