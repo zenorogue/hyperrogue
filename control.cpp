@@ -1281,6 +1281,12 @@ EX void handle_event(SDL_Event& ev) {
     bool rollchange = (cmode & sm::OVERVIEW) && getcstat >= 2000 && cheater;
 
     if(ev.type == SDL_EVENT_MOUSE_BUTTON_DOWN || ev.type == SDL_EVENT_MOUSE_BUTTON_UP SDL12(, || ev.type == SDL_EVENT_MOUSE_WHEEL)) {
+
+      #if SDLVER == 1
+      // ignore the extra event on touchpad
+      if(ev.type == SDL_EVENT_MOUSE_BUTTON_DOWN && ev.button.which == 255) return;
+      #endif
+
       mousepressed = ev.type == SDL_EVENT_MOUSE_BUTTON_DOWN;
       if(mousepressed) flashMessages();
       mousing = true;
