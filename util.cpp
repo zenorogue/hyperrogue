@@ -245,6 +245,12 @@ cld exp_parser::parse(int prio) {
   else if(eat("floor(")) res = floor(validate_real(parsepar()));
   else if(eat("frac(")) { res = parsepar(); res = res - floor(validate_real(res)); }
   else if(eat("to01(")) { res = parsepar(); return atan(res) / ld(M_PI) + ld(0.5); }
+  else if(eat("angle_from_matrix(")) {
+    auto m = parsematrix(); eat(")"); return -atan2(m * C0);
+    }
+  else if(eat("dist_from_matrix(")) {
+    auto m = parsematrix(); eat(")"); return hdist0(m * C0);
+    }
   else if(eat("min(")) {
     ld a = rparse(0);
     while(skip_white(), eat(",")) a = min(a, rparse(0));
@@ -380,6 +386,24 @@ cld exp_parser::parse(int prio) {
     force_eat(",");
     dynamicval<cld> d(extra_params[name], val);
     res = parsepar();
+    }
+  else if(eat("solve(")) {
+    string name = next_token();
+    force_eat("=");
+    cld minval = parse(0);
+    force_eat(",");
+    cld maxval = parse(0);
+    force_eat(",");
+    int bak_at = at;
+    for(int i=0; i<100; i++) {
+      res = (minval + maxval) / cld(2);
+      dynamicval<cld> d(extra_params[name], res);
+      at = bak_at;
+      cld result = parsepar();
+      println(hlog, res, " : ", result);
+      if(real(result) > 0) maxval = res;
+      else minval = res;
+      }
     }
   #if CAP_TEXTURE
   else if(eat("txp(")) {
