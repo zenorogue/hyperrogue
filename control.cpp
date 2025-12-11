@@ -1292,10 +1292,11 @@ EX void handle_event(SDL_Event& ev) {
       if(ev.button.x != ui_mousex || ev.button.y != ui_mousey) {
         mousex = ui_mousex = ev.button.x;
         mousey = ui_mousey = ev.button.y;
-        just_refreshing = true;
+        just_refreshing = 2;
         reset_handlers();
         screens.back()();
-        just_refreshing = false;
+        just_refreshing = 0;
+        need_refresh = false;
         }
 
       mousepressed = ev.type == SDL_EVENT_MOUSE_BUTTON_DOWN;
@@ -1445,10 +1446,10 @@ EX void handle_event(SDL_Event& ev) {
     
     if(sym || uni) {
       if(need_refresh) {
-        just_refreshing = true;
+        just_refreshing = 1;
         reset_handlers();
         screens.back()();
-        just_refreshing = false;
+        just_refreshing = 0;
         }
       need_refresh = true;
       }

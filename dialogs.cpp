@@ -732,7 +732,7 @@ EX namespace dialog {
   EX void display() {
 
     callhooks(hooks_display_dialog);
-    if(just_refreshing) return;
+    if(just_refreshing == 1) return;
     int N = items.size();
     dfsize = vid.fsize * dialog_font_scale;
     #if ISMOBILE || ISPANDORA

@@ -1691,7 +1691,8 @@ EX void drawfullmap() {
 extern bool wclick;
 #endif
 
-EX bool just_refreshing;
+// 0 = not refreshing, 1 = refreshing for keyboard, 2 = refreshing for mouse position analysis
+EX int just_refreshing;
 
 EX int menu_darkening = 2;
 EX bool centered_menus = false;
@@ -1706,7 +1707,7 @@ EX void gamescreen() {
     return;
     }
 
-  if(just_refreshing) return;
+  if(just_refreshing == 1) return;
 
   if(subscreens::split([=] () {
     calcparam();
