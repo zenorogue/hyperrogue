@@ -171,7 +171,7 @@ EX void buildHelpText() {
 #else
   if(DEFAULTCONTROL && dialog::display_keys == 3)
     help += XLAT(
-      "To move, aim with the left joystick then press A. Press B for menu, X for keyboard, Y to center. R1 to highlight important things on the map.\n\n"
+      "To move, aim with the left joystick then press Ⓐ. Press Ⓑ for menu, Steam+Ⓧ for keyboard, Ⓨ to center. Ⓡ to highlight important things on the map.\n\n"
       "For ranged attacks, use the DPad to aim, then push the left joystick to target an orb or the right joystick to target a ranged weapon. "
       "Alternatively, you can also use the right trackpad.\n\n"
       "Press L5 to drop a dead orb. R4/R5 to rotate the screen.\n\n"

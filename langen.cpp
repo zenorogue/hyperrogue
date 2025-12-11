@@ -383,7 +383,9 @@ int main(int argc, char ** argv) {
     // other symbols
     "⌫", "⏎", "←", "→", "␣", "↑", "↓",
     // international letters
-    "ñ", "Ñ", "ê", "Ç", "Ą", "Ć", "Ę", "Ł", "Ń", "Ó", "Ś", "Ź", "Ż"
+    "ñ", "Ñ", "ê", "Ç", "Ą", "Ć", "Ę", "Ł", "Ń", "Ó", "Ś", "Ź", "Ż",
+    // controller symbols
+    "Ⓐ", "Ⓑ", "Ⓧ", "Ⓨ", "Ⓛ", "Ⓡ"
     })
     allchars.insert(s);
 

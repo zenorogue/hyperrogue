@@ -237,7 +237,7 @@ EX void slidehelp() {
     help += "\n\n" + XLAT(
       "This tour typically displays keys on the keyboard. "
       "On the SteamDeck, you can press the Menu button to move to the next slide, "
-      "or the B button to see a menu with other options.");
+      "or the Ⓑ button to see a menu with other options.");
 
   gotoHelp(help);
   presentation(pmHelpEx);

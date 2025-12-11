@@ -242,6 +242,14 @@ EX namespace dialog {
     if(k >= 1 && k <= 26) { string s = "Ctrl+"; s += (k+64); return s; }
     if(k < 128) { string s; s += k; return s; }
     if(k == 508) return "Alt+8";
+    if(is_joy_index(k, 0)) return "Ⓐ";
+    if(is_joy_index(k, 1)) return "Ⓑ";
+    if(is_joy_index(k, 2)) return "Ⓧ";
+    if(is_joy_index(k, 3)) return "Ⓨ";
+    if(is_joy_index(k, 0)) return "Ⓐ";
+    if(is_joy_index(k, 9)) return "Ⓛ";
+    if(is_joy_index(k, 10)) return "Ⓡ";
+
     return "?";
     }
 
