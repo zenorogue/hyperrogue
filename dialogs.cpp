@@ -1390,6 +1390,12 @@ EX namespace dialog {
     addKeyboardItem(lr ? " \t\x1\x2" : " \t");
     }
   
+  EX void setting_keyboard() {
+    addKeyboardItem("qwertyuiop");
+    addKeyboardItem("asdfghjkl");
+    addKeyboardItem("zxcvbnm_\b");
+    }
+
   EX bool onscreen_keyboard = ISMOBILE;
 
   struct number_dialog_help {

@@ -4222,6 +4222,9 @@ EX void find_parameter() {
 
   dialog::addBreak(100);
   dialog::addInfo(XLAT("press letters to search"));
+
+  if(dialog::onscreen_keyboard) dialog::setting_keyboard();
+
   dialog::addSelItem(XLAT("matching items"), its(found), 0);
   dialog::display();
 
