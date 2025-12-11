@@ -1,7 +1,32 @@
 ## pentagons that tile the plane aperiodically, by toimine
 h2.
 
+# the default value of 'a' yields pentagons with equal edges (i.e., d = d1)
 slider(a, 1.383623710490773765269419035368675322851830232551, 0.4, 1.5)
+
+# some advanced formula elements:
+
+# vertex order
+#   1
+#   ^
+#  / \
+#0/   \2
+# |   |
+# |___|
+#4     3
+
+# - the shape is symmetric; "big angles" 0 and 2 are 2*a, while the angle at 1 is 2 * pi - 4 * a
+
+# - we need to pick the length of edge, 'd', which makes the angle at vertices 4 and 3 also a
+
+# - for this, we construct a matrix M, using RogueViz matrix formulae:
+#   lxz(x) is 'Lorentz boost by x', rxy is 'rotate by x radians in xy', etc.
+
+# - angle_from_matrix(M) and dist_from_matrix(M) return am and dm such as M * C0 = rxy(am) * lxz(dm) * C0
+#   (C0 is the vector (0,0,1) which has 1 on the 'z' coordinate)
+
+# - then we use solve(d=a, b, f(d)) to find the value of d in [a,b] such that f(d) = 0. It is assumed that
+#   f(a) <= 0 and f(b) >= 0 (bisection method)
 
 let(d = solve(d=0, 3, 
   a - angle_from_matrix(lxz(d) * ryx(2*a) * lxz(-d) * rxy(4 * a) * lxz(d) * ryx(2*a) * lxz(-d))
