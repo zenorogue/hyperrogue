@@ -136,7 +136,7 @@ EX hint hints[] = {
 
   {
     0,
-    []() { return !canmove; },
+    []() { return !canmove && dialog::display_keys != 3; },
     []() { 
       dialog::addInfo(XLAT(
         "Press ESC to view this screen during the game."
@@ -149,11 +149,10 @@ EX hint hints[] = {
     []() { return in_full_game(); },
     []() { 
       dialog::addInfo(
-#if ISMOBILE
+  (ISMOBILE || dialog::display_keys == 3) ?
         XLAT("The 'world overview' shows all the lands in HyperRogue.")
-#else
+      :
         XLAT("Press 'o' to see all the lands in HyperRogue.")
-#endif
         );
       dialog::addBreak(50);
       dialog::addItem(XLAT("world overview") + " ", 'z');
@@ -330,13 +329,20 @@ eLand nextHyperstone() {
   return laCrossroads;
   }
 
+EX bool separate_status = true;
+EX bool showing_status = true;
+
 EX void showGameMenu() {
 
   cmode = sm::DOTOUR | sm::MISSION | sm::CENTER | sm::MAYDARK | sm::SIDE;
   gamescreen(); drawStats();
   getcstat = SDLK_ESCAPE;
 
-  dialog::init(
+  bool skip_status = separate_status && !showing_status;
+
+  if(skip_status) dialog::init(XLAT("main menu"));
+
+  else dialog::init(
 #if CAP_TOUR
     tour::on ? (canmove ? XLAT("guided tour") : XLAT("GAME OVER")) :
 #endif
@@ -347,7 +353,8 @@ EX void showGameMenu() {
     XLAT("GAME OVER"), 
     0xC00000, 200, 100
     );
-  if(!canmove && yasc_message != "") dialog::addInfo(yasc_message);
+
+  if(!canmove && yasc_message != "" && !skip_status) dialog::addInfo(yasc_message);
 
   #if CAP_COMPLEX2
   bool sweeper = mine::in_minesweeper();
@@ -355,14 +362,15 @@ EX void showGameMenu() {
   const bool sweeper = false;
   #endif
 
-  if(!peace::on && !racing::on && !sweeper && !in_lovasz())
+  if(!peace::on && !racing::on && !sweeper && !in_lovasz() && !skip_status)
     dialog::addInfo(XLAT("Your score: %1", its(gold())));
-  if(!peace::on && !racing::on && !sweeper && !in_lovasz())
+  if(!peace::on && !racing::on && !sweeper && !in_lovasz() && !skip_status)
     dialog::addInfo(XLAT("Enemies killed: %1", its(tkills())));
 
 #if CAP_TOUR
   if(tour::on) ; else 
 #endif
+  if(skip_status) ; else
   if(items[itOrbYendor]) {
     dialog::addInfo(XLAT("Orbs of Yendor found: %1", its(items[itOrbYendor])), iinf[itOrbYendor].color);
     dialog::addInfo(XLAT("CONGRATULATIONS!"), iinf[itOrbYendor].color);
@@ -426,7 +434,8 @@ EX void showGameMenu() {
   if(canmove && !timerstart)
     timerstart = time(NULL);
   
-  if(princess::challenge) ;
+  if(skip_status) ;
+  else if(princess::challenge) ;
 #if CAP_TOUR
   else if(tour::on) ;
 #endif
@@ -450,17 +459,17 @@ EX void showGameMenu() {
       dialog::addInfo(XLAT("Hyperstone Quest completed!"), iinf[itHyperstone].color);
     }
   else dialog::addInfo(XLAT("Some lands unlock at specific treasures or kills"));
-  if(cheater && !autocheat) {
+  if(cheater && !autocheat && !skip_status) {
     dialog::addInfo(XLAT("you have cheated %1 times", its(cheater)), 0xFF2020);
     }
-  if(!racing::on) {
+  if(!racing::on && !skip_status) {
     dialog::addInfo(timeline(), dialog::dialogcolor);
     }
   
-  dialog::addBreak(100);
+  if(!skip_status) dialog::addBreak(100);
 
 #if CAP_TOUR  
-  if(!tour::on) {
+  if(!tour::on && !skip_status) {
     hints[hinttoshow].display();
     dialog::addBreak(100);
     }
@@ -471,6 +480,19 @@ EX void showGameMenu() {
 #if CAP_TOUR
   intour = tour::on;
 #endif
+
+  if(separate_status && showing_status) {
+    dialog::addItem(XLAT("menu"), 'v');
+    dialog::add_action([] { showing_status = false; });
+    dialog::addBack();
+    dialog::display();
+    return;
+    }
+
+  if(skip_status) {
+    dialog::addItem(XLAT("show the status screen"), 'v');
+    dialog::add_action([] { showing_status = !showing_status; });
+    }
 
   if(intour) {
 #if CAP_TOUR
@@ -681,7 +703,7 @@ EX int counthints() {
   for(int h=0;; h++) if(hints[h].last < 0) return h;
   }
 
-EX void showMissionScreen() {
+EX void showMissionScreen(bool start_showing_status) {
   cancel(); cancel = noaction;
   popScreenAll();
   achievement_final(false);
@@ -691,8 +713,10 @@ EX void showMissionScreen() {
     pushScreen(daily::showMenu);
     #endif
     }
-  else
+  else {
+    showing_status = start_showing_status;
     pushScreen(showGameMenu);
+    }
 
 #if CAP_TOUR
   if(!tour::on)

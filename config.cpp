@@ -1101,6 +1101,7 @@ EX void initConfig() {
         dialog::dialog_font_scale = 3;
         dialog::display_keys = 3;
         qm = false;
+        separate_status = true;
         }
       }
     }
@@ -1111,7 +1112,11 @@ EX void initConfig() {
 
   param_i(vid.msglimit, "message limit", 5);
   param_i(vid.timeformat, "message log time format", 0);
-  
+
+  param_b(separate_status, "separate_status")
+  -> editable("separate status", 's')
+  -> help("Make quest status and main menu separate screens.");
+
   param_b(resizable, "resizable", true)
   -> editable("resizable window", 'r')
   -> help("This lets your operating system resize the window.");

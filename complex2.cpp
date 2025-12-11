@@ -528,7 +528,7 @@ EX void count_status() {
   for(cell *c: currentmap->allcells()) if(among(c->wall, waMineMine, waMineUnknown) && mine::marked_mine(c)) kills[moTameBomberbird]++;
   if(last && !kills[moBomberbird]) {
     mine::victory_time = getgametime();
-    showMissionScreen();
+    showMissionScreen(true);
     }
   }
 

@@ -133,7 +133,7 @@ EX movedir vectodir(hyperpoint P) {
   }
 
 EX void remission() {
-  if(!canmove && (cmode & sm::NORMAL) && !game_keys_scroll) showMissionScreen();
+  if(!canmove && (cmode & sm::NORMAL) && !game_keys_scroll) showMissionScreen(true);
  }
 
 EX hyperpoint move_destination_vec(int d) {
@@ -656,7 +656,7 @@ EX void handleKeyNormal(int sym, int uni) {
     else if(viewdists)
       viewdists = false;
     else
-      showMissionScreen();
+      showMissionScreen(true);
     }
 
   if(sym == SDLK_F10) {
@@ -682,10 +682,10 @@ EX void handleKeyNormal(int sym, int uni) {
     }
   
   if(sym == 'v' && DEFAULTNOR(sym)) 
-    showMissionScreen();
+    showMissionScreen(false);
 
   if(sym == PSEUDOKEY_MENU) 
-    showMissionScreen();
+    showMissionScreen(false);
   
   if(sym == PSEUDOKEY_NOHINT)
     no_find_player = true;
@@ -1425,7 +1425,7 @@ EX void handle_event(SDL_Event& ev) {
       if(daily::on) daily::handleQuit(3);
       else
       #endif
-      if(needConfirmation() && !(cmode & sm::MISSION)) showMissionScreen();
+      if(needConfirmation() && !(cmode & sm::MISSION)) showMissionScreen(false);
       else quitmainloop = true;
       }
     

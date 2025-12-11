@@ -580,7 +580,7 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
           princess::reviveAt = gold(NO_LOVE) + 20;
           }
         }
-      if(princess::challenge) changes.at_commit([] { showMissionScreen(); });
+      if(princess::challenge) changes.at_commit([] { showMissionScreen(true); });
       }
     }
 

@@ -469,7 +469,7 @@ EX void checkmove() {
   if(!canmove) {
     create_yasc_message();
     achievement_final(true);
-    if(cmode & sm::NORMAL) showMissionScreen();
+    if(cmode & sm::NORMAL) showMissionScreen(true);
     }
   else yasc_message = "";
 

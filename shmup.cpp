@@ -1645,7 +1645,7 @@ EX eItem targetRangedOrb(orbAction a) {
     useupOrb(itOrbMorph, 3);
     if(orig == moPlayer) {
       achievement_final(true);
-      showMissionScreen();
+      showMissionScreen(true);
       }
     return itOrbMorph;
     }
@@ -2874,7 +2874,7 @@ EX void turn(int delta) {
         }
       lastdead = pc[i]->dead;
       
-      if(lastcanmove && pc[i]->dead) showMissionScreen();
+      if(lastcanmove && pc[i]->dead) showMissionScreen(true);
         
       canmove = canmove && !pc[i]->dead;
       }

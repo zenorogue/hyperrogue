@@ -904,7 +904,7 @@ EX void handleInput(int delta, config &scfg) {
     get_o_key().second();
   
   if(act[panReviewQuest].pressed())
-    showMissionScreen();
+    showMissionScreen(true);
   
 #if CAP_INV
   if(act[panInventory].pressed() && inv::on)

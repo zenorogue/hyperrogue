@@ -653,7 +653,7 @@ struct info {
         addMessage(XLAT("Congratulations! Your score is %1.", its(i->value)));
         achievement_gain_once("PRINCESS2", rg::princess);
         if(!cheater) achievement_score(LB_PRINCESS, i->value);
-        LATE( showMissionScreen(); )
+        LATE( showMissionScreen(true); )
         }
       }
     if(i->princess->land == laDungeon && !saved && !nodungeon) {
