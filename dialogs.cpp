@@ -1391,9 +1391,10 @@ EX namespace dialog {
     }
   
   EX void setting_keyboard() {
-    addKeyboardItem("qwertyuiop");
-    addKeyboardItem("asdfghjkl");
-    addKeyboardItem("zxcvbnm_\b");
+    addKeyboardItem("1234567890");
+    addKeyboardItem("QWERTYUIOP");
+    addKeyboardItem("ASDFGHJKL");
+    addKeyboardItem("ZXCVBNM_\b");
     }
 
   EX bool onscreen_keyboard = ISMOBILE;
@@ -1967,13 +1968,13 @@ EX namespace dialog {
     if(uni >= 'A' && uni <= 'Z') infix += uni;
     else if(uni >= 'a' && uni <= 'z') infix += uni-32;
     else if(infix != "" && (uni == 8 || is_joy_index(sym, deck::space) || is_joy_index(sym, deck::key_pageup))) infix = infix.substr(0, isize(infix)-1);
-    else if(infix != "" && uni != 0) infix = "";
-    else if(is_joy_index(sym, deck::show_keyboard)) {
-      onscreen_keyboard = !onscreen_keyboard;
-      }
     else if(uni == PSEUDOKEY_ONSCREEN_KEYBOARD) {
       infix += keyboard_what;
       }
+    else if(is_joy_index(sym, deck::show_keyboard)) {
+      onscreen_keyboard = !onscreen_keyboard;
+      }
+    else if(infix != "" && uni != 0) infix = "";
     else return false;
     return true;
     }

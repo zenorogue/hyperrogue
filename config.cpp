@@ -4203,7 +4203,6 @@ EX void find_parameter() {
   gamescreen();
 
   dialog::init(XLAT("find a setting"));
-  if(dialog::infix != "") mouseovers = dialog::infix;
 
   dialog::start_list(900, 900, '1');
 
@@ -4221,12 +4220,14 @@ EX void find_parameter() {
   dialog::end_list();
 
   dialog::addBreak(100);
-  dialog::addInfo(XLAT("press letters to search"));
+  add_edit(dialog::onscreen_keyboard);
 
   if(dialog::onscreen_keyboard) dialog::setting_keyboard();
 
   dialog::addSelItem(XLAT("matching items"), its(found), 0);
   dialog::display();
+
+  if(dialog::infix != "") mouseovers = dialog::infix;
 
   keyhandler = [] (int sym, int uni) {
     dialog::handleNavigation(sym, uni);
