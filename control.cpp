@@ -1287,6 +1287,15 @@ EX void handle_event(SDL_Event& ev) {
       if(ev.type == SDL_EVENT_MOUSE_BUTTON_DOWN && ev.button.which == 255) return;
       #endif
 
+      if(ev.button.x != mousex || ev.button.y != mousey) {
+        mousex = ev.button.x;
+        mousey = ev.button.y;
+        just_refreshing = true;
+        reset_handlers();
+        screens.back()();
+        just_refreshing = false;
+        }
+
       mousepressed = ev.type == SDL_EVENT_MOUSE_BUTTON_DOWN;
       if(mousepressed) flashMessages();
       mousing = true;
