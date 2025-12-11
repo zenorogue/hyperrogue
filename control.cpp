@@ -361,6 +361,7 @@ EX bool doexiton(int sym, int uni) {
   if(sym == SDLK_F10) return true;
   if(sym == PSEUDOKEY_EXIT) return true;
   if(sym == PSEUDOKEY_RELEASE) return false;
+  if(is_joy_index(sym, deck::escape)) return true;
   #ifndef FAKE_SDL
   if(sym == SDLK_LSHIFT) return false;
   if(sym == SDLK_RSHIFT) return false;
