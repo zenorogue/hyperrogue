@@ -208,7 +208,8 @@ string latex_cachename(string s, flagtype flags) {
   return hr::format("latex-cache/%08X.png", hash);
   }
 
-/* note: you pdftopng from the xpdf package for this to work! */
+/* note: for this to work, you need either pdftopng from the xpdf package,
+ * or pdftoppm from the poppler-utils package */
 string gen_latex(presmode mode, string s, int res, flagtype flags) {
   string filename = latex_cachename(s, flags);
   if(mode == pmStartAll) {
@@ -225,13 +226,15 @@ string gen_latex(presmode mode, string s, int res, flagtype flags) {
         "\\end{document}\n", latex_packages.c_str(), s.c_str());
       fclose(f);
       hr::ignore(system("cd latex-cache; pdflatex rogueviz-latex.tex"));
+      bool has_working_pdftopng = system("pdftopng -v > /dev/null 2>&1") == 0;
+      string pdftopng_command = has_working_pdftopng ? "pdftopng" : "pdftoppm -png";
       string pngline = 
-        (flags & LATEX_COLOR) ? 
-          "cd latex-cache; pdftopng -alpha -r " + its(res) + " rogueviz-latex.pdf t"
-        : "cd latex-cache; pdftopng -r " + its(res) + " rogueviz-latex.pdf t";
+        (flags & LATEX_COLOR) && has_working_pdftopng ?
+          "cd latex-cache; " + pdftopng_command + " -alpha -r " + its(res) + " rogueviz-latex.pdf t"
+        : "cd latex-cache; " + pdftopng_command + " -r " + its(res) + " rogueviz-latex.pdf t";
       println(hlog, "calling: ", pngline);
       hr::ignore(system(pngline.c_str()));
-      rename("latex-cache/t-000001.png", filename.c_str());
+      rename(has_working_pdftopng ? "latex-cache/t-000001.png" : "latex-cache/t-1.png", filename.c_str());
       }
     }
   return filename;
