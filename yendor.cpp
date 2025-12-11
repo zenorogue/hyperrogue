@@ -976,7 +976,7 @@ EX namespace tactic {
         "Good luck, and have fun!"
         );
       else if(dialog::infix == "" && dialog::handlePageButtons(sym, uni, true, numpages)) ;
-      else if(dialog::editInfix(uni)) dialog::list_skip = 0;
+      else if(dialog::editInfix(sym, uni)) dialog::list_skip = 0;
       else if(doexiton(sym, uni)) popScreen();
       };
     }

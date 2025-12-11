@@ -2037,7 +2037,7 @@ EX namespace mapeditor {
 
     keyhandler = [] (int sym, int uni) {
       dialog::handleNavigation(sym, uni);
-      if(dialog::editInfix(uni)) dialog::list_skip = 0;
+      if(dialog::editInfix(sym, uni)) dialog::list_skip = 0;
       else if(doexiton(sym, uni)) popScreen();
       };    
     }

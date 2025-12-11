@@ -1950,11 +1950,17 @@ EX namespace dialog {
       }
     }
 
-  EX bool editInfix(int uni) {
+  EX bool editInfix(int sym, int uni) {
     if(uni >= 'A' && uni <= 'Z') infix += uni;
     else if(uni >= 'a' && uni <= 'z') infix += uni-32;
-    else if(infix != "" && uni == 8) infix = infix.substr(0, isize(infix)-1);
+    else if(infix != "" && (uni == 8 || is_joy_index(sym, deck::space) || is_joy_index(sym, deck::key_pageup))) infix = infix.substr(0, isize(infix)-1);
     else if(infix != "" && uni != 0) infix = "";
+    else if(is_joy_index(sym, deck::show_keyboard)) {
+      onscreen_keyboard = !onscreen_keyboard;
+      }
+    else if(uni == PSEUDOKEY_ONSCREEN_KEYBOARD) {
+      infix += keyboard_what;
+      }
     else return false;
     return true;
     }

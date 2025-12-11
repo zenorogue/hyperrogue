@@ -219,7 +219,7 @@ EX void showOverview() {
       "mousewheel to gain or lose treasures and orbs quickly (Ctrl = precise, Shift = reverse)."
       );
     else if(dialog::handlePageButtons(sym, uni, true, numpages)) ;
-    else if(dialog::editInfix(uni)) dialog::list_skip = 0;
+    else if(dialog::editInfix(sym, uni)) dialog::list_skip = 0;
     else if(doexiton(sym, uni)) popScreen();
     };
   }
