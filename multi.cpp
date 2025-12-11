@@ -70,6 +70,7 @@ EX namespace multi {
   EX shiftmatrix crosscenter[MAXPLAYER];
   EX double ccdist[MAXPLAYER];
   EX cell *ccat[MAXPLAYER];
+  EX bool accepted[MAXPLAYER], after_accepted[MAXPLAYER];
   
   bool combo[MAXPLAYER];
 
@@ -102,7 +103,7 @@ EX namespace multi {
   vector<string> playercmds_turn = {
     "move up-right", "move up-left", "move down-right", "move down-left", 
     "move up", "move right", "move down", "move left", 
-    "stay in place (left + right)", "cancel move", "leave the game", 
+    "accept (left + right to stay in place)", "cancel move", "leave the game",
     "drop Dead Orb (up + down)", "center the map on me", "",
     ""
     };
@@ -1020,7 +1021,7 @@ EX void handleInput(int delta, config &scfg) {
       auto &axes = axes_for(cpid);
 
       for(int ik=0; ik<4; ik++)
-        if(axes[ik])
+        if(axes[ik] && !accepted[i])
           anypressed = true, playermoved = true, multi::combo[i] = false;
       
       double mdx = 
@@ -1038,18 +1039,25 @@ EX void handleInput(int delta, config &scfg) {
       multi::mdy[i] = multi::mdy[i] * (1 - delta / 1000.) + mdy * delta / 2000.;
   
       if(WDIM == 2) {
-        if(mdx != 0 || mdy != 0) if(!multi::combo[i]) {
+        if(mdx != 0 || mdy != 0) if(!multi::combo[i] && !accepted[i]) {
           cwtV = multi::whereis[i]; cwt = multi::player[i];
           flipplayer = multi::flipped[i];
           multi::whereto[i] = vectodir(hpxy(multi::mdx[i], multi::mdy[i]));
           }
         }
       
-      if(act[pcFire] ||(act[pcMoveLeft] && act[pcMoveRight]))
+      if(act[pcMoveLeft] && act[pcMoveRight])
         multi::combo[i] = true, multi::whereto[i].d = MD_WAIT;
+
+      if(act[pcFire]) {
+        if(multi::whereto[i].d == MD_UNDECIDED || (multi::mdx[i] == 0 && multi::mdy[i] == 0)) multi::whereto[i].d = MD_WAIT;
+        multi::accepted[i] = true;
+        }
   
-      if(act[pcFace])
+      if(act[pcFace]) {
         multi::whereto[i].d = MD_UNDECIDED;
+        multi::accepted[i] = false;
+        }
       
       cwt.at = multi::player[i].at;      
       if(multi::ccat[i] && !multi::combo[i] && targetRangedOrb(multi::ccat[i], roMultiCheck)) {
@@ -1069,9 +1077,14 @@ EX void handleInput(int delta, config &scfg) {
         centerplayer = cpid; centerpc(100); playermoved = true; 
         }
   
+      for(int ik=0; ik<16; ik++) if(act[ik] && (!accepted[i] || ik >= 8)) anypressed = true;
+
+      if(after_accepted[i] && !accepted[i] && !anypressed) {
+        multi::whereto[i].d = MD_UNDECIDED;
+        after_accepted[i] = false;
+        }
+
       if(multi::whereto[i].d == MD_UNDECIDED) alldecided = false;
-      
-      for(int ik=0; ik<16; ik++) if(act[ik]) anypressed = true;
 
       if(anypressed) alldecided = false, needinput = false;
       else multi::mdx[i] = multi::mdy[i] = 0;
@@ -1088,6 +1101,8 @@ EX void handleInput(int delta, config &scfg) {
       for(int i: player_indices()) {
         origpos[i] = player[i].at;
         origtarget[i] = multiPlayerTarget(i);
+        multi::after_accepted[i] = multi::accepted[i];
+        multi::accepted[i] = false;
         }
   
       for(int i: player_indices())
