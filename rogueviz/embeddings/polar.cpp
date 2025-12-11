@@ -87,7 +87,7 @@ namespace embeddings {
 
       double r, theta;
       if(!scan(f, r, theta)) { println(hlog, "Error: incorrect format of r/alpha\n"); exit(1); }
-      pe->coords[id] = polar_point{.r = r, .theta = theta * degree};
+      pe->coords[id] = polar_point{r, theta * degree};
       }
     
     enable_embedding(pe);
