@@ -290,10 +290,10 @@ EX bool handleKeyTour(int sym, int uni) {
     dialog::key_actions[sym]();
     return true;
     }
-  if(sym == SDLK_PAGEDOWN) return next_slide();
-  if((sym == SDLK_RETURN || sym == SDLK_KP_ENTER) && (!inhelp || (flags & QUICKSKIP)))
+  if(sym == SDLK_PAGEDOWN || is_joy_index(sym, deck::key_pagedown)) return next_slide();
+  if((sym == SDLK_RETURN || sym == SDLK_KP_ENTER || is_joy_index(sym, deck::alt_enter)) && (!inhelp || (flags & QUICKSKIP)))
     return next_slide();
-  if(sym == SDLK_BACKSPACE || sym == SDLK_PAGEUP) {
+  if(sym == SDLK_BACKSPACE || sym == SDLK_PAGEUP || is_joy_index(sym, deck::key_pageup)) {
     if(gamestack::pushed()) { 
       gamestack::pop();
       if(!(flags & QUICKGEO)) return true;

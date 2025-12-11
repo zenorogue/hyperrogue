@@ -981,7 +981,7 @@ EX namespace dialog {
       highlight_text = "//missing";
       return;
       }
-    if(uni == '\n' || uni == '\r' || DIRECTIONKEY == SDLK_KP5 || uni == '`') {
+    if(uni == '\n' || uni == '\r' || DIRECTIONKEY == SDLK_KP5 || uni == '`' || is_joy_index(sym, deck::enter) || is_joy_index(sym, deck::alt_enter)) {
       for(int i=0; i<isize(items); i++) 
         if(isitem(items[i]))
           if(is_highlight(items[i])) {
@@ -1000,14 +1000,14 @@ EX namespace dialog {
       list_skip += 30;
       highlight_text = "//missing";
       }
-    if(DKEY == SDLK_PAGEDOWN) {
+    if(DKEY == SDLK_PAGEDOWN || is_joy_index(sym, deck::key_pagedown)) {
       uni = sym = 0;
       for(int i=0; i<isize(items); i++)
         if(isitem(items[i])) {
           set_highlight(items[i]);
           }
       }
-    if(DKEY == SDLK_PAGEUP) {
+    if(DKEY == SDLK_PAGEUP || is_joy_index(sym, deck::key_pageup)) {
       uni = sym = 0;
       for(int i=0; i<isize(items); i++) 
         if(isitem(items[i])) {
@@ -1078,7 +1078,7 @@ EX namespace dialog {
       if(x > 255) x = 255;
       part(color, uni - 'A') = x;
       }
-    else if(uni == ' ' || uni == '\n' || uni == '\r') {
+    else if(uni == ' ' || uni == '\n' || uni == '\r' || is_joy_index(sym, deck::enter) || is_joy_index(sym, deck::alt_enter)) {
       bool inHistory = false;
       for(int i=0; i<10; i++) if(colorhistory[i] == (color << shift))
         inHistory = true;
@@ -1867,14 +1867,14 @@ EX namespace dialog {
     string& s(*cfileptr);
     int i = isize(s) - (editext?0:4);
     
-    if(sym == SDLK_ESCAPE) {
+    if(sym == SDLK_ESCAPE || is_joy_index(sym, deck::escape)) {
       popScreen();
       }
-    else if(sym == SDLK_RETURN || sym == SDLK_KP_ENTER) {
+    else if(sym == SDLK_RETURN || sym == SDLK_KP_ENTER || is_joy_index(sym, deck::enter)) {
       bool ac = file_action();
       if(ac) closed = true;
       }
-    else if(sym == SDLK_BACKSPACE && i) {
+    else if((sym == SDLK_BACKSPACE || is_joy_index(sym, deck::space) || is_joy_index(sym, deck::key_pageup)) && i) {
       int len = utfsize_before(s, i);
       s.erase(i-len, len);
       highlight_text = "//missing";
@@ -1999,10 +1999,10 @@ EX namespace dialog {
     string u2;
     if(DKEY == SDLK_LEFT) editpos -= utfsize_before(es, editpos);
     else if(DKEY == SDLK_RIGHT) editpos += utfsize(es[editpos]);
-    else if(uni == '\t') {
+    else if(uni == '\t' || is_joy_index(sym, deck::key_t) || is_joy_index(sym, deck::key_pagedown)) {
       es = ""; editpos = 0;
       }
-    else if(uni == 8) {
+    else if(uni == 8 || is_joy_index(sym, deck::key_f) || is_joy_index(sym, deck::key_pageup)) {
       if(editpos == 0) return true;
       int len = utfsize_before(es, editpos);
       es.replace(editpos-len, len, "");

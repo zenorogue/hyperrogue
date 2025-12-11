@@ -1095,7 +1095,6 @@ EX void initConfig() {
       if(deck) {
         centered_menus = true;
         lands_per_page = 18;
-        defaultjoy = false;
         dialog::onscreen_keyboard = true;
         dialog::dialog_font_scale = 3;
         dialog::display_keys = 3;

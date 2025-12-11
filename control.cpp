@@ -610,9 +610,9 @@ EX void handleKeyNormal(int sym, int uni) {
   
   if(DEFAULTCONTROL && !game_keys_scroll) {
     if(sym == '.' || sym == 's') movepcto(-1, 1);
-    if((sym == SDLK_DELETE || sym == SDLK_KP_PERIOD || sym == 'g') && uni != 'G' && uni != 'G'-64) 
+    if((sym == SDLK_DELETE || sym == SDLK_KP_PERIOD || sym == 'g' || is_joy_index(sym, deck::key_g)) && uni != 'G' && uni != 'G'-64)
       movepcto(MD_DROP, 1);
-    if(sym == 't' && uni != 'T' && uni != 'T'-64 && canmove) {     
+    if((sym == 't' || is_joy_index(sym, deck::key_t)) && uni != 'T' && uni != 'T'-64 && canmove) {
       cell *target = GDIM == 3 ? mouseover : centerover;
       if(playermoved && items[itStrongWind]) { 
         cell *c = whirlwind::jumpDestination(cwt.at);
@@ -622,8 +622,8 @@ EX void handleKeyNormal(int sym, int uni) {
       else targetRangedOrb(target, roKeyboard);
       sym = 0; uni = 0;
       }
-    if(sym == 'f') bow::switch_fire_mode();
-    if(sym == '`') {
+    if(sym == 'f' || is_joy_index(sym, deck::key_f)) bow::switch_fire_mode();
+    if(sym == '`' || is_joy_index(sym, deck::enter)) {
       flashMessages();
       movepcto(joydir);
       joy_ignore_next = true;
@@ -649,7 +649,7 @@ EX void handleKeyNormal(int sym, int uni) {
     keybd_subdir *= -1;
     }
 
-  if(sym == SDLK_ESCAPE) {
+  if(sym == SDLK_ESCAPE || is_joy_index(sym, deck::escape)) {
     if(bow::fire_mode)
       bow::switch_fire_mode();
     else if(viewdists)
@@ -964,6 +964,12 @@ EX void mainloopiter() {
   hiliteclick = keystate[SDLK_LALT] | keystate[SDLK_RALT];
   #endif
 
+  if(defaultjoy) for(int i=0; i<numsticks; i++) {
+    if(SDL_JoystickGetButton(sticks[i], deck::key_control)) lctrlclick = true;
+    if(SDL_JoystickGetButton(sticks[i], deck::key_alt)) hiliteclick = true;
+    if(SDL_JoystickGetButton(sticks[i], deck::key_shift)) lshiftclick = true;
+    }
+
   anyshiftclick = lshiftclick | rshiftclick;
   anyctrlclick = lctrlclick | rctrlclick;
 
@@ -1217,16 +1223,8 @@ EX void handle_event(SDL_Event& ev) {
       if(ev.jhat.value == SDL_HAT_RIGHT) sym = SDLK_RIGHT;
       }
 
-    else if(ev.type == SDL_EVENT_JOYSTICK_BUTTON_DOWN && normal && DEFAULTCONTROL && defaultjoy) {
-      flashMessages();
-      movepcto(joydir);
-      joy_ignore_next = true;
-      joytime = -1;
-      checkjoy();
-      }
-
-    else if(ev.type == SDL_EVENT_JOYSTICK_BUTTON_DOWN && !normal && defaultjoy) {
-      sym = uni = SDLK_RETURN;
+    else if(ev.type == SDL_EVENT_JOYSTICK_BUTTON_DOWN && defaultjoy) {
+      sym = uni = PSEUDOKEY_JOY + 128 * ev.jbutton.which + ev.jbutton.button;
       }
 #endif
 
