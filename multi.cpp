@@ -643,7 +643,7 @@ EX void sconfig_savers(config& scfg, string prefix) {
       param_i(scfg.joyaction[i][j], pre+"-B"+its(j));
     for(int j=0; j<MAXAXE; j++) {
       param_i(scfg.axeaction[i][j], pre+" axis "+its(j));
-      param_i(scfg.deadzoneval[i][j], pre+" deadzone "+its(j));
+      param_i(scfg.deadzoneval[i][j], pre+" deadzone "+its(j), 2000);
       }
     for(int j=0; j<MAXHAT; j++) for(int k=0; k<4; k++) {
       param_i(scfg.hataction[i][j][k], pre+" hat "+its(j)+" "+"URDL"[k]);
