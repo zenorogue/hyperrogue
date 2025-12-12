@@ -87,6 +87,44 @@ vector<string> extra_keys_3d = {
 
 EX hookset<bool()> hooks_build_help;
 
+EX void build_controls() {
+  help = "";
+#if ISMOBILE
+  help += XLAT(
+    "Usually, you move by touching somewhere on the map; you can also touch one "
+    "of the four buttons on the map corners to change this (to scroll the map "
+    "or get information about map objects). You can also touch the "
+    "numbers displayed to get their meanings.\n"
+    );
+#else
+  if(DEFAULTCONTROL && dialog::display_keys == 3)
+    help += XLAT(
+      "To move, aim with the left joystick then press Ⓐ. Press Ⓑ for menu, Steam+Ⓧ for keyboard, Ⓨ to center. Ⓡ to highlight important things on the map.\n\n"
+      "For ranged attacks, use the DPad to aim, then push the left joystick to target an orb or the right joystick to target a ranged weapon. "
+      "Alternatively, you can also use the right trackpad.\n\n"
+      "Press L5 to drop a dead orb. R4/R5 to rotate the screen."
+      );
+  else
+  if(DEFAULTCONTROL && !game_keys_scroll)
+    help += XLAT(
+      "Move with mouse, num pad, qweadzxc, or hjklyubn. Wait by pressing 's' or '.'. Spin the world with arrows, PageUp/Down, and Space. "
+      "To save the game you need an Orb of Safety. Press 'v' for the main menu (configuration, special modes, etc.), ESC for the quest status.\n\n"
+      );
+  else if(DEFAULTCONTROL && WDIM == 2)
+    help += XLAT(
+      "You are currently in a visualization. Press wasd to scroll, qe to rotate. You can also use the arrow keys. ESC for menu.\n\n");
+  else if(DEFAULTCONTROL && WDIM == 3)
+    help += XLAT(
+      "You are currently in a visualization. Press wasdqe to rotate the camera, ijklyh to move. You can also use the arrow keys and Home/End and PgUp/PgDn. ESC for menu.\n\n");
+  help += XLAT(
+    "You can right click any element to get more information about it.\n\n"
+    );
+#if ISMAC
+  help += XLAT("(You can also use right Shift)\n\n");
+#endif
+#endif
+  }
+
 EX void buildHelpText() {
   if(callhandlers(0, hooks_build_help)) return;
   DEBBI(debug_graph, ("buildHelpText"));
@@ -161,71 +199,32 @@ EX void buildHelpText() {
     "get the details of all the Lands.\n\n");
   if(!game_keys_scroll) help += "\n\n";
     
-#if ISMOBILE
-  help += XLAT(
-    "Usually, you move by touching somewhere on the map; you can also touch one "
-    "of the four buttons on the map corners to change this (to scroll the map "
-    "or get information about map objects). You can also touch the "
-    "numbers displayed to get their meanings.\n"
-    );
-#else
-  if(DEFAULTCONTROL && dialog::display_keys == 3)
-    help += XLAT(
-      "To move, aim with the left joystick then press Ⓐ. Press Ⓑ for menu, Steam+Ⓧ for keyboard, Ⓨ to center. Ⓡ to highlight important things on the map.\n\n"
-      "For ranged attacks, use the DPad to aim, then push the left joystick to target an orb or the right joystick to target a ranged weapon. "
-      "Alternatively, you can also use the right trackpad.\n\n"
-      "Press L5 to drop a dead orb. R4/R5 to rotate the screen.\n\n"
-      );
-  else
-  if(DEFAULTCONTROL && !game_keys_scroll)
-    help += XLAT(
-      "Move with mouse, num pad, qweadzxc, or hjklyubn. Wait by pressing 's' or '.'. Spin the world with arrows, PageUp/Down, and Space. "
-      "To save the game you need an Orb of Safety. Press 'v' for the main menu (configuration, special modes, etc.), ESC for the quest status.\n\n"
-      );
-  else if(DEFAULTCONTROL && WDIM == 2)
-    help += XLAT(
-      "You are currently in a visualization. Press wasd to scroll, qe to rotate. You can also use the arrow keys. ESC for menu.\n\n");
-  else if(DEFAULTCONTROL && WDIM == 3)
-    help += XLAT(
-      "You are currently in a visualization. Press wasdqe to rotate the camera, ijklyh to move. You can also use the arrow keys and Home/End and PgUp/PgDn. ESC for menu.\n\n");
-  help += XLAT(
-    "You can right click any element to get more information about it.\n\n"
-    );
-#if ISMAC
-  help += XLAT("(You can also use right Shift)\n\n");
-#endif
-#endif
-  help += XLAT("See more on the website: ") 
-    + "https://roguetemple.com/z/hyper/\n\n";
-  
-#if CAP_TOUR
-  if(!tour::on)
-  help += XLAT("Try the Guided Tour to help with understanding the "
-    "geometry of HyperRogue (menu -> special modes).\n\n");
-#endif
-  
-  help += XLAT("Still confused? Read the FAQ on the HyperRogue website!\n\n");
-  
   help_extensions.clear();
   
   help_extensions.push_back(help_extension{'c', XLAT("credits"), [] () { buildCredits(); }});
-#if ISMOBILE == 0
-  help_extensions.push_back(help_extension{'k', XLAT("advanced keyboard shortcuts"), [] () { 
-    help = "";
-    for(string s: normal_keys) help += s, help += "\n";
-    for(string s: extra_keys) help += s, help += "\n";
-    help += "\n\nQuick keys:\n";
-    for(string s: quick_keys) help += s, help += "\n";
-    if(GDIM == 3 || rug::rugged) {
-      help += "\n\nIn 3D modes:\n";
-      for(string s: extra_keys_3d) help += s, help += "\n";
-      }
-    else {
-      help += "\n\nIn 2D modes:\n";
-      for(string s: extra_keys_2d) help += s, help += "\n";
-      }
+  
+  help_extensions.push_back(help_extension{'k', XLAT("controls"), [] () {
+    build_controls();
+    help_extensions.resize(2);
+    #if ISMOBILE == 0
+    help_extensions.push_back(help_extension{'k', XLAT("advanced keyboard shortcuts"), [] () {
+      help = "";
+      for(string s: normal_keys) help += s, help += "\n";
+      for(string s: extra_keys) help += s, help += "\n";
+      help += "\n\nQuick keys:\n";
+      for(string s: quick_keys) help += s, help += "\n";
+      if(GDIM == 3 || rug::rugged) {
+        help += "\n\nIn 3D modes:\n";
+        for(string s: extra_keys_3d) help += s, help += "\n";
+        }
+      else {
+        help += "\n\nIn 2D modes:\n";
+        for(string s: extra_keys_2d) help += s, help += "\n";
+        }
+      }});
+    #endif
     }});
-#endif
+
   }
 
 EX string standard_help() {
