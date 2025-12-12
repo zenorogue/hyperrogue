@@ -833,7 +833,7 @@ EX void initConfig() {
     ->editable("auto-adjust dual-focus projections", 'f');
   param_b(alwaysuse, "use configured keys");
   param_b(multi::multi_autojoy, "multi_autojoy")
-    ->editable("joystick moves automatically in configured keys", 'j');
+    ->editable("auto-accept moves", 'j');
 
   for(int i=0; i<7; i++) paramset(multi::scs[i], "player"+its(i));
 
