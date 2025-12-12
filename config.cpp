@@ -1147,7 +1147,8 @@ EX void initConfig() {
   ->editable("use higher contrast", 'h')
   ->help("Use higher contrast for some terrain elements.");
 
-  param_b(vid.grid, "grid");
+  param_b(vid.grid, "grid")
+  -> editable("display grid", 'g');
   param_b(models::desitter_projections, "desitter_projections", false);
   param_b(nonisotropic_weird_transforms, "nonisotropic_weird_transforms", false);
 
@@ -2414,12 +2415,12 @@ void show_animation_speed_settings() {
   dialog::display();
   }
 
-EX void showGraphConfig() {
+EX void showScreenConfig() {
   cmode = vid.xres > vid.yres * 1.4 ? sm::SIDE : sm::MAYDARK;
   gamescreen();
 
-  dialog::init(XLAT("graphics configuration"));
-  
+  dialog::init(XLAT("screen configuration"));
+
 #if !ISIOS && !ISWEB
   add_edit(vid.want_fullscreen);
   
@@ -2490,6 +2491,19 @@ EX void showGraphConfig() {
     }
   else
     dialog::addBreak(200);  
+
+  dialog::display();
+  }
+
+
+EX void showGraphConfig() {
+  cmode = vid.xres > vid.yres * 1.4 ? sm::SIDE : sm::MAYDARK;
+  gamescreen();
+
+  dialog::init(XLAT("graphics configuration"));
+
+  dialog::addSelItem(XLAT("screen settings"), its(current_display->xsize) + "x" + its(current_display->ysize), 's');
+  dialog::add_action_push(showScreenConfig);
 
   add_edit(mapfontscale);
 
@@ -3894,23 +3908,41 @@ EX void edit_color_table(colortable& ct, const reaction_t& r IS(reaction_t()), b
   dialog::display();
   }
 
-EX void show_color_dialog() {
+void color_handler(int sym, int uni) {
+  if(uni == '-') {
+    cell *c = mouseover;
+    if(!c) return;
+    else if(c == cwt.at) {
+      pushScreen(showCustomizeChar);
+      return;
+      }
+    else if(c->monst)
+      dialog::openColorDialog(minf[c->monst].color);
+    else if(c->item)
+      dialog::openColorDialog(iinf[c->item].color);
+    else if(auto tab = special_colortable_for(c)) { pushScreen([tab] { edit_color_table(*tab); }); return; }
+    else if(c->wall)
+      dialog::openColorDialog(winf[c->wall == waMineMine ? waMineUnknown : c->wall].color);
+    #if CAP_COMPLEX2
+    else if(c->land == laBrownian)
+      dialog::openColorDialog(brownian::get_color_edit(c->landparam));
+    #endif
+    else
+      dialog::openColorDialog(floorcolors[c->land]);
+    dialog::colorAlpha = false;
+    dialog::get_di().dialogflags |= sm::SIDE;
+    return;
+    }
+  else dialog::handleNavigation(sym, uni);
+  if(doexiton(sym, uni)) popScreen();
+  }
+
+EX void show_color_dialog_projection() {
   cmode = sm::SIDE | sm::DIALOG_STRICT_X;
   getcstat = '-';
   gamescreen();
-  dialog::init(XLAT("colors & aura"));
 
-  dialog::addColorItem(XLAT("background"), addalpha(backcolor), 'b');
-  dialog::add_action([] () { dialog::openColorDialog(backcolor); dialog::colorAlpha = false; dialog::get_di().dialogflags |= sm::SIDE; });
-  
-  if(WDIM == 2 && GDIM == 3 && hyperbolic)
-    dialog::addBoolItem_action(XLAT("cool fog effect"), context_fog, 'B');
-
-  dialog::addColorItem(XLAT("foreground"), addalpha(forecolor), 'f');
-  dialog::add_action([] () { dialog::openColorDialog(forecolor); dialog::colorAlpha = false; dialog::get_di().dialogflags |= sm::SIDE; });
-
-  dialog::addColorItem(XLAT("borders"), addalpha(bordcolor), 'o');
-  dialog::add_action([] () { dialog::openColorDialog(bordcolor); dialog::colorAlpha = false; dialog::get_di().dialogflags |= sm::SIDE; });
+  dialog::init(XLAT("projection colors & aura"));
 
   dialog::addColorItem(XLAT("projection boundary"), ringcolor, 'r');
   dialog::add_action([] () { dialog::openColorDialog(ringcolor); dialog::get_di().dialogflags |= sm::SIDE; });
@@ -3921,12 +3953,6 @@ EX void show_color_dialog() {
   dialog::addColorItem(XLAT("projection background"), modelcolor, 'c');
   dialog::add_action([] () { dialog::openColorDialog(modelcolor); dialog::get_di().dialogflags |= sm::SIDE; });
 
-  dialog::addColorItem(XLAT("standard grid color"), stdgridcolor, 'g');
-  dialog::add_action([] () { vid.grid = true; dialog::openColorDialog(stdgridcolor); dialog::get_di().dialogflags |= sm::SIDE; });
-  
-  dialog::addSelItem(XLAT("grid width multiplier"), fts(vid.multiplier_grid), 'G');
-  dialog::add_action([] () { dialog::editNumber(vid.multiplier_grid, 0, 10, 1, 1, XLAT("grid width multiplier"), ""); });
-
   dialog::addSelItem(XLAT("brightness behind the sphere"), fts(backbrightness), 'i');
   dialog::add_action([] () { dialog::editNumber(backbrightness, 0, 1, .01, 0.25, XLAT("brightness behind the sphere"), 
     XLAT("In the orthogonal projection, objects on the other side of the sphere are drawn darker.")); dialog::bound_low(0); });
@@ -3934,9 +3960,35 @@ EX void show_color_dialog() {
   dialog::addColorItem(XLAT("projection period"), periodcolor, 'p');
   dialog::add_action([] () { dialog::openColorDialog(periodcolor); dialog::get_di().dialogflags |= sm::SIDE; });
 
-  dialog::addColorItem(XLAT("dialogs"), addalpha(dialog::dialogcolor), 'd');
-  dialog::add_action([] () { dialog::openColorDialog(dialog::dialogcolor); dialog::colorAlpha = false; dialog::get_di().dialogflags |= sm::SIDE; });
-  dialog::addBoolItem_action(XLAT("higher contrast"), higher_contrast, 'h');
+  dialog::addBreak(50);
+
+  dialog::addSelItem(XLAT("aura brightness"), its(vid.aurastr), 'a');
+  dialog::add_action([] () { dialog::editNumber(vid.aurastr, 0, 256, 10, 128, XLAT("aura brightness"), ""); dialog::bound_low(0); });
+
+  dialog::addSelItem(XLAT("aura smoothening factor"), its(vid.aurasmoothen), 's');
+  dialog::add_action([] () { dialog::editNumber(vid.aurasmoothen, 1, 180, 1, 5, XLAT("aura smoothening factor"), ""); dialog::bound_low(1); });
+
+  dialog::addBreak(50);
+  dialog::addBack();
+  dialog::display();
+
+  keyhandler = color_handler;
+  }
+
+EX void show_color_dialog_game() {
+  cmode = sm::SIDE | sm::DIALOG_STRICT_X;
+  getcstat = '-';
+  gamescreen();
+
+  dialog::init(XLAT("game colors"));
+
+  add_edit(vid.grid);
+
+  dialog::addColorItem(XLAT("standard grid color"), stdgridcolor, 'g');
+  dialog::add_action([] () { vid.grid = true; dialog::openColorDialog(stdgridcolor); dialog::get_di().dialogflags |= sm::SIDE; });
+
+  dialog::addSelItem(XLAT("grid width multiplier"), fts(vid.multiplier_grid), 'G');
+  dialog::add_action([] () { dialog::editNumber(vid.multiplier_grid, 0, 10, 1, 1, XLAT("grid width multiplier"), ""); });
 
   dialog::addBreak(50);
   if(specialland == laCanvas && ccolor::which->ctab.size()) {
@@ -3972,15 +4024,43 @@ EX void show_color_dialog() {
     dialog::addBoolItem_action(XLAT("Galápagos shading"), tortoise::shading_enabled, 'T');
     }
 
+  dialog::addBoolItem_action(XLAT("higher contrast"), higher_contrast, 'h');
+
   dialog::addInfo(XLAT("colors of some game objects can be edited by clicking them."));
   
   dialog::addBreak(50);
+  dialog::addBack();
+  dialog::display();
 
-  dialog::addSelItem(XLAT("aura brightness"), its(vid.aurastr), 'a');
-  dialog::add_action([] () { dialog::editNumber(vid.aurastr, 0, 256, 10, 128, XLAT("aura brightness"), ""); dialog::bound_low(0); });
+  keyhandler = color_handler;
+  }
 
-  dialog::addSelItem(XLAT("aura smoothening factor"), its(vid.aurasmoothen), 's');
-  dialog::add_action([] () { dialog::editNumber(vid.aurasmoothen, 1, 180, 1, 5, XLAT("aura smoothening factor"), ""); dialog::bound_low(1); });  
+EX void show_color_dialog() {
+  cmode = sm::SIDE | sm::DIALOG_STRICT_X;
+  getcstat = '-';
+  gamescreen();
+  dialog::init(XLAT("colors & aura"));
+
+  dialog::addColorItem(XLAT("background"), addalpha(backcolor), 'b');
+  dialog::add_action([] () { dialog::openColorDialog(backcolor); dialog::colorAlpha = false; dialog::get_di().dialogflags |= sm::SIDE; });
+
+  if(WDIM == 2 && GDIM == 3 && hyperbolic)
+    dialog::addBoolItem_action(XLAT("cool fog effect"), context_fog, 'B');
+
+  dialog::addColorItem(XLAT("foreground"), addalpha(forecolor), 'f');
+  dialog::add_action([] () { dialog::openColorDialog(forecolor); dialog::colorAlpha = false; dialog::get_di().dialogflags |= sm::SIDE; });
+
+  dialog::addColorItem(XLAT("borders"), addalpha(bordcolor), 'o');
+  dialog::add_action([] () { dialog::openColorDialog(bordcolor); dialog::colorAlpha = false; dialog::get_di().dialogflags |= sm::SIDE; });
+
+  dialog::addColorItem(XLAT("dialogs"), addalpha(dialog::dialogcolor), 'd');
+  dialog::add_action([] () { dialog::openColorDialog(dialog::dialogcolor); dialog::colorAlpha = false; dialog::get_di().dialogflags |= sm::SIDE; });
+
+  dialog::addItem(XLAT("projection colors & aura"), 'p');
+  dialog::add_action_push(show_color_dialog_projection);
+
+  dialog::addItem(XLAT("grid & game colors"), 'g');
+  dialog::add_action_push(show_color_dialog_game);
 
   dialog::addBreak(50);
   dialog::addBack();
@@ -4014,6 +4094,8 @@ EX void show_color_dialog() {
     else dialog::handleNavigation(sym, uni);
     if(doexiton(sym, uni)) popScreen();
     };
+
+  keyhandler = color_handler;
   }
 
 #if CAP_CONFIG
