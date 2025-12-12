@@ -2501,7 +2501,7 @@ EX void showScreenConfig() {
 
 
 EX void showGraphConfig() {
-  cmode = vid.xres > vid.yres * 1.4 ? sm::SIDE : sm::MAYDARK;
+  cmode = sm::SIDE | sm::MAYDARK;
   gamescreen();
 
   dialog::init(XLAT("graphics configuration"));
@@ -3942,7 +3942,7 @@ void color_handler(int sym, int uni) {
   }
 
 EX void show_color_dialog_projection() {
-  cmode = sm::SIDE | sm::DIALOG_STRICT_X;
+  cmode = sm::SIDE | sm::DIALOG_STRICT_X | sm::MAYDARK;
   getcstat = '-';
   gamescreen();
 
@@ -4030,7 +4030,8 @@ EX void show_color_dialog_game() {
 
   dialog::addBoolItem_action(XLAT("higher contrast"), higher_contrast, 'h');
 
-  dialog::addInfo(XLAT("colors of some game objects can be edited by clicking them."));
+  dialog::addInfo(XLAT("colors of some game objects"));
+  dialog::addInfo(XLAT("can be edited by clicking them."));
   
   dialog::addBreak(50);
   dialog::addBack();
@@ -4040,7 +4041,7 @@ EX void show_color_dialog_game() {
   }
 
 EX void show_color_dialog() {
-  cmode = sm::SIDE | sm::DIALOG_STRICT_X;
+  cmode = sm::SIDE | sm::DIALOG_STRICT_X | sm::MAYDARK;
   getcstat = '-';
   gamescreen();
   dialog::init(XLAT("colors & aura"));
