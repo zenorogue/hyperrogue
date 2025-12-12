@@ -229,7 +229,7 @@ EX void buildHelpText() {
   }
 
 EX string standard_help() {
-  if(nohelp == 2) return "";
+  if(nohelp == 2 || dialog::display_keys == 3) return "";
   return XLAT("Press F1 or right click for help");
   }
 
