@@ -1830,7 +1830,7 @@ EX void show_menu_button() {
     displayButton(vid.xres-8, vid.yres-vid.fsize, XLAT("(ESC) tour menu"), SDLK_ESCAPE, 16);
 #endif
   else if(dialog::display_keys == 3)
-    displayButton(vid.xres-8, vid.yres-vid.fsize, XLAT("menu"), SDLK_ESCAPE, 16);
+    displayButton(vid.xres-8, vid.yres-vid.fsize, separate_status ? XLAT("quest") : XLAT("menu"), SDLK_ESCAPE, 16);
   else
     displayButton(vid.xres-8, vid.yres-vid.fsize, XLAT("(v) menu"), 'v', 16);
 
