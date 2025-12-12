@@ -7322,7 +7322,8 @@ S("Crystals emitting magical radiation.", "Излучающий магическ
 
 // [PL:7773] restructured menus
 S("colors & aura", "цветы и ауры")
-S("colors of some game objects can be edited by clicking them.", "можно изменить цветы нескольских объектов, кликая на них.")
+S("colors of some game objects", "можно изменить цветы нескольских")
+S("can be edited by clicking them.", "объектов, кликая на них.")
 S("standard grid color", "стандартный цвет сетки")
 S("mouse & touchscreen", "мышь и сенсорный экран")
 S("settings", "настройки")

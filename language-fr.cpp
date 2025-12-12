@@ -7640,7 +7640,8 @@ S("In the orthogonal projection, objects on the other side of the sphere are dra
 // restructured menus
 
 S("colors & aura", "couleur & aura")
-S("colors of some game objects can be edited by clicking them.", "Les couleurs de certains objets du jeu peuvent être éditées en les cliquant.")
+S("colors of some game objects", "Les couleurs de certains objets du jeu")
+S("can be edited by clicking them.", "peuvent être éditées en les cliquant.")
 S("standard grid color", "grille de couleurs standard")
 S("mouse & touchscreen", "souris & écran tactile")
 S("settings", "réglages")

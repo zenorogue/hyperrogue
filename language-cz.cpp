@@ -8036,7 +8036,8 @@ S("In the orthogonal projection, objects on the other side of the sphere are dra
 // restructured menus
 
 S("colors & aura", "barvy a aura")
-S("colors of some game objects can be edited by clicking them.", "barvy některých herních objektů lze editovat kliknutím.")
+S("colors of some game objects", "barvy některých herních objektů")
+S("can be edited by clicking them.", "lze editovat kliknutím.")
 S("standard grid color", "standardní barva mřížky")
 S("mouse & touchscreen", "myš a doteková obrazovka")
 S("settings", "nastavení")

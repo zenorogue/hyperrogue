@@ -6978,7 +6978,8 @@ S("In the orthogonal projection, objects on the other side of the sphere are dra
 // restructured menus
 
 S("colors & aura", "颜色与光环")
-S("colors of some game objects can be edited by clicking them.", "点击一些游戏物体可以修改它们的颜色。")
+S("colors of some game objects", "点击一些游戏物体可")
+S("can be edited by clicking them.", "以修改它们的颜色。")
 S("standard grid color", "标准网格颜色")
 S("mouse & touchscreen", "鼠标与触摸")
 S("settings", "设置")
