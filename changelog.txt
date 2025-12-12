@@ -5598,3 +5598,28 @@ Thanks to josephcsible:
 - circle the item the Orb of Space is about to collect
 - fix freeze if Ancient Jewelry ends up on a tile with a large landparam
 - fix a crash
+
+2025-12-12 13:44 Update 13.1h:
+Further improvements to the SteamDeck:
+- use SteamDeck buttons instead of relying on the layout
+- fixed some problems with touchscreens (no double events, correct position)
+- an option to allow touch to get information / drag, other than move
+- an option to split 'quest screen' and 'main menu' into separate screens
+- splitting 'general graphics', 'colors & aura', and the help screen into more subscreens
+- fixed the problem where the screen pans down on SteamDeck (and other similar popular controlers)
+- "search for config" screen now has onscreen keyboard
+- in turn-based multiplayer, deadzones are now >0 by default (so it works on SteamDeck), and also an option to force 'accepting' directions
+- an option to display help about OSM orbs in touch interfaces
+
+Other improvements:
+- fixed the help button in the main menu
+- you can no longer push statues/wood-trees onto Grat Walls and other 'do not touch' walls
+- when you have Orb of Aether you can now enter BSOC/trees if they cannot be pushed behind
+- extensions to the formula parser (see the aperiodic-pentagons.tes sample)
+- disable message wrapping if not appropriate
+
+Thanks to josephcsible:
+- Rework removed tiles in Crystal World
+- Fix Free Fall crashing in horodisk land structure
+- Fix crash when Orbs of Choice, Space, and Safety interact
+- Slow down Orb of Winter effect when flashing effects are off
