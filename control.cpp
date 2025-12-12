@@ -650,7 +650,7 @@ EX void handleKeyNormal(int sym, int uni) {
     keybd_subdir *= -1;
     }
 
-  if(sym == SDLK_ESCAPE || is_joy_index(sym, deck::escape)) {
+  if(sym == SDLK_ESCAPE || (is_joy_index(sym, deck::escape) && DEFAULTNOR(sym))) {
     if(bow::fire_mode)
       bow::switch_fire_mode();
     else if(viewdists)
