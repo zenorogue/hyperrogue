@@ -38,6 +38,7 @@ EX namespace multi {
   EX bool friendly_fire = true;
   EX bool self_hits;
   EX bool two_focus;
+  EX bool multi_autojoy = true;
 
   EX int players = 1;
   EX cellwalker player[MAXPLAYER];
@@ -507,6 +508,8 @@ struct shmup_configurer {
   
     add_edit(joy_init);
 
+    if(haveconfig && !shmup::on) add_edit(multi::multi_autojoy);
+
     dialog::addBreak(50);
   
     dialog::addHelp();
@@ -829,6 +832,8 @@ EX void initConfig() {
   param_b(multi::two_focus, "two_focus", false)
     ->editable("auto-adjust dual-focus projections", 'f');
   param_b(alwaysuse, "use configured keys");
+  param_b(multi::multi_autojoy, "multi_autojoy")
+    ->editable("joystick moves automatically in configured keys", 'j');
 
   for(int i=0; i<7; i++) paramset(multi::scs[i], "player"+its(i));
 
@@ -1094,6 +1099,8 @@ EX void handleInput(int delta, config &scfg) {
 
       if(multi::whereto[i].d == MD_UNDECIDED) alldecided = false;
 
+      if(!multi::multi_autojoy && !accepted[i]) alldecided = false;
+
       if(anypressed) alldecided = false, needinput = false;
       else multi::mdx[i] = multi::mdy[i] = 0;
       }
@@ -1167,8 +1174,10 @@ EX void handleInput(int delta, config &scfg) {
         int scdir = cdir;
         bool isUndecided = cdir == MD_UNDECIDED;
         if(countplayers_undecided > 0 && ! isUndecided) continue;
-        if(playerpos(i) == c)
+        if(playerpos(i) == c) {
           multi::whereto[i].d = MD_WAIT;
+          multi::accepted[i] = true;
+          }
         else if(!mouseout()) {
           for(int d=0; d<playerpos(i)->type; d++) {
             cdir = d;
@@ -1179,6 +1188,7 @@ EX void handleInput(int delta, config &scfg) {
             auto& sd = multi::whereto[i].subdir;
             sd = mousedest.subdir;
             if(sd == 0) sd = 1;
+            multi::accepted[i] = true;
             }
           }
         }
