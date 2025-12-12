@@ -1855,9 +1855,9 @@ EX void normalscreen() {
   dialog::key_actions.clear();
 
   if(!playerfound && !anims::any_on() && !sphere && !no_find_player && mapeditor::drawplayer)
-    displayButton(current_display->xcenter, current_display->ycenter, mousing ? XLAT("find the player") : XLAT("press SPACE to find the player"), ' ', 8);
+    displayButton(current_display->xcenter, current_display->ycenter, (!dialog::actual_display_keys()) ? XLAT("find the player") : XLAT("press SPACE to find the player"), ' ', 8);
 
-  if(!mapeditor::drawplayer && playermoved && !no_find_player)
+  if(!mapeditor::drawplayer && playermoved && !no_find_player && dialog::actual_display_keys())
     displayButton(current_display->xcenter, current_display->ycenter, XLAT("move the camera with arrow keys and Home/End"), PSEUDOKEY_NOHINT, 8);
 
   describeMouseover();
