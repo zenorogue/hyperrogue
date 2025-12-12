@@ -1054,7 +1054,7 @@ EX void handleInput(int delta, config &scfg) {
       if(WDIM == 2) {
         if(mdx != 0 || mdy != 0) if(!multi::combo[i] && !accepted[i]) {
           cwtV = multi::whereis[i]; cwt = multi::player[i];
-          flipplayer = multi::flipped[i];
+          if(activePlayers() > 1) flipplayer = multi::flipped[i];
           multi::whereto[i] = vectodir(hpxy(multi::mdx[i], multi::mdy[i]));
           }
         }
