@@ -70,6 +70,8 @@ void save_as(string fname) {
       println(f, "AT ", y, " ", x, " ", r.block_at[y][x]);
 
     for(auto& e: r.entities) save_via_stater(f, *e, "ENTITY");
+
+    if(r.timed_orb_end >= gframeid) println(f, "TIMER ", r.timed_orb_end);
     println(f);
     }
 
@@ -180,6 +182,10 @@ void load_from(string fname) {
       int x, y, c;
       sscanf(param.c_str(), "%d%d%d", &x, &y, &c);
       current_room->block_at[y][x] = c;
+      }
+    else if(cap == "TIMER") {
+      if(!current_room) { println(hlog, "warning: no current room"); continue; }
+      current_room->timed_orb_end = atoi(param.c_str());
       }
     else if(cap == "ENTITY") {
       if(!current_room) { println(hlog, "warning: no current room"); continue; }
