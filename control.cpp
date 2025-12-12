@@ -713,7 +713,7 @@ EX void handleKeyNormal(int sym, int uni) {
     
     multi::cpid = 0;
     if(touchmode == tmode::drag) {
-      panning(mouseoh, mouseh);
+      if(holdmouse) panning(mouseoh, mouseh);
       holdmouse = true;
       }
     else if(touchmode == tmode::info)
@@ -1340,7 +1340,7 @@ EX void handle_event(SDL_Event& ev) {
       
       bool act = false;
       
-      if(vid.quickmouse || getcstat == PSEUDOKEY_LIST_SLIDER) {
+      if(vid.quickmouse || getcstat == PSEUDOKEY_LIST_SLIDER || (getcstat == '-' && touchmode == tmode::drag)) {
         act = down;
         }
       else {
