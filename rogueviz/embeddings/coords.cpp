@@ -83,7 +83,6 @@ namespace embeddings {
           co = perspective_to_space(h1, 1);
           break;
         }
-      co = normalize(co);
       }
     
     enable_embedding(pe);
