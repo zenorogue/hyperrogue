@@ -1102,6 +1102,7 @@ EX void initConfig() {
         dialog::display_keys = 3;
         qm = false;
         separate_status = true;
+        multi::multi_autojoy = false;
         }
       }
     }
