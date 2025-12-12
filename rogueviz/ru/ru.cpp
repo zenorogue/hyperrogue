@@ -29,6 +29,7 @@ Have fun!
 #include "staters.cpp"
 #include "geometry.cpp"
 #include "entity.cpp"
+#include "hallucinate.cpp"
 #include "man.cpp"
 #include "room.cpp"
 #include "render.cpp"
@@ -301,8 +302,8 @@ void run() {
               help_entity = &*e;
 
         if(help_entity) {
-          mouseovers = help_entity->get_name();
-          helpstr = help_entity->get_help();
+          mouseovers = help_entity->hal()->get_name();
+          helpstr = help_entity->hal()->get_help();
           }
 
         int x = mousepx / block_x, y = mousepy / block_y;

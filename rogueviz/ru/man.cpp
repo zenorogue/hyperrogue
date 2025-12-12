@@ -111,6 +111,9 @@ void man::act() {
    
   handle_powers(dat);
 
+  if(next.hallucinating && !current.hallucinating)
+    prepare_hallucination();
+
   if((on_floor || current.jump_control || wallhug) && !on_ice) {
     vel.x = zero_vel.x + dat.dx * dat.d * dat.modv * 2.5;
     }
@@ -182,7 +185,7 @@ void man::launch_attack(power *p, int fac, boxfun f) {
         if(m == mod::freezing) { e->invinc_end = sav; e->attacked(qty); }
         if(m == mod::disarming && e->hidden()) {
           e->existing = false;
-          addMessage("You have disarmed a "+e->get_name()+".");
+          addMessage("You have disarmed a "+e->hal()->get_name()+".");
           }
         }
       }

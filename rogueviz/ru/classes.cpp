@@ -250,6 +250,9 @@ struct entity {
   int hp;
   int invinc_end;
 
+  entity *hallucinated = nullptr;
+  virtual bool can_be_hallucinated() { return true; }
+
   virtual int max_hp() { return 100; }
 
   virtual bool visible(room *r);
@@ -340,6 +343,8 @@ struct entity {
   virtual void on_fountain();
 
   virtual void on_reset_all() {}
+
+  entity *hal();
   };
 
 struct statdata {
@@ -724,6 +729,7 @@ struct hint : public located_entity {
   void act() override;
   bool have_help() { return false; }
   string get_name() override { return "<hint>"; }
+  bool can_be_hallucinated() override { return false; }
   };
 
 struct item : public located_entity {

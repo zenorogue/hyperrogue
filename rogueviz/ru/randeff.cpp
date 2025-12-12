@@ -183,7 +183,7 @@ void assign_potion_powers() {
   using relist = vector<randeff*>;
   find_power("health").randeffs = relist{ pick(&health_heal, &health_regen, &health_protect), random_powers[0] };
   find_power("the thief").randeffs = relist{ pick(&trap_detect, &trap_snake, &trap_disarm, &trap_detect_cross), random_powers[1] };
-  find_power("polymorph").randeffs = relist{ pick(&morph_cat, &morph_capy), random_powers[2] };
+  find_power("polymorph").randeffs = relist{ pick(&morph_cat, &morph_capy), random_powers[2], &hallux };
   find_power("reach").randeffs = relist{ pick(&jump_double, &jump_high, &jump_bubble, &jump_light), random_powers[3] };
   find_power("fire").randeffs = relist{ pick(&fire_spit, &fire_weapon), random_powers[4] };
   find_power("mystery").randeffs = relist{ random_powers[5], random_powers[6], random_powers[7] };

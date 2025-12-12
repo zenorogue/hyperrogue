@@ -237,7 +237,8 @@ void entity::draw() {
   ld maxx = max(where.x, gwhere.x) + si.x * d / 2;
   ld maxy = max(where.y, gwhere.y) + si.y * d / 2;
 
-  asciiletter(minx, miny, maxx, maxy, glyph(), color());
+  auto h = hal();
+  asciiletter(minx, miny, maxx, maxy, h->glyph(), h->color());
   }
 
 void man::draw() {

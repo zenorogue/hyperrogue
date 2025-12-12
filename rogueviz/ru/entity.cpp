@@ -111,7 +111,7 @@ void entity::apply_walls() {
     if(b == wRogueWallHidden && is_disarmer()) {
       current_room->replace_block_frev(x, y, wRogueWall);
       if(current_room->fov[y][x])
-        addMessage("Your hairsnake exposes a fake wall!");
+        addMessage("Your " + hal()->get_name() + " exposes a fake wall!");
       }
     };
 
@@ -362,7 +362,7 @@ void boar::act() {
   kino();
   if(intersect(get_pixel_bbox(), m.get_pixel_bbox())) {
     int s = where.x < m.where.x ? -1 : 1;
-    if(m.reduce_hp(15)) addMessage("The wild boar gores you!");
+    if(m.reduce_hp(15)) addMessage("The " + hal()->get_name() + " gores you!");
     auto dat = get_dat();
     auto mdat = m.get_dat();
     if(m.on_floor) m.vel.x = mdat.d * mdat.modv * -s * 1.5, m.vel.y = -mdat.d * mdat.modv * 2;
@@ -382,7 +382,7 @@ void boar::act() {
 void enemy::attacked(int dmg) {
   current_target = this;
   if(reduce_hp(dmg)) {
-    if(!existing) addMessage("You kill the " + get_name() + "."); else addMessage("You hit the " + get_name() + ".");
+    if(!existing) addMessage("You kill the " + hal()->get_name() + "."); else addMessage("You hit the " + hal()->get_name() + ".");
     }
   }
 
@@ -586,14 +586,14 @@ void kestrel::act() {
   apply_vel();
 
   if(intersect(get_pixel_bbox(), m.get_pixel_bbox())) {
-    if(m.reduce_hp(15)) addMessage("The kestrel claws you!");
+    if(m.reduce_hp(15)) addMessage("The " + hal()->get_name() + " claws you!");
     }
   }
 
 void gridbug::act() {
 
   if(intersect(get_pixel_bbox(), m.get_pixel_bbox())) {
-    if(m.reduce_hp(15)) addMessage("The grid bug zaps you!");
+    if(m.reduce_hp(15)) addMessage("The " + hal()->get_name() + " zaps you!");
     }
 
   if(gframeid < next_move || !visible(current_room) || gframeid < invinc_end) return;
@@ -669,7 +669,7 @@ void bat::act() {
   apply_vel();
 
   if(intersect(get_pixel_bbox(), m.get_pixel_bbox())) {
-    if(m.reduce_hp(15)) addMessage("The bat bites you!");
+    if(m.reduce_hp(15)) addMessage("The " + hal()->get_name() + " bites you!");
     }
   }
 
@@ -726,7 +726,7 @@ void guineapig::act() {
             where = nonblocked(ca = gmod(ca+j-3, 8), s).first;
             if(intersect(get_pixel_bbox(), m.get_pixel_bbox())) {
               if(m.reduce_hp(15)) {
-                addMessage("The guinea pig bites you!");
+                addMessage("The " + hal()->get_name() + " bites you!");
                 spindir *= -1;
                 }
               }
@@ -756,7 +756,7 @@ void vtrap::act() {
   apply_vel();
 
   if(intersect(get_pixel_bbox(), m.get_pixel_bbox())) {
-    if(m.reduce_hp(200)) addMessage("The trap zaps you!");
+    if(m.reduce_hp(200)) addMessage("The " + hal()->get_name() + " zaps you!");
     }
   }
 
@@ -783,7 +783,7 @@ void disnake::act() {
   kill_off_screen();
   for(auto& e: current_room->entities)
     if(e->hidden() && e->existing && intersect(e->get_pixel_bbox(), get_pixel_bbox())) {
-      addMessage("Your hear a sound of a " + e->get_name() + " colliding with a hairsnake.");
+      addMessage("Your hear a sound of the " + e->hal()->get_name() + " colliding with the " + hal()->get_name() + ".");
       e->existing = false;
       destroyed = true;
       }
@@ -816,7 +816,7 @@ void icicle::act() {
     }
   if(state != 0) {
     if(intersect(get_pixel_bbox(), m.get_pixel_bbox())) {
-      if(m.reduce_hp(50)) addMessage("An icicle falls on you!");
+      if(m.reduce_hp(50)) addMessage("The " + hal()->get_name() + " falls on you!");
       }
     }
   }
