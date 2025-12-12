@@ -132,25 +132,17 @@ bool eqs(const char* x, const char* y) {
   return *y? *x==*y?eqs(x+1,y+1):false:true;
   }
 
-EX int getnext(const char* s, int& i) {
+EX int getnext(const string& s, int& i) {
 
   int siz = utfsize(s[i]);
 // if(fontdeb) printf("s=%s i=%d siz=%d\n", s, i, siz);
   if(siz == 1) return s[i++];
   for(int k=0; k<NUMEXTRA; k++)
-    if(eqs(s+i, natchars[k])) {
+    if(eqs(s.c_str()+i, natchars[k])) {
       i += siz; return 128+k;
       }
 
-#ifdef REPLACE_LETTERS
-  for(int j=0; j<isize(dialog::latin_letters_l); j++)
-    if(s[i] == dialog::foreign_letters[2*j] && s[i+1] == dialog::foreign_letters[2*j+1]) {
-      i += 2;
-      return int(dialog::latin_letters_l[j]);
-      }
-#endif
-
-  printf("Unknown character in: '%s' at position %d\n", s, i);
+  printf("Unknown character in: '%s' at position %d\n", s.c_str(), i);
   i += siz; return '?';
   }
 
@@ -521,6 +513,7 @@ struct glfont_t {
   GLuint texture;                                     // Holds The Texture Id
 //GLuint list_base;                                   // Holds The First Display List ID  
   vector<charinfo_t> chars; 
+  vector<const char*> reps;
   };
 #endif
 
@@ -582,6 +575,7 @@ EX void init_glfont(int size) {
   glfont_t& f(*(cfont->glfont[size]));
   
   f.chars.resize(CHARS);
+  f.reps.resize(CHARS, nullptr);
 
 //f.list_base = glGenLists(128);
   glGenTextures(1, &f.texture );
@@ -630,6 +624,22 @@ EX void init_glfont(int size) {
     sdltogl(txt, f, ch);
     SDL_DestroySurface(txt);
 #endif
+
+    if(ch >= 128 && !TTF_GlyphIsProvided(cfont->font[siz], unicode_value(natchars[ch-128], 0).first)) {
+      string s = natchars[ch - 128];
+      if(s == "Ⓐ") f.reps[ch] = "(A)";
+      if(s == "Ⓑ") f.reps[ch] = "(B)";
+      if(s == "Ⓧ") f.reps[ch] = "(X)";
+      if(s == "Ⓨ") f.reps[ch] = "(Y)";
+      if(s == "Ⓛ") f.reps[ch] = "(L)";
+      if(s == "Ⓡ") f.reps[ch] = "(R)";
+      if(s == "Ⓡ") f.reps[ch] = "(R)";
+
+      for(int j=0; j<isize(dialog::latin_letters); j++)
+        if(s[0] == dialog::foreign_letters[2*j] && s[1] == dialog::foreign_letters[2*j+1])
+          f.reps[ch] = strdup((string("") + char(dialog::latin_letters[j])).c_str());
+      }
+
     }
 
   glBindTexture( GL_TEXTURE_2D, f.texture);
@@ -687,7 +697,7 @@ glhr::textured_vertex charvertex(int x1, int y1, ld tx, ld ty) {
   return res;
   }
 
-bool gl_print(int x, int y, int shift, int size, const char *s, color_t color, int align) {
+bool gl_print(int x, int y, int shift, int size, string s, color_t color, int align) {
   int gsiz = size;
   if(size > vid.fsize || size > max_glfont_size) gsiz = max_glfont_size;
 
@@ -702,8 +712,14 @@ bool gl_print(int x, int y, int shift, int size, const char *s, color_t color, i
   
   int tsize = 0;
   
+  const char *replacement = ""; int replacement_i = 0;
+
   for(int i=0; s[i];) {
-    tsize += f.chars[getnext(s,i)].w * size/gsiz;
+
+    int tabid = replacement[replacement_i] ? getnext(replacement, replacement_i) : getnext(s,i);
+    if(f.reps[tabid]) { replacement = f.reps[tabid]; replacement_i = 0; continue; }
+
+    tsize += f.chars[tabid].w * size/gsiz;
     }
   x -= tsize * align / 16;
   y += f.chars[32].h * size / (gsiz*2);
@@ -727,7 +743,8 @@ bool gl_print(int x, int y, int shift, int size, const char *s, color_t color, i
 
   for(int i=0; s[i];) {
   
-    int tabid = getnext(s,i);
+    int tabid = replacement[replacement_i] ? getnext(replacement, replacement_i) : getnext(s,i);
+    if(f.reps[tabid]) { replacement = f.reps[tabid]; replacement_i = 0; continue; }
     auto& c = f.chars[tabid];
     int wi = c.w * size/gsiz;
     int hi = c.h * size/gsiz;
@@ -798,6 +815,25 @@ EX void resetGL() {
 
 #endif
 
+EX pair<int, int> unicode_value(const string& s, int i) {
+  unsigned char uch = (unsigned char) s[i];
+  if(uch >= 192 && uch < 224) {
+    int u = ((s[i] - 192)&31) << 6;
+    i++;
+    u += (s[i] - 128) & 63;
+    return {u, i};
+    }
+  else if(uch >= 224 && uch < 240) {
+    int u = ((s[i] - 224)&15) << 12;
+    i++;
+    u += (s[i] & 63) << 6;
+    i++;
+    u += (s[i] & 63) << 0;
+    return {u, i};
+    }
+  return {uch, i+1};
+  }
+
 #if CAP_XGD
 
 vector<int> graphdata;
@@ -816,27 +852,9 @@ EX bool displaychr(int x, int y, int shift, int size, char chr, color_t col) {
 void gdpush_utf8(const string& s) {
   int g = (int) graphdata.size(), q = 0;
   gdpush((int) s.size()); for(int i=0; i<isize(s); i++) {
-#if ISANDROID
-    unsigned char uch = (unsigned char) s[i];
-    if(uch >= 192 && uch < 224) {
-      int u = ((s[i] - 192)&31) << 6;
-      i++;
-      u += (s[i] - 128) & 63;
-      gdpush(u); q++;
-      }
-    else if(uch >= 224 && uch < 240) {
-      int u = ((s[i] - 224)&15) << 12;
-      i++;
-      u += (s[i] & 63) << 6;
-      i++;
-      u += (s[i] & 63) << 0;
-      gdpush(u); q++;
-      }
-    else
-#endif
-      {
-      gdpush(s[i]); q++;
-      }
+    int u;
+    tie(u, i) = unicode_value(s, i);
+    gdpush(u); q++;
     }
   graphdata[g] = q;
   }

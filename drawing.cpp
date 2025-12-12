@@ -2911,7 +2911,7 @@ EX void write_in_space(const shiftmatrix& V, int fsize, double size, const strin
   
   vector<int> chars;
   int i = 0;
-  while(i < isize(s)) { chars.push_back(getnext(s.c_str(), i)); }
+  while(i < isize(s)) { chars.push_back(getnext(s, i)); }
   
   ld tw = 0;
   for(int c: chars) tw += f.chars[c].w;

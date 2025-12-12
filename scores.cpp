@@ -20,7 +20,7 @@ int which_mode;
 
 string csub(const string& str, int q) {
   int i = 0;
-  for(int j=0; j<q && i<isize(str); j++) getnext(str.c_str(), i);
+  for(int j=0; j<q && i<isize(str); j++) getnext(str, i);
   return str.substr(0, i);
   }
 
