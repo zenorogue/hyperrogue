@@ -828,4 +828,17 @@ struct fire_missile : public missile {
   bool hit_by_missile(missile *m) override { return m->freezing(); }
   };
 
+struct vision : public entity {
+  string text, name;
+  string sglyph;
+  color_t col;
+  string glyph() override { return sglyph; }
+  color_t color() override { return col; }
+  string get_name() override { return name; }
+  string get_help() override { return text; }
+  xy siz() { return {1, 1}; }
+  };
+
+vector<unique_ptr<vision>> visions;
+
 }

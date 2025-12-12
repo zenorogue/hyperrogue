@@ -309,6 +309,15 @@ void load_room(fhstream& f, cell *c) {
         b->hint_text = scanline_noblank(f);
         r.entities.emplace_back(std::move(b));
         }
+      else if(cap == "VISION") {
+        auto b = std::make_unique<vision>();
+        b->col = get_color();
+        s = scanline_noblank(f);
+        b->sglyph = s[0];
+        b->name = s.substr(1);
+        b->text = scanline_noblank(f);
+        visions.emplace_back(std::move(b));
+        }
       else println(hlog, "unknown mapline ", s);
       }
     else println(hlog, "unknown mapline ", s);

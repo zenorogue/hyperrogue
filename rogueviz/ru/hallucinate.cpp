@@ -11,6 +11,8 @@ void prepare_hallucination() {
     visions.push_back(&*e);
     }
 
+  for(auto& e: rogue_unlike::visions) visions.push_back(&*e);
+
   for(auto& [c, r]: rooms) for(auto& e: r.entities) {
     e->hallucinated = hrand_elt(visions);
     }

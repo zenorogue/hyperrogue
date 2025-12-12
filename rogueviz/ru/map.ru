@@ -2676,4 +2676,13 @@ GUINEAPIG Luy 395 105 .25 1
 GUINEAPIG Muy 448 23 .25 1
 GUINEAPIG Nuy 463 104 .25 1
 GUINEAPIG Puy 418 259 .25 1
+VISION FF8080FF
+Dancient red dragon
+A huge fire-breathing reptile. Run away!
+VISION 80FF80FF
+Dancient green dragon
+A huge poison-breathing reptile. Run away!
+VISION 8080FFFF
+Dancient blue dragon
+A huge lightning-breathing reptile. Run away!
 OK
