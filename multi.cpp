@@ -623,10 +623,18 @@ EX int key_to_scan(int sym) {
   }
 
 EX bool notremapped(int sym) {
+  int k;
   auto& scfg = scfg_default;
-  int sc = key_to_scan(sym);
-  if(sc < 0 || sc >= SCANCODES) return true;
-  int k = scfg.keyaction[sc];
+  if(is_joy_any(sym)) {
+    int joystick_id = gmod(gmod(sym, PSEUDOKEY_JOY) / JOY_ID, MAXJOY);
+    int button_id = gmod(gmod(sym, JOY_ID), MAXBUTTON);
+    k = scfg.joyaction[joystick_id][button_id];
+    }
+  else {
+    int sc = key_to_scan(sym);
+    if(sc < 0 || sc >= SCANCODES) return true;
+    k = scfg.keyaction[sc];
+    }
   if(k == 0) return true;
   k /= 16;
   if(k > 3) k--; else if(k==3) k = 0;
