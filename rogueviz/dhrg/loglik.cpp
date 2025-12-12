@@ -170,10 +170,10 @@ void writestats() {
   println(hlog, "  chaos         = ", loglik_chaos);
   println(hlog, "  optimal any   = ", loglik_opt);
   println(hlog, "  optimal mono  = ", loglik_mono);
-  println(hlog, "  estimated R/T = ", loglik_logistic(saved_logistic), " (R=", saved_logistic.R, " T=", saved_logistic.T);
-  println(hlog, "  optimal   R/T = ", loglik_rt, " (R=", current_logistic.R, " T=", current_logistic.T);
+  println(hlog, "  estimated R/T = ", loglik_logistic(saved_logistic), " (R=", saved_logistic.R, " T=", saved_logistic.T, ")");
+  println(hlog, "  optimal   R/T = ", loglik_rt, " (R=", current_logistic.R, " T=", current_logistic.T, ")");
   
-  println(hlog, "Compression ratio = %", (placement_loglik+loglik_opt)/loglik_chaos);
+  println(hlog, "Compression ratio = ", (placement_loglik+loglik_opt)/loglik_chaos);
   }
 
 template<class T> auto parallelize(long long N, T action) -> decltype(action(0,0)) {
