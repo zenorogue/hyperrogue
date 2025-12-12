@@ -329,7 +329,7 @@ eLand nextHyperstone() {
   return laCrossroads;
   }
 
-EX bool separate_status = true;
+EX bool separate_status = false;
 EX bool showing_status = true;
 
 EX void showGameMenu() {
