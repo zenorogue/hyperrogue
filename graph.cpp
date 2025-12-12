@@ -1833,6 +1833,9 @@ EX void show_menu_button() {
     displayButton(vid.xres-8, vid.yres-vid.fsize, XLAT("menu"), SDLK_ESCAPE, 16);
   else
     displayButton(vid.xres-8, vid.yres-vid.fsize, XLAT("(v) menu"), 'v', 16);
+
+  if(touch_interface)
+   displayButton(vid.xres - 8, vid.yres - 3 * vid.fsize, XLAT(touch_description[(int) touchmode]), PSEUDOKEY_TOUCH, 16);
   }
 
 EX void normalscreen() {

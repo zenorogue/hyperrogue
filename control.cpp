@@ -194,6 +194,14 @@ EX void calcMousedest() {
   cwt = bcwt;
   }
 
+#if HDR
+enum class tmode { move, info, drag, fire, ranged };
+#endif
+
+EX bool touch_interface;
+EX tmode touchmode;
+EX vector<string> touch_description = { "touch to move", "touch for info", "touch to drag", "touch to aim", "touch for ranged" };
+
 EX void mousemovement() {
 
   #if CAP_VR
@@ -690,11 +698,31 @@ EX void handleKeyNormal(int sym, int uni) {
   if(sym == PSEUDOKEY_NOHINT)
     no_find_player = true;
 
+  if(sym == PSEUDOKEY_TOUCH) {
+    bool invalid;
+    do {
+      touchmode = (tmode) gmod(1 + int(touchmode), 5);
+      invalid = touchmode == tmode::fire && !bow::crossbow_mode();
+      }
+    while(invalid);
+    }
+
   if(sym == '-' || sym == PSEUDOKEY_WHEELDOWN) {
     actonrelease = false;
+
     
     multi::cpid = 0;
-    if(bow::fire_mode) {
+    if(touchmode == tmode::drag) {
+      panning(mouseoh, mouseh);
+      holdmouse = true;
+      }
+    else if(touchmode == tmode::info)
+      gotoHelp(help);
+    else if(touchmode == tmode::ranged) {
+      if(shmup::on ? numplayers() == 1 && !shmup::pc[0]->dead : true)
+        targetRangedOrb(mouseover, roMouseForce);
+      }
+    else if(bow::fire_mode || (touchmode == tmode::fire && bow::crossbow_mode())) {
       if(mouseover) bow::add_fire(mouseover);
       }
     else if(mouseover &&

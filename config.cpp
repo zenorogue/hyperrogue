@@ -1103,6 +1103,7 @@ EX void initConfig() {
         qm = false;
         separate_status = true;
         multi::multi_autojoy = false;
+        touch_interface = true;
         }
       }
     }
@@ -1229,6 +1230,9 @@ EX void initConfig() {
   ->editable(0, 128, 10, "sound effects volume", "", 'e')
   ->set_sets(sets_sfx_volume);
   #endif
+
+  param_b(touch_interface, "touch_interface")
+    ->editable("a button for easier touching", 't');
 
   param_enum(dialog::display_keys, "dialog_display_keys")
     ->editable({{"never", ""}, {"when using keyboard", ""}, {"always", ""}, {"SteamDeck controls", ""}}, "display keys in dialogs", 'K');
