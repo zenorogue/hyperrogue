@@ -597,7 +597,7 @@ EX void showGameMenu() {
 #endif
 #endif
   dialog::addHelp();
-  dialog::add_action([] { buildHelpText(); gotoHelp(help); });
+  dialog::add_action([] { gotoHelp("@"); });
   if(!intour) {
     dialog::addItem(XLAT("restart"), SDLK_F5);
     dialog::addItem(inSpecialMode() ? XLAT("reset special modes") : XLAT("back to the start menu"), 'R');
