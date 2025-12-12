@@ -664,6 +664,23 @@ EX void init_glfont(int size) {
   GLERR("initfont");
   }
 
+vector<int> get_tabids(glfont_t& f, const char* s) {
+
+  vector<int> res;
+  for(int i=0; s[i];) {
+    int tabid = getnext(s,i);
+    if(f.reps[tabid]) {
+      for(auto sub: get_tabids(f, f.reps[tabid])) res.push_back(sub);
+      continue;
+      }
+
+    res.push_back(tabid);
+    }
+
+  return res;
+  }
+
+
 int gl_width(int size, const char *s) {
   int gsiz = size;
   if(size > vid.fsize || size > max_glfont_size) gsiz = max_glfont_size;
@@ -678,10 +695,7 @@ int gl_width(int size, const char *s) {
   glfont_t& f(*cfont->glfont[gsiz]);
 
   int x = 0;
-  for(int i=0; s[i];) {
-    int tabid = getnext(s,i);    
-    x += f.chars[tabid].w * size/gsiz;
-    }
+  for(int tabid: get_tabids(f, s)) x += f.chars[tabid].w * size/gsiz;
   
   return x;
   }
@@ -697,7 +711,7 @@ glhr::textured_vertex charvertex(int x1, int y1, ld tx, ld ty) {
   return res;
   }
 
-bool gl_print(int x, int y, int shift, int size, string s, color_t color, int align) {
+bool gl_print(int x, int y, int shift, int size, const char *s, color_t color, int align) {
   int gsiz = size;
   if(size > vid.fsize || size > max_glfont_size) gsiz = max_glfont_size;
 
@@ -712,13 +726,9 @@ bool gl_print(int x, int y, int shift, int size, string s, color_t color, int al
   
   int tsize = 0;
   
-  const char *replacement = ""; int replacement_i = 0;
+  auto tabids = get_tabids(f, s);
 
-  for(int i=0; s[i];) {
-
-    int tabid = replacement[replacement_i] ? getnext(replacement, replacement_i) : getnext(s,i);
-    if(f.reps[tabid]) { replacement = f.reps[tabid]; replacement_i = 0; continue; }
-
+  for(int tabid: tabids) {
     tsize += f.chars[tabid].w * size/gsiz;
     }
   x -= tsize * align / 16;
@@ -741,10 +751,8 @@ bool gl_print(int x, int y, int shift, int size, string s, color_t color, int al
 
   glBindTexture(GL_TEXTURE_2D, f.texture);
 
-  for(int i=0; s[i];) {
+  for(int tabid: tabids) {
   
-    int tabid = replacement[replacement_i] ? getnext(replacement, replacement_i) : getnext(s,i);
-    if(f.reps[tabid]) { replacement = f.reps[tabid]; replacement_i = 0; continue; }
     auto& c = f.chars[tabid];
     int wi = c.w * size/gsiz;
     int hi = c.h * size/gsiz;
