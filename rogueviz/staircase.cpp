@@ -258,7 +258,7 @@ int phooks = arg::add3("-stair", enable)
     })
   + addHook(hooks_configfile, 100, [] {
     param_f(scurvature, "stair_curvature")
-    ->editable(-1, 1, .05, XLAT("curvature of the space"), "", 'c')
+    ->editable(-1, 1, .05, "curvature of the space", "", 'c')
     ->set_reaction(make_staircase)
     ->set_extra([] {
       dialog::addItem("golden spiral", 'G');
@@ -269,11 +269,11 @@ int phooks = arg::add3("-stair", enable)
         });
       });
     param_i(prec, "stair_precision")
-    ->editable(1, 8, 1, XLAT("higher value = better"), "staircase precision", 'p')
+    ->editable(1, 8, 1, "higher value = better", "staircase precision", 'p')
     ->set_sets([] { dialog::bound_low(1); })
     ->set_reaction(make_staircase);
     param_i(maxr, "stair_maxr")
-    ->editable(1, 5000, 100, XLAT("higher value = more levels"), "staircase max", 'm')
+    ->editable(1, 5000, 100, "higher value = more levels", "staircase max", 'm')
     ->set_sets([] { dialog::bound_low(1); })
     ->set_reaction(make_staircase);
     });
