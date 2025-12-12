@@ -195,11 +195,11 @@ void dofullsa_iterations(long long saiter) {
 
     int cpct = numiter * 20 / (saiter-1);
 
-    if(cpct > lpct && output_fullsa) {
+    if(debug_progress && cpct > lpct && output_fullsa) {
       lpct = cpct;
-      if(debug_progress)
       println(hlog, format("it %12lld ratio %6.3f temp %8.4f step %9.3g cost %9.2f R=%8.4f T=%8.4f",
         numiter, last_ratio, double(sag::temperature), (double) exp(sag::temperature), cost, lgsag.R, lgsag.T));
+      hlog.flush();
       }
     }
 
