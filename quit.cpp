@@ -72,7 +72,6 @@ struct hint {
   time_t last;
   function<bool()> usable;
   function<void()> display;
-  function<void()> action;  
   };
 #endif
 
@@ -87,8 +86,8 @@ EX hint hints[] = {
        dialog::addHelp(XLAT(
         "If you collect too many treasures in a given land, it will become "
         "extremely dangerous. Try other lands once you have enough!"));
-      },
-    noaction},
+      }
+    },
 
   {
     0,
@@ -102,8 +101,8 @@ EX hint hints[] = {
        dialog::addHelp(XLAT(
          "(You can also use right Shift)\n\n"));
 #endif
-      },
-    noaction},
+      }
+    },
 
   {
     0,
@@ -114,14 +113,15 @@ EX hint hints[] = {
         ));
       dialog::addBreak(50);
       dialog::addItem(XLAT("guided tour"), 'z');
-      },
-    []() {
+      dialog::add_action([] {
 #if CAP_TOUR    
-      tour::start();
+        tour::start();
 #else
-      addMessage("Not in this version");
+        addMessage("Not in this version");
 #endif
-      }},
+        });
+      }
+    },
 
   {
     0,
@@ -131,8 +131,8 @@ EX hint hints[] = {
         "Collecting 25 treasures in a given land may be dangerous, "
         "but allows magical Orbs of this land to appear in other places!"
         ));
-      },
-    noaction},
+      }
+    },
 
   {
     0,
@@ -141,8 +141,7 @@ EX hint hints[] = {
       dialog::addInfo(XLAT(
         "Press ESC to view this screen during the game."
         ));
-      },
-    noaction
+      }
     },
   {
     0,
@@ -156,10 +155,9 @@ EX hint hints[] = {
         );
       dialog::addBreak(50);
       dialog::addItem(XLAT("world overview") + " ", 'z');
-      },
-    []() {
-      pushScreen(showOverview);
-      }},
+      dialog::add_action_push(showOverview);
+      }
+    },
   {
     0,
     []() { return !canmove; },
@@ -171,11 +169,9 @@ EX hint hints[] = {
         ));
       dialog::addBreak(50);
       dialog::addItem(XLAT("special game modes"), 'z');
+      dialog::add_action_push(showChangeMode);
       },
-    []() {
-      pushScreen(showChangeMode);
-      }},
-
+    },
   {
     0,
     []() { return true; },
@@ -185,10 +181,9 @@ EX hint hints[] = {
         ));
       dialog::addBreak(50);
       dialog::addItem(XLAT("special display modes"), 'z');
-      },
-    []() {
-      pushScreen(models::model_menu);
-      }},
+      dialog::add_action_push(models::model_menu);
+      }
+    },
 
   {
     0,
@@ -201,11 +196,11 @@ EX hint hints[] = {
         );
       dialog::addBreak(50);
       dialog::addItem(XLAT("Orb Strategy mode"), 'z');
-      },
-    []() {
+      dialog::add_action([] {
 #if CAP_INV
-      restart_game(rg::inv);
+        restart_game(rg::inv);
 #endif
+        });
       }
     },
   {
@@ -218,22 +213,22 @@ EX hint hints[] = {
         ));
       dialog::addBreak(50);
       dialog::addItem(XLAT("hypersian rug mode"), 'z');
-      },
-    [] () {
+      dialog::add_action([] {
 #if CAP_RUG
-      popScreen();
-      int wm, mm;
-      rug::init();
-      wm = vid.wallmode;
-      mm = vid.monmode;
-      vid.wallmode = 3;
-      vid.monmode = 2;
-      cancel = [wm, mm] () { 
-        rug::close();
-        vid.wallmode = wm;
-        vid.monmode = mm;
-        };
+        popScreen();
+        int wm, mm;
+        rug::init();
+        wm = vid.wallmode;
+        mm = vid.monmode;
+        vid.wallmode = 3;
+        vid.monmode = 2;
+        cancel = [wm, mm] () {
+          rug::close();
+          vid.wallmode = wm;
+          vid.monmode = mm;
+          };
 #endif
+        });
       }
     },
 
@@ -247,22 +242,22 @@ EX hint hints[] = {
         ));
       dialog::addBreak(50);
       dialog::addItem(XLAT("Show me!"), 'z');
+      dialog::add_action([] {
+        popScreen();
+        auto m = pmodel;
+        pmodel = mdBand;
+        auto r = models::rotation;
+        bool h = history::includeHistory;
+        models::rotation = Id;
+        history::includeHistory = true;
+        history::create_playerpath();
+        cancel = [m,r,h] () {
+          history::clear(); pmodel = m;
+          models::rotation = r;
+          history::includeHistory = h;
+          fullcenter(); };
+        });
       },
-    [] () {
-      popScreen();
-      auto m = pmodel;
-      pmodel = mdBand;
-      auto r = models::rotation;
-      bool h = history::includeHistory;
-      models::rotation = Id;
-      history::includeHistory = true;
-      history::create_playerpath();
-      cancel = [m,r,h] () { 
-        history::clear(); pmodel = m; 
-        models::rotation = r;
-        history::includeHistory = h;
-        fullcenter(); };
-      }
     },
 
   {
@@ -279,11 +274,11 @@ EX hint hints[] = {
         ));
       dialog::addBreak(50);
       dialog::addItem(XLAT("expansion"), 'z');
-      },
-    [] () {
-      viewdists = !viewdists;
-      popScreen();
-      cancel = [] () { viewdists = false; };
+      dialog::add_action([] {
+        viewdists = !viewdists;
+        popScreen();
+        cancel = [] () { viewdists = false; };
+        });
       }
     },
 
@@ -292,26 +287,26 @@ EX hint hints[] = {
     []() { return !canmove && showHalloween(); },
     []() {
       dialog::addItem(XLAT("Halloween mini-game"), 'z');
-      },
-    [] () {
-      if(!sphere) {
-        resetModes();
-        stop_game();
-        specialland = laHalloween;
-        set_geometry(gSphere);
-        start_game();
-        pconf.alpha = 999;
-        pconf.scale = 998;
-        }
-      else {
-        resetModes();
-        pconf.alpha = 1;
-        pconf.scale = 1;
-        }
+      dialog::add_action([] {
+        if(!sphere) {
+          resetModes();
+          stop_game();
+          specialland = laHalloween;
+          set_geometry(gSphere);
+          start_game();
+          pconf.alpha = 999;
+          pconf.scale = 998;
+          }
+        else {
+          resetModes();
+          pconf.alpha = 1;
+          pconf.scale = 1;
+          }
+        });
       }
     },
 
-  {-1, []() { return false; }, noaction, noaction}
+  {-1, []() { return false; }, noaction}
   }; 
 
 EX int hinttoshow;
@@ -657,7 +652,6 @@ EX void handleKeyQuit(int sym, int uni) {
     msgs.clear();
     });
   else if(uni == 'l') popScreenAll(), pushScreen(showMessageLog), messagelogpos = isize(gamelog);
-  else if(uni == 'z') hints[hinttoshow].action();
   #if CAP_SAVE
   else if(sym == SDLK_F9) {
     if(casual && savecount) {
