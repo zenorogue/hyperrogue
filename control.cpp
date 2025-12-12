@@ -805,7 +805,7 @@ EX bool is_joy_any(int sym) {
   }
 
 EX bool is_joy_index(int sym, int index) {
-  return is_joy_any(sym) && (sym & 127) == index;
+  return is_joy_any(sym) && (sym & (JOY_ID - 1)) == index;
   }
 
 #if HDR
@@ -1227,7 +1227,7 @@ EX void handle_event(SDL_Event& ev) {
       }
 
     else if(ev.type == SDL_EVENT_JOYSTICK_BUTTON_DOWN && defaultjoy) {
-      sym = uni = PSEUDOKEY_JOY + 128 * ev.jbutton.which + ev.jbutton.button;
+      sym = uni = PSEUDOKEY_JOY + JOY_ID * ev.jbutton.which + ev.jbutton.button;
       }
 #endif
 
