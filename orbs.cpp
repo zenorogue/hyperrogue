@@ -775,7 +775,8 @@ EX bool jumpTo(orbAction a, cell *dest, eItem byWhat, int bonuskill, jumpdata jd
   fix_whichcopy(dest);
   countLocalTreasure();
   
-  for(int i=9; i>=0; i--)
+  int low = 7 - getDistLimit() - genrange_bonus;
+  for(int i=9; i>=low; i--)
     setdist(cwt.at, i, NULL);
   
   if(from) movecost(from, dest, 2);
