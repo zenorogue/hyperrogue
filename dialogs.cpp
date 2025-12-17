@@ -482,10 +482,6 @@ EX namespace dialog {
     highlight_text = s; highlight_key = PSEUDOKEY_SELECT;
     }
   
-  EX bool never_keys() {
-    return ISMOBILE || among(display_keys, 0, 3);
-    }
-
   EX void measure() {
     tothei = 0;
     dialogwidth = 0;
@@ -731,6 +727,10 @@ EX namespace dialog {
     if(display_keys == 2) return true;
     if(display_keys == 1) return !mousing;
     return false;
+    }
+
+  EX bool never_keys() {
+    return ISMOBILE || among(display_keys, 0, 3);
     }
 
   EX void display() {
