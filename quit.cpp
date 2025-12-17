@@ -92,7 +92,7 @@ EX hint hints[] = {
   {
     0,
     []() { 
-      return !ISMOBILE;
+      return !dialog::never_keys();
       },    
     []() { 
        dialog::addHelp(XLAT(
@@ -147,8 +147,7 @@ EX hint hints[] = {
     0,
     []() { return in_full_game(); },
     []() { 
-      dialog::addInfo(
-  (ISMOBILE || dialog::display_keys == 3) ?
+      dialog::addInfo(dialog::never_keys() ?
         XLAT("The 'world overview' shows all the lands in HyperRogue.")
       :
         XLAT("Press 'o' to see all the lands in HyperRogue.")

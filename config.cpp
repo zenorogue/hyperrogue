@@ -4031,7 +4031,7 @@ EX void show_color_dialog_game() {
   dialog::addBoolItem_action(XLAT("higher contrast"), higher_contrast, 'h');
 
   dialog::addInfo(XLAT("colors of some game objects"));
-  dialog::addInfo(XLAT("can be edited by clicking them."));
+  dialog::addInfo(dialog::never_keys() ? XLAT("can be edited by touching them.") : XLAT("can be edited by clicking them."));
   
   dialog::addBreak(50);
   dialog::addBack();
@@ -4215,7 +4215,10 @@ EX void configureMouse() {
 #if ISMOBILE
   dialog::addBoolItem(XLAT("targetting ranged Orbs long-click only"), (vid.shifttarget&2), 'i');
 #else
-  dialog::addBoolItem(XLAT("targetting ranged Orbs Shift+click only"), (vid.shifttarget&1), 'i');
+  if(dialog::never_keys())
+    dialog::addBoolItem(XLAT("automatically target ranged Orbs by touch"), !(vid.shifttarget&1), 'i');
+  else
+    dialog::addBoolItem(XLAT("targetting ranged Orbs Shift+click only"), (vid.shifttarget&1), 'i');
 #endif
   dialog::add_action([] {vid.shifttarget = vid.shifttarget^3; });    
 

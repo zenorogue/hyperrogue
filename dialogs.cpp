@@ -1490,10 +1490,12 @@ EX namespace dialog {
     else
       addSlider(ne.sc.direct(ne.vmin), ne.sc.direct(*ne.editwhat), ne.sc.direct(ne.vmax), 500);
     addBreak(100);
-#if !ISMOBILE
-    addHelp(XLAT("You can scroll with arrow keys -- Ctrl to fine-tune"));
-    addBreak(100);
-#endif
+
+    if(!never_keys()) {
+      if(actual_display_keys()) addHelp(XLAT("You can scroll with arrow keys -- Ctrl to fine-tune"));
+      else addBreak(100);
+      addBreak(100);
+      }
     
     dialog::addBack();
     addSelItem(XLAT("default value"), disp(ne.dft), SDLK_HOME);
