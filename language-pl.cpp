@@ -9453,8 +9453,10 @@ S("blade", "broń biała")
 S("Standard Rogue weapon. Bump into a monster to hit. Most monsters attack you the same way.",
   "Standardowa broń. Uderz potwora, by go zaatakować. Większość potworów atakuję Cię w ten sposób.")
 S("crossbow", "kusza")
-S("Hits all monsters in a straight line, but slow to reload. Press 'f' or click the crossbow icon to target.",
-  "Rani wszystkich przeciwników w linii prostej, ale przeładowanie zajmuje dużo czasu. Naciśnij 'f' lub kliknij ikonę kuszy, by celować.")
+S("Hits all monsters in a straight line, but slow to reload.",
+  "Rani wszystkich przeciwników w linii prostej, ale przeładowanie zajmuje dużo czasu.")
+S("Press 'f' or click the crossbow icon to target.",
+  "Naciśnij 'f' lub kliknij ikonę kuszy, by celować.")
 
 // 'click to use orb' errors
 

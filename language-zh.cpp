@@ -8587,8 +8587,10 @@ S("blade", "短刀")
 S("Standard Rogue weapon. Bump into a monster to hit. Most monsters attack you the same way.",
   "标准游荡者武器。碰撞怪物来攻击。大多数怪物使用相同方式攻击你。")
 S("crossbow", "弩")
-S("Hits all monsters in a straight line, but slow to reload. Press 'f' or click the crossbow icon to target.",
-  "击中一条直线上所有的怪物，但装弹缓慢。按“f”或点击弩图标来瞄准。")
+S("Hits all monsters in a straight line, but slow to reload.",
+  "击中一条直线上所有的怪物，但装弹缓慢。")
+S("Press 'f' or click the crossbow icon to target.",
+  "按“f”或点击弩图标来瞄准。")
 
 // 'click to use orb' errors
 

@@ -9734,8 +9734,10 @@ S("blade", "čepel")
 S("Standard Rogue weapon. Bump into a monster to hit. Most monsters attack you the same way.",
   "Standardní zbraň. Naběhni do netvora, abys na něj zaútočil. Většina netvorů na tebe útočí stejným způsobem.")
 S("crossbow", "kuše")
-S("Hits all monsters in a straight line, but slow to reload. Press 'f' or click the crossbow icon to target.",
-  "Zasáhne všechny netvory v přímé linii, chvíli však trvá, než se znovu nabije. Cíluj klávesou 'f' nebo kliknutím na ikonu kuše.")
+S("Hits all monsters in a straight line, but slow to reload.",
+  "Zasáhne všechny netvory v přímé linii, chvíli však trvá, než se znovu nabije.")
+S("Press 'f' or click the crossbow icon to target.",
+  "Cíluj klávesou 'f' nebo kliknutím na ikonu kuše.")
 
 // 'click to use orb' errors
 

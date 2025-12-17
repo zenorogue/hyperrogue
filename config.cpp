@@ -1800,7 +1800,7 @@ EX void initConfig() {
 
   param_enum(bow::weapon, "pc_class", bow::weapon)
     -> editable({{"blade", "Standard Rogue weapon. Bump into a monster to hit. Most monsters attack you the same way."},
-      {"crossbow", "Hits all monsters in a straight line, but slow to reload. Press 'f' or click the crossbow icon to target."}},
+      {"crossbow", "Hits all monsters in a straight line, but slow to reload."}},
       "weapon selection", 'w')
     -> set_need_confirm()
     -> set_value_to = [] (bow::eWeapon wpn) { bool b = game_active; if(wpn != bow::weapon) stop_game(); bow::weapon = wpn;

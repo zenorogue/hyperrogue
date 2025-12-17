@@ -156,11 +156,19 @@ EX void welcomeMessage() {
     }
 
   if(nohelp == 2) return;
+
+  if(!dialog::never_keys()) {
+    if(bow::crossbow_mode()) {
+      addMessage(XLAT("Press 'f' or click the crossbow icon to target."));
+      }
+    else {
 #if ISMAC
-  addMessage(XLAT("Press F1 or right-shift-click things for help."));
-#elif !ISMOBILE
-  addMessage(XLAT("Press F1 or right-click things for help."));
+      addMessage(XLAT("Press F1 or right-shift-click things for help."));
+#else
+      addMessage(XLAT("Press F1 or right-click things for help."));
 #endif
+      }
+    }
   }
 
 /** \brief These hooks are called at the start of initgame. */
