@@ -880,17 +880,17 @@ int daily_mode;
 
 void announce_random() {
   dialog::addBreak(100);
-  dialog::addTitle("(random option)", 0x808080, 50);
+  dialog::addTitle("(random option)", 0x808080, 100);
   }
 
 void announce_nothing() {
   dialog::addBreak(100);
-  dialog::addTitle("", 0x808080, 50);
+  dialog::addTitle("", 0x808080, 100);
   }
 
 void announce_seasonal() {
   dialog::addBreak(100);
-  dialog::addTitle("(seasonal option)", 0x808080, 50);
+  dialog::addTitle("(seasonal option)", 0x808080, 100);
   }
 
 EX void showStartMenu() {
