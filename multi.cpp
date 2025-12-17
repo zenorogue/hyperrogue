@@ -542,8 +542,6 @@ struct shmup_configurer {
 
     dialog::addBreak(50);
   
-    dialog::addHelp();
-  
     dialog::addBack();
     dialog::display();
   #endif
