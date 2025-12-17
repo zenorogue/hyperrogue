@@ -185,6 +185,14 @@ EX int centerplayer = -1;
 int* axeconfigs[24]; int numaxeconfigs;
 int* dzconfigs[24];
 
+vector<string> controller_button_names = {
+  "Ⓐ", "Ⓑ", "Ⓧ", "Ⓨ",
+  "(back)", "(guide)", "(start)", "(left stick)", "(right stick)",
+  "(left shoulder)", "(right shoulder)",
+  "(up)", "(down)", "(left)", "(right)",
+  "(misc)", "(p1)", "(p2)", "(p3)", "(p4)", "(touchpad)"
+  };
+
 string listkeys(config& scfg, int id) {
 #if CAP_SDL
   string lk = "";
@@ -196,15 +204,22 @@ string listkeys(config& scfg, int id) {
       lk = lk + " " + SDL_GetKeyName(SDLKey(i));
       #endif
 #if CAP_SDLJOY
-  for(int i=0; i<numsticks; i++) for(int k=0; k<SDL_GetNumJoystickButtons(sticks[i]) && k<MAXBUTTON; k++)
-    if(scfg.joyaction[i][k] == id) {
-      lk = lk + " " + cts('A'+i)+"-B"+its(k);
-      }
-  for(int i=0; i<numsticks; i++) for(int k=0; k<SDL_GetNumJoystickHats(sticks[i]) && k<MAXHAT; k++)
-    for(int d=0; d<4; d++)
-      if(scfg.hataction[i][k][d] == id) {
-        lk = lk + " " + cts('A'+i)+"-"+"URDL"[d];
+  for(int i=0; i<isize(sticks); i++) {
+    auto& s = sticks[i];
+    for(int k=0; k<gjoy_buttons(s) && k<MAXBUTTON; k++)
+      if(scfg.joyaction[i][k] == id) {
+        #if SDLVER >= 2
+        if(s.gc) lk = lk + " " + cts('A'+i) + "-" + controller_button_names[k];
+        else
+        #endif
+        lk = lk + " " + cts('A'+i)+"-B"+its(k);
         }
+    for(int k=0; k<gjoy_hats(s) && k<MAXHAT; k++)
+      for(int d=0; d<4; d++)
+        if(scfg.hataction[i][k][d] == id) {
+          lk = lk + " " + cts('A'+i)+"-"+"URDL"[d];
+          }
+    }
 #endif
   return lk;
 #else
@@ -295,7 +310,19 @@ struct key_configurer {
 
 #if CAP_SDLJOY    
     joyhandler = [this] (SDL_Event& ev) { 
+      #if SDLVER >= 2
+      if(ev.type == SDL_CONTROLLERBUTTONDOWN && setwhat) {
+        int joyid = gjoy_myid(ev.cbutton.which);
+        int button = ev.cbutton.button;
+        if(joyid < 8 && button < 32)
+           which_config->joyaction[joyid][button] = setwhat;
+        setwhat = 0;
+        return true;
+        }
+      #endif
+
       if(ev.type == SDL_EVENT_JOYSTICK_BUTTON_DOWN && setwhat) {
+        if(gjoy_is_controller(ev.jaxis.which)) return false;
         int joyid = ev.jbutton.which;
         int button = ev.jbutton.button;
         if(joyid < 8 && button < 32)
@@ -305,6 +332,7 @@ struct key_configurer {
         }
   
       else if(ev.type == SDL_EVENT_JOYSTICK_HAT_MOTION && setwhat) {
+        if(gjoy_is_controller(ev.jaxis.which)) return false;
         int joyid = ev.jhat.which;
         int hat = ev.jhat.hat;
         int dir = 4;
@@ -358,9 +386,10 @@ struct joy_configurer {
     dialog::init();
     getcstat = ' ';
     numaxeconfigs = 0;
-    for(int j=0; j<numsticks; j++) {
-      for(int ax=0; ax<SDL_GetNumJoystickAxes(sticks[j]) && ax < MAXAXE; ax++) if(numaxeconfigs<24) {
-        int y = SDL_GetJoystickAxis(sticks[j], ax);
+    int j = 0;
+    for(auto& s: sticks) {
+      for(int ax=0; ax<SDL_GetNumJoystickAxes(s.joy) && ax < MAXAXE; ax++) if(numaxeconfigs<24) {
+        int y = gjoy_axis(s, ax);
         string buf = " ";
         if(configdead)
           buf += its(y);
@@ -380,6 +409,7 @@ struct joy_configurer {
           what, 'a'+numaxeconfigs);
         numaxeconfigs++;
         }
+      j++;
       }
     
     dialog::addBoolItem(XLAT("Configure dead zones"), (configdead), 'z');
@@ -497,7 +527,7 @@ struct shmup_configurer {
     else dialog::addBreak(100);
   
   #if CAP_SDLJOY
-    if(numsticks > 0) {
+    if(sticks.size()) {
       if(shmup::on || multi::alwaysuse || players > 1)  {
         dialog::addItem(XLAT("configure joystick axes"), 'x');
         dialog::add_action_push(joy_configurer(players, scfg_default));
@@ -773,8 +803,8 @@ EX void initConfig() {
 
   scfg.axeaction[0][0] = 4;
   scfg.axeaction[0][1] = 5;
-  scfg.axeaction[0][2] = 2;
-  scfg.axeaction[0][3] = 3;
+  scfg.axeaction[0][3] = 2;
+  scfg.axeaction[0][4] = 3;
 
   scfg.axeaction[1][0] = 8;
   scfg.axeaction[1][1] = 9;
@@ -854,27 +884,30 @@ EX void get_actions(config& scfg) {
     pressaction(scfg.keyaction[i]);
 
 #if CAP_SDLJOY  
-  for(int j=0; j<numsticks; j++) {
+  int j = 0;
+  for(auto& s: sticks) {
 
-    for(int b=0; b<SDL_GetNumJoystickButtons(sticks[j]) && b<MAXBUTTON; b++)
-      if(SDL_GetJoystickButton(sticks[j], b))
+    for(int b=0; b<SDL_GetNumJoystickButtons(s.joy) && b<MAXBUTTON; b++)
+      if(gjoy_button(sticks[j], b))
         pressaction(scfg.joyaction[j][b]);
 
-    for(int b=0; b<SDL_GetNumJoystickHats(sticks[j]) && b<MAXHAT; b++) {
-      int stat = SDL_GetJoystickHat(sticks[j], b);
+    for(int b=0; b<SDL_GetNumJoystickHats(s.joy) && b<MAXHAT; b++) {
+      int stat = SDL_GetJoystickHat(sticks[j].joy, b);
       if(stat & SDL_HAT_UP) pressaction(scfg.hataction[j][b][0]);
       if(stat & SDL_HAT_RIGHT) pressaction(scfg.hataction[j][b][1]);
       if(stat & SDL_HAT_DOWN) pressaction(scfg.hataction[j][b][2]);
       if(stat & SDL_HAT_LEFT) pressaction(scfg.hataction[j][b][3]);
       }
     
-    for(int b=0; b<SDL_GetNumJoystickAxes(sticks[j]) && b<MAXAXE; b++) {
-      int value = SDL_GetJoystickAxis(sticks[j], b);
+    for(int b=0; b<SDL_GetNumJoystickAxes(s.joy) && b<MAXAXE; b++) {
+      int value = gjoy_axis(sticks[j], b);
       int dz = scfg.deadzoneval[j][b];
       if(value > dz) value -= dz; else if(value < -dz) value += dz;
       else value = 0;
       axe_states[scfg.axeaction[j][b] % SHMUPAXES] += value;
       }
+
+    j++;
     }
 #endif
 #endif

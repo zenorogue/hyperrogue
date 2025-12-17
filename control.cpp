@@ -234,8 +234,69 @@ EX void mousemovement() {
   }
 
 #if CAP_SDLJOY
-EX SDL_Joystick* sticks[8];
-EX int numsticks;
+
+#if HDR
+struct joydata {
+  SDL_Joystick *joy;
+  #if SDLVER >= 2
+  SDL_GameController *gc;
+  #else
+  void *gc;
+  #endif
+  };
+#endif
+
+EX vector<joydata> sticks;
+
+EX bool gjoy_button(joydata &jd, int button) {
+  #if SDLVER >= 2
+  if(jd.gc) return SDL_GameControllerGetButton(jd.gc, (SDL_GameControllerButton) button);
+  #endif
+  return SDL_JoystickGetButton(jd.joy, button);
+  }
+
+EX bool gjoy_axis(joydata &jd, int axis) {
+  #if SDLVER >= 2
+  if(jd.gc) return SDL_GameControllerGetAxis(jd.gc, (SDL_GameControllerAxis) axis);
+  #endif
+  return SDL_JoystickGetButton(jd.joy, axis);
+  }
+
+EX bool gjoy_myid(int instance_id) {
+  #if SDLVER >= 2
+  for(int i=0; i<isize(sticks); i++)
+    if(SDL_JoystickInstanceID(sticks[i].joy) == instance_id)
+      return i;
+  return -1;
+  #else
+  return instance_id;
+  #endif
+  }
+
+EX bool gjoy_is_controller(int instance_id) {
+  #if SDLVER >= 2
+  int id = gjoy_myid(instance_id);
+  if(id >= 0 && id < isize(sticks))
+    return sticks[id].gc;
+  return false;
+  #else
+  return false;
+  #endif
+  }
+
+EX int gjoy_buttons(joydata& jd) {
+  #if SDLVER >= 2
+  if(jd.gc) return (int) SDL_CONTROLLER_BUTTON_MAX;
+  #endif
+  return SDL_GetNumJoystickButtons(jd.joy);
+  }
+
+EX int gjoy_hats(joydata& jd) {
+  #if SDLVER >= 2
+  if(jd.gc) return 0;
+  #endif
+  return SDL_GetNumJoystickHats(jd.joy);
+  }
 
 EX bool joysticks_initialized;
 
@@ -264,23 +325,37 @@ EX debugflag debug_joy_error = {"joy_error"};
 EX debugflag debug_joy = {"joy"};
 
 EX void countJoysticks() {
+  #if SDLVER == 1
   indenter_finish(debug_init_joy, "countJoysticks");
-  #if SDLVER <= 2
-  numsticks = SDL_NumJoysticks();
-  #else
-  SDL_GetJoysticks(&numsticks);
-  #endif
-  if(numsticks > 8) numsticks = 8;
+  int numsticks = SDL_NumJoysticks();
+  sticks.resize(numsticks);
   for(int i=0; i<numsticks; i++) {
-    sticks[i] = SDL_OpenJoystick(i);
-    /* printf("axes = %d, balls = %d, buttons = %d, hats = %d\n",
-      SDL_JoystickNumAxes(sticks[i]),
-      SDL_JoystickNumBalls(sticks[i]),
-      SDL_JoystickNumButtons(sticks[i]),
-      SDL_JoystickNumHats(sticks[i])
-      ); */
+    sticks[i].joy = SDL_OpenJoystick(i);
+    sticks[i].gc = nullptr;
+    }
+  #endif
+  }
+
+#if SDLVER >= 2
+EX void add_joystick(int which) {
+  if(SDL_IsGameController(which)) {
+    auto gc = SDL_GameControllerOpen(which);
+    sticks.emplace_back(joydata{SDL_GameControllerGetJoystick(gc), gc});
+    }
+  else {
+    sticks.emplace_back(joydata{SDL_OpenJoystick(which), nullptr});
     }
   }
+
+EX void delete_joystick(int instance) {
+  for(int i=0; i<isize(sticks); i++) if(SDL_JoystickInstanceID(sticks[i].joy) == instance) {
+    if(sticks[i].gc) SDL_GameControllerClose(sticks[i].gc);
+    else SDL_CloseJoystick(sticks[i].joy);
+    sticks.erase(sticks.begin() + i);
+    return;
+    }
+  }
+#endif
 
 EX void initJoysticks() {
 
@@ -289,7 +364,6 @@ EX void initJoysticks() {
   if (SDL_error_in(SDL_InitSubSystem(SDL_INIT_JOYSTICK)))
   {
     if(debug_joy_error) println(hlog, "Failed to initialize joysticks.");
-    numsticks = 0;
     return;
   }
 
@@ -299,10 +373,13 @@ EX void initJoysticks() {
 
 EX void closeJoysticks() {
   indenter_finish(debug_init_joy, "closeJoysticks");
-  for(int i=0; i<numsticks; i++) {
-    SDL_CloseJoystick(sticks[i]), sticks[i] = NULL;
+  for(auto& s: sticks) {
+    #if SDLVER >= 2
+    if(s.gc) SDL_GameControllerClose(s.gc); else
+    #endif
+    SDL_CloseJoystick(s.joy);
     }
-  numsticks = 0;
+  sticks.clear();
   }
 
 int joytime;
@@ -993,10 +1070,10 @@ EX void mainloopiter() {
   hiliteclick = keystate[SDLK_LALT] | keystate[SDLK_RALT];
   #endif
 
-  if(defaultjoy) for(int i=0; i<numsticks; i++) {
-    if(SDL_JoystickGetButton(sticks[i], deck::key_control)) lctrlclick = true;
-    if(SDL_JoystickGetButton(sticks[i], deck::key_alt)) hiliteclick = true;
-    if(SDL_JoystickGetButton(sticks[i], deck::key_shift)) lshiftclick = true;
+  if(defaultjoy) for(auto& s: sticks) {
+    if(gjoy_button(s, deck::key_control)) lctrlclick = true;
+    if(gjoy_button(s, deck::key_alt)) hiliteclick = true;
+    if(gjoy_button(s, deck::key_shift)) lshiftclick = true;
     }
 
   anyshiftclick = lshiftclick | rshiftclick;
@@ -1182,6 +1259,16 @@ EX void handle_event(SDL_Event& ev) {
       countJoysticks();
       } */
 
+    #if SDLVER >= 2
+    if(ev.type == SDL_JOYDEVICEADDED) {
+      add_joystick(ev.jdevice.which);
+      }
+
+    if(ev.type == SDL_JOYDEVICEREMOVED) {
+      delete_joystick(ev.jdevice.which);
+      }
+    #endif
+
     #if SDLVER == 3
     if(ev.type == SDL_EVENT_WINDOW_MOUSE_ENTER) outoffocus = false;
     if(ev.type == SDL_EVENT_WINDOW_MOUSE_LEAVE) outoffocus = true;
@@ -1223,31 +1310,52 @@ EX void handle_event(SDL_Event& ev) {
       }
     #endif
 
-#if CAP_SDLJOY    
+#if CAP_SDLJOY
     if(ev.type == SDL_EVENT_JOYSTICK_AXIS_MOTION && normal && DEFAULTCONTROL) {
+      if(gjoy_is_controller(ev.jaxis.which)) return;
       if(ev.jaxis.which == 0) {
         if(ev.jaxis.axis == 0)
           joyx = ev.jaxis.value;
         else if(ev.jaxis.axis == 1)
           joyy = ev.jaxis.value;
-        else if(ev.jaxis.axis == 3)
-          panjoyx = ev.jaxis.value;
-        else if(ev.jaxis.axis == 4)
-          panjoyy = ev.jaxis.value;
         checkjoy();
         // printf("panjoy = %d,%d\n", panjoyx, panjoyy);
         }
       else {
         if(ev.jaxis.axis == 0)
           panjoyx = ev.jaxis.value;
-        else 
+        else
           panjoyy = ev.jaxis.value;
         }
       }
+
+    #if SDLVER >= 2
+    if(ev.type == SDL_CONTROLLERAXISMOTION && normal && DEFAULTCONTROL) {
+      if(ev.caxis.which == 0) {
+        if(ev.caxis.axis == 0)
+          joyx = ev.caxis.value;
+        else if(ev.caxis.axis == 1)
+          joyy = ev.caxis.value;
+        else if(ev.caxis.axis == 3)
+          panjoyx = ev.caxis.value;
+        else if(ev.caxis.axis == 4)
+          panjoyy = ev.caxis.value;
+        checkjoy();
+        // printf("panjoy = %d,%d\n", panjoyx, panjoyy);
+        }
+      else {
+        if(ev.caxis.axis == 0)
+          panjoyx = ev.caxis.value;
+        else
+          panjoyy = ev.caxis.value;
+        }
+      }
+    #endif
     
     if(joyhandler && joyhandler(ev)) ;
 
     else if(ev.type == SDL_EVENT_JOYSTICK_HAT_MOTION && !normal && defaultjoy) {
+      if(gjoy_is_controller(ev.jhat.which)) return;
       if(ev.jhat.value == SDL_HAT_UP) sym = SDLK_UP;
       if(ev.jhat.value == SDL_HAT_DOWN) sym = SDLK_DOWN;
       if(ev.jhat.value == SDL_HAT_LEFT) sym = SDLK_LEFT;
@@ -1255,8 +1363,19 @@ EX void handle_event(SDL_Event& ev) {
       }
 
     else if(ev.type == SDL_EVENT_JOYSTICK_BUTTON_DOWN && defaultjoy) {
-      sym = uni = PSEUDOKEY_JOY + JOY_ID * ev.jbutton.which + ev.jbutton.button;
+      if(gjoy_is_controller(ev.jbutton.which)) return;
+      sym = uni = PSEUDOKEY_JOY + JOY_ID * gjoy_myid(ev.jbutton.which) + ev.jbutton.button;
       }
+
+    #if SDLVER >= 2
+    else if(ev.type == SDL_CONTROLLERBUTTONDOWN && defaultjoy) {
+      sym = uni = PSEUDOKEY_JOY + JOY_ID * gjoy_myid(ev.cbutton.which) + ev.cbutton.button;
+      if(ev.cbutton.which == SDL_CONTROLLER_BUTTON_DPAD_UP) sym = uni = SDLK_UP;
+      if(ev.cbutton.which == SDL_CONTROLLER_BUTTON_DPAD_DOWN) sym = uni = SDLK_DOWN;
+      if(ev.cbutton.which == SDL_CONTROLLER_BUTTON_DPAD_LEFT) sym = uni = SDLK_LEFT;
+      if(ev.cbutton.which == SDL_CONTROLLER_BUTTON_DPAD_RIGHT) sym = uni = SDLK_RIGHT;
+      }
+    #endif
 #endif
 
     if(ev.type == SDL_EVENT_KEY_DOWN) {
