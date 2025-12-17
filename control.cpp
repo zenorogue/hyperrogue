@@ -1431,14 +1431,25 @@ EX void handle_event(SDL_Event& ev) {
 
     if(ev.type == SDL_EVENT_MOUSE_BUTTON_DOWN || ev.type == SDL_EVENT_MOUSE_BUTTON_UP SDL12(, || ev.type == SDL_EVENT_MOUSE_WHEEL)) {
 
+
+      int current_mouse_x = ev.button.x, current_mouse_y = ev.button.y;
+
+      #if SDLVER == 2
+      if(ev.type == SDL_EVENT_MOUSE_WHEEL) current_mouse_x = ev.wheel.mouseX, current_mouse_y = ev.wheel.mouseY;
+      #endif
+
+      #if SDLVER == 3
+      if(ev.type == SDL_EVENT_MOUSE_WHEEL) current_mouse_x = ev.wheel.mouse_x, current_mouse_y = ev.wheel.mouse_y;
+      #endif
+
       #if SDLVER == 1
       // ignore the extra event on touchpad
       if(ev.type == SDL_EVENT_MOUSE_BUTTON_DOWN && ev.button.which == 255) return;
       #endif
 
-      if(ev.button.x != ui_mousex || ev.button.y != ui_mousey) {
-        mousex = ui_mousex = ev.button.x;
-        mousey = ui_mousey = ev.button.y;
+      if(current_mouse_x != ui_mousex || current_mouse_y != ui_mousey) {
+        mousex = ui_mousex = current_mouse_x;
+        mousey = ui_mousey = current_mouse_y;
         fix_mouseh();
         just_refreshing = 2;
         reset_handlers();
