@@ -1212,14 +1212,16 @@ EX void handleInput(int delta, config &scfg) {
         else if(!mouseout()) {
           for(int d=0; d<playerpos(i)->type; d++) {
             cdir = d;
-            if(multi::multiPlayerTarget(i) == c) break;
+            if(multi::multiPlayerTarget(i) == c) {
+              multi::accepted[i] = true;
+              cwt = multi::player[i];
+              calcMousedest();
+              auto& sd = multi::whereto[i].subdir;
+              sd = mousedest.subdir;
+              if(sd == 0) sd = 1;
+              break;
+              }
             cdir = scdir;
-            cwt = multi::player[i];
-            calcMousedest();
-            auto& sd = multi::whereto[i].subdir;
-            sd = mousedest.subdir;
-            if(sd == 0) sd = 1;
-            multi::accepted[i] = true;
             }
           }
         }
