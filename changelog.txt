@@ -5623,3 +5623,14 @@ Thanks to josephcsible:
 - Fix Free Fall crashing in horodisk land structure
 - Fix crash when Orbs of Choice, Space, and Safety interact
 - Slow down Orb of Winter effect when flashing effects are off
+
+2025-12-18 02:22 Update 13.1i:
+Further improvements to the SteamDeck:
+- should no longer confuse the controller axes and buttons
+- panning with the right joystick should work now
+- fixed some cases where keys where shown incorrectly
+- allowed more screenspace for dialogs since keys are never shown
+
+Other bugfixes:
+- fixed mousewheel in SDL2
+- fixed the generation range for Strong Wind and jump orb effects in alternate tilings
