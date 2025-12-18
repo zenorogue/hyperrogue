@@ -1344,9 +1344,9 @@ EX void handle_event(SDL_Event& ev) {
           joyx = ev.caxis.value;
         else if(ev.caxis.axis == 1)
           joyy = ev.caxis.value;
-        else if(ev.caxis.axis == 3)
+        else if(ev.caxis.axis == 2)
           panjoyx = ev.caxis.value;
-        else if(ev.caxis.axis == 4)
+        else if(ev.caxis.axis == 3)
           panjoyy = ev.caxis.value;
         checkjoy();
         // printf("panjoy = %d,%d\n", panjoyx, panjoyy);
@@ -1378,10 +1378,10 @@ EX void handle_event(SDL_Event& ev) {
     #if SDLVER >= 2
     else if(ev.type == SDL_CONTROLLERBUTTONDOWN && defaultjoy) {
       sym = uni = PSEUDOKEY_JOY + JOY_ID * gjoy_myid(ev.cbutton.which) + ev.cbutton.button;
-      if(ev.cbutton.which == SDL_CONTROLLER_BUTTON_DPAD_UP) sym = uni = SDLK_UP;
-      if(ev.cbutton.which == SDL_CONTROLLER_BUTTON_DPAD_DOWN) sym = uni = SDLK_DOWN;
-      if(ev.cbutton.which == SDL_CONTROLLER_BUTTON_DPAD_LEFT) sym = uni = SDLK_LEFT;
-      if(ev.cbutton.which == SDL_CONTROLLER_BUTTON_DPAD_RIGHT) sym = uni = SDLK_RIGHT;
+      if(ev.cbutton.button == SDL_CONTROLLER_BUTTON_DPAD_UP) sym = uni = SDLK_UP;
+      if(ev.cbutton.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN) sym = uni = SDLK_DOWN;
+      if(ev.cbutton.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT) sym = uni = SDLK_LEFT;
+      if(ev.cbutton.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT) sym = uni = SDLK_RIGHT;
       }
     #endif
 #endif
