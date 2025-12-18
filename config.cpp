@@ -1503,7 +1503,7 @@ EX void initConfig() {
   param_i(vid.joyvalue2, "vid.joyvalue2", 5600);
   param_i(vid.joysmooth, "vid.joysmooth", 200);
   param_i(vid.joypanthreshold, "vid.joypanthreshold", 2500);
-  param_f(vid.joypanspeed, "vid.joypanspeed", ISPANDORA ? 0.0001 : 0);
+  param_f(vid.joypanspeed, "vid.joypanspeed", (ISPANDORA || SDLVER >= 2) ? 0.0001 : 0);
   param_b(autojoy, "autojoy")
   -> editable("joystick moves automatically", 'J');
   param_b(defaultjoy, "defaultjoy")
