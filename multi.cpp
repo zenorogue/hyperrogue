@@ -388,7 +388,7 @@ struct joy_configurer {
     numaxeconfigs = 0;
     int j = 0;
     for(auto& s: sticks) {
-      for(int ax=0; ax<SDL_GetNumJoystickAxes(s.joy) && ax < MAXAXE; ax++) if(numaxeconfigs<24) {
+      for(int ax=0; ax<gjoy_axes(s) && ax < MAXAXE; ax++) if(numaxeconfigs<24) {
         int y = gjoy_axis(s, ax);
         string buf = " ";
         if(configdead)
@@ -885,20 +885,20 @@ EX void get_actions(config& scfg) {
   int j = 0;
   for(auto& s: sticks) {
 
-    for(int b=0; b<SDL_GetNumJoystickButtons(s.joy) && b<MAXBUTTON; b++)
-      if(gjoy_button(sticks[j], b))
+    for(int b=0; b<gjoy_buttons(s) && b<MAXBUTTON; b++)
+      if(gjoy_button(s, b))
         pressaction(scfg.joyaction[j][b]);
 
-    for(int b=0; b<SDL_GetNumJoystickHats(s.joy) && b<MAXHAT; b++) {
-      int stat = SDL_GetJoystickHat(sticks[j].joy, b);
+    for(int b=0; b<gjoy_hats(s) && b<MAXHAT; b++) {
+      int stat = SDL_GetJoystickHat(s.joy, b);
       if(stat & SDL_HAT_UP) pressaction(scfg.hataction[j][b][0]);
       if(stat & SDL_HAT_RIGHT) pressaction(scfg.hataction[j][b][1]);
       if(stat & SDL_HAT_DOWN) pressaction(scfg.hataction[j][b][2]);
       if(stat & SDL_HAT_LEFT) pressaction(scfg.hataction[j][b][3]);
       }
     
-    for(int b=0; b<SDL_GetNumJoystickAxes(s.joy) && b<MAXAXE; b++) {
-      int value = gjoy_axis(sticks[j], b);
+    for(int b=0; b<gjoy_axes(s) && b<MAXAXE; b++) {
+      int value = gjoy_axis(s, b);
       int dz = scfg.deadzoneval[j][b];
       if(value > dz) value -= dz; else if(value < -dz) value += dz;
       else value = 0;

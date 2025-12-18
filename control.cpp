@@ -255,7 +255,7 @@ EX bool gjoy_button(joydata &jd, int button) {
   return SDL_JoystickGetButton(jd.joy, button);
   }
 
-EX bool gjoy_axis(joydata &jd, int axis) {
+EX int gjoy_axis(joydata &jd, int axis) {
   #if SDLVER >= 2
   if(jd.gc) return SDL_GameControllerGetAxis(jd.gc, (SDL_GameControllerAxis) axis);
   #endif
@@ -287,6 +287,13 @@ EX bool gjoy_is_controller(int instance_id) {
 EX int gjoy_buttons(joydata& jd) {
   #if SDLVER >= 2
   if(jd.gc) return (int) SDL_CONTROLLER_BUTTON_MAX;
+  #endif
+  return SDL_GetNumJoystickButtons(jd.joy);
+  }
+
+EX int gjoy_axes(joydata& jd) {
+  #if SDLVER >= 2
+  if(jd.gc) return 6;
   #endif
   return SDL_GetNumJoystickButtons(jd.joy);
   }
@@ -1339,24 +1346,15 @@ EX void handle_event(SDL_Event& ev) {
 
     #if SDLVER >= 2
     if(ev.type == SDL_CONTROLLERAXISMOTION && normal && DEFAULTCONTROL) {
-      if(ev.caxis.which == 0) {
-        if(ev.caxis.axis == 0)
-          joyx = ev.caxis.value;
-        else if(ev.caxis.axis == 1)
-          joyy = ev.caxis.value;
-        else if(ev.caxis.axis == 2)
-          panjoyx = ev.caxis.value;
-        else if(ev.caxis.axis == 3)
-          panjoyy = ev.caxis.value;
-        checkjoy();
-        // printf("panjoy = %d,%d\n", panjoyx, panjoyy);
-        }
-      else {
-        if(ev.caxis.axis == 0)
-          panjoyx = ev.caxis.value;
-        else
-          panjoyy = ev.caxis.value;
-        }
+      if(ev.caxis.axis == 0)
+        joyx = ev.caxis.value;
+      else if(ev.caxis.axis == 1)
+        joyy = ev.caxis.value;
+      else if(ev.caxis.axis == 2)
+        panjoyx = ev.caxis.value;
+      else if(ev.caxis.axis == 3)
+        panjoyy = ev.caxis.value;
+      checkjoy();
       }
     #endif
     
