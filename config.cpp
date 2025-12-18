@@ -1508,7 +1508,7 @@ EX void initConfig() {
   -> editable("joystick moves automatically", 'J');
   param_b(defaultjoy, "defaultjoy")
   -> editable("apply joystick movements", 'H')
-  -> help("Disable this on Steam controllers, which also send key events, to avoid duplicated input. Press key ` (or assign it to the controller button in Steam) to move or accept menu options.");
+  -> help("You may disable this on Steam controllers, if configured to also send key events, to avoid duplicated input. Press key ` (or assign it to the controller button in Steam) to move or accept menu options.");
   #endif
     
   vid.killreduction = 0;
