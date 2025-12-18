@@ -367,6 +367,14 @@ EX void initJoysticks() {
     return;
   }
 
+  #if SDLVER >= 2
+  if (SDL_error_in(SDL_InitSubSystem(SDL_INIT_GAMECONTROLLER)))
+  {
+    if(debug_joy_error) println(hlog, "Failed to initialize game controllers.");
+    return;
+  }
+  #endif
+
   countJoysticks();
   joysticks_initialized = true;
   }
@@ -1259,7 +1267,7 @@ EX void handle_event(SDL_Event& ev) {
       countJoysticks();
       } */
 
-    #if SDLVER >= 2
+    #if SDLVER >= 2 && CAP_SDLJOY
     if(ev.type == SDL_JOYDEVICEADDED) {
       add_joystick(ev.jdevice.which);
       }
