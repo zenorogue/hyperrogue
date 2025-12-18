@@ -1057,7 +1057,7 @@ EX void drawMarkers() {
       multi::cpid = i;
       if(multi::players == 1) multi::player[i] = cwt;
       cell *ctgt = multi::multiPlayerTarget(i);
-      queuecircleat(ctgt, .40 - .06 * sintick(200, i / numplayers()), getcs().uicolor);
+      queuecircleat(ctgt, .40 - .06 * sintick((!multi::multi_autojoy && !multi::accepted[i]) ? 500 : 200, i / numplayers()), getcs().uicolor);
       }
     #endif
 
