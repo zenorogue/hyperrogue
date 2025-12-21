@@ -488,9 +488,9 @@ void gen_powers() {
     "$", 0xFFD500FF,
     [] (data& d) {
       if(d.keystate == 1) {
-        trader *tr;
+        trader *tr = nullptr;
         for(auto& e: current_room->entities) if(auto t = e->as_trader()) tr = t;
-        bool on_trader = intersect(tr->get_pixel_bbox(), m.get_pixel_bbox());
+        bool on_trader = tr && intersect(tr->get_pixel_bbox(), m.get_pixel_bbox());
         bool done_something = false;
         for(int it: {0, 1})
         for(auto& e: current_room->entities) if(auto si = e->as_shopitem()) {
