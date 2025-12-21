@@ -843,6 +843,7 @@ void icicle::act() {
       kino();
       if(on_floor) break;
       }
+    where = respawn;
     }
   if(state == 0) {
     auto w = m.where;
