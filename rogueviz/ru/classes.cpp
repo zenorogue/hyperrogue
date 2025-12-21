@@ -111,6 +111,10 @@ struct room {
     return eWall(block_at[y][x] >> 3);
     }
 
+  int subwall(int x, int y) {
+    return (block_at[y][x] & 7);
+    }
+
   eWall at(intxy xy) { return at(xy.x, xy.y); }
   
   void clear() {

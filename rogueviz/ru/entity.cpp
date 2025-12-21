@@ -269,6 +269,9 @@ void entity::apply_walls() {
 
       bool left = walls[b].glyph[0] == '\\';
 
+      // in big slopes, ignore one of the corners
+      if(current_room->subwall(x, y) == (left ? 5 : 4)) continue;
+
       auto bad = [&] (xy p) {
         if(left)
           return -p.x + p.y >= -block_x * x + block_y * y && p.y >= block_y * y && p.x <= block_x * (x + 1);
