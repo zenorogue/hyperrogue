@@ -242,6 +242,12 @@ Hint: to read signs, stay near them for a second.
 NPC 564 256 0
 @Forest Sign
 The sign reads, BEWARE THE WILD BOARS\n\nThis forest path feels somehow hostile indeed. You feel you will need to use your figthing skills soon.\n\nFights may be difficult if you try to handle them at the same speed as exploration. Press [key:chill time] to slow down time when expecting combat. If you want to resume quick exploration, press [key:chill time] again.
+HINT 420 146 60 60
+"Fear not the man who has practiced 1000 jumps once..."
+HINT 500 146 60 60
+"... but fear the man who has practiced one jump 1000 times."
+HINT 82 81 10 10
+... but sometimes, you wish you practiced other jumps.
 OK
 
 MOVE 2 Forest Path
@@ -275,8 +281,8 @@ MAP
 ##################################..............................................
 #b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b##............................................
 ######################################..........................................
-#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b##........................................
-##########################################......................................
+#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b##\.......................................
+##########################################\.....................................
 #b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b###\..................................
 ################################################\...............................
 #b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b####\...........................
@@ -291,6 +297,12 @@ MAP
 ################################################################################
 #b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b
 BOAR Pepf 348 202
+HINT 308 196 8 60
+The hill is getting steep. You will need to start jumping.
+HINT 253 147 8 60
+And hope your signature jump will be sufficient for this task.
+HINT 209 101 8 60
+Sure, when absolutely necessary, you will find out about other jumps.
 OK
 
 MOVE 1 Climbing the Hill
