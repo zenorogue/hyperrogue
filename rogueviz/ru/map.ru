@@ -233,7 +233,17 @@ MAP
 ################################################################################
 #b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b
 BOAR Peppo 210 60
+AVOID 210 300 16 16
+You have avoided combat. You feel like an experienced Rogue.
+AVOID 318 176 5 200
+Better to destroy a tree than an animal. Skills of an experienced Wizard.
+AVOID 267 87 100 2
+Experienced morphers know that small animals evade big ones.
 BOAR Pempo 113 255
+AVOID 110 300 16 16
+Avoiding combat feels amazing.
+AVOID 60 160 40 2
+Trick and RUN!
 ITEM 442 65
 furry ring
 Someone lost a small, weird ring here. Hopefully it will be useful to you.
@@ -249,7 +259,7 @@ HINT 500 146 60 60
 HINT 82 81 10 10
 ... but sometimes, you wish you practiced other jumps.
 HINT 390 50 10 60
-Are you sure you want to fight? Maybe better to use your training instead ('v'-'i' for inventory)?
+Are you sure you want to fight with a dagger? Maybe better use your training instead ('v'-'i' for inventory)?
 OK
 
 MOVE 2 Forest Path

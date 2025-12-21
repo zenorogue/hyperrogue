@@ -248,6 +248,7 @@ struct entity {
   virtual struct shopitem* as_shopitem() { return nullptr; }
   virtual struct trader* as_trader() { return nullptr; }
   virtual struct missile* as_missile() { return nullptr; }
+  virtual struct enemy* as_enemy() { return nullptr; }
 
   virtual bool is_disarmer() { return false; }
 
@@ -517,16 +518,21 @@ struct trader : public npc_or_trader {
   };
 
 struct enemy : public located_entity {
-  int num_kills;
-  void on_kill() override {
-    entity::on_kill();
+  int num_kills; // actually includes avoidances too
+  bool avoided;
+  void score() {
     num_kills++;
     m.experience += (base_xp() * 25 + 24) / (4 + num_kills) / (4 + num_kills);
     }
-  virtual void hs(stater& s) override { located_entity::hs(s); s.only_full().act("kills", num_kills, 0); }
+  void on_kill() override {
+    entity::on_kill();
+    if(!avoided) score();
+    }
+  virtual void hs(stater& s) override { located_entity::hs(s); s.only_full().act("kills", num_kills, 0); s.act("avoided", avoided, false); }
   void attacked(int s) override;
   virtual int base_xp() { return 0; }
   bool hit_by_missile(missile *m) override { return true; }
+  enemy* as_enemy() override { return this; }
   };
 
 struct vtrap : public located_entity {
@@ -736,6 +742,13 @@ struct hint : public located_entity {
   bool have_help() { return false; }
   string get_name() override { return "<hint>"; }
   bool can_be_hallucinated() override { return false; }
+  };
+
+struct avoid : public hint {
+  enemy *whom;
+  bool done;
+  void act() override;
+  virtual void hs(stater& s) override { hint::hs(s); s.act("done", done, false); }
   };
 
 struct item : public located_entity {

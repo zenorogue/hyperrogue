@@ -309,6 +309,15 @@ void load_room(fhstream& f, cell *c) {
         b->hint_text = scanline_noblank(f);
         r.entities.emplace_back(std::move(b));
         }
+      else if(cap == "AVOID") {
+        auto b = std::make_unique<avoid>();
+        b->respawn = get_xy(); b->size = get_xy();
+        b->hint_text = scanline_noblank(f);
+        b->id = b->hint_text;
+        for(auto& e: r.entities) if(e->as_enemy()) b->whom = e->as_enemy();
+        if(!b->whom) { println(hlog, "AVOID not after any enemy"); }
+        r.entities.emplace_back(std::move(b));
+        }
       else if(cap == "VISION") {
         auto b = std::make_unique<vision>();
         b->col = get_color();

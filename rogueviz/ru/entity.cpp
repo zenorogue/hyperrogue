@@ -539,6 +539,16 @@ void hint::act() {
   state = cur;
   }
 
+void avoid::act() {
+  bool cur = intersect(get_pixel_bbox(), m.get_pixel_bbox());
+  if(gframeid < 300) cur = 0;
+  if(whom && cur && !state && !whom->avoided && whom->existing && !done) {
+    whom->avoided = true; done = true; whom->score();
+    addMessage(parse_markup(hint_text));
+    }
+  state = cur;
+  }
+
 xy ferris_platform::location_at(ld t) {
   return from_hyper(rgpushxto0(to_hyper(ctr)) * xspinpush0(t / game_fps + shift, radius));
   }
