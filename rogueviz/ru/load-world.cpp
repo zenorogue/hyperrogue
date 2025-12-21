@@ -229,7 +229,7 @@ void load_room(fhstream& f, cell *c) {
         r.entities.emplace_back(std::move(b));
         }
       else if(cap == "TIMEORB") {
-        auto b = std::make_unique<timed_orb>(); nam(*b);
+        auto b = std::make_unique<timed_orb>();
         b->respawn = get_xy();
         b->duration = get_ld() * game_fps;
         r.entities.emplace_back(std::move(b));
