@@ -59,7 +59,7 @@ enum eWall {
   wAir, wWall, wBouncy, wSpike, wWater, wFrozen, wDoor, wSmashedDoor,
   wLockedDoor, wFountain, wBluePortal, wOrangePortal, wPlatform, wStaircase,
   wColumn, wForge, wWoodWall, wShopDoor, wSecretPassage, wSign, wWallSign, wTimeDoor, 
-  wBottomSpike, wRogueWallHidden, wRogueWall, wGUARD };
+  wBottomSpike, wRogueWallHidden, wRogueWall, wRightSlope, wLeftSlope, wGUARD };
 
 flagtype W_BLOCK = 1;
 flagtype W_TRANS = 2;
@@ -71,6 +71,7 @@ flagtype W_FROZEN = 64;
 flagtype W_BLOCKBIRD = 128;
 flagtype W_STABLE = 256;
 flagtype W_DOWNWARD = 512;
+flagtype W_SLOPE = 1024;
 
 constexpr int qwall = int(wGUARD);
 
@@ -100,6 +101,8 @@ ruwall walls[qwall] = {
   {"bottom spike", "v", 0xC08080FF, W_TRANS | W_PAIN | W_BLOCKBIRD | W_DOWNWARD, "A downward-pointing spike. You can fall from above through it safely, but otherwise, it is very dangerous."},
   {"wall", "#", 0xFFFFFFFF, W_BLOCK | W_STABLE, "These kinds of tough walls can never be destroyed."},
   {"fake wall", "#", 0x404080FF, W_PLATFORM | W_STABLE | W_BLOCKBIRD, "Your rogueish senses have discovered that this wall is fake."},
+  {"right slope", "/", 0xFFFFFFFF, W_STABLE | W_SLOPE, "Slope here."},
+  {"left slope", "\\", 0xFFFFFFFF, W_STABLE | W_SLOPE, "Slope here."},
   };
 
 int sel = 1;

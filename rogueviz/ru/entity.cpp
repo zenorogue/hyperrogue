@@ -17,6 +17,15 @@ bbox entity::get_pixel_bbox_at(xy p, ld scalex, ld scaley) {
   return b;
   }
 
+xy entity::get_precise_bbox_at(xy p, int mx, int my, ld scalex, ld scaley) {
+  double d = get_scale_at(p.y);
+  ld dx = d * scalex;
+  ld dy = d * scaley;
+  double man_x = siz().x;
+  double man_y = siz().y;
+  return xy { p.x + mx * man_x * dx / 2, p.y + my * man_y * dy / 2 };
+  }
+
 void entity::on_fountain() { hs(fountain_resetter); }
 
 bool entity::visible(room *r) {
@@ -253,6 +262,40 @@ void entity::apply_walls() {
       if(reset) goto again;
       }
     }
+
+  for(int x = jbb.minx; x < jbb.maxx; x++) for(int y = jbb.miny; y < jbb.maxy; y++) {
+    eWall b = current_room->at(x, y);
+    if(walls[b].flags & W_SLOPE) {
+
+      bool left = walls[b].glyph[0] == '\\';
+
+      auto bad = [&] (xy p) {
+        if(left)
+          return -p.x + p.y >= -block_x * x + block_y * y && p.y >= block_y * y && p.x <= block_x * (x + 1);
+        else
+          return p.x + p.y >= block_x * x + block_y * y + block_x && p.y >= block_y * y && p.x >= block_x * x;
+        };
+      auto p = get_precise_bbox_at(where + vel, left ? -1 : 1, 1);
+
+      if(loopcount > 200) {
+        println(hlog, "[slope loop error]");
+        continue;
+        }
+
+      if(bad(p)) {
+        ld target_vy;
+        target_vy = left ? vel.x : -vel.x;
+        if(target_vy > 0) target_vy *= .9;
+        if(vel.y > target_vy - 1e-6) vel.y = target_vy;
+        else if(vel.y > target_vy + 1e-6) vel.y = (vel.y + target_vy) / 2;
+        on_floor = true;
+        if(walls[b].flags & W_STABLE) is_stable = true;
+        goto again;
+        }
+      }
+    }
+
+  // println(hlog, format("%.20lf %.20lf %.20lf %.20lf L%d -> %.20lf %.20lf", where.x, where.y, vel.x, vel.y, loopcount, (where+vel).x, (where+vel).y));
   }
 
 bool entity::stay_on_screen() {

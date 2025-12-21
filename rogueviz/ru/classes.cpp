@@ -279,6 +279,8 @@ struct entity {
   struct bbox get_pixel_bbox_at(xy, ld scalex = 1, ld scaley = 1);
   struct bbox get_pixel_bbox() { return get_pixel_bbox_at(where); }
 
+  struct xy get_precise_bbox_at(xy, int mx, int my, ld scalex = 1, ld scaley = 1);
+
   virtual double grav() { return 0.1; }  
 
   bool on_floor, fallthru, on_ice, wallhug, on_bounce, is_stable;
