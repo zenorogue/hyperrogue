@@ -252,7 +252,7 @@ void man::draw() {
   for(auto& e: effects) {
     ld t = gframeid - e.attack_when;
     if(t < 50) {
-      auto col = find_power("dagger").get_color();
+      auto col = e.p->get_color();
       auto& alpha = part(col, 0);
       alpha = max<int> (0, alpha - 5 * t);
       auto box = e.f(t);
