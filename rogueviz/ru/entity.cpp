@@ -507,7 +507,7 @@ void ghost::act() {
   apply_vel();
   if(intersect(get_pixel_bbox(), m.get_pixel_bbox()) && gframeid > invinc_end) {
     invinc_end = gframeid + 200;
-    if(m.reduce_hp(20)) addMessage("The ghost passes through you!");
+    if(m.reduce_hp(20)) addMessage("The " + get_name() + " passes through you!");
     }
   }
 
@@ -522,7 +522,7 @@ void snake::act() {
     vel.x = zero_vel.x + dat.d * dat.modv * dir;
     }
   if(intersect(get_pixel_bbox(), m.get_pixel_bbox()) && gframeid > invinc_end) {
-    if(m.reduce_hp(bite())) addMessage("The snake bites you!");
+    if(m.reduce_hp(bite())) addMessage("The " + get_name() + " bites you!");
     }
   }
 
