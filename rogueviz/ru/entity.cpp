@@ -582,9 +582,9 @@ void moving_platform::draw() {
   double d = get_scale();
   auto wi = width();
   for(int w=0; w<wi; w++) {
-    ld minx = where.x + siz().x * d * (w - 0.5) / wi;
+    ld minx = where.x + siz().x * d * (((w+0.) / wi ) - 0.5);
     ld miny = where.y - siz().y * d / 2;
-    ld maxx = where.x + siz().x * d * (w + 0.5) / wi;
+    ld maxx = where.x + siz().x * d * (((w+1.) / wi) - 0.5);
     ld maxy = where.y + siz().y * d / 2;
     asciiletter(minx, miny, maxx, maxy, glyph(), color());
     }
