@@ -639,7 +639,10 @@ struct snake : public enemy {
   int base_xp() override { return 10; }
   int max_hp() override { return 30; }
   virtual int bite() { return 25; }
-  virtual void hs(stater& s) override { enemy::hs(s); s.act("dir", dir, respawn_dir); }
+  xy default_vel() override {
+    auto dat = get_dat(); return {dat.d * dat.modv * dir, 0};
+    }
+  virtual void hs(stater& s) override { s.act("dir", dir, respawn_dir); enemy::hs(s); }
   };
 
 struct disnake : public snake {
