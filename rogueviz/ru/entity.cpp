@@ -528,6 +528,7 @@ void snake::act() {
 
 void snake::attacked(int dmg) {
   enemy::attacked(dmg);
+  dir *= -1;
   if(where.x < m.where.x) vel.x = -abs(vel.x);
   if(where.x > m.where.x) vel.x = +abs(vel.x);
   }
