@@ -533,6 +533,48 @@ void snake::attacked(int dmg) {
   if(where.x > m.where.x) vel.x = +abs(vel.x);
   }
 
+void naga_warrior::act() {
+  stay_on_screen();
+  kino();
+  if(on_floor) {
+    auto dat = get_dat();
+    if(abs(vel.x) < 1e-6) {
+      dir = -dir;
+      }
+    vel.x = zero_vel.x + dat.d * dat.modv * dir;
+    }
+  if(gmod(gframeid, 100) == 0) {
+    bbox b = get_pixel_bbox_at(xy{where.x + dir * dsiz().x, where.y});
+    if(intersect(b, m.get_pixel_bbox()) && gframeid > invinc_end) {
+      if(m.reduce_hp(chop())) addMessage("The " + get_name() + " chops you!");
+      }
+    }
+  if(intersect(get_pixel_bbox(), m.get_pixel_bbox()) && gframeid > invinc_end) {
+    if(m.reduce_hp(bite())) addMessage("The " + get_name() + " bites you!");
+    }
+  }
+
+void naga_warrior::draw() {
+  entity::draw();
+
+  int t = gmod(gframeid, 100);
+  if(t <= 50) {
+    bbox b = get_pixel_bbox_at(xy{where.x + dir * (1-0.01 * t) * dsiz().x, where.y});
+    auto col = 0xFFFFFFFF;
+    auto& alpha = part(col, 0);
+    alpha = max<int> (0, alpha - 5 * t);
+    asciiletter(
+      b.minx, b.miny,
+      b.maxx, b.maxy,
+      dir == -1 ? "(" : ")", col
+      );
+    }
+  }
+
+void naga_warrior::attacked(int dmg) {
+  enemy::attacked(dmg); // do not reverse on being attacked!
+  }
+
 void hint::act() {
   bool cur = intersect(get_pixel_bbox(), m.get_pixel_bbox());
   if(gframeid < 300) cur = 0;

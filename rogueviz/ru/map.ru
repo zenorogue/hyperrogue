@@ -2828,7 +2828,10 @@ MAP
 #b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b
 ################################################################################
 #b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b
-SNAKE Axeman 300 200 1
+NAGA Axer 300 200 1
+LOOT 1
+axe
+This axe is a powerful weapon!
 OK
 
 MOVE 4 Guinea Pig Pen

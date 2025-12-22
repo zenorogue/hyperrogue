@@ -274,6 +274,12 @@ void load_room(fhstream& f, cell *c) {
         b->respawn_dir = get_int();
         r.entities.emplace_back(std::move(b));
         }
+      else if(cap == "NAGA") {
+        auto b = std::make_unique<naga_warrior>(); nam(*b);
+        b->respawn = get_xy();
+        b->respawn_dir = get_int();
+        r.entities.emplace_back(std::move(b));
+        }
       else if(cap == "FERRIS") {
         ld cx = get_ld(), cy = get_ld(), radius = get_ld(); int qty = get_int();
 

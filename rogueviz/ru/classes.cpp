@@ -660,6 +660,20 @@ struct disnake : public snake {
   virtual void hs(stater& s) override { snake::hs(s); s.act("respawn", respawn, {0, 0}); }
   };
 
+struct naga_warrior : public snake {
+  string glyph() override { return "N"; }
+  color_t color() override { return 0x20D020FF; }
+  string get_name() override { return "naga warrior"; }
+  string get_help() override { return "A nasty snake, wielding an axe."; }
+  int base_xp() override { return 200; }
+  int max_hp() override { return 500; }
+  xy siz() override { return {25, 25}; }
+  void act() override;
+  void attacked(int s) override;
+  void draw() override;
+  virtual int chop() { return 32; }
+  };
+
 struct kestrel : public enemy {
   xy respawn_vel;
   xy siz() override { return {10, 10}; }
