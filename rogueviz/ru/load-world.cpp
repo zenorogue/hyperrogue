@@ -152,6 +152,7 @@ void load_room(fhstream& f, cell *c) {
       string cap = s.substr(0, pos);
       string param = s.substr(pos+1) + " ";
       auto cutoff = [&] (const string& val) {
+        while(param != "" && among(param[0], ' ', '\t')) param = param.substr(1);
         if(param == "") { println(hlog, "parameter missing"); return val; }
         pos = param.find(" "); auto res = param.substr(0, pos); param = param.substr(pos + 1);
         return res;
