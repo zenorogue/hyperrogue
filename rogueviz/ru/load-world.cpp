@@ -408,6 +408,8 @@ void load_cheat(string fname) {
     else if(s == "") {}
     else println(hlog, "unrecognized cheat: ", s);
     }
+  for(auto i: allstats) m.current.stats[i] = m.next.stats[i] = m.base_stats[i];
+  m.hp = m.max_hp();
   }
 
 
