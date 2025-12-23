@@ -74,8 +74,24 @@ randeff trap_snake("Snake Hair", "Lets you create snakes that can be used to dis
 
 randeff trap_disarm("Disarm traps", "Lets you see all traps on the level for a short time, and to attack them with your [weapon] to destroy them.", "You suddenly feel able to disarm traps with your [weapon]!", [] (data &d) { 
   m.next.rough_detect = 0.1;
-  if(d.mode == rev::active)
-    m.next.mods.emplace_back(d.re->which_weapon, mod::disarming, m.current.stats[stat::wis]);
+  if(d.mode == rev::active) m.next.mods.emplace_back(weaponmod{
+    d.re->which_weapon,
+    [] (color_t& col) { col = 0x4040C0FF; },
+    [] (string& s) { s = "disarming " + s; },
+    [] (entity *e, int dam, int sav) {
+      if(e->hidden()) {
+        e->existing = false;
+        addMessage("You have disarmed a "+e->hal()->get_name()+".");
+        }
+      },
+    [] (int x, int y) {
+      int b = current_room->at(x, y);
+      if(b == wRogueWallHidden) {
+        current_room->replace_block_frev(x, y, wRogueWall);
+        addMessage("You open a secret passage!");
+        }
+      }
+    });
   });
 
 // health powers
@@ -103,17 +119,59 @@ randeff health_regen("Regeneration", "Heals you over a period of time.", "You fe
     }
   });
 randeff health_protect("Protection", "Makes you more resistant to damage.", "You feel protected!", [] (data &d) {
-  m.protection += 3 * m.current.stats[stat::wis] + m.hp * m.current.stats[stat::wis] * 2 / 100;
+  int& protection = d.re->a;
+  if(d.mode == rev::start) protection += 3 * m.current.stats[stat::wis] + m.hp * m.current.stats[stat::wis] * 2 / 100;
+  if(d.mode == rev::active) {
+    m.next.on_hit.emplace_back([&] (int& x) {
+      ld fraction = 1 - 100 / (protection + 100);
+      int take = ceil(x * fraction);
+      if(take > protection) take = protection;
+      protection -= take;
+      x -= protection;
+      });
+   m.next.status_strings.emplace_back([&] (hstream& ss) { print(ss, " P", protection); });
+   }
   });
 randeff health_vampire("Vampirism", "Attacks with your [weapon] restore your health.", "Your [weapon] wants blood!", [] (data &d) {
+  int& vampire = d.re->a;
   if(d.mode == rev::start)
-    m.vampire += 4 * m.current.stats[stat::wis] + m.max_hp() * m.current.stats[stat::wis] * 3 / 100;
-  if(d.mode == rev::active && m.vampire)
-    m.next.mods.emplace_back(d.re->which_weapon, mod::vampire, 2 * m.current.stats[stat::wis] + 1e-6);
+    vampire += 4 * m.current.stats[stat::wis] + m.max_hp() * m.current.stats[stat::wis] * 3 / 100;
+  if(d.mode == rev::active) {
+    m.next.mods.emplace_back(weaponmod{
+      d.re->which_weapon,
+      [] (color_t& col) { col = 0x802020FF; },
+      [] (string& s) { s = "vampiric " + s; },
+      [&] (entity *e, int dam, int sav) {
+        int dam1 = min(dam, vampire);
+        m.hp += dam1; vampire -= dam1;
+        if(m.hp > m.max_hp()) { m.hp = m.max_hp(); }
+        },
+      [] (int x, int y) {}
+      });
+     m.next.status_strings.emplace_back([&] (hstream& ss) { print(ss, " V", vampire); });
+     }
   });
 randeff health_bubbles("Bubbles", "When you are attacked, you produce red bubbles that you can collect to heal yourself back.", "You feel something bouncy growing inside you!", [] (data &d) {
-  if(d.mode == rev::start)
-    m.healbubble += 4 * m.current.stats[stat::wis] + m.max_hp() * m.current.stats[stat::wis] * 3 / 100;
+  int& healbubble = d.re->a;
+  if(d.mode == rev::start) healbubble += 4 * m.current.stats[stat::wis] + m.max_hp() * m.current.stats[stat::wis] * 3 / 100;
+  if(d.mode == rev::active) {
+    m.next.on_hit.emplace_back([&] (int& x) {
+      int take = x;
+      if(take > healbubble) take = healbubble;
+      healbubble -= take;
+      auto d = m.get_dat();
+      auto mi = std::make_unique<healthbubble>();
+      mi->id = "HEALBUBBLE";
+      ld r = (rand() % 360) * degree;
+      mi->hs(fountain_resetter);
+      mi->power = take * 2;
+      mi->where = m.where;
+      mi->vel = { cos(r) * d.modv * 3, sin(r) * d.modv * 3 };
+      mi->invinc_end = gframeid + 300;
+      new_entities.emplace_back(std::move(mi));
+      });
+    m.next.status_strings.emplace_back([&] (hstream& ss) { print(ss, " B", healbubble); });
+    }
   });
 
 // fire powers
@@ -132,7 +190,42 @@ randeff fire_spit("Fiery Spit", "Lets you spit fire.", "You feel fire in your mo
   });
 randeff fire_weapon("Fiery Weapon", "Attacks with your [weapon] set things on fire.", "Your hands glow, and your [weapon] burst into flame!", [] (data &d) {
   if(d.mode == rev::active)
-    m.next.mods.emplace_back(d.re->which_weapon, mod::burning, 2 * m.current.stats[stat::wis] + 1e-6);
+    m.next.mods.emplace_back(
+     weaponmod{
+       d.re->which_weapon,
+       [] (color_t& col) { col = gradient(0xFFFF00FF, 0xFF0000FF, -1, sin(ticks/100), 1); },
+       [] (string& s) { s = "burning " + s; },
+       [] (entity *e, int dam, int sav) {
+         e->invinc_end = sav; e->attacked(2 * m.current.stats[stat::wis] + 1e-6);
+         },
+       [] (int x, int y) {
+         int b = current_room->at(x, y);
+         if(b == wWoodWall) {
+           current_room->replace_block_frev(x, y, wAir);
+           addMessage("You burn the wall!");
+           }
+         }
+       });
+  });
+
+randeff ice_weapon("Chill Weapon", "Attacks with your [weapon] freeze things.", "Your hands glow, and your [weapon] turns cold!", [] (data &d) {
+  if(d.mode == rev::active)
+    m.next.mods.emplace_back(
+     weaponmod{
+       d.re->which_weapon,
+       [] (color_t& col) { col = 0x8080FFFF; },
+       [] (string& s) { s = "freezing " + s; },
+       [] (entity *e, int dam, int sav) {
+         e->invinc_end = sav; e->attacked(2 * m.current.stats[stat::wis] + 1e-6);
+         },
+       [] (int x, int y) {
+         int b = current_room->at(x, y);
+         if(b == wWater) {
+           current_room->replace_block_frev(x, y, wFrozen);
+           addMessage("You freeze the water!");
+           }
+         }
+       });
   });
 
 flavor morph_cat_color;
@@ -184,6 +277,8 @@ void assign_potion_powers() {
 
   fire_weapon.which_weapon = wpn[0];
   trap_disarm.which_weapon = wpn[1];
+  health_vampire.which_weapon = wpn[2];
+
   using relist = vector<randeff*>;
   find_power("health").randeffs = relist{ pick(&health_heal, &health_regen, &health_protect, &health_vampire, &health_bubbles, &health_protect), random_powers[0] };
   find_power("the thief").randeffs = relist{ pick(&trap_detect, &trap_snake, &trap_disarm, &trap_detect_cross), random_powers[1] };

@@ -16,6 +16,10 @@ void power::hs(stater& s) {
 void randeff::hs(stater& s) {
   string str = which_weapon ? which_weapon->id : "NONE";
   s.act("wpn", str, "NONE");
+  s.act("a", a, 0);
+  s.act("b", a, 0);
+  s.act("c", a, 0);
+  s.act("d", a, 0);
   try {
     which_weapon = (str != "NONE") ? &find_power_by_id(str) : nullptr;
     }

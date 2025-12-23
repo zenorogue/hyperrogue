@@ -290,9 +290,7 @@ void run() {
         mouseovers = current_room->roomname;
         shstream ss;
         print(ss, "HP ", m.hp, "/", m.max_hp());
-        if(m.vampire) print(ss, " V");
-        if(m.healbubble) print(ss, " B");
-        if(m.protection) print(ss, " P");
+        for(auto& sts: m.current.status_strings) sts(ss);
         displayfr(vid.fsize, vid.fsize, 2, vid.fsize, ss.s, titlecolor, 0);
         if(current_target && current_target->existing)
         displayfr(vid.xres - vid.fsize, vid.fsize, 2, vid.fsize, "HP " + its(current_target->hp) + "/" + its(current_target->max_hp()) + " " + current_target->get_name(), titlecolor, 16);

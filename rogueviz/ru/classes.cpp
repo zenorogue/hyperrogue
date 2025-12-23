@@ -28,8 +28,6 @@ struct randeff {
   void hs(struct stater& s);
   };
 
-enum class mod { burning, freezing, disarming, vampire };
-
 struct power {
   int key;
   string id;
@@ -46,7 +44,7 @@ struct power {
   int random_value;
   vector<struct randeff*> randeffs;
   void init();
-  vector<pair<mod, int>> mods;
+  vector<struct weaponmod> mods;
   hr::function<void(data&)> act, paused_act, dead_act;
   hr::function<string()> get_name;
   hr::function<string()> get_desc;
@@ -354,12 +352,22 @@ struct entity {
   entity *hal();
   };
 
+struct weaponmod {
+  power* wpn;
+  hr::function<void(color_t&)> change_color;
+  hr::function<void(string&)> change_name;
+  hr::function<void(entity *e, int dam, int sav)> action;
+  hr::function<void(int x, int y)> map_action;
+  };
+
 struct statdata {
   statarray<ld> stats;
   int jump_control, coyote_time, hallucinating;
   ld detect_area, detect_cross, rough_detect;
   void reset();
-  vector<tuple<power*, mod, int>> mods;
+  vector<weaponmod> mods;
+  vector<hr::function<void(int&)>> on_hit;
+  vector<hr::function<void(hstream&)>> status_strings;
   };
 
 using boxfun = hr::function<bbox(int)>;
@@ -378,8 +386,6 @@ struct man : public entity {
   int on_floor_when;
   entity *morphed = nullptr;
   vector<effect> effects;
-
-  int vampire, protection, healbubble;
 
   int last_action;
 

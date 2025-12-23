@@ -28,22 +28,12 @@ power& power::be_weapon() {
   picked_up = [this] (int x) { qty_owned += x; qty_filled = max(qty_filled, x);  };
   auto gn = get_name; get_name = [gn, this] {
     string s = addqof(gn(), this);
-    for(auto& [m, qty]: mods) {
-      if(m == mod::burning) s = "flaming " + s;
-      if(m == mod::freezing) s = "freezing " + s;
-      if(m == mod::disarming) s = "disarming " + s;
-      if(m == mod::vampire) s = "vampiric " + s;
-      }
+    for(auto& md: mods) md.change_name(s);
     return s;
     };
   auto gc = get_color; get_color = [gc, this] {
     auto col = gc();
-    for(auto& [m, qty]: mods) {
-      if(m == mod::vampire) col = 0x802020FF;
-      if(m == mod::disarming) col = 0x4040C0FF;
-      if(m == mod::burning) col = gradient(0xFFFF00FF, 0xFF0000FF, -1, sin(ticks/100), 1);
-      if(m == mod::freezing) col = 0x8080FFFF;
-      }
+    for(auto& md: mods) md.change_color(col);
     return col;
     };
   return self;

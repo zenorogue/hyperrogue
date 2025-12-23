@@ -46,6 +46,8 @@ void statdata::reset() {
   rough_detect = 0;
   hallucinating = false;
   mods.clear();
+  on_hit.clear();
+  status_strings.clear();
   }
 
 man::man() {
@@ -86,9 +88,6 @@ void man::hs(stater& s) {
   sdata(next, "next.");
 
   entity::hs(s);
-  s.act("protection", protection, 0);
-  s.act("vampire", vampire, 0);
-  s.act("healbubble", healbubble, 0);
   }
 
 void man::act() {
@@ -103,7 +102,7 @@ void man::act() {
   current = next;
   next.reset();
   for(auto& po: powers) po.mods.clear();
-  for(auto& [po, type, val]: current.mods) po->mods.emplace_back(type, val);
+  for(auto& md: current.mods) md.wpn->mods.emplace_back(md);
   if(h != max_hp())
     hp = randround(1. * hp * max_hp() / h);
   auto dat = get_dat();
@@ -135,28 +134,9 @@ void man::act() {
   }
 
 bool man::reduce_hp(int x) {
-  if(protection && gframeid >= invinc_end) {
-    ld fraction = 1 - 100 / (protection + 100);
-    int take = ceil(x * fraction);
-    if(take > protection) take = protection;
-    protection -= take;
-    x -= protection;
-    }
-  if(healbubble && gframeid >= invinc_end) {
-    int take = x;
-    if(take > healbubble) take = healbubble;
-    healbubble -= take;
-    auto d = m.get_dat();
-    auto mi = std::make_unique<healthbubble>();
-    mi->id = "HEALBUBBLE";
-    ld r = (rand() % 360) * degree;
-    mi->hs(fountain_resetter);
-    mi->power = take * 2;
-    mi->where = m.where;
-    mi->vel = { cos(r) * d.modv * 3, sin(r) * d.modv * 3 };
-    mi->invinc_end = gframeid + 300;
-    new_entities.emplace_back(std::move(mi));
-    }
+  if(gframeid >= invinc_end)
+    for(auto& f: m.current.on_hit)
+      f(x);
   return entity::reduce_hp(x);
   }
 
@@ -210,18 +190,7 @@ void man::launch_attack(power *p, int fac, boxfun f) {
       int sav = e->invinc_end;
       int dam = (m.current.stats[stat::str] + 1) * 3 / 2;
       e->attacked(dam);
-      for(auto& [md, qty]: p->mods) {
-        if(md == mod::burning) { e->invinc_end = sav; e->attacked(qty); }
-        if(md == mod::freezing) { e->invinc_end = sav; e->attacked(qty); }
-        if(md == mod::vampire) {
-          int dam1 = min(dam, m.vampire);
-          hp += dam1; m.vampire -= dam1;
-          }
-        if(md == mod::disarming && e->hidden()) {
-          e->existing = false;
-          addMessage("You have disarmed a "+e->hal()->get_name()+".");
-          }
-        }
+      for(auto& md: p->mods) md.action(&*e, dam, sav);
       }
   for(int y=bb.miny; y<bb.maxy; y++)
   for(int x=bb.minx; x<bb.maxx; x++) {
@@ -230,20 +199,7 @@ void man::launch_attack(power *p, int fac, boxfun f) {
       current_room->replace_block_frev(x, y, wSmashedDoor);
       addMessage("You smash the door!");
       }
-    for(auto& [m, qty]: p->mods) {
-      if(m == mod::burning && b == wWoodWall) {
-        current_room->replace_block_frev(x, y, wAir);
-        addMessage("You burn the wall!");
-        }
-      if(m == mod::freezing && b == wWater) {
-        current_room->replace_block_frev(x, y, wFrozen);
-        addMessage("You freeze the water!");
-        }
-      if(m == mod::disarming && b == wRogueWallHidden) {
-        current_room->replace_block_frev(x, y, wRogueWall);
-        addMessage("You open a secret passage!");
-        }
-      }
+    for(auto& md: p->mods) md.map_action(x, y);
     }
   }
 
