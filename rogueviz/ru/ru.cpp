@@ -145,6 +145,8 @@ tuple<xy, ld, int> get_next_room(xy w, room *r, int which) {
   return {w, 1, -1};
   }
 
+vector<unique_ptr<struct entity>> new_entities;
+
 void playing_frame() {
   m.act();
 
@@ -155,6 +157,9 @@ void playing_frame() {
   auto mb = ents.begin();
   for(auto& e: ents) if(!e->destroyed) *(mb++) = std::move(e);
   ents.resize(mb - ents.begin());
+
+  for(auto &e: new_entities) ents.push_back(std::move(e));
+  new_entities.clear();
 
   if(one_room) return;
 
@@ -283,7 +288,12 @@ void run() {
       if(cmode == mode::playing) {
         titlecolor = 0xFFFFFF;
         mouseovers = current_room->roomname;
-        displayfr(vid.fsize, vid.fsize, 2, vid.fsize, "HP " + its(m.hp) + "/" + its(m.max_hp()), titlecolor, 0);
+        shstream ss;
+        print(ss, "HP ", m.hp, "/", m.max_hp());
+        if(m.vampire) print(ss, " V");
+        if(m.healbubble) print(ss, " B");
+        if(m.protection) print(ss, " P");
+        displayfr(vid.fsize, vid.fsize, 2, vid.fsize, ss.s, titlecolor, 0);
         if(current_target && current_target->existing)
         displayfr(vid.xres - vid.fsize, vid.fsize, 2, vid.fsize, "HP " + its(current_target->hp) + "/" + its(current_target->max_hp()) + " " + current_target->get_name(), titlecolor, 16);
         }

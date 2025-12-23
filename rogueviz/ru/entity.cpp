@@ -691,6 +691,19 @@ void kestrel::act() {
     }
   }
 
+void healthbubble::act() {
+  stay_on_screen();
+  apply_walls_reflect();
+  apply_vel();
+
+  if(intersect(get_pixel_bbox(), m.get_pixel_bbox()) && gframeid >= invinc_end) {
+    addMessage("The " + hal()->get_name() + " heals you!");
+    m.hp += power;
+    existing = false;
+    if(m.hp > m.max_hp()) m.hp = m.max_hp();
+    }
+  }
+
 void gridbug::act() {
 
   if(intersect(get_pixel_bbox(), m.get_pixel_bbox())) {

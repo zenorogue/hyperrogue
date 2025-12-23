@@ -86,6 +86,9 @@ void man::hs(stater& s) {
   sdata(next, "next.");
 
   entity::hs(s);
+  s.act("protection", protection, 0);
+  s.act("vampire", vampire, 0);
+  s.act("healbubble", healbubble, 0);
   }
 
 void man::act() {
@@ -129,6 +132,32 @@ void man::act() {
   current_room->fov_from(where.x / block_x, where.y / block_y);
 
   check_fountains();
+  }
+
+bool man::reduce_hp(int x) {
+  if(protection && gframeid >= invinc_end) {
+    ld fraction = 1 - 100 / (protection + 100);
+    int take = ceil(x * fraction);
+    if(take > protection) take = protection;
+    protection -= take;
+    x -= protection;
+    }
+  if(healbubble && gframeid >= invinc_end) {
+    int take = x;
+    if(take > healbubble) take = healbubble;
+    healbubble -= take;
+    auto d = m.get_dat();
+    auto mi = std::make_unique<healthbubble>();
+    mi->id = "HEALBUBBLE";
+    ld r = (rand() % 360) * degree;
+    mi->hs(fountain_resetter);
+    mi->power = take * 2;
+    mi->where = m.where;
+    mi->vel = { cos(r) * d.modv * 3, sin(r) * d.modv * 3 };
+    mi->invinc_end = gframeid + 300;
+    new_entities.emplace_back(std::move(mi));
+    }
+  return entity::reduce_hp(x);
   }
 
 bool man::can_see(entity& e) {
@@ -179,11 +208,16 @@ void man::launch_attack(power *p, int fac, boxfun f) {
   for(auto& e: current_room->entities)
     if(e->existing && intersect(e->get_pixel_bbox(), pb)) {
       int sav = e->invinc_end;
-      e->attacked((m.current.stats[stat::str] + 1) * 3 / 2);
-      for(auto& [m, qty]: p->mods) {
-        if(m == mod::burning) { e->invinc_end = sav; e->attacked(qty); }
-        if(m == mod::freezing) { e->invinc_end = sav; e->attacked(qty); }
-        if(m == mod::disarming && e->hidden()) {
+      int dam = (m.current.stats[stat::str] + 1) * 3 / 2;
+      e->attacked(dam);
+      for(auto& [md, qty]: p->mods) {
+        if(md == mod::burning) { e->invinc_end = sav; e->attacked(qty); }
+        if(md == mod::freezing) { e->invinc_end = sav; e->attacked(qty); }
+        if(md == mod::vampire) {
+          int dam1 = min(dam, m.vampire);
+          hp += dam1; m.vampire -= dam1;
+          }
+        if(md == mod::disarming && e->hidden()) {
           e->existing = false;
           addMessage("You have disarmed a "+e->hal()->get_name()+".");
           }

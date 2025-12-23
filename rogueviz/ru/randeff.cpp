@@ -103,13 +103,17 @@ randeff health_regen("Regeneration", "Heals you over a period of time.", "You fe
     }
   });
 randeff health_protect("Protection", "Makes you more resistant to damage.", "You feel protected!", [] (data &d) {
-  // m.protection += 3 * m.current.stats[stat::wis] + m.hp * m.current.stats[stat::wis] * 2 / 100;
+  m.protection += 3 * m.current.stats[stat::wis] + m.hp * m.current.stats[stat::wis] * 2 / 100;
   });
 randeff health_vampire("Vampirism", "Attacks with your [weapon] restore your health.", "Your [weapon] wants blood!", [] (data &d) {
-  // m.vampire += 4 * m.current.stats[stat::wis] + m.max_hp() * m.current.stats[stat::wis] * 3 / 100;
+  if(d.mode == rev::start)
+    m.vampire += 4 * m.current.stats[stat::wis] + m.max_hp() * m.current.stats[stat::wis] * 3 / 100;
+  if(d.mode == rev::active && m.vampire)
+    m.next.mods.emplace_back(d.re->which_weapon, mod::vampire, 2 * m.current.stats[stat::wis] + 1e-6);
   });
 randeff health_bubbles("Bubbles", "When you are attacked, you produce red bubbles that you can collect to heal yourself back.", "You feel something bouncy growing inside you!", [] (data &d) {
-  // m.healbubbles += 4 * m.current.stats[stat::wis] + m.max_hp() * m.current.stats[stat::wis] * 3 / 100;
+  if(d.mode == rev::start)
+    m.healbubble += 4 * m.current.stats[stat::wis] + m.max_hp() * m.current.stats[stat::wis] * 3 / 100;
   });
 
 // fire powers
@@ -181,7 +185,7 @@ void assign_potion_powers() {
   fire_weapon.which_weapon = wpn[0];
   trap_disarm.which_weapon = wpn[1];
   using relist = vector<randeff*>;
-  find_power("health").randeffs = relist{ pick(&health_heal, &health_regen, &health_protect), random_powers[0] };
+  find_power("health").randeffs = relist{ pick(&health_heal, &health_regen, &health_protect, &health_vampire, &health_bubbles, &health_protect), random_powers[0] };
   find_power("the thief").randeffs = relist{ pick(&trap_detect, &trap_snake, &trap_disarm, &trap_detect_cross), random_powers[1] };
   find_power("polymorph").randeffs = relist{ pick(&morph_cat, &morph_capy), random_powers[2] };
   find_power("reach").randeffs = relist{ pick(&jump_double, &jump_high, &jump_bubble, &jump_light), random_powers[3] };

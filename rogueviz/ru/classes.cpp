@@ -28,7 +28,7 @@ struct randeff {
   void hs(struct stater& s);
   };
 
-enum class mod { burning, freezing, disarming };
+enum class mod { burning, freezing, disarming, vampire };
 
 struct power {
   int key;
@@ -379,6 +379,8 @@ struct man : public entity {
   entity *morphed = nullptr;
   vector<effect> effects;
 
+  int vampire, protection, healbubble;
+
   int last_action;
 
   int experience;
@@ -419,6 +421,8 @@ struct man : public entity {
     entity::spiked();
     addMessage("OUCH! These spikes hurt!");
     }
+
+  bool reduce_hp(int x) override;
 
   void launch_attack(power *p, int fac, boxfun f);
 
@@ -686,6 +690,17 @@ struct kestrel : public enemy {
   int base_xp() { return 30; }
   int max_hp() { return 30; }
   xy default_vel() override { return respawn_vel; }
+  };
+
+struct healthbubble : public entity {
+  ld power;
+  xy siz() override { return {10, 10}; }
+  string glyph() override { return "o"; }
+  color_t color() override { return 0xA04040FF; }
+  void act() override;
+  string get_name() override { return "health bubble"; }
+  string get_help() override { return "Can be catched to replenish your health."; }
+  virtual void hs(stater& s) override { entity::hs(s); s.act("power", power, 0); }
   };
 
 struct gridbug : public enemy {
