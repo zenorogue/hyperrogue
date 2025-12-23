@@ -507,7 +507,7 @@ void ghost::act() {
   apply_vel();
   if(intersect(get_pixel_bbox(), m.get_pixel_bbox()) && gframeid > invinc_end) {
     invinc_end = gframeid + 200;
-    if(m.reduce_hp(20)) addMessage("The " + get_name() + " passes through you!");
+    if(m.reduce_hp(20)) addMessage("The " + hal()->get_name() + " passes through you!");
     }
   }
 
@@ -522,7 +522,7 @@ void snake::act() {
     vel.x = zero_vel.x + dat.d * dat.modv * dir;
     }
   if(intersect(get_pixel_bbox(), m.get_pixel_bbox()) && gframeid > invinc_end) {
-    if(m.reduce_hp(bite())) addMessage("The " + get_name() + " bites you!");
+    if(m.reduce_hp(bite())) addMessage("The " + hal()->get_name() + " bites you!");
     }
   }
 
@@ -546,11 +546,11 @@ void naga_warrior::act() {
   if(gmod(gframeid, 100) == 0) {
     bbox b = get_pixel_bbox_at(xy{where.x + dir * dsiz().x, where.y});
     if(intersect(b, m.get_pixel_bbox()) && gframeid > invinc_end) {
-      if(m.reduce_hp(chop())) addMessage("The " + get_name() + " chops you!");
+      if(m.reduce_hp(chop())) addMessage("The " + hal()->get_name() + " chops you!");
       }
     }
   if(intersect(get_pixel_bbox(), m.get_pixel_bbox()) && gframeid > invinc_end) {
-    if(m.reduce_hp(bite())) addMessage("The " + get_name() + " bites you!");
+    if(m.reduce_hp(bite())) addMessage("The " + hal()->get_name() + " bites you!");
     }
   }
 
