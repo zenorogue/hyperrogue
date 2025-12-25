@@ -5634,3 +5634,8 @@ Further improvements to the SteamDeck:
 Other bugfixes:
 - fixed mousewheel in SDL2
 - fixed the generation range for Strong Wind and jump orb effects in alternate tilings
+
+2025-12-25 11:27 Update 13.1j:
+- fixed a crash when the '`' key was entered in some dialogs (which was a problem with older controller layouts which emitted this key)
+- fixed the screen size on SteamDeck
+- fixed the default control scheme when multiple controllers are connected
