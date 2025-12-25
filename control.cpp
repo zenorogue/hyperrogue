@@ -1275,6 +1275,14 @@ EX void mainloopiter() {
 EX bool need_refresh;
 EX int ui_mousex, ui_mousey;
 
+EX void refresh_if_needed() {
+  if(!need_refresh) return;
+  just_refreshing = 1;
+  reset_handlers();
+  screens.back()();
+  just_refreshing = 0;
+  }
+
 EX void handle_event(SDL_Event& ev) {
   bool normal = cmode & sm::NORMAL;
     indenter_finish(debug_control, "got event type #" + its(ev.type));
@@ -1418,6 +1426,7 @@ EX void handle_event(SDL_Event& ev) {
     
     #if SDLVER >= 2
     if(ev.type == SDL_EVENT_TEXT_INPUT) {
+      refresh_if_needed();
       texthandler(ev.text);
       }
     #endif
@@ -1604,12 +1613,7 @@ EX void handle_event(SDL_Event& ev) {
       }
     
     if(sym || uni) {
-      if(need_refresh) {
-        just_refreshing = 1;
-        reset_handlers();
-        screens.back()();
-        just_refreshing = 0;
-        }
+      refresh_if_needed();
       need_refresh = true;
       }
       
