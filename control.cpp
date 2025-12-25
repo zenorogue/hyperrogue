@@ -400,6 +400,20 @@ EX void closeJoysticks() {
 int joytime;
 EX bool joy_ignore_next = false;
 
+EX void read_joy_axes() {
+  joyx = joyy = panjoyx = panjoyy = 0;
+
+  for(auto& s: sticks) {
+    for(int ax=0; ax<gjoy_axes(s) && ax < 4; ax++) {
+      int val = gjoy_axis(s, ax);
+      if(ax == 0) joyx += val;
+      if(ax == 1) joyy += val;
+      if(s.gc && ax == 2) panjoyx += val;
+      if(s.gc && ax == 3) panjoyy += val;
+      }
+    }
+  }
+
 EX void checkjoy() {
   indenter_finish(debug_joy, "checkjoy");
   if(!DEFAULTCONTROL) return;
@@ -1327,33 +1341,13 @@ EX void handle_event(SDL_Event& ev) {
 
 #if CAP_SDLJOY
     if(ev.type == SDL_EVENT_JOYSTICK_AXIS_MOTION && normal && DEFAULTCONTROL) {
-      if(gjoy_is_controller(ev.jaxis.which)) return;
-      if(ev.jaxis.which == 0) {
-        if(ev.jaxis.axis == 0)
-          joyx = ev.jaxis.value;
-        else if(ev.jaxis.axis == 1)
-          joyy = ev.jaxis.value;
-        checkjoy();
-        // printf("panjoy = %d,%d\n", panjoyx, panjoyy);
-        }
-      else {
-        if(ev.jaxis.axis == 0)
-          panjoyx = ev.jaxis.value;
-        else
-          panjoyy = ev.jaxis.value;
-        }
+      read_joy_axes();
+      checkjoy();
       }
 
     #if SDLVER >= 2
     if(ev.type == SDL_CONTROLLERAXISMOTION && normal && DEFAULTCONTROL) {
-      if(ev.caxis.axis == 0)
-        joyx = ev.caxis.value;
-      else if(ev.caxis.axis == 1)
-        joyy = ev.caxis.value;
-      else if(ev.caxis.axis == 2)
-        panjoyx = ev.caxis.value;
-      else if(ev.caxis.axis == 3)
-        panjoyy = ev.caxis.value;
+      read_joy_axes();
       checkjoy();
       }
     #endif
