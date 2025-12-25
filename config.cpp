@@ -1087,13 +1087,14 @@ EX void initConfig() {
   DEBBI(debug_init_config, ("initconfig"));
 
   bool qm = !ISPANDORA;
+  bool deck = false;
 
   #if ISLINUX
   if(1) {
     fhstream f("/sys/devices/virtual/dmi/id/board_name", "rt");
     if(f.f) {
       string s = scanline_noblank(f);
-      bool deck = s.find("Jupiter") != string::npos;
+      deck = s.find("Jupiter") != string::npos;
       if(deck) {
         centered_menus = true;
         lands_per_page = 18;
@@ -1390,7 +1391,7 @@ EX void initConfig() {
   ->editable("vsync", 'v');
   #endif
   
-  param_b(vid.want_fullscreen, "fullscreen", false)
+  param_b(vid.want_fullscreen, "fullscreen", deck ? true : false)
   ->editable("fullscreen mode", 'f');
   param_b(vid.change_fullscr, "fullscreen_change", false)
   ->editable("use specific fullscreen resolution", 'g');
@@ -1404,7 +1405,7 @@ EX void initConfig() {
   -> editable(640, 3840, 640, "fullscreen resolution to use (X)", "", 'x')
   -> set_sets([] { dialog::bound_low(640); dialog::get_di().reaction_final = do_request_resolution_change; });
   
-  param_i(vid.fullscreen_y, "fullscreen_y", 1024)
+  param_i(vid.fullscreen_y, "fullscreen_y", deck ? 800 : 1024)
   -> editable(480, 2160, 480, "fullscreen resolution to use (Y)", "", 'x')
   -> set_sets([] { dialog::bound_low(480); dialog::get_di().reaction_final = do_request_resolution_change; });
 
@@ -1412,15 +1413,15 @@ EX void initConfig() {
   -> editable(160, 3840, 160, "window resolution to use (X)", "", 'x')
   -> set_sets([] { dialog::bound_low(160); dialog::get_di().reaction_final = do_request_resolution_change; });
 
-  param_i(vid.window_y, "window_y", 1024)
+  param_i(vid.window_y, "window_y", deck ? 800 : 1024)
   -> editable(120, 2160, 120, "window resolution to use (Y)", "", 'x')
   -> set_sets([] { dialog::bound_low(120); dialog::get_di().reaction_final = do_request_resolution_change; });
 
-  param_f(vid.window_rel_x, "window_rel_x", .9)
+  param_f(vid.window_rel_x, "window_rel_x", deck ? 1 : .9)
   -> editable(.1, 1, .1, "screen size percentage to use (X)", "", 'x')
   -> set_sets([] { dialog::bound_low(.1); dialog::get_di().reaction_final = do_request_resolution_change; });
 
-  param_f(vid.window_rel_y, "window_rel_y", .9)
+  param_f(vid.window_rel_y, "window_rel_y", deck ? 1 : .9)
   -> editable(.1, 1, .1, "screen size percentage to use (Y)", "", 'x')
   -> set_sets([] { dialog::bound_low(.1); dialog::get_di().reaction_final = do_request_resolution_change; });
 
