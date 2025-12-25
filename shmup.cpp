@@ -83,15 +83,10 @@ struct monster {
 
   void rebasePat(const shiftmatrix& new_pat, cell *tgt);
   
-  void remove_reference() {
-    refs--;
-    if(!refs) {
-      if(parent) parent->remove_reference();
-      delete this;
-      }
-    }
+  void remove_reference();
   
   void set_parent(monster *par) {
+    if(parent == par) return;
     if(parent) parent->remove_reference();
     parent = par;
     parent->refs++;
@@ -127,6 +122,15 @@ typedef multimap<cell*, monster*>::iterator mit;
 #endif
 
 EX vector<monster*> active, nonvirtual, additional;
+
+void monster::remove_reference() {
+  refs--;
+  if(!refs) {
+    if(parent) parent->remove_reference();
+    nonvirtual.erase(std::remove(nonvirtual.begin(), nonvirtual.end(), this), nonvirtual.end());
+    delete this;
+    }
+  }
 
 cell *findbaseAround(shiftpoint p, cell *around, int maxsteps) {
 
