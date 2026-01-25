@@ -1443,11 +1443,11 @@ EX void initConfig() {
     dialog::get_di().reaction_final = do_request_resolution_change; });
 
   param_i(vid.window_x, "window_x", 1280)
-  -> editable(160, 3840, 160, "window resolution to use (X)", "", 'x')
+  -> editable(160, 3840, 40, "window resolution to use (X)", "", 'x')
   -> set_sets([] { dialog::bound_low(160); dialog::get_di().reaction_final = do_request_resolution_change; });
 
   param_i(vid.window_y, "window_y", deck ? 800 : 1024)
-  -> editable(120, 2160, 120, "window resolution to use (Y)", "", 'x')
+  -> editable(120, 2160, 40, "window resolution to use (Y)", "", 'x')
   -> set_sets([] { dialog::bound_low(120); dialog::get_di().reaction_final = do_request_resolution_change; });
 
   param_f(vid.window_rel_x, "window_rel_x", deck ? 1 : .9)
