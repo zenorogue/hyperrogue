@@ -1070,6 +1070,33 @@ EX purehookset hooks_configfile;
 
 EX ld mapfontscale = 100;
 
+EX vector<int> get_display_modes(char which) {
+  set<int> seen;
+
+  #if SDLVER >= 2
+  SDL_DisplayMode mode;
+  for(int m=0; m<SDL_GetNumVideoDisplays(); m++) {
+    for(int i=0; i<SDL_GetNumDisplayModes(m); i++) {
+      SDL_GetDisplayMode(m, i, &mode);
+      if(which == 'x') seen.insert(mode.w);
+      if(which == 'y') seen.insert(mode.h);
+      }
+    }
+
+  #else
+  SDL_Rect **modes = SDL_ListModes(nullptr, 0);
+  if(modes && modes != (SDL_Rect**)-1) for(int i=0; modes[i]; i++) {
+    if(which == 'x') seen.insert(modes[i]->w);
+    if(which == 'y') seen.insert(modes[i]->h);
+    }
+  #endif
+
+  if(seen.empty()) return which == 'x' ? vector<int> { 640, 800, 1024, 1280, 1600, 1920 } : vector<int> { 480, 600, 720, 800, 1200, 1080 };
+  vector<int> v;
+  for(auto s: seen) v.push_back(s);
+  return v;
+  }
+
 #if CAP_SDLTTF
 EX void font_reaction() {
   if(among(font_id, 5, 6)) {
@@ -1402,12 +1429,18 @@ EX void initConfig() {
   param_custom_int(vid.yres, "yres", [] (key_type ch) {}, 0)->restrict = return_false;
   
   param_i(vid.fullscreen_x, "fullscreen_x", 1280)
-  -> editable(640, 3840, 640, "fullscreen resolution to use (X)", "", 'x')
-  -> set_sets([] { dialog::bound_low(640); dialog::get_di().reaction_final = do_request_resolution_change; });
+  -> editable(640, 3840, 1, "fullscreen resolution to use (X)", "", 'x')
+  -> set_sets([] {
+    dialog::scale_given(get_display_modes('x'));
+    dialog::bound_low(dialog::get_ne().vmin);
+    dialog::get_di().reaction_final = do_request_resolution_change; });
   
   param_i(vid.fullscreen_y, "fullscreen_y", deck ? 800 : 1024)
-  -> editable(480, 2160, 480, "fullscreen resolution to use (Y)", "", 'x')
-  -> set_sets([] { dialog::bound_low(480); dialog::get_di().reaction_final = do_request_resolution_change; });
+  -> editable(480, 2160, 1, "fullscreen resolution to use (Y)", "", 'x')
+  -> set_sets([] {
+    dialog::scale_given(get_display_modes('y'));
+    dialog::bound_low(dialog::get_ne().vmin);
+    dialog::get_di().reaction_final = do_request_resolution_change; });
 
   param_i(vid.window_x, "window_x", 1280)
   -> editable(160, 3840, 160, "window resolution to use (X)", "", 'x')
