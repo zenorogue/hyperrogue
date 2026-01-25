@@ -35,17 +35,16 @@ EX namespace dialog {
     };
   
   struct scaler {
-    ld (*direct) (ld);
-    ld (*inverse) (ld);
-    bool positive;
+    function<ld(ld)> direct, inverse;
+    bool positive, int_slider;
     };
 
   static inline ld identity_f(ld x) { return x; }
   
-  const static scaler identity = {identity_f, identity_f, false};
-  const static scaler logarithmic = {log, exp, true};
-  const static scaler asinhic = {asinh, sinh, false};
-  const static scaler asinhic100 = {[] (ld x) { return asinh(x*100); }, [] (ld x) { return sinh(x)/100; }, false};
+  const static scaler identity = {identity_f, identity_f, false, true};
+  const static scaler logarithmic = { (ld (*) (ld)) log, (ld (*) (ld)) exp, true, false};
+  const static scaler asinhic = { (ld (*) (ld)) asinh, (ld (*) (ld)) sinh, false, false};
+  const static scaler asinhic100 = {[] (ld x) { return asinh(x*100); }, [] (ld x) { return sinh(x)/100; }, false, false};
  
   /** extendable dialog */
   struct extdialog : funbase {
@@ -102,6 +101,29 @@ EX namespace dialog {
   EX void scaleLog() { get_ne().sc = logarithmic; }
   EX void scaleSinh() { get_ne().sc = asinhic; }
   EX void scaleSinh100() { get_ne().sc = asinhic100; }
+
+  EX void scale_given(vector<int> v) {
+    get_ne().vmin = v[0];
+    get_ne().vmax = v.back();
+    get_ne().sc = identity;
+    get_ne().sc.direct = [v] (ld val) -> ld {
+      ld last = 0; int id = 0;
+      for(auto x: v) {
+        if(val == x) return id;
+        if(val < x) return id - 0.75 + 0.5 * ilerp(last, x, val);
+        last = x; id++;
+        }
+      return (val / last) + id - 2;
+      };
+    get_ne().sc.inverse = [v] (ld val) -> ld {
+      if(val > isize(v) - 1) return (val - isize(v) + 2) * v.back();
+      if(val < 0) return v[0];
+      ld f = val - floor(val);
+      if(f < .25) return v[floor(val)];
+      if(f > .75) return v[ceil(val)];
+      return lerp(v[floor(val)], v[ceil(val)], (f - 0.25) * 2);
+      };
+    }
 
   EX color_t dialogcolor = 0xC0C0C0;
   EX color_t dialogcolor_clicked = 0xFF8000;
@@ -270,10 +292,11 @@ EX namespace dialog {
     items.push_back(it);
     }
   
-  EX void addIntSlider(int d1, int d2, int d3, key_type key) {
+  EX void addIntSlider(int d1, ld d2, int d3, key_type key) {
     item it(diIntSlider);
     it.key = key;
     it.p1 = (d2-d1);
+    it.param = (d2-d1) / (d3-d1);
     it.p2 = (d3-d1);
     items.push_back(it);
     }
@@ -606,7 +629,7 @@ EX namespace dialog {
       queuecurve(ASP, col, 0x80, PPR::LINE);
       quickqueue();
 
-      ld x = sl + sw * (I.type == diIntSlider ? I.p1 * 1. / I.p2 : I.param);
+      ld x = sl + sw * I.param;
       if(x < sl-si) {
         curvepoint(eupoint(sl-si, y));
         curvepoint(eupoint(x, y));
@@ -632,7 +655,7 @@ EX namespace dialog {
       displayfr(sl, mid, 2, dfsize * I.scale/100, "{", I.color, 16);
       if(I.p2 < sw / 4) for(int a=0; a<=I.p2; a++) if(a != I.p1)
         displayfr(sl + double(sw * a / I.p2), mid, 2, dfsize * I.scale/100, a == I.p1 ? "#" : ".", I.color, 8);
-      displayfr(sl + double(sw * I.p1 / I.p2), mid, 2, dfsize * I.scale/100, "#", I.color, 8);
+      displayfr(sl + double(sw * I.param), mid, 2, dfsize * I.scale/100, "#", I.color, 8);
       displayfr(sr, mid, 2, dfsize * I.scale/100, "}", I.color, 0);
       }
     }
@@ -1485,8 +1508,9 @@ EX namespace dialog {
     init(title);
     addInfo(s);
     auto& ne = self;
-    if(ne.intval && ne.sc.direct == &identity_f)
-      addIntSlider(int(ne.vmin), int(*ne.editwhat), int(ne.vmax), 500);
+    if(ne.intval && ne.sc.int_slider) {
+      addIntSlider(int(ne.sc.direct(ne.vmin)), ne.sc.direct(*ne.editwhat), int(ne.sc.direct(ne.vmax)), 500);
+      }
     else
       addSlider(ne.sc.direct(ne.vmin), ne.sc.direct(*ne.editwhat), ne.sc.direct(ne.vmax), 500);
     addBreak(100);
