@@ -1420,7 +1420,7 @@ EX void initConfig() {
   
   param_b(vid.want_fullscreen, "fullscreen", deck ? true : false)
   ->editable("fullscreen mode", 'f');
-  param_b(vid.change_fullscr, "fullscreen_change", false)
+  param_b(vid.change_fullscr, "fullscreen_change", deck ? true : false)
   ->editable("use specific fullscreen resolution", 'g');
   param_b(vid.relative_window_size, "window_relative", true)
   ->editable("specify relative window size", 'g');
