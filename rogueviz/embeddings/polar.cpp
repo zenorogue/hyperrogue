@@ -3,7 +3,7 @@ namespace rogueviz {
 
 namespace embeddings {
 
-  double graph_R, graph_alpha, graph_T;
+  double graph_R = 30, graph_alpha, graph_T = 1, beta;
 
   struct polar_point {
     ld r, theta;
