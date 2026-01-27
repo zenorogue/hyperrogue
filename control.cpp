@@ -906,6 +906,7 @@ EX bool stillscreen;
 int cframelimit = 1000;
 
 EX void resize_screen_to(int x, int y) {
+  if(debug_control) println(hlog, "resize_screen_to ", tie(x, y));
   dual::split_or_do([&] {
     vid.killreduction = 0;
     if(vid.want_fullscreen) return;
@@ -918,7 +919,7 @@ EX void resize_screen_to(int x, int y) {
       vid.window_y = y;
       }
     });
-  apply_screen_settings();
+  if(!vid.want_fullscreen) apply_screen_settings();
   }
 
 int lastframe;
