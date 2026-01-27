@@ -118,3 +118,6 @@ int a = arg::add3("-edgelist", [] { arg::shift(); read_edgelist(arg::args()); })
 #include "loglik.cpp"
 #include "routing.cpp"
 
+#include "maprank.cpp"
+#include "mdl.cpp"
+#include "compare.cpp"
