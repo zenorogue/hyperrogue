@@ -180,6 +180,8 @@ void showPickScores() {
 
 EX int scale = 2;
 
+int first_col = 0;
+
 void show() {
 
   if(columns.size() == 0) {
@@ -198,10 +200,17 @@ void show() {
   displaystr(bx*4, score_size, 0, score_size, "#", forecolor, 16);
   displaystr(bx*8, score_size, 0, score_size, XLAT("ver"), forecolor, 16);
   
+  bool not_shown = false;
+  if(curcol < first_col) first_col = curcol;
+  int numcol = isize(columns);
+
   int at = 9;
-  for(int i=0; i<=POSSCORE; i++) {
+  for(int i=first_col; i<numcol; i++) {
     int c = columns[i];
-    if(bx*at > vid.xres) break;
+    if(bx*at > vid.xres) {
+      not_shown = i <= curcol;
+      break;
+      }
     string s = displayfor(c, NULL, true);
     auto& cw = column_width[c];
     cw = max(cw, textwidth(score_size, s) / bx + 1);
@@ -240,7 +249,7 @@ void show() {
     displaystr(bx*8,  y, 0, score_size, S.ver, col, 16);
 
     int at = 9;
-    for(int i=0; i<=POSSCORE; i++) {
+    for(int i=first_col; i<numcol; i++) {
       int c = columns[i];
       if(bx*at > vid.xres) break;
       string s = displayfor(c, &S);
@@ -261,6 +270,8 @@ void show() {
     y += score_size*5/4; id++;
     }
 
+  if(not_shown) first_col++;
+
   column_width = next_column_width;
   int i0 = vid.yres - vid.fsize;
   int xr = vid.xres / 80;
@@ -270,14 +281,14 @@ void show() {
   displayButton(xr*50, i0, IFM("z - ") + XLAT("zoom"), 'z', 8);
   displayButton(xr*70, i0, IFM(dialog::keyname(SDLK_ESCAPE) + " - ") + XLAT("go back"), '0', 8);
 
-  keyhandler = [] (int sym, int uni) {
+  keyhandler = [numcol] (int sym, int uni) {
     if(DKEY == SDLK_LEFT || uni == 'h' || uni == 'a') {
       scorerev = false;
       if(curcol > 0) curcol--;
       }
     else if(DKEY == SDLK_RIGHT || uni == 'l' || uni == 'd') {
       scorerev = false;
-      if(curcol < POSSCORE) curcol++;
+      if(curcol < numcol - 1) curcol++;
       }
     else if(sym >= 1000 && sym <= 1000+POSSCORE) {
       scorerev = false;
