@@ -13,6 +13,7 @@
 #include "tests.cpp"
 #include "betweenness.cpp"
 #include "groundtruth.cpp"
+#include "dhrg-rank.cpp"
 
 namespace dhrg {
 
@@ -144,6 +145,14 @@ int dhrgArgs() {
     next_timestamp++;
     ts_rogueviz = next_timestamp;
     ts_vertices = next_timestamp;
+    }
+
+  else if(argis("-discrete-rank")) {
+    dhrg_ranks();
+    }
+
+  else if(argis("-penalty")) {
+    shift(); penalty = argf();
     }
 
   else return 1;
