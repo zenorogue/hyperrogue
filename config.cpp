@@ -1132,6 +1132,7 @@ EX void initConfig() {
         separate_status = true;
         multi::multi_autojoy = false;
         touch_interface = true;
+        scores::scale = 1;
         }
       }
     }
@@ -1362,6 +1363,8 @@ EX void initConfig() {
   -> editable(10, 60, 5, "lands per page",
     "lands per page shown in the World Overview",
     'L');
+
+  param_i(scores::scale, "scores_scale")->editable(1, 2, 1, "scores scale", "", 'S');
 
   param_b(startanims::enabled, "startanim", true)
   -> editable("start animations", 's');

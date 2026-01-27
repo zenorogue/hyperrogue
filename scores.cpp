@@ -8,7 +8,9 @@
 #include "hyper.h"
 #if CAP_SAVE
 
-namespace hr { namespace scores {
+namespace hr {
+
+EX namespace scores {
 
 vector<score> scores;
 score *currentgame;
@@ -176,7 +178,7 @@ void showPickScores() {
     };
   }
 
-int scale = 2;
+EX int scale = 2;
 
 void show() {
 
@@ -407,7 +409,7 @@ void load() {
     });
   }
 
-}
+EX }
 
 EX map<int, int> qty_scores_for;
 
