@@ -18,6 +18,9 @@ vector<char> tomove;
 bool smartmove = false;
 bool dorestart = false;
 
+/* penalty, to improve control. 0 = no penalty */
+ld penalty = 0;
+
 int lastmoves;
 
 int movearound() {
@@ -59,7 +62,10 @@ int movearound() {
       llo2[d] = loglik_chosen();
       if(lc_type == 'C')
         add_to_set(mc2[d], -1, 0);
-      if(llo2[d] > bestllo) bestd = d, bestllo = llo2[d];
+      ld with_penalty = llo2[d];
+      if(penalty) with_penalty += cgi.expansion->get_descendants(mc->lev).log_approx() * penalty;
+      if(penalty) with_penalty -= cgi.expansion->get_descendants(mc2[d]->lev).log_approx() * penalty;
+      if(with_penalty > bestllo) bestd = d, bestllo = with_penalty;
       
       add_to_tally(mc2[d], -1, 0);
       tallyedgesof(i, -1, mc2[d]);
@@ -81,6 +87,7 @@ int movearound() {
     }}
   // dispnewmoves();
   println(hlog, " moves = ", moves);
+  if(penalty) println(hlog, "penalty = ", penalty);
   return lastmoves = moves;
   }
 
