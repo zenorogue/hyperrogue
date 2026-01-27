@@ -116,8 +116,12 @@ EX void build_controls() {
   else if(DEFAULTCONTROL && WDIM == 3)
     help += XLAT(
       "You are currently in a visualization. Press wasdqe to rotate the camera, ijklyh to move. You can also use the arrow keys and Home/End and PgUp/PgDn. ESC for menu.\n\n");
-  help += XLAT(
+
+  if(dialog::display_keys != 3) help += XLAT(
     "You can right click any element to get more information about it.\n\n"
+    );
+  else help += XLAT(
+    "You can use trackpad to point at things, then press the right trigger, to get more information about things.\n\n"
     );
 #if ISMAC
   help += XLAT("(You can also use right Shift)\n\n");
