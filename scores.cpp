@@ -184,10 +184,10 @@ void show() {
 
   if(columns.size() == 0) {
     columns.push_back(POSSCORE);
-    for(int i=0; i<POSSCORE; i++) {
-      if(i == 5) columns.push_back(68);
-      else if(i == 68) columns.push_back(5);
-      else columns.push_back(i);
+
+    for(int j=0; j<(int) scores::bpGUARD; j++)
+    for(int i=0; i<POSSCORE; i++) if(!fakebox[i] && boxprio[i] == j) {
+      columns.push_back(i);
       }
     }
   int score_size = vid.fsize / scale;

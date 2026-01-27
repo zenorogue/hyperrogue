@@ -505,10 +505,31 @@ EX int boxid;
 /** \brief see hr::applyBox */
 EX bool saving, loading, loadingHi;
 
+#if HDR
+enum boxpriority {
+  bpMain, bpMain1,
+  bpSpecialTreasure,
+  bpTreasure,
+  bpMonster,
+  bpDeadOrb,
+  bpOtherItem,
+  bpFriendlyMonster,
+  bpMonsterPart,
+  bpWeirdStat,
+  bpOrb,
+  bpNAI,
+  bpMode,
+  bpTechnical,
+  bpGUARD
+  };
+#endif
+
 /** \brief names of all the boxes */
 EX string boxname[MAXBOX];
 /** \brief 'fake' boxes should not appear when examining local scores */
 EX bool fakebox[MAXBOX];
+/** \brief box priority, for local scores */
+EX boxpriority boxprio[MAXBOX];
 /** \brief does this box contain monster kills */
 EX bool monsbox[MAXBOX];
 
@@ -561,8 +582,16 @@ int applyBoxLoad(string name = "") {
   return i;
   }
 
+void setprio(boxpriority idx) { boxprio[boxid] = idx; }
+
 /** \brief the next box is the number of collected items it */
 void applyBoxI(eItem it, bool f = false) {
+  if(among(it, itOrbYendor, itHolyGrail)) setprio(bpSpecialTreasure);
+  else if(itemclass(it) == IC_NAI) setprio(bpNAI);
+  else if(it == itGreenStone) setprio(bpDeadOrb);
+  else if(itemclass(it) == IC_ORB) setprio(bpOrb);
+  else if(itemclass(it) == IC_OTHER) setprio(bpOtherItem);
+  else if(itemclass(it) == IC_TREASURE) setprio(bpTreasure);
   boxname[boxid] = iinf[it].name;
   fakebox[boxid] = f;
   monsbox[boxid] = false;
@@ -601,6 +630,7 @@ void list_invorb() {
 
 /** \brief handle the number of monsters of type m killed */
 void applyBoxM(eMonster m, bool f = false) {
+  setprio(isMonsterPart(m) ? bpMonsterPart : (isFriendly(m) || m == moTortoise) ? bpFriendlyMonster : bpMonster);
   fakebox[boxid] = f;
   boxname[boxid] = minf[m].name;
   monsbox[boxid] = true;
@@ -621,13 +651,13 @@ EX void applyBoxes() {
 
   eLand lostin = laNone;
 
-  applyBoxSave((int) timerstart, "time elapsed");
+  setprio(bpMain); applyBoxSave((int) timerstart, "time elapsed");
   time_t timer = time(NULL);
-  applyBoxSave((int) timer, "date");
-  applyBoxSave(gold(), "treasure collected");
-  applyBoxSave(tkills(), "total kills");
-  applyBoxNum(turncount, "turn count");
-  applyBoxNum(cellcount, "cells generated");
+  setprio(bpMain); applyBoxSave((int) timer, "date");
+  setprio(bpMain); applyBoxSave(gold(), "treasure collected");
+  setprio(bpMain); applyBoxSave(tkills(), "total kills");
+  setprio(bpMain); applyBoxNum(turncount, "turn count");
+  setprio(bpWeirdStat); applyBoxNum(cellcount, "cells generated");
 
   if(loading) timerstart = time(NULL);
 
@@ -648,10 +678,11 @@ EX void applyBoxes() {
     else if(i == moGreaterM) applyBoxOrb(itOrbIllusion);
     else if(i == moLesserM) applyBoxM(moFriendlyGhost);
     else if(i == moWolfMoved) applyBoxM(moWorldTurtle);
-    else if(i == moNone) applyBoxNum(kills[i], "icewalls melted");
+    else if(i == moNone) { setprio(bpWeirdStat); applyBoxNum(kills[i], "icewalls melted"); }
     else applyBoxM(eMonster(i));
     }
 
+  setprio(bpMain);
   if(saving) {
     int totaltime = savetime;
     if(!timerstopped) totaltime += timer - timerstart;
@@ -660,14 +691,16 @@ EX void applyBoxes() {
   else if(loading) savetime = applyBoxLoad("time played");
   else boxname[boxid] = "time played", boxid++;
 
+  setprio(bpMain1);
   if(saving) savecount++;
   applyBoxNum(savecount, "number of saves");
   if(saving) savecount--;
+  setprio(bpMode);
   applyBoxNum(cheater, "number of cheats");
 
-  fakebox[boxid] = false;
-  if(saving) applyBoxSave(items[itOrbSafety] ? safetyland : cwt.at->land, "@safetyland");
-  else if(loading) firstland = safetyland = eLand(applyBoxLoad("@safetyland"));
+  fakebox[boxid] = false; setprio(bpMain);
+  if(saving) applyBoxSave(items[itOrbSafety] ? safetyland : cwt.at->land, "where");
+  else if(loading) firstland = safetyland = eLand(applyBoxLoad("where"));
   else lostin = eLand(save.box[boxid++]);
 
   for(int i=itOrbLightning; i<25; i++) applyBoxOrb(eItem(i));
@@ -715,9 +748,13 @@ EX void applyBoxes() {
 
   int geo = geometry;
   applyBoxNum(geo, "@geometry"); geometry = eGeometry(geo);
+  setprio(bpMode);
   applyBoxBool(hardcore, "hardcore");
+  setprio(bpMode);
   applyBoxNum(hardcoreAt, "@hardcoreAt");
+  setprio(bpMode);
   applyBoxBool(shmup::on, "shmup");
+  setprio(bpMode);
   if(saving) applyBoxSave(specialland, "euclid land");
   else if(loading) specialland = eLand(applyBoxLoad("euclid land"));
   else fakebox[boxid++] = true;
@@ -781,7 +818,9 @@ EX void applyBoxes() {
   applyBoxOrb(itOrbLuck);
   applyBoxOrb(itOrbStunning);
 
+  setprio(bpMode);
   applyBoxBool(tactic::on, "@tactic");
+  setprio(bpMode);
   applyBoxNum(elec::lightningfast, "@lightningfast");
 
   // if(save.box[boxid]) printf("lotus = %d (lost = %d)\n", save.box[boxid], isHaunted(lostin));
@@ -795,9 +834,11 @@ EX void applyBoxes() {
   applyBoxOrb(itOrbFreedom);
   applyBoxM(moRedFox);
   applyBoxBool(survivalist, "@survivalist");
+  setprio(bpMode);
   if(loadingHi) applyBoxI(itLotus);
   else applyBoxNum(truelotus, "lotus/escape");
 
+  setprio(bpMode);
   applyBoxEnum(variation, "variation");
   applyBoxI(itRose);
   applyBoxOrb(itOrbBeauty);
@@ -808,7 +849,9 @@ EX void applyBoxes() {
   applyBoxM(moFalsePrincess);
   applyBoxM(moRoseLady);
   applyBoxM(moRoseBeauty);
+  setprio(bpMode);
   applyBoxEnum(land_structure, "land structure");
+  setprio(bpMode);
   applyBoxNum(multi::players, "shmup players");
   if(multi::players < 1 || multi::players > MAXPLAYER)
     multi::players = 1;
@@ -826,12 +869,16 @@ EX void applyBoxes() {
   applyBoxM(moTortoise);
   applyBoxOrb(itOrbShell);
 
+  setprio(bpMode);
   applyBoxNum(safetyseed, "@safetyseed");
 
   // (+18)
   for(int i=0; i<6; i++) {
+    setprio(bpWeirdStat);
     applyBoxNum(multi::treasures[i], "@multi-treasures" + its(i));
+    setprio(bpWeirdStat);
     applyBoxNum(multi::kills[i], "@multi-kills" + its(i));
+    setprio(bpWeirdStat);
     applyBoxNum(multi::deaths[i], "@multi-deaths" + its(i));
     }
   // (+8)
@@ -847,7 +894,9 @@ EX void applyBoxes() {
   applyBoxOrb(itOrbStone);
 
   bool sph;
+  setprio(bpMode);
   sph = false; applyBoxBool(sph, "sphere"); if(sph) geometry = gSphere;
+  setprio(bpMode);
   sph = false; applyBoxBool(sph, "elliptic"); if(sph) geometry = gElliptic;
   applyBoxNum(princess::reviveAt, "@reviveAt");
 
@@ -877,6 +926,7 @@ EX void applyBoxes() {
   addinv(itGreenStone);
   list_invorb();
   #if CAP_INV
+  setprio(bpMode);
   applyBoxBool(inv::on, "inventory"); // 306
   applyBoxNum(inv::rseed, "@inv-rseed");
   #else
@@ -924,7 +974,7 @@ EX void applyBoxes() {
   applyBoxNum(gp::param.first, "@gp-first");
   applyBoxNum(gp::param.second, "@gp-second");
 
-  v2 = false; applyBoxBool(v2); if(loading && v2) variation = eVariation::irregular;
+  v2 = false; applyBoxBool(v2, "@irregular"); if(loading && v2) variation = eVariation::irregular;
   applyBoxNum(irr::cellcount, "@irr-cellcount");
 
   list_invorb();
@@ -963,10 +1013,14 @@ EX void applyBoxes() {
   applyBoxM(moRusalka);
   list_invorb();
 
+  setprio(bpTechnical);
   applyBoxNum(saved_modecode, "modecode");
+  setprio(bpMode);
   applyBoxBool(ineligible_starting_land, "ineligible_starting_land");
 
+  setprio(bpMain1);
   applyBoxNum(yasc_code, "YASC code");
+  setprio(bpMode);
   applyBoxBool(casual, "casual mode");
 
   applyBoxI(itCursed);
@@ -984,23 +1038,28 @@ EX void applyBoxes() {
   applyBoxI(itCurseWater, true);
   list_invorb();
 
+  setprio(bpMode);
   applyBoxEnum(bow::weapon, "weapon choice");
+  setprio(bpMode);
   applyBoxEnum(bow::style, "crossbow style");
 
   applyBoxOrb(itOrbFish);
   list_invorb();
 
-  applyBoxNum(items[itCrossbow]);
-  applyBoxNum(items[itRevolver]);
-  applyBoxNum(items[itAsteroid]);
+  applyBoxI(itCrossbow, true);
+  applyBoxI(itRevolver, true);
+  applyBoxI(itAsteroid);
   applyBoxM(moAsteroid);
-  applyBoxNum(items[itTreat]);
+  applyBoxI(itTreat);
   applyBoxM(moVampire);
-  applyBoxNum(asteroids_generated);
-  applyBoxNum(asteroid_orbs_generated);
+  applyBoxNum(asteroids_generated, "@asteroids generated");
+  applyBoxNum(asteroid_orbs_generated, "@orbs generated");
 
+  setprio(bpWeirdStat);
   applyBoxNum(loadcount, "load count");
+  setprio(bpWeirdStat);
   applyBoxNum(load_branching, "load branching");
+  setprio(bpWeirdStat);
   applyBoxNum(current_loadcount, "current load count");
 
   if(POSSCORE != boxid) printf("ERROR: %d boxes\n", boxid);
