@@ -195,8 +195,8 @@ void show() {
   int bx = score_size;
   getcstat = 0;
   
-  displaystr(bx*4, score_size, 0, vid.fsize, "#", forecolor, 16);
-  displaystr(bx*8, score_size, 0, vid.fsize, XLAT("ver"), forecolor, 16);
+  displaystr(bx*4, score_size, 0, score_size, "#", forecolor, 16);
+  displaystr(bx*8, score_size, 0, score_size, XLAT("ver"), forecolor, 16);
   
   int at = 9;
   for(int i=0; i<=POSSCORE; i++) {
