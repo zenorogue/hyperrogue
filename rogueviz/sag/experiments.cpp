@@ -231,7 +231,7 @@ void output_stats() {
   embeddings::iddata routing_result;
   if(!known_pairs) { known_pairs = true; embeddings::prepare_pairs(); }
   embeddings::greedy_routing(routing_result);
-  print(hlog, "CSV;", logid++, ";", isize(sagnode), ";", DN, ";", isize(edgeinfos), ";", lgsag_pre.R, ";", lgsag_pre.T, ";", lgsag.R, ";", lgsag.T, ";", cost, ";", mAP, ";", MeanRank, ";", routing_result.suc / routing_result.tot, ";", routing_result.routedist / routing_result.bestdist);
+  print(hlog, "CSV;", logid++, ";", isize(sagnode), ";", DN, ";", isize(edgeinfos), ";", lgsag_pre.R, ";", lgsag_pre.T, ";", lgsag.R, ";", lgsag.T, ";", cost, ";", mAP, ";", MeanRank, ";", routing_result.suc / routing_result.tot, ";", routing_result.routedist / routing_result.tot);
   if(lastmethod) print(hlog, ";", lastmethod);
   if(mul_used) print(hlog, ";", mul_used);
   if(report_tempi) print(hlog, ";", hightemp,";",lowtemp,";",format("%lld", numiter));

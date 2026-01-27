@@ -69,8 +69,8 @@ ld bestll2(ld a, ld ab);
 /* greedy routing */
 
 struct iddata {
-  ld tot, suc, routedist, bestdist;
-  iddata() { tot = suc = routedist = bestdist = 0; }
+  ld tot, suc, routedist, eff, msuc, mroutedist, meff;
+  iddata() { tot = suc = routedist = eff = msuc = mroutedist = meff = 0; }
   };
 
 void prepare_pairs();

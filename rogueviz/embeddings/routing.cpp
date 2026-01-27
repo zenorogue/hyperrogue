@@ -5,7 +5,7 @@ namespace rogueviz {
 
 namespace embeddings {
 
-struct pairdata { ld success, route_length; };
+struct pairdata { ld success, route_length, modded_success, modded_route_length; };
 
 #define NOYET 127
 
@@ -51,10 +51,18 @@ void route_from(int src, int goal, const vector<ld>& distances_from_goal) {
   if(src == goal) {
     pairs[src].success = 1;
     pairs[src].route_length = 0;
+    pairs[src].modded_success = 1;
+    pairs[src].modded_route_length = 0;
     next_stop[src] = -1;
     }
   else {
-    ld bestd = distances_from_goal[src] - 1e-5;
+    pairs[src].modded_success = 0;
+    pairs[src].modded_route_length = 0;
+    pairs[src].success = 0;
+    pairs[src].route_length = 0;
+    last_goal[src] = goal;
+
+    ld bestd = HUGE_VAL;
 
     /* iprintf("route_from goal=%d a=%d, bestd = %f\n", goal, src, bestd + 1e-5);
     indent += 2; */
@@ -66,18 +74,36 @@ void route_from(int src, int goal, const vector<ld>& distances_from_goal) {
       if(d < bestd) bestd = d, candidates.clear();
       if(d == bestd) candidates.push_back(e);
       }
-    pairs[src].success = pairs[src].route_length = 0;
-    for(int c: candidates) {
-      route_from(c, goal, distances_from_goal);
-      // iprintf("candidate = %d\n", c);
-      pairs[src].success += pairs[c].success / isize(candidates);
-      pairs[src].route_length += (1 + pairs[c].route_length) / isize(candidates);
+
+    if(1) {
+      ld tmp_success = 0, tmp_route_length = 0;
+      for(int c: candidates) {
+        route_from(c, goal, distances_from_goal);
+        tmp_success += pairs[c].modded_success;
+        tmp_route_length += pairs[c].modded_route_length;
+        }
+
+      pairs[src].modded_success = tmp_success / isize(candidates);
+      pairs[src].modded_route_length = tmp_route_length / isize(candidates) + pairs[src].modded_success;
       }
 
-    if(isize(candidates) > 0) next_stop[src] = candidates[0];
-    else next_stop[src] = -1;
-    // iprintf("success = %f, route = %f\n", pairs[src].success, pairs[src].route_length);
-    // indent -= 2;
+    if(bestd < distances_from_goal[src] - 1e-7) {
+      ld tmp_success = 0, tmp_route_length = 0;
+      for(int c: candidates) {
+        tmp_success += pairs[c].success;
+        tmp_route_length += pairs[c].route_length;
+        }
+
+      next_stop[src] = candidates[0];
+      pairs[src].success = tmp_success / isize(candidates);
+      pairs[src].route_length = tmp_route_length / isize(candidates) + pairs[src].success;
+      }
+
+    else {
+      pairs[src].success = 0;
+      pairs[src].route_length = 0;
+      next_stop[src] = -1;
+      }
     }
   last_goal[src] = goal;
   }
@@ -93,9 +119,19 @@ void greedy_routing_to(iddata& d, int goal) {
   for(int j=0; j<N; j++) if(j != goal){
     d.tot++;
     ld p = pairs[j].success;
+
     d.suc += p;
-    d.routedist += pairs[j].route_length;
-    d.bestdist += p * actual[goal][j];
+    if(pairs[j].route_length > 0) {
+      d.routedist += pairs[j].route_length / actual[goal][j];
+      d.eff += p * p * actual[goal][j] / pairs[j].route_length;
+      }
+
+    ld mp = pairs[j].modded_success;
+    d.msuc += mp;
+    if(pairs[j].modded_route_length > 0) {
+      d.mroutedist += pairs[j].modded_route_length / actual[goal][j];
+      d.meff += mp * mp * actual[goal][j] / pairs[j].modded_route_length;
+      }
     }
   }
 
@@ -150,7 +186,7 @@ void routing_test(string s) {
     string cap = caps[id];
     auto& d = datas[id];
     report("suc_" + cap, d.suc / d.tot);
-    report("str_" + cap, d.routedist / d.bestdist);
+    report("str_" + cap, d.routedist / d.tot);
     }
 
   println(hlog, "HDR;", separated(";", reps), ";N;GROWTH\n");
@@ -177,18 +213,28 @@ int get_actual(int src) {
   return actual[src][current_goal];
   }
 
+void full_routing() {
+  iddata result;
+  prepare_pairs();
+  if(1) {
+    int N = isize(rogueviz::vdata);
+    progressbar pb(N, "greedy routing");
+    for(int goal=0; goal<N; goal++) {
+      pb++;
+      greedy_routing_to(result, goal);
+      }
+    }
+  println(hlog, "greedy routing: success = ", result.suc / result.tot, " stretch = ", result.routedist / result.suc, " efficiency = ", result.eff / result.tot);
+  println(hlog, "modded routing: success = ", result.msuc / result.tot, " stretch = ", result.mroutedist / result.msuc, " efficiency = ", result.meff / result.tot);
+  }
+
 int routing_args() {
   using namespace arg;
 
   if(argis("-routing")) {
     // shift(); routing_test(args());
     }
-  else if(argis("-gr")) {
-    iddata result;
-    prepare_pairs();
-    greedy_routing(result);
-    println(hlog, "success = ", result.suc / result.tot, " stretch = ", result.routedist / result.bestdist);
-    }
+  else if(argis("-gr")) full_routing();
   else return 1;
 
   return 0;
