@@ -239,6 +239,29 @@ void output_stats() {
   println(hlog, "R=", lgsag.R, " T=", lgsag.T, " cost=", cost, " mAP=", mAP, " meanrank=", MeanRank);
   }
 
+void sag_bridging() {
+  init_cells();
+  after_data();
+  println(hlog, "SAG for bridging started");
+  int DN = isize(sagid);
+  println(hlog, "DN = ", DN, " SN = ", isize(sagcells));
+  recost_each = DN; autofix_rt = 2;
+  hlog.flush();
+  twoway = true; allow_doubles = true;
+
+  method = smLogistic;
+  lgsag.R = max_sag_dist;
+  lgsag.T = 1;
+  compute_loglik_tab();
+  compute_cost();
+  best = lgsag; bestcost = HUGE_VAL;
+
+  /* find the rough values of R and T */
+  optimized_embedding(10000);
+  /* use it */
+  optimized_embedding(10000);
+  }
+
 int exp_read_args() {
 #if CAP_COMMANDLINE
   using namespace arg;
@@ -290,6 +313,9 @@ int exp_read_args() {
     }
   else if(argis("-sagstats")) {
     output_stats();
+    }
+  else if(argis("-sag-bridging")) {
+    sag_bridging();
     }
 
   else return 1;  
