@@ -5,13 +5,14 @@ namespace dhrg {
 // tally edges of the given vertex at the given index
 
 int edgetally[MAXDIST];
+int *whichedgetally = edgetally;
 
 void tallyedgesof(int i, int delta, mycell *mc) {
   using namespace rogueviz;
   for(auto p: vdata[i].edges) {
     int j = p.second->i ^ p.second->j ^ i;
     if(j==i) printf("LOOP!\n");
-    edgetally[quickdist(mc, vertices[j], 0)] += delta;
+    whichedgetally[quickdist(mc, vertices[j], 0)] += delta;
     }
   }
 
