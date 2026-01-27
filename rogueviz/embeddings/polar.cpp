@@ -17,7 +17,7 @@ namespace embeddings {
     virtual int get_dimension() override { return 2; }
 
     hyperpoint as_hyperpoint(int id) override {
-      return spin(coords[id].theta) * xpush0(coords[id].r);
+      return spin(coords[id].theta + beta) * xpush0(coords[id].r);
       }
 
     ld zero_distance(int id) override { return coords[id].r; }
@@ -95,7 +95,8 @@ namespace embeddings {
 
   int a_polar =
     arg::add3("-el-polar", [] { arg::shift(); read_polar(arg::args()); })
-  + arg::add3("-el-bfkl", [] { arg::shift(); read_edgelist(arg::args() + "-links.txt"); read_polar(arg::args() + "-coordinates.txt"); });
-  
+  + arg::add3("-el-bfkl", [] { arg::shift(); read_edgelist(arg::args() + "-links.txt"); read_polar(arg::args() + "-coordinates.txt"); })
+  + arg::add2("-polar-beta", [] { arg::shift(); beta = arg::argf(); });
+
   }
 }
