@@ -276,10 +276,10 @@ void show() {
   int i0 = vid.yres - vid.fsize;
   int xr = vid.xres / 80;
 
-  displayButton(xr*10, i0, IFM("s - ") + XLAT("sort"), 's', 8);
-  displayButton(xr*30, i0, IFM("t - ") + XLAT("choose"), 't', 8);
-  displayButton(xr*50, i0, IFM("z - ") + XLAT("zoom"), 'z', 8);
-  displayButton(xr*70, i0, IFM(dialog::keyname(SDLK_ESCAPE) + " - ") + XLAT("go back"), '0', 8);
+  displayButton(xr*1, i0, IFM("s - ") + XLAT("sort"), 's', 0);
+  displayButton(xr*15, i0, IFM("t - ") + XLAT("choose") + ": " +  displayfor(columns[curcol], NULL, false), 't', 0);
+  displayButton(xr*60, i0, IFM("z - ") + XLAT("zoom"), 'z', 16);
+  displayButton(xr*79, i0, IFM(dialog::keyname(SDLK_ESCAPE) + " - ") + XLAT("go back"), '0', 16);
 
   keyhandler = [numcol] (int sym, int uni) {
     if(DKEY == SDLK_LEFT || uni == 'h' || uni == 'a') {
