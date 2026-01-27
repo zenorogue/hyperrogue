@@ -39,6 +39,7 @@ enum presmode {
   pmStartAll = 0,
   pmStart = 1, pmFrame = 2, pmStop = 3, pmKey = 4, pmRestart = 5,
   pmAfterFrame = 6, pmHelpEx = 7, pmKeyAlt = 8, pmKeyAlt2 = 9,
+  pmSlideHelp = 10,
   pmGeometry = 11, pmGeometryReset = 13, pmGeometryStart = 15,
   pmGeometrySpecial = 16
   };
@@ -224,6 +225,15 @@ string get_subname(const string& s, const string& folder) {
   return s.substr(isize(folder));
   }
 
+EX void alt_deck_help(presmode mode, string s) {
+  if(mode == pmSlideHelp && dialog::display_keys == 3) {
+    string slidename = get_slidename(slides[currentslide].name);
+    help =
+      helptitle(XLAT(slidename), 0xFF8000) +
+      XLAT(s);
+    }
+  }
+
 /** \brief display the help text for the current slide if texts enabled */
 EX void slidehelp() {
   if(!slides[currentslide].help[0]) return;
@@ -244,6 +254,8 @@ EX void slidehelp() {
      "press ESC to see a "
      "menu with other options.");
     }
+
+  presentation(pmSlideHelp);
 
   gotoHelp(help);
   presentation(pmHelpEx);
@@ -677,6 +689,10 @@ EX slide default_slides[] = {
     "wants -- for example, in this slide, you can press '5' to get "
     "lots of Ice Diamonds quickly.",
     [] (presmode mode) {
+      alt_deck_help(mode,
+        "The game starts in the Icy Lands. Collect the Ice Diamonds "
+        "After you collect many of them, monsters will start to pose a challenge. "
+        "If you are checkmated, the tour menu has some cheats.");
       slidecommand = "gain Ice Diamonds";
       if(mode == 4)
         forCellEx(c2, cwt.at) 
@@ -713,6 +729,9 @@ EX slide default_slides[] = {
     "the surface HyperRogue actually takes place on.",
 #endif
     [] (presmode mode) {
+      alt_deck_help(mode,
+       "The next slide will show a rendering of the surface HyperRogue "
+       "actually takes place on.");
 #if CAP_RUG
       if(mode == 1)
         rug::init();
@@ -756,6 +775,9 @@ EX slide default_slides[] = {
     "running away in a straight line. "
     "Press '2' to try the same in the Euclidean world -- it is impossible.",
     [] (presmode mode) {
+      alt_deck_help(mode,
+        "You are attacked by two monsters at once. How to solve this?\n\n"
+        "In the Euclidean hex grid it would not be possible! (Use the tour menu to switch to Euclidean to check.)");
       setCanvas(mode, &ccolor::football);
       if(mode == 5) {
         cwt.at->move(0)->monst = moRunDog;
@@ -838,6 +860,12 @@ EX slide default_slides[] = {
     "Press '5' to cheat by seeing the smaller circles too.\n\n"
     "Note: Camelot and some other lands are unlocked earlier in the Tutorial than in a real game.",
     [] (presmode mode) {
+      alt_deck_help(mode,
+        "Circles are strange in hyperbolic geometry too. "
+        "Look for the Castle of Camelot in the Crossroads; "
+        "the Round Table inside is a circle of radius 28. "
+        "Finding its center is a difficult challenge."
+        );
       slidecommand = 
         camelotcheat ? XLAT("enable the Camelot cheat")
         : XLAT("disable the Camelot cheat");
@@ -1033,6 +1061,9 @@ EX slide default_slides[] = {
     "If you want, press '5' to see it rendered as a spiral, although it takes lots of time and "
     "memory.",
     [] (presmode mode) {
+      alt_deck_help(mode,
+        "The band model. The hyperbolic analog of the Mercator projection of the sphere."
+        );
       static int smart;
       if(mode == 1) pmodel = mdBand, history::create_playerpath(), models::rotation = Id,
         smart = vid.use_smart_range, vid.use_smart_range = 2;
@@ -1088,6 +1119,9 @@ EX slide default_slides[] = {
     "Have fun exploring!\n\n"
     "Press '5' to leave the tour mode.",
     [] (presmode mode) {
+      alt_deck_help(mode,
+        "This ends our tour. Have fun exploring the rest of HyperRogue world!"
+        );
       slidecommand = XLAT("leave the tour mode");
       if(mode == 4) restart_game(rg::tour);
       }
