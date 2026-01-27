@@ -995,10 +995,12 @@ EX namespace dialog {
   EX void handle_actions(int &sym, int &uni) {
     if(key_actions.count(uni)) {
       key_actions[uni]();
+      if(uni >= ' ' && uni <= 127) ignore_textinput = true;
       sym = uni = 0;
       return;
       }
     if(key_actions.count(sym)) {
+      if(sym >= ' ' && sym <= 127) ignore_textinput = true;
       key_actions[sym]();
       sym = uni = 0;
       return;

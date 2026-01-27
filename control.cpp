@@ -1255,6 +1255,7 @@ EX void mainloopiter() {
   if(((SDL_GetMouseState(NULL, NULL) & SDL_BUTTON_MMASK)) && !mouseout2())
     currently_scrolling = true;
 
+  ignore_textinput = false;
   ui_mousex = mousex, ui_mousey = mousey;
   #if SDLVER >= 2
   if(timetowait > 0) {
@@ -1274,6 +1275,8 @@ EX void mainloopiter() {
 
 EX bool need_refresh;
 EX int ui_mousex, ui_mousey;
+
+EX bool ignore_textinput;
 
 EX void refresh_if_needed() {
   if(!need_refresh) return;
@@ -1427,7 +1430,8 @@ EX void handle_event(SDL_Event& ev) {
     #if SDLVER >= 2
     if(ev.type == SDL_EVENT_TEXT_INPUT) {
       refresh_if_needed();
-      texthandler(ev.text);
+      if(ignore_textinput) ignore_textinput = false;
+      else texthandler(ev.text);
       }
     #endif
 
