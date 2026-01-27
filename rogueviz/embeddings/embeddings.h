@@ -34,16 +34,22 @@ struct untiled_embedding : embedding {
 
 extern shared_ptr<embedding> current;
 
+inline ld missing_edges = 0, remaining_edges = 1, log_missing_edges = log(0), log_remaining_edges = 0;
+
 /* for logistic regression */
 struct logistic {
   ld R, T;
-  ld yes1(ld d) { return 1/(1 + exp(d)); }
-  ld no1(ld d) { return 1/(1 + exp(-d)); }
+
   ld nor(ld d) { return (d-R) / 2 / T; }
+
+  ld yes1(ld d) { return remaining_edges /(1 + exp(d)); }
+  ld no1(ld d) { return missing_edges + remaining_edges /(1 + exp(-d)); }
+  ld lyes(ld d) { d = nor(d); return d > 200 ? -d + log_remaining_edges : log(yes1(d)); }
+  ld lno(ld d) { d = nor(d); return d < -200 ? max(d, log_missing_edges) : log(no1(d)); }
+
   ld yes(ld d) { return yes1(nor(d)); }
   ld no(ld d) { return no1(nor(d)); }
-  ld lyes(ld d) { d = nor(d); return d > 200 ? -d : log(yes1(d)); }
-  ld lno(ld d) { d = nor(d); return d < -200 ? d : log(no1(d)); }
+
   logistic() {}
   logistic(ld _R, ld _T) : R(_R), T(_T) {}  
   void setRT(ld _R, ld _T) { R = _R; T = _T; }

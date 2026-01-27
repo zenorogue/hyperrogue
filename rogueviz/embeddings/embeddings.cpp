@@ -104,10 +104,19 @@ string embedding::get_space() {
   return ss.s;
   }
 
+void set_missing_edges(ld x) {
+  missing_edges = x;
+  log_missing_edges = log(x);
+  remaining_edges = 1 - x;
+  log_remaining_edges = log(1 - x);
+  }
+
 int a = arg::add3("-edgelist", [] { arg::shift(); read_edgelist(arg::args()); })
   + addHook(hooks_gamedata, 230, store_gamedata)
   + arg::add3("-write-edges", [] { arg::shift(); write_edgelist(arg::args()); })
   + arg::add3("-esaveas", [] { arg::shift(); esave(arg::args()); })
+  + arg::add3("-missing-edges", [] { arg::shift(); set_missing_edges(arg::argf()); })
+  + arg::add3("-missing-edges-env", [] { auto env = std::getenv("MISSING_EDGES"); if(env) set_missing_edges(atof(env)); })
   + arg::add3("-el-rv", [] { if(rogueviz::rv_quality == 0) force_rvgraph(); current = std::make_shared<rv_embedding> (); });
 
 }
