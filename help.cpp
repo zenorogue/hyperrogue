@@ -144,7 +144,7 @@ EX void buildHelpText() {
     "monsters come to hunt you, as long as you are in the same land type. The "
     "Orbs of Yendor are the ultimate treasure; get at least one of them to win the game!"
     );
-  if(!game_keys_scroll) help += XLAT(" (press ESC for some hints about it).");
+  if(!game_keys_scroll && dialog::display_keys != 3) help += XLAT(" (press ESC for some hints about it).");
   if(!game_keys_scroll) help += "\n\n";
   
   if(!shmup::on && !hardcore && !game_keys_scroll)
