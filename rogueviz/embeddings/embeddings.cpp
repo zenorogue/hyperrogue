@@ -28,6 +28,7 @@ void read_edgelist(const string& fname) {
     });
 
   any = rogueviz::add_edgetype("embedded edges");
+  indenter_finish ind(true, "Reading edgelist...");
 
   fhstream f(fname, "rt");
   if(!f.f) return file_error(fname);
