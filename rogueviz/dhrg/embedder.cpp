@@ -255,15 +255,16 @@ void graph_from_rv() {
     progressbar pb(N, "Translating to cells");
 
     for(int i=0; i<N; i++) {
-      hyperpoint T0 = rogueviz::embeddings::current->as_hyperpoint(i);
 #if BUILD_ON_HR    
       cell *c = currentmap->gamestart();
+      hyperpoint T0 = vdata[i].m->at * C0;
       virtualRebase2(vdata[i].m->base, T0, true); 
       vertices[i] = find_mycell(vdata[i].m->base);
+      vdata[i].m->at = Id;
 #else
+      hyperpoint T0 = rogueviz::embeddings::current->as_hyperpoint(i);
       vertices[i] = find_mycell_by_path(computePath(T0));
 #endif
-      vdata[i].m->at = Id;
       pb++;
       // printf("%s %s\n", vdata[i].name.c_str(), computePath(vdata[i].m->base).c_str());
       }    
