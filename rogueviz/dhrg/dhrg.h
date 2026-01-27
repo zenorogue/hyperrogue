@@ -37,5 +37,9 @@ extern int iterations;
 void clear();
 
 void graph_from_rv();
+
+ld loglikopt();
+int quickdist(mycell *c1, mycell *c2, int setid=0);
+extern ll tally[MAXDIST];
 }
 #endif

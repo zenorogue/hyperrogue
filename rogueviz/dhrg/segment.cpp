@@ -243,7 +243,7 @@ int segmentdist(segment *p1, segment *p2, int d) {
     }
   }
 
-int quickdist(mycell *c1, mycell *c2, int setid=0) {
+int quickdist(mycell *c1, mycell *c2, int setid) {
   int d = 0;
   c1->build();
   c2->build();
