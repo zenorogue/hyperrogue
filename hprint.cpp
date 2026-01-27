@@ -583,7 +583,7 @@ struct progressbar : indenter_finish {
     step++;
     while(step >= drawat && total) {
       count++;
-      drawat = (total * (count+1)) / PBSIZE;
+      drawat = (total * (count+(long long) 1)) / PBSIZE;
       fprintf(stderr, "%s [", get_stamp().c_str());
       for(int k=0; k<count; k++) fprintf(stderr, "#");
       for(int k=count; k<64; k++) fprintf(stderr, "-");
