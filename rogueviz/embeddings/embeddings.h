@@ -4,6 +4,8 @@
 namespace rogueviz {
 namespace embeddings {
 
+extern vector<vector<int> > directed_edges;
+
 struct embedding {
   virtual hyperpoint as_hyperpoint(int id) = 0;
   virtual pair<cell*, hyperpoint> as_location(int id) = 0;
