@@ -163,7 +163,7 @@ void writestats() {
     }
     
   println(hlog, "log likelihood\n");
-  ld loglik_chaos = rogueviz::embeddings::bestll2(M, N*(N-1)/2);
+  ld loglik_chaos = rogueviz::embeddings::bestll2(M, N*(N-(long long) 1)/2);
   ld loglik_opt = loglikopt();
   ld loglik_mono = loglikopt_mono();
   ld loglik_rt = loglik_logistic();
