@@ -78,8 +78,8 @@ static constexpr flagtype NOTITLE = 256;
 static constexpr flagtype ALWAYS_TEXT = 256;
 /** \brief add a sidescreen to a normal screen */
 static constexpr flagtype SIDE = 512;
-/** \brief deck controls */
-static constexpr flagtype DECK_CONTROLS = 1024;
+/** \brief add a sidescreen to a normal screen */
+static constexpr flagtype TOUR_CONTROLS = 1024;
 #endif
 
 EX vector<reaction_t> restorers;
@@ -233,11 +233,17 @@ EX void slidehelp() {
     helptitle(XLAT(slidename), 0xFF8000) +
     XLAT(slides[currentslide].help);
 
-  if(dialog::display_keys == 3 && slides[currentslide].flags & DECK_CONTROLS)
-    help += "\n\n" + XLAT(
-      "This tour typically displays keys on the keyboard. "
-      "On the SteamDeck, you can press the Menu button to move to the next slide, "
-      "or the Ⓑ button to see a menu with other options.");
+  if(slides[currentslide].flags & TOUR_CONTROLS) {
+    if(dialog::display_keys == 3)
+      help += "\n\n" + XLAT(
+        "Press the Menu button to move to the next slide, "
+        "or the Ⓑ button to see a menu with other options.");
+    else help +=  "\n\n" + XLAT(
+     "You decide when you want to stop playing with the "
+     "current \"slide\" and go to the next one, by pressing Enter. You can also "
+     "press ESC to see a "
+     "menu with other options.");
+    }
 
   gotoHelp(help);
   presentation(pmHelpEx);
@@ -645,15 +651,11 @@ EX slide default_slides[] = {
       }
     },
 #endif
-  {"Introduction", 10, LEGAL::NONE | QUICKSKIP | DECK_CONTROLS,
+  {"Introduction", 10, LEGAL::NONE | QUICKSKIP | TOUR_CONTROLS,
     "This tour is mostly aimed to show what is "
     "special about the geometry used by HyperRogue. "
     "It also shows the basics of gameplay, and "
-    "how is it affected by geometry.\n\n"
-    "You decide when you want to stop playing with the "
-    "current \"slide\" and go to the next one, by pressing Enter. You can also "
-    "press ESC to see a "
-    "menu with other options.",
+    "how is it affected by geometry.",
     [] (presmode mode) {
       if(mode == pmStartAll) firstland = specialland = laIce;
       if(mode == 1) {

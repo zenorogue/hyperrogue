@@ -5179,30 +5179,33 @@ S("This guided tour is different than most other game tutorials -- "
   "We will not explain this land at the moment, and you could potentially "
   "get lost there.\n\n"
   "Remember that you can get to the next slide by pressing Enter.",
- 
+
   "Это руководство отличается от большинства других -- "
   "ты не обязан ничего делать, иди куда хочешь.\n\n"
   "Однако %1 -- не то, о чём мы сейчас говорим. Мы не будем сейчас "
   "объяснять эту землю, и ты можешь заблудиться в ней.\n\n"
   "Нажми Enter, чтобы перейти на следующий слайд.")
  
+S("You decide when you want to stop playing with the "
+  "current \"slide\" and go to the next one, by pressing Enter. You can also "
+  "press ESC to see a "
+  "menu with other options.",
+
+  "Ты можешь перейти на следующий \"слайд\", "
+  "нажав Enter. Нажми ESC, чтобы открыть меню с другими опциями.")
+// FIX: tutorial changed to tour
+
 S("Introduction", "Введение")
 S("Welcome to the HyperRogue Guided Tour!", "Добро пожаловать в руководство HyperRogue!")
 S(
   "This tour is mostly aimed to show what is "
   "special about the geometry used by HyperRogue. "
   "It also shows the basics of gameplay, and "
-  "how is it affected by geometry.\n\n"
-  "You decide when you want to stop playing with the "
-  "current \"slide\" and go to the next one, by pressing Enter. You can also "
-  "press ESC to see a "
-  "menu with other options.",
+  "how is it affected by geometry.\n\n",
  
   "Главная цель этого руководства -- показать особенности геометрии "
   "в HyperRogue. Также здесь объясняются основы игры, и как геометрия "
-  "на них влияет.\n\n"
-  "Ты можешь перейти на следующий \"слайд\", "
-  "нажав Enter. Нажми ESC, чтобы открыть меню с другими опциями.")
+  "на них влияет.\n\n")
 // FIX: tutorial changed to tour
  
 S("Basics of gameplay", "Начала игры")

@@ -4588,20 +4588,24 @@ S("This guided tour is different than most other game tutorials -- "
   "不过，%1不是我们正在讨论的内容。我们暂时不会解释这一地域，你有可能会在其中迷路。\n\n"
   "请记住你可以通过按回车键切换到下一页。")
 
+S("You decide when you want to stop playing with the "
+  "current \"slide\" and go to the next one, by pressing Enter. You can also "
+  "press ESC to see a "
+  "menu with other options.",
+
+  "由你来决定何时结束游玩当前的“一页”，按回车切换到下一页。你也可以按ESC检视有其他选项的菜单。")
+
 S("Introduction", "介绍")
 S("Welcome to the HyperRogue Guided Tour!", "欢迎来到HyperRogue指南游览！")
+
+
 S(
   "This tour is mostly aimed to show what is "
   "special about the geometry used by HyperRogue. "
   "It also shows the basics of gameplay, and "
-  "how is it affected by geometry.\n\n"
-  "You decide when you want to stop playing with the "
-  "current \"slide\" and go to the next one, by pressing Enter. You can also "
-  "press ESC to see a "
-  "menu with other options.",
+  "how is it affected by geometry.",
   
-  "这场旅行主要是想向你展示HyperRogue所使用几何的特别之处。它也包括基本的游戏内容，以及游戏内容是如何受到几何影响的。\n\n"
-  "由你来决定何时结束游玩当前的“一页”，按回车切换到下一页。你也可以按ESC检视有其他选项的菜单。")
+  "这场旅行主要是想向你展示HyperRogue所使用几何的特别之处。它也包括基本的游戏内容，以及游戏内容是如何受到几何影响的。")
 
 S("Basics of gameplay", "游戏基础")
 S("gain Ice Diamonds", "获取冰钻")

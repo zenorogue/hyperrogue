@@ -4938,32 +4938,36 @@ S("This guided tour is different than most other game tutorials -- "
   "We will not explain this land at the moment, and you could potentially "
   "get lost there.\n\n"
   "Remember that you can get to the next slide by pressing Enter.",
-  
+
   "Cette visite guidée est différente de la plupart des autres tutoriels de jeu -- "
   "vous n'avez pas besoin de faire quoi que se soit, et pouvez aller où vous voulez.\n\n"
   "Cependant, %le1 n'est pas ce dont on parle maintenant. Nous n'expliquerons pas ce "
   "pays maintenant, et vous pourriez vous y perdre.\n\n"
   "Rappelez vous que vous pouvez aller à la diapositive suivante en appuyant sur Entrée.")
 
-S("Introduction", "Introduction")
-S("Welcome to the HyperRogue Guided Tour!", "Bienvenue dans la visite guidée d'HyperRogue!")
 S(
-  "This tour is mostly aimed to show what is "
-  "special about the geometry used by HyperRogue. "
-  "It also shows the basics of gameplay, and "
-  "how is it affected by geometry.\n\n"
   "You decide when you want to stop playing with the "
   "current \"slide\" and go to the next one, by pressing Enter. You can also "
   "press ESC to see a "
   "menu with other options.",
+
+  "Vous décidez quand vous voulez arrêter de jouer avec la "
+  "\"diapositive\" actuelle et aller à la suivante, en appuyant sur Entrée. "
+  "Vous pouvez aussi appuyer ESC pour voir un menu avec d'autres options.")
+
+S("Introduction", "Introduction")
+S("Welcome to the HyperRogue Guided Tour!", "Bienvenue dans la visite guidée d'HyperRogue!")
+
+S(
+  "This tour is mostly aimed to show what is "
+  "special about the geometry used by HyperRogue. "
+  "It also shows the basics of gameplay, and "
+  "how is it affected by geometry.",
   
   "Cette visite a surtout pour but de montrer ce qui "
   "est spécial avec la géométrie utilisée par HyperRogue. "
   "Elle montre aussi les bases des mécaniques de jeu, et "
-  "comment il est affecté par la géométrie.\n\n"
-  "Vous décidez quand vous voulez arrêter de jouer avec la "
-  "\"diapositive\" actuelle et aller à la suivante, en appuyant sur Entrée. "
-  "Vous pouvez aussi appuyer ESC pour voir un menu avec d'autres options.")
+  "comment il est affecté par la géométrie.")
 
 S("Basics of gameplay", "Bases du jeu")
 S("gain Ice Diamonds", "gagnez des Diamants des glaces")

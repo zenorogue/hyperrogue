@@ -5070,24 +5070,26 @@ S("This guided tour is different than most other game tutorials -- "
   "i potencjalnie możesz się zgubić.\n\n"
   "Naciśnij Enter, by przejść do kolejnego slajdu.")
 
+S("You decide when you want to stop playing with the "
+  "current \"slide\" and go to the next one, by pressing Enter. You can also "
+  "press ESC to see a "
+  "menu with other options.",
+
+  "Ty decydujesz, kiedy chcesz skończyć bawić się obecnym \"slajdem\" "
+  "i przejść do kolejnego, naciskając Enter. Naciśnij ESC, by zobaczyć "
+  "pozostałe opcje.")
+
 S("Introduction", "Wstęp")
 S("Welcome to the HyperRogue Guided Tour!", "Witaj w Wycieczce HyperRogue!")
 S(
   "This tour is mostly aimed to show what is "
   "special about the geometry used by HyperRogue. "
   "It also shows the basics of gameplay, and "
-  "how is it affected by geometry.\n\n"
-  "You decide when you want to stop playing with the "
-  "current \"slide\" and go to the next one, by pressing Enter. You can also "
-  "press ESC to see a "
-  "menu with other options.",
+  "how is it affected by geometry.",
   
   "Zadaniem tej wycieczki jest pokazanie szczególnych własności "
   "geometrii używanej przez HyperRogue; są też pokazane podstawy "
-  "rozgrywki i jak geometria na nie wpływa.\n\n"
-  "Ty decydujesz, kiedy chcesz skończyć bawić się obecnym \"slajdem\" "
-  "i przejść do kolejnego, naciskając Enter. Naciśnij ESC, by zobaczyć "
-  "pozostałe opcje.")
+  "rozgrywki i jak geometria na nie wpływa.")
 
 S("Basics of gameplay", "Podstawy rozgrywki")
 S("gain Ice Diamonds", "daj Lodowe Diamenty")

@@ -5127,23 +5127,27 @@ S("This guided tour is different than most other game tutorials -- "
   "a je možné, že se v něm ztratíš.\n\n"
   "Nezapomeň, že stiskem klávesy Enter můžeš přejít na další snímek.")
 
-S("Introduction", "Úvod")
-S("Welcome to the HyperRogue Guided Tour!", "Vítej v tutoriálu HyperRogue!")
 S(
-  "This tour is mostly aimed to show what is "
-  "special about the geometry used by HyperRogue. "
-  "It also shows the basics of gameplay, and "
-  "how is it affected by geometry.\n\n"
   "You decide when you want to stop playing with the "
   "current \"slide\" and go to the next one, by pressing Enter. You can also "
   "press ESC to see a "
   "menu with other options.",
+
+  "Když si budeš chtít přestat hrát se současným \"snímkem\" a přejít na další, "
+  "stiskni Enter. Stiskem ESC můžeš také zobrazit menu s dalšími možnostmi.")
+
+S("Introduction", "Úvod")
+S("Welcome to the HyperRogue Guided Tour!", "Vítej v tutoriálu HyperRogue!")
+
+S(
+  "This tour is mostly aimed to show what is "
+  "special about the geometry used by HyperRogue. "
+  "It also shows the basics of gameplay, and "
+  "how is it affected by geometry.",
   
   "Tento tutoriál je převážně zaměřen na to, aby ukázal, co je zvláštního "
   "na geometrii, kterou HyperRogue používá. Také ukazuje základy hry a to, "
-  "jak ji geometrie ovlivňuje.\n\n"
-  "Když si budeš chtít přestat hrát se současným \"snímkem\" a přejít na další, "
-  "stiskni Enter. Stiskem ESC můžeš také zobrazit menu s dalšími možnostmi.")
+  "jak ji geometrie ovlivňuje.")
 // FIX: tutorial changed to tour
 
 S("Basics of gameplay", "Základy hry")
