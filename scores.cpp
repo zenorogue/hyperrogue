@@ -294,17 +294,17 @@ void show() {
       scorerev = false;
       curcol = sym - 1000;
       }
-    else if(uni == 't') { dialog::infix = ""; pushScreen(showPickScores); }
+    else if(uni == 't' || is_joy_index(sym, deck::enter)) { dialog::infix = ""; pushScreen(showPickScores); }
     else if(DKEY == SDLK_UP || uni == 'k' || uni == 'w')
       scorefrom -= 5;
     else if(DKEY == SDLK_DOWN || uni == 'j' || uni == 'x')
       scorefrom += 5;
-    else if(uni == 'z') scale = 3 - scale;
+    else if(uni == 'z' || is_joy_index(sym, deck::alt_enter)) scale = 3 - scale;
     else if(sym == PSEUDOKEY_WHEELUP)
       scorefrom--;
     else if(sym == PSEUDOKEY_WHEELDOWN)
       scorefrom++;
-    else if(uni == 's') {
+    else if(uni == 's' || is_joy_index(sym, deck::space)) {
       if(scorerev) reverse(scores.begin(), scores.end());
       else {
         scorerev = true;
