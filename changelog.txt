@@ -5639,3 +5639,9 @@ Other bugfixes:
 - fixed a crash when the '`' key was entered in some dialogs (which was a problem with older controller layouts which emitted this key)
 - fixed the screen size on SteamDeck
 - fixed the default control scheme when multiple controllers are connected
+
+2026-01-29 14:17 Update 13.1k:
+- local score screen: better default ordering of scores; scrolling left/right can now show extra columns; better buttons; fixed wrong scale of some elements
+- improved Deck UI information in help and tour
+- when you press e.g. 'b' to enter a text dialog, 'b' is not sent to this dialog
+- pressing left/right in the fullscreen resolution dialog now uses the list of actual supported resolutions; also hopefully fixed the resize screen loop
