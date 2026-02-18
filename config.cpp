@@ -1075,8 +1075,18 @@ EX vector<int> get_display_modes(char which) {
 
   #if SDLVER >= 2
   SDL_DisplayMode mode;
-  for(int m=0; m<SDL_GetNumVideoDisplays(); m++) {
-    for(int i=0; i<SDL_GetNumDisplayModes(m); i++) {
+  int num_video_displays = SDL_GetNumVideoDisplays();
+  if(num_video_displays < 0)
+    println(hlog, "SDL_GetNumVideoDisplays error: ", SDL_GetError());
+  else if(num_video_displays == 0)
+    println(hlog, "SDL_GetNumVideoDisplays returned 0");
+  for(int m=0; m<num_video_displays; m++) {
+    int num_display_modes = SDL_GetNumDisplayModes(m);
+    if(num_display_modes < 0)
+      println(hlog, "SDL_GetNumDisplayModes(", m, ") error: ", SDL_GetError());
+    else if(num_display_modes == 0)
+      println(hlog, "SDL_GetNumDisplayModes(", m, ") returned 0");
+    for(int i=0; i<num_display_modes; i++) {
       SDL_GetDisplayMode(m, i, &mode);
       if(which == 'x') seen.insert(mode.w);
       if(which == 'y') seen.insert(mode.h);
@@ -1085,7 +1095,13 @@ EX vector<int> get_display_modes(char which) {
 
   #else
   SDL_Rect **modes = SDL_ListModes(nullptr, 0);
-  if(modes && modes != (SDL_Rect**)-1) for(int i=0; modes[i]; i++) {
+  if(!modes)
+    println(hlog, "SDL_ListModes: No modes available!");
+  else if(modes == (SDL_Rect**)-1)
+    println(hlog, "SDL_ListModes: All resolutions available.");
+  else if(!*modes)
+    println(hlog, "SDL_ListModes returned an empty array");
+  else for(int i=0; modes[i]; i++) {
     if(which == 'x') seen.insert(modes[i]->w);
     if(which == 'y') seen.insert(modes[i]->h);
     }
