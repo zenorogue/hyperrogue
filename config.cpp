@@ -1094,7 +1094,7 @@ EX vector<int> get_display_modes(char which) {
     }
 
   #else
-  SDL_Rect **modes = SDL_ListModes(nullptr, 0);
+  SDL_Rect **modes = SDL_ListModes(nullptr, SDL_FULLSCREEN);
   if(!modes)
     println(hlog, "SDL_ListModes: No modes available!");
   else if(modes == (SDL_Rect**)-1)
