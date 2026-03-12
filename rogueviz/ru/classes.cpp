@@ -60,6 +60,7 @@ struct power {
   power& while_dead();
   power& identified_name(string, string);
   power& be_wearable(string wear_effect, string remove_effect, string worn = " (worn)");
+  power& be_armor(const vector<vector<string>>& v);
   power& be_jewelry(string jtype, string desc);
   power& be_potion();
   power& gain(int qf, int qo) { qty_filled += qf; qty_owned += qo; return self; }
@@ -73,6 +74,7 @@ flagtype IDENTIFIED = Flag(1);
 flagtype ACTIVE = Flag(2);
 flagtype PARTIAL = Flag(4);
 flagtype WEAPON = Flag(8);
+flagtype ARMOR = Flag(16);
 
 struct bbox {
   int minx, miny, maxx, maxy;
@@ -901,4 +903,5 @@ struct vision : public entity {
 
 vector<unique_ptr<vision>> visions;
 
+extern int statseed;
 }

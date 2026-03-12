@@ -39,6 +39,58 @@ power& power::be_weapon() {
   return self;
   }
 
+power& power::be_armor(const vector<vector<string>>& v) {
+  flags |= ARMOR;
+  picked_up = [this] (int x) { qty_owned += x; qty_filled = max(qty_filled, x);  };
+
+  auto gn = get_name; get_name = [gn, this] {
+    string s = gn();
+    s += " [" + its(qty_filled) + "]";
+    if(qty_owned > qty_filled) s += " (+" + its(qty_owned - qty_filled) + ")";
+    return s;
+    };
+
+  auto gd = get_desc;
+  get_desc = [this, gd, v] () -> string {
+    auto desc = gd();
+    std::mt19937 armorgen;
+    armorgen.seed(statseed ^ v[0][0][0] ^ (v[1][0][0] << 8));
+    println(hlog, "after armorgen");
+    vector<int> qty(v.size(), 0);
+    for(int i=0; i<qty_filled; i++) {
+      if(i < 2) qty[i]++;
+      else qty[armorgen() % v.size()]++;
+      }
+    println(hlog, "qty = ", qty);
+    desc += "\n\n";
+    desc += "This outfit consists of ";
+    int total = 0; for(auto q: qty) if(q) total++;
+    println(hlog, "total = ", total);
+    int index = 0;
+    int aindex = 0;
+    for(auto& q: qty) {
+      auto& vi = v[aindex++];
+      println(hlog, "vi = ", vi, " q = ", q);
+      if(!q) continue;
+      index++;
+      if(index && index == total) desc += " and ";
+      else if(index > 1) desc += ", ";
+      if(q <= isize(vi)) desc += vi[q-1];
+      else if(vi.back().substr(0, 2) == "a ") desc += "a +" + its(q - isize(vi)) + " " + vi.back().substr(2);
+      else if(vi.back().substr(0, 3) == "an ") desc += "an +" + its(q - isize(vi)) + " " + vi.back().substr(3);
+      else desc += "+" + its(q - isize(vi)) + " " + vi.back();
+      }
+    desc += ".\n";
+    if(qty_owned == qty_filled + 1)
+      desc += "\nYou have also found another piece that must be tailored to fit your size.";
+    else if(qty_owned > qty_filled)
+      desc += "\nYou have also found " + its(qty_owned - qty_filled) +" pieces that must be tailored to fit your size.";
+    return desc;
+    };
+
+  return self;
+  }
+
 power& power::be_resource(string s) {
   get_name = [this, s] { return its(qty_filled) + " " + s; };
   return self;
@@ -300,6 +352,28 @@ void gen_powers() {
     "-", 0xFF0000FF,
     [] (data& d) {
       }).is_starting().while_paused().be_wearable("You concentrate.", "You calm down.", " (on)"),
+
+  gen_power('h', "heavy armor",
+    "This kind of armor reduces the amount of damage you take from hits.",
+     "]", 0xC0C0C0FF,
+    [] (data& d) {}).be_armor({{"a chain shirt", "plate armor"}, {"an iron cap", "an iron helmet"}, {"an iron gorget"}, {"bracers"}, {"gauntlets"}, {"iron-shod boots"}, {"greaves"}}),
+
+  gen_power('k', "thief garments",
+    "This outfit makes it harder for enemies to notice or hit you.",
+     "]", 0xC08000FF,
+    [] (data& d) {}).be_armor({{"a leather vest"}, {"a hood"}, {"comfortable boots", "muffled boots", "boots of dodging"}, {"a cloak", "chameleon cloak"}, {"leather gloves"}, {"leather pants"}}),
+
+  gen_power('n', "wizard attire",
+    "This outfit provides a magical aura that prevents you from taking damage. However, eventually, "
+    "with lots of attacks, the aura will lose its power. You need to spend some time without being attacked to "
+    "regenerate it.",
+     "]", 0x0080C0FF,
+    [] (data& d) {}).be_armor({{"a simple magic robe", "embroidered robe"}, {"a wizard hat"}, {"runed boots", "silk runed boots"}, {"runed gloves", "silk runed gloves"}, {"a silver circlet", "a golden circlet"}}),
+
+  gen_power('v', "druid outfit",
+    "This outfit reduces the damage you take from hits, makes it harder for enemies to hit you, and also provides some magical aura protection.",
+     "]", 0x40C040FF,
+    [] (data& d) {}).be_armor({{"a light fur", "a heavy fur"}, {"a horned cap", "a horned helmet"}, {"enchanted cloak"}, {"furry gloves", "beast gloves"}, {"furry boots"}, {"bracers"}}),
 
   gen_power(' ', "dagger",
     "This sharp dagger is very useful during the preparation of alchemical ingredients, but it works as a basic weapon too.",

@@ -202,15 +202,19 @@ void stat_screen(bool editable) {
       switch(m.profession) {
         case stat::str:
           find_power("axe").gain(1, 1);
+          find_power("heavy armor").gain(2, 2);
           break;
         case stat::con:
           find_power("polymorph").gain(1, 1).flags |= IDENTIFIED | PARTIAL;
+          find_power("druid outfit").gain(2, 2);
           break;
         case stat::dex:
           find_power("the thief").gain(1, 1).flags |= IDENTIFIED | PARTIAL;
+          find_power("thief garments").gain(2, 2);
           break;
         case stat::wis:
           find_power("fire").gain(1, 1).flags |= IDENTIFIED | PARTIAL;
+          find_power("wizard attire").gain(2, 2);
           break;
         }
       });
