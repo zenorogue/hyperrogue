@@ -73,7 +73,7 @@ void save_as(string fname) {
     for(int x=0; x<room_y; x++) if(r.block_at[y][x] != r.orig_block_at[y][x])
       println(f, "AT ", y, " ", x, " ", r.block_at[y][x]);
 
-    for(auto& e: r.entities) save_via_stater(f, *e, "ENTITY");
+    for(auto& e: r.entities) if(e->nonstatic()) save_via_stater(f, *e, "ENTITY");
 
     if(r.timed_orb_end >= gframeid) println(f, "TIMER ", r.timed_orb_end);
     println(f);

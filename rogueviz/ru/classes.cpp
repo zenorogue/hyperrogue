@@ -350,6 +350,8 @@ struct entity {
   virtual void on_reset_all() {}
 
   entity *hal();
+
+  virtual bool nonstatic() { return true; }
   };
 
 struct weaponmod {
@@ -453,7 +455,8 @@ struct moving_platform : public entity {
   virtual moving_platform* as_platform() { return this; }
   string get_name() override { return "moving platform"; }
   string get_help() override { return "Moving platforms move."; }
-};
+  bool nonstatic() override { return false; }
+  };
 
 struct ferris_platform : public moving_platform {
   xy location_at(ld t) override;
