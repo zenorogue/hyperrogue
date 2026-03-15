@@ -431,7 +431,7 @@ void gen_powers() {
      "]", 0x0080C0FF,
     [] (data& d) {}).be_armor({{"a simple magic robe", "embroidered robe"}, {"a wizard hat"}, {"runed boots", "silk runed boots"}, {"runed gloves", "silk runed gloves"}, {"a silver circlet", "a golden circlet"}}),
 
-  gen_power('v', "druid outfit",
+  gen_power('f', "druid outfit",
     "This outfit reduces the damage you take from hits, makes it harder for enemies to hit you, and also provides some magical aura protection.",
      "]", 0x40C040FF,
     [] (data& d) {}).be_armor({{"a light fur", "a heavy fur"}, {"a horned cap", "a horned helmet"}, {"enchanted cloak"}, {"furry gloves", "beast gloves"}, {"furry boots"}, {"bracers"}}),
