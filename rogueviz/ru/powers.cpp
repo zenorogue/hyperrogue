@@ -97,8 +97,22 @@ power& power::be_armor(const vector<vector<string>>& v) {
       else if(d.p->flags & ACTIVE) {
         addMessage("You start removing your " + gn() + ".");
         d.p->flags &=~ ACTIVE;
-        m.dresstime += game_fps * 1.5;
-        m.effects.emplace_back();
+        int len = game_fps * 1.5;
+        m.dresstime += len;
+
+        for(auto fac: {1, -1}) {
+          m.effects.emplace_back();
+          auto& e = m.effects.back();
+          e.p = this;
+          e.when = gframeid;
+          e.facing = fac;
+          e.length = len;
+          e.cf = [len] (color_t& col, int t) {
+            auto& alpha = part(col, 0);
+            alpha *= ((len-t) * 1. / len);
+            };
+          e.f = [fac, len] (int t) { return m.get_pixel_bbox_at(xy{m.where.x + fac * (t * 1. / len) * m.dsiz().x, m.where.y}); };
+          }
         }
       else {
         power *wearing_what = nullptr;
