@@ -388,6 +388,7 @@ struct man : public entity {
   int attack_facing;
   int attack_when;
   int on_floor_when;
+  int dresstime;
   entity *morphed = nullptr;
   vector<effect> effects;
 

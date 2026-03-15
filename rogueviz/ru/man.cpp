@@ -66,7 +66,8 @@ void man::hs(stater& s) {
    .act("on_floor_when", on_floor_when, 0)
    .act("xp", experience, 0)
    .act("last_action", last_action, 0)
-   .act("gameseed", gameseed, 0);
+   .act("gameseed", gameseed, 0)
+   .act("dresstime", dresstime, 0);
   sact(s1, "hair", hair);
   sact(s1, "eyes", eye);
   string z = unspace(backstory);
@@ -107,6 +108,11 @@ void man::act() {
   if(h != max_hp())
     hp = randround(1. * hp * max_hp() / h);
   auto dat = get_dat();
+
+  if(dresstime) {
+    dresstime--;
+    if(dresstime == 0) addMessage("You finish redressing.");
+    }
 
   if(on_floor) on_floor_when = gframeid;
 

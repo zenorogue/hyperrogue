@@ -46,6 +46,7 @@ power& power::be_armor(const vector<vector<string>>& v) {
   auto gn = get_name; get_name = [gn, this] {
     string s = gn();
     s += " [" + its(qty_filled) + "]";
+    if(flags & ACTIVE) s += " (worn)";
     if(qty_owned > qty_filled) s += " (+" + its(qty_owned - qty_filled) + ")";
     return s;
     };
@@ -86,6 +87,47 @@ power& power::be_armor(const vector<vector<string>>& v) {
     else if(qty_owned > qty_filled)
       desc += "\nYou have also found " + its(qty_owned - qty_filled) +" pieces that must be tailored to fit your size.";
     return desc;
+    };
+
+  auto ac = act;
+  act = [this, gn, ac] (data& d) {
+    if(d.keystate == 1) {
+      if(!m.is_stable)
+        addMessage("You need to be on stable footing to redress.");
+      else if(d.p->flags & ACTIVE) {
+        addMessage("You start removing your " + gn() + ".");
+        d.p->flags &=~ ACTIVE;
+        m.dresstime += game_fps * 1.5;
+        m.effects.emplace_back();
+        }
+      else {
+        power *wearing_what = nullptr;
+        for(auto& p: powers) if((p.flags & ACTIVE) && (p.flags & ARMOR)) wearing_what = &p;
+        if(wearing_what)
+          addMessage("You have to remove your " + wearing_what->name + " first.");
+        else {
+          d.p->flags |= ACTIVE;
+          addMessage("You start putting on your " + gn() + ".");
+          int len = game_fps * 2;
+          m.dresstime += len;
+
+          for(auto fac: {1, -1}) {
+            m.effects.emplace_back();
+            auto& e = m.effects.back();
+            e.p = this;
+            e.attack_when = gframeid;
+            e.attack_facing = fac;
+            e.length = len;
+            e.cf = [len] (color_t& col, int t) {
+              auto& alpha = part(col, 0);
+              alpha *= (t * 1. / len);
+              };
+            e.f = [fac, len] (int t) { return m.get_pixel_bbox_at(xy{m.where.x + fac * ((len - t) * 1. / len) * m.dsiz().x, m.where.y}); };
+            }
+          }
+        }
+      }
+    ac(d);
     };
 
   return self;
