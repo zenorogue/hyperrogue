@@ -8,7 +8,7 @@ struct data {
   double d;
   ld modv;
   ld moda;
-  int dx;
+  ld dx;
   struct power *p;
   struct randeff *re;
   rev mode;

@@ -350,13 +350,17 @@ void gen_powers() {
   gen_power('d', "move right",
     "A special power of human beings, and most other animals, that they earn early in their life.",
     ">", 0xFF0000FF,
-    [] (data& d) { if(d.keystate & 1) d.dx += 1; }
+    [] (data& d) {
+      if(d.keystate & 1) d.dx += (m.dresstime ? 0.2 : 1);
+      }
     ).is_starting(),
 
   gen_power('a', "move left",
     "Moving to the right was a mistake? If so, this special power can be used to ignore the consequences. In most cases, at least...",
     "<", 0xFF0000FF,
-    [] (data& d) { if(d.keystate & 1) d.dx -= 1; }
+    [] (data& d) {
+      if(d.keystate & 1) d.dx -= (m.dresstime ? 0.2 : 1);
+      }
     ).is_starting(),
 
   gen_power('w', "jump",
@@ -367,6 +371,7 @@ void gen_powers() {
       if(d.keystate & 1) {
         bool can_jump = m.on_floor;
         if(gframeid <= m.on_floor_when + m.current.coyote_time) can_jump = true;
+        if(m.dresstime) can_jump = false;
         if(can_jump) m.vel.y = m.zero_vel.y-(non_hyperbolic ? 3 : 5) * d.d * d.modv, m.on_floor_when = -1000;
         }
       }
