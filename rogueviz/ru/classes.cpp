@@ -30,6 +30,7 @@ struct randeff {
 
 struct power {
   int key;
+  int shifted;
   string id;
   string name;
   string desc;
@@ -391,6 +392,7 @@ struct man : public entity {
   int dresstime;
   entity *morphed = nullptr;
   vector<effect> effects;
+  power *use_next_turn;
 
   int last_action;
 

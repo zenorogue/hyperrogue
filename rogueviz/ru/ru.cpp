@@ -336,6 +336,7 @@ void run() {
       dialog::addTitle("Fountains of Alchemy", 0x4040C0, 150);
       dialog::addItem("return to game", 'v');
       dialog::add_action([] { cmode = mode::playing; });
+      inventory_page = 0;
 
       dialog::addItem("inventory", 'i');
       dialog::add_action_push(draw_inventory);

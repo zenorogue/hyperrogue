@@ -56,6 +56,7 @@ man::man() {
   for(auto s: allstats) base_stats[s] = 10;
   next.reset(); current.reset();
   hs(fountain_resetter);
+  use_next_turn = nullptr;
   }
 
 void man::hs(stater& s) {

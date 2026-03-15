@@ -279,10 +279,10 @@ void power::init() {
   reshuffle = [this] {};
   }
 
-power& gen_power(int key, string name, string desc, string glyph, color_t color, powerfun pf) {
+power& gen_power(int key, int shifted, string name, string desc, string glyph, color_t color, powerfun pf) {
   powers.emplace_back();
   auto& p = powers.back();
-  p.key = key;
+  p.key = key; p.shifted = shifted;
   p.name = name;
   p.id = unspace(name);
   p.desc = desc;
@@ -304,7 +304,7 @@ void power_death_revert(power& p) {
 void gen_powers() {
   powers.reserve(100);
 
-  extra_life = &gen_power('1', "Extra Life",
+  extra_life = &gen_power('1', 0, "Extra Life",
     "You are really proud of this potion, which, after you die, will let you return to the moment of time when you drank it. "
     "Unfortunately it still requires an ingredient found only in the magical fountains of the Dungeons of Alchemy.\n\n"
     "You can only drink this potion when at a magical fountain. To protect yourself from dying permanently, when you drink it, "
@@ -361,7 +361,7 @@ void gen_powers() {
     ).is_starting().be_potion().while_dead();
   extra_life->qty_filled = 0;
 
-  gen_power('d', "move right",
+  gen_power('d', 0, "move right",
     "A special power of human beings, and most other animals, that they earn early in their life.",
     ">", 0xFF0000FF,
     [] (data& d) {
@@ -369,7 +369,7 @@ void gen_powers() {
       }
     ).is_starting(),
 
-  gen_power('a', "move left",
+  gen_power('a', 0, "move left",
     "Moving to the right was a mistake? If so, this special power can be used to ignore the consequences. In most cases, at least...",
     "<", 0xFF0000FF,
     [] (data& d) {
@@ -377,7 +377,7 @@ void gen_powers() {
       }
     ).is_starting(),
 
-  gen_power('w', "jump",
+  gen_power('w', 0, "jump",
     "This power can be used to reach higher parts of the world. Its power is quite limited compared to move left and right, but "
     "you expect to find some ways to make it more powerful.",
     "^", 0xFF0000FF,
@@ -391,7 +391,7 @@ void gen_powers() {
       }
     ).is_starting(),
 
-  gen_power('s', "fall",
+  gen_power('s', 0, "fall",
     "If you are on a platform, this ability can be used to drop down.",
     "v", 0xFF0000FF,
     [] (data& d) {
@@ -399,7 +399,7 @@ void gen_powers() {
       }
     ).is_starting(),
 
-  gen_power('p', "pause",
+  gen_power('p', 0, "pause",
     "Becoming an alchemist requires intelligence: thinking quickly to react to surprising effects of experiments. "
     "To reflect this, you can use this power at any time to give yourself more time to think about the situation.",
     "-", 0xFF0000FF,
@@ -407,36 +407,36 @@ void gen_powers() {
       if(d.keystate == 1) cmode = (cmode == mode::paused ? mode::playing : mode::paused);
       }).is_starting().while_paused(),
 
-  dexmode = &gen_power('c', "chill time",
+  dexmode = &gen_power('c', 0, "chill time",
     "Concentrate to make the timing of your moves perfect.\n\n"
     "From the player's point of view, this makes the game run slower.\n\nThe higher your Dexterity, the slower the game becomes.",
     "-", 0xFF0000FF,
     [] (data& d) {
       }).is_starting().while_paused().be_wearable("You concentrate.", "You calm down.", " (on)"),
 
-  gen_power('h', "heavy armor",
+  gen_power('a', 1, "heavy armor",
     "This kind of armor reduces the amount of damage you take from hits.",
      "]", 0xC0C0C0FF,
     [] (data& d) {}).be_armor({{"a chain shirt", "plate armor"}, {"an iron cap", "an iron helmet"}, {"an iron gorget"}, {"bracers"}, {"gauntlets"}, {"iron-shod boots"}, {"greaves"}}),
 
-  gen_power('k', "thief garments",
+  gen_power('t', 1, "thief garments",
     "This outfit makes it harder for enemies to notice or hit you.",
      "]", 0xC08000FF,
     [] (data& d) {}).be_armor({{"a leather vest"}, {"a hood"}, {"comfortable boots", "muffled boots", "boots of dodging"}, {"a cloak", "chameleon cloak"}, {"leather gloves"}, {"leather pants"}}),
 
-  gen_power('n', "wizard attire",
+  gen_power('w', 1, "wizard attire",
     "This outfit provides a magical aura that prevents you from taking damage. However, eventually, "
     "with lots of attacks, the aura will lose its power. You need to spend some time without being attacked to "
     "regenerate it.",
      "]", 0x0080C0FF,
     [] (data& d) {}).be_armor({{"a simple magic robe", "embroidered robe"}, {"a wizard hat"}, {"runed boots", "silk runed boots"}, {"runed gloves", "silk runed gloves"}, {"a silver circlet", "a golden circlet"}}),
 
-  gen_power('f', "druid outfit",
+  gen_power('d', 1, "druid outfit",
     "This outfit reduces the damage you take from hits, makes it harder for enemies to hit you, and also provides some magical aura protection.",
      "]", 0x40C040FF,
     [] (data& d) {}).be_armor({{"a light fur", "a heavy fur"}, {"a horned cap", "a horned helmet"}, {"enchanted cloak"}, {"furry gloves", "beast gloves"}, {"furry boots"}, {"bracers"}}),
 
-  gen_power(' ', "dagger",
+  gen_power(' ', 0, "dagger",
     "This sharp dagger is very useful during the preparation of alchemical ingredients, but it works as a basic weapon too.",
     ")", 0xFFFFFFFF,
     [] (data& d) {
@@ -445,7 +445,7 @@ void gen_powers() {
         m.launch_attack(d.p, fac, [fac] (int t) { return m.get_pixel_bbox_at(xy{m.where.x + fac * (1-0.01 * t) * m.dsiz().x, m.where.y}); });
       }).be_weapon(),
 
-  gen_power('x', "axe",
+  gen_power('x', 0, "axe",
     "This axe is very sharp and strong! It could even destroy heavy doors.",
     ")", 0xFFFFFFFF,
     [] (data& d) {
@@ -454,7 +454,7 @@ void gen_powers() {
       m.launch_attack(d.p, fac, [fac] (int t) { return m.get_pixel_bbox_at(xy{m.where.x + fac * (1-0.01 * t) * m.dsiz().x, m.where.y}, 2, 2); });
       }).be_weapon(),
 
-  gen_power('o', "strange blue crystal ball", "You feel an urge to look into it.",
+  gen_power('o', 0, "strange blue crystal ball", "You feel an urge to look into it.",
     "o", 0x00FF00FF,
     [] (data& d) {
       if(d.keystate != 1) return;
@@ -465,7 +465,7 @@ void gen_powers() {
           "parts of the world you have seen so far. This artifact is rumored to have been actually created by Beltrami, but "
           "it was bought and presented to people by the famous wizard Poincaré, and people thought it was Poincaré's creation."),
 
-  gen_power('b', "strange cyan crystal ball", "You feel an urge to look into it.",
+  gen_power('b', 0, "strange cyan crystal ball", "You feel an urge to look into it.",
     "o", 0x00FFFFFF,
     [] (data& d) {
       if(d.keystate != 1) return;
@@ -476,7 +476,7 @@ void gen_powers() {
           "but will let you easily map the parts of the world you have seen so far. Contrary to Poincaré's ball, straight lines are "
           "mapped faithfully."),
 
-  gen_power('u', "furry ring",
+  gen_power('c', 1, "furry ring",
     "This strange ring is too small to put on your finger, but maybe you could put it on your small toe?",
     "=", 0xe1cbbeFF,
     [] (data& d) {
@@ -489,7 +489,7 @@ void gen_powers() {
     ).identified_name("Toe Ring of the Coyote", "This ring, worn on a toe, will let you still jump after running off a platform. Just make sure that you run off with the foot that you are wearing this ring on!")
     .be_wearable("You put the % on your toe.", "You remove the % from your toe.");
 
-  gen_power('g', "Golden Shoelaces",
+  gen_power('g', 0, "Golden Shoelaces",
     "These shoelaces might bind you into place or give you freedom... or they could just be mundane shoelaces for rich people... one way to tell.",
     "=", 0xFFD500FF,
     [] (data& d) {
@@ -521,7 +521,7 @@ void gen_powers() {
     ).identified_name("Golden Shoelaces", "Normally you cannot control your jumps while you are flying. These shoelaces allow you some control over your jumps.")
     .be_wearable("You put the Golden Shoelaces on your boots.", "You remove the Golden Shoelaces on your boots.");
 
-  gen_power('r', "strength",
+  gen_power('s', 1, "strength",
     "Wearing this ring will raise your strength.",
     "=", 0xC04040FF,
     [] (data& d) {
@@ -533,7 +533,7 @@ void gen_powers() {
     ).be_jewelry("ring", "You need to wear this ring to know what it does.")
      .be_wearable("You put the % on your finger. You feel stronger!", "You remove the %. You feel weaker..."),
 
-  gen_power('j', "toughness",
+  gen_power('u', 1, "toughness",
     "Wearing this ring will raise your toughness.",
     "=", 0xC04040FF,
     [] (data& d) {
@@ -545,7 +545,7 @@ void gen_powers() {
     ).be_jewelry("ring", "You need to wear this ring to know what it does.")
      .be_wearable("You put the % on your finger. You feel tougher!", "You remove the %. You feel weaker..."),
 
-  gen_power('y', "wisdom",
+  gen_power('i', 1, "wisdom",
     "Wearing this ring will raise your wisdom.",
     "=", 0xC04040FF,
     [] (data& d) {
@@ -557,7 +557,7 @@ void gen_powers() {
     ).be_jewelry("ring", "You need to wear this ring to know what it does.")
      .be_wearable("You put the % on your finger. You feel wiser!", "You remove the %. You feel stupid..."),
 
-  gen_power('x', "dexterity",
+  gen_power('d', 1, "dexterity",
     "Wearing this ring will raise your dexterity.",
     "=", 0xC04040FF,
     [] (data& d) {
@@ -569,37 +569,37 @@ void gen_powers() {
     ).be_jewelry("ring", "You need to wear this ring to know what it does.")
      .be_wearable("You put the % on your finger. You feel better with bows!", "You remove the %. You feel worse with bows..."),
 
-  gen_power('2', "health",
+  gen_power('2', 0, "health",
     "This will cure your wounds, in some way.",
     "!", 0xFFFF00FF,
     random_potion_act
     ).be_potion(),
 
-  gen_power('3', "reach",
+  gen_power('3', 0, "reach",
     "This will let you reach heights, in some way.",
     "!", 0xFFFF00FF,
     random_potion_act
     ).be_potion(),
 
-  gen_power('4', "fire",
+  gen_power('4', 0, "fire",
     "This will let you produce fire, in some way.",
     "!", 0xFFFF00FF,
     random_potion_act
     ).be_potion(),
 
-  gen_power('5', "polymorph",
+  gen_power('5', 0, "polymorph",
     "This will let you change into a small creature.",
     "!", 0xFFFF00FF,
     random_potion_act
     ).be_potion(),
 
-  gen_power('6', "the thief",
+  gen_power('6', 0, "the thief",
     "This will let you bypass trapped areas, in some way.",
     "!", 0xFFFF00FF,
     random_potion_act
     ).be_potion(),
 
-  gen_power('7', "mystery",
+  gen_power('7', 0, "mystery",
     "A potion with some random effect.",
     "!", 0xFFFF00FF,
     random_potion_act
@@ -607,7 +607,7 @@ void gen_powers() {
 
   gold_id = isize(powers);
 
-  gen_power('t', "gold",
+  gen_power('t', 0, "gold",
     "For some weird reason, people love gold, and they will give you anything if you give them enough gold.\n\n"
     "This can be used to buy things in shops. "
     "Just stand on the item, press the hotkey, go to the shopkeeper, and press the hotkey again.\n\n"
@@ -675,16 +675,24 @@ void gen_powers() {
   };
 
 void handle_powers(data& d) {
+  int page = 0;
+  #if SDLVER >= 2
+  if(keyheld(SDL_SCANCODE_LSHIFT) || keyheld(SDL_SCANCODE_RSHIFT)) page = 1;
+  #else
+  if(keyheld(SDLK_LSHIFT) || keyheld(SDLK_RSHIFT)) page = 1;
+  #endif
   for(auto& p: powers) {
     if(!p.qty_owned) continue;
     d.keystate = 0;
-    if(keyheld(p.key)) d.keystate |= 1;
-    if(keywasheld(p.key)) d.keystate |= 2;
+    if(keyheld(p.key) && p.shifted == page) d.keystate |= 1;
+    if(keywasheld(p.key) && p.shifted == page) d.keystate |= 2;
+    if(&p == m.use_next_turn) d.keystate |= 1;
     d.p = &p;
     if(cmode == mode::paused) p.paused_act(d);
     else if(!m.existing) p.dead_act(d);
     else p.act(d);
     }
+  m.use_next_turn = nullptr;
   }
 
 void draw_inventory_frame() {
@@ -696,36 +704,68 @@ void draw_inventory_frame() {
   quickqueue();
   }
 
+int inventory_page;
+
+void assign_key_screen(power& p, int page) {
+  render_the_map();
+  draw_inventory_frame();
+  dialog::init(p.get_name(), p.get_color() >> 8);
+  dialog::addItem("press a key to redefine", SDLK_ESCAPE);
+  dialog::display();
+  dialog::addBack();
+  keyhandler = [&p, page] (int sym, int uni) {
+    if(sym == 0) return;
+    if(sym == 'v') return;
+    if(sym == SDLK_LSHIFT || sym == SDLK_RSHIFT) return;
+    if(sym == SDLK_ESCAPE) return popScreen();
+    for(auto& p1: powers) if(tie(p1.key, p1.shifted) == tie(sym, page)) tie(p1.key, p1.shifted) = tie(p.key, p.shifted);
+    p.key = sym; p.shifted = page;
+    popScreen(); popScreen(); inventory_page = page;
+    };
+  }
+
 void draw_inventory() {
   render_the_map();
   draw_inventory_frame();
   dialog::init();
   int next_y = 48;
+  int column = 0;
   int st = vid.fsize * 1.2;
   displaystr(32, next_y, 0, vid.fsize, "Your inventory:", 0xC0C0C0, 0);
+  string s;
+  if(inventory_page == 0) s = "normal";
+  if(inventory_page == 1) s = "hold Shift to use";
+  if(displaystr(32 + vid.xres/2, next_y, 0, vid.fsize, "(v) page: " + s, 0xC0C0C0, 0)) getcstat = 'v';
   next_y += st * 1.5;
-  for(auto& p: powers) if(p.qty_owned) {
+  for(auto& p: powers) if(p.qty_owned && p.shifted == inventory_page) {
     string key = p.key == ' ' ? "␣" : dialog::keyname(p.key);
-    if(displaystr(100, next_y, 0, vid.fsize, key, p.get_color() >> 8, 16)) getcstat = p.key;
-    if(displaystr(130, next_y, 0, vid.fsize, p.get_glyph(), p.get_color() >> 8, 8)) getcstat = p.key;
-    if(displaystr(160, next_y, 0, vid.fsize, p.get_name(), p.get_color() >> 8, 0)) getcstat = p.key;
+    if(displaystr(column + 100, next_y, 0, vid.fsize, key, p.get_color() >> 8, 16)) getcstat = p.key;
+    if(displaystr(column + 130, next_y, 0, vid.fsize, p.get_glyph(), p.get_color() >> 8, 8)) getcstat = p.key;
+    if(displaystr(column + 160, next_y, 0, vid.fsize, p.get_name(), p.get_color() >> 8, 0)) getcstat = p.key;
     next_y += st;
+    if(next_y >= vid.yres - 48) { next_y = 48 + st * 1.5; column = vid.xres/2; }
     dialog::add_key_action(p.key, [&p] { pushScreen([&p] {
       render_the_map();
       draw_inventory_frame();
       dialog::init(p.get_name(), p.get_color() >> 8);
       dialog::addHelp(p.get_desc());
-      dialog::addItem("press a key to redefine", SDLK_ESCAPE);
+
+      dialog::addItem("return to inventory", SDLK_ESCAPE);
+      dialog::add_action(popScreen);
+
+      dialog::addItem("use this item", SDLK_RETURN);
+      dialog::add_action([&p] { popScreen(); popScreen(); cmode = mode::playing; m.use_next_turn = &p; });
+
+      dialog::addItem("assign key", 'v');
+      dialog::add_action_push([&p] { assign_key_screen(p, 0); });
+
+      dialog::addItem("assign key (shifted)", 'V');
+      dialog::add_action_push([&p] { assign_key_screen(p, 1); });
+
       dialog::display();
-      dialog::addBack();
-      keyhandler = [&p] (int sym, int uni) {
-        if(sym == 0) return;
-        if(sym == SDLK_ESCAPE) return popScreen();
-        for(auto& p1: powers) if(p1.key == sym) p1.key = p.key;
-        p.key = sym;
-        };
       }); });
     }
+  dialog::add_key_action('v', [] { inventory_page = inventory_page ^ 1; });
   }
 
 void shuffle_all() {
