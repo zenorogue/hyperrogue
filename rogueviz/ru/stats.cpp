@@ -68,6 +68,7 @@ void randomize_stats() {
 
 void generate_character() {
   statseed = time(NULL);
+  m.gameseed = statseed;
   randomize_stories();
   randomize_stats();
   }

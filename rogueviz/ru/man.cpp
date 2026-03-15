@@ -65,7 +65,8 @@ void man::hs(stater& s) {
    .act("attack_when", attack_when, 0)
    .act("on_floor_when", on_floor_when, 0)
    .act("xp", experience, 0)
-   .act("last_action", last_action, 0);
+   .act("last_action", last_action, 0)
+   .act("gameseed", gameseed, 0);
   sact(s1, "hair", hair);
   sact(s1, "eyes", eye);
   string z = unspace(backstory);

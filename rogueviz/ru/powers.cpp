@@ -54,7 +54,7 @@ power& power::be_armor(const vector<vector<string>>& v) {
   get_desc = [this, gd, v] () -> string {
     auto desc = gd();
     std::mt19937 armorgen;
-    armorgen.seed(statseed ^ v[0][0][0] ^ (v[1][0][0] << 8));
+    armorgen.seed(m.gameseed ^ v[0][0][0] ^ (v[1][0][0] << 8));
     println(hlog, "after armorgen");
     vector<int> qty(v.size(), 0);
     for(int i=0; i<qty_filled; i++) {

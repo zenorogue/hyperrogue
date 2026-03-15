@@ -393,6 +393,7 @@ struct man : public entity {
 
   int last_action;
 
+  int gameseed;
   int experience;
   stat profession;
   string backstory;
