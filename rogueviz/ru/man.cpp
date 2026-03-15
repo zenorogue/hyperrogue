@@ -52,7 +52,7 @@ void statdata::reset() {
 
 man::man() {
   id = "Alchemist";
-  facing = 1; attack_facing = 1;
+  facing = 1;
   for(auto s: allstats) base_stats[s] = 10;
   next.reset(); current.reset();
   hs(fountain_resetter);
@@ -61,8 +61,6 @@ man::man() {
 void man::hs(stater& s) {
   auto& s1 = s.only_full();
   s1.act("facing", facing, 1)
-   .act("attack_facing", attack_facing, 1)
-   .act("attack_when", attack_when, 0)
    .act("on_floor_when", on_floor_when, 0)
    .act("xp", experience, 0)
    .act("last_action", last_action, 0)

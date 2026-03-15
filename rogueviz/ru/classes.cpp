@@ -385,8 +385,6 @@ struct effect {
 
 struct man : public entity {
   int facing;
-  int attack_facing;
-  int attack_when;
   int on_floor_when;
   int dresstime;
   entity *morphed = nullptr;
