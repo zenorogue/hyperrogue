@@ -115,8 +115,8 @@ power& power::be_armor(const vector<vector<string>>& v) {
             m.effects.emplace_back();
             auto& e = m.effects.back();
             e.p = this;
-            e.attack_when = gframeid;
-            e.attack_facing = fac;
+            e.when = gframeid;
+            e.facing = fac;
             e.length = len;
             e.cf = [len] (color_t& col, int t) {
               auto& alpha = part(col, 0);

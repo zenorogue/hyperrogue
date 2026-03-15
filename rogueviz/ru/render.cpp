@@ -250,16 +250,16 @@ void man::draw() {
   auto efs = effects.begin();
 
   for(auto& e: effects) {
-    ld t = gframeid - e.attack_when;
-    if(t < 50) {
+    ld t = gframeid - e.when;
+    if(t < e.length) {
       auto col = e.p->get_color();
-      auto& alpha = part(col, 0);
-      alpha = max<int> (0, alpha - 5 * t);
+      e.cf(col, t);
       auto box = e.f(t);
       asciiletter(
         box.minx, box.miny, // where.x + af * ds.x - ds.x/2, where.y - ds.y/2,
         box.maxx, box.maxy, // where.x + af * ds.x + ds.x/2, where.y + ds.y/2,
-        e.attack_facing == -1 ? "(" : ")", col
+        (e.p->flags & ARMOR) ? ( e.facing == -1 ? "[" : "]" ) :
+        e.facing == -1 ? "(" : ")", col
         );
       *(efs++) = e;
       }

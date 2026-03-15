@@ -378,8 +378,10 @@ using boxfun = hr::function<bbox(int)>;
 
 struct effect {
   power *p;
-  int attack_facing;
-  int attack_when;
+  int facing;
+  int when;
+  int length;
+  hr::function<void(color_t&, int)> cf;
   boxfun f;
   };
 

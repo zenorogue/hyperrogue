@@ -185,9 +185,15 @@ void man::launch_attack(power *p, int fac, boxfun f) {
   effects.emplace_back();
   auto& e = effects.back();
   e.p = p;
-  e.attack_facing = fac;
-  e.attack_when = gframeid;
+  e.facing = fac;
+  e.when = gframeid;
   e.f = f;
+  e.length = 50;
+  e.cf = [&] (color_t col, int t) {
+    auto& alpha = part(col, 0);
+    alpha = max<int> (0, alpha - 5 * t);
+    };
+
   auto pb = f(0);
   auto bb = pixel_to_block(pb);
   for(auto& e: current_room->entities)
