@@ -944,12 +944,7 @@ EX namespace tactic {
           });
         }
       else if(uni == '0') {
-        if(tactic::on) {
-          stop_game();          
-          firstland = laIce;
-          restart_game(rg::tactic);
-          }
-        else popScreen();
+        popScreen();
         }
 
       else if(sym == SDLK_F1) gotoHelp(
