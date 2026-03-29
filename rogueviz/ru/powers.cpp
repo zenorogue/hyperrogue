@@ -236,8 +236,13 @@ power& power::be_potion() {
   }
 
 void random_potion_act(data& d) {
-  if(d.p->qty_filled == d.p->qty_owned) d.p->flags &=~ ACTIVE;
+  if(d.p->qty_filled == d.p->qty_owned) d.p->active_in_rooms.clear();
+  d.p->flags &=~ ACTIVE;
+  if(d.p->active_in_rooms.count(current_room)) d.p->flags |= ACTIVE;
   if(d.keystate == 1 && !(d.p->flags & ACTIVE)) {
+    d.flags &=~ DO_NOT_DRINK;
+    for(auto& e: d.p->randeffs) e->unact(d);
+    if(d.flags & DO_NOT_DRINK) return;
     if(d.p->qty_filled == 0) {
       addMessage("You have no more " + d.p->get_name());
       return;
@@ -250,6 +255,7 @@ void random_potion_act(data& d) {
       d.re = e; d.mode = rev::start;
       e->act(d);
       }
+    d.p->active_in_rooms.insert(current_room);
     d.p->flags |= (ACTIVE | PARTIAL | IDENTIFIED);
     d.p->qty_filled--;
     }

@@ -409,6 +409,7 @@ void enable() {
   set_sval();
   init_scales();
   gen_powers();
+  gen_randeffs();
   shuffle_all();
   
   hyperpoint aleft = deparabolic13(to_hyper(l_margin_at, yctr));

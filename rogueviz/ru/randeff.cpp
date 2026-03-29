@@ -7,6 +7,7 @@ randeff::randeff (string name, string desc, string effect, powerfun act)
    id = unspace(name);
    if(!all_effects) all_effects = new map<string, randeff*>;
    (*all_effects)[id] = this;
+   unact = [] (data&d) {};
    }
 
 randeff inc_str("Strength", "Increases your Strength by 50%.", "You feel stronger!", [] (data &d) { m.next.stats[stat::str] += m.current.stats[stat::str] / 3; });
@@ -261,6 +262,14 @@ vector<power*> all_weapons() {
     res.push_back(&w);
   if(res.empty()) res = { &find_power("dagger") };
   return res;
+  }
+
+void gen_randeffs() {
+  powerfun unmorph = [] (data& d) {
+    if(m.morphed) { m.handle_morph(nullptr); if(!m.morphed) d.flags |= DO_NOT_DRINK; }
+    };
+  morph_cat.unact = unmorph;
+  morph_capy.unact = unmorph;
   }
 
 void assign_potion_powers() {

@@ -12,7 +12,10 @@ struct data {
   struct power *p;
   struct randeff *re;
   rev mode;
+  flagtype flags;
   };
+
+flagtype DO_NOT_DRINK = 1;
 
 using powerfun = hr::function<void(data&)>;
 
@@ -24,6 +27,7 @@ struct randeff {
   power *which_weapon;
   int qty, a, b, c, d;
   powerfun act;
+  powerfun unact;
   randeff (string name, string desc, string effect, powerfun act);
   void hs(struct stater& s);
   };
@@ -44,6 +48,7 @@ struct power {
   int flags;
   int random_value;
   vector<struct randeff*> randeffs;
+  set<struct room*> active_in_rooms;
   void init();
   vector<struct weaponmod> mods;
   hr::function<void(data&)> act, paused_act, dead_act;
