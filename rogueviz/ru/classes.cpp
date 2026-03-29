@@ -407,6 +407,7 @@ struct man : public entity {
 
   virtual int max_hp() { return 10 * current.stats[stat::con]; }
 
+  void handle_morph(entity *m);
   bool can_see(entity& e);
   man();
   xy siz() override {

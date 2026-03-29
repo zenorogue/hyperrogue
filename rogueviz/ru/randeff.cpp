@@ -230,33 +230,28 @@ randeff ice_weapon("Chill Weapon", "Attacks with your [weapon] freeze things.", 
 
 flavor morph_cat_color;
 
+cat *new_cat() {
+  auto c = new cat;
+  c->id = "cat";
+  c->col = morph_cat_color;
+  return c;
+  }
+
+capybara *new_capy() {
+  auto c = new capybara;
+  c->id = "capy";
+  return c;
+  }
+
 // morph powers
 randeff morph_cat("Cat", "Turns you into a cat.", "You turn into a cat!", [] (data &d) {
   if(d.mode == rev::start || (d.mode == rev::active && d.keystate == 1) || (d.mode == rev::stop && m.morphed)) {
-    if(m.morphed) {
-      delete(m.morphed), m.morphed = nullptr;
-      addMessage("You morph back into a human.");
-      }
-    else {
-      auto mcat = new cat;
-      mcat->id = "cat";
-      mcat->col = morph_cat_color;
-      m.morphed = mcat;
-      addMessage("You morph into a " + m.morphed->get_name() + "!");
-      }
+    m.handle_morph(m.morphed ? nullptr : new_cat());
     }
   });
 randeff morph_capy("Capybara", "Turns you into a capybara.", "You turn into a capybara!", [] (data &d) {
   if(d.mode == rev::start || (d.mode == rev::active && d.keystate == 1) || (d.mode == rev::stop && m.morphed)) {
-    if(m.morphed) {
-      delete(m.morphed), m.morphed = nullptr;
-      addMessage("You morph back into a human.");
-      }
-    else {
-      m.morphed = new capybara;
-      m.morphed->id = "capy";
-      addMessage("You morph into a lovely capybara!");
-      }
+    m.handle_morph(m.morphed ? nullptr : new_capy());
     }
   });
 

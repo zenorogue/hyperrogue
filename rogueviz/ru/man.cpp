@@ -215,4 +215,45 @@ void man::launch_attack(power *p, int fac, boxfun f) {
     }
   }
 
+void man::handle_morph(entity *m) {
+  auto pre_size = get_pixel_bbox();
+  swap(m, morphed);
+  auto at = where;
+  if(on_floor) {
+    do {
+      where.y += 1;
+      }
+    while(get_pixel_bbox().maxy < pre_size.maxy);
+    do {
+      where.y -= 1;
+      }
+    while(get_pixel_bbox().maxy > pre_size.maxy);
+    }
+  println(hlog, "where moved from ", at.y, " to ", where.y);
+  auto bb = pixel_to_block(get_pixel_bbox());
+  println(hlog, "bblock is ", bb);
+  bool ok = true;
+  for(int x = bb.minx; x < bb.maxx; x++) for(int y = bb.miny; y < bb.maxy; y++) {
+    eWall b = current_room->at(x, y);
+    if(walls[b].flags & W_BLOCK) ok = false;
+    }
+  for(auto& e: current_room->entities) if(auto p = e->as_platform()) {
+    auto pb = p->get_pixel_bbox();
+    if(intersect(pb, bb)) ok = false;
+    }
+  if(ok) {
+    if(morphed) {
+      string adj = morphed->id == "capy" ? "lovely " : "";
+      addMessage("You morph into a " + adj + morphed->get_name() + "!");
+      }
+    else
+      addMessage("You morph back into a human.");
+    }
+  else {
+    swap(m, morphed); where = at;
+    addMessage("Not enough space here to morph!");
+    }
+  if(m) delete m;
+  }
+
 }
