@@ -194,4 +194,5 @@ extern vector<unique_ptr<struct entity>> new_entities;
 string unspace(const string& s);
 string respace(const string& s);
 
+extern map<string, entity*> entity_by_id;
 }

@@ -936,4 +936,27 @@ void icicle::act() {
     }
   }
 
+void guard_event::act() {
+  if(monster == nullptr) {
+    if(!entity_by_id.count(monster_name)) {
+      println(hlog, "Guard event not connected correctly: ", monster_name);
+      existing = false;
+      return;
+      }
+    monster = entity_by_id[monster_name];
+    println(hlog, "guard event connected");
+    }
+  if(item->existing && monster->existing) {
+    active = true;
+    monster->existing = false;
+    println(hlog, "guard event activated");
+    }
+  if(active && !item->existing && !monster->existing) {
+    monster->existing = true;
+    monster->invinc_end = max(monster->invinc_end, gframeid + 100);
+    active = false;
+    println(hlog, "guard event deactivated");
+    }
+  }
+
 }

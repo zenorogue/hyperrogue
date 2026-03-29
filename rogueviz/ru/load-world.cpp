@@ -185,6 +185,17 @@ void load_room(fhstream& f, cell *c) {
         b->id = unspace(b->pickup_message = scanline_noblank(f));
         r.entities.emplace_back(std::move(b));
         }
+      else if(cap == "GUARD") {
+        auto loot = &*r.entities.back();
+        println(hlog, "loot is ", loot->id);
+        auto b = std::make_unique<guard_event>();
+        b->item = loot;
+        b->monster = nullptr;
+        b->monster_name = cutoff("NOTHING");
+        b->id = b->monster_name + "-GUARD";
+        println(hlog, "guard ", b->id, " added on ", b->item->id);
+        r.entities.emplace_back(std::move(b));
+        }
       else if(cap == "SHOPITEM") {
         auto b = std::make_unique<shopitem>();
         b->respawn = get_xy();

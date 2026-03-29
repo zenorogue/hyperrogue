@@ -841,6 +841,23 @@ struct shopitem : public item {
   virtual void hs(stater& s) override { item::hs(s); s.act("bought", bought, false).act("last_intersect", last_intersect, 0); }
   };
 
+struct non_spatial_entity : public entity {
+  virtual xy siz() { return {0,0}; }
+  virtual string glyph() { return "?"; }
+  virtual color_t color() { return 0xC04040FF; }
+  virtual void draw() override {}
+  virtual void act() override {}
+  virtual bool hidden() override { return true; }
+  };
+
+struct guard_event : non_spatial_entity {
+  entity *item, *monster;
+  string monster_name;
+  bool active;
+  virtual void act() override;
+  virtual void hs(stater& s) override { entity::hs(s); s.act("active", active, false); }
+  };
+
 struct loot : public item {
   entity *owner;
   bool dropped;
