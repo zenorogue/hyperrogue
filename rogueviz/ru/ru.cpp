@@ -399,6 +399,8 @@ string parse_markup(string s) {
 
 void enable() {
 
+  if(powers.size()) throw hr_exception("error: ru doubly-enabled");
+
   stop_game();
   geometry = gBinary4;
   showstartmenu = false;
