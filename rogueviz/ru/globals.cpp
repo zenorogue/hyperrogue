@@ -59,7 +59,8 @@ enum eWall {
   wAir, wWall, wBouncy, wSpike, wWater, wFrozen, wDoor, wSmashedDoor,
   wLockedDoor, wFountain, wBluePortal, wOrangePortal, wPlatform, wStaircase,
   wColumn, wForge, wWoodWall, wShopDoor, wSecretPassage, wSign, wWallSign, wTimeDoor, 
-  wBottomSpike, wRogueWallHidden, wRogueWall, wRightSlope, wLeftSlope, wLeftSlopedRoof, wRightSlopedRoof, wGUARD };
+  wBottomSpike, wRogueWallHidden, wRogueWall, wRightSlope, wLeftSlope, wLeftSlopedRoof, wRightSlopedRoof,
+  wWeakWall, wStrangeSign, wGUARD };
 
 flagtype W_BLOCK = 1;
 flagtype W_TRANS = 2;
@@ -105,6 +106,8 @@ ruwall walls[qwall] = {
   {"left slope", "\\", 0xFFFFFFFF, W_STABLE | W_SLOPE, "Slope here."},
   {"left sloped roof", "/", 0xC0C0C0FF, W_BLOCK, "Sloped roof."},
   {"right sloped roof", "\\", 0xC0C0C0FF, W_BLOCK, "Sloped roof."},
+  {"weak wall", "#", 0xC08080FF, W_BLOCK | W_STABLE, "These walls are quite weak, and can be destroyed with a weapon powerful enough, for example, an axe."},
+  {"strange sign", "X", 0x90909080, W_TRANS, "A strange sign is drawn in the background."},
   };
 
 int sel = 1;
