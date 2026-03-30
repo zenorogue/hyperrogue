@@ -321,6 +321,11 @@ void load_room(fhstream& f, cell *c) {
         b->a = get_xy(); b->b = get_xy(); b->period = get_ld(); b->shift = get_ld();
         r.entities.emplace_back(std::move(b));
         }
+      else if(cap == "ELLIPSE") {
+        auto b = std::make_unique<ellipse_platform>();
+        b->a = get_xy(); b->b = get_xy(); b->period = get_ld(); b->shift = get_ld(); b->ratio = get_ld();
+        r.entities.emplace_back(std::move(b));
+        }
       else if(cap == "HINT") {
         auto b = std::make_unique<hint>();
         b->respawn = get_xy(); b->size = get_xy();

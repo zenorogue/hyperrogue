@@ -484,6 +484,16 @@ struct pendulum_platform : public moving_platform {
   string get_help() override { return "These pendulum platforms go back and forth between two locations, taking the shortest path possible."; }
   };
 
+struct ellipse_platform : public moving_platform {
+  xy a, b;
+  ld ratio, period, shift;
+  vector<hyperpoint> points;
+  vector<ld> lengthsum;
+  xy location_at(ld t) override;
+  string get_name() override { return "ellipse platform"; }
+  string get_help() override { return "These platforms go in an ellipse."; }
+  };
+
 struct rope_platform : public moving_platform {
   ld period, shift, dist, max_swing;
   xy location_at(ld t) override;

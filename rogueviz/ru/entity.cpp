@@ -623,6 +623,36 @@ xy pendulum_platform::location_at(ld t) {
   return from_hyper(rgpushxto0(h1) * rspintox(gpushxto0(h1) * h2) * xpush0(x));
   }
 
+xy ellipse_platform::location_at(ld t) {
+  if(points.empty()) {
+    auto h1 = to_hyper(a);
+    auto h2 = to_hyper(b);
+    auto m = mid(h1, h2);
+    ld wanted = hdist(h1, h2) * ratio;
+    for(int it=0; it<360; it++) {
+      auto p = [&] (ld x) { return rgpushxto0(m) * spin(it*1._deg) * xpush0(x); };
+      ld x = binsearch(0, 5, [&] (ld x) { auto px = p(x); return hdist(h1, px) + hdist(h2, px) >= wanted; });
+      points.push_back(p(x));
+      }
+    int N = isize(points);
+    points.push_back(points[0]);
+    ld ls = 0;
+    for(int i=0; i<N; i++) {
+      lengthsum.push_back(ls);
+      ls += hdist(points[i], points[i+1]);
+      }
+    lengthsum.push_back(ls);
+    }
+  ld our_t = t / (period * game_fps);
+  our_t -= floor(our_t);
+  our_t *= lengthsum.back();
+  auto it = lower_bound(lengthsum.begin(), lengthsum.end(), our_t);
+  auto index = it - lengthsum.begin();
+  auto& h1 = points[index-1];
+  auto& h2 = points[index];
+  return from_hyper(rgpushxto0(h1) * rspintox(gpushxto0(h1) * h2) * xpush0(our_t - lengthsum[index-1]));
+  }
+
 void moving_platform::draw() {
   double d = get_scale();
   auto wi = width();
