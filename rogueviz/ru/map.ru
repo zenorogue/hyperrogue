@@ -469,6 +469,7 @@ What a shiny crystal ball!
 ITEM 75 200 20
 gold
 You found 20 gold pieces
+GUARD Sssss
 KESTREL Magpie 85 66 15 15
 KESTREL Loon 527 65 20 10
 KESTREL Emu 309 211 10 20
@@ -477,6 +478,7 @@ KESTREL Nandu 561 198 25 5
 SNAKE Ss 111 220 1
 SNAKE Sss 549 234 1
 SNAKE Ssss 493 135 1
+SNAKE Sssss 75 200 1
 OK
 
 MOVE 2 Dungeon Entrance
