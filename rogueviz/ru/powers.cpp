@@ -459,7 +459,7 @@ void gen_powers() {
       if(d.keystate != 1) return;
       int fac = m.facing;
       m.launch_attack(d.p, fac, [fac] (int t) { return m.get_pixel_bbox_at(xy{m.where.x + fac * (1-0.01 * t) * m.dsiz().x, m.where.y}, 2, 2); });
-      }).be_weapon(),
+      }).be_weapon().add_flags(WEAPON_AXE),
 
   gen_power('o', 0, "strange blue crystal ball", "You feel an urge to look into it.",
     "o", 0x00FF00FF,

@@ -207,6 +207,14 @@ void man::launch_attack(power *p, int fac, boxfun f) {
   for(int y=bb.miny; y<bb.maxy; y++)
   for(int x=bb.minx; x<bb.maxx; x++) {
     int b = current_room->at(x, y);
+    if(b == wWeakWall && (p->flags & WEAPON_AXE)) {
+      current_room->replace_block_frev(x, y, wSmashedDoor);
+      addMessage("You smash the wall!");
+      }
+    if(b == wDoor && (p->flags & WEAPON_AXE)) {
+      current_room->replace_block_frev(x, y, wSmashedDoor);
+      addMessage("You SMASH the door!");
+      }
     if(b == wDoor) {
       current_room->replace_block_frev(x, y, wSmashedDoor);
       addMessage("You smash the door!");

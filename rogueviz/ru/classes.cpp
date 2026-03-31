@@ -70,6 +70,7 @@ struct power {
   power& be_jewelry(string jtype, string desc);
   power& be_potion();
   power& gain(int qf, int qo) { qty_filled += qf; qty_owned += qo; return self; }
+  power& add_flags(flagtype f) { flags |= f; return self; }
   void hs(struct stater& s);
   };
 
@@ -81,6 +82,7 @@ flagtype ACTIVE = Flag(2);
 flagtype PARTIAL = Flag(4);
 flagtype WEAPON = Flag(8);
 flagtype ARMOR = Flag(16);
+flagtype WEAPON_AXE = Flag(32);
 
 struct bbox {
   int minx, miny, maxx, maxy;
