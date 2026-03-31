@@ -84,6 +84,7 @@ randeff trap_disarm("Disarm traps", "Lets you see all traps on the level for a s
         e->existing = false;
         addMessage("You have disarmed a "+e->hal()->get_name()+".");
         }
+      e->invinc_end = sav; e->attacked(0, thief_power);
       },
     [] (int x, int y) {
       int b = current_room->at(x, y);
@@ -197,7 +198,7 @@ randeff fire_weapon("Fiery Weapon", "Attacks with your [weapon] set things on fi
        [] (color_t& col) { col = gradient(0xFFFF00FF, 0xFF0000FF, -1, sin(ticks/100), 1); },
        [] (string& s) { s = "burning " + s; },
        [] (entity *e, int dam, int sav) {
-         e->invinc_end = sav; e->attacked(2 * m.current.stats[stat::wis] + 1e-6);
+         e->invinc_end = sav; e->attacked(2 * m.current.stats[stat::wis] + 1e-6, fire_power);
          },
        [] (int x, int y) {
          int b = current_room->at(x, y);
@@ -217,7 +218,7 @@ randeff ice_weapon("Chill Weapon", "Attacks with your [weapon] freeze things.", 
        [] (color_t& col) { col = 0x8080FFFF; },
        [] (string& s) { s = "freezing " + s; },
        [] (entity *e, int dam, int sav) {
-         e->invinc_end = sav; e->attacked(2 * m.current.stats[stat::wis] + 1e-6);
+         e->invinc_end = sav; e->attacked(2 * m.current.stats[stat::wis] + 1e-6, ice_power);
          },
        [] (int x, int y) {
          int b = current_room->at(x, y);

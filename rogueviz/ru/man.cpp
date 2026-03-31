@@ -201,7 +201,7 @@ void man::launch_attack(power *p, int fac, boxfun f) {
     if(e->existing && intersect(e->get_pixel_bbox(), pb)) {
       int sav = e->invinc_end;
       int dam = (m.current.stats[stat::str] + 1) * 3 / 2;
-      e->attacked(dam);
+      e->attacked(dam, p);
       for(auto& md: p->mods) md.action(&*e, dam, sav);
       }
   for(int y=bb.miny; y<bb.maxy; y++)

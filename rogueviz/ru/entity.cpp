@@ -349,7 +349,7 @@ void missile::act() {
     if(freezing() && e->as_missile() && e->burning()) { destroyed = true; e->destroyed = true; }
     hit_list.insert(&*e);
     e->invinc_end = 0;
-    e->attacked(power);
+    e->attacked(power, burning() ? fire_power : freezing() ? ice_power : nullptr);
     }
   }
 
@@ -425,15 +425,15 @@ void boar::act() {
     }
   }
 
-void enemy::attacked(int dmg) {
+void enemy::attacked(int dmg, power *p) {
   current_target = this;
   if(reduce_hp(dmg)) {
     if(!existing) addMessage("You kill the " + hal()->get_name() + "."); else addMessage("You hit the " + hal()->get_name() + ".");
     }
   }
 
-void boar::attacked(int dmg) {
-  enemy::attacked(dmg);
+void boar::attacked(int dmg, power *p) {
+  enemy::attacked(dmg, p);
   auto dat = get_dat();
   int s = where.x < m.where.x ? -1 : 1;
   if(on_floor) vel.x = dat.d * dat.modv * s * 2, vel.y = -dat.d * dat.modv * 2.5;
@@ -486,8 +486,8 @@ void frog::act() {
     }
   }
 
-void frog::attacked(int dmg) {
-  enemy::attacked(dmg);
+void frog::attacked(int dmg, power *p) {
+  enemy::attacked(dmg, p);
   auto dat = get_dat();
   int s = where.x < m.where.x ? -1 : 1;
   if(on_floor) vel.x = dat.d * dat.modv * s * 2, vel.y = -dat.d * dat.modv * 2.5;
@@ -526,8 +526,8 @@ void snake::act() {
     }
   }
 
-void snake::attacked(int dmg) {
-  enemy::attacked(dmg);
+void snake::attacked(int dmg, power *p) {
+  enemy::attacked(dmg, p);
   dir *= -1;
   if(where.x < m.where.x) vel.x = -abs(vel.x);
   if(where.x > m.where.x) vel.x = +abs(vel.x);
@@ -571,8 +571,8 @@ void naga_warrior::draw() {
     }
   }
 
-void naga_warrior::attacked(int dmg) {
-  enemy::attacked(dmg); // do not reverse on being attacked!
+void naga_warrior::attacked(int dmg, power *p) {
+  enemy::attacked(dmg, p); // do not reverse on being attacked!
   }
 
 void hint::act() {
@@ -884,8 +884,8 @@ void guineapig::act() {
   falling = true; vel = xy(0, 0);
   }
 
-void guineapig::attacked(int dmg) {
-  enemy::attacked(dmg);
+void guineapig::attacked(int dmg, power *p) {
+  enemy::attacked(dmg, p);
   spindir *= -1;
   }
 
@@ -904,14 +904,14 @@ void vtrap::act() {
     }
   }
 
-void kestrel::attacked(int dmg) {
-  enemy::attacked(dmg);
+void kestrel::attacked(int dmg, power *p) {
+  enemy::attacked(dmg, p);
   if(where.x < m.where.x) vel.x = -abs(vel.x);
   if(where.x > m.where.x) vel.x = +abs(vel.x);
   }
 
-void bat::attacked(int dmg) {
-  enemy::attacked(dmg);
+void bat::attacked(int dmg, power *p) {
+  enemy::attacked(dmg, p);
   if(where.x < m.where.x) vel.x = -abs(vel.x);
   if(where.x > m.where.x) vel.x = +abs(vel.x);
   if(where.y < m.where.y) vel.y = -abs(vel.y);

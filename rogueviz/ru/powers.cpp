@@ -302,6 +302,7 @@ power& gen_power(int key, int shifted, string name, string desc, string glyph, c
 power *extra_life;
 int gold_id;
 power *dexmode;
+power *fire_power, *ice_power, *thief_power;
 
 void power_death_revert(power& p) {
   add_revert(death_revert, {"ITEM", p.id, its(p.qty_filled), its(p.qty_owned)});
@@ -425,7 +426,7 @@ void gen_powers() {
      "]", 0xC0C0C0FF,
     [] (data& d) {}).be_armor({{"a chain shirt", "plate armor"}, {"an iron cap", "an iron helmet"}, {"an iron gorget"}, {"bracers"}, {"gauntlets"}, {"iron-shod boots"}, {"greaves"}}),
 
-  gen_power('t', 1, "thief garments",
+  thief_power = &gen_power('t', 1, "thief garments",
     "This outfit makes it harder for enemies to notice or hit you.",
      "]", 0xC08000FF,
     [] (data& d) {}).be_armor({{"a leather vest"}, {"a hood"}, {"comfortable boots", "muffled boots", "boots of dodging"}, {"a cloak", "chameleon cloak"}, {"leather gloves"}, {"leather pants"}}),
@@ -587,7 +588,7 @@ void gen_powers() {
     random_potion_act
     ).be_potion(),
 
-  gen_power('4', 0, "fire",
+  fire_power = &gen_power('4', 0, "fire",
     "This will let you produce fire, in some way.",
     "!", 0xFFFF00FF,
     random_potion_act

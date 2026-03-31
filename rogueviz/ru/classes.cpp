@@ -316,7 +316,7 @@ struct entity {
 
   virtual void draw();
 
-  virtual void attacked(int s) {}
+  virtual void attacked(int s, power *p) {}
 
   virtual void spiked() {
     reduce_hp(10);
@@ -564,7 +564,7 @@ struct enemy : public located_entity {
     if(!avoided) score();
     }
   virtual void hs(stater& s) override { located_entity::hs(s); s.only_full().act("kills", num_kills, 0); s.act("avoided", avoided, false); }
-  void attacked(int s) override;
+  void attacked(int s, power *p) override;
   virtual int base_xp() { return 0; }
   bool hit_by_missile(missile *m) override { return true; }
   enemy* as_enemy() override { return this; }
@@ -610,7 +610,7 @@ struct boar : public enemy {
   string glyph() override { return "B"; }
   color_t color() override { return 0x804000FF; }
   void act() override;
-  void attacked(int s) override;
+  void attacked(int s, power *p) override;
   string get_name() override { return "giant boar"; }
   string get_help() override { return "Beware their tusks."; }
   int base_xp() { return 60; }
@@ -625,7 +625,7 @@ struct frog : public enemy {
   ld maxrange() { return 50; }
   color_t color() override { return 0x208020FF; }
   void act() override;
-  void attacked(int s) override;
+  void attacked(int s, power *p) override;
   string get_name() override { return "frog"; }
   string get_help() override { return "What a nice frog."; }
   int base_xp() { return 30; }
@@ -668,7 +668,7 @@ struct snake : public enemy {
   string glyph() override { return "S"; }
   color_t color() override { return 0x20D020FF; }
   void act() override;
-  void attacked(int s) override;
+  void attacked(int s, power *p) override;
   string get_name() override { return "snake"; }
   string get_help() override { return "A nasty dungeon snake."; }
   int base_xp() override { return 10; }
@@ -704,7 +704,7 @@ struct naga_warrior : public snake {
   int max_hp() override { return 500; }
   xy siz() override { return {25, 25}; }
   void act() override;
-  void attacked(int s) override;
+  void attacked(int s, power *p) override;
   void draw() override;
   virtual int chop() { return 32; }
   };
@@ -715,7 +715,7 @@ struct kestrel : public enemy {
   string glyph() override { return "K"; }
   color_t color() override { return 0xD0A0A0FF; }
   void act() override;
-  void attacked(int s) override;
+  void attacked(int s, power *p) override;
   string get_name() override { return "kestrel"; }
   string get_help() override { return "A standard dungeon kestrel."; }
   int base_xp() { return 30; }
@@ -753,7 +753,7 @@ struct bat : public enemy {
   string glyph() override { return "B"; }
   color_t color() override { return 0xD0A0A0FF; }
   void act() override;
-  void attacked(int s) override;
+  void attacked(int s, power *p) override;
   string get_name() override { return "bat"; }
   string get_help() override { return "A cave bat."; }
   int base_xp() { return 10; }
@@ -770,7 +770,7 @@ struct guineapig : public enemy {
   string glyph() override { return "G"; }
   color_t color() override { return 0xD0A0A0FF; }
   void act() override;
-  void attacked(int s) override;
+  void attacked(int s, power *p) override;
   string get_name() override { return "guinea pig"; }
   string get_help() override { return "A standard dungeon guinea pig."; }
   int base_xp() { return 30; }
