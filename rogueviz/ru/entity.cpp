@@ -669,6 +669,52 @@ void moving_platform::act() {
   where = location_at(gframeid);
   }
 
+void saw::act() {
+  auto b = base->as_platform();
+  if(!b) { addMessage("You have a vision of an otherworldly saw!"); existing = false; return; }
+  where = b->location_at(gframeid);
+  auto bb = get_pixel_bbox();
+  if(intersect(bb, m.get_pixel_bbox())) {
+    if(m.reduce_hp(40)) addMessage("The " + get_name() + " shreds you!");
+    }
+  }
+
+void weaksaw::attacked(int s, power *p) {
+  if(p->flags & WEAPON_AXE) {
+    addMessage("You smash the " + get_name() + "!");
+    existing = false;
+    }
+  }
+
+void woodsaw::attacked(int s, power *p) {
+  if(p == fire_power) {
+    addMessage("You incinerate the " + get_name() + "!");
+    existing = false;
+    }
+  }
+
+void fakesaw::act() {
+  auto b = base->as_platform();
+  if(!b) { addMessage("You have a vision of an otherworldly saw!"); existing = false; return; }
+  where = b->location_at(gframeid);
+  auto bb = get_pixel_bbox();
+  if(intersect(bb, m.get_pixel_bbox())) {
+    addMessage("This " + get_name() + " turned out to be an illusion!");
+    existing = false;
+    }
+  if(m.can_see(self)) {
+    addMessage("You realize that the " + get_name() + " is an illusion!");
+    existing = false;
+    }
+  }
+
+void fakesaw::attacked(int s, power *p) {
+  if(p == thief_power) {
+    addMessage("Your attack goes right through the " + get_name() + "!");
+    existing = false;
+    }
+  }
+
 void entity::apply_walls_reflect() {
   int loopcount = 0;
   again:

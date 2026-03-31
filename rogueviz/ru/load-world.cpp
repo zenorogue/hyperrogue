@@ -326,6 +326,26 @@ void load_room(fhstream& f, cell *c) {
         b->a = get_xy(); b->b = get_xy(); b->period = get_ld(); b->shift = get_ld(); b->ratio = get_ld();
         r.entities.emplace_back(std::move(b));
         }
+      else if(cap == "SAW") {
+        auto b = std::make_unique<saw>(); nam(*b);
+        b->base = std::move(r.entities.back());
+        r.entities.back() = std::move(b);
+        }
+      else if(cap == "WOODSAW") {
+        auto b = std::make_unique<woodsaw>(); nam(*b);
+        b->base = std::move(r.entities.back());
+        r.entities.back() = std::move(b);
+        }
+      else if(cap == "WEAKSAW") {
+        auto b = std::make_unique<weaksaw>(); nam(*b);
+        b->base = std::move(r.entities.back());
+        r.entities.back() = std::move(b);
+        }
+      else if(cap == "FAKESAW") {
+        auto b = std::make_unique<fakesaw>(); nam(*b);
+        b->base = std::move(r.entities.back());
+        r.entities.back() = std::move(b);
+        }
       else if(cap == "HINT") {
         auto b = std::make_unique<hint>();
         b->respawn = get_xy(); b->size = get_xy();

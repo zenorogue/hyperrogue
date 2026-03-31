@@ -507,6 +507,32 @@ struct rope_platform : public moving_platform {
   void draw() override;
   };
 
+struct saw: public entity {
+  unique_ptr<entity> base;
+  string glyph() override { return "*"; }
+  color_t color() override { return walls[wWall].color; }
+  xy siz() override { return {18, 18}; }
+  string get_name() override { return "circular saw"; }
+  void act() override;
+  };
+
+struct weaksaw : public saw {
+  color_t color() override { return walls[wWeakWall].color; }
+  string get_name() override { return "weak saw"; }
+  void attacked(int s, power *p) override;
+  };
+
+struct woodsaw  : public saw {
+  color_t color() override { return walls[wWoodWall].color; }
+  string get_name() override { return "wooden saw"; }
+  void attacked(int s, power *p) override;
+  };
+
+struct fakesaw : public saw {
+  void attacked(int s, power *p) override;
+  void act() override;
+  };
+
 /* entities with a defined 'respawn' location */
 struct located_entity : public entity {
   xy respawn;
