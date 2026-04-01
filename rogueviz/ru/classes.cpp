@@ -171,6 +171,12 @@ struct room {
     place_block_full(x, y, b);
     }
   
+  void replace_block_death(int x, int y, eWall w) {
+    auto orig = at(x, y);
+    replace_block(x, y, w);
+    add_revert(death_revert, {"BLOCK", id, its(x), its(y), its(orig)});
+    }
+
   void replace_block_frev(int x, int y, eWall w) {
     auto orig = at(x, y);
     replace_block(x, y, w);
@@ -551,6 +557,22 @@ struct timed_orb : public located_entity {
   void act() override;
   string get_name() override { return "time orb"; }
   string get_help() override { return "These orbs activate mechanisms for a limited time."; }
+  };
+
+struct switch_event {
+  bbox box;
+  eWall wall;
+  };
+
+struct mapswitch : public located_entity {
+  vector<switch_event> events;
+  string text, name;
+  xy siz() override { return {18, 18}; }
+  string glyph() override { return "!"; }
+  color_t color() override { return 0xA06000FF; }
+  void act() override;
+  string get_name() override { return name; }
+  string get_help() override { return text; }
   };
 
 struct npc_or_trader : public located_entity {

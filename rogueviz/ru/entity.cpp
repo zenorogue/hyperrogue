@@ -369,6 +369,20 @@ void npc_or_trader::act() {
     }
   }
 
+void mapswitch::act() {
+  if(intersect(get_pixel_bbox(), m.get_pixel_bbox())) {
+    bool didsomething = false;
+    for(auto& ev: events) {
+      for(int y=ev.box.miny; y<ev.box.maxy; y++)
+      for(int x=ev.box.minx; x<ev.box.maxx; x++) {
+        int b = current_room->at(x, y);
+        if(b != ev.wall) { didsomething = true; current_room->replace_block_death(x, y, ev.wall); }
+        }
+      }
+    if(didsomething) addMessage(text);
+    }
+  }
+
 extern int gold_id;
 
 string shopitem::glyph() { if(bought) return powers[gold_id].get_glyph(); else return item::glyph(); }

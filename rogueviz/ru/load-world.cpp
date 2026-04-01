@@ -105,6 +105,8 @@ void create_long_rope(room& r, int step, xy w) {
     }
   }
 
+mapswitch *lmev;
+
 void load_room(fhstream& f, cell *c) {
   setdist(c, 7, nullptr);
   auto& r = *get_room_at(c);
@@ -369,6 +371,28 @@ void load_room(fhstream& f, cell *c) {
         b->name = s.substr(1);
         b->text = scanline_noblank(f);
         visions.emplace_back(std::move(b));
+        }
+      else if(cap == "MAPSWITCH") {
+        auto b = std::make_unique<mapswitch>();
+        b->respawn = get_xy();
+        b->name = scanline_noblank(f);
+        b->text = scanline_noblank(f);
+        lmev = &*b;
+        r.entities.emplace_back(std::move(b));
+        }
+      else if(cap == "SWITCHEVENT") {
+        if(!lmev) throw hr_exception("SWITCHEVENT without MAPSWITCH");
+        auto& ev = lmev->events;
+        ev.emplace_back();
+        ev.back().box.minx = get_int();
+        ev.back().box.miny = get_int();
+        ev.back().box.maxx = get_int();
+        ev.back().box.maxy = get_int();
+        ev.back().wall = wDoor;
+        bool ok = false;
+        for(int i=0; i<qwall; i++) if(walls[i].name + " " == param)
+          ev.back().wall = eWall(i), ok = true;
+        if(!ok) println(hlog, "warning: SWITCHEVENT wall not recognized");
         }
       else println(hlog, "unknown mapline ", s);
       }
