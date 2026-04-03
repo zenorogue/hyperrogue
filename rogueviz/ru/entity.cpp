@@ -401,6 +401,16 @@ void timed_orb::act() {
     current_room->timed_orb_end = gframeid + duration;
   }
 
+void dark_orb::preact() {
+  for(int y=box.miny; y<box.maxy; y++)
+  for(int x=box.minx; x<box.maxx; x++)
+    current_room->unreveal(x, y);
+  if(intersect(get_pixel_bbox(), m.get_pixel_bbox())) {
+    addMessage("You shatter the orb of darkness!");
+    existing = false;
+    }
+  }
+
 void trader::act() {
   bool any_purchases = false;
   for(auto& e: current_room->entities) if(auto si = e->as_shopitem()) if(!si->existing) any_purchases = true;

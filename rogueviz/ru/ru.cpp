@@ -148,9 +148,11 @@ tuple<xy, ld, int> get_next_room(xy w, room *r, int which) {
 vector<unique_ptr<struct entity>> new_entities;
 
 void playing_frame() {
-  m.act();
-
   auto& ents = current_room->entities;
+
+  for(auto& e: ents) if(e->existing) e->preact();
+
+  m.act();
 
   for(auto& e: ents) if(e->existing) e->act(); else e->unact();
 

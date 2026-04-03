@@ -188,6 +188,7 @@ struct room {
   void generate();
 
   void reveal(int cx, int cy);
+  void unreveal(int cx, int cy);
   void reveal_around(int cx, int cy);
   void fov_from(int sx, int sy);
 
@@ -368,6 +369,8 @@ struct entity {
   entity *hal();
 
   virtual bool nonstatic() { return true; }
+
+  virtual void preact() {}
   };
 
 struct weaponmod {
@@ -557,6 +560,17 @@ struct timed_orb : public located_entity {
   void act() override;
   string get_name() override { return "time orb"; }
   string get_help() override { return "These orbs activate mechanisms for a limited time."; }
+  };
+
+struct dark_orb : public located_entity {
+  int duration;
+  bbox box;
+  xy siz() override { return {18, 18}; }
+  string glyph() override { return "O"; }
+  color_t color() override { return 0x303030FF; }
+  void preact() override;
+  string get_name() override { return "dark orb"; }
+  string get_help() override { return "These orbs make it impossible to map a part of room."; }
   };
 
 struct switch_event {

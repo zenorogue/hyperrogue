@@ -164,6 +164,7 @@ void load_room(fhstream& f, cell *c) {
       auto get_int = [&] () { return atoi(cutoff("0").c_str()); };
       auto get_color = [&] () { color_t col; sscanf(cutoff("0").c_str(), "%08x", &col); return col; };
       auto get_xy = [&] () { ld x = get_ld(); ld y = get_ld(); return xy{x, y}; };
+      auto get_box = [&] () { bbox b; b.minx = get_int(); b.miny = get_int(); b.maxx = get_int(); b.maxy = get_int(); return b; };
 
       if(cap == "START") {
         fountain_room = current_room = &r;
@@ -246,6 +247,12 @@ void load_room(fhstream& f, cell *c) {
         auto b = std::make_unique<timed_orb>();
         b->respawn = get_xy();
         b->duration = get_ld() * game_fps;
+        r.entities.emplace_back(std::move(b));
+        }
+      else if(cap == "DARKORB") {
+        auto b = std::make_unique<dark_orb>(); nam(*b);
+        b->respawn = get_xy();
+        b->box = get_box();
         r.entities.emplace_back(std::move(b));
         }
       else if(cap == "BAT") {
@@ -384,11 +391,7 @@ void load_room(fhstream& f, cell *c) {
         if(!lmev) throw hr_exception("SWITCHEVENT without MAPSWITCH");
         auto& ev = lmev->events;
         ev.emplace_back();
-        ev.back().box.minx = get_int();
-        ev.back().box.miny = get_int();
-        ev.back().box.maxx = get_int();
-        ev.back().box.maxy = get_int();
-        ev.back().wall = wDoor;
+        ev.back().box = get_box();
         bool ok = false;
         for(int i=0; i<qwall; i++) if(walls[i].name + " " == param)
           ev.back().wall = eWall(i), ok = true;
