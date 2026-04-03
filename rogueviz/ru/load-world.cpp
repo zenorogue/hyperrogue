@@ -65,8 +65,9 @@ void save_map(string fname) {
     for(int y=0; y<room_y; y++) {
       for(int x=0; x<room_x; x++) {
         auto v = r.block_at[y][x];
-        if(v == int(wRogueWallHidden)) v = int(wRogueWall);
-        print(f, format("%c", (v & 7) == 7 ? 'b' : code_for[v>>3]));
+        auto vi = v >> 3;
+        if(vi == int(wRogueWallHidden)) vi = int(wRogueWall);
+        print(f, format("%c", (v & 7) == 7 ? 'b' : code_for[vi]));
         }
       println(f);
       }
