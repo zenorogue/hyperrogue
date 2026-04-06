@@ -478,7 +478,8 @@ struct moving_platform : public entity {
   void draw() override;
   void act() override;
   virtual moving_platform* as_platform() { return this; }
-  string get_name() override { return "moving platform"; }
+  virtual string get_shape_name() { return "moving"; }
+  string get_name() override { return get_shape_name() + " platform"; }
   string get_help() override { return "Moving platforms move."; }
   bool nonstatic() override { return false; }
   };
@@ -493,8 +494,8 @@ struct pendulum_platform : public moving_platform {
   xy a, b;
   ld period, shift;
   xy location_at(ld t) override;
-  string get_name() override { return "pendulum platform"; }
-  string get_help() override { return "These pendulum platforms go back and forth between two locations, taking the shortest path possible."; }
+  string get_shape_name() override { return "pendulum"; }
+  string get_help() override { return "Pendulums go back and forth between two locations, taking the shortest path possible."; }
   };
 
 struct ellipse_platform : public moving_platform {
@@ -503,8 +504,8 @@ struct ellipse_platform : public moving_platform {
   vector<hyperpoint> points;
   vector<ld> lengthsum;
   xy location_at(ld t) override;
-  string get_name() override { return "ellipse platform"; }
-  string get_help() override { return "These platforms go in an ellipse."; }
+  string get_shape_name() override { return "ellipse"; }
+  string get_help() override { return "There are two focal points, and the sum of distances from them remains constant."; }
   };
 
 struct rope_platform : public moving_platform {
@@ -520,22 +521,23 @@ struct rope_platform : public moving_platform {
 
 struct saw: public entity {
   unique_ptr<entity> base;
+  moving_platform& mp() { return (moving_platform&)(*base); }
   string glyph() override { return "*"; }
   color_t color() override { return walls[wWall].color; }
   xy siz() override { return {18, 18}; }
-  string get_name() override { return "circular saw"; }
+  string get_name() override { return mp().get_shape_name() + " circular saw"; }
   void act() override;
   };
 
 struct weaksaw : public saw {
   color_t color() override { return walls[wWeakWall].color; }
-  string get_name() override { return "weak saw"; }
+  string get_name() override { return mp().get_shape_name() + " weak saw"; }
   void attacked(int s, power *p) override;
   };
 
 struct woodsaw  : public saw {
   color_t color() override { return walls[wWoodWall].color; }
-  string get_name() override { return "wooden saw"; }
+  string get_name() override { return mp().get_shape_name() + " wooden saw"; }
   void attacked(int s, power *p) override;
   };
 
