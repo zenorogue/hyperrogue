@@ -329,7 +329,10 @@ struct entity {
 
   virtual void spiked() {
     reduce_hp(10);
+    spike_message();
     }
+
+  virtual void spike_message() {}
 
   virtual string glyph() = 0;
   virtual color_t color() = 0;
@@ -448,8 +451,7 @@ struct man : public entity {
 
   bool hit_by_missile(missile *m) override { return true; }
 
-  virtual void spiked() {
-    entity::spiked();
+  virtual void spike_message() override {
     addMessage("OUCH! These spikes hurt!");
     }
 
