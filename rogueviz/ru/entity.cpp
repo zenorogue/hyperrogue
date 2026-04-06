@@ -647,6 +647,22 @@ xy pendulum_platform::location_at(ld t) {
   return from_hyper(rgpushxto0(h1) * rspintox(gpushxto0(h1) * h2) * xpush0(x));
   }
 
+xy horoplatform::location_at(ld t) {
+  ld tp = t / game_fps / period - shift;
+  tp = tp - floor(tp);
+  tp = min(2*tp, 2-2*tp);
+  return xy(lerp(a.x, b.x, tp), lerp(a.y, b.y, tp));
+  }
+
+xy cycloid_platform::location_at(ld t) {
+  auto b =base->location_at(t);
+  auto h1 = to_hyper(b);
+  auto ph = t / game_fps / period + shift;
+  auto h2 = rgpushxto0(h1) * xspinpush0(ph * TAU, radius);
+  auto p = from_hyper(h2);
+  return p;
+  }
+
 xy ellipse_platform::location_at(ld t) {
   if(points.empty()) {
     auto h1 = to_hyper(a);

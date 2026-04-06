@@ -108,6 +108,8 @@ void create_long_rope(room& r, int step, xy w) {
 
 mapswitch *lmev;
 
+moving_platform *last_platform;
+
 void load_room(fhstream& f, cell *c) {
   setdist(c, 7, nullptr);
   auto& r = *get_room_at(c);
@@ -329,11 +331,25 @@ void load_room(fhstream& f, cell *c) {
       else if(cap == "PENDULUM") {
         auto b = std::make_unique<pendulum_platform>();
         b->a = get_xy(); b->b = get_xy(); b->period = get_ld(); b->shift = get_ld();
+        last_platform = &*b;
+        r.entities.emplace_back(std::move(b));
+        }
+      else if(cap == "HORO") {
+        auto b = std::make_unique<horoplatform>();
+        b->a = get_xy(); b->b = get_xy(); b->period = get_ld(); b->shift = get_ld();
+        last_platform = &*b;
         r.entities.emplace_back(std::move(b));
         }
       else if(cap == "ELLIPSE") {
         auto b = std::make_unique<ellipse_platform>();
         b->a = get_xy(); b->b = get_xy(); b->period = get_ld(); b->shift = get_ld(); b->ratio = get_ld();
+        last_platform = &*b;
+        r.entities.emplace_back(std::move(b));
+        }
+      else if(cap == "CYCLOID") {
+        auto b = std::make_unique<cycloid_platform>();
+        b->base = last_platform; b->radius = get_ld(); b->period = get_ld(); b->shift = get_ld();
+        last_platform = &*b;
         r.entities.emplace_back(std::move(b));
         }
       else if(cap == "SAW") {

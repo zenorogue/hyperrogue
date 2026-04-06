@@ -519,6 +519,26 @@ struct rope_platform : public moving_platform {
   void draw() override;
   };
 
+struct horoplatform : public moving_platform {
+  xy a, b;
+  ld period, shift;
+  xy location_at(ld t) override;
+  string get_shape_name() override { return a.y == b.y ? "horo" : "equi"; }
+  string get_help() override { return
+    a.y == b.y ?
+      "Go back and forth between two locations, on a horocyclic path."
+    : "Go back and forth between two locations, on an equidistant path.";
+    }
+  };
+
+struct cycloid_platform : public moving_platform {
+  moving_platform *base;
+  ld period, shift;
+  xy location_at(ld t) override;
+  string get_shape_name() override { return "cycloid"; }
+  string get_help() override { return "These go in a circle around another moving object."; }
+  };
+
 struct saw: public entity {
   unique_ptr<entity> base;
   moving_platform& mp() { return (moving_platform&)(*base); }
