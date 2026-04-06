@@ -213,6 +213,13 @@ void entity::apply_walls() {
     if((walls[b].flags & W_PAIN) && pain_effect()) goto again;
     }
 
+  for(int x = jbb.minx; x < jbb.maxx; x++) for(int y = obb.maxy; y < jbb.maxy; y++) {
+    eWall b = current_room->at(x, y);
+    if((walls[b].flags & W_PAIN_DOWN) && hurt_by_spikes()) {
+      reduce_hp(40); spike_message();
+      }
+    }
+
   if(loopcount < 100) for(auto& e: current_room->entities) if(auto p = e->as_platform()) {
     auto opw = p->location_at(gframeid-1);
     auto npw = p->location_at(gframeid);
