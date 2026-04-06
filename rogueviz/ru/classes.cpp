@@ -577,6 +577,19 @@ struct located_entity : public entity {
   xy default_where() override { return respawn; }
   };
 
+struct rollingsaw: public located_entity {
+  string glyph() override { return "*"; }
+  color_t color() override { return walls[wWall].color; }
+  xy siz() override { return {8, 8}; }
+  string get_name() override { return "rolling saw"; }
+  void act() override;
+  int dir, respawn_dir;
+  xy default_vel() override {
+    auto dat = get_dat(); return {dat.d * dat.modv * dir, 0};
+    }
+  virtual void hs(stater& s) override { s.act("dir", dir, respawn_dir); located_entity::hs(s); }
+  };
+
 struct timed_orb : public located_entity {
   int duration;
   xy siz() override { return {18, 18}; }

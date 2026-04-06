@@ -1075,4 +1075,20 @@ void guard_event::act() {
     }
   }
 
+void rollingsaw::act() {
+  stay_on_screen();
+  kino();
+  if(on_floor) {
+    auto dat = get_dat();
+    if(abs(vel.x) < 1e-6) {
+      dir = -dir;
+      }
+    vel.x = zero_vel.x + dat.d * dat.modv * dir;
+    }
+  if(intersect(get_pixel_bbox(), m.get_pixel_bbox()) && gframeid > invinc_end) {
+    if(m.reduce_hp(60)) addMessage("The " + hal()->get_name() + " shreds you!");
+    }
+  }
+
+
 }

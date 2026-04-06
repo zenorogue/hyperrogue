@@ -377,6 +377,12 @@ void load_room(fhstream& f, cell *c) {
         b->base = std::move(r.entities.back());
         r.entities.back() = std::move(b);
         }
+      else if(cap == "ROLLINGSAW") {
+        auto b = std::make_unique<rollingsaw>(); nam(*b);
+        b->respawn = get_xy();
+        b->respawn_dir = get_int();
+        r.entities.emplace_back(std::move(b));
+        }
       else if(cap == "HINT") {
         auto b = std::make_unique<hint>();
         b->respawn = get_xy(); b->size = get_xy();
