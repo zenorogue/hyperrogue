@@ -357,6 +357,11 @@ void load_room(fhstream& f, cell *c) {
         b->base = std::move(r.entities.back());
         r.entities.back() = std::move(b);
         }
+      else if(cap == "TINYSAW") {
+        auto b = std::make_unique<tinysaw>(); nam(*b);
+        b->base = std::move(r.entities.back());
+        r.entities.back() = std::move(b);
+        }
       else if(cap == "WOODSAW") {
         auto b = std::make_unique<woodsaw>(); nam(*b);
         b->base = std::move(r.entities.back());

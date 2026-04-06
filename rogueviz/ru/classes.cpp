@@ -549,6 +549,11 @@ struct saw: public entity {
   void act() override;
   };
 
+struct tinysaw: public saw {
+  xy siz() override { return {8, 8}; }
+  string get_name() override { return "tiny " + mp().get_shape_name() + " circular saw"; }
+  };
+
 struct weaksaw : public saw {
   color_t color() override { return walls[wWeakWall].color; }
   string get_name() override { return mp().get_shape_name() + " weak saw"; }
