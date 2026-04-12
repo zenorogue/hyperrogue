@@ -62,6 +62,15 @@ hyperpoint ortho1(hyperpoint A, hyperpoint B) {
   return X;
   }
 
+hyperpoint mirror_line_point(hyperpoint A, hyperpoint B, hyperpoint X) {
+  if(1) {
+    simplifier s1(gpushxto0(A), {&A, &B, &X});
+    simplifier s2(spintox(B), {&A, &B, &X});
+    X[1] = -X[1];
+    }
+  return X;
+  }
+
 hyperpoint linecross3(hyperpoint A, hyperpoint A1, hyperpoint B, hyperpoint B1, hyperpoint C, hyperpoint C1, const string& s) {
   hyperpoint res = linecross(A, A1, B, B1);
   println(hlog, s, is_on_line(C, C1, res) ? " verification: OK" : " verification: failed");
@@ -93,36 +102,73 @@ void tricenter() {
   markpoint(C, 0xFF0000);
   markseg(A, B, 0xFF0000FF); markseg(B, C, 0xFF0000FF); markseg(C, A, 0xFF0000FF);
 
-  /* hyperpoint A1 = bisector(A, B, C);
+  // indices as in: https://faculty.evansville.edu/ck6/encyclopedia/ETC.html
+
+  hyperpoint A1 = bisector(A, B, C);
   hyperpoint B1 = bisector(B, C, A);
   hyperpoint C1 = bisector(C, A, B);
-  hyperpoint D1 = linecross3(A, A1, B, B1, C, C1, "incenter");
+  hyperpoint D1 = linecross3(A, A1, B, B1, C, C1, "incenter"); ignore(D1);
   markseg(A, A1, 0x00FF00FF); markseg(B, B1, 0x00FF00FF); markseg(C, C1, 0x00FF00FF);
-  markpoint(D1, 0x00FF00); */
+  markpoint(D1, 0x00FF00);
 
-  hyperpoint C2 = perpendicular_drop(A, B, C);
-  hyperpoint A2 = perpendicular_drop(B, C, A);
-  hyperpoint B2 = perpendicular_drop(C, A, B);
-  hyperpoint D2 = linecross3(A, A2, B, B2, C, C2, "orthocenter");
-  markseg(A, A2, 0xFFFF00FF); markseg(B, B2, 0xFFFF00FF); markseg(C, C2, 0xFFFF00FF);
-  markpoint(D2, 0xFFFF00);
+  hyperpoint C2 = mid(A, B);
+  hyperpoint A2 = mid(B, C);
+  hyperpoint B2 = mid(C, A);
+  hyperpoint D2 = linecross3(A2, A, B2, B, C2, C, "centroid");
+  markseg(A2, A, 0xFF00FFFF); markseg(B2, B, 0xFF00FFFF); markseg(C2, C, 0xFF00FFFF);
+  markpoint(D2, 0xFF00FF);
 
-  hyperpoint C3 = mid(A, B); 
-  hyperpoint A3 = mid(B, C); 
-  hyperpoint B3 = mid(C, A); 
-  hyperpoint D3 = linecross3(A3, A, B3, B, C3, C, "centroid");
-  markseg(A3, A, 0xFF00FFFF); markseg(B3, B, 0xFF00FFFF); markseg(C3, C, 0xFF00FFFF);
-  markpoint(D3, 0xFF00FF);
+  /*
+  hyperpoint C3 = ortho1(C2, A);
+  hyperpoint A3 = ortho1(A2, B);
+  hyperpoint B3 = ortho1(B2, C);
+  hyperpoint D3 = linecross3(A2, A3, B2, B3, C2, C3, "circumcenter");
+  markseg(A2, A3, 0x00FFFFFF); markseg(B2, B3, 0x00FFFFFF); markseg(C2, C3, 0x00FFFFFF);
+  markpoint(D3, 0x00FFFF);
 
-  hyperpoint C4 = ortho1(C3, A);
-  hyperpoint A4 = ortho1(A3, B);
-  hyperpoint B4 = ortho1(B3, C);
-  hyperpoint D4 = linecross3(A3, A4, B3, B4, C3, C4, "circumcenter");
-  markseg(A3, A4, 0x00FFFFFF); markseg(B3, B4, 0x00FFFFFF); markseg(C3, C4, 0x00FFFFFF);
-  markpoint(D4, 0x00FFFF);
+  hyperpoint C4 = perpendicular_drop(A, B, C);
+  hyperpoint A4 = perpendicular_drop(B, C, A);
+  hyperpoint B4 = perpendicular_drop(C, A, B);
+  hyperpoint D4 = linecross3(A, A4, B, B4, C, C4, "orthocenter");
+  markseg(A, A4, 0xFFFF00FF); markseg(B, B4, 0xFFFF00FF); markseg(C, C4, 0xFFFF00FF);
+  markpoint(D4, 0xFFFF00);
 
-  markseg(D3, D2, 0xFFFFFFFF); markseg(D3, D4, 0xFFFFFFFF); markseg(D2, D4, 0xFFFFFFFF);
-  if(is_on_line(D3, D2, D4)) println(hlog, "Euler line verified"); else println(hlog, "Euler line failed");
+  auto markcc = [&] (hyperpoint h1, hyperpoint h2, hyperpoint h3, color_t col, const string& s) {
+    if(is_on_line(h1, h2, h3)) {
+      println(hlog, s, ": lie on a line");
+      if(h1[0] > h2[0]) swap(h1, h2);
+      if(h2[0] > h3[0]) swap(h3, h2);
+      if(h1[0] > h2[0]) swap(h1, h2);
+      markseg(h1, h3, col);
+      }
+    else {
+      hyperpoint ctr = circumscribe(h1, h2, h3);
+      ld rad = hdist(h1, ctr);
+      for(int i=0; i<=360; i++) curvepoint(xspinpush0(i*1._deg, rad));
+      queuecurve(S * rgpushxto0(ctr), col, 0, PPR::LINE);
+      }
+    };
+
+  markcc(D2, D3, D4, 0xFFFFFFFF, "Euler line");
+
+  // the nine-point circle center:
+  // - passes through the centers of the sides
+  hyperpoint D5_a = circumscribe(A2, B2, C2);
+  // - passes through the feet of the altitudes
+  hyperpoint D5_b = circumscribe(A4, B4, C4);
+  // - passes through the midpoints of AD4, BD4 and CD4
+  hyperpoint D5_c = circumscribe(mid(A, D4), mid(B, D4), mid(C, D4));
+  markpoint(D5_a, 0xC0C0C0);
+  markpoint(D5_b, 0xC0C0C0);
+  markpoint(D5_c, 0xC0C0C0); */
+
+  hyperpoint A6 = mirror_line_point(A, A1, A2);
+  hyperpoint B6 = mirror_line_point(B, B1, B2);
+  hyperpoint C6 = mirror_line_point(C, C1, C2);
+  hyperpoint D6 = linecross3(A, A6, B, B6, C, C6, "symmedian point");
+  markseg(A, A6, 0x8000FFFF); markseg(B, B6, 0x8000FFFF); markseg(C, C6, 0x8000FFFF);
+  markpoint(D6, 0x8000FF);
+
   }
 
 void enable() {
