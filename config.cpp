@@ -1118,25 +1118,36 @@ EX void initConfig() {
 
   #if ISLINUX
   if(1) {
-    fhstream f("/sys/devices/virtual/dmi/id/board_name", "rt");
-    if(f.f) {
-      string s = scanline_noblank(f);
-      deck = s.find("Jupiter") != string::npos;
-      if(deck) {
-        centered_menus = true;
-        lands_per_page = 18;
-        dialog::onscreen_keyboard = true;
-        dialog::dialog_font_scale = 3;
-        dialog::display_keys = 3;
-        qm = false;
-        separate_status = true;
-        multi::multi_autojoy = false;
-        touch_interface = true;
-        scores::scale = 1;
-        }
+    string name = "", vendor = "";
+    if(1) {
+      fhstream f("/sys/devices/virtual/dmi/id/board_name", "rt");
+      if(f.f) name = scanline_noblank(f);
       }
+    if(1) {
+      fhstream f("/sys/devices/virtual/dmi/id/board_vendor", "rt");
+      if(f.f) vendor = scanline_noblank(f);
+      }
+    if(vendor.find("Valve") != string::npos && (name.find("Jupiter") != string::npos || name.find("Galileo") != string::npos))
+      deck = true;
     }
   #endif
+
+  #if ISSTEAM
+  if(is_steamdeck()) deck = true;
+  #endif
+
+  if(deck) {
+    centered_menus = true;
+    lands_per_page = 18;
+    dialog::onscreen_keyboard = true;
+    dialog::dialog_font_scale = 3;
+    dialog::display_keys = 3;
+    qm = false;
+    separate_status = true;
+    multi::multi_autojoy = false;
+    touch_interface = true;
+    scores::scale = 1;
+    }
 
   // basic config
   param_i(vid.flashtime, "flashtime", 8);
