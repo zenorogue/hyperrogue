@@ -162,12 +162,19 @@ void tricenter() {
   markpoint(D5_b, 0xC0C0C0);
   markpoint(D5_c, 0xC0C0C0); */
 
-  hyperpoint A6 = mirror_line_point(A, A1, A2);
+  /* hyperpoint A6 = mirror_line_point(A, A1, A2);
   hyperpoint B6 = mirror_line_point(B, B1, B2);
   hyperpoint C6 = mirror_line_point(C, C1, C2);
   hyperpoint D6 = linecross3(A, A6, B, B6, C, C6, "symmedian point");
   markseg(A, A6, 0x8000FFFF); markseg(B, B6, 0x8000FFFF); markseg(C, C6, 0x8000FFFF);
-  markpoint(D6, 0x8000FF);
+  markpoint(D6, 0x8000FF); */
+
+  hyperpoint C7 = perpendicular_drop(A, B, D1);
+  hyperpoint A7 = perpendicular_drop(B, C, D1);
+  hyperpoint B7 = perpendicular_drop(C, A, D1);
+  hyperpoint D7 = linecross3(A, A7, B, B7, C, C7, "Gergonne point");
+  markseg(A, A7, 0xC06040FF); markseg(B, B7, 0xC06040FF); markseg(C, C7, 0xC06040FF);
+  markpoint(D7, 0xC06040);
 
   }
 
