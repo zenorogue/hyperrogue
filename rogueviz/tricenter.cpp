@@ -110,14 +110,14 @@ void tricenter() {
   hyperpoint C3 = mid(A, B); 
   hyperpoint A3 = mid(B, C); 
   hyperpoint B3 = mid(C, A); 
-  hyperpoint D3 = linecross3(A3, A, B3, B, C3, C, "good center");
+  hyperpoint D3 = linecross3(A3, A, B3, B, C3, C, "centroid");
   markseg(A3, A, 0xFF00FFFF); markseg(B3, B, 0xFF00FFFF); markseg(C3, C, 0xFF00FFFF);
   markpoint(D3, 0xFF00FF);
 
   hyperpoint C4 = ortho1(C3, A);
   hyperpoint A4 = ortho1(A3, B);
   hyperpoint B4 = ortho1(B3, C);
-  hyperpoint D4 = linecross3(A3, A4, B3, B4, C3, C4, "outcenter");
+  hyperpoint D4 = linecross3(A3, A4, B3, B4, C3, C4, "circumcenter");
   markseg(A3, A4, 0x00FFFFFF); markseg(B3, B4, 0x00FFFFFF); markseg(C3, C4, 0x00FFFFFF);
   markpoint(D4, 0x00FFFF);
 
