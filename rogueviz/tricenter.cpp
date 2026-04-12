@@ -36,12 +36,12 @@ hyperpoint perpendicular_drop(hyperpoint A, hyperpoint B, hyperpoint X) {
   return X;
   }
 
-hyperpoint d1(hyperpoint A, hyperpoint B) {
+hyperpoint d1(hyperpoint A, hyperpoint B, ld d = 1.5) {
   hyperpoint X;
   if(1) {
     simplifier s1(gpushxto0(A), {&A, &B}, {&X});
     simplifier s2(spintox(B), {&A, &B}, {&X});
-    X = xpush0(1.5);
+    X = xpush0(d);
     }
   return X;
   }
@@ -169,13 +169,19 @@ void tricenter() {
   markseg(A, A6, 0x8000FFFF); markseg(B, B6, 0x8000FFFF); markseg(C, C6, 0x8000FFFF);
   markpoint(D6, 0x8000FF); */
 
-  hyperpoint C7 = perpendicular_drop(A, B, D1);
+  /* hyperpoint C7 = perpendicular_drop(A, B, D1);
   hyperpoint A7 = perpendicular_drop(B, C, D1);
   hyperpoint B7 = perpendicular_drop(C, A, D1);
   hyperpoint D7 = linecross3(A, A7, B, B7, C, C7, "Gergonne point");
   markseg(A, A7, 0xC06040FF); markseg(B, B7, 0xC06040FF); markseg(C, C7, 0xC06040FF);
   markpoint(D7, 0xC06040);
 
+  hyperpoint A8 = d1(B, C, (hdist(A, C) + hdist(B, C) - hdist(A, B)) / 2);
+  hyperpoint B8 = d1(C, A, (hdist(B, A) + hdist(C, A) - hdist(B, C)) / 2);
+  hyperpoint C8 = d1(A, B, (hdist(C, B) + hdist(A, B) - hdist(C, A)) / 2);
+  hyperpoint D8 = linecross3(A, A8, B, B8, C, C8, "Nagel point");
+  markseg(A, A8, 0x9090E0FF); markseg(B, B8, 0x9090E0FF); markseg(C, C8, 0x9090E0FF);
+  markpoint(D8, 0x9090E0);
   }
 
 void enable() {
