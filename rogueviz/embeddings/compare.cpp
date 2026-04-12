@@ -164,7 +164,7 @@ struct dmercator_embedding : abstract_embedding {
   virtual string name() override { return "dmercator"; }
   eGeometryClass get_geometry() override { return gcHyperbolic; }
   int get_dimension() override { return 3; }
-  hyperpoint as_hyperpoint(int id) {
+  hyperpoint as_hyperpoint(int id) override {
     auto& mc = mcs[id];
     hyperpoint h;
     for(int i=0; i<3; i++) 
@@ -175,7 +175,7 @@ struct dmercator_embedding : abstract_embedding {
 
   ld zero_distance(int id) override { return mcs[id].distance; }
 
-  ld distance(int a, int b) {
+  ld distance(int a, int b) override {
     if(a == b) return ld(0);
     ld da = mcs[a].distance;
     ld db = mcs[b].distance;

@@ -51,7 +51,7 @@ not the data, which is available on [itch.io](https://zenorogue.itch.io/rogueviz
 
 On Linux with apt-get:
 
-```sudo apt-get install make g++ libsdl1.2-dev libsdl-ttf2.0-dev libsdl-gfx1.2-dev libsdl-mixer1.2-dev libglew-dev```
+```sudo apt-get install make g++ libsdl1.2-dev libsdl-ttf2.0-dev libsdl-gfx1.2-dev libsdl-mixer1.2-dev libglew-dev libpng-dev```
 
 On macOS with Homebrew:
 
