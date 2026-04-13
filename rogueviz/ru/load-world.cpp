@@ -370,6 +370,17 @@ void load_room(fhstream& f, cell *c) {
         p = &*b;
         r.entities.emplace_back(std::move(b));
         }
+      else if(cap == "LENGTH") {
+        int len = get_int();
+        for(auto& p: last_platform) {
+          auto& f = find_entity(r, p);
+          auto b = std::make_unique<length_platform>();
+          b->len = len;
+          p = &*b;
+          b->base = std::move(as_platform(f));
+          f = std::move(b);
+          }
+        }
       else if(cap == "SAW") for(auto p: last_platform) {
         auto& f = find_entity(r, p);
         auto b = std::make_unique<saw>(); nam(*b);

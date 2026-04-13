@@ -532,6 +532,14 @@ struct horoplatform : public moving_platform {
     }
   };
 
+struct length_platform : public moving_platform {
+  unique_ptr<moving_platform> base; int len;
+  virtual int width() { return len; }
+  xy location_at(ld t) { return base->location_at(t); }
+  string get_name() override { return "short " + base->get_name(); }
+  string get_help() override { return base->get_help(); }
+  };
+
 struct cycloid_platform : public moving_platform {
   moving_platform *base;
   ld period, shift;
