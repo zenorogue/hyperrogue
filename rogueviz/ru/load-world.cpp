@@ -317,12 +317,16 @@ void load_room(fhstream& f, cell *c) {
         r.entities.emplace_back(std::move(b));
         }
       else if(cap == "FERRIS") {
-        ld cx = get_ld(), cy = get_ld(), radius = get_ld(); int qty = get_int();
+        ld cx = get_ld(), cy = get_ld(), radius = get_ld(); int qty = get_int(); ld period = get_ld();
+
+        last_platform = {};
 
         for(int i=0; i<qty; i++) {
           auto b = std::make_unique<ferris_platform>();
           b->ctr = {cx, cy}; b->radius = radius;
           b->shift = i * TAU / qty;
+          b->period = period;
+          last_platform.push_back(&*b);
           r.entities.emplace_back(std::move(b));
           }
         }

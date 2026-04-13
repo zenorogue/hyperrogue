@@ -485,6 +485,7 @@ struct moving_platform : public entity {
   };
 
 struct ferris_platform : public moving_platform {
+  ld period;
   xy location_at(ld t) override;
   string get_name() override { return "Ferris platform"; }
   string get_help() override { return "Ferris wheel platforms, powered by some ancient mechanism. They always go in perfect circles, with constant velocity."; }

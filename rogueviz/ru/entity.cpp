@@ -626,7 +626,7 @@ void avoid::act() {
   }
 
 xy ferris_platform::location_at(ld t) {
-  return from_hyper(rgpushxto0(to_hyper(ctr)) * xspinpush0(t / game_fps + shift, radius));
+  return from_hyper(rgpushxto0(to_hyper(ctr)) * xspinpush0(t / game_fps / period * TAU + shift, radius));
   }
 
 xy rope_platform::location_at(ld t) {
