@@ -717,9 +717,7 @@ void moving_platform::act() {
   }
 
 void saw::act() {
-  auto b = base->as_platform();
-  if(!b) { addMessage("You have a vision of an otherworldly saw!"); existing = false; return; }
-  where = b->location_at(gframeid);
+  where = base->location_at(gframeid);
   auto bb = get_pixel_bbox();
   if(intersect(bb, m.get_pixel_bbox())) {
     if(m.reduce_hp(40)) addMessage("The " + get_name() + " shreds you!");
@@ -741,9 +739,7 @@ void woodsaw::attacked(int s, power *p) {
   }
 
 void fakesaw::act() {
-  auto b = base->as_platform();
-  if(!b) { addMessage("You have a vision of an otherworldly saw!"); existing = false; return; }
-  where = b->location_at(gframeid);
+  where = base->location_at(gframeid);
   auto bb = get_pixel_bbox();
   if(intersect(bb, m.get_pixel_bbox())) {
     addMessage("This " + get_name() + " turned out to be an illusion!");

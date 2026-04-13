@@ -540,7 +540,7 @@ struct cycloid_platform : public moving_platform {
   };
 
 struct saw: public entity {
-  unique_ptr<entity> base;
+  unique_ptr<moving_platform> base;
   moving_platform& mp() { return (moving_platform&)(*base); }
   string glyph() override { return "*"; }
   color_t color() override { return walls[wWall].color; }

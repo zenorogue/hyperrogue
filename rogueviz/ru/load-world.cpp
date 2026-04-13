@@ -108,7 +108,20 @@ void create_long_rope(room& r, int step, xy w) {
 
 mapswitch *lmev;
 
-moving_platform *last_platform;
+vector<moving_platform*> last_platform;
+
+unique_ptr<entity>& find_entity(room &r, moving_platform *p) {
+  for(auto& e: r.entities)
+    if(&*e == p)
+     return e;
+  throw hr_exception("failed to find entity");
+  }
+
+unique_ptr<moving_platform>& as_platform(unique_ptr<entity>& e) {
+  auto b = e->as_platform();
+  if(!b) throw hr_exception("not a platform as platform");
+  return (unique_ptr<moving_platform>&) e;
+  }
 
 void load_room(fhstream& f, cell *c) {
   setdist(c, 7, nullptr);
@@ -331,51 +344,57 @@ void load_room(fhstream& f, cell *c) {
       else if(cap == "PENDULUM") {
         auto b = std::make_unique<pendulum_platform>();
         b->a = get_xy(); b->b = get_xy(); b->period = get_ld(); b->shift = get_ld();
-        last_platform = &*b;
+        last_platform = {&*b};
         r.entities.emplace_back(std::move(b));
         }
       else if(cap == "HORO") {
         auto b = std::make_unique<horoplatform>();
         b->a = get_xy(); b->b = get_xy(); b->period = get_ld(); b->shift = get_ld();
-        last_platform = &*b;
+        last_platform = {&*b};
         r.entities.emplace_back(std::move(b));
         }
       else if(cap == "ELLIPSE") {
         auto b = std::make_unique<ellipse_platform>();
         b->a = get_xy(); b->b = get_xy(); b->period = get_ld(); b->shift = get_ld(); b->ratio = get_ld();
-        last_platform = &*b;
+        last_platform = {&*b};
         r.entities.emplace_back(std::move(b));
         }
-      else if(cap == "CYCLOID") {
+      else if(cap == "CYCLOID") for(auto& p: last_platform) {
         auto b = std::make_unique<cycloid_platform>();
-        b->base = last_platform; b->radius = get_ld(); b->period = get_ld(); b->shift = get_ld();
-        last_platform = &*b;
+        b->radius = get_ld(); b->period = get_ld(); b->shift = get_ld();
+        b->base = p->as_platform();
+        p = &*b;
         r.entities.emplace_back(std::move(b));
         }
-      else if(cap == "SAW") {
+      else if(cap == "SAW") for(auto p: last_platform) {
+        auto& f = find_entity(r, p);
         auto b = std::make_unique<saw>(); nam(*b);
-        b->base = std::move(r.entities.back());
-        r.entities.back() = std::move(b);
+        b->base = std::move(as_platform(f));
+        f = std::move(b);
         }
-      else if(cap == "TINYSAW") {
+      else if(cap == "TINYSAW") for(auto p: last_platform) {
+        auto& f = find_entity(r, p);
         auto b = std::make_unique<tinysaw>(); nam(*b);
-        b->base = std::move(r.entities.back());
-        r.entities.back() = std::move(b);
+        b->base = std::move(as_platform(f));
+        f = std::move(b);
         }
-      else if(cap == "WOODSAW") {
+      else if(cap == "WOODSAW") for(auto p: last_platform) {
+        auto& f = find_entity(r, p);
         auto b = std::make_unique<woodsaw>(); nam(*b);
-        b->base = std::move(r.entities.back());
-        r.entities.back() = std::move(b);
+        b->base = std::move(as_platform(f));
+        f = std::move(b);
         }
-      else if(cap == "WEAKSAW") {
+      else if(cap == "WEAKSAW") for(auto p: last_platform) {
+        auto& f = find_entity(r, p);
         auto b = std::make_unique<weaksaw>(); nam(*b);
-        b->base = std::move(r.entities.back());
-        r.entities.back() = std::move(b);
+        b->base = std::move(as_platform(f));
+        f = std::move(b);
         }
-      else if(cap == "FAKESAW") {
+      else if(cap == "FAKESAW") for(auto p: last_platform) {
+        auto& f = find_entity(r, p);
         auto b = std::make_unique<fakesaw>(); nam(*b);
-        b->base = std::move(r.entities.back());
-        r.entities.back() = std::move(b);
+        b->base = std::move(as_platform(f));
+        f = std::move(b);
         }
       else if(cap == "ROLLINGSAW") {
         auto b = std::make_unique<rollingsaw>(); nam(*b);
