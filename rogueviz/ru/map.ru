@@ -1248,7 +1248,7 @@ MAP
 #b#b#b#b#b#b#b#b#b#b^b^b^b^b^b^b^b^b^b^b^b^b^b^b^b^b^b^b^b^b#b#b#b#b#b#b#b#b#b#b
 ################################################################################
 #b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b
-FERRIS 320 140 0.277 8
+FERRIS 320 140 0.277 8 6
 ITEM 142 34 8
 gold
 You find some gold.
