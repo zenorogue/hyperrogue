@@ -147,9 +147,16 @@ void render_room_walls(room *r) {
 
     int cc = c >> 3;
 
-    if(r == current_room && cc == wSecretPassage && r->at(x, y-1) == wWall) {
-      r->replace_block(x, y, wAir);
-      r->replace_block(x, y-1, wSecretPassage);
+    if(r == current_room && cc == wSecretPassageVHidden && r->fov[y+1][x] && r->fov[y-1][x]) {
+      r->replace_block(x, y, wSecretPassageV);
+      }
+
+    if(r == current_room && cc == wSecretPassageUHidden && r->fov[y+1][x]) {
+      r->replace_block(x, y, wSecretPassageU);
+      }
+
+    if(r == current_room && cc == wSecretPassageHHidden && r->fov[y][x-1] && r->fov[y][x+1]) {
+      r->replace_block(x, y, wSecretPassageH);
       }
 
     if((c & 7) == 0)

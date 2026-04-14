@@ -58,7 +58,11 @@ struct ruwall {
 enum eWall {
   wAir, wWall, wBouncy, wSpike, wWater, wFrozen, wDoor, wSmashedDoor,
   wLockedDoor, wFountain, wBluePortal, wOrangePortal, wPlatform, wStaircase,
-  wColumn, wForge, wWoodWall, wShopDoor, wSecretPassage, wSign, wWallSign, wTimeDoor, 
+  wColumn, wForge, wWoodWall, wShopDoor,
+  wSecretPassageVHidden, wSecretPassageV,
+  wSecretPassageUHidden, wSecretPassageU,
+  wSecretPassageHHidden, wSecretPassageH,
+  wSign, wWallSign, wTimeDoor,
   wBottomSpike, wRogueWallHidden, wRogueWall, wRightSlope, wLeftSlope, wLeftSlopedRoof, wRightSlopedRoof,
   wWeakWall, wStrangeSign, wWalkSpikes, wGUARD };
 
@@ -74,12 +78,26 @@ flagtype W_STABLE = 256;
 flagtype W_DOWNWARD = 512;
 flagtype W_SLOPE = 1024;
 flagtype W_PAIN_DOWN = 2048;
+flagtype W_HYPERBOUNCY = 4096;
 
 constexpr int qwall = int(wGUARD);
 
+ruwall r_wall = {"wall", "#", 0xFFFFFFFF, W_BLOCK | W_STABLE, "These kinds of tough walls can never be destroyed."};
+
+vector<pair<eWall, eWall>> hidden_unhidden = {
+  {wSecretPassageHHidden, wSecretPassageH},
+  {wSecretPassageVHidden, wSecretPassageV},
+  {wSecretPassageUHidden, wSecretPassageU},
+  {wRogueWallHidden, wRogueWall}
+  };
+
+vector<pair<eWall, eWall>> base_changed = {
+  {wDoor, wSmashedDoor}
+  };
+
 ruwall walls[qwall] = {
   {"air", ".", 0x40404080, W_TRANS, "Looks like an empty space, but actually necessary for survival."},
-  {"wall", "#", 0xFFFFFFFF, W_BLOCK | W_STABLE, "These kinds of tough walls can never be destroyed."},
+  r_wall,
   {"bouncy wall", "#", 0x80FF80FF, W_BLOCK | W_BOUNCY, "Like walls, but things bounce off them."},
   {"spike", "^", 0xC08080FF, W_TRANS | W_PAIN | W_BLOCKBIRD, "Dangerous!"},
   {"water", "~", 0x0000FFFF, W_BLOCK | W_TRANS | W_BLOCKBIRD, "Not used yet."},
@@ -96,12 +114,17 @@ ruwall walls[qwall] = {
   {"forge", "&", 0xB0202080, W_TRANS | W_PAIN, "Used by runesmiths."},
   {"wooden wall", "#", 0xFF8000FF, W_BLOCK | W_STABLE, "These kinds of tough walls can be destroyed with fire."},
   {"shop door", "#", 0xFFD500FF, W_TRANS, "A powerful door, to protect against shoplifters."},
-  {"secret passage", "#", 0xFFFF40FF, W_PLATFORM | W_BLOCKBIRD, "You have discovered a secret passage from the other side."},
+  r_wall,
+  {"secret trapdoor", "#", 0xFFFF40FF, W_PLATFORM | W_BLOCKBIRD, "A secret passage that becomes obvious once you see it from above and below."},
+  r_wall,
+  {"secret tunnel", "#", 0xFFFF40FF, W_PLATFORM | W_BLOCKBIRD, "A secret passage that becomes obvious once you see it from below."},
+  r_wall,
+  {"secret door", "#", 0xFFFF40FF, W_BLOCKBIRD, "A secret passage that becomes obvious once you see it both from left and right."},
   {"sign", "X", 0xFFFF40FF, W_TRANS, "You need to wait close to this sign to read it."},
   {"wall sign", "X", 0xFFFFC0FF, W_BLOCK, "You need to wait close to this sign to read it."},
   {"time door", "#", 0x8080FFFF, W_BLOCK | W_STABLE, "A powerful door, opened by a mechanism."},
   {"bottom spike", "v", 0xC08080FF, W_TRANS | W_PAIN | W_BLOCKBIRD | W_DOWNWARD, "A downward-pointing spike. You can fall from above through it safely, but otherwise, it is very dangerous."},
-  {"wall", "#", 0xFFFFFFFF, W_BLOCK | W_STABLE, "These kinds of tough walls can never be destroyed."},
+  r_wall,
   {"fake wall", "#", 0x404080FF, W_PLATFORM | W_STABLE | W_BLOCKBIRD, "Your rogueish senses have discovered that this wall is fake."},
   {"right slope", "/", 0xFFFFFFFF, W_STABLE | W_SLOPE, "Slope here."},
   {"left slope", "\\", 0xFFFFFFFF, W_STABLE | W_SLOPE, "Slope here."},
