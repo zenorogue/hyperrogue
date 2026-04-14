@@ -129,7 +129,11 @@ void entity::apply_walls() {
     if(walls[b].flags & W_DOWNWARD) continue;
     allside(x, y, b);
     if(walls[b].flags & blocking) {
-      if(walls[b].flags & W_BOUNCY) { vel.y = -vel.y; apply_grav(); apply_grav(); if(vel.y > 0) vel.y = 0; on_bounce = true; goto again; }
+      if(walls[b].flags & W_BOUNCY) {
+        vel.y = -vel.y;
+        if(walls[b].flags & W_HYPERBOUNCY) vel.y *= 10;
+        apply_grav(); apply_grav(); if(vel.y > 0) vel.y = 0; on_bounce = true; goto again;
+        }
       on_floor = true;
       if(walls[b].flags & W_FROZEN) on_ice = true;
       vel.y /= 2;
@@ -157,7 +161,11 @@ void entity::apply_walls() {
     eWall b = current_room->at(x, y);
     allside(x, y, b);
     if(walls[b].flags & W_BLOCK) {
-      if(walls[b].flags & W_BOUNCY) { vel.y = -vel.y; apply_grav(); apply_grav(); on_bounce = true; goto again; }
+      if(walls[b].flags & W_BOUNCY) {
+        vel.y = -vel.y;
+        if(walls[b].flags & W_HYPERBOUNCY) vel.y *= 10;
+        apply_grav(); apply_grav(); on_bounce = true; goto again;
+        }
       vel.y /= 2;
       if(abs(vel.y) < 1e-6) vel.y = 0;
       if(pixel_to_block(get_pixel_bbox_at(where + vel)).miny > y) where.y += vel.y;
@@ -182,7 +190,11 @@ void entity::apply_walls() {
     allside(x, y, b);
     if((walls[b].flags & W_DOWNWARD) && b == current_room->at(x-1, y)) continue;
     if(walls[b].flags & W_BLOCK) {
-      if(walls[b].flags & W_BOUNCY) { vel.x = -vel.x; on_bounce = true; goto again; }
+      if(walls[b].flags & W_BOUNCY) {
+        vel.x = -vel.x;
+        if(walls[b].flags & W_HYPERBOUNCY) vel.x *= 10;
+        on_bounce = true; goto again;
+        }
       if(freezing()) { hit_wall(); }
       if(burning()) {
         if(b == wWoodWall) current_room->replace_block_frev(x, y, wAir);
