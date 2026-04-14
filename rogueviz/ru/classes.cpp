@@ -604,7 +604,6 @@ struct timed_orb : public located_entity {
   xy siz() override { return {18, 18}; }
   string glyph() override { return "O"; }
   color_t color() override {
-    println(hlog, tie(gframeid, current_room->timed_orb_end));
     if(gframeid > current_room->timed_orb_end) return 0x8080FFFF;
     return gradient(0x404080FF, 0x8080FFFF, -1, cos((gframeid - current_room->timed_orb_end) * TAU * 5 / game_fps), 1);
     }
