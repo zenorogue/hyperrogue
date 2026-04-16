@@ -374,16 +374,19 @@ void distribute_neurons() {
     int id = p.second;
     int s = p.first;
     auto& w = *whowon[s];
-    vdata[id].m->base = w.where;
-    
+
+    transmatrix At = Id;
+
     if(!triangulate(data[s].val, w, find, vdata[id].m->at))
-      vdata[id].m->at = 
+      At =
         spin(TAU*w.csample / w.drawn_samples) * xpush(rad * (w.drawn_samples-1) / w.drawn_samples);
+
+    vdata[id].be(w.where, At);
+    
     w.csample++;
     for(auto& e: vdata[id].edges) e.second->orig = nullptr;
     }
   
-  shmup::fixStorage();  
   setindex(false);
   }
 

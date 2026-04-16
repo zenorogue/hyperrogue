@@ -289,12 +289,9 @@ void viz_longpath() {
 void unoptimize() {
   use_cells_to_draw = true;
   drawthemap();
-  for(int i=0; i<isize(vdata); i++) {
-    vdata[i].m->at = inverse_shift(ggmatrix(cwt.at), ggmatrix(vdata[i].m->base)) * vdata[i].m->at;
-    vdata[i].m->base = cwt.at;
-    }
+  for(int i=0; i<isize(vdata); i++)
+    vdata[i].be(cwt.at, inverse_shift(ggmatrix(cwt.at), ggmatrix(vdata[i].m->base)) * vdata[i].m->at);
   use_cells_to_draw = false;
-  shmup::fixStorage();
   rogueviz::rv_change(dont_optimize, true);
   rogueviz::rv_change(frustum_culling, false);
   }
