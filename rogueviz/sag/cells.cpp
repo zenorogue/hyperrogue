@@ -697,7 +697,7 @@ int cell_read_args() {
     }
   /* to viz only subcellpoints */
   else if(argis("-sag-clear")) {
-    shmup::monstersAt.clear();
+    for(auto& vd: vdata) vd.be_nowhere();
     }
   else return 1;  
 #endif
