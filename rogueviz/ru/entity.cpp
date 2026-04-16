@@ -818,7 +818,7 @@ void kestrel::act() {
   apply_vel();
 
   if(intersect(get_pixel_bbox(), m.get_pixel_bbox())) {
-    if(m.reduce_hp(15)) addMessage("The " + hal()->get_name() + " claws you!");
+    if(m.reduce_hp(chop())) addMessage("The " + hal()->get_name() + " claws you!");
     }
   }
 

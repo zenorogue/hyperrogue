@@ -844,9 +844,22 @@ struct kestrel : public enemy {
   void attacked(int s, power *p) override;
   string get_name() override { return "kestrel"; }
   string get_help() override { return "A standard dungeon kestrel."; }
-  int base_xp() { return 30; }
-  int max_hp() { return 30; }
+  int base_xp() override { return 30; }
+  int max_hp() override { return 30; }
   xy default_vel() override { return respawn_vel; }
+  virtual int chop() { return 15; }
+  };
+
+struct butterfly : public kestrel {
+  color_t col;
+  xy siz() override { return {8, 8}; }
+  string glyph() override { return "i"; }
+  color_t color() override { return col; }
+  string get_name() override { return "butterfly"; }
+  string get_help() override { return "Dungeon butterflies come in many colors."; }
+  int base_xp() override { return 40; }
+  int max_hp() override { return 45; }
+  int chop() override { return 20; }
   };
 
 struct healthbubble : public entity {

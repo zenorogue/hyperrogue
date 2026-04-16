@@ -310,6 +310,13 @@ void load_room(fhstream& f, cell *c) {
         b->respawn_vel = get_xy() * xy(block_x, block_y) / game_fps;
         r.entities.emplace_back(std::move(b));
         }
+      else if(cap == "BUTTERFLY") {
+        auto b = std::make_unique<butterfly>(); nam(*b);
+        b->respawn = get_xy();
+        b->respawn_vel = get_xy() * xy(block_x, block_y) / game_fps;
+        b->col = get_color();
+        r.entities.emplace_back(std::move(b));
+        }
       else if(cap == "SNAKE") {
         auto b = std::make_unique<snake>(); nam(*b);
         b->respawn = get_xy();
