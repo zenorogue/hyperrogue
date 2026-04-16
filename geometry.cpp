@@ -992,12 +992,14 @@ extern struct dim_listener *dl_list;
 struct dim_listener {
   dim_listener *next, **prev;
   dim_listener() {
-    dl_list->prev = &next;
+    if(dl_list) dl_list->prev = &next;
     next = dl_list;
     dl_list = this;
+    prev = &dl_list;
     }
   ~dim_listener() {
-    *prev = next; next->prev = prev;
+    if(next) next->prev = prev;
+    *prev = next;
     }
   virtual void on_dim_change() {}
   };
