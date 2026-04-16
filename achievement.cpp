@@ -116,6 +116,8 @@ EX int score_default(int id);
 EX void improveItemScores();
 EX void upload_score(int id, int v);
 
+EX bool is_steamdeck();
+
 EX string achievementMessage[3];
 EX int achievementTimer;
 /** achievements received this game */
