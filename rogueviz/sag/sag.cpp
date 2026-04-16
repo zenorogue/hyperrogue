@@ -345,7 +345,7 @@ void init() {
 
   weight_label = "min weight";
   temperature = 0; sagmode = sagOff;
-  sag_edge = add_edgetype("SAG edge");
+  ensure_sag_edge();
   }
 
 void clear() {

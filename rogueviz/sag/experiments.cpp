@@ -240,6 +240,7 @@ void output_stats() {
   }
 
 void sag_bridging(bool tw, int iters) {
+  init();
   init_cells();
   after_data();
   println(hlog, "SAG for bridging started");
