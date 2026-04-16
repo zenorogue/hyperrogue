@@ -322,7 +322,9 @@ int readArgs() {
   else if(argis("-sag-unoptimize")) {
     unoptimize();
     }
-
+  else if(argis("-sag-edge-arrow")) {
+    shift(); ensure_sag_edge()->arrow_scale = arg::argf();
+    }
   else return 1;
 #endif
   return 0;
@@ -356,7 +358,6 @@ void clear() {
   cell_matrix.clear();
   cellpoint.clear();
   sagdist.clear();
-  sag_edge = nullptr;
   state = 0;
   qon.clear(); qsf.clear();
   }

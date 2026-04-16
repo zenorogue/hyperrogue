@@ -11,6 +11,11 @@ vector<vector<int> > directed_edges;
 
 rogueviz::edgetype *any;
 
+edgetype *ensure_edge() {
+  if(!any) any = add_edgetype("embedded edge");
+  return any;
+  }
+
 struct rv_embedding : public tiled_embedding {
   virtual string name() override { return "RogueViz internal representation"; }
   pair<cell*, hyperpoint> as_location(int id) override {
@@ -27,7 +32,7 @@ void read_edgelist(const string& fname) {
     current = nullptr;
     });
 
-  any = rogueviz::add_edgetype("embedded edges");
+  ensure_edge();
   indenter_finish ind(true, "Reading edgelist...");
 
   fhstream f(fname, "rt");
@@ -117,7 +122,10 @@ int a = arg::add3("-edgelist", [] { arg::shift(); read_edgelist(arg::args()); })
   + arg::add3("-esaveas", [] { arg::shift(); esave(arg::args()); })
   + arg::add3("-missing-edges", [] { arg::shift(); set_missing_edges(arg::argf()); })
   + arg::add3("-missing-edges-env", [] { auto env = std::getenv("MISSING_EDGES"); if(env) set_missing_edges(atof(env)); })
-  + arg::add3("-el-rv", [] { if(rogueviz::rv_quality == 0) force_rvgraph(); current = std::make_shared<rv_embedding> (); });
+  + arg::add3("-el-rv", [] { if(rogueviz::rv_quality == 0) force_rvgraph(); current = std::make_shared<rv_embedding> (); })
+  + arg::add3("-edge-arrow", [] {
+    arg::shift(); any->arrow_scale = arg::argf();
+    });
 
 }
 
