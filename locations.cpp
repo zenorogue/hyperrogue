@@ -32,19 +32,17 @@ struct cell_content {
   virtual shmup::monster *as_monster() { return nullptr; }
 
   void remove_from_list() {
-    if(last) { last[0] = next; next->last = last; next = nullptr; last = nullptr; }
+    if(last) { last[0] = next; if(next) next->last = last; next = nullptr; last = nullptr; }
     }
 
   void add_to_list(cell_content_list& l) {
     remove_from_list();
-    last = &l;
-    next = l;
-    next->last = &next;
-    l = this;
+    next = l; if(l) l->last = &next;
+    last = &l; l = this;
     }
 
   int refs;
-  cell_content() { refs = 1; }
+  cell_content() { refs = 1; next = nullptr; last = nullptr; }
 
   virtual ~cell_content() {
     remove_from_list();
@@ -59,7 +57,7 @@ struct cell_content {
   virtual void draw(struct celldrawer& cd) {}
   };
 
-#define FOR_LIST(it, ml) for(cell_content *it = (ml); it; it = ml->next)
+#define FOR_LIST(it, ml) for(cell_content *it = (ml); it; it = it->next)
 
 /** \brief Cell information for the game. struct cell builds on this */
 struct gcell {
