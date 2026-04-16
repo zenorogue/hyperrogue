@@ -54,6 +54,7 @@ namespace rogueviz {
     double visible_from_hi;
     unsigned color, color_hi;
     string name;
+    double arrow_scale = 0;
     };
 
   edgetype *add_edgetype(const string& name);

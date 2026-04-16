@@ -661,6 +661,19 @@ void draw_edge(const shiftmatrix &V, cell *c, edgeinfo *ei) {
         storeline(ei->prec, inverse_shift(T, h1), inverse_shift(T, h2));
       }
     
+    if(ei->type->arrow_scale) {
+      auto T2 = gm2 * vd2.m->at;
+      auto T1 = gm1 * vd1.m->at;
+      auto T = inverse_shift(T1, T2);
+      auto X = rspintox(T * C0) * xpush(hdist(T1*C0, T2*C0)/2);
+      auto cs = cgi.scalefactor * ei->type->arrow_scale;
+      curvepoint(xpush0(0.1 * cs));
+      curvepoint(xpush(-0.1 * cs) * ypush0(0.05 * cs));
+      curvepoint(xpush(-0.1 * cs) * ypush0(-0.05 * cs));
+      curvepoint(xpush0(0.1 * cs));
+      queuecurve(gm1 * X, col, col, PPR::STRUCT0);
+      }
+
     const shiftmatrix& T = multidraw ? V : ggmatrix(ei->orig);
 
     queue_prec(T, ei, col);
