@@ -574,14 +574,15 @@ EX void rate_limited_error(const string& s, const string& t IS("")) {
   }
 
 #if HDR
-struct progressbar : indenter_finish {
+struct progressbar {
   string name;
   static constexpr int PBSIZE = 64;
-  int step = -1, total, drawat = 0, count = -1;
+  int step = -1, total, drawat = 0, count = -1, tstart;
 
   void operator ++ (int) {
     step++;
     while(step >= drawat && total) {
+      fflush(stdout);
       count++;
       drawat = (total * (count+(long long) 1)) / PBSIZE;
       fprintf(stderr, "%s [", get_stamp().c_str());
@@ -593,10 +594,15 @@ struct progressbar : indenter_finish {
     }
 
   ~progressbar() {
-    fprintf(stderr, "\x1b[K");
+    fflush(stdout); fprintf(stderr, "\x1b[K"); fflush(stderr);
     }
 
-  progressbar(int t, string n) : indenter_finish(n), name(n) { hlog.indentation -= 2; hlog.indentation += 2; total = t; (*this)++; }
+  int clear_time() {
+    fflush(stdout); fprintf(stderr, "\x1b[K"); fflush(stderr);
+    return SDL_GetTicks() - tstart;
+    }
+
+  progressbar(int t, string n) : name(n) { total = t; (*this)++; tstart = SDL_GetTicks(); }
   };
 #endif
 
