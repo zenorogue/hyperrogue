@@ -29,7 +29,6 @@ struct hrmap {
   virtual ~hrmap() { }
   virtual vector<cell*>& allcells();
   virtual void verify() { }
-  virtual void on_dim_change() { }
   virtual bool link_alt(heptagon *h, heptagon *alt, hstate firststate, int dir);
   virtual void extend_altmap(heptagon *h, int levs = default_levs(), bool link_cdata = true);
   heptagon *may_create_step(heptagon *h, int direction) {
@@ -37,6 +36,8 @@ struct hrmap {
     return create_step(h, direction);
     }
   virtual heptagon *create_step(heptagon *h, int direction);
+  /** reinitialize the map after swapping dimensions */
+  virtual void reinit() {}
 protected:
   virtual transmatrix relative_matrixh(heptagon *h2, heptagon *h1, const hyperpoint& hint);
   virtual transmatrix relative_matrixc(cell *c2, cell *c1, const hyperpoint& hint);
@@ -103,7 +104,7 @@ public:
  *  Liskov substitution warning: maps which produce both tiling like above and 3D tilings
  *  (e.g. Euclidean and Crystal) also inherit from hrmap_standard
  **/
-struct hrmap_standard : hrmap {
+struct hrmap_standard : hrmap, dim_listener {
   void draw_at(cell *at, const shiftmatrix& where) override;
   transmatrix relative_matrixh(heptagon *h2, heptagon *h1, const hyperpoint& hint) override;
   transmatrix relative_matrixc(cell *c2, cell *c1, const hyperpoint& hint) override;
@@ -592,7 +593,7 @@ EX void initcells() {
     check_cgi();
     geom3::swap_direction = +1;
     for(auto& m: cgi.heptmove) swapmatrix(m);
-    currentmap->on_dim_change();
+    currentmap->reinit();
     return;
     }
 

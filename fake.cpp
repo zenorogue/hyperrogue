@@ -25,8 +25,8 @@ EX namespace fake {
 
   EX bool in_ext() { return in() || (mhybrid && PIU(in())); }
 
-  EX void on_dim_change() { pmap->on_dim_change(); }
-  
+  EX void reinit() override { pmap->reinit(); }
+
   /** like in() but takes slided arb into account */
   EX bool split() { return in() || arb::in_slided(); }
   

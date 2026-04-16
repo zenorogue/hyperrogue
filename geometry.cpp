@@ -986,6 +986,25 @@ void geometry_information::prepare_basics() {
 
 EX purehookset hooks_swapdim;
 
+#if HDR
+extern struct dim_listener *dl_list;
+
+struct dim_listener {
+  dim_listener *next, **prev;
+  dim_listener() {
+    dl_list->prev = &next;
+    next = dl_list;
+    dl_list = this;
+    }
+  ~dim_listener() {
+    *prev = next; next->prev = prev;
+    }
+  virtual void on_dim_change() {}
+  };
+#endif
+
+dim_listener *dl_list;
+
 EX hookset<void(geometry_information*)> hooks_scalefactor;
 
 EX namespace geom3 {
@@ -1210,7 +1229,7 @@ EX namespace geom3 {
     swapmatrix_view(NLP, View);
     swapmatrix_view(NLP, current_display->which_copy);
     callhooks(hooks_swapdim);
-    for(auto m: allmaps) m->on_dim_change();
+    auto dl = dl_list; while(dl) { dl->on_dim_change(); dl = dl->next; }
     }
 
   #if MAXMDIM >= 4

@@ -34,7 +34,8 @@ ld sqdist(shiftpoint a, shiftpoint b) {
 EX namespace shmup {
 
 #if HDR
-struct monster {
+
+struct monster : dim_listener {
   eMonster type;
   cell *base;      ///< on which base cell this monster currently is
   cell *torigin;   ///< tortoises: origin, butterflies: last position
@@ -92,7 +93,8 @@ struct monster {
     parent->refs++;
     }
 
-  };  
+  void on_dim_change() override { swapmatrix(at); }
+  };
 #endif
 
 void monster::reset() {
@@ -3056,12 +3058,6 @@ EX void switch_shmup() {
   start_game();
   }
 
-#if MAXMDIM >= 4
-auto hooksw = addHook(hooks_swapdim, 100, [] {
-  for(auto& p: monstersAt) swapmatrix(p.second->at);
-  });
-#endif
-    
 EX shiftmatrix at_missile_level(const shiftmatrix& T) {
   if(WDIM == 3) return T;
   if(GDIM == 3) return orthogonal_move(T, cgi.BODY);

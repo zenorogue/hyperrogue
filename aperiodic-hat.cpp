@@ -784,7 +784,7 @@ vector<rule_recursive> spectre_rules_recursive = { rule_recursive
 EX ld hat_param = 1;
 EX ld hat_param_imag = 0;
 
-struct hrmap_hat : hrmap {
+struct hrmap_hat : hrmap, dim_listener {
 
   // always generate the same way
   std::mt19937 hatrng;
