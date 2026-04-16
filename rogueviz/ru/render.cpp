@@ -160,6 +160,8 @@ void render_room_walls(room *r) {
 
     int cc = c >> 3;
 
+    if(!af) for(auto [hid, unh]: hidden_unhidden) if(cc == int(hid)) cc = int(unh);
+
     if(r == current_room && cc == wSecretPassageVHidden && r->fov[y+1][x] && r->fov[y-1][x]) {
       r->replace_block(x, y, wSecretPassageV);
       }
