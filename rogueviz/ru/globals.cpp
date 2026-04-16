@@ -64,7 +64,9 @@ enum eWall {
   wSecretPassageHHidden, wSecretPassageH,
   wSign, wWallSign, wTimeDoor,
   wBottomSpike, wRogueWallHidden, wRogueWall, wRightSlope, wLeftSlope, wLeftSlopedRoof, wRightSlopedRoof,
-  wWeakWall, wStrangeSign, wWalkSpikes, wHyperBouncy, wGUARD };
+  wWeakWall, wStrangeSign, wWalkSpikes, wHyperBouncy,
+  wArenaDoor,
+  wGUARD };
 
 flagtype W_BLOCK = 1;
 flagtype W_TRANS = 2;
@@ -134,6 +136,7 @@ ruwall walls[qwall] = {
   {"strange sign", "X", 0x90909080, W_TRANS, "A strange sign is drawn in the background."},
   {"walkable spikes", "|", 0xC08080FF, W_TRANS | W_PAIN_DOWN, "You can walk through these spikes, but falling into them would hurt."},
   {"hyper-bouncy wall", "#", 0xC04040FF, W_BLOCK | W_BOUNCY | W_HYPERBOUNCY, "Like walls, but things really bounce off them."},
+  {"arena door", "+", 0x50A000FF, W_BLOCK, "You need to defeat all monsters here to open this door."}
   };
 
 int sel = 1;

@@ -162,6 +162,18 @@ void playing_frame() {
   for(auto& e: ents) if(!e->destroyed) *(mb++) = std::move(e);
   ents.resize(mb - ents.begin());
 
+  int enemies = 0;
+  for(auto& e: ents) if(e->as_enemy() && e->existing) enemies++;
+  if(enemies > 0) {
+    walls[wArenaDoor].glyph = '+';
+    walls[wArenaDoor].flags = W_BLOCK | W_BLOCKBIRD;
+    }
+  else {
+    walls[wArenaDoor].glyph = '\'';
+    walls[wArenaDoor].flags = W_TRANS;
+    }
+
+
   for(auto &e: new_entities) ents.push_back(std::move(e));
   new_entities.clear();
 
