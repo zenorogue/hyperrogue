@@ -25,8 +25,6 @@ EX namespace fake {
 
   EX bool in_ext() { return in() || (mhybrid && PIU(in())); }
 
-  EX void reinit() override { pmap->reinit(); }
-
   /** like in() but takes slided arb into account */
   EX bool split() { return in() || arb::in_slided(); }
   
@@ -70,6 +68,8 @@ EX namespace fake {
     heptagon *getOrigin() override { return in_underlying([this] { return underlying_map->getOrigin(); }); }
     
     cell* gamestart() override { return in_underlying([this] { return underlying_map->gamestart(); }); }
+
+    void reinit() override { pmap->reinit(); }
 
     hrmap_fake(hrmap *u) {
       underlying_map = u;
