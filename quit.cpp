@@ -340,7 +340,7 @@ EX void showGameMenu() {
 #if CAP_TOUR
     tour::on ? (canmove ? XLAT("guided tour") : XLAT("GAME OVER")) :
 #endif
-    (cheater && !autocheat) ? XLAT("It is a shame to cheat!") :
+    (cheater && !autocheat) ? XLAT("cheats active") :
     racing::on ? "racing mode" :
     (canmove && princess::challenge) ? XLAT("%1 Challenge", moPrincess) :
     canmove ? XLAT("Quest status") : 
@@ -361,13 +361,15 @@ EX void showGameMenu() {
   if(!peace::on && !racing::on && !sweeper && !in_lovasz() && !skip_status)
     dialog::addInfo(XLAT("Enemies killed: %1", its(tkills())));
 
+  auto congrats = cheater ? XLAT("cheaters never win") : XLAT("CONGRATULATIONS!");
+
 #if CAP_TOUR
   if(tour::on) ; else 
 #endif
   if(skip_status) ; else
   if(items[itOrbYendor]) {
     dialog::addInfo(XLAT("Orbs of Yendor found: %1", its(items[itOrbYendor])), iinf[itOrbYendor].color);
-    dialog::addInfo(XLAT("CONGRATULATIONS!"), iinf[itOrbYendor].color);
+    dialog::addInfo(congrats, iinf[itOrbYendor].color);
     }
   #if CAP_COMPLEX2
   else if(mine::in_minesweeper()) {
@@ -377,7 +379,7 @@ EX void showGameMenu() {
       dialog::addInfo(XLAT("Cells to uncover: %1", its(to_uncover)));
       }
     else {
-      dialog::addInfo(XLAT("CONGRATULATIONS!"), iinf[itOrbYendor].color);
+      dialog::addInfo(congrats, iinf[itOrbYendor].color);
       dialog::addInfo(XLAT("You won in %1", getgametime_s(mine::victory_time)));      
       }
     }
@@ -390,7 +392,7 @@ EX void showGameMenu() {
       all++;
       }
     dialog::addInfo(XLAT("Dropped floors: %1/%2", its(score), its(all)));
-    if(score == all) dialog::addInfo(XLAT("CONGRATULATIONS!"), iinf[itOrbYendor].color);
+    if(score == all) dialog::addInfo(congrats, iinf[itOrbYendor].color);
     if(score == all) achievement_gain_once("LOVASZ", specgeom_lovasz());
     }
   else {  

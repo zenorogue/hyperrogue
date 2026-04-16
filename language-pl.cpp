@@ -10516,3 +10516,5 @@ S("zoom", "powiększenie")
 S("changing this during shmup is counted as cheating", "zmiana tego parametru podczas trybu strzelanki to oszustwo")
 
 S("single type+symmetry", "typ+symetrie")
+
+S("cheats active", "oszustwo aktywne")
