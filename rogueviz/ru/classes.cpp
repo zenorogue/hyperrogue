@@ -114,6 +114,7 @@ struct room {
   int timed_orb_end;
 
   vector<unique_ptr<struct entity>> entities;
+  vector<unique_ptr<struct room_mod>> room_mods;
 
   eWall at(int x, int y) {
     return eWall(block_at[y][x] >> 3);
@@ -577,6 +578,17 @@ struct woodsaw  : public saw {
 
 struct fakesaw : public saw {
   void attacked(int s, power *p) override;
+  void act() override;
+  };
+
+struct room_mod {
+  virtual void draw() {}
+  virtual void act() {}
+  };
+
+struct reflector : public room_mod {
+  xy pos1, pos2;
+  void draw() override;
   void act() override;
   };
 

@@ -1105,5 +1105,37 @@ void rollingsaw::act() {
     }
   }
 
+void reflector::draw() {
+  hyperpoint h1 = to_hyper(pos1);
+  hyperpoint h2 = to_hyper(pos2);
+  for(int i=0; i<=100; i++) {
+    hyperpoint h = lerp(h1, h2, i/100.);
+    auto p = from_hyper(h);
+    curvepoint(eupush(p.x, p.y) * C0);
+    }
+  queuecurve(scrm, 0xFF0000FF, 0, PPR::LINE);
+  }
+
+void reflector::act() {
+  auto x1 = to_hyper(pos1);
+  auto x2 = to_hyper(pos2);
+  transmatrix T = gpushxto0(x1);
+  x2 = T * x2;
+  transmatrix T1 = spintox(x2);
+  T = T1 * T;
+  x2 = T1 * x2;
+  for(auto& e: current_room->entities) if(e->existing && e->get_name() != "REFLECTOR") {
+    hyperpoint h_at = T * to_hyper(e->where);
+    hyperpoint h_was = T * to_hyper(e->where - e->vel);
+    if(h_at[0] >= 0 && h_at[0] < x2[0])
+    if(h_was[0] >= 0 && h_was[0] < x2[0])
+    if(h_was[1] > 0 && h_at[1] <= 0) {
+      h_was[1] *= -1;
+      h_at[1] *= -1;
+      e->where = from_hyper(iso_inverse(T) * h_at);
+      e->vel = e->where - from_hyper(iso_inverse(T) * h_was);
+      }
+    }
+  }
 
 }

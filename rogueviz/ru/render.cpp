@@ -349,6 +349,7 @@ void man::draw() {
 void render_room_objects(room *r) {
   initquickqueue();
   if(r == current_room && m.visible_inv() && m.existing) m.draw();
+  for(auto& e: r->room_mods) e->draw();
   for(auto& e: r->entities)
     if(e->existing && (cmode == mode::editmap || (e->visible(r) && e->visible_inv()))) {
       if(e->hidden() && !m.can_see(*e)) continue;

@@ -150,6 +150,8 @@ vector<unique_ptr<struct entity>> new_entities;
 void playing_frame() {
   auto& ents = current_room->entities;
 
+  for(auto& e: current_room->room_mods) e->act();
+
   for(auto& e: ents) if(e->existing) e->preact();
 
   m.act();

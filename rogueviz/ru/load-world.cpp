@@ -465,6 +465,12 @@ void load_room(fhstream& f, cell *c) {
           ev.back().wall = eWall(i), ok = true;
         if(!ok) println(hlog, "warning: SWITCHEVENT wall not recognized");
         }
+      else if(cap == "KREF") {
+        auto b = std::make_unique<reflector>();
+        b->pos1 = get_xy();
+        b->pos2 = get_xy();
+        r.room_mods.emplace_back(std::move(b));
+        }
       else println(hlog, "unknown mapline ", s);
       }
     else println(hlog, "unknown mapline ", s);
