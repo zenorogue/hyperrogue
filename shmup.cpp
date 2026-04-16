@@ -335,7 +335,7 @@ EX void popmonsters() {
         m->dead = true; // already killed
         // also kill all the other monsters pushed there
         for(int j=0; j<i; j++) {
-          monster *m2 = active[j];
+          monster *m2 = nonvirtual[j];
           if(m2->base == m->base && !m2->notpushed) 
             killMonster(m2, moNone);
           }
