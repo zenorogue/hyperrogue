@@ -194,7 +194,6 @@ int arg::readCommon() {
     }
   else if(argis("-msg")) {
     shift(); addMessage(args());
-    printf("%s\n", args().c_str());
     }
   else if(argis("-msg0")) {
     clearMessages();
