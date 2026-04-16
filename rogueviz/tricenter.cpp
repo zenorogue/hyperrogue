@@ -79,6 +79,9 @@ hyperpoint linecross3(hyperpoint A, hyperpoint A1, hyperpoint B, hyperpoint B1, 
 
 double a, b, c;
 
+bool show_triangle = true, show_incenter, show_centroid, show_circumcenter, show_orthocenter,
+  show_euler_line, show_ninepoint, show_symmedian, show_gergonne, show_nagel;
+
 void tricenter() {
   hyperpoint A = xspinpush0(a, 1);
   hyperpoint B = xspinpush0(b, 1);
@@ -97,10 +100,12 @@ void tricenter() {
     vid.linewidth /= 3;
     };
 
-  markpoint(A, 0xFF0000);
-  markpoint(B, 0xFF0000);
-  markpoint(C, 0xFF0000);
-  markseg(A, B, 0xFF0000FF); markseg(B, C, 0xFF0000FF); markseg(C, A, 0xFF0000FF);
+  if(show_triangle) {
+    markpoint(A, 0xFF0000);
+    markpoint(B, 0xFF0000);
+    markpoint(C, 0xFF0000);
+    markseg(A, B, 0xFF0000FF); markseg(B, C, 0xFF0000FF); markseg(C, A, 0xFF0000FF);
+    }
 
   // indices as in: https://faculty.evansville.edu/ck6/encyclopedia/ETC.html
 
@@ -108,30 +113,37 @@ void tricenter() {
   hyperpoint B1 = bisector(B, C, A);
   hyperpoint C1 = bisector(C, A, B);
   hyperpoint D1 = linecross3(A, A1, B, B1, C, C1, "incenter"); ignore(D1);
-  markseg(A, A1, 0x00FF00FF); markseg(B, B1, 0x00FF00FF); markseg(C, C1, 0x00FF00FF);
-  markpoint(D1, 0x00FF00);
+  if(show_incenter) {
+    markseg(A, A1, 0x00FF00FF); markseg(B, B1, 0x00FF00FF); markseg(C, C1, 0x00FF00FF);
+    markpoint(D1, 0x00FF00);
+    }
 
   hyperpoint C2 = mid(A, B);
   hyperpoint A2 = mid(B, C);
   hyperpoint B2 = mid(C, A);
   hyperpoint D2 = linecross3(A2, A, B2, B, C2, C, "centroid");
-  markseg(A2, A, 0xFF00FFFF); markseg(B2, B, 0xFF00FFFF); markseg(C2, C, 0xFF00FFFF);
-  markpoint(D2, 0xFF00FF);
+  if(show_centroid) {
+    markseg(A2, A, 0xFF00FFFF); markseg(B2, B, 0xFF00FFFF); markseg(C2, C, 0xFF00FFFF);
+    markpoint(D2, 0xFF00FF);
+    }
 
-  /*
   hyperpoint C3 = ortho1(C2, A);
   hyperpoint A3 = ortho1(A2, B);
   hyperpoint B3 = ortho1(B2, C);
   hyperpoint D3 = linecross3(A2, A3, B2, B3, C2, C3, "circumcenter");
-  markseg(A2, A3, 0x00FFFFFF); markseg(B2, B3, 0x00FFFFFF); markseg(C2, C3, 0x00FFFFFF);
-  markpoint(D3, 0x00FFFF);
+  if(show_circumcenter) {
+    markseg(A2, A3, 0x00FFFFFF); markseg(B2, B3, 0x00FFFFFF); markseg(C2, C3, 0x00FFFFFF);
+    markpoint(D3, 0x00FFFF);
+    }
 
   hyperpoint C4 = perpendicular_drop(A, B, C);
   hyperpoint A4 = perpendicular_drop(B, C, A);
   hyperpoint B4 = perpendicular_drop(C, A, B);
   hyperpoint D4 = linecross3(A, A4, B, B4, C, C4, "orthocenter");
-  markseg(A, A4, 0xFFFF00FF); markseg(B, B4, 0xFFFF00FF); markseg(C, C4, 0xFFFF00FF);
-  markpoint(D4, 0xFFFF00);
+  if(show_orthocenter) {
+    markseg(A, A4, 0xFFFF00FF); markseg(B, B4, 0xFFFF00FF); markseg(C, C4, 0xFFFF00FF);
+    markpoint(D4, 0xFFFF00);
+    }
 
   auto markcc = [&] (hyperpoint h1, hyperpoint h2, hyperpoint h3, color_t col, const string& s) {
     if(is_on_line(h1, h2, h3)) {
@@ -149,7 +161,7 @@ void tricenter() {
       }
     };
 
-  markcc(D2, D3, D4, 0xFFFFFFFF, "Euler line");
+  if(show_euler_line) markcc(D2, D3, D4, 0xFFFFFFFF, "Euler line");
 
   // the nine-point circle center:
   // - passes through the centers of the sides
@@ -158,48 +170,89 @@ void tricenter() {
   hyperpoint D5_b = circumscribe(A4, B4, C4);
   // - passes through the midpoints of AD4, BD4 and CD4
   hyperpoint D5_c = circumscribe(mid(A, D4), mid(B, D4), mid(C, D4));
-  markpoint(D5_a, 0xC0C0C0);
-  markpoint(D5_b, 0xC0C0C0);
-  markpoint(D5_c, 0xC0C0C0); */
+  if(show_ninepoint) {
+    markpoint(D5_a, 0xC0C0C0);
+    markpoint(D5_b, 0xC0C0C0);
+    markpoint(D5_c, 0xC0C0C0);
+    }
 
-  /* hyperpoint A6 = mirror_line_point(A, A1, A2);
+  vector<hyperpoint> all = { A2, B2, C2, A4, B4, C4, mid(A, D4), mid(B, D4), mid(C, D4) };
+  hyperpoint eucenter = circumscribe(D2, D3, D4); ld rad = hdist(eucenter, D2);
+  int score = 0, outof = 0;
+  for(int a=0; a<9; a++)
+  for(int b=0; b<9; b++)
+  for(int c=0; c<9; c++) if(a<b && b<c) {
+    hyperpoint x = circumscribe(all[a], all[b], all[c]);
+    if(abs(hdist(eucenter, x) - rad) < 1e-6) score++;
+    outof++;
+    ld xrad = hdist(x, all[a]);
+    for(int d=0; d<9; d++) if(!among(d, a, b, c)) {
+      if(abs(hdist(all[d], x) - xrad) < 1e-6) score++;
+      outof++;
+      }
+    }
+  println(hlog, "score = ", score, " out of ", outof);
+
+  hyperpoint A6 = mirror_line_point(A, A1, A2);
   hyperpoint B6 = mirror_line_point(B, B1, B2);
   hyperpoint C6 = mirror_line_point(C, C1, C2);
   hyperpoint D6 = linecross3(A, A6, B, B6, C, C6, "symmedian point");
-  markseg(A, A6, 0x8000FFFF); markseg(B, B6, 0x8000FFFF); markseg(C, C6, 0x8000FFFF);
-  markpoint(D6, 0x8000FF); */
+  if(show_symmedian) {
+    markseg(A, A6, 0x8000FFFF); markseg(B, B6, 0x8000FFFF); markseg(C, C6, 0x8000FFFF);
+    markpoint(D6, 0x8000FF);
+    }
 
-  /* hyperpoint C7 = perpendicular_drop(A, B, D1);
+  hyperpoint C7 = perpendicular_drop(A, B, D1);
   hyperpoint A7 = perpendicular_drop(B, C, D1);
   hyperpoint B7 = perpendicular_drop(C, A, D1);
   hyperpoint D7 = linecross3(A, A7, B, B7, C, C7, "Gergonne point");
-  markseg(A, A7, 0xC06040FF); markseg(B, B7, 0xC06040FF); markseg(C, C7, 0xC06040FF);
-  markpoint(D7, 0xC06040);
+  if(show_gergonne) {
+    markseg(A, A7, 0xC06040FF); markseg(B, B7, 0xC06040FF); markseg(C, C7, 0xC06040FF);
+    markpoint(D7, 0xC06040);
+    }
 
   hyperpoint A8 = d1(B, C, (hdist(A, C) + hdist(B, C) - hdist(A, B)) / 2);
   hyperpoint B8 = d1(C, A, (hdist(B, A) + hdist(C, A) - hdist(B, C)) / 2);
   hyperpoint C8 = d1(A, B, (hdist(C, B) + hdist(A, B) - hdist(C, A)) / 2);
   hyperpoint D8 = linecross3(A, A8, B, B8, C, C8, "Nagel point");
-  markseg(A, A8, 0x9090E0FF); markseg(B, B8, 0x9090E0FF); markseg(C, C8, 0x9090E0FF);
-  markpoint(D8, 0x9090E0);
+  if(show_nagel) {
+    markseg(A, A8, 0x9090E0FF); markseg(B, B8, 0x9090E0FF); markseg(C, C8, 0x9090E0FF);
+    markpoint(D8, 0x9090E0);
+    }
+  }
+
+void show() {
+  cmode = sm::SIDE | sm::MAYDARK;
+  gamescreen();
+  dialog::init(XLAT("tricenter"), 0xFFFFFFFF, 150, 0);
+
+  dialog::addBoolItem_action("show triangle", show_triangle, 't');
+  dialog::addBoolItem_action("show incenter", show_incenter, 'i');
+  dialog::addBoolItem_action("show centroid", show_centroid, 'c');
+  dialog::addBoolItem_action("show circumcenter", show_circumcenter, 'C');
+  dialog::addBoolItem_action("show orthocenter", show_orthocenter, 'o');
+  dialog::addBoolItem_action("show Euler line", show_euler_line, 'e');
+  dialog::addBoolItem_action("show nine-point", show_ninepoint, '9');
+  dialog::addBoolItem_action("show symmedian", show_symmedian, 's');
+  dialog::addBoolItem_action("show Gergonne point", show_gergonne, 'g');
+  dialog::addBoolItem_action("show Nagel point", show_nagel, 'n');
+  dialog::addSelItem("randomize points", "?", 'r');
+  dialog::add_action([] {
+    a = rand() % 1000;
+    b = rand() % 1000;
+    c = rand() % 1000;
+    });
+  dialog::addBack();
+  dialog::display();
   }
 
 void enable() {
 
   a = 1; b = 2; c = 5;
 
-  addHook(hooks_frame, 100, tricenter);
+  rv_hook(hooks_o_key, 80, [] (o_funcs& v) { v.push_back(named_dialog("tricenter", show)); });
 
-  addHook(hooks_handleKey, 101, [] (int sym, int uni) {
-    if((cmode & sm::NORMAL) && uni == 'r') {
-      a = rand() % 1000;
-      b = rand() % 1000;
-      c = rand() % 1000;
-      return true;
-      }
-    return false;
-    });
-
+  rv_hook(hooks_frame, 100, tricenter);
   }
 
 auto tricenter_hooks = arg::add2("-tricenter", enable);
