@@ -131,6 +131,8 @@ void compute_scrm() {
   scrm.T[2][2] = 1;
   }
 
+bool final_view = false;
+
 void render_room_walls(room *r) {
   initquickqueue();
   bool af = should_apply_fov();
@@ -141,6 +143,17 @@ void render_room_walls(room *r) {
   for(int x=0; x<room_x; x++) {
     if(af && !r->fov[y][x]) continue;
     int c = r->block_at[y][x];
+
+    if(!af && final_view) {
+      int x1 = x-1, y1 = y-1, x2 = x+2, y2 = y+2;
+      if(c&4) x2++, y2++;
+      if(c&1) x1--, x2--;
+      if(c&2) y1--, y2--;
+      if(x1<0) x1=0; if(y1<0) y1=0; if(x2>room_x) x2=room_x; if(y2>room_y) y2=room_y;
+      for(int ax=x1; ax<x2; ax++) for(int ay=y1; ay<y2; ay++) if(walls[r->at(ax, ay)].flags & W_TRANS) goto ok;
+      continue;
+      }
+    ok:
 
     // ld sx = 1.5;
     // ld sy = 1.3;
