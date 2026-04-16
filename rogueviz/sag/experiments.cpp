@@ -239,7 +239,7 @@ void output_stats() {
   println(hlog, "R=", lgsag.R, " T=", lgsag.T, " cost=", cost, " mAP=", mAP, " meanrank=", MeanRank);
   }
 
-void sag_bridging() {
+void sag_bridging(bool tw, int iters) {
   init_cells();
   after_data();
   println(hlog, "SAG for bridging started");
@@ -247,7 +247,7 @@ void sag_bridging() {
   println(hlog, "DN = ", DN, " SN = ", isize(sagcells));
   recost_each = DN; autofix_rt = 2;
   hlog.flush();
-  twoway = true; allow_doubles = true;
+  twoway = tw; allow_doubles = tw;
 
   method = smLogistic;
   lgsag.R = max_sag_dist;
@@ -257,9 +257,9 @@ void sag_bridging() {
   best = lgsag; bestcost = HUGE_VAL;
 
   /* find the rough values of R and T */
-  optimized_embedding(10000);
+  optimized_embedding(iters);
   /* use it */
-  optimized_embedding(10000);
+  optimized_embedding(iters);
   }
 
 int exp_read_args() {
@@ -315,7 +315,12 @@ int exp_read_args() {
     output_stats();
     }
   else if(argis("-sag-bridging")) {
-    sag_bridging();
+    sag_bridging(true, 10000);
+    }
+  else if(argis("-sag-bridging-param")) {
+    shift(); bool tw = argi();
+    shift(); auto iter = argi();
+    sag_bridging(tw, iter);
     }
 
   else return 1;  
