@@ -56,7 +56,7 @@ void save_map(string fname) {
       for(auto [bas, cha]: base_changed)
         if(i == int(cha)) i = int(bas);
       auto& c = code_for[i];
-      if(c == 0 && !code_used.count(walls[i].glyph[0])) c = walls[i].glyph[0];
+      if(c == 0 && !code_used.count(walls[i].default_map_symbol)) c = walls[i].default_map_symbol;
       if(c == 0) c = next_code++;
       code_used[c] = i;
       }
