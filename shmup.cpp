@@ -89,12 +89,7 @@ struct monster : cell_content, dim_listener {
 
   void rebasePat(const shiftmatrix& new_pat, cell *tgt);
   
-  ~monster() {
-    if(mousetarget == this) mousetarget = nullptr;
-    if(lmousetarget == this) lmousetarget = nullptr;
-    callhooks(hooks_destroy_monster, this);
-    if(parent) parent->unref();
-    }
+  ~monster();
 
   void set_parent(monster *par) {
     if(parent) parent->unref();
@@ -129,6 +124,14 @@ bool lastdead = false;
 EX cell_content_list active;
 
 EX vector<monster*> nonvirtual, additional;
+
+monster::~monster() {
+  if(mousetarget == this) mousetarget = nullptr;
+  if(lmousetarget == this) lmousetarget = nullptr;
+  callhooks(hooks_destroy_monster, this);
+  if(parent) parent->unref();
+  nonvirtual.erase(std::remove(nonvirtual.begin(), nonvirtual.end(), this), nonvirtual.end());
+  }
 
 cell *findbaseAround(shiftpoint p, cell *around, int maxsteps) {
 
