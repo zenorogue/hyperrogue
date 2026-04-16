@@ -202,6 +202,7 @@ void load_room(fhstream& f, cell *c) {
         b->id = unspace(b->pickup_message = scanline_noblank(f));
         r.entities.emplace_back(std::move(b)); 
         }
+      else if(cap == "#") continue;
       else if(cap == "LOOT") {
         auto b = std::make_unique<loot>();
         b->owner = &*r.entities.back();
