@@ -220,9 +220,8 @@ namespace flocking {
       m->ori = oris[i];
       virtualRebase(m);
       m->vel = vels[i];
+      m->store();
       }
-    shmup::fixStorage();
-    
     }
 
   bool turn(int delta) {

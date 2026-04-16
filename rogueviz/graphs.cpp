@@ -182,8 +182,11 @@ void clear_extenders(edgeinfo *ei);
 void redo_extenders(edgeinfo *ei);
 
 void vertexdata::be_nowhere() {
-  if(m) m->dead = true;
-  m = nullptr;
+  if(m) {
+    m->dead = true;
+    m->unlist_and_unref();
+    m = nullptr;
+    }
   for(auto& ei: edges)
     clear_extenders(ei.second);
   }
@@ -193,8 +196,7 @@ int extender_levels = 3;
 int rv_quality = 4;
 
 void vertexdata::be(cell *c, transmatrix at) {
-  be_nowhere();
-  m = new shmup::monster;
+  if(!m) m = new shmup::monster;
   m->pid = id;
   m->type = moRogueviz;
   m->base = c;

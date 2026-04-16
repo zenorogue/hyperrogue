@@ -393,6 +393,7 @@ void compute_creq_neighbors() {
 vector<vector<pair<ld, subcell>>> dijkstra_edges;
 
 void find_cells() {
+  if(!game_active) start_game();
   DEBBI(debug_init_sag, ("find_cells with ", cellcount, " cells"));
   ensure_subcell_points();
   struct qitem {
