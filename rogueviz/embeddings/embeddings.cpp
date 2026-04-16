@@ -79,7 +79,7 @@ void write_edgelist(const string &fname) {
   }
 
 void force_rvgraph() {
-  for(auto& v: vdata) {
+  for(auto& v: vdata) if(v.id < isize(directed_edges)) {
     auto p = current->as_location(v.id);
     v.be(p.first, rgpushxto0(p.second));
     }
