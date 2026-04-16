@@ -57,7 +57,6 @@ struct celldrawer {
   void draw();
   bool cell_clipped();
   void draw_fallanims();
-  bool draw_shmup_monster();
   void draw_gravity_particles();
 
   void set_land_floor(const shiftmatrix& Vf);
@@ -2975,7 +2974,7 @@ void celldrawer::draw() {
     
     Vboat = Vd;
       
-    draw_shmup_monster();
+    FOR_LIST(li, c->contents) li->draw(self);
 
     poly_outline = OUTLINE_DEFAULT;    
 

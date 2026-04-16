@@ -1106,7 +1106,6 @@ EX slide default_slides[] = {
         resetview();
         }
       if(mode == 3) {
-        shmup::clearMonsters();
         gamestack::pop();
         }    
       }

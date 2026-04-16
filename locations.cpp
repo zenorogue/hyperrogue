@@ -22,6 +22,45 @@ extern int cellcount, heptacount;
 #define NOBARRIERS 127
 #define NOBARRIERS2 125
 
+using cell_content_list = struct cell_content*;
+
+namespace shmup { struct monster; }
+
+struct cell_content {
+  cell_content *next;
+  cell_content_list *last;
+  virtual shmup::monster *as_monster() { return nullptr; }
+
+  void remove_from_list() {
+    if(last) { last[0] = next; next->last = last; next = nullptr; last = nullptr; }
+    }
+
+  void add_to_list(cell_content_list& l) {
+    remove_from_list();
+    last = &l;
+    next = l;
+    next->last = &next;
+    l = this;
+    }
+
+  int refs;
+  cell_content() { refs = 1; }
+
+  virtual ~cell_content() {
+    remove_from_list();
+    }
+
+  void unref() {
+    refs--;
+    if(!refs) delete this;
+    }
+
+  void unlist_and_unref() { remove_from_list(); unref(); }
+  virtual void draw(struct celldrawer& cd) {}
+  };
+
+#define FOR_LIST(it, ml) for(cell_content *it = (ml); it; it = ml->next)
+
 /** \brief Cell information for the game. struct cell builds on this */
 struct gcell {
 
@@ -98,11 +137,14 @@ struct gcell {
   #ifdef CELLID
   int cellid;
   #endif
+
+  cell_content_list contents;
   
   gcell() {
     #ifdef CELLID
-    cellid = cellcount;  
+    cellid = cellcount;
     #endif
+    contents = nullptr;
     }
   };
 

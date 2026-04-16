@@ -249,6 +249,7 @@ EX int dirdiff(int dd, int t) {
 EX int cellcount = 0;
 
 EX void destroy_cell(cell *c) {
+  while(c->contents) c->contents->unlist_and_unref();
   tailored_delete(c);
   cellcount--;
   }

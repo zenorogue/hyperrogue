@@ -67,12 +67,8 @@ EX void addradar(const shiftpoint h1, const shiftpoint h2, color_t col) {
 void celldrawer::drawcell_in_radar() {
   #if CAP_SHMUP
   if(shmup::on) {
-    pair<shmup::mit, shmup::mit> p = 
-      shmup::monstersAt.equal_range(c);
-    for(shmup::mit it = p.first; it != p.second; it++) {
-      shmup::monster* m = it->second;
+    FOR_LIST(it, c->contents) if(shmup::monster *m = it->as_monster())
       addradar(V*m->at, minf[m->type].glyph, minf[m->type].color, 0xFF0000FF);
-      }
     }
   #endif
   if(c->monst) 
