@@ -314,24 +314,24 @@ void show() {
         }
       }
     else if(doexiton(sym, uni)) popScreen();
-
-    static int scoredragy;
-    static bool lclicked;
-    
-    if(mousepressed) {
-      if(!lclicked) {
-        // scoredragx = mousex;
-        scoredragy = mousey;
-        }
-  
-      else {
-        while(mousey > scoredragy + vid.fsize) scoredragy += vid.fsize, scorefrom--;
-        while(mousey < scoredragy - vid.fsize) scoredragy -= vid.fsize, scorefrom++;
-        }
-
-      lclicked = mousepressed;
-      }
     };
+
+  static int scoredragy;
+  static bool lclicked;
+  if(mousepressed) {
+    if(!lclicked) {
+      // scoredragx = mousex;
+      scoredragy = mousey;
+      }
+
+    else {
+      while(mousey > scoredragy + vid.fsize) scoredragy += vid.fsize, scorefrom--;
+      while(mousey < scoredragy - vid.fsize) scoredragy -= vid.fsize, scorefrom++;
+      }
+
+    lclicked = mousepressed;
+    }
+  else lclicked = false;
   }
 
 void load_only() {
