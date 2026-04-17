@@ -1440,7 +1440,9 @@ EX namespace dice {
             cx = (face[j2] - face[j]) / 2;
             cy = face[j1] - (face[j] + face[j2]) / 4;
             }
-          write_in_space(V1, max_glfont_size, -1.2, its(1+dw->sides[q][j]), 0xFFFFFFFF, 0, 8, prio, pf);
+          ld scale = -1.2;
+          if(getDistLimit() < 4) scale /= 3;
+          write_in_space(V1, max_glfont_size, scale, its(1+dw->sides[q][j]), 0xFFFFFFFF, 0, 8, prio, pf);
           }
         }
       else {
@@ -1449,7 +1451,9 @@ EX namespace dice {
         if(fid == 6) s = "6.";
         else if(fid == 9) s = "9.";
         else s = its(fid);
-        write_in_space(V1, max_glfont_size, dw->faces < 10 ? -1.2 : -.75, s, 0xFFFFFFFF, 0, 8, prio, pf);
+        ld scale = dw->faces < 10 ? -1.2 : -.75;
+        if(getDistLimit() < 4) scale /= 2.5;
+        write_in_space(V1, max_glfont_size, scale, s, 0xFFFFFFFF, 0, 8, prio, pf);
         }
       #endif
       #endif
