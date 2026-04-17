@@ -976,12 +976,12 @@ EX void mainloopiter() {
   vrhr::vr_shift();
   #endif
 
-  check_cgi();
+  if(!outoffocus) check_cgi();
   cgi.require_basics();
 
-  optimizeview();
+  if(!outoffocus) optimizeview();
   
-  models::configure();
+  if(!outoffocus) models::configure();
 
   lastt = ticks;
   ticks = SDL_GetTicks();
@@ -995,7 +995,7 @@ EX void mainloopiter() {
   
   bool normal = cmode & sm::NORMAL;
   
-  shmup::turn(ticks - lastt);
+  if(!outoffocus) shmup::turn(ticks - lastt);
     
   if(!shmup::on && (multi::alwaysuse || multi::players > 1) && normal)
     timetowait = 0, multi::handleMulti(ticks - lastt);
