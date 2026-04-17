@@ -75,6 +75,7 @@ EX bool checkflags(flagtype flags, flagtype x) {
     if((x & P_MARKWATER) && markOrb(itOrbWater)) return true;
     if((x & P_AETHER)    && markOrb2(itOrbAether) && !(flags&P_NOAETHER)) return true;
     if((x & P_WATERCURSE)&& markOrb2(itCurseWater)) return true;
+    if((x & P_IVY)       && markOrb2(itOrbNature)) return true;
     }
   if(flags & P_ISFRIEND) if(items[itOrbEmpathy]) 
     if(checkflags(flags ^ P_ISPLAYER ^ P_ISFRIEND, x) && markOrb(itOrbEmpathy))
@@ -272,6 +273,7 @@ EX bool passable(cell *w, cell *from, flagtype flags) {
   if(isChasmy(w)) {
     if(in_gravity_zone(w)) ;
     else if(!F(P_AETHER | P_FLYING | P_BLOW | P_JUMP1 | P_BULLET | P_DEADLY | P_REPTILE | P_IVY)) return false;
+    if(F(P_IVY) && from && isChasmy(from)) return false;
     }
 
   if(w->wall == waRoundTable && from && from->wall != waRoundTable && (flags & P_ISPLAYER)) return true;
