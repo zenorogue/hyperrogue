@@ -22,6 +22,14 @@ EX bool delayed_start;
 EX string scorefile = "hyperrogue.log";
 
 EX namespace arg {
+
+template<class T> T read_index(T fallback, int max, const string& ss) {
+  if(ss[0] < '0' && ss[0] > '9') return fallback;
+  int val = atoi(ss.c_str());
+  if(val < 0 || val >= max) return fallback;
+  return T(val);
+  }
+
 EX eLand readland(const string& ss) {
   if(ss == "II") return laCrossroads2;
   if(ss == "III") return laCrossroads3;
@@ -31,7 +39,7 @@ EX eLand readland(const string& ss) {
     return eLand(l);
     break;
     }
-  return laNone;
+  return read_index(laNone, landtypes, ss);
   }
 
 EX eItem readItem(const string& ss) {
@@ -39,7 +47,7 @@ EX eItem readItem(const string& ss) {
     return eItem(i);
     break;
     }
-  return itNone;
+  return read_index(itNone, ittypes, ss);
   }
 
 EX eMonster readMonster(const string& ss) {
@@ -48,7 +56,7 @@ EX eMonster readMonster(const string& ss) {
     return eMonster(i);
     break;
     }
-  return moNone;
+  return read_index(moNone, motypes, ss);
   }
 EX }
 
