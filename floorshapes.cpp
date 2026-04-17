@@ -1373,6 +1373,7 @@ void geometry_information::make_floor_textures_here() {
   */
   rb.reset();
   last_texture_step = vid.texture_step;
+  delete m;
   }
 
 EX void make_floor_textures() {
