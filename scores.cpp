@@ -93,7 +93,7 @@ string displayfor(int scoredisplay, score* S, bool shorten = false) {
     if(scoredisplay == POSSCORE) return "mode";
     string str = XLATN(boxname[scoredisplay]);
     if(!shorten) return str;
-    if(scoredisplay == 0 || scoredisplay == 65) return XLAT("time");
+    if(scoredisplay == 65) return XLAT("time");
     if(scoredisplay == 2) return "$$$";
     if(scoredisplay == 3) return XLAT("kills");
     if(scoredisplay == 4) return XLAT("turns");
@@ -104,7 +104,7 @@ string displayfor(int scoredisplay, score* S, bool shorten = false) {
     if(scoredisplay == 68) return XLAT("where");
     return csub(str, 5);
     }
-  if(scoredisplay == 0 || scoredisplay == 65) {
+  if(scoredisplay == 65) {
     char buf[20];
     int t = S->box[0];
     if(t >= 3600) 
@@ -139,7 +139,7 @@ void showPickScores() {
 
   scorerev = false;
 
-  for(int i=0; i<=POSSCORE; i++) {
+  for(int i=1; i<=POSSCORE; i++) {
     int scoredisplay = i;
     if(!fakebox[scoredisplay]) {
       string s = displayfor(scoredisplay, NULL);
@@ -161,7 +161,7 @@ void showPickScores() {
     dialog::addItem(vi.first, dialog::list_fake_key++);
     dialog::add_action([&vi] {
       int scoredisplay = vi.second;
-      for(int i=0; i<=POSSCORE; i++)
+      for(int i=1; i<=POSSCORE; i++)
         if(columns[i] == scoredisplay) swap(columns[i], columns[curcol]);
       popScreen();
       });
@@ -188,7 +188,7 @@ void show() {
     columns.push_back(POSSCORE);
 
     for(int j=0; j<(int) scores::bpGUARD; j++)
-    for(int i=0; i<POSSCORE; i++) if(!fakebox[i] && boxprio[i] == j) {
+    for(int i=1; i<POSSCORE; i++) if(!fakebox[i] && boxprio[i] == j) {
       columns.push_back(i);
       }
     }
