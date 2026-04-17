@@ -1112,6 +1112,14 @@ EX land_validity_t& land_validity(eLand l) {
 
   if(l == laDice && WDIM == 3)
     return dont_work;
+
+  #if CAP_ARCM
+  if(l == laDice && arcm::in() && !arcm::support_dice(3) && !arcm::support_dice(4) && !arcm::support_dice(5))
+    return dont_work;
+  #endif
+
+  if(l == laDice && arb::in() && !arb::support_dice(3) && !arb::support_dice(4) && !arb::support_dice(5))
+    return dont_work;
   
   if(old_daily_id < frog_when && among(l, laFrog, laEclectic, laWet))
     return not_implemented;

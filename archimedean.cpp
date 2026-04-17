@@ -1656,6 +1656,23 @@ EX int valence() {
  
 EX map<gp::loc, cdata>& get_cdata() { return ((arcm::hrmap_archimedean*) (currentmap))->eucdata; }
 
+EX bool support_dice(int x) {
+  if(PURE) {
+    if(gcd(current.faces[0], x) > 1 && gcd(current.faces.back(), x) > 1) return true;
+    for(int i=1; i<isize(current.faces); i++) if(gcd(current.faces[i], x) > 1 && gcd(current.faces[i-1], x) > 1) return true;
+    }
+  else if(DUAL) {
+    if(gcd(current.N, x) > 1) return true;
+    }
+  else {
+    auto& adj = current.adjacent;
+    for(int i=0; i<isize(adj); i++) if(gcd(isize(adj[i]), x) > 1)
+      for(auto p: adj[i]) if(gcd(isize(adj[p.first]), x) > 1)
+        return true;
+    }
+  return false;
+  }
+
 #endif
 
 EX }

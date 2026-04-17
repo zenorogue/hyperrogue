@@ -2269,5 +2269,12 @@ auto hooksw = addHook(hooks_swapdim, 100, [] {
   });
 #endif
 
+EX bool support_dice(int x) {
+  for(auto& s: current.shapes) if(gcd(s.size(), x) > 1)
+    for(auto& t: s.connections) if(gcd(current.shapes[t.sid].size(), x) > 1)
+      return true;
+  return false;
+  }
+
 EX }
 }
