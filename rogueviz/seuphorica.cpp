@@ -1062,7 +1062,7 @@ void seuphorica_screen() {
     handlePanning(sym, uni);
     dialog::handleNavigation(sym, uni);
     if(uni == SDLK_ESCAPE) pushScreen(seuphorica_menu);
-    if(uni == PSEUDOKEY_RELEASE && hold_mode == 4 && tile_moved) {
+    if(uni == PSEUDOKEY_RELEASE && hold_mode == 4 && tile_moved && !drawn.empty()) {
       swap(*tile_moved, drawn[0]);
       cast_spell(tile_boxid);
       }
@@ -1098,7 +1098,7 @@ void seuphorica_screen() {
         /* do nothing, it was already removed from the board */
         /* ... but assume we want the default interface */
         if(snapshots.empty()) snapshot();
-        for(auto& s: snapshots) {
+        if(!drawn.empty()) for(auto& s: snapshots) {
           s.erase(drawn[0].id);
           s.emplace(drawn[0].id, snaptile{ drawn[0], eupoint(mousex, mousey) });
           }
@@ -1126,10 +1126,13 @@ void seuphorica_screen() {
       auto at = mouseover;
       if(board.count(at)) {
         back_from_board(at); hold_mode = 1; tile_moved_from = mouseover;
-        holdmouse = true; tile_moved = &(drawn[0]); tile_boxid = 0; box_moved = &drawn;
+        holdmouse = true;
+        if(!drawn.empty()) {
+          tile_moved = &(drawn[0]); tile_boxid = 0; box_moved = &drawn;
+          }
         }
       else if(in_board(at) && tile_orientation.count(at)) {
-        for(auto& s: snapshots) s.erase(drawn[0].id);
+        if(!drawn.empty()) for(auto& s: snapshots) s.erase(drawn[0].id);
         drop_hand_on(at);
         if(snapshots.empty()) snapshot();
         for(auto& d: drawn) where_is_tile.erase(d.id);
