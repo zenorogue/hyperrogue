@@ -56,6 +56,7 @@ void gamedata_all(gamedata& gd) {
   gd.store(currentmap);
   gd.store(cwt);
   gd.store(allmaps);
+  gd.store(dl_list);
   gd.store(shmup::on);
   gd.store(land_structure);
   gd.store(*current_display);
