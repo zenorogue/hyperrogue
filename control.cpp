@@ -991,6 +991,7 @@ EX void mainloopiter() {
 
   cframelimit = vid.framelimit;
   if(stillscreen && cframelimit > 10) cframelimit = 10;
+  if(outoffocus && cframelimit > 10) cframelimit = 10;
   
   bool normal = cmode & sm::NORMAL;
   
