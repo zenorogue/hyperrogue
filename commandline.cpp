@@ -61,13 +61,37 @@ EX void initializeCLI() {
 #endif
 
   #ifdef FHS
-  static string sbuf, cbuf;
-  if(getenv("HOME")) {
-    sbuf = getenv("HOME"); sbuf += "/."; sbuf += scorefile;
-    cbuf = getenv("HOME"); cbuf += "/."; cbuf += conffile;
-    scorefile = sbuf;
-    conffile = cbuf.c_str();
-    }
+  auto try_place = [&] (string env, string suffix, string& which_file, bool only_file) {
+    char *res = getenv(env.c_str());
+    if(!res) return false;
+    string buf = res; buf += suffix; buf += "/hyperrogue";
+    if(only_file && file_exists(buf + "/" + which_file)) {
+      which_file = buf + "/" + which_file;
+      return true;
+      }
+    if(!file_exists(buf)) system(("mkdir -p " +buf).c_str());
+    which_file = buf + "/" + which_file;
+    return true;
+    };
+
+  auto try_dot = [&] (string& which_file) {
+    char *res = getenv("HOME");
+    string buf = res;
+    buf += "/."; buf += which_file;
+    if(!file_exists(buf)) return false;
+    which_file = buf;
+    return true;
+    };
+
+  if(try_dot(scorefile)) {}
+  else if(try_place("XDG_DATA_HOME", "", scorefile, true)) {}
+  else if(try_place("HOME", "/.local/share", scorefile, false)) {}
+  else if(try_place("XDG_DATA_HOME", "", scorefile, false)) {}
+
+  if(try_dot(conffile)) {}
+  else if(try_place("XDG_CONFIG_HOME", "", conffile, true)) {}
+  else if(try_place("HOME", "/.config", conffile, true)) {}
+  else if(try_place("XDG_CONFIG_HOME", "", conffile, false)) {}
   #endif
   }
 

@@ -918,7 +918,7 @@ EX shared_ptr<custom_parameter> param_colortable(colortable& val, const paramete
 EX ld bounded_mine_percentage = 0.1;
 EX int bounded_mine_quantity, bounded_mine_max;
 
-EX const char *conffile = "hyperrogue.ini";
+EX string conffile = "hyperrogue.ini";
 
 /* extra space if more geometries are added */
 EX array<ld, gGUARD+64> sightranges;
@@ -2058,7 +2058,7 @@ EX debugflag debug_init_config = {"init_config", true};
 
 EX void saveConfig() {
   indenter_finish(debug_init_config, "saveConfig");
-  FILE *f = fopen(conffile, "wt");
+  FILE *f = fopen(conffile.c_str(), "wt");
   if(!f) {
     addMessage(s0 + "Could not open the config file: " + conffile);
     return;
@@ -2131,7 +2131,7 @@ EX void loadConfig() {
  
   indenter_finish(debug_init_config, "loadConfig");
   vid.xres = 9999; vid.yres = 9999; vid.framelimit = 999;
-  FILE *f = fopen(conffile, "rt");
+  FILE *f = fopen(conffile.c_str(), "rt");
   if(f) {
     int err;
     int fs;
@@ -4185,7 +4185,7 @@ EX void resetConfigMenu() {
 
     if(uni == 'd') { 
       resetConfig();
-      unlink(conffile);
+      unlink(conffile.c_str());
       popScreen();
       }
     else if(uni == 'y') {
