@@ -409,4 +409,8 @@ EX bool isDie(eWall w) {
   return among(w, waRichDie, waHappyDie);
   }
 
+EX bool looks_like_player(eMonster m) {
+  return among(m, moPlayer, moMimic, moIllusion, moShadow);
+  }
+
 }

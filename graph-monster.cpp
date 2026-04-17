@@ -370,7 +370,15 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
   char xch = minf[m].glyph;
   
   shiftmatrix V = V1;
-  if(WDIM == 3 && (classflag(m) & CF_FACE_UP) && where && !mhybrid) V = V1 * cspin90(0, 2);
+  if(WDIM == 3) {
+    bool faceup;
+    if(looks_like_player(m))
+      faceup = playershapes[getcs().charid >> 1].is_humanoid;
+    else
+      faceup = classflag(m) & CF_FACE_UP;
+    if(faceup)
+      V = V1 * cspin90(0, 2);
+    }
   
   #if CAP_SHAPES
   if(among(m, moTortoise, moWorldTurtle) && where && where->stuntime >= 3)
