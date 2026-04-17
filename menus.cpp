@@ -835,6 +835,7 @@ EX void showChangeMode() {
     clearMessages();
     if(yendor::everwon || autocheat || unlock_all)
       pushScreen(yendor::showMenu);
+    else if(yendor::on) restart_game(rg::yendor);
     else gotoHelp(yendor::chelp);
     });
 #if CAP_RACING

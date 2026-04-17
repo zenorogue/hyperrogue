@@ -944,11 +944,7 @@ EX namespace tactic {
           });
         }
       else if(uni == '0') {
-        if(tactic::on) {
-          stop_game();          
-          firstland = laIce;
-          restart_game(rg::tactic);
-          }
+        if(tactic::on) restart_game(rg::tactic);
         else popScreen();
         }
 
@@ -984,7 +980,8 @@ EX namespace tactic {
   EX void start() {
     dialog::infix = "";
     popScreenAll();
-    pushScreen(tactic::showMenu);
+    if(tactic::on) restart_game(rg::tactic);
+    else pushScreen(tactic::showMenu);
     }
 EX }
 
