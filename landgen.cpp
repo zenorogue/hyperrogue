@@ -20,6 +20,10 @@ EX eLand lastland;
 
 EX int lastexplore;
 
+EX void update_lastexplore() {
+  lastexplore = shmup::on ? shmup::curtime : turncount;
+  }
+
 EX bool randomPatternsMode = false;
 EX int randompattern[landtypes];
 
@@ -3034,7 +3038,7 @@ EX void setdist(cell *c, int d, cell *from) {
       }
     }
 
-  if(d <= 10 - getDistLimit()) lastexplore = shmup::on ? shmup::curtime : turncount;
+  if(d <= 10 - getDistLimit()) update_lastexplore();
   
   if(mhybrid) {
     auto wc = hybrid::get_where(c).first;

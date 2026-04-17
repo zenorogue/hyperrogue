@@ -160,7 +160,7 @@ EX namespace yendor {
     cell *actualKey;
     bool found;
     bool foundOrb;
-    int howfar;
+    int howfar, howfar_back;
     bignum age;
     yendorinfo() { actualKey = NULL; }
     cell* key() { return path[YDIST-1]; }
@@ -257,6 +257,7 @@ EX namespace yendor {
 
       nyi.found = false;
       nyi.foundOrb = false;
+      nyi.howfar_back = 999;
   
       for(int i=1; i<YDIST; i++) {
         setdist(nyi.path[i], 7, nyi.path[i-1]);
@@ -405,6 +406,10 @@ EX namespace yendor {
     if(yii < isize(yi)) {
       for(int i=0; i<YDIST; i++) if(yi[yii].path[i]->cpdist <= 7) {
         if(i > yi[yii].howfar) yi[yii].howfar = i;
+        if(yi[yii].found && i < yi[yii].howfar_back) {
+          yi[yii].howfar_back = i;
+          update_lastexplore();
+          }
         path = true;
         }
       }
