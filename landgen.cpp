@@ -1803,7 +1803,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
         }  
       if(d == 7 && c->wall == waSea && hrand_monster(10000) < 20 + items[itPirate] + 2 * yendor::hardness() && !safety)
         c->monst = moCShark;  
-      if(d == 7 && c->wall == waCTree && hrand_monster(GDIM == 2 ? 5000 : 50000) < 100 + items[itPirate] + yendor::hardness())
+      if(d == 7 && c->wall == waCTree && hrand_monster(GDIM == 2 ? 5000 : 50000) < 100 + items[itPirate] + yendor::hardness() && !safety)
         c->monst = moParrot;    
       ONEMPTY {
         if(hrand(1500) < 4 && celldistAlt(c) <= -5 && peace::on && !cryst)
