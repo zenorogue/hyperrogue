@@ -131,24 +131,17 @@ heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0, int fix
     else if(S3 == 4 && BITRUNCATED) {
       h->distance = parent->distance + 2;
       if(h->c.spin(0) == 2 || (h->c.spin(0) == 3 && S7 <= 5))
-        h->distance = min<short>(h->distance, createStep(h->move(0), 0)->distance + 3);
+        h->distance = min<short>(h->distance, h->move(0)->cmove(0)->distance + 3);
       if(h->c.spin(0) == 2 && h->move(0)) {
         int d = h->c.spin(0);
         int d1 = (d+S7-1)%S7;
-        bool missing0 = !h->move(0)->move(d1);
-        if(missing0) {
-          if(s == 1 && h->move(0)->s != hsOrigin)
-            h->distance = h->move(0)->distance + 1;
-          }
-        else {
-          heptagon* h1 = createStep(h->move(0), d1);
-          if(h1->distance <= h->move(0)->distance)
-            h->distance = h->move(0)->distance+1;
-          }
+        heptagon* h1 = h->move(0)->cmove(d1);
+        if(h1->distance <= h->move(0)->distance)
+          h->distance = h->move(0)->distance+1;
         }
       if((h->s == hsB && h->move(0)->s == hsB) || h->move(0)->s == hsA) {
         int d = h->c.spin(0);
-        heptagon* h1 = createStep(h->move(0), (d+1)%S7);
+        heptagon* h1 = h->move(0)->cmove((d+1)%S7);
         if(h1->distance <= h->move(0)->distance)
           h->distance = h->move(0)->distance+1;
         }
