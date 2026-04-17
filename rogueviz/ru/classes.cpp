@@ -45,7 +45,7 @@ struct power {
   int id_status;
   int qty_filled;
   int qty_owned;
-  int flags;
+  flagtype flags;
   int random_value;
   vector<struct randeff*> randeffs;
   set<struct room*> active_in_rooms;
@@ -79,10 +79,10 @@ extern power *extra_life;
 
 flagtype IDENTIFIED = Flag(1);
 flagtype ACTIVE = Flag(2);
-flagtype PARTIAL = Flag(4);
-flagtype WEAPON = Flag(8);
-flagtype ARMOR = Flag(16);
-flagtype WEAPON_AXE = Flag(32);
+flagtype PARTIAL = Flag(3);
+flagtype WEAPON = Flag(4);
+flagtype ARMOR = Flag(5);
+flagtype WEAPON_AXE = Flag(6);
 
 struct bbox {
   int minx, miny, maxx, maxy;
