@@ -138,6 +138,7 @@ EX bool anti_alchemy(cell *w, cell *from) {
 #define P_PHASE      Flag(33) // phasing movement
 #define P_PULLMAGNET Flag(34) // pull the other part of the magnet
 #define P_WATERCURSE Flag(35) // Curse of Water
+#define P_IVY        Flag(36) // ivy
 #endif
 
 EX bool passable(cell *w, cell *from, flagtype flags) {
@@ -270,7 +271,7 @@ EX bool passable(cell *w, cell *from, flagtype flags) {
     }
   if(isChasmy(w)) {
     if(in_gravity_zone(w)) ;
-    else if(!F(P_AETHER | P_FLYING | P_BLOW | P_JUMP1 | P_BULLET | P_DEADLY | P_REPTILE)) return false;  
+    else if(!F(P_AETHER | P_FLYING | P_BLOW | P_JUMP1 | P_BULLET | P_DEADLY | P_REPTILE | P_IVY)) return false;
     }
 
   if(w->wall == waRoundTable && from && from->wall != waRoundTable && (flags & P_ISPLAYER)) return true;
@@ -465,6 +466,14 @@ EX bool notNearItem(cell *c) {
 
 EX bool isNeighbor1(cell *f, cell *w) {
   return !f || f == w || isNeighbor(f, w);
+  }
+
+EX bool ivy_passable(cell *c2, cell *c) {
+  if(!passable(c2, c, P_IVY)) return false;
+  if(isWatery(c2)) return false;
+  if(strictlyAgainstGravity(c2, c, false, MF_IVY)) return false;
+  if(cellUnstableOrChasm(c) && cellUnstableOrChasm(c2)) return false;
+  return true;
   }
 
 EX bool passable_for(eMonster m, cell *w, cell *from, flagtype extra) {

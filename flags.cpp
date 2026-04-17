@@ -214,7 +214,7 @@ EX bool isFlying(eMonster m) {
   }
 
 EX bool survivesChasm(eMonster m) {
-  return isFlying(m);
+  return isFlying(m) || isAnyIvy(m);
   }
 
 EX bool ignoresPlates(eMonster m) {

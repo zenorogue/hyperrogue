@@ -1482,7 +1482,7 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
         if(c->monst ? (
           CHK(canAttack(cf, moFriendlyIvy, c, c->monst, f), XLAT("Cannot attack there!"))
           ) : (
-          CHK(passable(c, cf, P_ISFRIEND | P_MONSTER), XLAT("Cannot grow there!")) &&
+          CHK(passable(c, cf, P_ISFRIEND | P_MONSTER | P_IVY), XLAT("Cannot grow there!")) &&
           CHK(!strictlyAgainstGravity(c, cf, false, MF_IVY), XLAT("Cannot grow against gravity!"))
           ))
           dirs.push_back(d);

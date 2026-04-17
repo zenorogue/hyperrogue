@@ -240,6 +240,7 @@ EX void computePathdist(eMonster param, bool include_allies IS(true)) {
       cell *c2 = cw1.peek();
       
       flagtype f = P_MONSTER;
+      if(param == moIvyRoot) f |= P_IVY;
       if(param == moTameBomberbird) f |= P_FLYING | P_ISFRIEND;
       if(isPrincess(param)) f |= P_ISFRIEND | P_USEBOAT | P_CHAIN;
       if(param == moGolem) f |= P_ISFRIEND;
@@ -251,7 +252,7 @@ EX void computePathdist(eMonster param, bool include_allies IS(true)) {
         
         if(qb >= qtarg) {
           if(param == moTortoise && nogoSlow(c, c2)) continue;
-          if(param == moIvyRoot  && strictlyAgainstGravity(c, c2, false, MF_IVY)) continue;
+          if(param == moIvyRoot  && !ivy_passable(c, c2)) continue;
           if(param == moWorm && (cellUnstable(c) || cellEdgeUnstable(c) || prairie::no_worms(c))) continue;
           if(!isFriendly(param) && items[itOrbLava] && c2->cpdist <= 5 && pseudohept(c) && makeflame(c2, 1, true))
             continue;

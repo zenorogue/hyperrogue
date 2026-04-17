@@ -1041,7 +1041,7 @@ EX void moveivy() {
             }
           continue;
           }
-        if(c2 && c2->pathdist < pd && passable(c2, c, 0) && !strictlyAgainstGravity(c2, c, false, MF_IVY))
+        if(c2 && c2->pathdist < pd && ivy_passable(c2, c))
           mi = movei(c, j), pd = c2->pathdist;
         }
       c = c->move(c->mondir);
@@ -1437,7 +1437,7 @@ EX void movemutant() {
       
       if(isPlayerOn(c2)) continue;
 
-      if((c2->land == laOvergrown || !pseudohept(c2)) && passable(c2, c, 0)) {
+      if((c2->land == laOvergrown || !pseudohept(c2)) && ivy_passable(c2, c)) {
         if(c2->land == laClearing && !closed_or_bounded && c2->mpdist > 7) continue;
         c2->monst = moMutant;
         c2->mondir = c->c.spin(j);
