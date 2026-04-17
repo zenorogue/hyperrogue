@@ -1684,34 +1684,70 @@ EX namespace dialog {
     return ret;
     }
   
-  EX void displayPageButtons(int i, int numpages) {
+  #if HDR
+  constexpr flagtype DB_BACK = 1;
+  constexpr flagtype DB_HELP = 2;
+  constexpr flagtype DB_EXIT = 4;
+  constexpr flagtype DB_PLAIN = 8;
+  constexpr flagtype DB_ACTIVATE = 16;
+  constexpr flagtype DB_EXPLAIN = 32;
+  #endif
+
+  EX void display_bottom_buttons(int numpages, flagtype flags) {
+
+    struct button {
+      int key;
+      string text;
+      color_t col;
+      int width;
+      bool digits;
+      };
+    vector<button> buttons;
+    auto add_button = [&] (int k, string t, color_t c) {
+      buttons.emplace_back();
+      buttons.back().key = k;
+      buttons.back().text = t;
+      buttons.back().col = c;
+      buttons.back().digits = false;
+      };
+
+    if(numpages == 2) {
+      add_button('1', XLAT("page") + " 1", nlpage == 1 ? 0xD8D8C0 : dialogcolor);
+      add_button('2', XLAT("page") + " 2", nlpage == 2 ? 0xD8D8C0 : dialogcolor);
+      add_button('3', XLAT("all"), nlpage == 0 ? 0xD8D8C0 : dialogcolor);
+      }
+    else if(numpages > 2) {
+      add_button('1', XLAT("last page"), nlpage == 1 ? 0xD8D8C0 : dialogcolor);
+      add_button('2', XLAT("next page"), nlpage == numpages ? 0xD8D8C0 : dialogcolor);
+      add_button('3', nlpage ? its(nlpage) + "/" + its(numpages) : XLAT("all"), nlpage == 0 ? 0xD8D8C0 : dialogcolor);
+      buttons.back().digits = true;
+      }
+    else if(numpages == 0) {
+      if(flags & DB_PLAIN) add_button('1', XLAT("plain"), dialogcolor);
+      if(flags & DB_ACTIVATE) add_button('2', XLAT("touch to activate"), dialogcolor);
+      if(flags & DB_EXPLAIN) add_button('2', XLAT("touch to explain"), dialogcolor);
+      }
+    if(flags & DB_BACK) add_button(SDLK_ESCAPE, XLAT("go back"), dialogcolor);
+    if(flags & DB_HELP) add_button(SDLK_F1, XLAT("help"), dialogcolor);
+    if(flags & DB_EXIT) add_button('0', XLAT("exit mode"), dialogcolor);
+
+    int total_w = 0;
+
+    for(auto& b: buttons) {
+      string t = keyname(b.key) + " - " + b.text;
+      total_w += b.width = textwidth(vid.fsize, t);
+      }
+
+    int hole = (vid.xres - total_w) / (isize(buttons) + 1);
+
     int i0 = vid.yres - vid.fsize;
-    int xr = vid.xres / 80;
-
-    if(numpages == 2) if(displayfrZH(xr*8, i0, 1, vid.fsize, IFM("1 - ") + XLAT("page") + " 1", nlpage == 1 ? 0xD8D8C0 : dialogcolor, 8))
-      getcstat = '1';
-    if(numpages == 2) if(displayfrZH(xr*24, i0, 1, vid.fsize, IFM("2 - ") + XLAT("page") + " 2", nlpage == 1 ? 0xD8D8C0 : dialogcolor, 8))
-      getcstat = '2';
-    if(numpages == 2) if(displayfrZH(xr*40, i0, 1, vid.fsize, IFM("3 - ") + XLAT("all"), nlpage == 0 ? 0xD8D8C0 : dialogcolor, 8))
-      getcstat = '3';
-
-    if(numpages > 2) if(displayfrZH(xr*8, i0, 1, vid.fsize, IFM("1 - ") + XLAT("last page"), nlpage == 1 ? 0xD8D8C0 : dialogcolor, 8))
-      getcstat = '1';
-    if(numpages > 2) if(displayfrZH(xr*24, i0, 1, vid.fsize, IFM("2 - ") + XLAT("next page"), nlpage == numpages ? 0xD8D8C0 : dialogcolor, 8))
-      getcstat = '2';
-    if(numpages > 2) if(displayfrZH(xr*40, i0, 1, vid.fsize, nlpage ? its(nlpage) + "/" + its(numpages) : IFM("3 - ") + XLAT("all"), nlpage == 0 ? 0xD8D8C0 : dialogcolor, 8))
-      getcstat = '3';
-
-    if(i&1) if(displayfrZH(xr*56, i0, 1, vid.fsize, IFM(keyname(SDLK_ESCAPE) + " - ") + XLAT("go back"), dialogcolor, 8))
-      getcstat = SDLK_ESCAPE;
-    if(i&2) if(displayfrZH(xr*72, i0, 1, vid.fsize, IFM("F1 - ") + XLAT("help"), dialogcolor, 8))
-      getcstat = SDLK_F1;
-    if(i&4) if(displayfrZH(xr*8, i0, 1, vid.fsize, IFM("1 - ") + XLAT("plain"), dialogcolor, 8))
-      getcstat = '1';
-    if(i&8) if(displayfrZH(xr*24, i0, 1, vid.fsize, IFM("2 - ") + XLAT("touch to activate"), dialogcolor, 8))
-      getcstat = '2';
-    if(i&16) if(displayfrZH(xr*24, i0, 1, vid.fsize, IFM("2 - ") + XLAT("touch to explain"), dialogcolor, 8))
-      getcstat = '2';
+    int x = 0;
+    for(auto& b: buttons) {
+      string t = IFM(keyname(b.key) + " - ") + b.text;
+      x += b.width + hole;
+      if(displayfrZH(x, i0, 1, vid.fsize, t, b.col, 16))
+        getcstat = b.key;
+      }
     }
   
   EX bool handlePageButtons(int sym, int uni, bool dkeys, int numpages) {

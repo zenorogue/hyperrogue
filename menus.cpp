@@ -152,7 +152,7 @@ EX void showOverview() {
       }
     }
 
-  dialog::displayPageButtons(3, numpages);
+  dialog::display_bottom_buttons(numpages, dialog::DB_BACK | dialog::DB_HELP);
   
   keyhandler = [numpages] (int sym, int uni) {
     int umod = uni % 1000;

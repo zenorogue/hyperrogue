@@ -917,7 +917,7 @@ EX namespace tactic {
         }
       }
     
-    dialog::displayPageButtons(3, numpages);
+    dialog::display_bottom_buttons(numpages, dialog::DB_BACK | dialog::DB_HELP | dialog::DB_EXIT);
 
     uploadScore();
     if(on) unrecord(specialland);
