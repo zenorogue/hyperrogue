@@ -413,4 +413,9 @@ EX bool looks_like_player(eMonster m) {
   return among(m, moPlayer, moMimic, moIllusion, moShadow);
   }
 
+EX int halfvine_direction(cell *c) {
+  for(int t=0; t<c->type; t++) if(c->move(t) && c->move(t)->wall == c->wall) return t;
+  return -1;
+  }
+
 }

@@ -987,9 +987,7 @@ void celldrawer::draw_grid_edge(int t, color_t col, int prec) {
 
 void celldrawer::draw_halfvine() {
 
-  int i =-1;
-  for(int t=0;t<6; t++) if(c->move(t) && c->move(t)->wall == c->wall)
-    i = t;
+  int i = halfvine_direction(c);
 
   qfi.spin = ddspin(c, i, M_PI/S3);
   shiftmatrix V2 = V * qfi.spin;

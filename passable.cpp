@@ -382,22 +382,13 @@ bool slimepassable(cell *w, cell *c) {
 
   // only travel to halfvines correctly
   if(cellHalfvine(c)) {
-    int i=0;
-    for(int t=0; t<c->type; t++) if(c->move(t) && c->move(t)->wall == c->wall) i=t;
-    int z = i-u; if(z<0) z=-z; z%=6;
-    if(z>1) return false;
-    hv=(group == ogroup);
+    if(angledist(c, halfvine_direction(c), u) > 1) return false;
     }
   // only travel from halfvines correctly
   if(cellHalfvine(w)) {
-    int i=0;
-    for(int t=0; t<w->type; t++) if(w->move(t) && w->move(t)->wall == w->wall) i=t;
-    int z = i-c->c.spin(u); if(z<0) z=-z; z%=6;
-    if(z>1) return false;
-    hv=(group == ogroup);
+    if(angledist(w, halfvine_direction(w), c->c.spin(u)) > 1) return false;
     }
-  if(!hv) return false;
-  return true;
+  return hv;
   }
 
 bool sharkpassable(cell *w, cell *c) {
