@@ -1550,6 +1550,10 @@ EX land_validity_t& land_validity(eLand l) {
   if(l == laCrossroads4 && quotient)
     return some0;
 
+  if(l == laZebra && bt::in()) return pattern_defined;
+
+  if(l == laZebra && S3 >= OINF) return pattern_not_implemented_random;
+
   if(among(l, laZebra, laFrog) && quotient && geometry != gZebraQuotient && !randomPatternsMode)
     return pattern_incompatibility;
   

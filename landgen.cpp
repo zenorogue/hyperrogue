@@ -229,8 +229,14 @@ EX bool is_zebra_trapdoor(cell *c) {
     return (y&1);
     }
   #if CAP_ARCM
-  else 
+  else
     if(arcm::in()) return hrand(2);
+  #endif
+  else
+    if(S3 >= OINF) return hrand(2);
+  #if CAP_BT
+  else
+    if(bt::in()) return c->master->distance & 1;
   #endif
   else
     return (randomPatternsMode ? RANDPAT : (zebra40(c)&2));
