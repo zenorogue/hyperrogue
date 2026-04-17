@@ -312,6 +312,7 @@ int arg::readCommon() {
     clearMessages();
     nohud = true;
     mapeditor::drawplayer = false;
+    no_find_player = true;
     }
 
   else if(argis("-vizhr")) {
