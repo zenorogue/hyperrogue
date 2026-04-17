@@ -1683,7 +1683,7 @@ EX void switch_game_mode(char switchWhat) {
       randomPatternsMode = false;
       land_structure = lsNiceWalls;
       racing::on = false;
-      if(!yendor::on) firstland = laIce;
+      if(!yendor::on) firstland = specialland = laIce;
       dual::disable();
       break;
 
@@ -1709,7 +1709,7 @@ EX void switch_game_mode(char switchWhat) {
       princess::challenge = false;
       racing::on = false;
       land_structure = tactic::on ? lsSingle : lsNiceWalls;
-      if(!tactic::on) firstland = laIce;
+      if(!tactic::on) firstland = specialland = laIce;
       dual::disable();
       break;
 
