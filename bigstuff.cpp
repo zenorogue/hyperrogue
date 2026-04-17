@@ -125,7 +125,8 @@ EX int compassDist(cell *c) {
 /** identify the compass target that compassDist is talking about */
 EX const void *whichCompass(cell *c) {
   if(sphere || quotient) return nullptr;
-  if(eubinary || c->master->alt) return c->master->alt->alt;
+  if(eubinary) return nullptr;
+  if(c->master->alt) return c->master->alt->alt;
   if(isHaunted(c->land) || c->land == laGraveyard) return &linf[laHaunted];
   return &NOCOMPASS;
   }
