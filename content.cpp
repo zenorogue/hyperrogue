@@ -1384,7 +1384,7 @@ LAND( 0x804020, "Burial Grounds", laBurial, ZERO, itBarrow, RESERVED,
     "ancient jewelry buried in the graves."
     )
   NATIVE(m == moDraugr ? 1 : 0)
-  REQ(ITEMS(itKraken, U10))
+  REQ(IFINGAME(laKraken, ITEMS(itKraken, U10), GOLD(R60)))
 
 LAND( 0x90A548, "Trollheim", laTrollheim, ZERO, itTrollEgg, RESERVED, 
     "Many clans of Trolls spend their lives in this kingdom. You can find many "
