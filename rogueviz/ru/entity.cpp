@@ -1138,4 +1138,66 @@ void reflector::act() {
     }
   }
 
+void trader::attacked(int dmg, power *p) {
+  addMessage(hal()->get_name() + " laughs at your attack!");
+  }
+
+void fight_trader::attacked(int dmg, power *p) {
+  if(p->flags & WEAPON_AXE) {
+    angered = true;
+    current_target = this;
+    if(reduce_hp(dmg)) {
+      if(!existing) addMessage("You kill the " + hal()->get_name() + "."); else addMessage("You hit the " + hal()->get_name() + ".");
+      if(!existing) {
+        walls[wShopDoor].glyph = '\'';
+        walls[wShopDoor].flags = W_TRANS;
+        }
+      }
+    if(where.x < m.where.x) vel.x = -abs(vel.x);
+    if(where.x > m.where.x) vel.x = +abs(vel.x);
+    }
+  else trader::attacked(dmg, p);
+  }
+
+void fight_trader::act() {
+  if(!angered) { trader::act(); return; }
+  if(stay_on_screen()) dir = -dir;
+  kino();
+  if(on_floor) {
+    auto dat = get_dat();
+    if(abs(vel.x) < 1e-6) {
+      dir = -dir;
+      }
+    vel.x = zero_vel.x + dat.d * dat.modv * dir;
+    }
+  if(gmod(gframeid, 100) == 0) {
+    bbox b = get_pixel_bbox_at(xy{where.x + dir * dsiz().x, where.y});
+    if(intersect(b, m.get_pixel_bbox()) && gframeid > invinc_end) {
+      if(m.reduce_hp(30)) addMessage("The " + hal()->get_name() + " chops you!");
+      }
+    }
+  if(intersect(get_pixel_bbox(), m.get_pixel_bbox()) && gframeid > invinc_end) {
+    if(m.reduce_hp(20)) addMessage("The " + hal()->get_name() + " slaps you!");
+    }
+  }
+
+void fight_trader::draw() {
+  entity::draw();
+  if(!angered) return;
+
+  int t = gmod(gframeid, 100);
+  if(t <= 50) {
+    bbox b = get_pixel_bbox_at(xy{where.x + dir * (1-0.01 * t) * dsiz().x, where.y});
+    auto col = 0xFFFFFFFF;
+    auto& alpha = part(col, 0);
+    alpha = max<int> (0, alpha - 5 * t);
+    asciiletter(
+      b.minx, b.miny,
+      b.maxx, b.maxy,
+      dir == -1 ? "(" : ")", col
+      );
+    }
+  }
+
+
 }

@@ -677,6 +677,16 @@ struct trader : public npc_or_trader {
   void act() override;
   string get_help() override { return "Stay awhile and listen. Or use gold to pay."; }
   virtual struct trader* as_trader() { return this; }
+  void attacked(int s, power *p) override;
+  };
+
+struct fight_trader : public trader {
+  int dir;
+  bool angered;
+  void draw() override;
+  void act() override;
+  void attacked(int s, power *p) override;
+  virtual void hs(stater& s) override { trader::hs(s); s.act("angered", angered, false); s.act("dir", dir, 1); }
   };
 
 struct enemy : public located_entity {

@@ -251,6 +251,14 @@ void load_room(fhstream& f, cell *c) {
         b->id = unspace(b->name);
         r.entities.emplace_back(std::move(b));
         }
+      else if(cap == "FIGHTTRADER") {
+        auto b = std::make_unique<fight_trader>();
+        b->respawn = get_xy();
+        b->name = scanline_noblank(f);
+        b->text = scanline_noblank(f);
+        b->id = unspace(b->name);
+        r.entities.emplace_back(std::move(b));
+        }
       else if(cap == "BOAR") {
         auto b = std::make_unique<boar>(); nam(*b);
         b->respawn = get_xy();
