@@ -233,6 +233,8 @@ EX bool is_zebra_trapdoor(cell *c) {
     if(arcm::in()) return hrand(2);
   #endif
   else
+    if(arb::in()) return hrand(2);
+  else
     if(S3 >= OINF) return hrand(2);
   #if CAP_BT
   else
@@ -844,7 +846,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           }
         else if(WDIM == 3 && hyperbolic && !bt::in())
           c->wall = (c->master->zebraval & 2) ? waVinePlant : waNone;
-        else if(a4 || sphere || arcm::in() || bt::in() || S3 >= OINF)
+        else if(a4 || sphere || arcm::in() || bt::in() || arb::in() || S3 >= OINF)
           c->wall = hrand(100) < 50 ? waNone : waVinePlant;
         else {
           int v = emeraldval(c);

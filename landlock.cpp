@@ -1220,6 +1220,10 @@ EX land_validity_t& land_validity(eLand l) {
     }
   #endif
 
+  if(arb::in()) {
+    if(among(l, laPower, laZebra, laFrog, laWineyard) && arb::current.have_line) return lv::pattern_defined;
+    }
+
   #if CAP_CRYSTAL
   if(cryst) {
     if(l == laCamelot) return interesting;
@@ -1331,9 +1335,9 @@ EX land_validity_t& land_validity(eLand l) {
     return dont_work;
   #endif
     
-  if(arcm::in() && l == laPrairie) return dont_work;
+  if((arcm::in() || arb::in()) && l == laPrairie) return dont_work;
 
-  if((IRREGULAR || arcm::in()) && among(l, laBlizzard, laVolcano) && !sphere)
+  if((IRREGULAR || arcm::in() || arb::in()) && among(l, laBlizzard, laVolcano) && !sphere)
     return dont_work;
 
   if(arcm::in() && DUAL && l == laCrossroads4)
@@ -1558,13 +1562,13 @@ EX land_validity_t& land_validity(eLand l) {
   if(l == laCrossroads4 && quotient)
     return some0;
 
-  if(l == laZebra && bt::in()) return pattern_defined;
+  if(among(l, laZebra, laFrog) && bt::in()) return pattern_defined;
 
-  if(l == laZebra && S3 >= OINF) return pattern_not_implemented_random;
+  if(among(l, laZebra, laFrog) && (S3 >= OINF || arcm::in() || arb::in())) return pattern_not_implemented_random;
 
   if(among(l, laZebra, laFrog) && quotient && geometry != gZebraQuotient && !randomPatternsMode)
     return pattern_incompatibility;
-  
+
   if(among(l, laZebra, laFrog) && !(stdeucx || (a4 && !BITRUNCATED) || a46 || (geometry == gZebraQuotient && old_daily_id > 106)) && !randomPatternsMode)
     return pattern_not_implemented_weird;
   
