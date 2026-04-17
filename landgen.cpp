@@ -311,7 +311,7 @@ EX void clear_item(cell *c) {
   }
 
 EX void giantLandSwitch(cell *c, int d, cell *from) {
-  bool fargen = d == 9;
+  bool fargen = d == 9 || (d == 8 && BARLEV == 8);
   switch(c->land) {
 
     case laPrairie: // -------------------------------------------------------------
