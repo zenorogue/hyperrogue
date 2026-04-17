@@ -407,6 +407,7 @@ int arg::readCommon() {
     printf("  -s FILE            - use the specified highscore file\n");
     printf("  -m FILE            - use the specified soundtrack (music)\n");
     printf("  -se DIR            - the directory containing sound effects\n");
+    printf("  -font FILE         - use the specified font file\n");
 
     printf("\nLogging:\n");
     printf("  -log PATTERN       - log events matching the pattern\n");
