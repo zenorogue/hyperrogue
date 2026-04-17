@@ -2,9 +2,9 @@
 // compile with: mymake -O3 rogueviz/tricenter.cpp
 // run with e.g.
 // ./hyper -canvas-random 0 -canvas i -geo 0 -tricenter -noplayer -noscr -zoom .95 -run -shot-1000 -shott 1 -fillmodel 000000 -pngshot euler-fail.png
-// press 'r' to use a different triangle
+// press 'o' to change options
 
-#include "../hyper.h"
+#include "rogueviz.h"
 
 namespace hr {
 
@@ -255,7 +255,19 @@ void enable() {
   rv_hook(hooks_frame, 100, tricenter);
   }
 
-auto tricenter_hooks = arg::add2("-tricenter", enable);
+auto tricenter_hooks = arg::add2("-tricenter", enable)
+  + addHook_rvslides(187, [] (string s, vector<tour::slide>& v) {
+      if(s != "mixed") return;
+      using namespace tour;
+      v.push_back(slide{
+        "triangle centers", 10, LEGAL::NONE | QUICKGEO,
+        "An exploration of various 'triangle centers' in non-Euclidean geometry. Press 'o'."
+        ,
+        [] (presmode mode) {
+          if(mode == pmStart) enable();
+          }});
+      });
+
 
 }
 }
