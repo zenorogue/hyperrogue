@@ -428,6 +428,12 @@ int arg::readCommon() {
     printf("  -MK ID n           - start with n of kills of monster ID (cheat)\n");
     printf("  -canvas ID         - set background color or pattern code for the canvas\n");
 
+    printf("\nTroubleshooting suggestions:\n");
+    printf("  -c test1 -s test2              - to check if config/score files are responsible\n");
+    printf("  -noshaders -o0 -wm 3 -mm 2     - to disable complex graphics (-o0 disables OpenGL, -wm and -mm disable 3D walls/monsters)\n");
+    printf("  -log-all -log-to error.txt     - to log everything to a file error.txt\n");
+    printf("  -offline                       - to troubleshoot online connection issues\n");
+
     exit(0);
     }
   else return 1;
