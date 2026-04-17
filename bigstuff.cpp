@@ -2005,7 +2005,10 @@ EX bool openplains(cell *c) {
     }
   int dlimit = getDistLimit();
   if(arcm::in()) dlimit--;
-  if(dlimit < 7) {
+  if(getDistLimit() < 4) {
+    return true;
+    }
+  else if(dlimit < 7) {
     celllister cl(c, dlimit, 1000000, NULL);
     int bad = 0;
     for(cell *c: cl.lst) { 
