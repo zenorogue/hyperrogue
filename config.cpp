@@ -2036,7 +2036,12 @@ EX void resetModes(char leave IS('c')) {
 
   set_geometry(gNormal);
   set_variation(leave == rg::heptagons ? eVariation::pure : eVariation::bitruncated);
-  
+
+#if CAP_TEXTURE
+  texture::config.tstate = texture::tsOff;
+#endif
+
+  mapeditor::drawplayer = true;
   start_game();
   }
 
