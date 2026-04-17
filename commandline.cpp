@@ -381,47 +381,51 @@ int arg::readCommon() {
     }
   else if(argis("")) {}
   else if(argis("-help") || argis("-h")) {
-    printf("Press F1 while playing to get ingame options.\n\n");
-    printf("HyperRogue accepts the following command line options:\n");
-    printf("  -c FILE        - use the specified configuration file\n");
-    printf("  -s FILE        - use the specified highscore file\n");
-    printf("  -m FILE        - use the specified soundtrack (music)\n");
-    printf("  -se DIR        - the directory containing sound effects\n");
-    printf("  -lev FILE      - use the specified filename for the map editor (without loading)\n");
-    printf("  -load FILE     - use the specified filename for the map editor\n");
-    printf("  -canvas COLOR  - set background color or pattern code for the canvas\n");
-    printf("  --version, -v  - show the version number\n");
-    printf("  --help, -h     - show the commandline options\n");
-    printf("  -f*            - toggle fullscreen mode\n");
-    printf("  -wm n, -mm n   - start in the given wallmode or monmode\n");
-    printf("  -r WxHxF       - use the given resolution and font size\n");
-    printf("  -o*            - toggle the OpenGL mode\n");
-    printf("  -W LAND        - start in the given land (cheat)\n");
-    printf("  -W2 LAND       - make the given land easy to find (also turns on autocheat)\n");
-    printf("  -ch            - auto-enable cheat mode\n");
-    printf("  -geo n         - switch geometry (1=Euclidean, 2=spherical, 3=elliptic, 4/5=quotient)\n");
-    printf("  -qs <desc>     - fieldpattern: quotient by the given <desc> (must be followed by qpar)\n");
-    printf("  -qpar <prime>  - fieldpattern: use the given prime instead of 43\n");
-    printf("  -cs <desc>     - fieldpattern: set subpath to the given <desc> (cannot be followed by qpar)\n");
-    printf("  -csp           - fieldpattern: find the subpath of order <prime> (cannot be followed by qpar)\n");
-    printf("  -S*            - toggle Shmup\n");
-    printf("  -P n           - switch Shmup number of players (n=1..7)\n");
-    printf("  -PM            - switch the model index\n");
-    printf("  -H*            - toggle Hardcore\n");
-    printf("  -T*            - toggle Tactical\n");
-    printf("  -7*            - toggle heptagonal mode\n");
-    printf("  -C*            - toggle Chaos mode\n");
-    printf("  -R*            - toggle Random Pattern\n");
-    printf("  -Y id          - enable Yendor, level id\n");
-    printf("  -D             - disable all the special game modes\n");
-    printf("  -L             - list of features\n");
-    printf("  -debugf 7      - output debugging information to hyperrogue-debug.txt\n");
-    printf("  -debuge 7      - output debugging information to stderr\n");
-    printf("  -offline       - don't connect to Steam (for Steam versions)\n");
-    printf("  -I ITEM n      - start with n of ITEM (activates cheat and disables ghosts)\n");
-    printf("  -fix           - fix the seed\n");
-    printf("Toggles: -o0 disables, -o1 enables, -o switches\n");
-    printf("Not all options are documented, see hyper.cpp\n");
+    printf("\nCommandline help follows. If you meant in-game help, press F1 while playing.\n\n");
+    printf("Some commadline options automatically enable the cheat mode.\n");
+    printf("ID is a part of the name of the chosen option; indices are also allowed.\n");
+    printf("You can change various configuration settings using the [name]=[value] format, e.g. , `unlock_all=1`.\n");
+    printf("The names are as in the config file, and formulae are allowed.\n");
+    printf("HyperRogue has lots of options; only the basic ones are documented here.\n");
+
+    printf("\nBasic options:\n");
+    printf("  --version, -v      - show the version number\n");
+    printf("  --help, -h         - show the commandline options\n");
+    printf("  -ch                - auto-enable cheat mode\n");
+    printf("  -offline           - do not connect to Steam (for Steam versions)\n");
+    printf("  -L                 - list of features\n");
+    printf("  -fix               - fix the RNG seed (cheat)\n");
+    printf("  -fixx SEED         - fix the RNG seed to the given value (cheat)\n");
+    printf("  -noscr             - skip the start menu\n");
+    printf("  -viz               - visualization mode: do not display the game elements\n");
+    printf("  -nogui             - do not start the GUI\n");
+    printf("  -run               - run (before handling other options) until the user presses F10\n");
+    printf("  -exit              - exit the program\n");
+
+    printf("\nFile options:\n");
+    printf("  -c FILE            - use the specified configuration file\n");
+    printf("  -s FILE            - use the specified highscore file\n");
+    printf("  -m FILE            - use the specified soundtrack (music)\n");
+    printf("  -se DIR            - the directory containing sound effects\n");
+
+    printf("\nLogging:\n");
+    printf("  -log PATTERN       - log events matching the pattern\n");
+    printf("  -no-log PATTERN    - do not log events matching the pattern\n");
+    printf("  -log-to FILE       - log to the given file\n");
+    printf("  -log-append FILE   - append log to the given file\n");
+
+    printf("\nQuick testing:\n");
+    printf("  -load FILE         - load a level file created using the map editor\n");
+    printf("  -geo ID            - choose the geometry\n");
+    printf("  -PM ID             - choose the projection/model\n");
+    printf("  -W ID              - start in the given land\n");
+    printf("  -W2 ID             - make the given land easy to find (cheat)\n");
+    printf("  -W3 ID             - like -W2 but can be used multiple times (cheat)\n");
+    printf("  -I ID n            - start with n of item ID nearby (cheat)\n");
+    printf("  -M ID n            - start with n of monster ID nearby (cheat)\n");
+    printf("  -MK ID n           - start with n of kills of monster ID (cheat)\n");
+    printf("  -canvas ID         - set background color or pattern code for the canvas\n");
+
     exit(0);
     }
   else return 1;
