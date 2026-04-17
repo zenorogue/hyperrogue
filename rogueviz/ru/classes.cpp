@@ -245,6 +245,7 @@ struct stater {
   virtual stater& act(const string& s, color_t& c, color_t _c) = 0;
   virtual stater& act(const string& s, intxy& xy, intxy _xy) { act(s+".x", xy.x, _xy.x); act(s+".y", xy.y, _xy.y); return self; }
   virtual stater& act(const string& s, xy& p, xy _p) { act(s+".x", p.x, _p.x); act(s+".y", p.y, _p.y); return self; }
+  virtual stater& act(const string& s, flagtype& f, flagtype _f) { int u = f; act(s, u, (int)_f); f = u; return self; }
   virtual stater& only_full() { return self; }
   };
 
