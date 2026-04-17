@@ -3,8 +3,8 @@
 # Environmental vairables:
 #   If you want to build with Glew, set
 #     HYPERROGUE_USE_GLEW=1
-#   If you want to use libpng, set
-#     HYPERROGUE_USE_PNG=1
+#   If you do not want to use libpng, set
+#     HYPERROGUE_USE_PNG=0
 #
 # For Mac OS X:
 #   Run `brew install sdl12-compat sdl_gfx sdl_mixer sdl_ttf`
@@ -130,7 +130,7 @@ else
   CXXFLAGS_EARLY += -DCAP_GLEW=0
 endif
 
-ifeq (${HYPERROGUE_USE_PNG},1)
+ifneq (${HYPERROGUE_USE_PNG},0)
   CXXFLAGS_EARLY += -DCAP_PNG=1
   hyper_LDFLAGS += $(LDFLAGS_PNG)
   hyper_OBJS += savepng$(OBJ_EXTENSION)
