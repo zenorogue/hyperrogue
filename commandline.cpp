@@ -391,13 +391,13 @@ int arg::readCommon() {
     printf("\nBasic options:\n");
     printf("  --version, -v      - show the version number\n");
     printf("  --help, -h         - show the commandline options\n");
-    printf("  -ch                - auto-enable cheat mode\n");
     printf("  -offline           - do not connect to Steam (for Steam versions)\n");
     printf("  -L                 - list of features\n");
     printf("  -fix               - fix the RNG seed (cheat)\n");
     printf("  -fixx SEED         - fix the RNG seed to the given value (cheat)\n");
     printf("  -noscr             - skip the start menu\n");
     printf("  -viz               - visualization mode: do not display the game elements\n");
+    printf("  -g                 - debug mode: do not use scorefile, fix seed, enable cheat mode\n");
     printf("  -nogui             - do not start the GUI\n");
     printf("  -run               - run (before handling other options) until the user presses F10\n");
     printf("  -exit              - exit the program\n");
@@ -407,6 +407,7 @@ int arg::readCommon() {
     printf("  -s FILE            - use the specified highscore file\n");
     printf("  -m FILE            - use the specified soundtrack (music)\n");
     printf("  -se DIR            - the directory containing sound effects\n");
+    printf("  -rsrc DIR          - the directory containing resources\n");
     printf("  -font FILE         - use the specified font file\n");
 
     printf("\nLogging:\n");
