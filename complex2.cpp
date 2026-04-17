@@ -1014,13 +1014,13 @@ EX namespace dice {
     dd.which = ds;
     vector<int> dirs;
     for(int i=0; i<c->type; i++) createMov(c, i);
-    for(int i=0; i<c->type; i++) 
+    for(int i=0; i<c->type * ds->facesides; i++)
     for(int j=0; j<c->type; j++) if(can_roll(ds->facesides, i, movei(c, j)))
       dirs.push_back(i);
     if(dirs.empty())
-      dd.dir = hrand(c->type) * ds->facesides;
+      dd.dir = hrand(c->type * ds->facesides);
     else
-      dd.dir = hrand_elt(dirs) * ds->facesides;
+      dd.dir = hrand_elt(dirs);
     vector<int> sides;
     for(int i=0; i<ds->faces; i++) 
       if(ds->hardness[i] >= min_hardness && ds->hardness[i] <= max_hardness)
