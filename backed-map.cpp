@@ -174,4 +174,42 @@ void backed_map::swapdim() {
   alt_cgip[1] = nullptr;
   }
 
+bool show_map_stress;
+
+void draw_stress_map() {
+  if(!show_map_stress) return;
+  auto bm = currentmap->get_backmap();
+  if(!bm) return;
+  int prec = grid_prec();
+  vid.linewidth *= 4;
+  for(auto& p: gmatrix) {
+    cell *c = p.first;
+    const shiftmatrix& V = p.second;
+    auto h = c->master;
+    auto p1 = bm->where[h];
+    for(int i=0; i<c->type; i++) {
+      auto c2 = c->move(i);
+      if(!c2 || c2 < c || !gmatrix.count(c2)) continue;
+      auto h2 = c2->master;
+      auto& p2 = bm->where[h2];
+      auto p3 = p1;
+      for(int j=0; j<h->type; j++) if(h->move(j) == h2) { p3.second = p1.second * currentmap->adj(h, j); goto done; }
+      for(int j=0; j<h->type; j++) if(h->move(j)) for(int k=0; k<h->move(j)->type; k++) if(h->move(j)->move(k) == h2) { p3.second = p1.second * currentmap->adj(h, j) * currentmap->adj(h->move(j), k); goto done; }
+      continue;
+      done:
+      bm->rebase(p3.first, p3.second);
+
+      ld dist = hdist(p3.second * C0, p2.second * C0); // + hdist(p3.second * lxpush0(1), p2.second * lxpush0(1));
+      if(dist < 1e-20) dist = 1e-20;
+      // if(c == cwt.at && c2 == cwt.at->move(0)) println(hlog, "dist' = ", dist);
+      // if(c2 == cwt.at && c == cwt.at->move(0)) println(hlog, "dist'' = ", dist);
+      color_t col = gradient(0x80FF80, 0xFF0000, log(1e-20), log(dist), log(1e-4));
+      gridline(V, get_corner_position(c, i), get_corner_position(c, (i+1)%c->type), darkena(col, 0, 0xFF), prec);
+      }
+    }
+  vid.linewidth /= 4;
+  }
+
+int hk = addHook(hooks_markers, 100, draw_stress_map) + addHook(hooks_configfile, 100, [] { param_b(show_map_stress, "show_map_stress"); });
+
 }
