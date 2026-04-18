@@ -3125,6 +3125,7 @@ EX void setdist(cell *c, int d, cell *from) {
       }
     
     if(d < BARLEV) {
+      apply_precision_policy(c, from);
       bool rev = (precision_policy & 1) && currentmap->get_backmap() && hrand(2);
       for(int i=0; i<c->type; i++) {
         setdist(createMov(c, rev ? (c->type-1-i) : i), d+1, c);

@@ -17,7 +17,8 @@ struct backed_map {
   void assign(heptagon *actual, heptagon *backer, transmatrix T);
   void reassign(heptagon *actual, heptagon *backer, transmatrix T);
   void rebase(heptagon*& backer, transmatrix& T);
-  void handle_precision_errors(heptagon *actual);
+  void redo_connection(heptagon *h, int d);
+  void redo_connections_around(heptagon *actual, int qty);
 
   transmatrix relative_backer_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint);
 
@@ -133,49 +134,54 @@ EX bool same_point_may_warn(hyperpoint a, hyperpoint b) {
   return true;
   }
 
-bool in_hpe = false;
-
-void backed_map::handle_precision_errors(heptagon *h) {
-  if(!hyperbolic) return;
-  if(in_hpe) return;
-  in_hpe = true;
-  if(worst_precision_error > 1e-7) {
-    println(hlog, "worst_precision_error = ", worst_precision_error, ", fixing the local structure");
-    worst_precision_error = 0;
-    set<heptagon*> visited;
-    vector<heptagon*> q;
-    auto enqueue = [&] (heptagon *h1) {
-      if(visited.count(h1)) return false;
-      visited.insert(h1);
-      q.push_back(h1);
-      return true;
-      };
-    enqueue(h);
-    ld hpe_precision = 0;
-    for(int i=0; i<250; i++) {
-      h = q[i];
-      for(int d=0; d<h->type; d++) {
-        auto h2 = h->move(d);
-        if(!h2) continue;
-        bool first = enqueue(h2);
-        if(true) {
-          auto p1 = where[h];
-          fixmatrix(p1.second);
-          heptspin hi(h, d);
-          transmatrix T = p1.second * currentmap->adj(h, d);
-          auto p2 = p1;
-          p2.second = T;
-
-          rebase(p2.first, p2.second);
-
-          if(first) reassign(h2, p2.first, p2.second);
-          else hpe_precision = max(hpe_precision, hdist(where[h2].second*C0, p2.second*C0));
-          }
-        }
+EX void apply_precision_policy(cell *c, cell *from) {
+  if(!(precision_policy & 2)) return;
+  if(!from) return;
+  auto bm = currentmap->get_backmap();
+  if(!bm) return;
+  auto h = from->master;
+  auto h2 = c->master;
+  for(int i=0; i<h->type; i++) if(h->move(i) == h2) { bm->redo_connection(h, i); return; }
+  for(int i=0; i<h->type; i++) if(auto h3 = h->move(i)) {
+    for(int j=0; j<h3->type; j++) if(h3->move(j) == h2) {
+      bm->redo_connection(h, i);
+      bm->redo_connection(h3, j);
+      return;
       }
-    worst_precision_error = 0; println(hlog, "hpe_precision = ", hpe_precision);
     }
-  in_hpe = false;
+  }
+
+void backed_map::redo_connection(heptagon *h, int d) {
+  auto h2 = h->move(d);
+  auto p1 = where[h];
+  fixmatrix(p1.second);
+  heptspin hi(h, d);
+  transmatrix T = p1.second * currentmap->adj(h, d);
+  auto p2 = p1;
+  p2.second = T;
+  rebase(p2.first, p2.second);
+  reassign(h2, p2.first, p2.second);
+  }
+
+void backed_map::redo_connections_around(heptagon *h, int qty) {
+  set<heptagon*> visited;
+  vector<heptagon*> q;
+  auto enqueue = [&] (heptagon *h1) {
+    if(visited.count(h1)) return false;
+    visited.insert(h1);
+    q.push_back(h1);
+    return true;
+    };
+  enqueue(h);
+  for(int i=0; i<qty; i++) {
+    h = q[i];
+    for(int d=0; d<h->type; d++) {
+      auto h2 = h->move(d);
+      if(!h2) continue;
+      bool first = enqueue(h2);
+      if(first) redo_connection(h, d);
+      }
+    }
   }
 
 void backed_map::clear() {

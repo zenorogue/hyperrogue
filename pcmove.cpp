@@ -1668,7 +1668,7 @@ EX void playerMoveEffects(movei mi) {
 EX void afterplayermoved() {
   pregen();
   if(!racing::on)
-  setdist(cwt.at, 7 - getDistLimit() - genrange_bonus, NULL);
+  setdist(cwt.at, 7 - getDistLimit() - genrange_bonus, cwt.peek());
   prairie::treasures();
   if(generatingEquidistant) {
     printf("Warning: generatingEquidistant set to true\n");
