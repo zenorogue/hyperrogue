@@ -577,6 +577,8 @@ struct hrmap_archimedean : hrmap {
   heptagon *origin;
   heptagon *getOrigin() override { return origin; }
 
+  backed_map* get_backmap() override { return &bm; }
+
   hrmap_archimedean() {
     dynamicval<hrmap*> curmap(currentmap, this);
     int id = DUAL ? current.N * 2 : 0;;

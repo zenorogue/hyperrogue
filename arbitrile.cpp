@@ -1529,6 +1529,8 @@ struct hrmap_arbi : hrmap {
   heptagon *origin;
   heptagon *getOrigin() override { return origin; }
 
+  backed_map* get_backmap() override { return &bm; }
+
   hrmap_arbi() {
     dynamicval<hrmap*> curmap(currentmap, this);
     origin = init_heptagon(current.shapes[0].size());

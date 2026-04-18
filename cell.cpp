@@ -97,6 +97,8 @@ public:
   /** this takes a large closed manifold M that is a quotient of this, and returns a unique identifier of the cell corresponding to M
    *  returns PATTERN_INVALID if not implemented or impossible */
   virtual int pattern_value(cell *c) { return PATTERN_INVALID; }
+
+  virtual struct backed_map* get_backmap() { return nullptr; }
   };
 
 /** hrmaps which are based on regular non-Euclidean 2D tilings, possibly quotient  
