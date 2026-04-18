@@ -3662,6 +3662,8 @@ EX namespace windmap {
       }
     }
 
+  EX int wind_failed = 0;
+
   EX void create() {
     if(disable_bigstuff) return;
     if(cgflags & qPORTALSPACE) return;
@@ -3709,9 +3711,15 @@ EX namespace windmap {
     vector<int> tocheck;
     for(int i=0; i<N; i++) tocheck.push_back(i);
     hrandom_shuffle(tocheck);
-    
+
+    wind_failed = 0;
+
     for(int a=0; a<isize(tocheck); a++) {
-      if(a >= 200*N) { printf("does not converge\n"); break; }
+      if(a >= 200*N) {
+        println(hlog, "does not converge");
+        wind_failed |= 1;
+        break;
+        }
       int bestval = 1000000000, best = 0;
       int i = tocheck[a];
       for(int k=0; k<256; k++) {
@@ -3740,8 +3748,10 @@ EX namespace windmap {
       if(tries < maxtries) goto tryagain;
       }
     if(debug_geometry) println(hlog, "windmap: tries = ", tries, " N = ", N);
-    if(tries >= maxtries && maxtries >= 20) {
-      addMessage("Failed to generate an interesting wind/lava pattern.");
+    if(tries >= maxtries) {
+      if(maxtries >= 20)
+        addMessage("Failed to generate an interesting wind/lava pattern.");
+      wind_failed |= 2;
       }
     else if(false) {
       printf("tocheck size = %d\n", isize(tocheck));

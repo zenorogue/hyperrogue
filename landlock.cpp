@@ -846,6 +846,7 @@ EX bool isLandIngame(eLand l) {
   if((eubinary || sol) && isCyclic(l) && l != specialland) return false;
   if(l == laCamelot && hyperbolic && WDIM == 3) return false;
   if(!(land_validity(l).flags & lv::appears_in_full)) return false;
+  if(among(l, laBlizzard, laVolcano) && windmap::wind_failed) return false;
   return landAccessibleFromIngame(l);
   }
 

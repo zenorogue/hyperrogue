@@ -829,6 +829,9 @@ EX string generateHelpForLand(eLand l) {
   if(l == laWildWest)
     s += XLAT("Bonus land, available only in some special modes.\n");
   
+  if(among(l, laBlizzard, laVolcano) && windmap::wind_failed)
+    s += XLAT("Failed to construct a wind/lava pattern. This land will not work correctly.\n");
+
   if(l == laWhirlpool)
     s += XLAT("Orbs of Safety always appear here, and may be used to escape.\n");
 
