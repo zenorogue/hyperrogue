@@ -54,7 +54,6 @@ void backed_map::initialize(heptagon *origin) {
     alt->alt = alt;
     current_altmap = newAltMap(alt);
     if(f) geom3::light_flip(true);
-    println(hlog, "original alt is ", alt);
     }
 
   bool f = geom3::flipped;
