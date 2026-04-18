@@ -1195,6 +1195,8 @@ EX void showEuclideanMenu() {
   dialog::addSelItem(XLAT("size of the world"), gd.size_str, '3');
   add_size_action();
 
+  if(currentmap->get_backmap()) add_edit(precision_policy);
+
   if(closed_manifold) {
     dialog::addSelItem(XLAT("Euler characteristics"), gd.euler == UNKNOWN ? "?" : its(gd.euler), 0);
     if(WDIM == 3) ;

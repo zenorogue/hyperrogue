@@ -114,6 +114,8 @@ void backed_map::rebase(heptagon*& backer, transmatrix& T) {
     }
   }
 
+EX int precision_policy = 3;
+
 EX ld worst_precision_error;
 
 #if HDR
@@ -227,10 +229,10 @@ transmatrix backed_map::relative_backer_matrix(heptagon *h2, heptagon *h1, const
   return Id;
   }
 
-bool show_map_stress;
+ld min_precision_error = 1e-6;
 
 void draw_stress_map() {
-  if(!show_map_stress) return;
+  if(worst_precision_error < min_precision_error) return;
   auto bm = currentmap->get_backmap();
   if(!bm) return;
   int prec = grid_prec();
@@ -268,6 +270,26 @@ void draw_stress_map() {
   vid.linewidth /= 4;
   }
 
-int hk = addHook(hooks_markers, 100, draw_stress_map) + addHook(hooks_configfile, 100, [] { param_b(show_map_stress, "show_map_stress"); });
+int hk = addHook(hooks_frame, 100, draw_stress_map) + addHook(hooks_configfile, 100, [] {
+  param_f(min_precision_error, "min_precision_error")
+  -> editable(0, 1, log(10)/4, "minimum precision error to display", "Display a visualization of precision errors when they build up over this value.", 'M')
+  ->set_sets([] { dialog::scaleSinh_big(); dialog::bound_low(0); })
+  ->set_extra([] {
+    });
+  param_enum(precision_policy, "precision_policy", 3)
+    ->editable({{"OFF", ""}, {"random", ""}, {"travel", ""}, {"both", ""}}, "precision policy", 'P')
+    ->add_extra([] {
+      if(currentmap->get_backmap())
+        dialog::addHelp(XLAT("The current map uses a implementation that may occassionally lead to crashes due to numerical precision errors. These options can be used to eliminate these issues.") + "\n\n"
+        + XLAT("'Random' randomizes the generation order which may break down specific paths causing imprecision.") + "\n\n"
+        + XLAT("'Travel' builds the precise tree based on the path the player actually takes.")
+        );
+      else
+        dialog::addHelp(XLAT("The current map is precise."));
+      dialog::addSelItem(XLAT("current error"), format("%lg", worst_precision_error), 'R');
+      dialog::add_action([] { worst_precision_error = 0; });
+      add_edit(min_precision_error);
+      });
+  });
 
 }
