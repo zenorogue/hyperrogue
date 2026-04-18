@@ -23,6 +23,8 @@ struct backed_map {
 
   geometry_information *find_alt_cgip();
 
+  backed_map() { current_altmap = nullptr; }
+
   void store(gamedata *gd);
   void clear();
   void swapdim();
@@ -43,8 +45,9 @@ geometry_information *backed_map::find_alt_cgip() {
 void backed_map::initialize(heptagon *origin) {
 
   heptagon *alt = nullptr;
+  transmatrix T = Id;
 
-  if(mhyperbolic) {
+  if(mhyperbolic && WDIM == 2) {
     bool f = geom3::flipped;
     if(f) geom3::light_flip(false);
     dynamicval<eGeometry> g(geometry, gNormal);
@@ -78,7 +81,7 @@ void backed_map::reassign(heptagon *actual, heptagon *backer, transmatrix T) {
   }
 
 void backed_map::rebase(heptagon*& backer, transmatrix& T) {
-  if(mhyperbolic) {
+  if(mhyperbolic && WDIM == 2) {
     dynamicval<int> uc(cgip->use_count, cgip->use_count+1);
     dynamicval<eGeometry> g(geometry, gNormal);
     dynamicval<eVariation> gv(variation, eVariation::pure);
@@ -86,6 +89,13 @@ void backed_map::rebase(heptagon*& backer, transmatrix& T) {
     dynamicval<hrmap*> cm(currentmap, current_altmap);
     current_altmap->virtualRebase(backer, T);
     }
+  #if CAP_BT
+  if(mhyperbolic && WDIM == 3) {
+    dynamicval<eGeometry> g(geometry, gBinary3);
+    dynamicval<hrmap*> cm(currentmap, current_altmap);
+    current_altmap->virtualRebase(backer, T);
+    }
+  #endif
   if(euclid) {
     /* hash the rough coordinates as heptagon* alt */
     size_t s = size_t(T[0][LDIM]+.261) * 124101 + size_t(T[1][LDIM]+.261) * 82143;

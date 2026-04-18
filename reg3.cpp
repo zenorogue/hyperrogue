@@ -1465,12 +1465,12 @@ EX namespace reg3 {
   struct hrmap_h3 : hrmap_h3_abstract {
   
     heptagon *origin;
-    hrmap *binary_map;
+    backed_map bm;
+
+    backed_map* get_backmap() override { return &bm; }
+
     vector<heptagon*> extra_origins;
     
-    map<heptagon*, pair<heptagon*, transmatrix>> reg_gmatrix;
-    map<heptagon*, vector<pair<heptagon*, transmatrix> > > altmap;
-
     vector<cell*>& allcells() override { 
       return hrmap::allcells();
       }
@@ -1564,13 +1564,11 @@ EX namespace reg3 {
       }
 
     void verify_neighbors(heptagon *alt, int steps, const hyperpoint& hT) {
-      ld err;
-      for(auto& p2: altmap[alt]) if((err = intval(tC0(p2.second), hT)) < 1e-3)
-        throw hr_exception("hrmap_h3 verify_neighbors failure");
+      for(auto& p2: bm.what_at[alt]) same_point_may_warn(tC0(p2.second), hT);
       #if CAP_BT
       if(steps) { 
         dynamicval<eGeometry> g(geometry, gBinary3);
-        dynamicval<hrmap*> cm(currentmap, binary_map);
+        dynamicval<hrmap*> cm(currentmap, bm.current_altmap);
         for(int i=0; i<alt->type; i++)
           verify_neighbors(alt->cmove(i), steps-1, currentmap->iadj(alt, i) * hT);
         }
@@ -1578,7 +1576,7 @@ EX namespace reg3 {
       }
 
     heptagon *create_step(heptagon *parent, int d) override {
-      auto& p1 = reg_gmatrix[parent];
+      auto& p1 = bm.where[parent];
       if(debug_map_details) println(hlog, "creating step ", parent, ":", d, ", at ", p1.first, tC0(p1.second));
       heptagon *alt = p1.first;
       #if CAP_FIELD
@@ -1586,26 +1584,17 @@ EX namespace reg3 {
       #else
       transmatrix T = p1.second * cgi.adjmoves[d];
       #endif
-      #if CAP_BT
-      if(hyperbolic) {
-        dynamicval<eGeometry> g(geometry, gBinary3);
-        dynamicval<hrmap*> cm(currentmap, binary_map);
-        binary_map->virtualRebase(alt, T);
-        }
-      #endif
+      bm.rebase(alt, T);
 
       fixmatrix(T);
       auto hT = tC0(T);
       
       if(debug_map_details) {
         println(hlog, "searching at ", alt, ":", hT);
-        for(auto& p2: altmap[alt]) println(hlog, "for ", tC0(p2.second), " intval is ", intval(tC0(p2.second), hT));
+        for(auto& p2: bm.what_at[alt]) println(hlog, "for ", tC0(p2.second), " intval is ", intval(tC0(p2.second), hT));
         }
       
-      ld err;
-      
-      for(auto& p2: altmap[alt]) if((err = intval(tC0(p2.second), hT)) < 1e-3) {
-        if(err > worst_error1 && debug_map_numerical) println(hlog, hr::format("worst_error1 = %lg", double(worst_error1 = err)));
+      for(auto& p2: bm.what_at[alt]) if(same_point_may_warn(tC0(p2.second), hT)) {
         // println(hlog, "YES found in ", isize(altmap[alt]));
         if(debug_map_details) println(hlog, "-> found ", p2.first);
         int fb = 0;
@@ -1619,8 +1608,7 @@ EX namespace reg3 {
         #endif
         for(int d2=0; d2<S7; d2++) {
           hyperpoint back = p2.second * tC0(cgi.adjmoves[d2]);
-          if((err = intval(back, old)) < 1e-3) {
-            if(err > worst_error2 && debug_map_numerical) println(hlog, hr::format("worst_error2 = %lg", double(worst_error2 = err)));
+          if(same_point_may_warn(back, old)) {
             if(p2.first->move(d2)) println(hlog, "error: repeated edge");
             p2.first->c.connect(d2, parent, d, false);
             fix_distances(p2.first, parent);
@@ -1644,7 +1632,7 @@ EX namespace reg3 {
       if(extra_verification) verify_neighbors(alt, extra_verification, hT);
       
       if(debug_map_details) println(hlog, "-> not found");
-      int d2 = 0, fv = isize(reg_gmatrix);
+      int d2 = 0, fv = isize(bm.where);
       #if CAP_FIELD
       if(quotient_map) {
         auto cp = counterpart(parent);
@@ -1666,19 +1654,13 @@ EX namespace reg3 {
       created->distance = parent->distance + 1;
       created->fiftyval = 9999;
       fixmatrix(T);
-      reg_gmatrix[created] = make_pair(alt, T);
-      altmap[alt].emplace_back(created, T);
+      bm.assign(created, alt, T);
       created->c.connect(d2, parent, d, false);
       return created;
       }
 
     ~hrmap_h3() {
-      #if CAP_BT
-      if(binary_map) {        
-        dynamicval<eGeometry> g(geometry, gBinary3);
-        delete binary_map;
-        }
-      #endif
+      bm.clear();
       if(quotient_map) delete quotient_map;
       clearfrom(origin);
       for(auto e: extra_origins) clearfrom(e);
@@ -1722,14 +1704,14 @@ EX namespace reg3 {
       }
      
     transmatrix relative_matrixh(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {
-      auto p1 = reg_gmatrix[h1];
-      auto p2 = reg_gmatrix[h2];
+      auto p1 = bm.where[h1];
+      auto p2 = bm.where[h2];
       transmatrix T = Id;
       #if CAP_BT
       if(hyperbolic) { 
         dynamicval<eGeometry> g(geometry, gBinary3);
-        dynamicval<hrmap*> cm(currentmap, binary_map);
-        T = binary_map->relative_matrix(p2.first, p1.first, hint);
+        dynamicval<hrmap*> cm(currentmap, bm.current_altmap);
+        T = currentmap->relative_matrix(p2.first, p1.first, hint);
         }
       #endif
       T = inverse(p1.second) * T * p2.second;      
@@ -1740,29 +1722,21 @@ EX namespace reg3 {
     cell* gen_extra_origin(int fv) override {
       auto orig = isize(extra_origins) ? extra_origins.back() : origin;
 
-      auto& p1 = reg_gmatrix[orig];
+      auto& p1 = bm.where[orig];
       heptagon *alt = p1.first;
 
       transmatrix T = p1.second;
 
       for(int a=0; a<10; a++) {
         T = T * xpush(euclid ? 1000 : 10);
-        #if CAP_BT
-        if(hyperbolic) {
-          dynamicval<eGeometry> g(geometry, gBinary3);
-          dynamicval<hrmap*> cm(currentmap, binary_map);
-          binary_map->virtualRebase(alt, T);
-          fixmatrix(T);
-          }
-        #endif
+        bm.rebase(alt, T); fixmatrix(T);
         }
 
       heptagon *created = init_heptagon(S7);
 
       created->s = hsOrigin;
       created->fieldval = quotient_map->acells[fv]->master->fieldval;
-      reg_gmatrix[created] = make_pair(alt, T);
-      altmap[alt].emplace_back(created, T);
+      bm.assign(created, alt, T);
 
       extra_origins.push_back(created);
       return get_cell_at(created, fv);
@@ -2707,7 +2681,7 @@ EX int celldistance(cell *c1, cell *c2) {
 
   dynamicval<eGeometry> g(geometry, gBinary3);  
   #if CAP_BT
-  return 20 + bt::celldistance3(r->reg_gmatrix[c1->master].first, r->reg_gmatrix[c2->master].first);
+  return 20 + bt::celldistance3(r->bm.where[c1->master].first, r->bm.where[c2->master].first);
   #else
   return 20;
   #endif
@@ -2751,7 +2725,7 @@ EX bool pseudohept(cell *c) {
   auto ms = dynamic_cast<hrmap_h3_subrule*> (currentmap);
   if(ms) return c->master->fieldval == 0;
   if(m && hyperbolic) {
-    heptagon *h = m->reg_gmatrix[c->master].first;
+    heptagon *h = m->bm.where[c->master].first;
     return (h->zebraval == 1) && (h->distance & 1);
     }    
   
