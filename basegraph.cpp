@@ -1113,8 +1113,8 @@ EX void drawmessage(const string& s, int& y, color_t col) {
     }
 
   for(int i=1; i<isize(s); i++)
-    if(s[i-1] == ' ' && textwidth(vid.fsize, "..."+s.substr(i)) <= space) {    
-      displayfr(0, y, 1, vid.fsize, "..."+s.substr(i), col, 0);
+    if(s[i-1] == ' ' && textwidth(vid.fsize, "... "+s.substr(i)) <= space) {    
+      displayfr(0, y, 1, vid.fsize, "... "+s.substr(i), col, 0);
       y -= vid.fsize;
       drawmessage(s.substr(0, i-1), y, col);
       return;
