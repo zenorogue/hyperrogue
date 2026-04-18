@@ -1435,7 +1435,7 @@ EX land_validity_t& land_validity(eLand l) {
     return not_enough_space;
   
   // ... and it works in gp only partially
-  if((l == laBlizzard || l == laVolcano) && GOLDBERG && (old_daily_id < 33 || !sphere))
+  if((l == laBlizzard || l == laVolcano) && GOLDBERG_INV && (old_daily_id < 33 || !sphere))
     return partially_implemented;
 
   // Kraken does not really work on odd-sided cells;
