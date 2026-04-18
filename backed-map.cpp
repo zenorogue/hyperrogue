@@ -230,13 +230,14 @@ transmatrix backed_map::relative_backer_matrix(heptagon *h2, heptagon *h1, const
   }
 
 ld min_precision_error = 1e-6;
+ld precision_width = 4;
 
 void draw_stress_map() {
   if(worst_precision_error < min_precision_error) return;
   auto bm = currentmap->get_backmap();
   if(!bm) return;
   int prec = grid_prec();
-  vid.linewidth *= 4;
+  dynamicval<ld> dv(vid.linewidth, vid.linewidth * precision_width);
   for(auto& p: gmatrix) {
     cell *c = p.first;
     const shiftmatrix& V = p.second;
@@ -271,11 +272,12 @@ void draw_stress_map() {
   }
 
 int hk = addHook(hooks_frame, 100, draw_stress_map) + addHook(hooks_configfile, 100, [] {
+  param_f(precision_width, "precision_viz_width")
+  ->editable(0, 32, 0.5, "width of precision visualization", "", 'W');
   param_f(min_precision_error, "min_precision_error")
   -> editable(0, 1, log(10)/4, "minimum precision error to display", "Display a visualization of precision errors when they build up over this value.", 'M')
   ->set_sets([] { dialog::scaleSinh_big(); dialog::bound_low(0); })
-  ->set_extra([] {
-    });
+  ->set_extra([] { add_edit(precision_width); });
   param_enum(precision_policy, "precision_policy", 3)
     ->editable({{"OFF", ""}, {"random", ""}, {"travel", ""}, {"both", ""}}, "precision policy", 'P')
     ->add_extra([] {
