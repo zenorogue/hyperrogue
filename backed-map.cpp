@@ -246,10 +246,12 @@ void draw_stress_map() {
       auto h2 = c2->master;
       auto& p2 = bm->where[h2];
       auto p3 = p1;
-      for(int j=0; j<h->type; j++) if(h->move(j) == h2) { p3.second = p1.second * currentmap->adj(h, j); goto done; }
-      for(int j=0; j<h->type; j++) if(h->move(j)) for(int k=0; k<h->move(j)->type; k++) if(h->move(j)->move(k) == h2) { p3.second = p1.second * currentmap->adj(h, j) * currentmap->adj(h->move(j), k); goto done; }
+      transmatrix T = Id;
+      for(int j=0; j<h->type; j++) if(h->move(j) == h2) { T = currentmap->adj(h, j); goto done; }
+      for(int j=0; j<h->type; j++) if(h->move(j)) for(int k=0; k<h->move(j)->type; k++) if(h->move(j)->move(k) == h2) { T = currentmap->adj(h, j) * currentmap->adj(h->move(j), k); goto done; }
       continue;
       done:
+      p3.second = p1.second * T;
       bm->rebase(p3.first, p3.second);
 
       ld dist = hdist(p3.second * C0, p2.second * C0); // + hdist(p3.second * lxpush0(1), p2.second * lxpush0(1));
@@ -257,7 +259,10 @@ void draw_stress_map() {
       // if(c == cwt.at && c2 == cwt.at->move(0)) println(hlog, "dist' = ", dist);
       // if(c2 == cwt.at && c == cwt.at->move(0)) println(hlog, "dist'' = ", dist);
       color_t col = gradient(0x80FF80, 0xFF0000, log(1e-20), log(dist), log(1e-4));
-      gridline(V, get_corner_position(c, i), get_corner_position(c, (i+1)%c->type), darkena(col, 0, 0xFF), prec);
+      if(WDIM == 2)
+        gridline(V, get_corner_position(c, i), get_corner_position(c, (i+1)%c->type), darkena(col, 0, 0xFF), prec);
+      else
+        queuepoly(V * rgpushxto0(mid(C0, T * C0)), cgi.shSnowball, darkena(col, 0, 0xFF));
       }
     }
   vid.linewidth /= 4;
