@@ -306,7 +306,6 @@ EX bool movepcto(int d, int subdir IS(1), bool checkonly IS(false)) {
         if(among(cwt.at->land, laPalace, laCaves, laWarpCoast, laWarpSea))
           addMessage(XLAT("Wait about 100 turns to let the ghosts decide your fate."));
         }
-      println(hlog, "orb_used_where = ", orb_used_where);
       if(orb_used_where.size() == 1)
         addMessage(XLAT("You can use your %1.\n", orb_used_where.begin()->first));
       else if(orb_used_where.size() > 1) {
