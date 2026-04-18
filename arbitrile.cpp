@@ -1615,7 +1615,6 @@ struct hrmap_arbi : hrmap {
           throw hr_exception("already connected!");
           }
         h->c.connect(d, p2.first, co1.eid, co1.mirror);
-        bm.handle_precision_errors(p2.first);
         return p2.first;
         }
       }

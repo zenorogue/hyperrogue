@@ -693,7 +693,6 @@ struct hrmap_archimedean : hrmap {
           while(skip_digons(hs, -1)) hs--;
           connectHeptagons(hi, hs);
           connect_digons_too(hi, hs);
-          bm.handle_precision_errors(h);
           return h->move(d);
           }
         }
