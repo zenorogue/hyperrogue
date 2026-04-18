@@ -603,15 +603,20 @@ EX void activateLightning() {
 // roMouse/roKeyboard: 
 //    return orb type if successful, eItem(-1) if do nothing, 0 otherwise
 
-EX bool haveRangedTarget() {
+EX map<eItem, cell*> orb_used_where;
+
+EX bool haveRangedTarget(bool complete) {
+  orb_used_where.clear();
   if(!haveRangedOrb())
     return false;
   for(int i=0; i<isize(dcal); i++) {
     cell *c = dcal[i];
-    if(targetRangedOrb(c, roCheck)) {
-      return true;
+    if(eItem it = targetRangedOrb(c, roCheck)) {
+      if(complete && !orb_used_where.count(it)) orb_used_where[it] = c;
+      else return true;
       }
     }
+  if(complete) return orb_used_where.size();
   return false;
   }
 
@@ -619,7 +624,7 @@ void checkmoveO() {
   bow::bowpath_map.clear();
   if(multi::players > 1 && multi::activePlayers() == 1)
     multi::checklastmove();
-  if(multi::players == 1) checkmove();
+  if(multi::players == 1) checkmove(false);
   }
 
 int teleportAction() {

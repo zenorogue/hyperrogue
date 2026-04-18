@@ -200,7 +200,7 @@ EX void showOverview() {
         dialog::helpToEdit(items[umod], 0, 200, 10, 10);
         dialog::get_ne().reaction = [] () {
           if(hardcore) canmove = true;
-          else checkmove();
+          else checkmove(false);
           cheater++;
           };
         dialog::bound_low(0);

@@ -455,7 +455,7 @@ EX void initgame() {
 
   lastsafety = gold();
   bfs();
-  checkmove();
+  checkmove(false);
   playermoved = true;
 
   if(quotient || sphere)
@@ -1533,6 +1533,7 @@ EX void stop_game() {
   #endif
   // items[itGreenStone] = 100;
   game_active = false;
+  movehints_ticks = 0;
   clearMemory();
 #if CAP_DAILY
   if(daily::on)

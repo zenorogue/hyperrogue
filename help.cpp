@@ -357,6 +357,24 @@ string power_help =
   "collected. This also affects the mirrorings which happened before "
   "collecting the Powerstones.";
 
+EX string ranged_click_help() {
+  string s;
+#if ISMOBILE
+  if(vid.shifttarget&2)
+    s = XLAT("\nRanged Orbs can be targeted by long touching the desired location.");
+  else
+    s = XLAT("\nRanged Orbs can be targeted by touching the desired location.");
+#else
+  if(vid.shifttarget&1)
+    s = XLAT("\nRanged Orbs can be targeted by shift-clicking the desired location. ");
+  else
+    s = XLAT("\nRanged Orbs can be targeted by clicking the desired location. ");
+  if(DEFAULTCONTROL)
+    s += XLAT("You can also scroll to the desired location and then press 't'.");
+#endif
+  return s;
+  }
+
 EX string generateHelpForItem(eItem it) {
 
    string help = helptitle(XLATN(iinf[it].name), iinf[it].color);
@@ -401,19 +419,8 @@ EX string generateHelpForItem(eItem it) {
 #endif
 
    if(isRangedOrb(it)) {
-     help += XLAT("\nThis is a ranged Orb. ");
-#if ISMOBILE   
-     if(vid.shifttarget&2)
-       help += XLAT("\nRanged Orbs can be targeted by long touching the desired location.");
-     else
-       help += XLAT("\nRanged Orbs can be targeted by touching the desired location.");
-#else
-     if(vid.shifttarget&1)
-       help += XLAT("\nRanged Orbs can be targeted by shift-clicking the desired location. ");
-     else
-       help += XLAT("\nRanged Orbs can be targeted by clicking the desired location. ");
-     help += XLAT("You can also scroll to the desired location and then press 't'.");
-#endif
+     help += XLAT("\nThis is a ranged Orb. \n");
+     help += ranged_click_help();
      help += XLAT("\nYou can never target cells which are adjacent to the player character, or ones out of the sight range.");
      }
 

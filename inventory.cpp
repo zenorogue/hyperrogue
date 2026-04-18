@@ -687,7 +687,7 @@ EX namespace inv {
             usedForbidden = true;
           cwt.at->item = it;
           evokeOrb(orbmap[uni]);
-          checkmove();
+          checkmove(false);
           popScreenAll();
           }
         }

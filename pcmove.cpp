@@ -273,6 +273,9 @@ bool pcmove::vmsg(moveissue mi) {
   return errormsgs && !checkonly;
   }
 
+EX int attempts = 0;
+EX int movehints_ticks = 0;
+
 EX bool movepcto(int d, int subdir IS(1), bool checkonly IS(false)) {
   checked_move_issue.type = miVALID;
   pcmove pcm;
@@ -281,6 +284,40 @@ EX bool movepcto(int d, int subdir IS(1), bool checkonly IS(false)) {
   pcm.subdir = subdir;
   auto b = pcm.movepcto();
   global_pushto = pcm.mip.t;
+  if(!checkonly && !b && multi::players == 1) {
+    attempts++;
+    if(attempts == 3) {
+      attempts = 0;
+      checkmove(true);
+      movehints_ticks = ticks + 1000;
+      if(legalmoves[cwt.at->type]) {
+        if(!DEFAULTCONTROL) addMessage(XLAT("You can skip your turn."));
+#if ISMOBILE
+        else if(vid.mobilecompasssize) addMessage(XLAT("Touch the center of the compass to skip your turn."));
+#else
+        else if(vid.mobilecompasssize) addMessage(XLAT("Click the center of the compass to skip your turn."));
+#endif
+        else if(dialog::display_keys == 3) addMessage(XLAT("Press Ⓐ to skip your turn."));
+        else if(dialog::actual_display_keys()) addMessage(XLAT("Press . or s to skip your turn."));
+#if ISMOBILE
+        else if(true) addMessage(XLAT("Touch the Rogue to skip your turn."));
+#endif
+        else addMessage(XLAT("Click the Rogue to skip your turn."));
+        if(among(cwt.at->land, laPalace, laCaves, laWarpCoast, laWarpSea))
+          addMessage(XLAT("Wait about 100 turns to let the ghosts decide your fate."));
+        }
+      println(hlog, "orb_used_where = ", orb_used_where);
+      if(orb_used_where.size() == 1)
+        addMessage(XLAT("You can use your %1.\n", orb_used_where.begin()->first));
+      else if(orb_used_where.size() > 1) {
+        string txt;
+        for(auto x: orb_used_where) { if(txt != "") txt += ", "; txt += dnameof(x.first); }
+        addMessage(XLAT("You can use: %1.\n", txt));
+        }
+      if(orb_used_where.size()) addMessage(ranged_click_help());
+      if(bowtarget && bowtarget->cpdist >= 2) addMessage(XLAT("You have a bow target."));
+      }
+    }
   return b;
   }
 
@@ -322,7 +359,7 @@ bool pcmove::try_shooting(bool auto_target) {
     if(checkonly) return true;
     if(changes.on) changes.commit();
     addMessage(XLAT("(shooting while unstable -- no turn passes)"));
-    checkmove();
+    checkmove(false);
     return true;
     }
 
@@ -428,7 +465,7 @@ bool pcmove::movepcto() {
       if(checkonly) { nextmovetype = lmInstant; return true; }
       if(warning_shown || orbProtection(itOrbFlash)) return true;
       activateFlash();
-      checkmove();
+      checkmove(false);
       return true;
       }
 
@@ -436,7 +473,7 @@ bool pcmove::movepcto() {
       if(checkonly) { nextmovetype = lmInstant; return true; }
       if(warning_shown || orbProtection(itOrbLightning)) return true;
       activateLightning();
-      checkmove();
+      checkmove(false);
       return true;
       }
           
@@ -520,7 +557,7 @@ bool pcmove::after_instant(bool kl) {
   bfs();
   keepLightning = false;
   if(multi::players > 1) { multi::whereto[multi::cpid].d = MD_UNDECIDED; return false; }
-  checkmove();
+  checkmove(false);
   return true;
   }
 

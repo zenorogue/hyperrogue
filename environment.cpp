@@ -901,7 +901,7 @@ EX void monstersTurn() {
       checkFreedom(pc);
 
   DEBB(debug_turn, ("check"));
-  checkmove();
+  checkmove(false);
   if(canmove) elec::checklightningfast();
 
 

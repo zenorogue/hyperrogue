@@ -1024,7 +1024,7 @@ EX void handleInput(int delta, config &scfg) {
       }
     if(multi::activePlayers() == 1) {
       multi::checkonly = true;
-      checkmove();
+      checkmove(false);
       multi::checkonly = false;
       }
     }

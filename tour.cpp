@@ -414,12 +414,12 @@ EX bool handleKeyTour(int sym, int uni) {
     popScreenAll();
     if(items[itOrbTeleport]) goto give_aether;
     items[itOrbTeleport] = 1;
-    checkmove();
+    checkmove(false);
     if(!canmove) {
       if(items[itOrbAether]) goto give_flash;
       give_aether:
       items[itOrbAether] = 10;
-      checkmove();
+      checkmove(false);
       if(!canmove) {
         give_flash:
         activateFlash();

@@ -962,6 +962,20 @@ EX void drawMarkers() {
   viewmat();
   #endif
   
+  if(ticks < movehints_ticks) {
+    if(legalmoves[cwt.at->type] && !vid.mobilecompasssize) queuecircleat(cwt.at, 0.5 + 0.25 * sintick(75), darkena(0xFFFFFF, 0, 0xFF));
+    for(auto& p: orb_used_where) if(gmatrix.count(p.second))
+      queuestr(gmatrix[p.second], mapfontscale/100, "X", gradient(0, iinf[p.first].color, -1, sintick(75), 1));
+    if(bowtarget && gmatrix.count(bowtarget) && bowtarget->cpdist >= 2) {
+      auto V = gmatrix[bowtarget];
+      queuestr(V, mapfontscale/100, "X", gradient(0, iinf[itCrossbow].color, -1, sintick(75), 1));
+      poly_outline = gradient(0, getcs().bowcolor, -1, sintick(75), 1);
+      queuepolyat(V, cgi.shCrossbowIcon, 0, PPR::LINE);
+      poly_outline = gradient(0, getcs().bowcolor2, -1, sintick(75), 1);
+      queuepolyat(V, cgi.shCrossbowstringIcon, 0, PPR::LINE);
+      }
+    }
+
   #if CAP_QUEUE
   for(cell *c1: crush_now) 
     queuecircleat(c1, .8, darkena(minf[moCrusher].color, 0, 0xFF));

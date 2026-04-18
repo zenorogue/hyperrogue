@@ -4299,7 +4299,7 @@ EX void configureMouse() {
   dialog::add_action([] {
     dialog::editNumber(vid.mobilecompasssize, 0, 100, 10, 20, XLAT("compass size"), XLAT("0 to disable"));
     // we need to check the moves
-    dialog::get_di().reaction = checkmove;
+    dialog::get_di().reaction = [] { checkmove(false); };
     dialog::bound_low(0);
     });
 
