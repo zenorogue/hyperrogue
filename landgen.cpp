@@ -3124,10 +3124,12 @@ EX void setdist(cell *c, int d, cell *from) {
       exploreland[d][c->land]++;
       }
     
-    if(d < BARLEV) for(int i=0; i<c->type; i++) {
-      
-      setdist(createMov(c, i), d+1, c);
-      if(buggyGeneration) return;
+    if(d < BARLEV) {
+      bool rev = (precision_policy & 1) && currentmap->get_backmap() && hrand(2);
+      for(int i=0; i<c->type; i++) {
+        setdist(createMov(c, rev ? (c->type-1-i) : i), d+1, c);
+        if(buggyGeneration) return;
+        }
       }
     
     int eqlevel = max(BARLEV-2, 7);

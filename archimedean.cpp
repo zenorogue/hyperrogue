@@ -792,7 +792,8 @@ struct hrmap_archimedean : hrmap {
   void find_cell_connection(cell *c, int d) override {
     if(PURE) {
       if(arcm::id_of(c->master) < arcm::current.N * 2) {
-        heptspin hs = heptspin(c->master, d) + wstep + 2 + wstep + 1;
+        bool rev = (precision_policy & 1) && hrand(2);
+        heptspin hs = rev ? heptspin(c->master, d) - 1 + wstep - 2 + wstep: heptspin(c->master, d) + wstep + 2 + wstep + 1;
         c->c.connect(d, hs.at->c7, hs.spin, hs.mirrored);
         }
       else c->c.connect(d, c, d, false);
