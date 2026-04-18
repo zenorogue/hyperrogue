@@ -2722,13 +2722,27 @@ EX namespace linepatterns {
 
   EX ld tree_starter = 0.25;
 
-  EX linepattern patTree = linepattern("underlying tree", 0x00d0d000, [] { return bt::in() || (trees_known() && mod_allowed()); },
+  EX linepattern patTree = linepattern("underlying tree", 0x00d0d000, [] { return arcm::in() || bt::in() || (trees_known() && mod_allowed()); },
     ALLCELLS(
       if(is_master(c)) {
         int dir = updir(c->master);
         if(dir == -1) continue;
         hyperpoint end = currentmap->master_relative(c, true) * currentmap->adj(c->master, dir) * C0;
         hyperpoint start = normalize(C0 + tree_starter * (end - C0));
+        gridlinef(V, start, V, end, col, 2 + vid.linequality);
+        }
+      if(arcm::in() && PURE) for(int i=0; i<c->master->type; i++) {
+        auto h2 = c->master->move(i);
+        bool used = false;
+        for(int j=0; j<h2->type; j++) if(h2->move(j) && arcm::id_of(h2->move(j)) < 2*arcm::current.N && h2->move(j) < c->master) {
+          used = true;
+          }
+        if(used) continue;
+        int dir = updir(h2);
+        if(dir == -1) continue;
+        transmatrix T = currentmap->master_relative(c, true) * currentmap->adj(c->master, i);
+        hyperpoint end = T * currentmap->adj(h2, dir) * C0;
+        hyperpoint start = normalize(T * C0 + tree_starter * (end - T * C0));
         gridlinef(V, start, V, end, col, 2 + vid.linequality);
         }
       )
