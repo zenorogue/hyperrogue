@@ -57,13 +57,22 @@ void backed_map::initialize(heptagon *origin) {
     alt->s = hsOrigin;
     alt->alt = alt;
     current_altmap = newAltMap(alt);
+    T = lxpush(.01241) * spin(1.4117) * lxpush(0.1241) * Id;
     if(f) geom3::light_flip(true);
     }
 
-  bool f = geom3::flipped;
-  if(f) geom3::light_flip(false);
-  transmatrix T = lxpush(.01241) * spin(1.4117) * lxpush(0.1241) * Id;
-  if(f) geom3::light_flip(true);
+  if(mhyperbolic && WDIM == 3) {
+    #if CAP_BT
+    dynamicval<eGeometry> g(geometry, gBinary3);
+    bt::build_tmatrix();
+    alt = init_heptagon(S7);
+    alt->s = hsOrigin;
+    alt->alt = alt;
+    current_altmap = bt::new_alt_map(alt);
+    T = xpush(.01241) * spin(1.4117) * xpush(0.1241) * cspin(0, 2, 1.1249) * xpush(0.07) * Id;
+    #endif
+    }
+
   assign(origin, alt, T);
   }
 

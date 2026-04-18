@@ -1485,28 +1485,11 @@ EX namespace reg3 {
       
       dynamicval<hrmap*> cr(currentmap, this);
       
-      heptagon *alt = NULL;
-      transmatrix T = Id;
-      
-      binary_map = nullptr;
       quotient_map = gen_quotient_map(minimize_quotient_maps, currfp);
       
       h.zebraval = quotient_map ? quotient_map->allh[0]->zebraval : 0;
-      
-      #if CAP_BT
-      if(hyperbolic) {
-        dynamicval<eGeometry> g(geometry, gBinary3); 
-        bt::build_tmatrix();
-        alt = init_heptagon(S7);
-        alt->s = hsOrigin;
-        alt->alt = alt;
-        binary_map = bt::new_alt_map(alt);
-        T = xpush(.01241) * spin(1.4117) * xpush(0.1241) * cspin(0, 2, 1.1249) * xpush(0.07) * Id;
-        }
-      #endif
-      
-      reg_gmatrix[origin] = make_pair(alt, T);
-      altmap[alt].emplace_back(origin, T);
+
+      bm.initialize(origin);
 
       if(PURE) {
         celllister cl(origin->c7, 4, 100000, NULL);
