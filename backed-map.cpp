@@ -15,7 +15,7 @@ struct backed_map {
 
   void initialize(heptagon *origin);
   void assign(heptagon *actual, heptagon *backer, transmatrix T);
-  void rebase(heptagon*& backer, transmatrix& T, transmatrix& U);
+  void rebase(heptagon*& backer, transmatrix& T);
   void handle_precision_errors(heptagon *actual);
 
   geometry_information *alt_cgip[2];
@@ -69,16 +69,14 @@ void backed_map::assign(heptagon *actual, heptagon *backer, transmatrix T) {
   what_at[backer].emplace_back(actual, T);
   }
 
-void backed_map::rebase(heptagon*& backer, transmatrix& T, transmatrix& U) {
+void backed_map::rebase(heptagon*& backer, transmatrix& T) {
   if(mhyperbolic) {
     dynamicval<int> uc(cgip->use_count, cgip->use_count+1);
     dynamicval<eGeometry> g(geometry, gNormal);
     dynamicval<eVariation> gv(variation, eVariation::pure);
     dynamicval<geometry_information*> gi(cgip, find_alt_cgip());
     dynamicval<hrmap*> cm(currentmap, current_altmap);
-    U = T;
     current_altmap->virtualRebase(backer, T);
-    U = U * iso_inverse(T);
     }
   if(euclid) {
     /* hash the rough coordinates as heptagon* alt */
@@ -124,8 +122,7 @@ void backed_map::handle_precision_errors(heptagon *h) {
           auto p2 = p1;
           p2.second = T;
 
-          transmatrix T0 = Id;
-          rebase(p2.first, p2.second, T0);
+          rebase(p2.first, p2.second);
 
           if(first) {
             if(where.count(h2)) {

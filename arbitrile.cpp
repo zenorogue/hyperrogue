@@ -1603,8 +1603,7 @@ struct hrmap_arbi : hrmap {
     
     transmatrix T = p.second * adj(h, d);
     
-    transmatrix U;
-    bm.rebase(alt, T, U);
+    bm.rebase(alt, T);
     fixmatrix(T);
 
     for(auto& p2: bm.what_at[alt]) if(id_of(p2.first) == co.sid) {

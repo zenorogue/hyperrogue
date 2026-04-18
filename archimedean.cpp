@@ -657,12 +657,11 @@ struct hrmap_archimedean : hrmap {
 
     auto& p1 = bm.where[h];
 
-    heptagon *alt = p1.first; auto alt0 = alt;
+    heptagon *alt = p1.first; // auto alt0 = alt;
 
     transmatrix T = p1.second * spin(-t1.first) * lxpush(t1.second);
-    transmatrix U = Id;
 
-    bm.rebase(alt, T, U);
+    bm.rebase(alt, T);
 
     if(debug_geometry) println(hlog, "look for: ", alt, " / ", kz(T * C0));
 
@@ -675,17 +674,19 @@ struct hrmap_archimedean : hrmap {
         if(debug_geometry) println(hlog, "compare: ", kz(T1 * lxpush0(1)), ":: ", kz(p2.second * lxpush0(1)));
         if(same_point_may_warn(T1 * lxpush0(1), p2.second * lxpush0(1))) {
         
+          #if 0
           // T1 = p2.second
           // T * spin(pi+t2.first) == p2.second
           // p1.second * spinm(-t1.first) * lxpush(t1.second) * spin(pi+t2.first) == p2.second
           
           // bring p1 and p2 closer, to prevent floating point errors
-          if(hyperbolic && false) {
+          if(hyperbolic) {
             fixup_matrix(p1.second, U * p2.second * spin(-M_PI - t2.first) * lxpush(-t1.second) * spin(t1.first), 0.25);
             fixup_matrix(p2.second, T1, 0.25);
             for(auto& z: bm.what_at[alt0]) if(z.first == h) z.second = p1.second;
             bm.where[p2.first].second = p2.second;
             }
+          #endif
   
           while(skip_digons(hs, -1)) hs--;
           connectHeptagons(hi, hs);
