@@ -2136,6 +2136,9 @@ EX namespace heat {
     if(arcm::in()) divby *= 2;
     if(WDIM == 3) divby *= 2;
     
+    ld blizzard_mul = 5;
+    if(UNRECTIFIED && S3 == 4) blizzard_mul = 1;
+
     for(int i=0; i<dcs; i++) {
       cell *c = allcells[i];
       double xrate = (c->land == laCocytus && shmup::on) ? 1/3. : 1;
@@ -2199,7 +2202,7 @@ EX namespace heat {
             int v = (windmap::at(ct) - windmap::at(c)) & 255;
             if(v > 128) v -= 256;
             if(v < windmap::NOWINDFROM && v > -windmap::NOWINDFROM)
-              hdiff = hdiff * (1 - v * 5. / windmap::NOWINDFROM);
+              hdiff = hdiff * (1 - v * blizzard_mul / windmap::NOWINDFROM);
             }
           #endif
 
