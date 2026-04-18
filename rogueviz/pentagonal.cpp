@@ -132,7 +132,7 @@ void run_snub(int v, int w) {
   drawthemap();
   
   if(euclid || sphere) for(cell *c: currentmap->allcells())
-    gmatrix[c] = shiftless(arcm::archimedean_gmatrix[c->master].second);
+    gmatrix[c] = shiftless(arcm::bm.where[c->master].second);
 
   cellwalker cw(currentmap->gamestart(), 0);
   p0 = cw.at;
