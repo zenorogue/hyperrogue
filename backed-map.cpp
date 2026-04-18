@@ -19,6 +19,8 @@ struct backed_map {
   void rebase(heptagon*& backer, transmatrix& T);
   void handle_precision_errors(heptagon *actual);
 
+  transmatrix relative_backer_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint);
+
   geometry_information *alt_cgip[2];
 
   geometry_information *find_alt_cgip();
@@ -187,6 +189,25 @@ void backed_map::swapdim() {
 
   alt_cgip[0] = nullptr;
   alt_cgip[1] = nullptr;
+  }
+
+transmatrix backed_map::relative_backer_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) {
+  #if CAP_BT
+  if(mhyperbolic && GDIM == 3) {
+    dynamicval<eGeometry> g(geometry, gBinary3);
+    dynamicval<hrmap*> cm(currentmap, current_altmap);
+    return currentmap->relative_matrix(h2, h1, hint);
+    }
+  #endif
+  if(mhyperbolic && GDIM == 2) {
+    dynamicval<int> uc(cgip->use_count, cgip->use_count+1);
+    dynamicval<eGeometry> g(geometry, gNormal);
+    dynamicval<eVariation> gv(variation, eVariation::pure);
+    dynamicval<geometry_information*> gi(cgip, find_alt_cgip());
+    dynamicval<hrmap*> cm(currentmap, current_altmap);
+    return currentmap->relative_matrix(h2, h1, hint);
+    }
+  return Id;
   }
 
 bool show_map_stress;

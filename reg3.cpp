@@ -1689,14 +1689,7 @@ EX namespace reg3 {
     transmatrix relative_matrixh(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {
       auto p1 = bm.where[h1];
       auto p2 = bm.where[h2];
-      transmatrix T = Id;
-      #if CAP_BT
-      if(hyperbolic) { 
-        dynamicval<eGeometry> g(geometry, gBinary3);
-        dynamicval<hrmap*> cm(currentmap, bm.current_altmap);
-        T = currentmap->relative_matrix(p2.first, p1.first, hint);
-        }
-      #endif
+      transmatrix T = bm.relative_backer_matrix(p2.first, p1.first, hint);
       T = inverse(p1.second) * T * p2.second;      
       if(elliptic && T[LDIM][LDIM] < 0) T = centralsym * T;
       return T;
