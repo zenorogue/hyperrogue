@@ -36,15 +36,16 @@ EX namespace dialog {
   
   struct scaler {
     function<ld(ld)> direct, inverse;
-    bool positive, int_slider;
+    bool positive, int_slider, zerify;
     };
 
   static inline ld identity_f(ld x) { return x; }
   
-  const static scaler identity = {identity_f, identity_f, false, true};
-  const static scaler logarithmic = { (ld (*) (ld)) log, (ld (*) (ld)) exp, true, false};
-  const static scaler asinhic = { (ld (*) (ld)) asinh, (ld (*) (ld)) sinh, false, false};
-  const static scaler asinhic100 = {[] (ld x) { return asinh(x*100); }, [] (ld x) { return sinh(x)/100; }, false, false};
+  const static scaler identity = {identity_f, identity_f, false, true, true};
+  const static scaler logarithmic = { (ld (*) (ld)) log, (ld (*) (ld)) exp, true, false, false};
+  const static scaler asinhic = { (ld (*) (ld)) asinh, (ld (*) (ld)) sinh, false, false, false};
+  const static scaler asinhic100 = {[] (ld x) { return asinh(x*100); }, [] (ld x) { return sinh(x)/100; }, false, false, false};
+  const static scaler asinhic_big = {[] (ld x) { return asinh(x*1e15); }, [] (ld x) { return sinh(x)/1e15; }, false, false, false};
  
   /** extendable dialog */
   struct extdialog : funbase {
@@ -101,6 +102,7 @@ EX namespace dialog {
   EX void scaleLog() { get_ne().sc = logarithmic; }
   EX void scaleSinh() { get_ne().sc = asinhic; }
   EX void scaleSinh100() { get_ne().sc = asinhic100; }
+  EX void scaleSinh_big() { get_ne().sc = asinhic_big; }
 
   EX void scale_given(vector<int> v) {
     get_ne().vmin = v[0];
@@ -1567,7 +1569,7 @@ EX namespace dialog {
           (*ne.editwhat)++;
         else
           *ne.editwhat = ne.sc.inverse(ne.sc.direct(*ne.editwhat) + shiftmul * ne.step);
-        if(abs(*ne.editwhat) < ne.step * 1e-6 && !ne.intval) *ne.editwhat = 0;
+        if(abs(*ne.editwhat) < ne.step * 1e-6 && !ne.intval && ne.sc.zerify) *ne.editwhat = 0;
         apply_slider();
         }
       else if(DKEY == SDLK_LEFT) {
@@ -1575,7 +1577,7 @@ EX namespace dialog {
           (*ne.editwhat)--;
         else
           *ne.editwhat = ne.sc.inverse(ne.sc.direct(*ne.editwhat) - shiftmul * ne.step);
-        if(abs(*ne.editwhat) < ne.step * 1e-6 && !ne.intval) *ne.editwhat = 0;
+        if(abs(*ne.editwhat) < ne.step * 1e-6 && !ne.intval && ne.sc.zerify) *ne.editwhat = 0;
         apply_slider();
         }
   #endif
