@@ -1273,12 +1273,12 @@ int ld_to_int(ld x) {
 
 #if CAP_ARCM
 EX gp::loc pseudocoords(cell *c) {
-  transmatrix T = arcm::archimedean_gmatrix[c->master].second;
+  transmatrix T = arcm::bm.where[c->master].second;
   return {ld_to_int(T[0][LDIM]), ld_to_int((spin(60._deg) * T)[0][LDIM])};
   }
 
 EX cdata *arcmCdata(cell *c) {
-  auto &agm = arcm::archimedean_gmatrix;
+  auto &agm = arcm::bm.where;
   if(!agm.count(c->master) || !agm[c->master].first) {
     forCellEx(c1, c) if(agm.count(c->master) && agm[c->master].first) return arcmCdata(c1);
     static cdata dummy;
@@ -1286,7 +1286,7 @@ EX cdata *arcmCdata(cell *c) {
     }
   heptagon *h2 = agm[c->master].first;
   dynamicval<eGeometry> g(geometry, gNormal); 
-  dynamicval<hrmap*> cm(currentmap, arcm::current_altmap);  
+  dynamicval<hrmap*> cm(currentmap, arcm::bm.current_altmap);
   return getHeptagonCdata(h2);
   }
 #endif

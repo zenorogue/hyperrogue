@@ -38,6 +38,7 @@
 #include "asonov.cpp"
 #include "kite.cpp"
 #include "aperiodic-hat.cpp"
+#include "backed-map.cpp"
 #include "archimedean.cpp"
 #include "arbitrile.cpp"
 #include "rulegen.cpp"

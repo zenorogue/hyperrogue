@@ -1396,11 +1396,7 @@ geometryinfo1& arbi_tiling::get_geometry() {
   return ginf[gEuclid].g;
   }
 
-map<heptagon*, vector<pair<heptagon*, transmatrix> > > altmap;
-
-EX map<heptagon*, pair<heptagon*, transmatrix>> arbi_matrix;
-
-EX hrmap *current_altmap;
+EX backed_map bm;
 
 heptagon *build_child(heptspin p, pair<int, int> adj);
 
@@ -1539,30 +1535,12 @@ struct hrmap_arbi : hrmap {
     origin->s = hsOrigin;
     origin->c7 = newCell(origin->type, origin);
 
-    heptagon *alt = NULL;
-    
-    if(mhyperbolic) {
-      dynamicval<eGeometry> g(geometry, gNormal); 
-      alt = init_heptagon(S7);
-      alt->s = hsOrigin;
-      alt->alt = alt;
-      current_altmap = newAltMap(alt); 
-      }
-    
-    transmatrix T = lxpush(.01241) * spin(1.4117) * lxpush(0.1241) * Id;
-    arbi_matrix[origin] = make_pair(alt, T);
-    altmap[alt].emplace_back(origin, T);
+    bm.initialize(origin);
     }
 
   ~hrmap_arbi() {
     clearfrom(origin);
-    altmap.clear();
-    arbi_matrix.clear();
-    if(current_altmap) {
-      dynamicval<eGeometry> g(geometry, gNormal);       
-      delete current_altmap;
-      current_altmap = NULL;
-      }
+    bm.clear();
     }
   void verify() override { }
 
@@ -1619,34 +1597,24 @@ struct hrmap_arbi : hrmap {
       return h1;
       }
 
-    const auto& p = arbi_matrix[h];
+    const auto& p = bm.where[h];
     
     heptagon *alt = p.first;
     
     transmatrix T = p.second * adj(h, d);
     
-    if(mhyperbolic) {
-      dynamicval<eGeometry> g(geometry, gNormal); 
-      dynamicval<hrmap*> cm(currentmap, current_altmap);
-      // transmatrix U = T;
-      current_altmap->virtualRebase(alt, T);
-      // U = U * inverse(T);
-      }
+    transmatrix U;
+    bm.rebase(alt, T, U);
     fixmatrix(T);
 
-    if(meuclid) {
-      /* hash the rough coordinates as heptagon* alt */
-      size_t s = size_t(T[0][LDIM]+.261) * 124101 + size_t(T[1][LDIM]+.261) * 82143;
-      alt = (heptagon*) s;
-      }
-
-    for(auto& p2: altmap[alt]) if(id_of(p2.first) == co.sid) {
+    for(auto& p2: bm.what_at[alt]) if(id_of(p2.first) == co.sid) {
       connection_t co1 = co;
       if(find_connection(T, p2.second, co1)) {
         if(p2.first->move(co1.eid)) {
           throw hr_exception("already connected!");
           }
         h->c.connect(d, p2.first, co1.eid, co1.mirror);
+        bm.handle_precision_errors(p2.first);
         return p2.first;
         }
       }
@@ -1658,8 +1626,7 @@ struct hrmap_arbi : hrmap {
     h1->emeraldval = h->emeraldval ^ co.mirror;
     h->c.connect(d, h1, co.eid, co.mirror);
     
-    arbi_matrix[h1] = make_pair(alt, T);
-    altmap[alt].emplace_back(h1, T);    
+    bm.assign(h1, alt, T);
     return h1;
     }
   
@@ -2262,11 +2229,7 @@ EX void swap_vertices() {
   }
 
 #if MAXMDIM >= 4
-auto hooksw = addHook(hooks_swapdim, 100, [] {
-  swap_vertices();
-  for(auto& p: altmap) for(auto& pp: p.second) swapmatrix(pp.second);
-  for(auto& p: arbi_matrix) swapmatrix(p.second.second);
-  });
+auto hooksw = addHook(hooks_swapdim, 100, [] { swap_vertices(); bm.swapdim(); });
 #endif
 
 EX bool support_dice(int x) {
