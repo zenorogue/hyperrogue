@@ -15,6 +15,7 @@ struct backed_map {
 
   void initialize(heptagon *origin);
   void assign(heptagon *actual, heptagon *backer, transmatrix T);
+  void reassign(heptagon *actual, heptagon *backer, transmatrix T);
   void rebase(heptagon*& backer, transmatrix& T);
   void handle_precision_errors(heptagon *actual);
 
@@ -68,6 +69,14 @@ void backed_map::assign(heptagon *actual, heptagon *backer, transmatrix T) {
   what_at[backer].emplace_back(actual, T);
   }
 
+void backed_map::reassign(heptagon *actual, heptagon *backer, transmatrix T) {
+  auto& p = where[actual];
+  auto& old = what_at[p.first];
+  for(auto& v: old) if(v.first == actual) { swap(v, old.back()); old.pop_back(); break; }
+  p = make_pair(backer, T);
+  what_at[backer].emplace_back(actual, T);
+  }
+
 void backed_map::rebase(heptagon*& backer, transmatrix& T) {
   if(mhyperbolic) {
     dynamicval<int> uc(cgip->use_count, cgip->use_count+1);
@@ -103,41 +112,28 @@ void backed_map::handle_precision_errors(heptagon *h) {
       };
     enqueue(h);
     ld hpe_precision = 0;
-    int chances = 0, deleted = 0;
     for(int i=0; i<250; i++) {
       h = q[i];
       for(int d=0; d<h->type; d++) {
-        auto h2 = h->cmove(d);
+        auto h2 = h->move(d);
+        if(!h2) continue;
         bool first = enqueue(h2);
         if(true) {
           auto p1 = where[h];
           fixmatrix(p1.second);
           heptspin hi(h, d);
-          // auto& t1 = current.get_triangle(hi);
-          // heptspin hs(h2, h->c.spin(d));
-          // auto& t2 = current.get_triangle(hs);
           transmatrix T = p1.second * currentmap->adj(h, d);
-          // spin(-t1.first) * lxpush(t1.second) * spin(M_PI + t2.first);
           auto p2 = p1;
           p2.second = T;
 
           rebase(p2.first, p2.second);
 
-          if(first) {
-            if(where.count(h2)) {
-              auto old_p2 = where[h2];
-              auto& old = what_at[old_p2.first];
-              chances++;
-              for(auto& v: old) if(v.first == h2) { swap(v, old.back()); old.pop_back(); deleted++; break; }
-              }
-            where[h2] = p2;
-            what_at[p2.first].emplace_back(h2, p2.second);
-            }
+          if(first) reassign(h2, p2.first, p2.second);
           else hpe_precision = max(hpe_precision, hdist(where[h2].second*C0, p2.second*C0));
           }
         }
       }
-    worst_precision_error = 0; println(hlog, "hpe_precision = ", hpe_precision, " deleted ", deleted, " / ", chances);
+    worst_precision_error = 0; println(hlog, "hpe_precision = ", hpe_precision);
     }
   in_hpe = false;
   }
