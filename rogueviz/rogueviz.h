@@ -97,20 +97,29 @@ namespace rogueviz {
 
   struct colorpair {
     color_t color1, color2;
+    color_t color_border;
+    char border_type;
     char shade;
     #if CAP_TEXTURE
     shared_ptr<rvimage> img;
     #endif
-    colorpair(color_t col = 0xC0C0C0FF) { shade = 0; color1 = color2 = col; }
+    colorpair(color_t col = 0xC0C0C0FF) { shade = 0; color1 = color2 = col; color_border = 0; border_type = 0; }
     bool operator == (const colorpair& cp) {
       return tie(color1, color2, shade, img) == tie(cp.color1, cp.color2, cp.shade, cp.img);
       }
     bool operator != (const colorpair& cp) { return !(self == cp); }
     };
   
+  struct titleline {
+    string text;
+    ld x, y, size;
+    int align;
+    };
+
   struct vertexdata {
     int id;
     vector<pair<int, edgeinfo*> > edges;
+    vector<titleline> title;
     string name;
     colorpair cp;
     bool special;

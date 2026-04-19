@@ -133,7 +133,20 @@ colorpair parse(string s) {
     #endif
     }
   auto pos = s.find(":");
-  if(pos != string::npos) {
+  auto pos2 = s.find("::");
+  if(pos2 != string::npos && pos != string::npos) {
+    cp.color1 = parse1(s.substr(0, pos));
+    cp.shade = s[pos+1];
+    cp.color2 = parse1(s.substr(pos+2, pos2 - pos-2));
+    cp.border_type = s[pos2+2];
+    cp.color_border = parse1(s.substr(pos2+3));
+    }
+  else if(pos2 != string::npos) {
+    cp.color1 = cp.color2 = parse1(s.substr(0, pos));
+    cp.border_type = s[pos2+2];
+    cp.color_border = parse1(s.substr(pos2+3));
+    }
+  else if(pos != string::npos) {
     cp.color1 = parse1(s.substr(0, pos));
     cp.shade = s[pos+1];
     cp.color2 = parse1(s.substr(pos+2));
@@ -484,20 +497,38 @@ void queuedisk(const shiftmatrix& V, const colorpair& cp, bool legend, const str
     if(url) queueaction(PPR::MONSTER_HEAD, [] () { SVG_LINK(""); });
     }
   switch(cp.shade) {
-    case 't': queuepoly(V1, cgi.shDiskT, darken_a(cp.color2)); return;
-    case 's': queuepoly(V1, cgi.shDiskS, darken_a(cp.color2)); return;
-    case 'q': queuepoly(V1, cgi.shDiskSq, darken_a(cp.color2)); return;
-    case 'm': queuepoly(V1, cgi.shDiskM, darken_a(cp.color2)); return;
-    case 'h': queuepoly(V1, cgi.shHalfDisk, darken_a(cp.color2)); return;
-    case 'c': queuepoly(V1, cgi.shMoonDisk, darken_a(cp.color2)); return;
-    case 'S': queuepoly(V1, cgi.shDiskSegment, darken_a(cp.color2)); return;
-    case 'e': queuepoly(V1, cgi.shEccentricDisk, darken_a(cp.color2)); return;
-    case 'b': queuepoly(V1, GDIM == 3 ? cgi.shAnimatedTinyEagle[wingphase(200)] : cgi.shTinyBird, darken_a(cp.color2)); return;
-    case 'f': queuepoly(V1, cgi.shTinyShark, darken_a(cp.color2)); return;
-    case 'g': queuepoly(V1, cgi.shMiniGhost, darken_a(cp.color2)); return;
-    case 'B': queuepoly(V1, GDIM == 3 ? cgi.shAnimatedEagle[wingphase(100)] : cgi.shEagle, darken_a(cp.color2)); return;
-    case 'F': queuepoly(V1, cgi.shShark, darken_a(cp.color2)); return;
-    case 'G': queuepoly(V1, cgi.shGhost, darken_a(cp.color2)); return;
+    case 't': queuepoly(V1, cgi.shDiskT, darken_a(cp.color2)); break;
+    case 's': queuepoly(V1, cgi.shDiskS, darken_a(cp.color2)); break;
+    case 'q': queuepoly(V1, cgi.shDiskSq, darken_a(cp.color2)); break;
+    case 'm': queuepoly(V1, cgi.shDiskM, darken_a(cp.color2)); break;
+    case 'h': queuepoly(V1, cgi.shHalfDisk, darken_a(cp.color2)); break;
+    case 'c': queuepoly(V1, cgi.shMoonDisk, darken_a(cp.color2)); break;
+    case 'S': queuepoly(V1, cgi.shDiskSegment, darken_a(cp.color2)); break;
+    case 'e': queuepoly(V1, cgi.shEccentricDisk, darken_a(cp.color2)); break;
+    case 'b': queuepoly(V1, GDIM == 3 ? cgi.shAnimatedTinyEagle[wingphase(200)] : cgi.shTinyBird, darken_a(cp.color2)); break;
+    case 'f': queuepoly(V1, cgi.shTinyShark, darken_a(cp.color2)); break;
+    case 'g': queuepoly(V1, cgi.shMiniGhost, darken_a(cp.color2)); break;
+    case 'B': queuepoly(V1, GDIM == 3 ? cgi.shAnimatedEagle[wingphase(100)] : cgi.shEagle, darken_a(cp.color2)); break;
+    case 'F': queuepoly(V1, cgi.shShark, darken_a(cp.color2)); break;
+    case 'G': queuepoly(V1, cgi.shGhost, darken_a(cp.color2)); break;
+    }
+  switch(cp.border_type) {
+    case 'r': queuepoly(V1, cgi.shRing, darken_a(cp.color_border)); break;
+    case 'o': {
+      for(int i=0; i<=360; i++) curvepoint(xspinpush0(i * 1._deg, cgi.orbsize * .25));
+      vid.linewidth *= 2;
+      queuecurve(V1, darken_a(cp.color_border), 0, PPR::ITEM);
+      vid.linewidth /= 2; break;
+      }
+    case 's': queuepoly(V1, cgi.shSpikedRing, darken_a(cp.color_border)); break;
+    case 't': queuepoly(V1, cgi.shTargetRing, darken_a(cp.color_border)); break;
+    case 'w': queuepoly(V1, cgi.shSawRing, darken_a(cp.color_border)); break;
+    case 'g': queuepoly(V1, cgi.shGearRing, darken_a(cp.color_border)); break;
+    case 'p': queuepoly(V1, cgi.shPeaceRing, darken_a(cp.color_border)); break;
+    case 'h': queuepoly(V1, cgi.shHeptaRing, darken_a(cp.color_border)); break;
+    case 'z': queuepoly(V1, cgi.shSpearRing, darken_a(cp.color_border)); break;
+    case 'l': queuepoly(V1, cgi.shLoveRing, darken_a(cp.color_border)); break;
+    case 'f': queuepoly(V1, cgi.shFrogRing, darken_a(cp.color_border)); break;
     }
   }
 
@@ -717,17 +748,27 @@ bool drawVertex(const shiftmatrix &V, cell *c, shmup::monster *m) {
       }
     
     shiftpoint h = tC0(V * m->at);
-    shiftmatrix V2 = GDIM == 3 ? V * m->at : rgpushxto0(h) * ypush(cgi.scalefactor * labelshift); // todo-variation
-    if(doshow && !behindsphere(V2)) {
-      if(url) queueaction(PPR::MONSTER_HEAD, [url] () { SVG_LINK(*url); });
-      string s;
-      ld w = hi_weight;
-      if(vizflags & RV_INVERSE_WEIGHT) w = 1/w;
-      if(showlabels && show_edges && hi_weight) s = vd.name + " : " + fts(w);
-      else if(showlabels) s = vd.name;
-      else if(hi_weight) s = fts(w);
-      queuestr(V2, labelscale, s, forecolor, (svg::in || ISWEB) ? 0 : 1);
-      if(url) queueaction(PPR::MONSTER_HEAD, [] () { SVG_LINK(""); });
+
+    if(vd.title.size()) {
+      for(auto& t: vd.title) {
+        shiftmatrix V2 = rgpushxto0(h) * xpush(labelscale * t.x * 0.5) * ypush(labelscale * t.y * 0.5); // todo-variation
+        queuestr(V2, labelscale * t.size, t.text, forecolor, (svg::in || ISWEB) ? 0 : 1, t.align);
+        }
+      }
+
+    else {
+      shiftmatrix V2 = GDIM == 3 ? V * m->at : rgpushxto0(h) * ypush(cgi.scalefactor * labelshift); // todo-variation
+      if(doshow && !behindsphere(V2)) {
+        if(url) queueaction(PPR::MONSTER_HEAD, [url] () { SVG_LINK(*url); });
+        string s;
+        ld w = hi_weight;
+        if(vizflags & RV_INVERSE_WEIGHT) w = 1/w;
+        if(showlabels && show_edges && hi_weight) s = vd.name + " : " + fts(w);
+        else if(showlabels) s = vd.name;
+        else if(hi_weight) s = fts(w);
+        queuestr(V2, labelscale, s, forecolor, (svg::in || ISWEB) ? 0 : 1);
+        if(url) queueaction(PPR::MONSTER_HEAD, [] () { SVG_LINK(""); });
+        }
       }
     }
 
@@ -892,6 +933,26 @@ void readcolor(const string& cfname) {
     }
   }
 
+void readtitles(const string& cfname) {
+  println(hlog, "reading from: ", cfname);
+  fhstream f(cfname, "rt");
+  string s;
+  while(!feof(f.f)) {
+    s = scanline_noblank(f);
+    if(s == "") continue;
+    auto id = getid(s);
+
+    s = scanline_noblank(f);
+    titleline tl;
+    sscanf(s.c_str(), "%lf%lf%lf%d", &tl.x, &tl.y, &tl.size, &tl.align);
+    tl.text = scanline_noblank(f);
+
+    vdata[id].title.push_back(tl);
+    println(hlog, "added line '", tl.text, "' to id ", id, " : ", vdata[id].name);
+    }
+  println(hlog, "done");
+  }
+
 void graph_rv_hooks();
 
 void init(flagtype _vizflags) {
@@ -962,6 +1023,10 @@ int readArgs() {
   // read the color/legend file
   else if(argis("-color")) {
     PHASE(3); shift(); readcolor(args());
+    }
+  // read the titles
+  else if(argis("-rvtitles")) {
+    PHASE(3); shift(); readtitles(args());
     }
   else if(argis("-lab")) {
     showlabels = true;
