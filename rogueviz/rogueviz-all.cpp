@@ -90,6 +90,7 @@
 #include "embeddings/embeddings.cpp"
 
 #include "watcher.cpp"
+#include "tricenter.cpp"
 
 // the following comments are read by mymake so that it knows that the files include other files there:
 // hidden dependencies: rogueviz/nilrider/
