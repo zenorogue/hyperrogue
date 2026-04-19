@@ -63,7 +63,7 @@ EX always_false in;
       }
     }
   
-  char* stylestr(color_t fill, color_t stroke, ld width=1) {
+  char* stylestr(color_t fill, color_t stroke, ld width=1, string extrastyle = "") {
     fixgamma(fill);
     fixgamma(stroke);
     static char buf[600];
@@ -78,10 +78,11 @@ EX always_false in;
       else fill = 0xFFFFFFFF;
       }
     
-    snprintf(buf, 600, "style=\"stroke:#%06x;stroke-opacity:%.3" PLDF ";stroke-width:%" PLDF "px;fill:#%06x;fill-opacity:%.3" PLDF "\"",
+    snprintf(buf, 600, "style=\"stroke:#%06x;stroke-opacity:%.3" PLDF ";stroke-width:%" PLDF "px;fill:#%06x;fill-opacity:%.3" PLDF "%s\"",
       (stroke>>8) & 0xFFFFFF, cta(stroke),
       width/divby,
-      (fill>>8) & 0xFFFFFF, cta(fill)
+      (fill>>8) & 0xFFFFFF, cta(fill),
+      extrastyle.c_str()
       );
     return buf;
     }
@@ -106,6 +107,8 @@ EX always_false in;
     }
 
   string font = "Times";
+  string fontstyle = "";
+  string tspan = "";
   
   ld text_width_multiplier = 1/40.;
   int min_text = 3;
@@ -144,8 +147,10 @@ EX always_false in;
         "end", "' ");
       if(!uselatex)
         print(f, "font-family='", font, "' font-size='", coord(size), "' ");
+      if(tspan != "") str2 =
+        "<tspan style=\"" + tspan + "\">" + str2 + "</tspan>";
       print(f, 
-        stylestr(col, frame ? 0x0000000FF : 0, (1<<get_sightrange())*dfc*text_width_multiplier), 
+        stylestr(col, frame ? 0x0000000FF : 0, (1<<get_sightrange())*dfc*text_width_multiplier, fontstyle),
         ">", str2, "</text>");
       stopstring();
       println(f);
@@ -216,6 +221,14 @@ int read_args() {
     }
   else if(argis("-svgfont")) {
     shift(); svg::font = args();
+    // note: use '-svgfont latex' to produce text output as: \myfont{size}{text}
+    // (this is helpful with Inkscape's PDF+TeX output feature; define \myfont yourself)
+    }
+  else if(argis("-svgtspan")) {
+    shift(); svg::tspan = args();
+    }
+  else if(argis("-svgfontstyle")) {
+    shift(); svg::fontstyle = args();
     // note: use '-svgfont latex' to produce text output as: \myfont{size}{text}
     // (this is helpful with Inkscape's PDF+TeX output feature; define \myfont yourself)
     }
