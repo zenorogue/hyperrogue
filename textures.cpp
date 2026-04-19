@@ -258,7 +258,7 @@ bool texture_data::readtexture(string tn) {
 #elif CAP_PNG
   
   FILE *f = fopen(tn.c_str(), "rb");
-  if(!f) { printf("failed to open file\n"); return false; }
+  if(!f) { perror("fopen"); printf("failed to open file %s\n", tn.c_str()); return false; }
   png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
   if(!png) { printf("failed to create_read_struct\n"); return false; }
   if(setjmp(png_jmpbuf(png))) { 
