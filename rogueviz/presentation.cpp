@@ -177,6 +177,7 @@ texture::texture_data& get_texture(string s, flagtype flags = 0) {
 
 void sub_picture(string s, flagtype flags, ld dx, ld dy, ld scale) {
   auto& tex = get_texture(s);
+  if(tex.textureid == 0) return;
   flat_model_enabler fme;
   draw_texture(tex, dx, dy, scale);
   }
