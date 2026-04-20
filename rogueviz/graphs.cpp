@@ -939,7 +939,7 @@ void readcolor(const string& cfname) {
   }
 
 void readtitles(const string& cfname) {
-  println(hlog, "reading from: ", cfname);
+  println(hlog, "reading titles from: ", cfname);
   fhstream f(cfname, "rt");
   string s;
   while(!feof(f.f)) {
@@ -947,15 +947,19 @@ void readtitles(const string& cfname) {
     if(s == "") continue;
     auto id = getid(s);
 
-    s = scanline_noblank(f);
-    titleline tl;
-    sscanf(s.c_str(), "%lf%lf%lf%d", &tl.x, &tl.y, &tl.size, &tl.align);
-    tl.text = scanline_noblank(f);
-
-    vdata[id].title.push_back(tl);
-    println(hlog, "added line '", tl.text, "' to id ", id, " : ", vdata[id].name);
+    while(true) {
+      s = scanline_noblank(f);
+      if(s == "") break;
+      if(s.substr(0, 5) == "INFO ") { vdata[id].infos.push_back(s.substr(5)); continue; }
+      else if(s.substr(0, 4) == "URL ") { vdata[id].urls.push_back(s.substr(4)); continue; }
+      else if(s.substr(0, 6) == "COLOR ") { vdata[id].cp = parse(s.substr(6)); continue; }
+      else if(s.substr(0, 7) == "RENAME ") { vdata[id].name = s.substr(7); continue; }
+      titleline tl; int pos;
+      sscanf(s.c_str(), "%lf%lf%lf%d %n", &tl.x, &tl.y, &tl.size, &tl.align, &pos);
+      tl.text = s.substr(pos);
+      vdata[id].title.push_back(tl);
+      }
     }
-  println(hlog, "done");
   }
 
 void graph_rv_hooks();
@@ -1184,6 +1188,8 @@ void showVertexSearch() {
   for(int i=0; i<isize(vdata); i++) {
     string n = vdata[i].name;
     for(auto& u: vdata[i].infos) n += "||" + u;
+    for(auto& u: vdata[i].title) n += "||" + u.text;
+    for(auto& u: vdata[i].urls) n += "||" + u;
     if(n == "") continue;
     if(n[0] == '|') n = its(i) + n;
     dialog::vpush2(i, vdata[i].name, n);
