@@ -472,29 +472,34 @@ void queuedisk(const shiftmatrix& V, const colorpair& cp, bool legend, const str
     vertex_shape == 3 ? cgi.shSnowball :
     cgi.shDisk;
   
+  auto add_url = [&] {
+    if(url) queueaction(PPR::MONSTER_HEAD, [url] () { SVG_LINK(*url); });
+    };
+  auto del_url = [&] { if(url) queueaction(PPR::MONSTER_HEAD, [] { SVG_LINK(""); }); };
+
   if(vertex_shape == 0) ;
   else if(GDIM == 3 && among(cp.shade, 'b', 'f', 'g', 'B', 'F', 'G')) {
     V1 = V;
     }
   else if(GDIM == 3) {
     V1 = face_the_player(V);
-    if(url) queueaction(PPR::MONSTER_HEAD, [url] () { SVG_LINK(*url); });
+    add_url();
     queuepolyat(V1, sh, darken_a(cp.color1), PPR::MONSTER_HEAD);
-    if(url) queueaction(PPR::MONSTER_HEAD, [] () { SVG_LINK(""); });
+    del_url();
     V1 = V;
     }
   else if(rog3) {
     int p = poly_outline; poly_outline = OUTLINE_TRANS; 
     queuepolyat(V, sh, 0x80, PPR::MONSTER_SHADOW); 
     poly_outline = p; 
-    if(url) queueaction(PPR::MONSTER_HEAD, [url] () { SVG_LINK(*url); });
+    add_url();
     queuepolyat(V1 = orthogonal_move_fol(V, cgi.BODY), sh, darken_a(cp.color1), PPR::MONSTER_HEAD);
-    if(url) queueaction(PPR::MONSTER_HEAD, [] () { SVG_LINK(""); });
+    del_url();
     }
   else {
-    if(url) queueaction(PPR::MONSTER_HEAD, [url] () { SVG_LINK(*url); });
-    queuepoly(V1 = V, sh, darken_a(cp.color1));
-    if(url) queueaction(PPR::MONSTER_HEAD, [] () { SVG_LINK(""); });
+    add_url();
+    queuepolyat(V1 = V, sh, darken_a(cp.color1), PPR::MONSTER_HEAD);
+    del_url();
     }
   switch(cp.shade) {
     case 't': queuepoly(V1, cgi.shDiskT, darken_a(cp.color2)); break;
