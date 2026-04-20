@@ -101,6 +101,48 @@ void build_disttable_approx() {
       if(p) delete p;
       });
   for(std::thread& t:v) t.join();
+
+  int mx = 0;
+  for(auto& r: results) mx = max(mx, isize(r));
+  disttable_approx.clear();
+  disttable_approx.resize(mx, zero);
+
+  for(auto& r: results)
+    for(int i=0; i<isize(r); i++)
+      for(int j=0; j<2; j++)
+        disttable_approx[i][j] += r[i][j];
+  }
+
+void build_disttable_approx_undirected() {
+  indenter_finish im("build_disttable_approx_undirected");
+
+  array<ll, 2> zero = {0, 0};
+
+  using namespace rogueviz;
+
+  std::vector<vector<array<ll, 2>>> results(threads);
+  std::vector<std::thread> v;
+  int N = isize(rogueviz::vdata);
+  for(int k=0; k<threads; k++)
+    v.emplace_back([&,k] () {
+      auto& dt = results[k];
+      vector<int> tab(N, N);
+      auto p = k ? nullptr : new progressbar(N/threads, "build_disttable_approx");
+      for(int i=k; i<N; i+=threads) {
+        if(p) (*p)++;
+        for(auto j: directed_edges[i]) tab[j] =	i;
+        for(int j=0; j<N; j++) if(j != i) {
+          ld dist = current->distance(i, j);
+          if(dist < 0) continue;
+          int dista = dist * llcont_approx_prec;
+          if(isize(dt) < dista+1)
+            dt.resize(dista+1, zero);
+          dt[dista][(tab[j] == i) ? 1 : 0]++;
+          }
+        }
+      if(p) delete p;
+      });
+  for(std::thread& t:v) t.join();
   
   int mx = 0;
   for(auto& r: results) mx = max(mx, isize(r));
