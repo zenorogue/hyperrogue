@@ -913,7 +913,8 @@ slide sweeper_slides[] = {
         tour::slide_backup(backcolor, 0xC0C0C0);
         tour::slide_backup(bordcolor, 0);
         }
-      show_picture(mode, "rogueviz/mine/mine4d.png");
+      // show_picture(mode, "rogueviz/mine/mine4d.png");
+      slide_url(mode, 'w', "link to Minesweeper 6D", "https://download.cnet.com/minefield-6d/3000-2111_4-10527216.html");
       no_other_hud(mode);
       }
     },
