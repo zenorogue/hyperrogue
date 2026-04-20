@@ -567,6 +567,7 @@ hpcshape
     int area;
     int pshid[3][8][GOLDBERG_LIMIT][GOLDBERG_LIMIT][8];
     vector<array<int, 5>> id_to_params;
+    map<vector<int>, int> field_data;
     };
   shared_ptr<gpdata_t> gpdata = nullptr;
   #endif

@@ -144,7 +144,8 @@ struct hrmap_hyperbolic : hrmap_standard {
 
 int hrmap_standard::pattern_value(cell *c) {
   if(&currfp == &fieldpattern::fp_invalid) return 0;
-  if(ctof(c) || NONSTDVAR) return c->master->fieldval/S7;
+  if(NONSTDVAR) return gp::get_pattern_value(c);
+  if(ctof(c)) return c->master->fieldval/S7;
   int z = 0;
   for(int u=0; u<S6; u+=2)
     z = max(z, fieldpattern::btspin(createMov(c, u)->master->fieldval, c->c.spin(u)));

@@ -1469,5 +1469,57 @@ auto hooksw = addHook(hooks_swapdim, 100, [] {
   for(auto& p: gp_adj) swapmatrix(p.second);
   });
 
-    
+EX int get_pattern_value(cell *c) {
+  if(!c) return 0;
+  if(li_for != c) {
+    li_for = c;
+    current_li = get_local_info(c);
+    }
+  vector<int> data;
+  gp::loc v = current_li.relative * gp::param.conj();
+  if(current_li.relative.first == 0 && current_li.relative.second == 0) {
+    data = {c->master->fieldval/S7};
+    }
+  else if(v.second == 0) {
+    auto v1 = gp::param * gp::param.conj();
+    auto h1 = c->master->cmodmove(current_li.last_dir);
+    if(c->master->fieldval < h1->fieldval)
+      data = {c->master->fieldval/S7, h1->fieldval/S7, v.first};
+    else
+      data = {h1->fieldval/S7, c->master->fieldval/S7, v1.first - v.first};
+    }
+  else if(S3 == 3) {
+    auto h0 = c->master;
+    int d = current_li.last_dir;
+    if(v.second < 0) d--;
+    auto h1 = h0->cmodmove(d);
+    auto h2 = h0->cmodmove(d+1);
+    auto t = current_li.relative; if(v.second < 0) t = loc(0,1) * t;
+    while(h1->fieldval > h0->fieldval || h2->fieldval > h0->fieldval) {
+      tie(h0, h1, h2) = make_tuple(h1, h2, h0);
+      t = t * loc(0,-1) + param * loc(0,1);
+      }
+    data = {h0->fieldval/S7, h1->fieldval/S7, t.first, t.second};
+    }
+  else {
+    auto h0 = c->master;
+    int d = current_li.last_dir;
+    if(v.second < 0) d--; d = gmod(d, h0->type);
+    auto h1 = h0->cmodmove(d);
+    auto h3 = h0->cmodmove(d+1);
+    auto h2 = (heptspin(h0, d)+wstep-1+wstep).at;
+    auto t = current_li.relative; if(v.second < 0) t = loc(0,1) * t;
+    int spins = 0;
+    while(h1->fieldval > h0->fieldval || h2->fieldval > h0->fieldval || h3->fieldval > h0->fieldval) {
+      tie(h0, h1, h2, h3) = make_tuple(h1, h2, h3, h0); spins++;
+      t = t * loc(0,-1) + param * loc(0,1);
+      }
+    data = {h0->fieldval/S7, h1->fieldval/S7, t.first, t.second};
+    }
+  if(ldebug) println(hlog, c, " = ", data);
+  auto& res = cgi.gpdata->field_data[data];
+  if(res == 0) res = cgi.gpdata->field_data.size();
+  return res;
+  }
+
   }}

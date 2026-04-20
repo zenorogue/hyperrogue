@@ -1435,10 +1435,6 @@ EX land_validity_t& land_validity(eLand l) {
   if((l == laBlizzard || l == laVolcano) && elliptic && S7 < 5 && !arcm::in())
     return not_enough_space;
   
-  // ... and it works in gp only partially
-  if((l == laBlizzard || l == laVolcano) && GOLDBERG_INV && (old_daily_id < 33 || !sphere))
-    return partially_implemented;
-
   // Kraken does not really work on odd-sided cells;
   // a nice football pattern will solve the problem by forbidding the Kraken to go there
   // (but we do have to allow it in non-bitrunc standard)
