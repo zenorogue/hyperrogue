@@ -392,6 +392,8 @@ void compute_creq_neighbors() {
 
 vector<vector<pair<ld, subcell>>> dijkstra_edges;
 
+color_t sag_cellcolor = 0x101010;
+
 void find_cells() {
   if(!game_active) start_game();
   DEBBI(debug_init_sag, ("find_cells with ", cellcount, " cells"));
@@ -477,7 +479,7 @@ void find_cells() {
 
   all_disk_cells_sorted = {};
   for(auto p: ids) if(all_disk_cells_sorted.empty() || p.first.first != all_disk_cells_sorted.back()) all_disk_cells_sorted.push_back(p.first.first);
-  for(cell *c: all_disk_cells_sorted) c->mpdist = 0, c->land = laCanvas, c->landparam = 0x101010, c->wall = waNone;
+  for(cell *c: all_disk_cells_sorted) c->mpdist = 0, c->land = laCanvas, c->landparam = sag_cellcolor, c->wall = waNone;
   }
 
 void init_cell_request() {
@@ -694,6 +696,9 @@ int cell_read_args() {
     }
   else if(argis("-subcellpoints-off")) {
     subcell_points.clear();
+    }
+  else if(argis("-sag-cellcolor")) {
+    shift(); sag_cellcolor = argcolor(24);
     }
   /* to viz only subcellpoints */
   else if(argis("-sag-clear")) {
