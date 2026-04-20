@@ -3878,7 +3878,7 @@ EX void showCustomizeChar() {
     dialog::addColorItem(XLAT("bowstring color"), cs.bowcolor2, 'c');
     }
   
-  if(id != pshRogue) dialog::addColorItem(XLAT("dress color"), cs.dresscolor, 'd');
+  if(id != pshRogue || cs.charid == 1) dialog::addColorItem(XLAT("dress color"), cs.dresscolor, 'd');
   else dialog::addBreak(100);
   if(cs.charid == 3 || id == pshRatling) dialog::addColorItem(XLAT("dress color II"), cs.dresscolor2, 'f');
   else dialog::addBreak(100);
