@@ -210,6 +210,7 @@ template<class T, class U> void scale_colorarray(int origdim, int targetdim, con
   
 bool texture_data::loadTextureGL() {
 
+  if(!twidth || !theight) return false;
   if(textureid == 0) glGenTextures(1, &textureid);
 
   glBindTexture( GL_TEXTURE_2D, textureid);
