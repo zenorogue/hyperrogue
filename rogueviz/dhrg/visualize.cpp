@@ -3,7 +3,7 @@
 int held_id = -1;
 
 void show_likelihood() {
-  cmode = sm::SIDE | sm::MAYDARK | sm::DIALOG_STRICT_X | sm::PANNING;
+  cmode = sm::SIDE | sm::DIALOG_STRICT_X | sm::PANNING;
   gamescreen();
 
   dialog::init("DHRG information");
@@ -93,6 +93,13 @@ void show_likelihood() {
     if(doexiton(sym, uni)) popScreen();
     };
   }
+
+int a1 = addHook(rogueviz::hooks_rvmenu, 100, [] {
+    if(isize(vertices)) {
+      dialog::addItem("examine DHRG", 'd');
+      dialog::add_action_push(show_likelihood);
+      }
+    });
 
 bool dhrg_animate(int sym, int uni) {
   if((cmode & sm::NORMAL) && uni == '/') {

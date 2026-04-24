@@ -147,3 +147,4 @@ int a = arg::add3("-edgelist", [] { arg::shift(); read_edgelist(arg::args()); })
 #include "maprank.cpp"
 #include "mdl.cpp"
 #include "compare.cpp"
+#include "visualize.cpp"
