@@ -809,6 +809,8 @@ EX void handleKeyNormal(int sym, int uni) {
     do {
       touchmode = (tmode) gmod(1 + int(touchmode), 5);
       invalid = touchmode == tmode::fire && !bow::crossbow_mode();
+      if(!mapeditor::drawplayer && touchmode == tmode::ranged) invalid=true;
+      if(game_keys_scroll && touchmode == tmode::move) invalid=true;
       }
     while(invalid);
     }
