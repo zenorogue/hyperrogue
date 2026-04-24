@@ -4,8 +4,8 @@ namespace rogueviz {
 
 namespace embeddings {
 
-void continuous_ranks() {
-  ld tot_ranks = 0, tot_rby = 0, tot_map = 0, tot_n = 0;
+rankinfo continuous_ranks() {
+  rankinfo ri;
 
   int N = get_n();
 
@@ -57,15 +57,16 @@ void continuous_ranks() {
         ltot_n++;
         }
       std::unique_lock<std::mutex> lk(lock);
-      tot_rby += ltot_rby;
-      tot_map += ltot_map;
-      tot_ranks += ltot_ranks;
-      tot_n += ltot_n;
+      ri.rby += ltot_rby;
+      ri.map += ltot_map;
+      ri.ranks += ltot_ranks;
+      ri.n += ltot_n;
       return 0;
       });
     }
-  println(hlog, "MeanRank = ", tot_ranks / tot_rby, " MAP = ", tot_map / tot_n);
-  println(hlog, "data: ", tie(tot_rby, tot_map, tot_ranks, tot_n, N));
+  println(hlog, "MeanRank = ", ri.ranks / ri.rby, " MAP = ", ri.map / ri.n);
+  println(hlog, "data: ", tie(ri.rby, ri.map, ri.ranks, ri.n, N));
+  return ri;
   }
 
 

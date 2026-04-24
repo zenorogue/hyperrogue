@@ -92,11 +92,13 @@ void force_rvgraph() {
   }
 
 void reenable_embedding() {
+  eval.current = false;
   if(rogueviz::rv_quality >= 1 && among(current->get_dimension(), 2, 3) && current->get_dimension() <= WDIM) force_rvgraph();
   }
 
 void enable_embedding(std::shared_ptr<embedding> pe) {
   current = std::move(pe);
+  eval.current = false;
   reenable_embedding();
   }
 

@@ -92,6 +92,26 @@ int count_directed_edges();
 
 void read_edgelist(const string& fn);
 void read_polar(const string& fn);
+
+struct rankinfo {
+  ld ranks = 0, rby = 0, map = 0, n = 0;
+  };
+
+struct loglik_info {
+  ld loglik, control;
+  long long N, N1, M;
+  bool symmetric;
+  };
+
+extern struct evaltype {
+  bool current;
+  ld maxradius;
+  iddata routing;
+  rankinfo rank;
+  loglik_info li;
+  bool symmetric;
+  } eval;
+
 }
 }
 

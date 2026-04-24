@@ -10,21 +10,24 @@ int count_directed_edges() {
   return M;
   }
 
+evaltype eval;
+
 void full_evaluation() {
 
   println(hlog, "evaluating embedding: " + current->name());
+  eval.current = true;
 
   try {
-    ld maxradius = 0;  
-    for(int i=0; i<isize(rogueviz::vdata); i++) maxradius = max(maxradius, current->zero_distance(i));
-    println(hlog, "maximum radius = ", maxradius);
+    eval.maxradius = 0;
+    for(int i=0; i<get_n(); i++) eval.maxradius = max(eval.maxradius, current->zero_distance(i));
+    println(hlog, "maximum radius = ", eval.maxradius);
     }
   catch(hr_exception&) {}
 
-  bool symmetric = count_directed_edges() == 2 * isize(edgeinfos);
-  if(symmetric) full_routing();
-  continuous_ranks();
-  analyze_mdl_symmetric(symmetric);
+  eval.symmetric = count_directed_edges() == 2 * isize(edgeinfos);
+  if(eval.symmetric) eval.routing = full_routing();
+  eval.rank = continuous_ranks();
+  eval.li = analyze_mdl_symmetric(eval.symmetric);
   }
 
 struct abstract_embedding : embedding {

@@ -4,11 +4,12 @@ namespace embeddings {
 
 int tal_limit = 0;
 
-void analyze_mdl_symmetric(bool symmetric) {
+loglik_info analyze_mdl_symmetric(bool symmetric) {
   int dim = current->get_dimension();
-  int N = isize(rogueviz::vdata);
+  int N = get_n();
+  loglik_info li;
 
-  if(dim == 1) return;
+  if(dim == 1) return li;
 
   vector<ld> center_distances(N);
   for(int id=0; id<N; id++) center_distances[id] = current->zero_distance(id);
@@ -16,13 +17,17 @@ void analyze_mdl_symmetric(bool symmetric) {
   build_disttable_approx();
   logistic cont;
   cont.setRT(0, 1);
-  if(symmetric) fast_loglik_cont(cont, loglik_cont_approx, "lcont", 1, 1e-6);
-  if(symmetric) println(hlog, "loglikelihood = ", format("%.1f", -loglik_cont_approx(cont)));
+  if(symmetric) {
+    fast_loglik_cont(cont, loglik_cont_approx, "lcont", 1, 1e-6);
+    li.loglik = loglik_cont_approx(cont);
+    if(symmetric) println(hlog, "loglikelihood = ", format("%.1f", -li.loglik));
+    }
   ld N1 = N * (N-1.);
   ld M = count_directed_edges();
   if(symmetric) { N1 /= 2; M /= 2; }
   ld max_radius = 0;
   for(auto& d: center_distances) max_radius = max(max_radius, d);
+  li.N = N; li.M = M; li.N1 = N1;
   ld M1 = N1 - M;
   ld entropy = M * log(M/N1) + M1 * log(M1/N1);
   println(hlog, "N = ", N, " M = ", M, " radius = ", max_radius, " entropy = ", format("%.1f", -entropy));
@@ -53,8 +58,8 @@ void analyze_mdl_symmetric(bool symmetric) {
   vector<logistic> logistics(N, cont);
 
   if(!symmetric) {
-    if(tal_limit == 0) { println(hlog, "not computing TAL -- the graph is asymmetric"); return; }
-    if(N >= tal_limit) { println(hlog, "too large graph to compute TAL"); return; }
+    if(tal_limit == 0) { println(hlog, "not computing TAL -- the graph is asymmetric"); return li; }
+    if(N >= tal_limit) { println(hlog, "too large graph to compute TAL"); return li; }
 
     println(hlog, "computing TAL");
     bad.resize(N);
@@ -134,7 +139,7 @@ void analyze_mdl_symmetric(bool symmetric) {
       println(hlog, "  negloglik = ", extra_info);
       println(hlog, "  control = ", format("%.1f", dist_entropy + sphere_entropy + extra_info));
       }
-    return dist_entropy + sphere_entropy + extra_info;
+    return li.control = dist_entropy + sphere_entropy + extra_info;
     };
 
   ld last_rep = HUGE_VAL;
@@ -163,6 +168,8 @@ void analyze_mdl_symmetric(bool symmetric) {
       }
     last_rep = cur_rep;
     }
+
+  return li;
   }
 
 }

@@ -213,7 +213,7 @@ int get_actual(int src) {
   return actual[src][current_goal];
   }
 
-void full_routing() {
+iddata full_routing() {
   iddata result;
   prepare_pairs();
   if(1) {
@@ -226,6 +226,7 @@ void full_routing() {
     }
   println(hlog, "greedy routing: success = ", result.suc / result.tot, " stretch = ", result.routedist / result.suc, " efficiency = ", result.eff / result.tot);
   println(hlog, "modded routing: success = ", result.msuc / result.tot, " stretch = ", result.mroutedist / result.msuc, " efficiency = ", result.meff / result.tot);
+  return result;
   }
 
 int routing_args() {
