@@ -315,6 +315,20 @@ int arg::readCommon() {
     no_find_player = true;
     }
 
+  else if(argis("-vizs")) {
+    PHASE(3);
+    showstartmenu = false;
+    start_game();
+    popScreenAll();
+    clearMessages();
+    nohud = true;
+    mapeditor::drawplayer = false;
+    no_find_player = true;
+    game_keys_scroll = true;
+    smooth_scrolling = true;
+    touchmode = tmode::drag;
+    }
+
   else if(argis("-vizhr")) {
     PHASE(3);
     showstartmenu = false;
@@ -397,6 +411,7 @@ int arg::readCommon() {
     printf("  -fixx SEED         - fix the RNG seed to the given value (cheat)\n");
     printf("  -noscr             - skip the start menu\n");
     printf("  -viz               - visualization mode: do not display the game elements\n");
+    printf("  -vizs              - visualization mode with smooth control\n");
     printf("  -g                 - debug mode: do not use scorefile, fix seed, enable cheat mode\n");
     printf("  -nogui             - do not start the GUI\n");
     printf("  -run               - run (before handling other options) until the user presses F10\n");
