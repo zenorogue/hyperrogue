@@ -17,7 +17,7 @@ vector<int> last_goal;
 vector<int> next_stop;
 
 void prepare_pairs() {
-  int N = isize(rogueviz::vdata);
+  int N = get_n();
   pairs.resize(N);
   actual.resize(N);
   for(int i=0; i<N; i++) actual[i].clear();
@@ -109,7 +109,7 @@ void route_from(int src, int goal, const vector<ld>& distances_from_goal) {
   }
 
 void greedy_routing_to(iddata& d, int goal) {
-  int N = isize(rogueviz::vdata);
+  int N = get_n();
   vector<ld> distances_from_goal(N);
   for(int src=0; src<N; src++)
     distances_from_goal[src] = current->distance(goal, src);
@@ -136,7 +136,7 @@ void greedy_routing_to(iddata& d, int goal) {
   }
 
 void greedy_routing(iddata& d) {
-  int N = isize(rogueviz::vdata);
+  int N = get_n();
   for(int goal=0; goal<N; goal++) greedy_routing_to(d, goal);
   }
 
@@ -217,7 +217,7 @@ void full_routing() {
   iddata result;
   prepare_pairs();
   if(1) {
-    int N = isize(rogueviz::vdata);
+    int N = get_n();
     progressbar pb(N, "greedy routing");
     for(int goal=0; goal<N; goal++) {
       pb++;

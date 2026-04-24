@@ -7,7 +7,7 @@ namespace embeddings {
 void continuous_ranks() {
   ld tot_ranks = 0, tot_rby = 0, tot_map = 0, tot_n = 0;
 
-  int N = isize(rogueviz::vdata);
+  int N = get_n();
 
   if(1) {
     progressbar pb(N/threads, "continuous ranks");

@@ -25,7 +25,7 @@ int lastmoves;
 
 int movearound() {
   indenter_finish im("movearound");
-  int N = isize(rogueviz::vdata);
+  int N = get_n();
   int total = 0;
   if(smartmove) for(bool b: tomove) if(b) total++;
   if(total == 0) {
@@ -99,7 +99,7 @@ int move_restart() {
   int moves = 0;
 //  int im = 0;
 
-  int N = isize(rogueviz::vdata);
+  int N = get_n();
   
   {progressbar pb(N, "move_restart");
   for(int i=0; i<N; i++) {
@@ -175,7 +175,7 @@ void preparegraph() {
   indenter_finish im("preparegraph");
   using namespace rogueviz;
   M = 0;
-  int N = isize(rogueviz::vdata);
+  int N = get_n();
   vertices.resize(N);
 
   if(1) {
@@ -233,7 +233,7 @@ struct dhrg_embedding : public rogueviz::embeddings::tiled_embedding {
     }
 
   void save(fhstream& f) override {
-    int N = isize(rogueviz::vdata);
+    int N = get_n();
     for(int i=0; i<N; i++) {
       string p = get_path(vertices[i]);
       if(p == "") p = "X";
@@ -250,7 +250,7 @@ void graph_from_rv() {
   memoryInfo();
 
   if(true) {
-    int N = isize(rogueviz::vdata);
+    int N = get_n();
     vertices.resize(N);
     progressbar pb(N, "Translating to cells");
 
@@ -308,7 +308,7 @@ void load_embedded(const string& s) {
   if(s == "-") return graph_from_rv();
 
   if(true) {
-    int N = isize(rogueviz::vdata);
+    int N = get_n();
     progressbar pb(N, "reading embedding");
     vertices.resize(N, NULL);
     

@@ -87,6 +87,7 @@ std::vector<int> path(int src);
 int get_actual(int src);
 void prepare_goal(int goal);
 
+int get_n();
 int count_directed_edges();
 
 void read_edgelist(const string& fn);

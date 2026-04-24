@@ -323,7 +323,7 @@ bool neq(betweenness_type a, betweenness_type b) {
   }
 
 void compute_betweenness(bool verify) {
-  auto N = isize(rogueviz::vdata);
+  auto N = get_n();
   progressbar pb(N, "compute_betweenness");
   int errorcount = 0, errorcount2 = 0;
   for(int i=0; i<N; i++) {

@@ -83,7 +83,7 @@ void show_likelihood() {
 
     handlePanning(sym, uni);
     if(uni == '-' && held_id == -1) {
-      int N = isize(rogueviz::vdata);
+      int N = get_n();
       for(int i=0; i<N; i++) if(rogueviz::vdata[i].m->base == mouseover)
         held_id = i;
       return;

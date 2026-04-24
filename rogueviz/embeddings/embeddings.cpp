@@ -9,6 +9,12 @@ std::shared_ptr<embedding> current;
 
 vector<vector<int> > directed_edges;
 
+// keep this correct
+// note: isize(vdata) may be not correct because of the extra 'legend' nodes
+int get_n() {
+  return isize(directed_edges);
+  }
+
 rogueviz::edgetype *any;
 
 edgetype *ensure_edge() {
@@ -79,7 +85,7 @@ void write_edgelist(const string &fname) {
   }
 
 void force_rvgraph() {
-  for(auto& v: vdata) if(v.id < isize(directed_edges)) {
+  for(auto& v: vdata) if(v.id < get_n()) {
     auto p = current->as_location(v.id);
     v.be(p.first, rgpushxto0(p.second));
     }

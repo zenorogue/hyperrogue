@@ -58,7 +58,7 @@ struct landscape_embedding : abstract_embedding {
 
 void landscape_build(int dim) {
   rogueviz::embeddings::init_landscape(columns = landscape_dim = dim);
-  int N = isize(rogueviz::vdata);
+  int N = get_n();
   landscape_weights.resize(N);
   if(1) {
     progressbar pb(N, "compute landscape");
@@ -73,7 +73,7 @@ void landscape_build(int dim) {
 
 void landscape_output(string shape, ld target_dist, string fname) {
   ld max_dist = 0;
-  int N = isize(rogueviz::vdata);
+  int N = get_n();
   for(int i=0; i<N; i++) {
     ld tot = 0;
     for(int d=0; d<columns; d++) tot += pow(landscape_weights[i][d], 2);
@@ -121,7 +121,7 @@ struct zdisttable_embedding : disttable_embedding {
 
 void read_disttable(string nodelist_fname, string disttable_fname) {
   auto de = make_shared<disttable_embedding> ();
-  int N = isize(rogueviz::vdata);
+  int N = get_n();
 
   fhstream g(nodelist_fname, "rt");
   vector<int> our_index;
@@ -195,7 +195,7 @@ struct dmercator_embedding : untiled_embedding {
 
 void read_dmercator(string fname, bool only_read = false) {
   auto me = make_shared<dmercator_embedding> ();
-  int N = isize(rogueviz::vdata);
+  int N = get_n();
 
   me->mcs.resize(N);
 
@@ -232,7 +232,7 @@ struct euclid_embedding : zdisttable_embedding {
 
 void read_euclid(string fname, int dim) {
   auto ee = make_shared<euclid_embedding> ();
-  int N = isize(rogueviz::vdata);
+  int N = get_n();
 
   println(hlog, "Open file ", fname);
   fhstream g(fname, "rt");
@@ -274,7 +274,7 @@ struct poincare_embedding : zdisttable_embedding {
 
 void read_poincare(string fname, int dim) {
   auto pe = make_shared<poincare_embedding>();
-  int N = isize(rogueviz::vdata);
+  int N = get_n();
 
   println(hlog, "Open file ", fname);
   fhstream g(fname, "rt");

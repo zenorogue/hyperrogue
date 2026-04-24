@@ -217,6 +217,7 @@ void vertexdata::be(cell *c, transmatrix at) {
   m->isVirtual = false;
   if(rv_quality >= 3) virtualRebase(m);
   if(rv_quality >= 2) m->store();
+  for(auto& ei: edges) ei.second->orig = nullptr;
   if(rv_quality >= 4) for(auto& ei: edges) redo_extenders(ei.second);
   }
 

@@ -26,7 +26,7 @@ using logisticfun = std::function<ld(logistic&)>;
 // needs cellcoords/rvcoords/origcoords
 void build_disttable() {
   indenter_finish im("build_disttable");
-  int N = isize(rogueviz::vdata);
+  int N = get_n();
   vector<int> tab(N, N);
   disttable0.clear();
   disttable1.clear();
@@ -77,7 +77,7 @@ void build_disttable_approx() {
 
   std::vector<vector<array<ll, 2>>> results(threads);
   std::vector<std::thread> v;
-  int N = isize(rogueviz::vdata);
+  int N = get_n();
   for(int k=0; k<threads; k++)
     v.emplace_back([&,k] () {
       auto& dt = results[k];
@@ -122,7 +122,7 @@ void build_disttable_approx_undirected() {
 
   std::vector<vector<array<ll, 2>>> results(threads);
   std::vector<std::thread> v;
-  int N = isize(rogueviz::vdata);
+  int N = get_n();
   for(int k=0; k<threads; k++)
     v.emplace_back([&,k] () {
       auto& dt = results[k];
