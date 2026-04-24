@@ -159,7 +159,7 @@ struct mercator_coord {
   array<ld, 3> h;
   };
 
-struct dmercator_embedding : abstract_embedding {
+struct dmercator_embedding : untiled_embedding {
   vector<mercator_coord> mcs;
   virtual string name() override { return "dmercator"; }
   eGeometryClass get_geometry() override { return gcHyperbolic; }
