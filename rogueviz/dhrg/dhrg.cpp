@@ -106,6 +106,7 @@ int dhrgArgs() {
     embedder_loop(argi());
     next_timestamp++;
     ts_vertices = next_timestamp;
+    rogueviz::embeddings::reenable_embedding();
     }
 
   else if(argis("-dorestart")) {
