@@ -1117,7 +1117,8 @@ EX void describeMouseover() {
       if(!c->monst) set_help_to(c->item);
       }
     
-    if(isPlayerOn(c) && !shmup::on) out += XLAT(", you"), help = generateHelpForMonster(moPlayer);
+    if(isPlayerOn(c) && !shmup::on && mapeditor::drawplayer)
+      out += XLAT(", you"), help = generateHelpForMonster(moPlayer);
 
     shmup::addShmupHelp(out);
 
