@@ -22,6 +22,7 @@ EX bool targetclick, hiliteclick, forcetarget, numlock_on;
 EX bool gtouched;
 
 EX bool holdmouse;
+EX int mouse_state; // 0 = default, 1 = press, 3 = hold, 2 = release
 
 EX int getcstat, lgetcstat;
 EX ld getcshift;
@@ -199,6 +200,7 @@ enum class tmode { move, info, drag, fire, ranged };
 #endif
 
 EX bool touch_interface;
+EX ld drag_sensitivity, drag_distance;
 EX tmode touchmode;
 EX vector<string> touch_description = { "touch to move", "touch for info", "touch to drag", "touch to aim", "touch for ranged" };
 
@@ -811,18 +813,21 @@ EX void handleKeyNormal(int sym, int uni) {
       invalid = touchmode == tmode::fire && !bow::crossbow_mode();
       if(!mapeditor::drawplayer && touchmode == tmode::ranged) invalid=true;
       if(game_keys_scroll && touchmode == tmode::move) invalid=true;
+      if(drag_sensitivity && touchmode == tmode::drag) invalid=true;
       }
     while(invalid);
     }
 
   if(sym == '-' || sym == PSEUDOKEY_WHEELDOWN) {
     actonrelease = false;
-
     
     multi::cpid = 0;
-    if(touchmode == tmode::drag) {
+    bool adr = drag_sensitivity && !vid.quickmouse && mouse_state != 2;
+    if(touchmode == tmode::drag || adr) {
       if(holdmouse) panning(mouseoh, mouseh);
+      if(!holdmouse) drag_distance = 0;
       holdmouse = true;
+      if(adr && drag_distance < 1/drag_sensitivity) actonrelease = true;
       }
     else if(touchmode == tmode::info)
       gotoHelp(help);
@@ -1296,6 +1301,7 @@ EX void handle_event(SDL_Event& ev) {
     int sym = 0;
     int uni = 0;
     shiftmul = 1;
+    mouse_state = 0;
     
 /*    if(ev.type == SDL_JOYDEVICEADDED || ev.type == SDL_JOYDEVICEREMOVED) {
       joyx = joyy = 0;
@@ -1487,8 +1493,12 @@ EX void handle_event(SDL_Event& ev) {
       bool up = ev.type == SDL_EVENT_MOUSE_BUTTON_UP;
       
       bool act = false;
+      mouse_state = down ? 1 : up ? 2 : 0;
+
+      bool startdrag = getcstat == '-' &&
+        (touchmode == tmode::drag || (!vid.quickmouse && drag_sensitivity && !was_holdmouse));
       
-      if(vid.quickmouse || getcstat == PSEUDOKEY_LIST_SLIDER || (getcstat == '-' && touchmode == tmode::drag)) {
+      if(vid.quickmouse || getcstat == PSEUDOKEY_LIST_SLIDER || startdrag) {
         act = down;
         }
       else {
@@ -1570,7 +1580,7 @@ EX void handle_event(SDL_Event& ev) {
       
       need_mouseh = true;
 
-      if(holdmouse && getcstat == '-') sym = uni = getcstat, fix_mouseh();
+      if(holdmouse && getcstat == '-') sym = uni = getcstat, fix_mouseh(), mouse_state = 3;
 
       if(((SDL_GetMouseState(NULL, NULL) & SDL_BUTTON_MMASK)) && !mouseout2()) {
         fix_mouseh();

@@ -1578,6 +1578,8 @@ EX void initConfig() {
   vid.killreduction = 0;
   
   param_b(vid.skipstart, "skip the start menu", false);
+  param_f(drag_sensitivity, "drag_sensitivity", 0)
+  ->editable(0, 100, 1, "drag threshold", "Drag automatically on touch movement. Only if quick mouse is off. Set to 0 to disable, large numbers are more sensitive.", 'T');
   param_b(vid.quickmouse, "quick mouse", qm)
   -> help("Buttons activate when they are pressed (by clicking), not when they are released.");
   
@@ -4294,6 +4296,8 @@ EX void configureMouse() {
   #if !ISMOBILE
   dialog::addBoolItem_action(XLAT("quick mouse"), vid.quickmouse, 'M');
   #endif
+
+  add_edit(drag_sensitivity);
 
   dialog::addSelItem(XLAT("move by clicking on compass"), its(vid.mobilecompasssize), 'C');
   dialog::add_action([] {

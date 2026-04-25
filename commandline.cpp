@@ -326,7 +326,7 @@ int arg::readCommon() {
     no_find_player = true;
     game_keys_scroll = true;
     smooth_scrolling = true;
-    touchmode = tmode::drag;
+    touchmode = tmode::info;
     }
 
   else if(argis("-vizhr")) {
