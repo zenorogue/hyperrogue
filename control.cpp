@@ -200,7 +200,9 @@ enum class tmode { move, info, drag, fire, ranged };
 #endif
 
 EX bool touch_interface;
-EX ld drag_sensitivity, drag_distance;
+EX ld drag_sensitivity;
+EX shiftpoint drag_start;
+EX bool not_started_dragging;
 EX tmode touchmode;
 EX vector<string> touch_description = { "touch to move", "touch for info", "touch to drag", "touch to aim", "touch for ranged" };
 
@@ -823,11 +825,22 @@ EX void handleKeyNormal(int sym, int uni) {
     
     multi::cpid = 0;
     bool adr = drag_sensitivity && !vid.quickmouse && mouse_state != 2;
-    if(touchmode == tmode::drag || adr) {
-      if(holdmouse) panning(mouseoh, mouseh);
-      if(!holdmouse) drag_distance = 0;
+    if(adr) {
+      if(holdmouse && not_started_dragging) {
+        ld d = hdist(drag_start, mouseh);
+        if(d < 1/drag_sensitivity) actonrelease = true;
+        else panning(drag_start, mouseh), not_started_dragging = false;
+        }
+      else if(holdmouse) {
+        panning(mouseoh, mouseh);
+        }
+      else if(!holdmouse)
+        drag_start = mouseh, not_started_dragging = true, actonrelease = true;
       holdmouse = true;
-      if(adr && drag_distance < 1/drag_sensitivity) actonrelease = true;
+      }
+    else if(touchmode == tmode::drag) {
+      if(holdmouse) panning(mouseoh, mouseh);
+      holdmouse = true;
       }
     else if(touchmode == tmode::info)
       gotoHelp(help);

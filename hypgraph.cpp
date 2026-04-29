@@ -2501,16 +2501,12 @@ EX void resetview() {
   // SDL_UnlockSurface(s);
   }
 
-
 EX void panning(shiftpoint hf0, shiftpoint ht0) {
   hyperpoint hf = hf0.h;
   hyperpoint ht = unshift(ht0, hf0.shift);
-  ld d = hdist(hf, ht);
-  if(drag_sensitivity && d < 1/drag_sensitivity && drag_distance == 0) return;
   View = 
     rgpushxto0(hf) * rgpushxto0(gpushxto0(hf) * ht) * gpushxto0(hf) * View;
   playermoved = false; currently_scrolling = true;
-  drag_distance += d;
   }
 
 EX int cells_drawn, cells_generated;
