@@ -162,7 +162,6 @@ bool kill_off(hyperpoint h1, hyperpoint h2, hyperpoint& h3) {
 int bad;
 
 void test_reverse() {
-  int killed = 0;
   bad = 0;
   for(int a=0; a<100; a++) {
     hyperpoint h = random_spin3() * C0;
@@ -173,8 +172,7 @@ void test_reverse() {
     bool ko = kill_off(h, h1, h2);
     if(hdist(h, h2) < 1e-5)
       ;
-    else if(ko)
-      killed++;
+    else if(ko) ;
     else {
       bad++;
       println(hlog, h, " -> ", h1, " -> ", h2);
