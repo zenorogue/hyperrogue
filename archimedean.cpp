@@ -14,6 +14,15 @@ EX namespace arcm {
 
 EX bool in() { return cgflags & qARCHI; }
 
+EX bool in_or_converted() {
+  if(geometry == gArbitrary) {
+    dynamicval d1(geometry, arb::convert::base_geometry);
+    dynamicval d2(variation, arb::convert::base_variation);
+    return in();
+    }
+  return cgflags & qARCHI;
+  }
+
 EX ld euclidean_edge_length = .5;
 
 #if HDR
@@ -1050,6 +1059,7 @@ EX bool load_symbol(const string& s, bool switch_geom) {
   stop_game();
   set_geometry(gArchimedean);
   current = at;
+  rulegen::convert_if_appropriate();
   if(!delayed_start) start_game();
   return true;
   }
@@ -1264,10 +1274,12 @@ archimedean_tiling edited;
 bool symbol_editing;
 
 EX void next_variation() {
+  if(geometry == gArbitrary) { stop_game(); arb::convert::deactivate(); }
   set_variation(
     PURE ? eVariation::dual :
     DUAL ? eVariation::bitruncated : 
     eVariation::pure);
+  rulegen::convert_if_appropriate();
   start_game();
   }
 
@@ -1297,6 +1309,7 @@ EX void enable(archimedean_tiling& arct) {
       }
     }
 #endif
+  rulegen::convert_if_appropriate();
   start_game();
   }
 

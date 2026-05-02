@@ -36,7 +36,7 @@ EX namespace fake {
     if(WDIM == 2 && standard_tiling() && GOLDBERG && S3 == 4 && gp::param.first == 1 && gp::param.second == 1) return true;
     if(WDIM == 2 && standard_tiling() && UNRECTIFIED && S3 == 4 && gp::param.first == 1 && gp::param.second == 1) return true;
     if(WDIM == 2 && standard_tiling() && UNTRUNCATED && S3 == 3 && gp::param.first == 1 && gp::param.second == 1) return true;
-    if(arcm::in() && PURE) return true;
+    if(arcm::in_or_converted() && PURE) return true;
     if(hat::in()) return true;
     if(WDIM == 2) return false;
     if(among(geometry, gBitrunc3)) return false;
@@ -116,7 +116,7 @@ EX namespace fake {
         return cgi.emb->base_to_actual(h);
         }
 
-      if(arcm::in() || hat::in()) {
+      if(arcm::in_or_converted() || hat::in()) {
         return underlying_map->get_corner(c, cid, cf);
         }
 
@@ -230,7 +230,7 @@ EX namespace fake {
         }
 
       #if CAP_ARCM
-      if(arcm::in()) {
+      if(arcm::in_or_converted()) {
         int t = arcm::id_of(c->master);
         int t2 = arcm::id_of(c->move(d)->master);
         auto& cof = arcm::current_or_fake();
@@ -310,7 +310,7 @@ EX namespace fake {
       }
 
     transmatrix relative_matrixc(cell *h2, cell *h1, const hyperpoint& hint) override {
-      if(arcm::in()) return underlying_map->relative_matrix(h2, h1, hint);
+      if(arcm::in_or_converted()) return underlying_map->relative_matrix(h2, h1, hint);
       if(h1 == h2) return Id;
   
       for(int a=0; a<h1->type; a++) if(h1->move(a) == h2)
@@ -320,7 +320,7 @@ EX namespace fake {
       }
 
     transmatrix relative_matrixh(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {
-      if(arcm::in()) return underlying_map->relative_matrix(h2, h1, hint);
+      if(arcm::in_or_converted()) return underlying_map->relative_matrix(h2, h1, hint);
       return relative_matrix(h2->c7, h1->c7, hint);
       }
 
@@ -587,7 +587,7 @@ EX ld around;
 /** @brief the value of 'around' which makes the tiling Euclidean */
 EX ld compute_euclidean() {
   #if CAP_ARCM
-  if(arcm::in()) return arcm::current.N * 2 / arcm::current.euclidean_angle_sum;
+  if(arcm::in_or_converted()) return arcm::current.N * 2 / arcm::current.euclidean_angle_sum;
   #endif
   if(underlying == gAperiodicHat) return 6;
   if(WDIM == 2 && BITRUNCATED) return 9 / (4.5 - 3. / S7 - 6. / S6);
@@ -612,7 +612,7 @@ EX ld compute_euclidean() {
 
 EX ld around_orig() {
   #if CAP_ARCM
-  if(arcm::in())
+  if(arcm::in_or_converted())
     return arcm::current.N;
   #endif
   if(hat::in()) return 6;
@@ -669,7 +669,7 @@ EX void compute_scale() {
     geom3::apply_always3_to(ginf[gFake]);
     }});
 
-  if(arcm::in()) {
+  if(arcm::in_or_converted()) {
     ginf[gFake].tiling_name = "(" + ginf[gArchimedean].tiling_name + ")^" + fts(around / around_orig());
     return;
     }

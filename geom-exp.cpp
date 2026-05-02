@@ -676,7 +676,7 @@ EX string full_geometry_name() {
 void action_change_variation() {
   if(0) ;
   #if CAP_ARCM
-  else if(arcm::in()) arcm::next_variation();
+  else if(arcm::in_or_converted()) arcm::next_variation();
   #endif
   #if MAXMDIM >= 4
   else if(reg3::in() || geometry == gCubeTiling) reg3::configure_variation();
@@ -988,6 +988,16 @@ EX void showEuclideanMenu() {
 
   dialog::init(XLAT("experiment with geometry"));
 
+  dynamicval d1(geometry, geometry);
+  dynamicval d2(variation, variation);
+
+  bool converted = false;
+  if(arb::convert::in() && rulegen::auto_rulegen) {
+    converted = true;
+    geometry = arb::convert::base_geometry;
+    variation = arb::convert::base_variation;
+    }
+
   dialog::addSelItem(XLAT("geometry"), geometry_name(), 'd');
   dialog::add_action([] { pushScreen(ge_select_tiling); pushScreen(ge_select_filter); });
 
@@ -1021,7 +1031,7 @@ EX void showEuclideanMenu() {
     }
   #endif
   
-  if(fake::available()) {
+  if(fake::available() && !converted) {
     dialog::addItem(XLAT("fake curvature"), '4');
     
     dialog::add_action([] {

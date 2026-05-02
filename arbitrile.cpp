@@ -1707,6 +1707,8 @@ EX void run(string fname) {
   catch(connection_debug_request& cr) {
     launch_connection_debugger(g, t, cr.c, cr.id);
     }
+  if(!t.have_tree) rulegen::rules_known_for = "unknown";
+  if(!t.have_tree) rulegen::convert_if_appropriate();
   start_game();
   }
 
@@ -2024,6 +2026,7 @@ EX void convert() {
   auto& ac = arb::current;
   ac.order++; 
   ac.filename = full_geometry_name();
+  ac.name = "CONVERTED: " + full_geometry_name();
   ac.comment = "converted from: " + ac.filename;
   ac.cscale = cgi.scalefactor;
   ac.boundary_ratio = 1;
@@ -2113,6 +2116,14 @@ EX void activate() {
     stop_game();
     geometry = gArbitrary;
     variation = eVariation::pure;
+    }
+  }
+
+EX void deactivate() {
+  if(in()) {
+    println(hlog, "*** DEACTIVATING");
+    geometry = base_geometry;
+    variation = base_variation;
     }
   }
 

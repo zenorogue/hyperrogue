@@ -1614,6 +1614,7 @@ EX void set_variation(eVariation target) {
     if(target != eVariation::pure) {
       if(bt::in() || sol || aperiodic || WDIM == 3) if(!mproduct) geometry = gNormal;
       }
+    arb::convert::deactivate();
     auto& cd = ginf[gCrystal];
     if(target == eVariation::bitruncated && cryst && cd.sides == 8 && cd.vertex == 4) {
       cd.vertex = 3;

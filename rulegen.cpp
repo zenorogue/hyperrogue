@@ -11,6 +11,8 @@ namespace hr {
 
 EX namespace rulegen {
 
+EX bool auto_rulegen = true;
+
 /* limits */
 EX int max_retries = 999;
 EX int max_tcellcount = 1000000;
@@ -2554,6 +2556,8 @@ auto hooks_arg =
 #endif
 
 auto hooks = addHook(hooks_configfile, 100, [] {
+      param_b(auto_rulegen, "auto_rulegen")
+      ->editable("auto-use strict tree maps when appropriate", 'a');
       param_i(max_retries, "max_retries")
       ->set_reaction(change_rulegen_params);
       param_i(max_tcellcount, "max_tcellcount")
@@ -2714,6 +2718,8 @@ EX void show() {
     return;
     }
 
+  add_edit(auto_rulegen);
+
   dialog::addBoolItem(XLAT("in tes internal format"), arb::in(), 't');
   dialog::add_action(switch_tes_internal_format);
 
@@ -2813,6 +2819,21 @@ int readRuleArgs() {
 
 auto hook = addHook(hooks_args, 100, readRuleArgs);
 #endif
+
+EX void convert_if_appropriate() {
+  println(hlog, "*** CONVERT TO RULEGEN");
+  if(!auto_rulegen) return;
+  if(!hyperbolic) return;
+  println(hlog, "converting");
+  if(geometry != gArbitrary)
+    arb::convert::convert();
+  println(hlog, "activating");
+  arb::convert::activate();
+  println(hlog, "preparing rules");
+
+  if(!prepare_rules()) return;
+  println(hlog, "success");
+  }
 
 EX }
 }
