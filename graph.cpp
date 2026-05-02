@@ -1926,6 +1926,7 @@ namespace sm {
   static constexpr flagtype MOUSEAIM = Flag(28); // mouse aiming active here
   static constexpr flagtype DIALOG_OFFMAP = Flag(29); // try hard to keep dialogs off the map
   static constexpr flagtype NO_EXIT = Flag(30); // do not allow to exit the current dialog
+  static constexpr flagtype EDIT_RULER = Flag(31); // in mapeditor::rulers::
   }
 #endif
 

@@ -1497,6 +1497,16 @@ EX void initConfig() {
     param_color(lp->color, "lpcolor-" + lp->lpname, true, lp->color);
     param_f(lp->multiplier, "lpwidth-" + lp->lpname);
     }
+
+  auto display_the_ruler = [] { rulers::active = true; dialog::get_di().dialogflags |= sm::DRAW; };
+
+  // ruler settings
+  param_color(rulers::ruler_color, "ruler_color", true)->editable("ruler color", "", 'C')
+  -> set_sets(display_the_ruler);
+  param_f(rulers::ruler_width, "ruler_width")->editable(0, 10, 0.1, "ruler width", "", 'W')
+  -> set_sets(display_the_ruler);
+  param_f(rulers::measuring_unit, "ruler_measure")->editable(0, 5, 0.1, "measuring unit", "A mark is displayed on the ruler, on every multiple of this distance, and a bigger one every 10 multiples. Set to 0 to disable.", 'M')
+  -> set_sets(display_the_ruler);
   
   // special graphics
 

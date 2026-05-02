@@ -8,6 +8,371 @@
 #include "hyper.h"
 namespace hr {
 
+EX namespace rulers {
+
+  EX bool active = false;
+
+  EX color_t ruler_color = 0x8080C030;
+  EX ld ruler_width = 4;
+  EX ld measuring_unit = 0.1;
+
+  struct ruler;
+
+  flagtype HYPER_ONLY = 1;
+  flagtype THREE_POINTS = 2;
+
+  struct rulertype {
+    char key;
+    string name;
+    flagtype flags;
+    hr::function<void(ruler&)> render;
+    hr::function<shiftpoint(ruler&, shiftpoint h)> snap;
+    };
+
+  extern rulertype linear;
+
+  struct ruler {
+    cell *c1, *c2, *c3;
+    hyperpoint h1, h2, h3;
+    rulertype *type;
+    void render();
+    void snap(shiftpoint h);
+    void reset() { c1 = c2 = c3 = nullptr; }
+    bool is_valid() {
+      if(type->flags & THREE_POINTS) {
+        if(!c3) return false;
+        }
+      return c1 && c2 && (c1 != c2 || h1 != h2);
+      }
+    ruler() { type = &linear; reset(); }
+    shiftpoint s1() { return ggmatrix(c1) * h1; }
+    shiftpoint s2() { return ggmatrix(c2) * h2; }
+    shiftpoint s3() { return ggmatrix(c3) * h3; }
+    shiftmatrix tox() {
+      shiftmatrix T = rgpushxto0(s1());
+      auto sh2 = inverse_shift(T, s2());
+      return T * rspintox(sh2);
+      }
+    ld dist() { return hdist(s1(), s2()); }
+    };
+
+  ld get_len() {
+    if(euclid) return 1000;
+    if(hyperbolic) return 10;
+    if(sphere) return 3.14;
+    return 10;
+    }
+
+  ld mmark(int i) {
+    if(i == 0) return measuring_unit;
+    if(i % 10 == 0) return measuring_unit * 2/3.;
+    return measuring_unit * 1/3.;
+    }
+
+  rulertype linear { 'l', "ruler", 0, [] (ruler& r) {
+     shiftmatrix T = r.tox();
+     if(sphere) {
+       for(int a=0; a<360; a++)
+         queueline(T * xpush0(a*1._deg), T * xpush0((a+1)*1._deg), ruler_color, 0);
+       }
+     else
+       queueline(T * xpush0(-get_len()), T * xpush0(get_len()), ruler_color, 10);
+     int u = measuring_unit ? min<int>(get_len() / measuring_unit, 1000) : -1;
+     for(int i=-u; i<=u; i++)
+       queueline(T * xpush(i * measuring_unit) * ypush0(mmark(i)), T * xpush(i * measuring_unit) * ypush0(-mmark(i)), ruler_color, 1);
+     },
+    [] (ruler& r, shiftpoint h) {
+      shiftmatrix T = r.tox();
+      auto sh = inverse_shift(T, h);
+      for(int d=1; d<GDIM; d++) sh[d] = 0; sh = normalize(sh);
+      return T * sh;
+      }};
+
+  rulertype ortho { 'o', "orthogonal ruler", 0, [] (ruler& r) {
+      shiftmatrix T = r.tox();;
+     if(sphere) {
+       for(int a=0; a<360; a++)
+         queueline(T * ypush0(a*1._deg), T * ypush0((a+1)*1._deg), ruler_color, 0);
+       }
+     else
+       queueline(T * ypush0(-get_len()), T * ypush0(+get_len()), ruler_color, 10);
+      if(GDIM == 3)
+        queueline(T * zpush0(-get_len()), T * zpush0(get_len()), ruler_color, 10);
+      int u = measuring_unit ? min<int>(get_len() / measuring_unit, 1000) : -1;
+      if(GDIM == 2) for(int i=-u; i<=u; i++)
+        queueline(T * ypush(i * measuring_unit) * xpush0(mmark(i)), T * ypush(i * measuring_unit) * xpush0(-mmark(i)), ruler_color, 1);
+      },
+    [] (ruler& r, shiftpoint h) {
+      shiftmatrix T = r.tox();
+      auto sh = inverse_shift(T, h);
+      sh[0] = 0; sh = normalize(sh);
+      return T * sh;
+      }};
+
+  rulertype compass { 'c', "compass", 0, [] (ruler& r) {
+      shiftmatrix T = r.tox();
+      ld radius = r.dist();
+
+      ld len = sin_auto(radius);
+      int ll = ceil(360 * len);
+      if(ll > 1000000) ll = 1000000;
+      for(int i=0; i<=ll; i++)
+        curvepoint(xspinpush0(TAU*i/ll, radius));
+      queuecurve(T, ruler_color, 0, PPR::LINE);
+
+      int u = measuring_unit ? min<int>(M_PI*len / measuring_unit, 1000) : -1;
+      for(int i=-u; i<=u; i++)
+        queueline(T * xspinpush0(i * measuring_unit / len, radius - mmark(i)),
+                  T * xspinpush0(i * measuring_unit / len, radius + mmark(i)), ruler_color, 1);
+      },
+    [] (ruler& r, shiftpoint h) {
+      shiftmatrix T = r.tox();
+      auto sh2 = inverse_shift(T, r.s2());
+      auto sh = inverse_shift(T, h);
+      ld ratio = sqrt(sqhypot_d(GDIM, sh2) / sqhypot_d(GDIM, sh));
+      for(int i=0; i<GDIM; i++) sh[i] *= ratio;
+      sh[GDIM] = sh2[GDIM];
+      return T * sh;
+      }};
+
+  rulertype equi { 'e', "equidistant", 0, [] (ruler& r) {
+      shiftmatrix T = r.tox();
+
+      ld radius = r.dist();
+      ld len = get_len();
+
+      for(int i=-1000; i<=1000; i++) {
+        curvepoint(ypush0(i / 1000. * len));
+        }
+      queuecurve(T, ruler_color, 0, PPR::LINE);
+
+      for(int i=-1000; i<=1000; i++) {
+        curvepoint(ypush(i / 1000. * len) * xpush0(radius));
+        }
+      queuecurve(T, ruler_color, 0, PPR::LINE);
+
+      auto car = cos_auto(radius);
+      int u = measuring_unit ? min<int>(len*car / measuring_unit, 1000) : -1;
+      for(int i=-u; i<=u; i++)
+        queueline(T * ypush(i * measuring_unit / car) * xpush0(radius - mmark(i)),
+                  T * ypush(i * measuring_unit / car) * xpush0(radius + mmark(i)), ruler_color, 1);
+      },
+    [] (ruler& r, shiftpoint h) {
+      shiftmatrix T = r.tox();
+      ld radius = r.dist();
+      auto sh = inverse_shift(T, h);
+      ld s = asin_auto(sh[1]);
+      return T * ypush(s) * xpush0(radius);
+      }};
+
+  rulertype horo { 'h', "horocycle", HYPER_ONLY, [] (ruler& r) {
+      if(!hyperbolic) return linear.render(r);
+      shiftmatrix T = r.tox();
+      auto d = r.dist();
+      T = T * xpush(d/2) * spin90();
+
+      auto offset = deparabolic13(inverse_shift(T, r.s2()))[0];
+
+      for(int i=-500; i<500; i++)
+        curvepoint(parabolic13(point2(offset, sinh(i/100.))));
+      queuecurve(T, ruler_color, 0, PPR::LINE);
+
+      for(int i=-500; i<=500; i++)
+        queueline(T * parabolic13(point2(offset - mmark(i), (i * measuring_unit) * exp(offset))),
+                  T * parabolic13(point2(offset + mmark(i), (i * measuring_unit) * exp(offset))),
+                  ruler_color, 1);
+      },
+    [] (ruler& r, shiftpoint h) {
+      if(!hyperbolic) return linear.snap(r, h);
+      shiftmatrix T = r.tox();
+      auto d = r.dist();
+      T = T * xpush(d/2) * spin90();
+
+      auto offset = deparabolic13(inverse_shift(T, r.s2()))[0];
+      auto co = deparabolic13(inverse_shift(T, h));
+      co[0] = offset;
+      return T * parabolic13(co);
+      }};
+
+  map<ld, vector<ld>> ellipse_cache;
+
+  rulertype ellipse { 'E', "ellipse", THREE_POINTS, [] (ruler& r) {
+      shiftmatrix T = r.tox();
+      auto d = r.dist();
+      T = T * xpush(d/2);
+
+      hyperpoint h1 = inverse_shift(T, r.s1());
+      hyperpoint h2 = inverse_shift(T, r.s2());
+      hyperpoint h3 = inverse_shift(T, r.s3());
+
+      ld wanted = hdist(h1, h3) + hdist(h2, h3);
+
+      auto& ec = ellipse_cache[wanted];
+
+      if(ec.empty()) for(int it=0; it<=360; it++) {
+        auto p = [&] (ld x) { return xspinpush0(it*1._deg, x); };
+        ld x = binsearch(0, 5, [&] (ld x) { auto px = p(x); return hdist(h1, px) + hdist(h2, px) >= wanted; });
+        ec.push_back(x);
+        }
+
+      for(int it=0; it<=360; it++)
+        curvepoint(xspinpush0(it*1._deg, ec[it]));
+
+      queuecurve(T, ruler_color, 0, PPR::LINE);
+      },
+    [] (ruler& r, shiftpoint h) {
+      shiftmatrix T = r.tox();
+      auto d = r.dist();
+      T = T * xpush(d/2);
+
+      hyperpoint h1 = inverse_shift(T, r.s1());
+      hyperpoint h2 = inverse_shift(T, r.s2());
+      hyperpoint h3 = inverse_shift(T, r.s3());
+
+      ld wanted = hdist(h1, h3) + hdist(h2, h3);
+      ld alpha = -atan2(inverse_shift(T, h));
+
+      auto p = [&] (ld x) { return xspinpush0(alpha, x); };
+      ld x = binsearch(0, 5, [&] (ld x) { auto px = p(x); return hdist(h1, px) + hdist(h2, px) >= wanted; });
+      return T * p(x);
+      }};
+
+  vector<rulertype*> rulers = { &linear, &compass, &ortho, &ellipse, &horo, &equi };
+
+  ruler current;
+
+  EX void render_current() {
+    if(!active || !current.is_valid()) return;
+    dynamicval<ld> lw(vid.linewidth, vid.linewidth * ruler_width);
+    dynamicval<color_t> rc(ruler_color, ruler_color);
+    if(cmode & sm::EDIT_RULER) ruler_color |= 0xFF;
+    current.type->render(current);
+    }
+
+  EX void snap_to_current(shiftpoint& s) {
+    if(!active || !current.is_valid() || (cmode & sm::EDIT_RULER)) return;
+    s = current.type->snap(current, s);
+    }
+
+  EX bool edit_first_point, edit_third_point;
+
+  EX void handle_key_rulers(int sym, int uni) {
+
+    if(mapeditor::handle_wheel_draw(sym, uni)) return;
+    handlePanning(sym, uni);
+    dialog::handleNavigation(sym, uni);
+    if(uni == SDLK_ESCAPE) popScreen();
+
+    if(uni == SETMOUSEKEY) {
+       if(mousekey == newmousekey)
+         mousekey = '-';
+       else
+         mousekey = newmousekey;
+       }
+
+    shiftpoint mh = mapeditor::full_mouseh();
+
+    if(uni == '-') {
+      cell *b = centerover;
+      shiftmatrix T = rgpushxto0(mh);
+      auto T1 = inverse_shift(ggmatrix(b), T);
+      virtualRebase(b, T1);
+
+      if((current.type->flags & THREE_POINTS) && edit_third_point) {
+        current.c3 = b;
+        current.h3 = tC0(T1);
+        }
+      else {
+        if(edit_first_point || !holdmouse) {
+          current.c1 = b;
+          current.h1 = tC0(T1);
+          }
+        if(!current.c2 || !edit_first_point) {
+          current.c2 = b;
+          current.h2 = tC0(T1);
+          }
+        if(!current.c3) {
+          current.c3 = centerover; current.h3 = C0;
+          }
+        }
+      holdmouse = true;
+      active = true;
+      }
+    else if(doexiton(sym, uni)) popScreen();
+    }
+
+  EX void show() {
+    cmode = sm::DRAW | sm::PANNING | sm::EDIT_RULER;
+    if(mapeditor::show_menu) cmode |= sm::SIDE;
+    gamescreen();
+
+    initquickqueue();
+    if(current.c1)
+      mapeditor::draw_cross_at(current.s1(), 0x4040FFFF);
+    if(current.c2)
+      mapeditor::draw_cross_at(current.s2(), 0xFFFF40FF);
+    if(current.c3 && (current.type->flags & THREE_POINTS))
+      mapeditor::draw_cross_at(current.s3(), 0xFF40FFFF);
+    quickqueue();
+
+    if(callhandlers(false, hooks_prestats)) return;
+
+    if(!mouseout()) getcstat = '-';
+
+    cmode |= sm::DIALOG_STRICT_X;
+
+    dialog::init(XLAT("compass and ruler"));
+    dialog::addHelp(XLAT("draw strictly along a line or curve"));
+    dialog::addBreak(100);
+
+    for(auto r: rulers) {
+      dialog::addBoolItem(r->name, r == current.type, r->key);
+      dialog::add_action([r] { current.type = r; });
+      }
+
+    dialog::addBreak(100);
+
+    if(current.c1 && current.c2) {
+      dialog::addItem("swap the points", 'S');
+      dialog::add_action([] { swap(current.c1, current.c2); swap(current.h1, current.h2); });
+      }
+    else dialog::addBreak(100);
+
+    if(current.c1 && current.c2 && !holdmouse) {
+      dialog::addBoolItem_action("edit the first point", edit_first_point, 'P');
+      }
+    else dialog::addBreak(100);
+
+    if(current.type->flags & THREE_POINTS) {
+      dialog::addBoolItem_action("edit the third point", edit_third_point, 'T');
+      }
+    else dialog::addBreak(100);
+
+    add_edit(ruler_color);
+    add_edit(ruler_width);
+    add_edit(measuring_unit);
+    if(GDIM == 2)
+      dialog::addBoolItem_action(XLAT("snap"), mapeditor::snapping, 'S');
+
+    dialog::addBreak(100);
+    if(current.is_valid()) {
+      dialog::addItem(XLAT("use this ruler"), 'u');
+      dialog::add_action([] { active = true; popScreen(); });
+      }
+    else dialog::addBreak(100);
+    if(active) {
+      dialog::addItem(XLAT("do not use ruler"), 'd');
+      dialog::add_action([] { active = false; popScreen(); });
+      }
+    else dialog::addBreak(100);
+
+    if(mapeditor::show_menu) { dialog::display(); }
+    else dialog::add_key_action(SDLK_ESCAPE, [] { mapeditor::show_menu = true; });
+
+    keyhandler = handle_key_rulers;
+    }
+EX }
+
 EX namespace mapeditor {
 
   /* changes when the map is changed */
@@ -175,8 +540,17 @@ EX namespace mapeditor {
       else
       #endif
       fmh = mouseh;
+      rulers::snap_to_current(fmh);
       }
     return fmh;
+    }
+
+  EX void draw_cross_at(shiftpoint h, color_t col) {
+    shiftmatrix T = rgpushxto0(h);
+    queueline(T * xpush0(-.1), T * xpush0(.1), col);
+    queueline(T * ypush0(-.1), T * ypush0(.1), col);
+    if(GDIM == 3)
+      queueline(T * zpush0(-.1), T * zpush0(.1), col);
     }
 
   EX void draw_dtshapes() {
@@ -203,11 +577,8 @@ EX namespace mapeditor {
         torus_rug_jump(moh, lstart);
         queueline(lstart, moh, dtcolor, 4 + vid.linequality, PPR::LINE);
         }
-      else if(!holdmouse && !mouseout()) {
-        shiftmatrix T = rgpushxto0(moh);
-        queueline(T * xpush0(-.1), T * xpush0(.1), dtcolor);
-        queueline(T * ypush0(-.1), T * ypush0(.1), dtcolor);
-        }
+      else if(!holdmouse && !mouseout())
+        draw_cross_at(moh, dtcolor);
       }
 #endif
     }
@@ -2209,6 +2580,8 @@ EX namespace mapeditor {
 
     if(snapping && !mouseout())
       queuestr(fmh, 10, "x", 0xC040C0);
+
+    rulers::render_current();
     }
 
   static ld brush_sizes[10] = {
@@ -2460,6 +2833,9 @@ EX namespace mapeditor {
       #endif
       dialog::addBreak(CAP_TEXTURE ? 700 : 1000);
       }
+
+    dialog::addBoolItem(XLAT("compass and ruler"), rulers::active, 'R');
+    dialog::add_action_push(rulers::show);
 
     if(GDIM == 2)
       dialog::addBoolItem_action(XLAT("snap"), snapping, 'S');
@@ -2981,15 +3357,22 @@ EX namespace mapeditor {
 
 #endif
 
-  EX void handle_key_draw(int sym, int uni) {
+  EX bool handle_wheel_draw(int sym, int uni) {
 
     if(uni == PSEUDOKEY_WHEELUP && GDIM == 3 && front_step) {
-      front_edit += front_step * shiftmul; return;
+      front_edit += front_step * shiftmul; return true;
       }
 
     if(uni == PSEUDOKEY_WHEELDOWN && GDIM == 3 && front_step) {
-      front_edit -= front_step * shiftmul; return;
+      front_edit -= front_step * shiftmul; return true;
       }
+
+    return false;
+    }
+
+  EX void handle_key_draw(int sym, int uni) {
+
+    if(handle_wheel_draw(sym, uni)) return;
 
     handlePanning(sym, uni);
     dialog::handleNavigation(sym, uni);
@@ -3112,6 +3495,8 @@ EX namespace mapeditor {
     mapeditor::dtshapes.clear();
     dt_finish();
     drawcell = nullptr;
+    rulers::current.reset(); rulers::active = false;
+    rulers::ellipse_cache.clear();
     }) + 
   addHook(hooks_removecells, 0, [] () {
     modelcell.clear();
