@@ -988,8 +988,8 @@ EX void showEuclideanMenu() {
 
   dialog::init(XLAT("experiment with geometry"));
 
-  dynamicval d1(geometry, geometry);
-  dynamicval d2(variation, variation);
+  dynamicval<eGeometry> d1(geometry, geometry);
+  dynamicval<eVariation> d2(variation, variation);
 
   bool converted = false;
   if(arb::convert::in() && rulegen::auto_rulegen) {

@@ -16,8 +16,8 @@ EX bool in() { return cgflags & qARCHI; }
 
 EX bool in_or_converted() {
   if(geometry == gArbitrary) {
-    dynamicval d1(geometry, arb::convert::base_geometry);
-    dynamicval d2(variation, arb::convert::base_variation);
+    dynamicval<eGeometry> d1(geometry, arb::convert::base_geometry);
+    dynamicval<eVariation> d2(variation, arb::convert::base_variation);
     return in();
     }
   return cgflags & qARCHI;
