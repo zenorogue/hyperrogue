@@ -256,9 +256,6 @@ void wfc() {
         int ca=0, cb=0, cc=0, cd=0, ce=0;
         int cur1 = (cur+1) % 3;
         int cur2 = (cur+2) % 3;
-        int same = 0;
-        int in1 = 0;
-        int in2 = 0;
         for(int i=0; i<isize(v); i++) {
           auto va = v[i], vb = v[(i+1)%isize(v)];
           if(va == cur && vb == cur1) ca++;
@@ -267,11 +264,8 @@ void wfc() {
           if(va == cur2 && vb == cur) cd++;
           if(va == cur1 && vb == cur2) ce++;
           if(va == cur2 && vb == cur1) ce++;
-          if(va == cur) same++;
-          if(va == cur1) in1++;
-          if(va == cur2) in2++;
           }
-        mul[a] = ca==1 && cb==1 && cc==1 && cd==1 && ce==0; // && in1 >= 2; // && in2 >= 2;
+        mul[a] = ca==1 && cb==1 && cc==1 && cd==1 && ce==0;
         if(mul[a]) println(hlog, v, cur, " => ", mul[a]);
         break;
         }

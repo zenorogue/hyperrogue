@@ -41,11 +41,9 @@ bool restrict(cell *c, const shiftmatrix& V) {
     cellwalker cw(c, i);
     cellwalker cw0 = cw;
     
-    int q = 0;
     int walls = 0;
     vector<cellwalker> unknown;
     do {
-      q++;
       cw += wstep;
       cw++;
       if(cw.at->wall == waWaxWall) walls++;

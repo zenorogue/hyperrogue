@@ -162,7 +162,7 @@ bool kill_off(hyperpoint h1, hyperpoint h2, hyperpoint& h3) {
 int bad;
 
 void test_reverse() {
-  int ok = 0, killed = 0;
+  int killed = 0;
   bad = 0;
   for(int a=0; a<100; a++) {
     hyperpoint h = random_spin3() * C0;
@@ -172,7 +172,7 @@ void test_reverse() {
     reverse_model(h1, h2, pmodel);
     bool ko = kill_off(h, h1, h2);
     if(hdist(h, h2) < 1e-5)
-      ok++;
+      ;
     else if(ko)
       killed++;
     else {
@@ -180,7 +180,6 @@ void test_reverse() {
       println(hlog, h, " -> ", h1, " -> ", h2);
       }
     }
-  // println(hlog, "ok ", ok, " bad ", bad, " killed ", killed);
   }
 
 texture::texture_data *tgt_planet = &moon;

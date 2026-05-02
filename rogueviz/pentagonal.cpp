@@ -233,11 +233,8 @@ void create_model() {
   
   transmatrix tester = spin(1.1) * xpush(1);
   
-  int idh = 0;
-  
   for(hyperpoint h: {ctr, tria[0], tria[1], tria[2], tria[3], tria[4], ctr}) {
     int good1 = 0, good2 = 0;
-    // printf("%d: ", idh);
     for(int i=0; i<5; i++) {
       array<hyperpoint, 3> testplane;
       testplane[0] = tester * h;
@@ -247,12 +244,8 @@ void create_model() {
       if(f[0] > -1e-6 || std::isnan(f[0])) good1++;
       if(f[0] < +1e-6 || std::isnan(f[0])) good2++;
       }
-    // printf("\n");
     if(good1 == 5 || good2 == 5) {ctr = h; break; }
-    idh++;
     }
-  
-  // printf("idh = %d\n", idh);
   
   // printf("createmodel with ticks = %d\n", ticks);
 
