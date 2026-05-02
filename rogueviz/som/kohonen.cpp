@@ -1009,7 +1009,7 @@ namespace levelline {
       lv.values.push_back(-1e10);
       if(!distro_based) {
         int steps = 1 << (lv.qty-1);
-        for(int r=0; r < steps; r++) lv.values.push_back(lerp(sample[0], sample.back(), (r + .5) / steps));
+        for(int r=0; r < steps; r++) lv.values.push_back(hr::lerp(sample[0], sample.back(), (r + .5) / steps));
         }
       else {
         int step = sampsize >> (lv.qty);
@@ -1444,7 +1444,7 @@ bool draw_heatmap() {
       curvepoint(eupoint(width*2, y));
       curvepoint(eupoint(width*2, y+pixstep));
       curvepoint(eupoint(width, y+pixstep));
-      queuecurve(atscreenpos(0,0), 0, darkena(heatmap(ilerp(width, vid.yres-width, y+pixstep/2.)), 0, 0xFF), PPR::LINE);
+      queuecurve(atscreenpos(0,0), 0, darkena(heatmap(hr::ilerp(width, vid.yres-width, y+pixstep/2.)), 0, 0xFF), PPR::LINE);
       }
     for(int p=0; p<=10; p++) {
       ld y = hr::lerp(width, vid.yres-width, p / 10.);
