@@ -3422,7 +3422,6 @@ EX namespace mapeditor {
         }
       
       if(sym == PSEUDOKEY_RELEASE) {
-        printf("release\n");
 #if CAP_TEXTURE
         if(mousekey == 'l' && intexture) { 
           texture::config.data.undoLock();
