@@ -55,7 +55,8 @@ void backed_map::initialize(heptagon *origin) {
     if(f) geom3::light_flip(false);
     dynamicval<eGeometry> g(geometry, gNormal);
     dynamicval<eVariation> gv(variation, eVariation::pure);
-    dynamicval<geometry_information*> gi(cgip, find_alt_cgip());
+    dynamicval<geometry_information*> gi(cgip, cgip);
+    cgip = find_alt_cgip();
     alt = init_heptagon(S7);
     alt->s = hsOrigin;
     alt->alt = alt;
