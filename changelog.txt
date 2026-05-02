@@ -5645,3 +5645,51 @@ Other bugfixes:
 - improved Deck UI information in help and tour
 - when you press e.g. 'b' to enter a text dialog, 'b' is not sent to this dialog
 - pressing left/right in the fullscreen resolution dialog now uses the list of actual supported resolutions; also hopefully fixed the resize screen loop
+
+2026-05-02 10:54 Update 13.1l:
+Game:
+- after 3 illegal moves, provide some suggestions regarding possible skip-moves and Orb uses
+- Ivy can now grow through single-tile wide chasms
+- fixed Vine Spirits sometimes considering some halfvine-related moves illegal
+- no more parrots placed near the player after using Orb of Safety
+- going back towards the Orb of Yendor now keeps the timer ghosts away
+- replaced "it is a shame to cheat" with a less judgemental "cheaters never win"
+
+Features:
+- compass-and-ruler functionality in the drawing tool (and other graphics tools)
+- more intuitive dragging on touchscreens (controlled by the `drag_sensitivity` setting)
+
+Bugfixes:
+- female Rogue can now change her dress
+- reset-special-modes now also resets texture mode and drawplayer off
+- fixed some shmup crashes
+- in "local scores", fixed dragging, and doubly-displayed time
+- disabling yendor/tactics now correctly sets the land to Ice
+- pressing yendor/tactic mode in the menu now, when active, automatically disables the mode
+- less CPU usage when out of focus
+
+Experiment with geometry:
+- in 'arbitrary file' and Archimedean tilings, the "strict tree maps" system is now used by default for hyperbolic tilings. This allows more complex land generation (horocycles) and
+  avoids precision errors. In case of any problems, the 'auto_rulegen' setting can be switched off. If switched off, the 'backed' system is reimplemented, and options to study the
+  precision issues are added to the 'experiment with geometry' menu.
+- fixed the distance computation in bitruncated {4,5}
+- field patterns (Blizzard, Wasteland) now work correctly in Goldberg/unrectified/untruncated geometries
+- fixed missing generation in some lands in some geometries
+- fixed Hunting Ground in quickly expanding geometries
+- fixed dice generated immobile in some geometries such as {5,4} bitruncated
+- fixed a crash when displaying a compass in binary tiling
+- disabled more patterned lands in 'strict tree maps'
+- provided an alternate unlock for Burial Grounds
+- zebra patterns: binary-tiling (parity), oox3 (random)
+
+Commandline fixes:
+- better at finding the HyperRogue files when launched from another directory
+- better `-help`, `-vizs` option for smooth visualization
+- in Linux, HyperRogue ini/log files are now created according to the XDG standard
+
+RogueViz:
+- fix a crash in Seuphorica
+- don't crash if file not found
+- many improvements to 'embeddings'
+- added triangle centers visualization
+- fixed some links in presentations
