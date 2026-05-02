@@ -961,10 +961,8 @@ void all_pairs(bool one) {
 
   hr::ignore(system(("mkdir -p " + dir + "/img").c_str()));
 
-  int sid = 0;
   for(auto s1: shapelist) {
     for(auto s2: shapelist) {
-      sid++;
       
       if(kohonen::gaussian == 2 && s2.substr(0, 4) != "disk" && s2.substr(0, 6) != "sphere") continue;
       if(only_landscape && s1.substr(0, 4) != "disk") continue;
