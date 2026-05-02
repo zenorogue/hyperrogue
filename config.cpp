@@ -618,6 +618,7 @@ void color_parameter::show_edit_option(key_type key) {
     dialog::openColorDialog(*value);
     dialog::colorAlpha = has_alpha;
     dialog::get_di().dialogflags |= sm::SIDE;
+    if(sets) sets();
     });
   }
 
