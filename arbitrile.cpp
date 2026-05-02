@@ -1663,6 +1663,7 @@ EX void run_raw(string fname) {
   ginf[gArbitrary].tiling_name = current.name;
   tes = fname;
   convert::base_geometry = gArbitrary;
+  if(!current.have_tree) rulegen::convert_if_appropriate();
   }
 
 EX void launch_connection_debugger(eGeometry g, const arbi_tiling& t, eGeometryClass c, int id) {
