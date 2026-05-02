@@ -1509,9 +1509,8 @@ EX int get_pattern_value(cell *c) {
     auto h3 = h0->cmodmove(d+1);
     auto h2 = (heptspin(h0, d)+wstep-1+wstep).at;
     auto t = current_li.relative; if(v.second < 0) t = loc(0,1) * t;
-    int spins = 0;
     while(h1->fieldval > h0->fieldval || h2->fieldval > h0->fieldval || h3->fieldval > h0->fieldval) {
-      tie(h0, h1, h2, h3) = make_tuple(h1, h2, h3, h0); spins++;
+      tie(h0, h1, h2, h3) = make_tuple(h1, h2, h3, h0);
       t = t * loc(0,-1) + param * loc(0,1);
       }
     data = {h0->fieldval/S7, h1->fieldval/S7, t.first, t.second};

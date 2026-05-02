@@ -13,7 +13,6 @@ EX subdivision su = subdivision::conformal;
 pair<ld, ld> compute_all_areas(bool recolor) {
   map<ld, int> qty_of;
   map<ld, int> qty_of_standard;
-  ld totar = 0;
 
   map<cell*, ld> areas;
 
@@ -26,7 +25,6 @@ pair<ld, ld> compute_all_areas(bool recolor) {
     hs.push_back(hs[0]);
 
     ld area = abs(compute_area(hs));
-    totar += area;
 
     qty_of[area]++;
     areas[c] = area;
