@@ -394,6 +394,12 @@ int arg::readCommon() {
     exit(0);
     }
   else if(argis("")) {}
+  else if(argis("-deck")) {
+    if(!detect_deck) printf("warning: -deck option after reading config\n");
+    detect_deck = false;
+    shift();
+    running_on_deck = argi();
+    }
   else if(argis("-help") || argis("-h")) {
     printf("\nCommandline help follows. If you meant in-game help, press F1 while playing.\n\n");
     printf("Some commadline options automatically enable the cheat mode.\n");
@@ -416,6 +422,7 @@ int arg::readCommon() {
     printf("  -nogui             - do not start the GUI\n");
     printf("  -run               - run (before handling other options) until the user presses F10\n");
     printf("  -exit              - exit the program\n");
+    printf("  -deck n            - disable SteamDeck auto-detection (`-deck 0` sets not deck, `-deck 1` sets deck)\n");
 
     printf("\nFile options:\n");
     printf("  -c FILE            - use the specified configuration file\n");
