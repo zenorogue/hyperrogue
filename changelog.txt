@@ -5695,7 +5695,6 @@ RogueViz:
 - fixed some links in presentations
 
 2026-08-01 12:13 Update 13.1m:
-Version 13.1m:
 - line-of-sight mode: walls block sight, both for you and for your enemies
 - in PTM, added the 'minimal' mode which shows just the one best run
 
@@ -5709,3 +5708,15 @@ Bug fixes:
 - improved the open/close plate z levels so that z-fighting is less likely
 - fixed missing ceiling configuration for CR6, MCR, DR and CC
 - [donkey implemented], [morph both poles]
+
+2026-08-02 10:11 Update 13.1n:
+- fixed the crash after trying some complex modes involving the line-of-sight mode
+- fixed not recognizing los as separate mode in some cases
+- mimics and pushables now display hints for alt-keyboard and controller users
+- the controller target color is now based on the UI color configured for the player
+- adjacent thumpers and barrels no longer block visibility
+- display changed LOS immediately after the mode is switched
+- the score to get the gold medal for Camelot in PTM Minimal fixed to be 8
+- fixed the name of 'neon_magic_vision' option
+- help now mentions ice wolves as ignoring vision
+- a CLI option (`-deck 0`, `-deck 1`) to override SteamDeck detection
