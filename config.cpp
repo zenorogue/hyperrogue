@@ -1886,7 +1886,7 @@ EX void initConfig() {
   
   param_enum(neon_mode, "neon_mode", neon_mode)->editable(neon_options, "neon mode", 'M');
 
-  param_enum(neon_magic_vision, "neon_mode", neon_magic_vision)->editable(neon_options, "neon mode in magic vision", 'V')
+  param_enum(neon_magic_vision, "neon_magic_vision", neon_magic_vision)->editable(neon_options, "neon mode in magic vision", 'V')
   ->add_extra([] { dialog::addHelp("Some Orbs let you see tiles you would not normally see. Such tiles can be shown differently."); });
 
   param_enum(bow::weapon, "pc_class", bow::weapon)
