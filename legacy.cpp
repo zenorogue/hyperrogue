@@ -213,6 +213,7 @@ EX modecode_t legacy_modecode() {
   if(casual) return UNKNOWN;
   if(bow::weapon) return UNKNOWN;
   if(use_custom_land_list) return UNKNOWN;
+  if(lineofsight != los::none || lineofsightAt >= PURELOS_LEVEL) return UNKNOWN;
 
   bool is_default_land_structure = land_structure == get_default_land_structure();
 
