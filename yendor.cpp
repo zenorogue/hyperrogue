@@ -1210,6 +1210,7 @@ EX void load_mode_data_with_zero(hstream& f) {
       case 9: {
         lineofsight = (los) f.get<char>();
         lineofsightAt = f.get<char>() ? PURELOS_LEVEL : 0;
+        break;
         }
 
       default:
