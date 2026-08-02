@@ -901,7 +901,9 @@ EX namespace tactic {
       if(!unlocked) sco = "L";
 
       if(displayfrZH(x0 + (vid.xres / numpages) - xr, y0, 1, vf - 4, sco, col, 16) && unlocked) getcstat = keyhere;
-      if(recordrun[xc][l] >= 50) displayfrZH(x0 + (vid.xres / numpages) - xr, y0, 1, vf - 4, "*", 0xFFD500, 0);
+      int gold_medal_at = (l == laCamelot) ? 8 : 5;
+      if(recordrun[xc][l] >= gold_medal_at)
+        displayfrZH(x0 + (vid.xres / numpages) - xr, y0, 1, vf - 4, "*", 0xFFD500, 0);
       }
 
     else for(int i=0; i<nl; i++) {
