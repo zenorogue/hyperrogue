@@ -958,7 +958,7 @@ EX bool blocks_sight(cell *c, cell *last) {
     return blocks_sight(cw2.at, cw2.cpeek());
     }
   if(c->monst == passive_switch) return true;
-  if(among(c->wall, waBigStatue, waMirror, waCloud)) return c->cpdist > 1;
+  if(among(c->wall, waBigStatue, waMirror, waCloud, waThumperOff, waThumperOn, waExplosiveBarrel)) return c->cpdist > 1;
   if(snakelevel(c) == 3 && !(c->cpdist == 1 && snakelevel(cwt.at) >= 2)) return true;
   return (isWall(c) && !among(c->wall, waFreshGrave, waAncientGrave, waClosedGate, waMirrorWall, waSmallTree, waShrub)) || thruVine(c, last);
   }
