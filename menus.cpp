@@ -306,6 +306,7 @@ EX void switchHardcore_quiet() {
 
 EX void switchLOS_quiet() {
   lineofsightAt = turncount;
+  create_los();
   }
 
 EX void switchHardcore() {
