@@ -1055,9 +1055,16 @@ EX void drawMarkers() {
     #endif
 
 #if CAP_SDLJOY && CAP_QUEUE
-    if(joydir.d >= 0 && WDIM == 2) 
-      queuecircleat(cwt.at->modmove(joydir.d+cwt.spin), .78 - .02 * sintick(199), 
-        darkena(0x00FF00, 0, 0xFF));
+    if(joydir.d >= 0 && WDIM == 2) {
+      cell *c = (cwt + joydir.d).cpeek();
+      ld size = .78 - .02 * sintick(199);
+      queuecircleat(c, size, getcs().uicolor);
+
+      if((c->type & 1) && (isStunnable(c->monst) || isPushable(c->wall))) {
+        cell *c1 = (cwt + joydir.d + wstep - (joydir.subdir * c->type/2)).cpeek();
+        queuecircleat(c1, size, getcs().uicolor);
+        }
+      }
 #endif
 
     bool m = true;
@@ -1075,7 +1082,12 @@ EX void drawMarkers() {
       multi::cpid = i;
       if(multi::players == 1) multi::player[i] = cwt;
       cell *ctgt = multi::multiPlayerTarget(i);
-      queuecircleat(ctgt, .40 - .06 * sintick((!multi::multi_autojoy && !multi::accepted[i]) ? 500 : 200, i / numplayers()), getcs().uicolor);
+      ld size = .40 - .06 * sintick((!multi::multi_autojoy && !multi::accepted[i]) ? 500 : 200, i / numplayers());
+      queuecircleat(ctgt, size, getcs().uicolor);
+      if(ctgt && (ctgt->type & 1) && (isStunnable(ctgt->monst) || isPushable(ctgt->wall))) {
+        cell *c2 = (multi::player[i] + multi::whereto[i].d + wstep - (multi::whereto[i].subdir * ctgt->type/2)).cpeek();
+        queuecircleat(c2, size, getcs().uicolor);
+        }
       }
     #endif
 

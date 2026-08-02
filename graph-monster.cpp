@@ -1783,6 +1783,7 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
       if(mirrored != mirr && half_elliptic) continue;
       shiftmatrix T = shiftless(Id);
       nospins = applyAnimation(cwt.at, T, footphase, LAYER_SMALL);
+      auto Vs1 = Vs;
       if(nospins) 
         Vs = Vs * ddspin(c, cw.spin, 0) * iddspin(cwt.at, cwt.spin, 0) * unshift(T);
       else
@@ -1794,6 +1795,28 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
         shiftpoint P2 = Vs * inverse_shift(inmirrorcount ? ocwtV : cwtV, mouseh);
         queuestr(P2, 10*mapfontscale/100, "x", 0xFF00);
         }
+
+      if(multi::alwaysuse) {
+        int dir = multi::whereto[multi::cpid].d;
+        if(dir >= 0) {
+          dir = (cw + dir).spin;
+          hyperpoint h = tC0(currentmap->adj(cw.at, dir));
+          ld part = (1 + sintick(250)) / 2;
+          h = normalize(h * part + C0 * (1-part));
+          queuestr(Vs1 * h, 10 * mapfontscale / 100, "x", 0xFF00);
+          }
+        }
+
+      #if CAP_SDLJOY
+      if(joydir.d >= 0 && WDIM == 2) {
+        int dir = (cw + joydir.d).spin;
+        hyperpoint h = tC0(currentmap->adj(cw.at, dir));
+        ld part = (1 + sintick(250)) / 2;
+        h = normalize(h * part + C0 * (1-part));
+        queuestr(Vs1 * h, 10 * mapfontscale / 100, "x", 0xFF00);
+        }
+      #endif
+
       if(!nospins && flipplayer) Vs = Vs * lpispin();
 
       res = res && drawMonsterType(moMimic, c, Vs, col, footphase, asciicol);
