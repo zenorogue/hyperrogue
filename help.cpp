@@ -943,7 +943,7 @@ EX void describeMouseover() {
     out = XLAT("you cannot see this place");
     help = XLAT("You cannot currently see this tile.\n\nThis also means that most enemies will not try to reach you through this tile.\n\n");
     help += XLAT("Enemies which ignore this restriction:");
-    help += XLAT(" ghosts, demon sharks, hyperbugs");
+    help += XLAT("ice wolves, ghosts, demon sharks, hyperbugs");
     }
   else if(c->wall != waInvisibleFloor) {
     out = XLAT1(linf[c->land].name);
