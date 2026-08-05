@@ -957,10 +957,16 @@ EX bool blocks_sight(cell *c, cell *last) {
     auto cw2 = mirror::reflect(cw);
     return blocks_sight(cw2.at, cw2.cpeek());
     }
+  if(invisfish && !isWateryOrBoat(c)) return true;
   if(c->monst == passive_switch) return true;
   if(among(c->wall, waBigStatue, waMirror, waCloud, waThumperOff, waThumperOn, waExplosiveBarrel)) return c->cpdist > 1;
   if(snakelevel(c) == 3 && !(c->cpdist == 1 && snakelevel(cwt.at) >= 2)) return true;
-  return (isWall(c) && !among(c->wall, waFreshGrave, waAncientGrave, waClosedGate, waMirrorWall, waSmallTree, waShrub)) || thruVine(c, last);
+  if(c->wall == waTrunk && last && last->wall != waTrunk && c->cpdist > 1) return true;
+  if(c->land == laMountain && last->land == laMountain) {
+    int d = celldistAlt(last);
+    if(celldistAlt(c) > d && (cwt.at->land != laMountain || celldistAlt(cwt.at) > d)) return true;
+    }
+  return (isWall(c) && !among(c->wall, waFreshGrave, waAncientGrave, waClosedGate, waMirrorWall, waSmallTree, waShrub, waRoundTable)) || thruVine(c, last);
   }
 
 EX bool in_line_of_sight(cell *c) {
