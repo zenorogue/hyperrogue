@@ -3680,11 +3680,11 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
     "Note that, in exponentially expanding spaces, too high values could cause rendering issues. So "
     "if you want infinity, values of 5 or similar should be used -- there is no visible difference "
     "from infinity and glitches are avoided.";
-  param_f(vid.lake_top, parameter_names("lake_top", "3D lake top"), .25 / 0.3)
+  param_f(vid.lake_top, parameter_names("lake_top", "3D lake top"), .25)
     ->editable(0, 1, .1, "Level of water surface", unitwarn, 'l');
-  param_f(vid.lake_shallow, parameter_names("lake_shallow", "3D lake shallow"), .4 / 0.3)
+  param_f(vid.lake_shallow, parameter_names("lake_shallow", "3D lake shallow"), .4)
     ->editable(0, 1, .1, "Level of shallow water", unitwarn, 's');
-  param_f(vid.lake_bottom, parameter_names("lake_bottom", "3D lake bottom"), .9 / 0.3)
+  param_f(vid.lake_bottom, parameter_names("lake_bottom", "3D lake bottom"), .9)
     ->editable(0, 1, .1, "Level of water bottom", unitwarn, 'k');
   param_f(vid.wall_height2, "wall_height2", 2)
     ->editable(0, 5, .1, "ratio of high walls to normal walls", unitwarn, '2');
