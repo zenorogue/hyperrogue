@@ -5720,3 +5720,12 @@ Bug fixes:
 - fixed the name of 'neon_magic_vision' option
 - help now mentions ice wolves as ignoring vision
 - a CLI option (`-deck 0`, `-deck 1`) to override SteamDeck detection
+
+2026-08-05 15:12 Update 13.1o:
+- fixed incorrect values of altitudes of sub-floor levels
+- music reset modes: you can now choose to not reset music if it is the same
+- changed line-of-sight blocking rules for: Orb of Fish users, Yendorian trunks, Lost Mountain, Round Table
+- line-of-sight fixed in shmup (works against enemies, takes precise position into account) and in multiplayer
+- in PTM minimal, the 'gold medal' is shown at 50 as intended, not 5
+- switching LOS or hardcore during a PTM/YC/PrC run now resets the run
+- fixed a possible crash
