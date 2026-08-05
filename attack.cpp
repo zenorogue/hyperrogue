@@ -1169,9 +1169,9 @@ EX void handle_switchplaces(cell *c1, cell *c2, bool& switchplaces) {
 
 EX bool flashWouldKill(cell *c, flagtype extra) {
   for(int t=0; t<c->type; t++) {
-    cell *c2 = c->move(t);
+    cell *c2 = c->cmove(t);
     for(int u=0; u<c2->type; u++) {
-      cell *c3 = c2->move(u);
+      cell *c3 = c2->cmove(u);
       if(isWorm(c3)) continue; // immune to Flash
       if(isFriendly(c3)) continue; // player's allies and mounts don't count
       if(c3->monst == moEvilGolem) continue; // evil golems don't count
