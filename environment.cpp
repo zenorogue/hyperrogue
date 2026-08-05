@@ -993,7 +993,7 @@ EX void create_los() {
     for(auto c: dcal) for(auto cp: player_positions()) {
       hyperpoint h = tC0(currentmap->relative_matrix(c, cp, C0));
       transmatrix T = spintox(h);
-      cellwalker at = cwt;
+      cellwalker at = cp;
 
       while(true) {
         int best_i = -1;
