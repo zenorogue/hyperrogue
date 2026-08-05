@@ -948,6 +948,7 @@ EX los lineofsight;
 /** when did we switch the lineofsight mode */
 EX int lineofsightAt;
 EX bool recompute_los = false;
+EX bool lineofsight_cheat = false;
 
 EX map<cell*, int> current_fov; // 1 == seen, 2 = see through
 
@@ -976,6 +977,7 @@ EX bool in_line_of_sight(cell *c) {
 
 EX bool in_line_of_sight_for_player(cell *c) {
   if(in_line_of_sight(c)) return true;
+  if(cheater && lineofsight_cheat) return true;
   int range = 0;
   if(items[itOrbAether]) range = 2;
   if(items[itOrbDash] || items[itOrbFrog] || items[itOrbPhasing]) range = 3;

@@ -1692,6 +1692,9 @@ EX void initConfig() {
    ->set_pre_reaction([] { if(mode_demands_consistency()) stop_game(); })
    ->set_reaction([] { switchLOS_quiet(); if(!delayed_start) start_game(); });
 
+  param_b(lineofsight_cheat, "lineofsight_cheat", false)
+  ->help("If the cheat mode is active while in line-of-sight mode, you still see everything using 'magic vision'.");
+
   param_f(vid.plevel_factor, "plevel_factor", 0.7);
 
   param_b(nohud, "no-hud", false);
