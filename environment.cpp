@@ -994,13 +994,15 @@ EX void create_los() {
         current_fov[c] |= blocks_sight(c, c1) ? 1 : 3;
       }
     }
-  if(lineofsight == los::geometric) {
+  if(lineofsight == los::geometric) for(int p=0; p<numplayers(); p++) if(multi::playerActive(p)) {
+    auto cp = playerpos(p);
+    current_fov[cp] = 3;
 
-    for(cell *cp: player_positions()) current_fov[cp] = 3;
-
-    for(auto c: dcal) for(auto cp: player_positions()) {
-      hyperpoint h = tC0(currentmap->relative_matrix(c, cp, C0));
+    for(auto c: dcal) {
+      transmatrix R = currentmap->relative_matrix(c, cp, C0);
+      hyperpoint h = tC0(R);
       transmatrix T = spintox(h);
+      if(shmup::on) T = iso_inverse(shmup::pc[p]->at) * T;
       cellwalker at = cp;
 
       while(true) {

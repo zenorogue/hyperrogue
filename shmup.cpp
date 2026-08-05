@@ -2728,6 +2728,7 @@ EX void turn(int delta) {
       if(d == PINFD-1) continue;
       for(int i=0; i<c->type; i++) {
         cell *c2 = c->move(i);
+        if(!in_line_of_sight(c2)) continue;
         // printf("i=%d cd=%d\n", i, c->move(i)->cpdist);
         if(c2 && c2->pathdist == PINFD && gmatrix.count(c2) && 
           (passable_for(eMonster(t), c, c2, P_CHAIN | P_ONPLAYER) || c->wall == waThumperOn)) {
