@@ -1129,6 +1129,10 @@ EX void font_reaction() {
 EX bool running_on_deck = false;
 EX bool detect_deck = true;
 
+EX bool mode_demands_consistency() {
+  return tactic::on || yendor::on || princess::challenge;
+  }
+
 EX void initConfig() {
   
   DEBBI(debug_init_config, ("initconfig"));
@@ -1645,7 +1649,9 @@ EX void initConfig() {
   // modes
     
   param_b(shmup::on, "mode-shmup", false)->be_non_editable();
-  param_b(hardcore, "mode-hardcore", false)->set_reaction([] { hardcore = !hardcore; switchHardcore_quiet(); });
+  param_b(hardcore, "mode-hardcore", false)
+  ->set_pre_reaction([] { if(mode_demands_consistency()) stop_game(); })
+  ->set_reaction([] {hardcore = !hardcore; switchHardcore_quiet(); if(!delayed_start) start_game(); });
   param_enum(land_structure, "mode-chaos", lsNiceWalls)->be_non_editable();
   #if CAP_INV
   param_b(inv::on, "mode-Orb Strategy")->be_non_editable();
@@ -1683,7 +1689,8 @@ EX void initConfig() {
      {"geometric", "Approximations of geometric straight lines."}},
      "line-of-sight mode", 'v')
    ->add_extra([] { add_edit(neon_magic_vision); })
-   ->set_reaction(switchLOS_quiet);
+   ->set_pre_reaction([] { if(mode_demands_consistency()) stop_game(); })
+   ->set_reaction([] { switchLOS_quiet(); if(!delayed_start) start_game(); });
 
   param_f(vid.plevel_factor, "plevel_factor", 0.7);
 
