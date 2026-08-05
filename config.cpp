@@ -1700,6 +1700,13 @@ EX void initConfig() {
   param_b(nohud, "no-hud", false);
   param_b(nomap, "nomap", false);
   param_b(nofps, "no-fps", false);
+
+  param_enum(music_reset, "music_reset", music_reset_t::always)
+   ->editable({
+     {"always", "even if both lands use the same music"},
+     {"non-subland", "except sublands using the same music"},
+     {"if different", "only if lands use different music"}},
+     "reset music when land changes", 'r');
   
   #if CAP_IRR
   param_f(irr::density, "irregular-density", 2);
@@ -2702,6 +2709,7 @@ EX void configureOther() {
 #if CAP_AUDIO
   add_edit(musicvolume);
   add_edit(effvolume);
+  add_edit(music_reset);
 #endif
 
   menuitem_sightrange('r');

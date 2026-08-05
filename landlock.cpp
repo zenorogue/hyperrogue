@@ -477,6 +477,18 @@ EX eLand pickluck(eLand l1, eLand l2) {
     l == laPrairie || l == laHalloween;
   } */
 
+EX eLand get_superland(eLand l) {
+  if(l == laMountain) return laJungle;
+  if(l == laHaunted) return laGraveyard;
+  if(l == laCamelot || isCrossroads(l)) return laCrossroads;
+  if(l == laTemple) return laRlyeh;
+  if(l == laPrincessQuest) return laPalace;
+  if(l == laClearing) return laOvergrown;
+  if(l == laMirrorWall || l == laMirrored || l == laMirrorWall2) return laMirror;
+  if(l == laBrownian || l == laWhirlpool) return laOcean;
+  return l;
+  }
+
 EX eLand getNewSealand(eLand old) {
   for(int it=0; it<100; it++) {
     eLand p = pick(laOcean, pick(laCaribbean, laLivefjord, laWarpSea, laKraken, laDocks));

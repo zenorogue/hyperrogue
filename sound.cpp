@@ -27,6 +27,12 @@ EX int effvolume = 60;
 EX bool music_available;
 EX int musiclength[MUSIC_MAX];
 
+#if HDR
+enum class music_reset_t { always, subland, never };
+#endif
+
+EX music_reset_t music_reset;
+
 EX eLand getCurrentLandForMusic() {
   eLand id = ((anims::center_music()) && centerover) ? centerover->land : cwt.at->land;
   if(isHaunted(id)) id = laHaunted;
@@ -128,6 +134,11 @@ EX void handlemusic() {
            printf("Mix_LoadMUS: %s\n", Mix_GetError());
            }
         }
+      }
+    if(id != cid && musfname[id] == musfname[cid]) {
+      if(music_reset == music_reset_t::never) id = cid;
+      if(music_reset == music_reset_t::subland && get_superland(id) == get_superland(cid))
+        id = cid;
       }
     if(cid != id && !musfadeval) {
       musicpos[cid] = SDL_GetTicks() - musstart;
