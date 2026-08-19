@@ -596,10 +596,11 @@ void draw_edge(const shiftmatrix &V, cell *c, edgeinfo *ei) {
 
   if(ei->weight < (hilite ? ei->type->visible_from_hi : ei->type->visible_from)) return;
 
-  dynamicval<ld> w(vid.linewidth, vid.linewidth * edgewidth);
-  
   color_t col = (hilite ? ei->type->color_hi : ei->type->color);
   auto& alpha = part(col, 0);
+  if(alpha == 0) return;
+
+  dynamicval<ld> w(vid.linewidth, vid.linewidth * edgewidth);
   
   if(vizflags & RV_AUTO_MAXWEIGHT) {
     if(ei->weight2 > maxweight) maxweight = ei->weight2;
@@ -721,7 +722,7 @@ void draw_edge(const shiftmatrix &V, cell *c, edgeinfo *ei) {
 bool drawVertex(const shiftmatrix &V, cell *c, shmup::monster *m) {
   if(m->dead) return true;
   if(m->type == moRoguevizExtender) {
-    draw_edge(V, c, edgeinfos[m->pid]);
+    if(part(edgeinfos[m->pid]->type->color, 0)) draw_edge(V, c, edgeinfos[m->pid]);
     return true;
     }
   if(m->type != moRogueviz) return false;
@@ -735,7 +736,7 @@ bool drawVertex(const shiftmatrix &V, cell *c, shmup::monster *m) {
 
   ld hi_weight = 0;
         
-  if(!lshiftclick) for(auto& e: vd.edges) {
+  for(auto& e: vd.edges) {
     draw_edge(V, c, e.second);
     if(vdata[e.first].m == shmup::mousetarget)
       hi_weight = e.second->weight;
