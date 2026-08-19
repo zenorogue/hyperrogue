@@ -195,6 +195,60 @@ EX namespace arg {
   EX void read(int phase);
 EX }
 
+int parseviz() {
+  const char* buf = arg::argcs();
+  if(buf[0] != '-') return 1;
+  buf++;
+  if(buf[0] == '-') buf++;
+  if(buf[0] != 'v' || buf[1] != 'i' || buf[2] != 'z') return 1;
+  buf += 3;
+  bool hr = false;
+  bool smooth = false;
+  bool dark = false;
+  bool invis = false;
+  bool smart = false;
+  while(*buf) {
+    if(*buf == 'h') hr = true;
+    if(*buf == 's') smooth = true;
+    if(*buf == 'd') dark = true;
+    if(*buf == 'i') invis = true;
+    if(*buf == 'f') smart = true;
+    buf++;
+    }
+  PHASE(3);
+  showstartmenu = false;
+
+  if(invis || dark) {
+    stop_game();
+    enable_canvas();
+    ccolor::set_plain_nowall(0x101010);
+    if(invis) canvas_default_wall = waInvisibleFloor;
+    }
+
+  println(hlog, "land = ", dnameof(specialland));
+  start_game();
+  println(hlog, "land = ", dnameof(specialland));
+  popScreenAll();
+  clearMessages();
+
+  if(!hr) {
+    nohud = true;
+    mapeditor::drawplayer = false;
+    no_find_player = true;
+    }
+  if(smooth) {
+    game_keys_scroll = true;
+    smooth_scrolling = true;
+    touchmode = tmode::info;
+    vid.axes = 0;
+    }
+  if(smart) {
+    arg::cheat();
+    vid.use_smart_range = 2;
+    vid.smart_range_detail = 4;
+    }
+  return 0;
+  }
 
 int arg::readCommon() {
 
@@ -302,38 +356,6 @@ int arg::readCommon() {
     PHASE(3);
     popScreenAll();
     showstartmenu = false;
-    }
-
-  else if(argis("-viz")) {
-    PHASE(3);
-    showstartmenu = false;
-    start_game();
-    popScreenAll();
-    clearMessages();
-    nohud = true;
-    mapeditor::drawplayer = false;
-    no_find_player = true;
-    }
-
-  else if(argis("-vizs")) {
-    PHASE(3);
-    showstartmenu = false;
-    start_game();
-    popScreenAll();
-    clearMessages();
-    nohud = true;
-    mapeditor::drawplayer = false;
-    no_find_player = true;
-    game_keys_scroll = true;
-    smooth_scrolling = true;
-    touchmode = tmode::info;
-    }
-
-  else if(argis("-vizhr")) {
-    PHASE(3);
-    showstartmenu = false;
-    popScreenAll();
-    clearMessages();
     }
 
   else if(argis("-save-mode")) {
@@ -495,7 +517,8 @@ EX namespace arg {
   EX int add2(const string& s, const reaction_t& r) { return add_at(s, 2, r); }
   EX int add3(const string& s, const reaction_t& r) { return add_at(s, 3, r); }
 
-  auto ah = addHook(hooks_args, 0, readCommon) + addHook(hooks_args, 200, read_added_commands);
+  auto ah = addHook(hooks_args, 0, readCommon) + addHook(hooks_args, 200, read_added_commands)
+    + addHook(hooks_args, 0, parseviz);
   
   void read(int phase) { 
     curphase = phase;
