@@ -652,6 +652,7 @@ void geometry_information::generate_faces() {
 void geometry_information::prepare_basics() {
 
   indenter_finish dif(debug_geometry, "prepare_basics");
+  if(debug_geometry) println(hlog, "geometry: ", full_geometry_name());
   
   hexshift = 0;
 
@@ -796,7 +797,7 @@ void geometry_information::prepare_basics() {
     }
   
   if(debug_geometry) println(hlog,
-    hr::format("S7=%d S6=%d hexf = " LDF" hcross = " LDF" tessf = " LDF" hexshift = " LDF " hexhex = " LDF " hexv = " LDF "\n", S7, S6, hexf, hcrossf, tessf, hexshift, 
+    hr::format("S7=%d S6=%d hexf = " LDF" hcross = " LDF" tessf = " LDF" hexshift = " LDF " hexhex = " LDF " hexv = " LDF, S7, S6, hexf, hcrossf, tessf, hexshift, 
     hexhexdist, hexvdist));
   
   hybrid_finish:
@@ -962,8 +963,11 @@ void geometry_information::prepare_basics() {
   #endif
 
   prepare_compute3();
-  if(hyperbolic && &currfp != &fieldpattern::fp_invalid)
-    currfp.analyze(); 
+
+  auto& c = currfp; /* note: this can actually build the fpattern */
+
+  if(hyperbolic && &c != &fieldpattern::fp_invalid && variation != c.current_variation)
+    c.analyze();
 
   heptmove.resize(S7);
   hexmove.resize(S7);

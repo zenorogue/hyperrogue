@@ -588,6 +588,7 @@ EX debugflag debug_init_cells = {"init_cells", true};
 /** create a map in the current geometry */
 EX void initcells() {
   indenter_finish dif(debug_init_cells, "initcells");
+  if(debug_init_cells) println(hlog, "creating the map for geometry: ", full_geometry_name());
 
   if(embedded_plane) {
     geom3::swap_direction = -1;

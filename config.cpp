@@ -2147,6 +2147,7 @@ map<string, shared_ptr<parameter> > allconfigs;
 
 EX void parseline(const string& str) {
   if(str[0] == '#') return;
+  DEBBI(debug_init_config, ("config line: ", str));
   for(int i=0; i<isize(str); i++) if(str[i] == '=') {
     string cname = str.substr(0, i);
     if(!allconfigs.count(cname)) {

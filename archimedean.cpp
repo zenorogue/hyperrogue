@@ -205,6 +205,7 @@ void archimedean_tiling::compute_sum() {
 
 void archimedean_tiling::prepare() {
 
+  indenter_finish iprep(debug_geometry, "arcm::prepare");
   compute_sum();
 
   for(int i: faces) if(i > MAX_EDGE_ARCM) {
@@ -310,7 +311,7 @@ void archimedean_tiling::prepare() {
         else at = (at+N-1) % N;
         }
       if(!inv) make_match(2*i, 0, inv ? (2*at+2*N-1) % 2*N : 2*at, 0);
-      if(debug_geometry) print(hlog, "-> ", tie(at, inv));
+      if(debug_geometry) println(hlog, "-> ", tie(at, inv));
       }
     }
   for(int i=0; i<N; i++) {
@@ -417,7 +418,7 @@ void archimedean_tiling::regroup() {
   
   if(debug_geometry) {
     for(int i=0; i<M; i+=(have_symmetry?1:2))
-      print(hlog, hr::format("tiling group of %2d: [%2d]%2d+Z%2d", i, tilegroup[i], groupoffset[i], periods[i]));
+      println(hlog, hr::format("tiling group of %2d: [%2d]%2d+Z%2d", i, tilegroup[i], groupoffset[i], periods[i]));
     }
   }
 
@@ -431,6 +432,8 @@ void archimedean_tiling::compute_geometry() {
 
   if(embedded_plane && geometry != gArchimedean) return;
   if(embedded_plane) return IPF(compute_geometry());
+
+  indenter_finish icg(debug_geometry, "arcm::compute geometry");
 
   auto gg = get_geometry();
 
@@ -446,7 +449,7 @@ void archimedean_tiling::compute_geometry() {
     }
 
   if(debug_geometry)
-    println(hlog, "euclidean_angle_sum = ", euclidean_angle_sum);
+    println(hlog, "symbol ", symbol, ", euclidean_angle_sum = ", euclidean_angle_sum);
 
   bool infake = fake::in_ext();
   

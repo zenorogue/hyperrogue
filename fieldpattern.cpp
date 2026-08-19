@@ -283,6 +283,7 @@ struct fpattern {
   int distflower0;
   
   vector<eItem> markers;
+  eVariation current_variation;
 
   int getdist(pair<int,bool> a, vector<char>& dists);
   int getdist(pair<int,bool> a, pair<int,bool> b);
@@ -300,6 +301,7 @@ struct fpattern {
   // 1+z+z^7 == 1+z+z^2(z^5) == 1+z+z^2(1+z^2) = 1+z+z^2+z^4
   
   void init(int p) {
+    indenter_finish iinit(debug_geometry, "initializing a fieldpattern");
     Prime = p;
     if(solve()) {
       printf("error: could not solve the fieldpattern\n");
@@ -675,6 +677,8 @@ void fpattern::set_field(int p, int sq) {
 
 int fpattern::solve() {
   
+  indenter_finish isolve(debug_field, "fpattern::solve");
+
   for(int a=0; a<MWDIM; a++) for(int b=0; b<MWDIM; b++) Id[a][b] = a==b?1:0;
 
   if(!isprime(Prime)) {
@@ -859,6 +863,7 @@ vector<triplet_info> fpattern::find_triplets() {
 void fpattern::build() {
 
   if(WDIM == 3) return;
+  indenter_finish ibuild(debug_geometry, "fpattern::build");
   
   for(int i=0; i<isize(qpaths); i++) {
     matrix M = strtomatrix(qpaths[i]);
@@ -887,10 +892,10 @@ void fpattern::build() {
     connections.push_back(matcode[PM]);
     }
 
-  if(debug_field) println(hlog, "Computing inverses...\n");
+  if(debug_field) println(hlog, "Computing inverses...");
   int N = isize(matrices);
 
-  if(debug_field) println(hlog, "Number of heptagons: %d\n", N);
+  if(debug_field) println(hlog, "Number of heptagons: ", N);
   
   if(WDIM == 3) return;
 
@@ -933,7 +938,7 @@ void fpattern::build() {
       }
     }
   
-  if(debug_field) println(hlog, "Built.\n");
+  if(debug_field) println(hlog, "Built.");
   }
 
 int fpattern::getdist(pair<int,bool> a, vector<char>& dists) {
@@ -988,6 +993,8 @@ int fpattern::dijkstra(vector<char>& dists, vector<int> indist[MAXDIST]) {
 
 void fpattern::analyze() {
 
+  indenter_finish dif(debug_geometry, "fpattern::analyze");
+
   if(MWDIM == 4) {
     /* we need to compute inverses */
     int N = isize(matrices);
@@ -998,8 +1005,9 @@ void fpattern::analyze() {
       inverses[i] = matcode[M2];
       }
     }
-    
-  if(debug_field) println(hlog, "variation = %d\n", int(variation));
+
+  if(debug_field) println(hlog, "variation = ", int(variation), " (", full_geometry_name(), ")");
+  current_variation = variation;
   int N = isize(connections);
   
   markers.resize(N);
@@ -1047,7 +1055,7 @@ void fpattern::analyze() {
     if(disthep[connections[i]] < disthep[i] && disthep[connections[btspin(i,u)]] < disthep[i])
       circrad = disthep[i];
 
-  if(debug_field) println(hlog, "maxdist = %d otherpole = %d circrad = %d\n", maxdist, otherpole, circrad);
+  if(debug_field) println(hlog, "maxdist = ", maxdist, " otherpole = ", otherpole, " circrad = ", circrad);
   
   matrix PRRR = strtomatrix("PRRR");
   matrix PRRPRRRRR = strtomatrix("PRRPRRRRR");
@@ -1059,7 +1067,7 @@ void fpattern::analyze() {
   wallorder = order(Wall);
   wallid = matcode[Wall];
   
-  if(debug_field) println(hlog, "wall order = %d\n", wallorder);
+  if(debug_field) println(hlog, "wall order = ", wallorder);
 
 #define SETDIST(X, d, it) {int c = matcode[X]; indist[d].push_back(c); if(it == itNone) ; else if(markers[c] && markers[c] != it) markers[c] = itBuggy; else markers[c] = it; }
   
@@ -1075,7 +1083,7 @@ void fpattern::analyze() {
     }
   
   int walldist = dijkstra(distwall, indist);
-  if(debug_field) println(hlog, "wall dist = %d\n", walldist);
+  if(debug_field) println(hlog, "wall dist = ", walldist);
   
   W = strtomatrix("RRRRPR");
   for(int j=0; j<wallorder; j++) {
@@ -1096,7 +1104,7 @@ void fpattern::analyze() {
     int ipush = gmul(rpushid, i);
     for(int k=0; k<wallorder; k++) {
       if(ipush == j) {
-        if(debug_field) println(hlog, "River found at %d:%d\n", i, k);
+        if(debug_field) println(hlog, "River found at ", i, ":", k);
         riverid = i;
         goto riveridfound;
         }
@@ -1138,7 +1146,7 @@ void fpattern::analyze() {
     W = mmul(W, Wall);
     }
   int riverdist = dijkstra(PURE ? distflower : distriver, indist);
-  if(debug_field) println(hlog, "river dist = %d\n", riverdist);
+  if(debug_field) println(hlog, "river dist = ", riverdist);
   
   for(int i=0; i<isize(matrices); i++)
     if(distflower[i] == 0) {
@@ -1201,8 +1209,7 @@ void fpattern::analyze() {
     dijkstra(distriverright, indist);
     }
 
-  if(debug_field) println(hlog, "wall-river distance = %d\n", distwall[riverid]);
-  if(debug_field) println(hlog, "river-wall distance = %d\n", distriver[0]);
+  if(debug_field) println(hlog, "wall-river distance = ", distwall[riverid], " river-wall distance = ", distriver[0]);
   }
 
 int fpattern::orderstats() {
@@ -1223,9 +1230,11 @@ int fpattern::orderstats() {
       }
     }
   
-  printf("Listing:\n");
-  for(int i=0; i<MAXORD; i++) if(ordcount[i])
-    printf("Found %4d matrices of order %3d: %s\n", ordcount[i], i, decodepath(ordsample[i]).c_str());
+  if(debug_field) {
+    println(hlog, "Listing:\n");
+    for(int i=0; i<MAXORD; i++) if(ordcount[i])
+      println(hlog, format("Found %4d matrices of order %3d: ", ordcount[i], i), decodepath(ordsample[i]));
+    }
   
   return ordsample[Prime];
   }
@@ -1236,7 +1245,7 @@ void fpattern::findsubpath() {
     if(gpow(i, Prime) == 0) {
       subpathid = i;
       subpathorder = Prime;
-      if(debug_field) println(hlog, "Subpath found: %s\n", decodepath(i).c_str());
+      if(debug_field) println(hlog, "Subpath found: ", decodepath(i));
       return;
       }
   }
