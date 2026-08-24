@@ -44,6 +44,12 @@ void statdata::reset() {
   detect_area = 0;
   detect_cross = 0;
   rough_detect = 0;
+
+  heavy_armor = 0;
+  spikes = 0;
+  max_mageshield = 0;
+  stealth_bonus = 0;
+  dodge_value = 0;
   hallucinating = false;
   mods.clear();
   on_hit.clear();
@@ -66,7 +72,9 @@ void man::hs(stater& s) {
    .act("xp", experience, 0)
    .act("last_action", last_action, 0)
    .act("gameseed", gameseed, 0)
-   .act("dresstime", dresstime, 0);
+   .act("dresstime", dresstime, 0)
+   .act("current_mageshield", current_mageshield, 0)
+   .act("mageshield_recharge_time", mageshield_recharge_time, 0);
   sact(s1, "hair", hair);
   sact(s1, "eyes", eye);
   string z = unspace(backstory);
@@ -83,6 +91,12 @@ void man::hs(stater& s) {
     s1.act(prefix + "detect_area", sd.detect_area, 0);
     s1.act(prefix + "detect_cross", sd.detect_cross, 0);
     s1.act(prefix + "rough_detect", sd.rough_detect, 0);
+
+    s1.act(prefix + "heavy_armor", sd.heavy_armor, 0);
+    s1.act(prefix + "spikes", sd.spikes, 0);
+    s1.act(prefix + "max_mageshield", sd.max_mageshield, 0);
+    s1.act(prefix + "stealth_bonus", sd.stealth_bonus, 0);
+    s1.act(prefix + "dodge_value", sd.dodge_value, 0);
     };
 
   sdata(current, "curr.");
@@ -110,8 +124,13 @@ void man::act() {
 
   if(dresstime) {
     dresstime--;
-    if(dresstime == 0) addMessage("You finish redressing.");
+    if(dresstime == 0) { addMessage("You finish redressing."); mageshield_recharge_time = game_fps * 5; }
     }
+
+  if(current_mageshield > current.max_mageshield) current.max_mageshield = 0;
+
+  if(mageshield_recharge_time) mageshield_recharge_time--;
+  else if(current_mageshield < current.max_mageshield) current_mageshield++;
 
   if(on_floor) on_floor_when = gframeid;
 
@@ -139,11 +158,15 @@ void man::act() {
   check_fountains();
   }
 
-bool man::reduce_hp(int x) {
+bool man::reduce_hp(int x, entity *attacker, flagtype flags) {
+  if(m.current.dodge_value > 0 && rand() % 100 < m.current.dodge_value && !(flags & NON_DODGEABLE)) { x = 1; }
+  if(m.current_mageshield > 0) { int q = min(m.current_mageshield, x); x -= q; m.current_mageshield -= q; m.mageshield_recharge_time = game_fps * 5; }
+  if(m.current.heavy_armor > 0) { x = max((x+4)/5, x - m.current.heavy_armor); }
+  if(attacker && m.current.spikes > 0 && !(flags & SPIKES)) attacker->reduce_hp(m.current.spikes, this, SPIKES);
   if(gframeid >= invinc_end)
     for(auto& f: m.current.on_hit)
       f(x);
-  return entity::reduce_hp(x);
+  return entity::reduce_hp(x, attacker, flags);
   }
 
 bool man::can_see(entity& e) {

@@ -424,24 +424,41 @@ void gen_powers() {
   gen_power('a', 1, "heavy armor",
     "This kind of armor reduces the amount of damage you take from hits.",
      "]", 0xC0C0C0FF,
-    [] (data& d) {}).be_armor({{"a chain shirt", "plate armor"}, {"an iron cap", "an iron helmet"}, {"an iron gorget"}, {"bracers"}, {"gauntlets"}, {"iron-shod boots"}, {"greaves"}}),
+    [] (data& d) {
+      if(d.p->flags & ACTIVE) if(!m.dresstime) {
+        m.next.heavy_armor += 2 * d.p->qty_filled;
+        }
+      }).be_armor({{"a chain shirt", "plate armor"}, {"an iron cap", "an iron helmet"}, {"an iron gorget"}, {"bracers"}, {"gauntlets"}, {"iron-shod boots"}, {"greaves"}}),
 
   thief_power = &gen_power('t', 1, "thief garments",
     "This outfit makes it harder for enemies to notice or hit you.",
      "]", 0xC08000FF,
-    [] (data& d) {}).be_armor({{"a leather vest"}, {"a hood"}, {"comfortable boots", "muffled boots", "boots of dodging"}, {"a cloak", "chameleon cloak"}, {"leather gloves"}, {"leather pants"}}),
+    [] (data& d) {
+      if(d.p->flags & ACTIVE) if(!m.dresstime) {
+        m.next.dodge_value += m.current.stats[stat::dex] + 5 * d.p->qty_filled;
+        m.next.stealth_bonus += d.p->qty_filled;
+        }
+      }).be_armor({{"a leather vest"}, {"a hood"}, {"comfortable boots", "muffled boots", "boots of dodging"}, {"a cloak", "chameleon cloak"}, {"leather gloves"}, {"leather pants"}}),
 
   gen_power('w', 1, "wizard attire",
     "This outfit provides a magical aura that prevents you from taking damage. However, eventually, "
     "with lots of attacks, the aura will lose its power. You need to spend some time without being attacked to "
     "regenerate it.",
      "]", 0x0080C0FF,
-    [] (data& d) {}).be_armor({{"a simple magic robe", "embroidered robe"}, {"a wizard hat"}, {"runed boots", "silk runed boots"}, {"runed gloves", "silk runed gloves"}, {"a silver circlet", "a golden circlet"}}),
+    [] (data& d) {
+      if(d.p->flags & ACTIVE) if(!m.dresstime) {
+        m.next.max_mageshield += 5 * d.p->qty_filled;
+        }
+    }).be_armor({{"a simple magic robe", "embroidered robe"}, {"a wizard hat"}, {"runed boots", "silk runed boots"}, {"runed gloves", "silk runed gloves"}, {"a silver circlet", "a golden circlet"}}),
 
-  gen_power('d', 1, "druid outfit",
-    "This outfit reduces the damage you take from hits, makes it harder for enemies to hit you, and also provides some magical aura protection.",
+  gen_power('r', 1, "druid outfit",
+    "This outfit has nasty spikes that damages those who attack you.",
      "]", 0x40C040FF,
-    [] (data& d) {}).be_armor({{"a light fur", "a heavy fur"}, {"a horned cap", "a horned helmet"}, {"enchanted cloak"}, {"furry gloves", "beast gloves"}, {"furry boots"}, {"bracers"}}),
+    [] (data& d) {
+      if(d.p->flags & ACTIVE) if(!m.dresstime) {
+        m.next.spikes += 5 + 3 * d.p->qty_filled;
+        }
+    }).be_armor({{"a light fur", "a heavy fur"}, {"a horned cap", "a horned helmet"}, {"enchanted cloak"}, {"furry gloves", "beast gloves"}, {"furry boots"}, {"bracers"}}),
 
   gen_power(' ', 0, "dagger",
     "This sharp dagger is very useful during the preparation of alchemical ingredients, but it works as a basic weapon too.",

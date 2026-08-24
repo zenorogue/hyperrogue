@@ -308,6 +308,10 @@ void run() {
         shstream ss;
         print(ss, "HP ", m.hp, "/", m.max_hp());
         for(auto& sts: m.current.status_strings) sts(ss);
+        if(m.current.max_mageshield) print(ss, " SH ", m.current_mageshield, "/", m.current.max_mageshield);
+        if(m.current.dodge_value) print(ss, " DV ", m.current.dodge_value, "%");
+        if(m.current.heavy_armor) print(ss, " PV ", m.current.heavy_armor, "%");
+        if(m.current.spikes) print(ss, " SP ", m.current.spikes);
         displayfr(vid.fsize, vid.fsize, 2, vid.fsize, ss.s, titlecolor, 0);
         if(current_target && current_target->existing)
         displayfr(vid.xres - vid.fsize, vid.fsize, 2, vid.fsize, "HP " + its(current_target->hp) + "/" + its(current_target->max_hp()) + " " + current_target->get_name(), titlecolor, 16);

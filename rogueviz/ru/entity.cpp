@@ -228,7 +228,7 @@ void entity::apply_walls() {
   for(int x = jbb.minx; x < jbb.maxx; x++) for(int y = obb.maxy; y < jbb.maxy; y++) {
     eWall b = current_room->at(x, y);
     if((walls[b].flags & W_PAIN_DOWN) && hurt_by_spikes()) {
-      reduce_hp(40); spike_message();
+      reduce_hp(40, nullptr, NON_DODGEABLE); spike_message();
       }
     }
 
@@ -451,7 +451,7 @@ void boar::act() {
   kino();
   if(intersect(get_pixel_bbox(), m.get_pixel_bbox())) {
     int s = where.x < m.where.x ? -1 : 1;
-    if(m.reduce_hp(15)) addMessage("The " + hal()->get_name() + " gores you!");
+    if(m.reduce_hp(15, this)) addMessage("The " + hal()->get_name() + " gores you!");
     auto dat = get_dat();
     auto mdat = m.get_dat();
     if(m.on_floor) m.vel.x = mdat.d * mdat.modv * -s * 1.5, m.vel.y = -mdat.d * mdat.modv * 2;
@@ -462,15 +462,15 @@ void boar::act() {
     if(vel.x > 0) vel.x = max<ld>(vel.x - dat.d * dat.moda * 0.05, 0);
     if(vel.x < 0) vel.x = min<ld>(vel.x + dat.d * dat.moda * 0.05, 0);
     if(gframeid > invinc_end) {
-      if(intersect(extend(get_pixel_bbox(), 60 * dat.d, 0, 0, 0), m.get_pixel_bbox())) vel.x -= dat.d * dat.moda * 0.2;
-      if(intersect(extend(get_pixel_bbox(), 0, 60 * dat.d, 0, 0), m.get_pixel_bbox())) vel.x += dat.d * dat.moda * 0.2;
+      if(intersect(extend(get_pixel_bbox(), 60 * dat.d * m.stealth_ratio(), 0, 0, 0), m.get_pixel_bbox())) vel.x -= dat.d * dat.moda * 0.2;
+      if(intersect(extend(get_pixel_bbox(), 0, 60 * dat.d * m.stealth_ratio(), 0, 0), m.get_pixel_bbox())) vel.x += dat.d * dat.moda * 0.2;
       }
     }
   }
 
 void enemy::attacked(int dmg, power *p) {
   current_target = this;
-  if(reduce_hp(dmg)) {
+  if(reduce_hp(dmg, &m)) {
     if(!existing) addMessage("You kill the " + hal()->get_name() + "."); else addMessage("You hit the " + hal()->get_name() + ".");
     }
   }
@@ -487,7 +487,7 @@ void frog::act() {
   kino();
   if(intersect(get_pixel_bbox(), m.get_pixel_bbox())) {
     int s = where.x < m.where.x ? -1 : 1;
-    if(m.reduce_hp(20)) addMessage("The giant frog crushes you!");
+    if(m.reduce_hp(20, this)) addMessage("The giant frog crushes you!");
     auto dat = get_dat();
     auto mdat = m.get_dat();
     if(m.on_floor) m.vel.x = mdat.d * mdat.modv * -s * 1.5, m.vel.y = -mdat.d * mdat.modv * 2;
@@ -497,7 +497,8 @@ void frog::act() {
     vel.x = 0;
     if(gframeid > invinc_end) {
       auto dat = get_dat();
-      if(jphase == 0 && gframeid >= jump_at && intersect(extend(get_pixel_bbox(), 100 * dat.d, 100 * dat.d, 20 * dat.d, 20 * dat.d), m.get_pixel_bbox())) {
+      ld f = m.stealth_ratio();
+      if(jphase == 0 && gframeid >= jump_at && intersect(extend(get_pixel_bbox(), 100 * dat.d * f, 100 * dat.d * f, 20 * dat.d * f, 20 * dat.d * f), m.get_pixel_bbox())) {
         vel.y = -2 * dat.modv;
         jphase = 1;
         }
@@ -550,7 +551,7 @@ void ghost::act() {
   apply_vel();
   if(intersect(get_pixel_bbox(), m.get_pixel_bbox()) && gframeid > invinc_end) {
     invinc_end = gframeid + 200;
-    if(m.reduce_hp(20)) addMessage("The " + hal()->get_name() + " passes through you!");
+    if(m.reduce_hp(20, this)) addMessage("The " + hal()->get_name() + " passes through you!");
     }
   }
 
@@ -565,7 +566,7 @@ void snake::act() {
     vel.x = zero_vel.x + dat.d * dat.modv * dir;
     }
   if(intersect(get_pixel_bbox(), m.get_pixel_bbox()) && gframeid > invinc_end) {
-    if(m.reduce_hp(bite())) addMessage("The " + hal()->get_name() + " bites you!");
+    if(m.reduce_hp(bite(), this)) addMessage("The " + hal()->get_name() + " bites you!");
     }
   }
 
@@ -589,11 +590,11 @@ void naga_warrior::act() {
   if(gmod(gframeid, 100) == 0) {
     bbox b = get_pixel_bbox_at(xy{where.x + dir * dsiz().x, where.y});
     if(intersect(b, m.get_pixel_bbox()) && gframeid > invinc_end) {
-      if(m.reduce_hp(chop())) addMessage("The " + hal()->get_name() + " chops you!");
+      if(m.reduce_hp(chop(), this)) addMessage("The " + hal()->get_name() + " chops you!");
       }
     }
   if(intersect(get_pixel_bbox(), m.get_pixel_bbox()) && gframeid > invinc_end) {
-    if(m.reduce_hp(bite())) addMessage("The " + hal()->get_name() + " bites you!");
+    if(m.reduce_hp(bite(), this)) addMessage("The " + hal()->get_name() + " bites you!");
     }
   }
 
@@ -732,7 +733,7 @@ void saw::act() {
   where = base->location_at(gframeid);
   auto bb = get_pixel_bbox();
   if(intersect(bb, m.get_pixel_bbox())) {
-    if(m.reduce_hp(40)) addMessage("The " + get_name() + " shreds you!");
+    if(m.reduce_hp(40, this)) addMessage("The " + get_name() + " shreds you!");
     }
   }
 
@@ -818,7 +819,7 @@ void kestrel::act() {
   apply_vel();
 
   if(intersect(get_pixel_bbox(), m.get_pixel_bbox())) {
-    if(m.reduce_hp(chop())) addMessage("The " + hal()->get_name() + " claws you!");
+    if(m.reduce_hp(chop(), this)) addMessage("The " + hal()->get_name() + " claws you!");
     }
   }
 
@@ -838,7 +839,7 @@ void healthbubble::act() {
 void gridbug::act() {
 
   if(intersect(get_pixel_bbox(), m.get_pixel_bbox())) {
-    if(m.reduce_hp(15)) addMessage("The " + hal()->get_name() + " zaps you!");
+    if(m.reduce_hp(15, this)) addMessage("The " + hal()->get_name() + " zaps you!");
     }
 
   if(gframeid < next_move || !visible(current_room) || gframeid < invinc_end) return;
@@ -914,7 +915,7 @@ void bat::act() {
   apply_vel();
 
   if(intersect(get_pixel_bbox(), m.get_pixel_bbox())) {
-    if(m.reduce_hp(15)) addMessage("The " + hal()->get_name() + " bites you!");
+    if(m.reduce_hp(15, this)) addMessage("The " + hal()->get_name() + " bites you!");
     }
   }
 
@@ -970,7 +971,7 @@ void guineapig::act() {
           if(nonblocked(ca+j-3, s).second) {
             where = nonblocked(ca = gmod(ca+j-3, 8), s).first;
             if(intersect(get_pixel_bbox(), m.get_pixel_bbox())) {
-              if(m.reduce_hp(15)) {
+              if(m.reduce_hp(15, this)) {
                 addMessage("The " + hal()->get_name() + " bites you!");
                 spindir *= -1;
                 }
@@ -1001,7 +1002,7 @@ void vtrap::act() {
   apply_vel();
 
   if(intersect(get_pixel_bbox(), m.get_pixel_bbox())) {
-    if(m.reduce_hp(200)) addMessage("The " + hal()->get_name() + " zaps you!");
+    if(m.reduce_hp(200, this)) addMessage("The " + hal()->get_name() + " zaps you!");
     }
   }
 
@@ -1062,7 +1063,7 @@ void icicle::act() {
     }
   if(state != 0) {
     if(intersect(get_pixel_bbox(), m.get_pixel_bbox())) {
-      if(m.reduce_hp(50)) addMessage("The " + hal()->get_name() + " falls on you!");
+      if(m.reduce_hp(50, this)) addMessage("The " + hal()->get_name() + " falls on you!");
       }
     }
   }
@@ -1101,7 +1102,7 @@ void rollingsaw::act() {
     vel.x = zero_vel.x + dat.d * dat.modv * dir;
     }
   if(intersect(get_pixel_bbox(), m.get_pixel_bbox()) && gframeid > invinc_end) {
-    if(m.reduce_hp(60)) addMessage("The " + hal()->get_name() + " shreds you!");
+    if(m.reduce_hp(60, this)) addMessage("The " + hal()->get_name() + " shreds you!");
     }
   }
 
@@ -1146,7 +1147,7 @@ void fight_trader::attacked(int dmg, power *p) {
   if(p->flags & WEAPON_AXE) {
     angered = true;
     current_target = this;
-    if(reduce_hp(dmg)) {
+    if(reduce_hp(dmg, this)) {
       if(!existing) addMessage("You kill the " + hal()->get_name() + "."); else addMessage("You hit the " + hal()->get_name() + ".");
       if(!existing) {
         walls[wShopDoor].glyph = '\'';
@@ -1173,11 +1174,11 @@ void fight_trader::act() {
   if(gmod(gframeid, 100) == 0) {
     bbox b = get_pixel_bbox_at(xy{where.x + dir * dsiz().x, where.y});
     if(intersect(b, m.get_pixel_bbox()) && gframeid > invinc_end) {
-      if(m.reduce_hp(30)) addMessage("The " + hal()->get_name() + " chops you!");
+      if(m.reduce_hp(30, this)) addMessage("The " + hal()->get_name() + " chops you!");
       }
     }
   if(intersect(get_pixel_bbox(), m.get_pixel_bbox()) && gframeid > invinc_end) {
-    if(m.reduce_hp(20)) addMessage("The " + hal()->get_name() + " slaps you!");
+    if(m.reduce_hp(20, this)) addMessage("The " + hal()->get_name() + " slaps you!");
     }
   }
 

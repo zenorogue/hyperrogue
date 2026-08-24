@@ -249,6 +249,10 @@ struct stater {
   virtual stater& only_full() { return self; }
   };
 
+/* reduce_hp flags */
+constexpr flagtype NON_DODGEABLE = 1;
+constexpr flagtype SPIKES = 2;
+
 struct entity {
   string id;
   virtual ~entity() {}
@@ -330,7 +334,7 @@ struct entity {
   virtual void attacked(int s, power *p) {}
 
   virtual void spiked() {
-    reduce_hp(10);
+    reduce_hp(10, nullptr, NON_DODGEABLE);
     spike_message();
     }
 
@@ -354,7 +358,7 @@ struct entity {
 
   virtual int invinc_time() { return 150; }
 
-  virtual bool reduce_hp(int x) {
+  virtual bool reduce_hp(int x, entity *attacker = nullptr, flagtype flags = 0) {
     if(hp < 0) return false;
     if(gframeid < invinc_end) return false;
     hp -= x;
@@ -390,6 +394,7 @@ struct statdata {
   statarray<ld> stats;
   int jump_control, coyote_time, hallucinating;
   ld detect_area, detect_cross, rough_detect;
+  int heavy_armor, spikes, max_mageshield, stealth_bonus, dodge_value;
   void reset();
   vector<weaponmod> mods;
   vector<hr::function<void(int&)>> on_hit;
@@ -428,6 +433,8 @@ struct man : public entity {
 
   virtual int max_hp() { return 10 * current.stats[stat::con]; }
 
+  int current_mageshield, mageshield_recharge_time;
+
   void handle_morph(entity *m);
   bool can_see(entity& e);
   man();
@@ -457,7 +464,9 @@ struct man : public entity {
     addMessage("OUCH! These spikes hurt!");
     }
 
-  bool reduce_hp(int x) override;
+  double stealth_ratio() { return 3 / (3. + current.stealth_bonus); }
+
+  bool reduce_hp(int x, entity *attacker = nullptr, flagtype flags = 0) override;
 
   void launch_attack(power *p, int fac, boxfun f);
 
