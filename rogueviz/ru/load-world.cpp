@@ -559,6 +559,9 @@ void load_cheat(string fname) {
     else if(s == "ACTIVATE") {
       power_edited->flags |= ACTIVE;
       }
+    else if(s == "DEACTIVATE") {
+      power_edited->flags &=~ ACTIVE;
+      }
     else if(s == "") {}
     else println(hlog, "unrecognized cheat: ", s);
     }
