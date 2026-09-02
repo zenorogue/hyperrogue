@@ -174,11 +174,15 @@ void render_room_walls(room *r) {
       r->replace_block(x, y, wSecretPassageH);
       }
 
+    string* glyph = &walls[cc].glyph;
+    static string dot = ".";
+    if(eWall(cc) == wWater && r->water_pressure[y][x] < 0.1) glyph = &dot;
+
     if((c & 7) == 0)
-      asciiletter(x*block_x, y*block_y, (x+1)*block_x, (y+1)*block_y, walls[cc].glyph, walls[cc].color);
+      asciiletter(x*block_x, y*block_y, (x+1)*block_x, (y+1)*block_y, *glyph, walls[cc].color);
 
     if((c & 7) == 4)
-      asciiletter(x*block_x, y*block_y, (x+2)*block_x, (y+2)*block_y, walls[cc].glyph, walls[cc].color);
+      asciiletter(x*block_x, y*block_y, (x+2)*block_x, (y+2)*block_y, *glyph, walls[cc].color);
 
     if(gravision) {
       int minx = x*block_x, maxx = (x+1)*block_x;

@@ -40,6 +40,7 @@ Have fun!
 #include "randeff.cpp"
 #include "reverts.cpp"
 #include "save.cpp"
+#include "physics.cpp"
 
 namespace rogue_unlike {
 
@@ -174,6 +175,7 @@ void playing_frame() {
     walls[wArenaDoor].flags = W_TRANS;
     }
 
+  current_room->physics_act();
 
   for(auto &e: new_entities) ents.push_back(std::move(e));
   new_entities.clear();
@@ -339,9 +341,11 @@ void run() {
         if(!help_entity && x >= 0 && y >= 0 && x < room_x && y < room_y) {
           if(!current_room->fov[y][x]) mouseovers = "invisible", helpstr = "You need to explore to see what is there.";
           else {
-            auto&w = walls[current_room->block_at[y][x] >> 3];
+            auto wtype = current_room->block_at[y][x] >> 3;
+            auto&w = walls[wtype];
             mouseovers = w.name;
             helpstr = w.help;
+            if(eWall(wtype) == wWater) mouseovers += " pressure: " + format("%lf", current_room->water_pressure[y][x]);
             }
           }
 

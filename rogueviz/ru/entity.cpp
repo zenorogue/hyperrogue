@@ -49,6 +49,20 @@ void entity::apply_grav() {
 
   auto dat = get_dat();
   vel.y += dat.d * grav() * dat.moda * 16/9.;
+
+  int bx = floor(where.x / block_x);
+  int by = floor(where.y / block_y);
+  if(current_room->at(bx, by) == wWater) {
+    auto w = current_room->water_pressure[by][bx];
+
+    bool in_water = where.y / block_y > by + 1 - w;
+
+    /* water resistance and currents */
+    vel.x = lerp(vel.x, current_room->current_x[by][bx] * 10, w / game_fps);
+    vel.y = lerp(vel.y, current_room->current_y[by][bx] * 10, w / game_fps);
+    /* buoyancy */
+    if(in_water) vel.y -= dat.d * grav() * dat.moda * 16/9. * 1.1;
+    }
   }
 
 void entity::apply_vel() {

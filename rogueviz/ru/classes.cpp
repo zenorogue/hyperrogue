@@ -103,6 +103,9 @@ struct room {
   renderbuffer *rbuf;
   cell *where;
   array<array<short, room_x>, room_y> block_at, orig_block_at;
+
+  array<array<ld, room_x>, room_y> water_pressure, current_x, current_y;
+
   bool fov[room_y][room_x];
   bool which_map_rendered;
 
@@ -197,6 +200,9 @@ struct room {
 
   using bfs_progress = hr::function<bool(intxy)>;
   vector<intxy> bfs(intxy start, const bfs_progress& f);
+
+  void physics_init();
+  void physics_act();
   };
 
 struct xy {

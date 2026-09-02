@@ -491,6 +491,7 @@ void load_room(fhstream& f, cell *c) {
       }
     else println(hlog, "unknown mapline ", s);
     }
+  r.physics_init();
   }
 
 map<string, entity*> entity_by_id;
