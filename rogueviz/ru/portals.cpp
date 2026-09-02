@@ -80,7 +80,6 @@ void load_nonhyperbolic() {
     if(flip_y == 0 || flip_y == 255) loc.fixed = true;
     }
 
-  int it = 0;
   while(true) {
     ld err = 0;
     for(int y=0; y<256; y++) for(int x=0; x<256; x++) {
@@ -90,7 +89,6 @@ void load_nonhyperbolic() {
       err += abs(pot - loc.potential);
       loc.potential = pot;
       }
-    it++;
     if(err < 1e-2) break;
     }
   }

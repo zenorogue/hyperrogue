@@ -505,6 +505,12 @@ void add_platf_hooks() {
 
   rogueviz::rv_hook(hooks_drawcell, 90, draw_room_on_map);
 
+  rogueviz::rv_change(shot::gamescreen_in_shots, false);
+  rogueviz::rv_hook(shot::hooks_hqshot, 100, [] {
+    render_room(current_room);
+    draw_room();
+    });
+
   rogueviz::rv_hook(mapstream::hooks_savemap, 100, [] (hstream& f) {
     f.write<int>(67);
     for(auto& p: rooms) {
