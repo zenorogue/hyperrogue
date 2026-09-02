@@ -543,6 +543,13 @@ auto chk = arg::add3("-ru", enable)
   + arg::add3("-ru-start", start_new_game)
   + arg::add3("-ru-load", [] { arg::shift(); enable(); load_from(arg::args()); })
   + arg::add3("-ru-cheat", [] { arg::shift(); load_cheat(arg::args()); })
+  + arg::add3("-ru-see-all", [] {
+     for(auto& [w, r]: rooms)
+     for(int y=0; y<room_y; y++)
+     for(int x=0; x<room_x; x++)
+       if(walls[r.at(x,y)].flags & W_TRANS)
+         r.reveal_around(x, y);
+     })
   + addHook(mapstream::hooks_loadmap, 100, [] (hstream& f, int id) {
     if(id == 67) {
       println(hlog, "loading platformer");
