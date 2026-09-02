@@ -315,7 +315,8 @@ struct entity {
 
   virtual double grav() { return 0.1; }  
 
-  bool on_floor, fallthru, on_ice, wallhug, on_bounce, is_stable;
+  bool on_floor, fallthru, wallhug, on_bounce, is_stable;
+  int on_ice;
 
   bool destroyed;
   void kino();

@@ -149,17 +149,26 @@ void entity::apply_walls() {
         apply_grav(); apply_grav(); if(vel.y > 0) vel.y = 0; on_bounce = true; goto again;
         }
       on_floor = true;
-      if(walls[b].flags & W_FROZEN) on_ice = true;
+      if(walls[b].flags & W_FROZEN) on_ice = 2;
+      if(walls[b].flags & W_SLIPPERY) on_ice = max(on_ice, 1);
       vel.y /= 2;
       if(abs(vel.y) < 1e-6) vel.y = 0;
       if(burning()) {
         if(b == wWoodWall)
           current_room->replace_block_frev(x, y, wAir);
+        else if(b == wIcyWall)
+          current_room->replace_block_frev(x, y, wWetWall);
+        else if(b == wIcyPlatform)
+          current_room->replace_block_frev(x, y, wWetPlatform);
         else hit_wall();
         }
       if(freezing()) {
         if(b == wWater)
           current_room->replace_block_frev(x, y, wFrozen);
+        else if(b == wWetPlatform)
+          current_room->replace_block_frev(x, y, wIcyPlatform);
+        else if(b == wWetWall)
+          current_room->replace_block_frev(x, y, wIcyWall);
         else if(b != wFrozen) hit_wall();
         }
       if(pixel_to_block(get_pixel_bbox_at(where + vel)).maxy <= y) where.y += vel.y; 
@@ -352,7 +361,7 @@ void entity::kill_off_screen() {
 
 void entity::kino() {
   on_floor = false;
-  on_ice = false;
+  on_ice = 0;
   wallhug = false;
   on_bounce = false;
   is_stable = false;

@@ -206,6 +206,18 @@ randeff fire_weapon("Fiery Weapon", "Attacks with your [weapon] set things on fi
            current_room->replace_block_frev(x, y, wAir);
            addMessage("You burn the wall!");
            }
+         if(b == wFrozen) {
+           current_room->replace_block_frev(x, y, wWater);
+           addMessage("You melt the ice!");
+           }
+         if(b == wIcyPlatform) {
+           current_room->replace_block_frev(x, y, wWetPlatform);
+           addMessage("You melt the ice on the platform!");
+           }
+         if(b == wIcyWall) {
+           current_room->replace_block_frev(x, y, wWetWall);
+           addMessage("You melt the ice on the wall!");
+           }
          }
        });
   });
@@ -225,6 +237,14 @@ randeff ice_weapon("Chill Weapon", "Attacks with your [weapon] freeze things.", 
          if(b == wWater) {
            current_room->replace_block_frev(x, y, wFrozen);
            addMessage("You freeze the water!");
+           }
+         if(b == wWetPlatform) {
+           current_room->replace_block_frev(x, y, wIcyPlatform);
+           addMessage("You freeze the platform!");
+           }
+         if(b == wWetWall) {
+           current_room->replace_block_frev(x, y, wIcyWall);
+           addMessage("You freeze the wall!");
            }
          }
        });

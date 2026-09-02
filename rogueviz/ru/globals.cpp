@@ -67,6 +67,7 @@ enum eWall {
   wBottomSpike, wRogueWallHidden, wRogueWall, wRightSlope, wLeftSlope, wLeftSlopedRoof, wRightSlopedRoof,
   wWeakWall, wStrangeSign, wWalkSpikes, wHyperBouncy,
   wArenaDoor, wGlassWall,
+  wWetWall, wIcyWall, wWetPlatform, wIcyPlatform,
   wGUARD };
 
 flagtype W_BLOCK = 1;
@@ -82,6 +83,7 @@ flagtype W_DOWNWARD = 512;
 flagtype W_SLOPE = 1024;
 flagtype W_PAIN_DOWN = 2048;
 flagtype W_HYPERBOUNCY = 4096;
+flagtype W_SLIPPERY = 8192;
 
 constexpr int qwall = int(wGUARD);
 
@@ -103,8 +105,8 @@ ruwall walls[qwall] = {
   r_wall,
   {"bouncy wall", "#", 'B', 0x80FF80FF, W_BLOCK | W_BOUNCY, "Like walls, but things bounce off them."},
   {"spike", "^", '^', 0xC08080FF, W_TRANS | W_PAIN | W_BLOCKBIRD, "Dangerous!"},
-  {"water", "~", '~', 0x0000FFFF, W_BLOCK | W_TRANS | W_BLOCKBIRD, "Not used yet."},
-  {"frozen water", "#", 'F', 0xC0C0FFFF, W_BLOCK | W_FROZEN, "Water magically turned into a slippery wall."},
+  {"water", "~", '~', 0x0000FFFF, W_TRANS | W_BLOCKBIRD, "Not used yet."},
+  {"frozen water", "#", 'F', 0xC0C0FFFF, W_BLOCK | W_FROZEN, "Water magically turned into a very slippery wall."},
   {"door", "+", '+', 0xC06000FF, W_BLOCK, "Attack the doors with your weapon to open them."},
   {"smashed door", "'", '?', 0xC06000FF, W_TRANS, "This door has been already opened."},
   {"locked door", "+", 'L', 0xA05000FF, W_BLOCK, "What is behind this door is not your business."},
@@ -138,7 +140,11 @@ ruwall walls[qwall] = {
   {"walkable spikes", "|", 'w', 0xC08080FF, W_TRANS | W_PAIN_DOWN, "You can walk through these spikes, but falling into them would hurt."},
   {"hyper-bouncy wall", "#", 'H', 0xC04040FF, W_BLOCK | W_BOUNCY | W_HYPERBOUNCY, "Like walls, but things really bounce off them."},
   {"arena door", "+", 'A', 0x50A000FF, W_BLOCK, "You need to defeat all monsters here to open this door."},
-  {"glass wall", "#", 'G', 0xA0A0FFFF, W_BLOCK | W_STABLE | W_TRANS, "This wall is tough, but transparent."}
+  {"glass wall", "#", 'G', 0xA0A0FFFF, W_BLOCK | W_STABLE | W_TRANS, "This wall is tough, but transparent."},
+  {"wet wall", "#", 'W', 0x404080FF, W_BLOCK | W_SLIPPERY, "This wall is wet. Be careful!"},
+  {"icy wall", "#", 'I', 0xD0D0FFFF, W_BLOCK | W_FROZEN, "This wall is covered with ice. Be very careful!"},
+  {"wet platform", "-", 'x', 0x404080FF, W_PLATFORM | W_TRANS | W_BLOCKBIRD | W_SLIPPERY, "This wall is wet. Be careful!"},
+  {"icy platform", "-", 'j', 0xD0D0FFFF, W_PLATFORM | W_TRANS | W_BLOCKBIRD | W_SLIPPERY, "This wall is covered with ice. Be very careful!"},
   };
 
 int sel = 1;
