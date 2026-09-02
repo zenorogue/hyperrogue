@@ -207,12 +207,14 @@ int parseviz() {
   bool dark = false;
   bool invis = false;
   bool smart = false;
+  bool zero = false;
   while(*buf) {
     if(*buf == 'h') hr = true;
     if(*buf == 's') smooth = true;
     if(*buf == 'd') dark = true;
     if(*buf == 'i') invis = true;
     if(*buf == 'f') smart = true;
+    if(*buf == 'z') zero = true;
     buf++;
     }
   PHASE(3);
@@ -246,6 +248,10 @@ int parseviz() {
     arg::cheat();
     vid.use_smart_range = 2;
     vid.smart_range_detail = 4;
+    }
+  if(zero) {
+    current_display->which_copy = inverse(View) * current_display->which_copy;
+    View = Id;
     }
   return 0;
   }
