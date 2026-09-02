@@ -661,7 +661,7 @@ void IMAGESAVE(SDL_Surface *s, const char *fname) {
 #if CAP_SHOT
 EX namespace shot {
 
-purehookset hooks_hqshot;
+EX purehookset hooks_hqshot;
 
 #if HDR
 enum screenshot_format { png, svg, wrl, rawfile };
@@ -691,9 +691,11 @@ void set_shotx() {
 
 EX int shot_aa = 1;
 
+EX bool gamescreen_in_shots = true;
+
 EX void default_screenshot_content() {
 
-  gamescreen();
+  if(gamescreen_in_shots) gamescreen();
 
   if(caption != "")
     displayfr(vid.xres/2, vid.fsize+vid.fsize/4, 3, vid.fsize*2, caption, forecolor, 8);
