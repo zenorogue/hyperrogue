@@ -112,6 +112,8 @@ extern struct evaltype {
   bool symmetric;
   } eval;
 
+void symmetrize();
+
 }
 }
 
