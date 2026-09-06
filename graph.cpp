@@ -1868,6 +1868,8 @@ EX void show_menu_button() {
    displayButton(vid.xres - 8, vid.yres - 3 * vid.fsize, XLAT(touch_description[(int) touchmode]), PSEUDOKEY_TOUCH, 16);
   }
 
+EX hookset<bool()> hooks_normalscreen;
+
 EX void normalscreen() {
   help = "@";
 
@@ -1881,6 +1883,9 @@ EX void normalscreen() {
   cmode = sm::NORMAL | sm::DOTOUR | sm::CENTER;
   if(viewdists && show_distance_lists) cmode |= sm::SIDE | sm::MAYDARK;
   if(tour::on && (tour::slides[tour::currentslide].flags & tour::SIDE)) cmode |= sm::SIDE;
+
+  if(callhandlers(false, hooks_normalscreen)) return;
+
   gamescreen(); drawStats();
 
   show_menu_button();
