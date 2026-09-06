@@ -76,6 +76,8 @@ void show_likelihood() {
       tallyedgesof(held_id, 1, mc);
       add_to_tally(mc, 1, 0);
       add_to_set(mc, 1, 0);
+
+      rogueviz::embeddings::eval.current = false;
       }
     }
   
