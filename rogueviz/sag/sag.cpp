@@ -363,6 +363,7 @@ void clear() {
   sagdist.clear();
   state = 0;
   qon.clear(); qsf.clear();
+  sag_edge = nullptr;
   }
 
 string cname() {
