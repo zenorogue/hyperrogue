@@ -584,6 +584,7 @@ void draw_edge(const shiftmatrix &V, cell *c, edgeinfo *ei) {
 
   vertexdata& vd1 = vdata[ei->i];
   vertexdata& vd2 = vdata[ei->j];
+  if(!vd1.m || !vd2.m) return;
 
   int oi = ei->i, oj = ei->j;
   bool hilite = false;
