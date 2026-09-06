@@ -24,23 +24,35 @@ void show_embedding_info() {
     vp("nodes", 'n', its(eval.li.N));
     vp("edges", 'm', its(eval.li.M));
     vp("embedding radius", 'r', its(eval.maxradius));
-    dialog::addBoolItem("symmetric", eval.li.symmetric, 's');
-    auto NX = bestll2(eval.li.M, eval.li.N1);
-    vp("normalized loglikelihood", 'x', fts(1 - eval.li.loglik / NX));
-    vp("icv", 'x', fts(-NX / (-NX + eval.li.control)));
+    dialog::addBoolItem("symmetric", eval.symmetric, 's');
+    dialog::add_action([] { if(!eval.symmetric) { symmetrize(); full_evaluation(); } });
 
     vp("mAP", 'M', fts(eval.rank.map / eval.rank.n));
     vp("MeanRank", 'R', fts(eval.rank.ranks / eval.rank.rby));
 
-    auto &r = eval.routing;
+    if(eval.symmetric) {
+      auto NX = bestll2(eval.li.M, eval.li.N1);
+      vp("normalized loglikelihood", 'x', fts(1 - eval.li.loglik / NX));
+      vp("icv", 'x', fts(-NX / (-NX + eval.li.control)));
+      }
+    else {
+      dialog::addBreak(100);
+      dialog::addInfo("edges are asymmetric");
+      dialog::addInfo("cannot evaluate other measures");
+      dialog::addBreak(100);
+      }
 
-    vp("greedy success", 'A', fts(r.suc / r.tot));
-    vp("greedy stretch", 'A', fts(r.routedist / r.suc));
-    vp("greedy efficiency", 'A', fts(r.eff / r.tot));
+    if(eval.symmetric) {
+      auto &r = eval.routing;
 
-    vp("modded success", 'A', fts(r.msuc / r.tot));
-    vp("modded stretch", 'A', fts(r.mroutedist / r.msuc));
-    vp("modded efficiency", 'A', fts(r.meff / r.tot));
+      vp("greedy success", 'A', fts(r.suc / r.tot));
+      vp("greedy stretch", 'A', fts(r.routedist / r.suc));
+      vp("greedy efficiency", 'A', fts(r.eff / r.tot));
+
+      vp("modded success", 'A', fts(r.msuc / r.tot));
+      vp("modded stretch", 'A', fts(r.mroutedist / r.msuc));
+      vp("modded efficiency", 'A', fts(r.meff / r.tot));
+      }
     }
 
   if(WDIM == 2) {

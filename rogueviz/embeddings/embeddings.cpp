@@ -29,6 +29,16 @@ struct rv_embedding : public tiled_embedding {
     }
   };
 
+void symmetrize() {
+  int n = get_n();
+  directed_edges.clear();
+  directed_edges.resize(n);
+  for(auto& e: edgeinfos) {
+    directed_edges[e->i].push_back(e->j);
+    directed_edges[e->j].push_back(e->i);
+    }
+  }
+
 void read_edgelist(const string& fname) {
 
   rogueviz::init(RV_GRAPH);

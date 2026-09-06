@@ -8,6 +8,7 @@ loglik_info analyze_mdl_symmetric(bool symmetric) {
   int dim = current->get_dimension();
   int N = get_n();
   loglik_info li;
+  li.symmetric = symmetric;
 
   if(dim == 1) return li;
 
