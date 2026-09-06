@@ -3,9 +3,9 @@ namespace rogueviz {
 
 namespace embeddings {
 
-  enum class fmt { hyperb, poincare, bhyper };
+  enum class fmt { hyperb, poincare, bhyper, bhyper_reduced };
   
-  string format_names[3] = { "hyperboloid trailing", "Poincare", "hyperboloid leading" };
+  string format_names[4] = { "hyperboloid trailing", "Poincare", "hyperboloid leading", "hyperboloid leading reduced" };
 
   fmt coord_format;
 
@@ -36,6 +36,8 @@ namespace embeddings {
             println(f, format("%.20lf", co[MDIM-1]));
             for(int i=0; i<MDIM-1; i++) println(f, format("%.20lf", co[i]));
             break;
+          case fmt::bhyper_reduced:
+            throw hr_exception("cannot save reduced embedding format");
           case fmt::poincare:
             auto h1 = space_to_perspective(co, 1);
             for(int i=0; i<MDIM-1; i++) println(f, format("%.20lf", h1[i]));
@@ -64,6 +66,8 @@ namespace embeddings {
     fhstream f(fn, "rt");
     if(!f.f) return file_error(fn);
 
+    if(coord_format == fmt::bhyper_reduced) node_importance.resize(N);
+
     for(int i=0; i<N; i++) {
       string s = scan<string>(f);
       if(s == "") throw hr_exception("data failure");
@@ -76,6 +80,12 @@ namespace embeddings {
         case fmt::bhyper:
           co[MDIM-1] = scan<ld>(f);
           for(int i=0; i<MDIM-1; i++) co[i] = scan<ld>(f);
+          break;
+        case fmt::bhyper_reduced:
+          scan<ld>(f);
+          for(int i=0; i<3; i++) co[i] = scan<ld>(f);
+          node_importance[id] = hypot_d(3, co);
+          co = normalize(co);
           break;
         case fmt::poincare:
           hyperpoint h1;
@@ -92,6 +102,7 @@ namespace embeddings {
     arg::add3("-el-coord", [] { arg::shift(); read_coord(arg::args()); })
   + arg::add3("-ec-hyperb", [] { coord_format = fmt::hyperb; })
   + arg::add3("-ec-bhyper", [] { coord_format = fmt::bhyper; })
+  + arg::add3("-ec-bhyper-reduced", [] { coord_format = fmt::bhyper_reduced; })
   + arg::add3("-ec-poincare", [] { coord_format = fmt::poincare; });
   
   }

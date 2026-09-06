@@ -112,6 +112,13 @@ extern struct evaltype {
   bool symmetric;
   } eval;
 
+extern vector<ld> node_importance;
+extern vector<bool> node_rendered;
+extern ld render_radius;
+
+inline ld get_node_importance(int i) { if(node_importance.empty()) return 0; else return node_importance[i]; }
+inline ld get_node_rendered(int i) { if(node_rendered.empty()) return true; else return node_rendered[i]; }
+
 void symmetrize();
 
 }

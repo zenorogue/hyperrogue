@@ -22,6 +22,8 @@ edgetype *ensure_edge() {
   return any;
   }
 
+vector<ld> importance;
+
 struct rv_embedding : public tiled_embedding {
   virtual string name() override { return "RogueViz internal representation"; }
   pair<cell*, hyperpoint> as_location(int id) override {
@@ -46,6 +48,7 @@ void read_edgelist(const string& fname) {
   rv_hook(hooks_clearmemory, 100, [] {
     directed_edges.clear();
     current = nullptr;
+    any = nullptr;
     });
 
   ensure_edge();
@@ -97,12 +100,38 @@ void write_edgelist(const string &fname) {
 void force_rvgraph() {
   for(auto& v: vdata) if(v.id < get_n()) {
     auto p = current->as_location(v.id);
-    v.be(p.first, rgpushxto0(p.second));
+    if(get_node_rendered(v.id))
+      v.be(p.first, rgpushxto0(p.second));
+    else
+      v.be_nowhere();
+    }
+  }
+
+vector<ld> node_importance;
+vector<bool> node_rendered;
+ld render_radius;
+
+void recompute_rendered() {
+  if(render_radius > 0) {
+    int N = get_n();
+    vector<int> order;
+    for(int i=0; i<N; i++) order.push_back(i);
+    sort(order.begin(), order.end(), [] (int i, int j) { return pair(get_node_importance(i), i) < pair(get_node_importance(j), j); });
+    vector<hyperpoint> sofar;
+    node_rendered.resize(N);
+    for(auto i: order) {
+      bool ok = true;
+      auto h1 = current->as_hyperpoint(i);
+      for(auto h0: sofar) if(hdist(h0, h1) < render_radius) { ok = false; break; }
+      node_rendered[i] = ok;
+      if(ok) sofar.push_back(h1);
+      }
     }
   }
 
 void reenable_embedding() {
   eval.current = false;
+  recompute_rendered();
   if(rogueviz::rv_quality >= 1 && among(current->get_dimension(), 2, 3) && current->get_dimension() <= WDIM) force_rvgraph();
   }
 
@@ -141,6 +170,7 @@ int a = arg::add3("-edgelist", [] { arg::shift(); read_edgelist(arg::args()); })
   + arg::add3("-missing-edges", [] { arg::shift(); set_missing_edges(arg::argf()); })
   + arg::add3("-missing-edges-env", [] { auto env = std::getenv("MISSING_EDGES"); if(env) set_missing_edges(atof(env)); })
   + arg::add3("-el-rv", [] { if(rogueviz::rv_quality == 0) force_rvgraph(); current = std::make_shared<rv_embedding> (); })
+  + arg::add3("-render-radius", [] { arg::shift_arg_formula(render_radius); })
   + arg::add3("-edge-arrow", [] {
     arg::shift(); any->arrow_scale = arg::argf();
     });
