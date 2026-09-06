@@ -16,7 +16,7 @@ int logid;
 int lastmethod = 0;
 int mul_used;
 
-bool optimized_embedding(int mul, ld bonus = 0) {
+bool optimized_embedding(int mul, ld bonus) {
   if(logid < recover_from) { println(hlog, "skipped ", logid++, " due to recover"); return false; }
   println(hlog, "starting, logid = ", logid, " recover_from = ", recover_from, " R = ", best.R+bonus, " T = ", best.T);
   int DN = isize(sagid);

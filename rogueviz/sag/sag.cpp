@@ -11,6 +11,9 @@ namespace rogueviz {
 
 namespace sag {
 
+debugflag debug_sag("sag");
+debugflag debug_init_sag("init_sag", true);
+
 flagtype state;
 
 // std::mt19937 los;

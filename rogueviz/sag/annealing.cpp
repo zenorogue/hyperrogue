@@ -6,8 +6,7 @@
 namespace rogueviz {
 namespace sag {
 
-enum eSagmode { sagOff, sagHC, sagSA };
-eSagmode sagmode; // 0 - off, 1 - hillclimbing, 2 - SA
+eSagmode sagmode;
 const char *sagmodes[3] = {"off", "HC", "SA"};
 
 ld temperature = 0;

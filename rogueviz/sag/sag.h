@@ -5,6 +5,7 @@
 #define _SAG_H_
 
 #include "../rogueviz.h"
+#include "../embeddings/embeddings.h"
 
 namespace rogueviz {
 namespace sag {
@@ -34,10 +35,36 @@ extern vector<int> sagid;
 extern ld yes_for(ld d);
 
 void init();
+void after_data();
 void clear();
+void compute_cost();
+void compute_loglik_tab();
 
-debugflag debug_sag("sag");
-debugflag debug_init_sag("init_sag", true);
+extern debugflag debug_sag;
+extern debugflag debug_init_sag;
+
+namespace cells {
+  extern color_t sag_cellcolor;
+  void activate_cellcolor();
+
+  extern int cell_request;
+  void init_cells();
+  }
+
+void sag_bridging(bool, int);
+bool optimized_embedding(int, ld=0);
+
+extern bool twoway, allow_doubles;
+
+enum eSagMethod { smClosest, smLogistic, smMatch };
+extern eSagMethod method;
+extern rogueviz::embeddings::logistic lgsag, lgsag_pre, best;
+extern ld bestcost;
+
+enum eSagmode { sagOff, sagHC, sagSA };
+extern eSagmode sagmode;
+
+extern int vizsa_start, vizsa_len;
 
 }
 }
