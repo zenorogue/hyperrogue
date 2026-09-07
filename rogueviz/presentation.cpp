@@ -227,7 +227,8 @@ string gen_latex(presmode mode, string s, int res, flagtype flags) {
         "\\end{document}\n", latex_packages.c_str(), s.c_str());
       fclose(f);
       hr::ignore(system("cd latex-cache; pdflatex rogueviz-latex.tex"));
-      bool has_working_pdftopng = system("pdftopng -v > /dev/null 2>&1") == 0;
+      int test_pdftopng = system("pdftopng -v > /dev/null 2>&1");
+      bool has_working_pdftopng = test_pdftopng == 0 || WEXITSTATUS(test_pdftopng) == 99;
       string pdftopng_command = has_working_pdftopng ? "pdftopng" : "pdftoppm -png";
       string pngline = 
         (flags & LATEX_COLOR) && has_working_pdftopng ?
