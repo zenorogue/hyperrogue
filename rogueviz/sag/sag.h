@@ -51,6 +51,7 @@ namespace cells {
   void init_cells();
   }
 
+void create_viz();
 void sag_bridging(bool, int);
 bool optimized_embedding(int, ld=0);
 
@@ -66,6 +67,7 @@ extern eSagmode sagmode;
 
 extern int vizsa_start, vizsa_len;
 
+extern edgetype *sag_edge;
 }
 }
 
