@@ -128,7 +128,9 @@ EX void init_floorcolors() {
   floorcolors[laCursed] = 0x481848;
   floorcolors[laDice] = 0xC0C0FF;
 
-  floorcolors[laMirror] = floorcolors[laMirrorWall] = floorcolors[laMirrorOld] = 0x808080;  
+  floorcolors[laMirror] = floorcolors[laMirrorWall] = floorcolors[laMirrorOld] = 0x808080;
+
+  floorcolors[laCircuit] = 0x128B2D;
   }
 
 EX color_t magma_color(int id) {

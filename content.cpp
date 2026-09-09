@@ -1601,7 +1601,35 @@ ITEM( 'o', 0x808080, "Orb of Plague", itOrbPlague, IC_ORB, IF_EMPATHY, RESERVED,
   NATIVE(among(m, moPike, moRusalka) ? 2 : 0)
   REQ( GOLD(R30) )
 
-LAND( 0x6FA136, "Frog Park",     laFrog, ZERO, itFrog, RESERVED, 
+LAND( 0x128B2D, "Circuit Land", laCircuit, ZERO, itCircuitSeed, RESERVED,
+  "Small logic circuits, grown from a seed by the hyperbugs to guard something precious. "
+  "The ivy branches into an AND, NAND, or OR gate wherever there is room to split "
+  "and lays down wires where the terrain forces it to run straight; the leaves are inputs. "
+  "Place a Dead Orb on an input to feed it a TRUE signal; when the top of the circuit "
+  "evaluates to TRUE, the whole thing burns out and the seed can be plucked. "
+  "The more seeds you gather, the larger the circuits become."
+  )
+ITEM( '*', 0xFFFFFF, "Circuit Seed", itCircuitSeed, IC_TREASURE, ZERO, RESERVED, osNone,
+  "A crystalline seed at the root of one of the hyperbugs' logic circuits. "
+  "It hums faintly when held; useful for the bugs, and apparently valuable in your world too.")
+WALL( '&', 0x09441B, "AND gate",  waCircuitAND,  WF_WALL, RESERVED, 0, sgNone,
+  "An AND gate. Outputs TRUE only if both of its inputs are TRUE.")
+WALL( '&', 0x09441B, "NAND gate", waCircuitNAND, WF_WALL, RESERVED, 0, sgNone,
+  "A NAND gate. Outputs FALSE only if both of its inputs are TRUE.")
+WALL( '*', 0xF0C040, "circuit seed", waCircuitSeed, WF_WALL | WF_HIGHWALL, RESERVED, 0, sgNone,
+  "The output of the circuit. When the circuit is satisfied, this shell breaks and drops the seed.")
+WALL( '=', 0x09441B, "circuit wire", waCircuitWire, WF_WALL | WF_HIGHWALL, RESERVED, 0, sgNone,
+  "Wiring inside the circuit. Solid and impassable -- signals only flow through it toward the seed.")
+WALL( '-', 0xF0C040, "input wire",  waCircuitInput, ZERO, RESERVED, 0, sgNone,
+  "An input at the end of a branch. Drop a Dead Orb here to feed a TRUE signal into the circuit.")
+WALL( '&', 0x09441B, "OR gate",  waCircuitOR, WF_WALL, RESERVED, 0, sgNone,
+  "An OR gate. Outputs TRUE if at least one of its inputs is TRUE.")
+  NATIVE(among(m, moBug0, moBug1, moBug2) ? 1 : 0)
+  #define LST {itRoyalJelly, itLotus, itFulgurite}
+  REQ(ACCONLY(laHive) ITEMS_TOTAL(LST, 30))
+  #undef LST
+
+LAND( 0x6FA136, "Frog Park",     laFrog, ZERO, itFrog, RESERVED,
   "This park is a perfect place for frogs to hide from predators. "
   "So perfect that the frogs have grown in size, gained magical abilities, "
   "and become very dangerous themselves."

@@ -700,7 +700,7 @@ EX vector<landtacinfo> land_tac = {
   
   {laCaribbean, 5, 2}, {laWhirlpool, 5, 2}, {laKraken, 5, 2}, 
   {laTemple, 5, 2}, {laMinefield, 5, 2},
-  {laPower, 5, 2}, {laHive, 5, 2}, {laRedRock, 5, 2}, {laStorms, 5, 2}, {laOvergrown, 5, 2},
+  {laPower, 5, 2}, {laHive, 5, 2}, {laCircuit, 5, 2}, {laRedRock, 5, 2}, {laStorms, 5, 2}, {laOvergrown, 5, 2},
   {laClearing, 5, 2},
   {laWhirlwind, 5, 2}, 
   {laBlizzard, 10, 1},

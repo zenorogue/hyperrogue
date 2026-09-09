@@ -349,6 +349,7 @@ EX bool collectItem(cell *c2, cell *last, bool telekinesis IS(false)) {
 
     if(!had_choice)
       c2->item = itNone;
+    if(c2->land == laCircuit) circuit::check(c2);
     }
 //    if(c2->land == laHive)
 //      c2->heat = 1;
@@ -403,8 +404,9 @@ EX void dropGreenStone(cell *c) {
     else {
       c->item = itGreenStone;
       addMessage(XLAT("You drop %the1.", itGreenStone));
-      if(isHaunted(cwt.at->land)) 
+      if(isHaunted(cwt.at->land))
         fail_survivalist();
+      if(c->land == laCircuit) circuit::check(c);
       }
     }
   else {

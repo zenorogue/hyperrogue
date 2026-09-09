@@ -342,6 +342,12 @@ void celldrawer::setcolors() {
       if(c->wall == waSmallTree) wcol = 0x008060;
       else if(c->wall == waBigTree) wcol = 0x0080C0;
       break;
+    case laCircuit:
+      // PCB green ground -- only for the base floor. waCircuitInput has its
+      // own gold color that must survive (it isn't a wall, so setcolors' top
+      // line has already set fcol = winf[waCircuitInput].color).
+      if(c->wall == waNone) fcol = floorcolors[c->land];
+      break;
     case laTemple: {
       int d = (eubinary||c->master->alt) ? celldistAlt(c) : 99;
       if(ls::any_chaos())
@@ -774,6 +780,10 @@ void celldrawer::draw_wall() {
   int starcol = wcol_star;
   if(c->wall == waWarpGate) starcol = 0;
   if(c->wall == waVinePlant) starcol = 0x60C000;
+  // Circuit gates get their symbol overlay drawn on the pillar top; keep the
+  // top face clean by suppressing the default star decoration.
+  if(c->wall == waCircuitAND || c->wall == waCircuitNAND || c->wall == waCircuitOR)
+    starcol = 0;
 
   if(c->wall == waClosedGate) {
     int hdir = 0;
@@ -1722,6 +1732,129 @@ void celldrawer::draw_features() {
       if(!mapeditor::drawUserShape(V * ddspin(c, c->mondir), mapeditor::sgWall, c->wparam, darkena(wcol, fd, 0xFF), c))
         queuepoly(V, cgi.shTriangle, darkena(wcol, fd, 0xFF));
       break;
+
+    case waCircuitAND:
+    case waCircuitNAND:
+    case waCircuitOR: {
+      // Gate rendered flat on the ground. Filled white IEEE-style logic-gate
+      // symbol with a thick black outline; output side faces the parent
+      // direction. Proportions taken from the reference SVG
+      // (nobody_Digital_logic_gates.svg on the user's Desktop):
+      //   AND: 32-wide by 26-tall D-shape, semicircle radius = half-height.
+      //   OR:  36-wide by 26-tall shield, concave back bows in by ~3.5.
+      //   NAND: AND + bubble of radius 2.
+      // Below, H = half-height, and every other dimension is scaled to it.
+      int pdir = c->landflags;
+      if(pdir < 0 || pdir >= c->type) break;
+      const color_t fill_col = 0xFFFFFFFF;
+      const color_t line_col = 0x000000FF;
+      const ld H = cgi.hexf * 0.45;   // half-height, fits comfortably in cell
+      shiftmatrix orient = V * ddspin(c, pdir);
+      auto pt = [&](ld x, ld y) -> hyperpoint {
+        ld r = hypot(x, y);
+        if(r < 1e-6) return C0;
+        return xspinpush0(atan2(y, x), r);
+        };
+      dynamicval<ld> lw(vid.linewidth, vid.linewidth * 20);
+      const int N = 20;
+
+      if(c->wall == waCircuitAND || c->wall == waCircuitNAND) {
+        // AND body: rectangle (-L .. P) plus semicircle of radius Hb on +X.
+        // For NAND, shrink the body so there's room for a fatter bubble.
+        const ld Hb = (c->wall == waCircuitNAND) ? H * 0.68 : H;
+        const ld L = Hb * 16.0 / 13.0;   // back at -L
+        const ld P = Hb *  3.0 / 13.0;   // semicircle center at +P
+        curvepoint(pt(-L, -Hb));
+        curvepoint(pt(-L,  Hb));
+        curvepoint(pt( P,  Hb));
+        for(int i = 1; i <= N; i++) {
+          ld ang = (90 - 180.0 * i / N) * degree;
+          curvepoint(pt(P + Hb * cos(ang), Hb * sin(ang)));
+          }
+        curvepoint(pt(-L, -Hb));
+        queuecurve(orient, line_col, fill_col, PPR::WALL_DECO);
+
+        if(c->wall == waCircuitNAND) {
+          const ld br = Hb * 0.45;                 // fat, readable bubble
+          const ld bx = P + Hb + br;               // just past the D-tip
+          const int M = 20;
+          for(int i = 0; i <= M; i++) {
+            ld ang = TAU * i / M;
+            curvepoint(pt(bx + br*cos(ang), br*sin(ang)));
+            }
+          queuecurve(orient, line_col, fill_col, PPR::WALL_DECO);
+          }
+        }
+      else {  // waCircuitOR: leaf shield, concave back, pointed tip
+        const ld W        = H * 18.0     / 13.0;    // half-width of back extent
+        const ld tip_x    = H * 18.0     / 13.0;    // tip at +tip_x on X axis
+        const ld flat_end = H * -4.531   / 13.0;    // horizontal edges end here
+        const ld bow      = H *  3.469   / 13.0;    // concave-back inward bow
+
+        // Concave back: (-W, -H) up to (-W, H), bowing toward +X at midpoint.
+        curvepoint(pt(-W, -H));
+        for(int i = 1; i <= N; i++) {
+          ld t = 1.0 * i / N;
+          ld yy = -H + 2*H*t;
+          ld xx = -W + bow * (1 - (2*t - 1) * (2*t - 1));
+          curvepoint(pt(xx, yy));
+          }
+        // Top horizontal from (-W, H) to (flat_end, H)
+        curvepoint(pt(flat_end, H));
+        // Top parabolic curve from (flat_end, H) to (tip_x, 0)
+        for(int i = 1; i <= N; i++) {
+          ld t = 1.0 * i / N;
+          ld xx = flat_end + (tip_x - flat_end) * t;
+          ld yy = H * (1 - t * t);
+          curvepoint(pt(xx, yy));
+          }
+        // Bottom parabolic curve from (tip_x, 0) to (flat_end, -H) -- mirror
+        // of top so the two halves of the leaf are symmetric.
+        for(int i = 1; i <= N; i++) {
+          ld t = 1.0 * i / N;
+          ld xx = tip_x - (tip_x - flat_end) * t;
+          ld u = 1 - t;
+          ld yy = -H * (1 - u * u);
+          curvepoint(pt(xx, yy));
+          }
+        // Bottom horizontal back to (-W, -H)
+        curvepoint(pt(-W, -H));
+        queuecurve(orient, line_col, fill_col, PPR::WALL_DECO);
+        }
+      break;
+      }
+
+    case waCircuitWire: {
+      // Wire cell: dark-green (silkscreen) background from winf[c->wall].color
+      // is already the floor color; on top of it draw two thick bright-green
+      // arms from cell center out to the SHARED-EDGE midpoints of the parent
+      // and child directions -- clipped to stay within this hexagon, since
+      // the neighboring cell renders its own half of the trace.
+      color_t wire_col = 0x128B2DFF;
+      dynamicval<ld> lw(vid.linewidth, vid.linewidth * 30);
+      shiftpoint center = V * C0;
+      int pdir = c->landflags;
+      if(pdir >= 0 && pdir < c->type) {
+        shiftpoint edge = mid(center, V * currentmap->adj(c, pdir) * C0);
+        queueline(center, edge, wire_col, 4);
+        }
+      // Find the child: the neighbor that is part of a circuit and whose
+      // landflags points back to us. The in_circuit filter matters -- a
+      // rollback-cleared non-circuit neighbor can coincidentally have
+      // landflags=0 and land at us via move(0), which would draw a spurious
+      // arm to an adjacent (60 deg-off) hex direction.
+      for(int i=0; i<c->type; i++) {
+        cell *n = c->move(i);
+        if(!n || !circuit::in_circuit(n)) continue;
+        if(n->landflags >= n->type) continue;
+        if(n->move(n->landflags) == c) {
+          shiftpoint edge = mid(center, V * currentmap->adj(c, i) * C0);
+          queueline(center, edge, wire_col, 4);
+          break;   // wires have exactly one child
+          }
+        }
+      break;
+      }
   
     default: {
       wa_default:
@@ -1812,6 +1945,7 @@ void celldrawer::draw_features() {
       }
     }
   #endif
+
   }
 
 void celldrawer::draw_features_and_walls_3d() {

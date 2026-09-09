@@ -538,6 +538,9 @@ EX eLand getNewLand(eLand old) {
 
   if(old == laTortoise) return laDragon;
 
+  if(old == laHive && landUnlocked(laCircuit) && hrand(100) < 25) return laCircuit;
+  if(old == laCircuit) return laHive;
+
   if(yendor::on && ls::any_chaos()) {
     while(true) {
       eLand n = eLand(hrand(landtypes));
@@ -789,7 +792,7 @@ EX vector<eLand> land_over = {
   laOcean, laDocks, laWarpCoast, laLivefjord, laKraken, laCaribbean, laBrownian, laWhirlpool, laRlyeh, laTemple,
   laIvoryTower, laEndorian, laWestWall, laDungeon, laMountain, 
   laCrossroads2, 
-  laDryForest, laWineyard, laDeadCaves, laGraveyard, laHaunted, laHive, 
+  laDryForest, laWineyard, laDeadCaves, laGraveyard, laHaunted, laHive, laCircuit,
   laRedRock, laVolcano,
   laDragon, laTortoise, laDice,
   laOvergrown, laClearing, laStorms, laBurial, laWhirlwind, 

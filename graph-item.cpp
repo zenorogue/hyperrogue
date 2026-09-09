@@ -283,7 +283,14 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
     int alpha = hidden ? (it == itKraken ? 0xC0 : 0x40) : 0xF0;
     if(c && c->wall == waIcewall) pr = PPR::HIDDEN, alpha = 0x80;
 
-    queuepolyat(V2, *xsh, darkena(icol, 0, alpha), pr);
+    if(it == itCircuitSeed) {
+      // Match the gate visual: white fill with a thick black outline.
+      dynamicval<color_t> po(poly_outline, 0x000000FF);
+      dynamicval<ld> lw(vid.linewidth, vid.linewidth * 20);
+      queuepolyat(V2, *xsh, darkena(icol, 0, alpha), pr);
+      }
+    else
+      queuepolyat(V2, *xsh, darkena(icol, 0, alpha), pr);
 
     if(it == itZebra) {
       shiftmatrix Vx = Vit * spinptick(1500, .5/(ct6+6));

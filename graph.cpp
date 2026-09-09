@@ -603,6 +603,7 @@ EX int getfd(cell *c) {
 
     case laRedRock:
     case laReptile:
+    case laCircuit:
       return 0;
       
     case laSnakeNest:

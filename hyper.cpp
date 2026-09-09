@@ -122,6 +122,7 @@
 #include "celldrawer.cpp"
 #include "sky.cpp"
 #include "blizzard.cpp"
+#include "circuit.cpp"
 #include "sound.cpp"
 #include "achievement.cpp"
 #include "barriers.cpp"

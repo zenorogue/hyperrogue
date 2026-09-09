@@ -1704,6 +1704,28 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
         }
       break;
     
+    case laCircuit:
+      if(fargen) {
+        // Sparser plant rate; try_plant now also enforces a wider clearance
+        // proportional to target_depth so deep trees can grow without
+        // colliding with a neighbor and falling back to shallower depths.
+        if(hrand(300) < 3 && !safety)
+          circuit::try_plant(c);
+        }
+      ONEMPTY {
+        // Don't spawn monsters or orbs on circuit cells -- a monster on a
+        // waCircuitInput would overwrite c->mondir and break tree traversal.
+        if(circuit::in_circuit(c)) break;
+        // scout hyperbugs wander the circuit land
+        if(hrand_monster(6000) < 20 + 3 * items[itCircuitSeed])
+          c->monst = hive::randomHyperbug();
+        // scatter Dead Orbs so the player always has fuel for the puzzles --
+        // essential in tactical mode where you start with none.
+        else if(hrand(1500) < 8)
+          c->item = itGreenStone;
+        }
+      break;
+
     case laHive:
       if(fargen) {
         if(hrand(2000) < (ls::tame_chaos() ? 1000 : (PURE && !ls::any_chaos()) ?200: ls::any_chaos() ? 10 : ls::horodisk_structure() ? 50 : ls::hv_structure() ? 10 : 2) && !safety)
