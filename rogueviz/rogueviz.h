@@ -154,6 +154,7 @@ namespace rogueviz {
   inline hookset<bool(int&, string&, FILE*)> hooks_readcolor;
   
   void readcolor(const string& cfname);
+  void readtitles(const string& cfname);
 
   void close();
   extern bool showlabels;
