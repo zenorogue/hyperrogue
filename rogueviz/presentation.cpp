@@ -228,6 +228,10 @@ string gen_latex(presmode mode, string s, int res, flagtype flags) {
       fclose(f);
       hr::ignore(system("cd latex-cache; pdflatex rogueviz-latex.tex"));
       int test_pdftopng = system("pdftopng -v > /dev/null 2>&1");
+// in MinGW there is no WEXITSTATUS, the value is returned directly
+#ifndef WEXITSTATUS
+#define WEXITSTATUS(x) x
+#endif
       bool has_working_pdftopng = test_pdftopng == 0 || WEXITSTATUS(test_pdftopng) == 99;
       string pdftopng_command = has_working_pdftopng ? "pdftopng" : "pdftoppm -png";
       string pngline = 
