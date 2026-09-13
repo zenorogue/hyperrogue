@@ -311,6 +311,8 @@ void assign_potion_powers() {
   find_power("reach").randeffs = relist{ pick(&jump_double, &jump_high, &jump_bubble, &jump_light), random_powers[3] };
   find_power("fire").randeffs = relist{ pick(&fire_spit, &fire_weapon), random_powers[4] };
   find_power("mystery").randeffs = relist{ random_powers[5], random_powers[6], random_powers[7] };
+  find_power("surprise").randeffs = relist{ random_powers[8] }; // need more random powers
+  find_power("enigma").randeffs = relist{ random_powers[9] }; // need more random powers
   morph_cat_color = hrand_elt(cat_colors);
   }
 

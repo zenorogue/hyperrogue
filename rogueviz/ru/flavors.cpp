@@ -29,6 +29,10 @@ flavor
   pc_green{"green", 0x00C000FF},
   pc_white{"white", 0xFFFFFFFF},
   pc_black{"black", 0x303030FF},
+  pc_darkgold{"dark golden", 0x804000FF},
+  pc_orange{"orange", 0xFFC000FF},
+  pc_darkgreen{"dark green", 0x105010FF},
+  pc_darkpurple{"dark purple", 0x505010FF},
 
   // jewelry flavors
   jc_steel{"steel", 0xA0A0C0FF},
@@ -39,7 +43,7 @@ flavor
 
 vector<flavor> cat_colors = { cc_red, cc_black, cc_white };
 
-vector<flavor> potion_colors = { pc_bubbling, pc_golden, pc_red, pc_blue, pc_green, pc_white, pc_black };
+vector<flavor> potion_colors = { pc_bubbling, pc_golden, pc_red, pc_blue, pc_green, pc_white, pc_black, pc_darkgold, pc_orange, pc_darkgreen, pc_darkpurple };
 
 vector<flavor> jewelry_colors = { jc_steel, jc_amethyst, jc_ruby, jc_sapphire, jc_emerald };
 

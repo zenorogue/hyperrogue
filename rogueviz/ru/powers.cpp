@@ -629,6 +629,18 @@ void gen_powers() {
     random_potion_act
     ).be_potion(),
 
+  gen_power('8', 0, "surprise",
+    "A potion with some random effect.",
+    "!", 0xFFFF00FF,
+    random_potion_act
+    ).be_potion(),
+
+  gen_power('9', 0, "enigma",
+    "A potion with some random effect.",
+    "!", 0xFFFF00FF,
+    random_potion_act
+    ).be_potion(),
+
   gold_id = isize(powers);
 
   gen_power('t', 0, "gold",
