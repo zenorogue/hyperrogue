@@ -210,7 +210,7 @@ EX namespace westwall {
   EX void switchTreasure(cell *c) {
     c->item = itNone;
     if(safety) return;
-    if(hrand(5000) < PT(100 + 2 * (kills[moAirElemental] + kills[moWindCrow]), 200) && c->landparam >= 5 + items[itWest])
+    if(hrand(5000) < PT(100 + 2 * (kills[moWestHawk] + kills[moFallingDog]), 200) && c->landparam >= 5 + items[itWest])
       c->item = itWest;
     else if(hrand(5000) < 20*PRIZEMUL)
       placeLocalOrbs(c);
