@@ -52,8 +52,8 @@ struct power {
   void init();
   vector<struct weaponmod> mods;
   hr::function<void(data&)> act, paused_act, dead_act;
-  hr::function<string()> get_name;
-  hr::function<string()> get_desc;
+  hr::function<string(struct item*)> get_name;
+  hr::function<string(struct item*)> get_desc;
   hr::function<string()> get_glyph;
   hr::function<color_t()> get_color;
   hr::function<void(int)> picked_up;
@@ -998,8 +998,8 @@ struct item : public located_entity {
       existing = false;
       }
     }
-  string get_name() override { return p->name; }
-  string get_help() override { return p->get_desc(); }
+  string get_name() override { return p->get_name(this); }
+  string get_help() override { return p->get_desc(this); }
   };
 
 struct shopitem : public item {

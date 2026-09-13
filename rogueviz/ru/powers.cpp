@@ -10,14 +10,15 @@ power& power::while_dead() { dead_act = act; return self; }
 
 power& power::identified_name(string s, string desc) {
   auto gn = get_name;
-  get_name = [gn, s, this] () { return (flags & IDENTIFIED) ? s : gn(); };
+  get_name = [gn, s, this] (item* it) { return (flags & IDENTIFIED) ? s : gn(it); };
   auto gd = get_desc;
-  get_desc = [gd, s, this] () { return (flags & IDENTIFIED) ? s : gd(); };
+  get_desc = [gd, s, this] (item* it) { return (flags & IDENTIFIED) ? s : gd(it); };
   return self;
   }
 
-string addqof(string base, power *p) {
-  if(p->qty_filled > 1) base = "+" + its(p->qty_filled) + " " + base;
+string addqof(string base, power *p, item *it) {
+  if(it) { if(it->qty > 1) base = "+" + its(it->qty) + " " + base; return base; }
+  if(p->qty_filled > 1) base = "+" + its(p->qty_filled-1) + " " + base;
   if(p->qty_owned > p->qty_filled) base = base + " " + "(+" + its(p->qty_owned - p->qty_filled) + ")";
   return base;
   }
@@ -26,8 +27,8 @@ string addqof(string base, power *p) {
 power& power::be_weapon() {
   flags |= WEAPON;
   picked_up = [this] (int x) { qty_owned += x; qty_filled = max(qty_filled, x);  };
-  auto gn = get_name; get_name = [gn, this] {
-    string s = addqof(gn(), this);
+  auto gn = get_name; get_name = [gn, this] (item *it) {
+    string s = addqof(gn(it), this, it);
     for(auto& md: mods) md.change_name(s);
     return s;
     };
@@ -43,8 +44,9 @@ power& power::be_armor(const vector<vector<string>>& v) {
   flags |= ARMOR;
   picked_up = [this] (int x) { qty_owned += x; qty_filled = max(qty_filled, x);  };
 
-  auto gn = get_name; get_name = [gn, this] {
-    string s = gn();
+  auto gn = get_name; get_name = [gn, this] (item *it) {
+    string s = gn(it);
+    if(it) { if(it->qty > 1)  s += " [" + its(it->qty) + " parts]"; return s; }
     s += " [" + its(qty_filled) + "]";
     if(flags & ACTIVE) s += " (worn)";
     if(qty_owned > qty_filled) s += " (+" + its(qty_owned - qty_filled) + ")";
@@ -52,8 +54,9 @@ power& power::be_armor(const vector<vector<string>>& v) {
     };
 
   auto gd = get_desc;
-  get_desc = [this, gd, v] () -> string {
-    auto desc = gd();
+  get_desc = [this, gd, v] (item *it) -> string {
+    auto desc = gd(it);
+    if(it) return desc;
     std::mt19937 armorgen;
     armorgen.seed(m.gameseed ^ v[0][0][0] ^ (v[1][0][0] << 8));
     println(hlog, "after armorgen");
@@ -95,7 +98,7 @@ power& power::be_armor(const vector<vector<string>>& v) {
       if(!m.is_stable)
         addMessage("You need to be on stable footing to redress.");
       else if(d.p->flags & ACTIVE) {
-        addMessage("You start removing your " + gn() + ".");
+        addMessage("You start removing your " + gn(nullptr) + ".");
         d.p->flags &=~ ACTIVE;
         int len = game_fps * 1.5;
         m.dresstime += len;
@@ -121,7 +124,7 @@ power& power::be_armor(const vector<vector<string>>& v) {
           addMessage("You have to remove your " + wearing_what->name + " first.");
         else {
           d.p->flags |= ACTIVE;
-          addMessage("You start putting on your " + gn() + ".");
+          addMessage("You start putting on your " + gn(nullptr) + ".");
           int len = game_fps * 2;
           m.dresstime += len;
 
@@ -148,7 +151,7 @@ power& power::be_armor(const vector<vector<string>>& v) {
   }
 
 power& power::be_resource(string s) {
-  get_name = [this, s] { return its(qty_filled) + " " + s; };
+  get_name = [this, s] (item *it) { return its(it ? it->qty : qty_filled) + " " + s; };
   return self;
   }
 
@@ -159,13 +162,13 @@ power& power::be_jewelry(string jtype, string xdesc) {
   reshuffle = [this, nj] { fl = jewelry_colors[nj]; };
   picked_up = [this] (int x) { qty_owned += x; qty_filled = max(qty_filled, x);  };
   get_color = [this] { return fl.col; };
-  get_name = [this, jtype] {
+  get_name = [this, jtype] (item *it) {
     string fname = fl.name + " " + jtype;
     if(flags & IDENTIFIED) fname = fname + " of " + name;
-    fname = addqof(fname, this);
+    fname = addqof(fname, this, it);
     return fname;
     };
-  get_desc = [this, xdesc] {
+  get_desc = [this, xdesc] (item *it) {
     return (flags & IDENTIFIED) ? desc : xdesc;
     };
   return self;
@@ -173,9 +176,9 @@ power& power::be_jewelry(string jtype, string xdesc) {
 
 power& power::be_wearable(string wear_effect, string remove_effect, string worn) {
   auto gn = get_name;
-  get_name = [this, gn, worn] {
-    string s = gn();
-    if(flags & ACTIVE) s += worn;
+  get_name = [this, gn, worn] (item* it) {
+    string s = gn(it);
+    if((!it) && (flags & ACTIVE)) s += worn;
     return s;
     };
   auto ac = act;
@@ -183,7 +186,7 @@ power& power::be_wearable(string wear_effect, string remove_effect, string worn)
     if(d.keystate == 1) {
       d.p->flags ^= ACTIVE;
       string msg = (d.p->flags & ACTIVE) ? wear_effect : remove_effect;
-      if(msg.find("%") != string::npos) msg.replace(msg.find("%"), 1, get_name());
+      if(msg.find("%") != string::npos) msg.replace(msg.find("%"), 1, get_name(nullptr));
       addMessage(msg);
       }
     ac(d);
@@ -195,7 +198,7 @@ string replace_weapon(string s, power *wpn) {
   while(true) {
     auto w = s.find("[weapon]");
     if(w == string::npos) return s;
-    s.replace(w, 8, wpn->get_name());
+    s.replace(w, 8, wpn->get_name(nullptr));
     }
   }
 
@@ -205,7 +208,7 @@ power& power::be_potion() {
   get_color = [this] { return fl.col; };
   refill = [this] { qty_filled = qty_owned; };
   reshuffle = [this, np] { fl = potion_colors[np]; flags &=~ IDENTIFIED; };
-  get_name = [this] {
+  get_name = [this] (item *it) {
     string fname = fl.name + " potion";
     if(flags & (PARTIAL | IDENTIFIED)) fname = fname + " of " + name;
     int insq = 0;
@@ -216,16 +219,19 @@ power& power::be_potion() {
         insq++;
         }
     if(insq) fname += "]";
-    fname += " (" + its(qty_filled) + "/" + its(qty_owned) + ")";
-    if(flags & ACTIVE) fname += " [active]";
+    if(it) fname += " (" + its(it->qty) + ")";
+    else {
+      fname += " (" + its(qty_filled) + "/" + its(qty_owned) + ")";
+      if(flags & ACTIVE) fname += " [active]";
+      }
     return fname;
     };
   auto gd = get_desc;
-  get_desc = [this, gd] () -> string {
+  get_desc = [this, gd] (item *it) -> string {
     if(!(flags & (PARTIAL | IDENTIFIED)))
       return "You will need to drink this potion to identify it.";
     else {
-      auto desc = gd();
+      auto desc = gd(it);
       if(flags & IDENTIFIED)
         for(auto& e: randeffs)
           desc += replace_weapon(e->desc, e->which_weapon);
@@ -244,10 +250,10 @@ void random_potion_act(data& d) {
     for(auto& e: d.p->randeffs) e->unact(d);
     if(d.flags & DO_NOT_DRINK) return;
     if(d.p->qty_filled == 0) {
-      addMessage("You have no more " + d.p->get_name());
+      addMessage("You have no more " + d.p->get_name(nullptr));
       return;
       }
-    addMessage("You drink the " + d.p->get_name());
+    addMessage("You drink the " + d.p->get_name(nullptr));
     for(auto& e: d.p->randeffs) {
       if(e->effect != "") {
         addMessage(replace_weapon(e->effect, e->which_weapon));
@@ -276,8 +282,8 @@ void power::init() {
   act = [this] (data& d) { pf(d); };
   paused_act = [] (data&) {};
   dead_act = [] (data&) {};
-  get_name = [this] { return name; };
-  get_desc = [this] { return desc; };
+  get_name = [this] (item*) { return name; };
+  get_desc = [this] (item*) { return desc; };
   get_color = [this] { return color; };
   get_glyph = [this] { return glyph; };
   picked_up = [this] (int x) { qty_filled += x; qty_owned += x; };
@@ -357,10 +363,10 @@ void gen_powers() {
         else if(d.p->flags & ACTIVE)
           addMessage("This potion is drank automatically whenever you visit a Magic Fountain.");
         else if(!on_fountain)
-          addMessage("For safety, you can only drink " + d.p->get_name() + " at the Magic Fountain.");
+          addMessage("For safety, you can only drink " + d.p->get_name(nullptr) + " at the Magic Fountain.");
         else {
           fountain_room = current_room; fountain_where = m.where; death_revert = {};
-          addMessage("You drink the " + d.p->get_name() + " and you feel that nothing will stop you now!");
+          addMessage("You drink the " + d.p->get_name(nullptr) + " and you feel that nothing will stop you now!");
           d.p->flags |= ACTIVE;
           }
         }
@@ -692,7 +698,7 @@ void gen_powers() {
             }
           else if(it == 0 && on_trader && !si->existing && d.p->qty_owned >= si->price) {
             done_something = true;
-            addMessage("You buy the " + si->p->get_name() + ".");
+            addMessage("You buy the " + si->p->get_name(si) + ".");
             power_death_revert(*si->p);
             powers[gold_id].qty_owned -= si->price;  powers[gold_id].qty_filled -= si->price;
             si->existing = true; si->bought = true;
@@ -700,7 +706,7 @@ void gen_powers() {
             }
           else if(it == 0 && on_trader && !si->existing && !si->bought) {
             done_something = true;
-            addMessage("You have not enough gold to buy the " + si->p->get_name() + ".");
+            addMessage("You have not enough gold to buy the " + si->p->get_name(si) + ".");
             }
           }
         if(!done_something) addMessage("You count your gold. You have " + its(d.p->qty_owned) + " gold.");
@@ -745,7 +751,7 @@ int inventory_page;
 void assign_key_screen(power& p, int page) {
   render_the_map();
   draw_inventory_frame();
-  dialog::init(p.get_name(), p.get_color() >> 8);
+  dialog::init(p.get_name(nullptr), p.get_color() >> 8);
   dialog::addItem("press a key to redefine", SDLK_ESCAPE);
   dialog::display();
   dialog::addBack();
@@ -777,14 +783,14 @@ void draw_inventory() {
     string key = p.key == ' ' ? "␣" : dialog::keyname(p.key);
     if(displaystr(column + 100, next_y, 0, vid.fsize, key, p.get_color() >> 8, 16)) getcstat = p.key;
     if(displaystr(column + 130, next_y, 0, vid.fsize, p.get_glyph(), p.get_color() >> 8, 8)) getcstat = p.key;
-    if(displaystr(column + 160, next_y, 0, vid.fsize, p.get_name(), p.get_color() >> 8, 0)) getcstat = p.key;
+    if(displaystr(column + 160, next_y, 0, vid.fsize, p.get_name(nullptr), p.get_color() >> 8, 0)) getcstat = p.key;
     next_y += st;
     if(next_y >= vid.yres - 48) { next_y = 48 + st * 1.5; column = vid.xres/2; }
     dialog::add_key_action(p.key, [&p] { pushScreen([&p] {
       render_the_map();
       draw_inventory_frame();
-      dialog::init(p.get_name(), p.get_color() >> 8);
-      dialog::addHelp(p.get_desc());
+      dialog::init(p.get_name(nullptr), p.get_color() >> 8);
+      dialog::addHelp(p.get_desc(nullptr));
 
       dialog::addItem("return to inventory", SDLK_ESCAPE);
       dialog::add_action(popScreen);
