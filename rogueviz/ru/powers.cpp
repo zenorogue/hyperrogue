@@ -668,7 +668,9 @@ void gen_powers() {
             done_something = true;
             addMessage(si->pickup_message);
             power_death_revert(*si->p);
-            si->p->qty_owned += si->qty;  si->p->qty_filled += si->qty1;
+            si->pre_owned = si->p->qty_owned; si->pre_filled = si->p->qty_filled;
+            si->p->picked_up(si->qty);
+            si->post_owned = si->p->qty_owned; si->post_filled = si->p->qty_filled;
             add_revert(death_revert, {"EXIST", si->id});
             si->existing = false;
             }
@@ -682,11 +684,14 @@ void gen_powers() {
             }
           else if((it ? !done_something : on) && !si->existing && !si->bought) {
             done_something = true;
-            addMessage("You rethink your purchase.");
-            power_death_revert(*si->p);
-            si->p->qty_owned -= si->qty;  si->p->qty_filled -= si->qty1;
-            add_revert(death_revert, {"UNEXIST", si->id});
-            si->existing = true;
+            if(si->p->qty_owned == si->post_owned && si->p->qty_filled == si->post_filled) {
+              addMessage("You rethink your purchase.");
+              power_death_revert(*si->p);
+              si->p->qty_owned = si->pre_owned;  si->p->qty_filled = si->pre_filled;
+              add_revert(death_revert, {"UNEXIST", si->id});
+              si->existing = true;
+              }
+            else addMessage("Cannot return this anymore, in the current state!");
             }
           else if((it ? !done_something : on) && !si->existing && si->bought) {
             done_something = true;

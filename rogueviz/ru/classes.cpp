@@ -1003,7 +1003,7 @@ struct item : public located_entity {
   };
 
 struct shopitem : public item {
-  int qty1;
+  int pre_owned, pre_filled, post_owned, post_filled;
   int price;
   bool bought;
   string glyph() override;
@@ -1012,15 +1012,20 @@ struct shopitem : public item {
   void act() override {
     kino();
     bool next_intersect = intersect(get_pixel_bbox(), m.get_pixel_bbox());
-    if(next_intersect && !last_intersect) {
-      addMessage("This costs " + its(price) + " gold.");
+    if(next_intersect && !last_intersect && !bought) {
+      addMessage("This costs " + its(price) + " gold: " + get_name());
       }
     last_intersect = next_intersect;
     }
   string get_name() override { if(bought) return its(price) + " gold"; return item::get_name(); }
   string get_help() override { if(bought) return "You have bought something from this shop. The trader has stored the gold here."; return item::get_help() + "\n\nPrice: " + its(price); }
   shopitem* as_shopitem() override { return this; }
-  virtual void hs(stater& s) override { item::hs(s); s.act("bought", bought, false).act("last_intersect", last_intersect, 0); }
+  virtual void hs(stater& s) override {
+    item::hs(s);
+    s.act("bought", bought, false).act("last_intersect", last_intersect, 0)
+    .act("pre_owned", pre_owned, 0).act("pre_filled", pre_filled, 0)
+    .act("post_owned", pre_owned, 0).act("post_filled", pre_filled, 0);
+    }
   };
 
 struct non_spatial_entity : public entity {

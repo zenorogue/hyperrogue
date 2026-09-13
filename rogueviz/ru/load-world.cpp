@@ -227,7 +227,6 @@ void load_room(fhstream& f, cell *c) {
         b->respawn = get_xy();
         b->price = get_int();
         b->qty = param == "" ? 1 : get_int();
-        b->qty1 = param == "" ? 0 : get_int();
         b->p = &find_power(scanline_noblank(f));
         b->id = unspace(b->pickup_message = scanline_noblank(f));
         r.entities.emplace_back(std::move(b));

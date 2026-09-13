@@ -1349,15 +1349,21 @@ Why is there always gold lying in these mazes...
 ITEM 308 261
 toughness
 You find a beautiful ring.
-SHOPITEM 421 238 50 1 0
-toughness
-You find a beautiful ring in this store.
-SHOPITEM 420 200 50 1 0
+SHOPITEM 421 238 50 1
+dexterity
+This ring is definitely beatiful.
+SHOPITEM 420 200 50 1
 wisdom
-You find another beautiful ring in this store.
+This ring will be beatiful after you clean it.
+SHOPITEM 444 200 50 1
+toughness
+This ring is probably magical.
+SHOPITEM 444 168 50 1
+strength
+This ring looks very well-made.
 TRADER 458 247
-John the trader
-Hello here! Please buy something from my shop!
+Jeweller
+Hello here! Please buy something beautiful from my jewelry shop!
 OK
 
 MOVE 2 Mazes of Menace
@@ -1726,9 +1732,21 @@ MAP
 #b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b
 TIMEORB 30 117 3.9
 TIMEORB 560 79 20
+SHOPITEM 250 45 80 1
+heavy armor
+You get a part of warrior outfit.
+SHOPITEM 280 45 80 1
+wizard attire
+You get a part of wizard outfit.
+SHOPITEM 314 45 80 1
+thief garments
+You get a part of thief outfit.
+SHOPITEM 345 45 80 1
+druid outfit
+You get a part of druid outfit.
 TRADER 236 67
-Jack the trader
-Do you want to buy anthing?\n\nSorry for the traps, last week a thief stole my stuff and escaped through some secret door. So I installed some for protection.\n\nNo idea where it is...
+Outfitter
+Hello, do you want anything to wear? welcome to my shop.\n\nSorry for the traps, last week a thief stole my stuff and escaped through some secret door. So I installed some for protection.
 OK
 
 MOVE 4 Timed Passage
@@ -3102,6 +3120,8 @@ $ shop door
 . air
 / right slope
 \ left slope
+^ spike
+| column
 MAP
 ################################################################################
 ################################################################################
@@ -3120,9 +3140,9 @@ MAP
 ################################################################################
 ################################################################################
 ################################################################################
-#############################################.................##################
-##################......................#####.................##################
-#################.......................#####.................##################
+#############################################.......|.........##################
+##################......................#####.......|.........##################
+#################.......................#####.......^.........##################
 ################........................#####.................##################
 ###############......./###########\........$..................##################
 ##############.......//###########\\.......$..................##################
@@ -3144,11 +3164,20 @@ MAP
 ################################################################################
 #b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b
 FIGHTTRADER 470 170
-Rick the trader
-Keep your axes away from the shop!
-SHOPITEM 420 170 50 1 0
-wisdom
-"It is wise to wear magical rings in your travels!"
+Apothecary
+Keep your axes away from my apothecary!
+SHOPITEM 360 170 150 1
+health
+You take the first bottle.
+SHOPITEM 385 170 50 1
+mystery
+You take the second bottle.
+SHOPITEM 410 170 50 1
+surprise
+You take the third bottle.
+SHOPITEM 435 170 50 1
+enigma
+You take the fourth bottle.
 OK
 
 MOVE 3 Central Cavern Bottom Left
@@ -3374,10 +3403,16 @@ MAP
 #b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b#b
 TRADER 516 90
 Kelly the trader
-Hey! We have some nice rings for sale!
-SHOPITEM 557 24 50 1 0
-toughness
-This shop sells some nice rings.
+Hey! We have some nice general stuff for sale!
+SHOPITEM 557 24 50 1
+dagger
+You pick up a simple dagger.
+SHOPITEM 557 40 80 1
+strange cyan crystal ball
+You pick up a crystal ball.
+SHOPITEM 510 40 20 1
+furry ring
+You pick up a furry ring.
 ITEM 240 230
 polymorph
 You find some alchemical ingredients.
