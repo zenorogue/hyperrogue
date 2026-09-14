@@ -54,6 +54,11 @@ void statdata::reset() {
   mods.clear();
   on_hit.clear();
   status_strings.clear();
+
+  jump_power = 1;
+  gravity_value = 1;
+  extra_jumps = 0;
+  boost_max = 0;
   }
 
 man::man() {
@@ -83,6 +88,9 @@ void man::hs(stater& s) {
   int prof = (int) profession; s1.act("profession", prof, -1); profession = (stat) prof;
   for(auto st: allstats) s1.act(statinfos[st].name, base_stats[st], 10);
 
+  s1.act("jumps_used", jumps_used, 0);
+  s1.act("boost_left", boost_left, 0);
+
   auto sdata = [&s1] (statdata& sd, string prefix) {
     for(auto st: allstats) s1.act(prefix + statinfos[st].name, sd.stats[st], 10);
     s1.act(prefix + "jump_control", sd.jump_control, 0);
@@ -97,6 +105,11 @@ void man::hs(stater& s) {
     s1.act(prefix + "max_mageshield", sd.max_mageshield, 0);
     s1.act(prefix + "stealth_bonus", sd.stealth_bonus, 0);
     s1.act(prefix + "dodge_value", sd.dodge_value, 0);
+
+    s1.act(prefix + "jump_power", sd.jump_power, 1);
+    s1.act(prefix + "gravity_value", sd.gravity_value, 1);
+    s1.act(prefix + "extra_jumps", sd.extra_jumps, 0);
+    s1.act(prefix + "boost_max", sd.boost_max, 0);
     };
 
   sdata(current, "curr.");

@@ -396,11 +396,22 @@ void gen_powers() {
     "^", 0xFF0000FF,
     [] (data& d) {
       if(d.keystate & 1) {
+        if(m.on_floor) m.jumps_used = 0;
         bool can_jump = m.on_floor;
         if(gframeid <= m.on_floor_when + m.current.coyote_time) can_jump = true;
         if(m.dresstime) can_jump = false;
-        if(can_jump) m.vel.y = m.zero_vel.y-(non_hyperbolic ? 3 : 5) * d.d * d.modv, m.on_floor_when = -1000;
+        if(!can_jump && m.current.extra_jumps > m.jumps_used && !(d.keystate & 2) && !m.dresstime) {
+          m.jumps_used++;
+          can_jump = true;
+          }
+        if(can_jump) {
+          if(m.on_floor_platform) m.on_floor_platform->jumped_on();
+          m.vel.y = m.zero_vel.y-(non_hyperbolic ? 3 : 5) * d.d * d.modv * m.current.jump_power, m.on_floor_when = -1000;
+          }
+        if(m.boost_left > 0) m.next.gravity_value += 1, m.boost_left --;
         }
+      if(m.boost_left < m.current.boost_max && m.on_floor) m.boost_left++;
+      if(m.boost_left > m.current.boost_max) m.boost_left--;
       }
     ).is_starting(),
 

@@ -274,13 +274,17 @@ void entity::apply_walls() {
       bool reset = false;
 
       if(p->platform_type() == wStaircase) {
-        if(!fallthru) { on_floor = true; zero_vel = zvel; if(rvel.y > 0) rvel.y = 0; }
+        if(!fallthru) {
+          on_floor = true; zero_vel = zvel; if(rvel.y > 0) rvel.y = 0;
+          on_floor_platform = p;
+          }
         }
 
       else if(intersect(pb, get_pixel_bbox_at(rmow))) { /* should not happen */ }
 
       else if(!intersect(pb, get_pixel_bbox_at(rmow + xy(rvel.x, 0))) && rvel.y > 0) {
         on_floor = true;
+        on_floor_platform = p;
         rvel.y /= 2;
         if(abs(rvel.y) < 1e-6) rvel.y = 0;
         reset = true;
@@ -361,6 +365,7 @@ void entity::kill_off_screen() {
 
 void entity::kino() {
   on_floor = false;
+  on_floor_platform = nullptr;
   on_ice = 0;
   wallhug = false;
   on_bounce = false;
@@ -844,6 +849,59 @@ void kestrel::act() {
   if(intersect(get_pixel_bbox(), m.get_pixel_bbox())) {
     if(m.reduce_hp(chop(), this)) addMessage("The " + hal()->get_name() + " claws you!");
     }
+  }
+
+xy freemoving_platform::location_at(ld t) {
+  act();
+  if(t == gframeid-1) return last_position;
+  if(t == gframeid) return where;
+  auto h1 = to_hyper(last_position);
+  auto h2 = to_hyper(where);
+  auto d = hdist(h1, h2);
+  auto x = d * (t - (gframeid - 1));
+  return from_hyper(rgpushxto0(h1) * rspintox(gpushxto0(h1) * h2) * xpush0(x));
+  }
+
+void floating_bubble_platform::act() {
+  if(position_time == gframeid) return;
+  last_position = where;
+  position_time = gframeid;
+
+  stay_on_screen();
+  apply_walls_reflect();
+  apply_vel();
+
+  auto dat = get_dat();
+  bool man_on = intersect(extend(get_pixel_bbox(), 0, 0, dat.d, 0), m.get_pixel_bbox());
+
+  if(man_on) vel.y += dat.d * dat.moda * 0.01;
+  else vel.y -= dat.d * dat.moda * 0.01;
+
+  vel.x = lerp(vel.x, 0, 1. / game_fps);
+  vel.y = lerp(vel.y, 0, 1. / game_fps);
+  }
+
+void floating_bubble_platform::jumped_on() {
+  auto d = get_dat();
+  vel.y += 1.5 * d.d * d.modv * m.current.jump_power;
+  }
+
+void levitating_bubble_platform::act() {
+  if(position_time == gframeid) return;
+  last_position = where;
+  position_time = gframeid;
+
+  stay_on_screen();
+  apply_walls_reflect();
+  apply_vel();
+
+  vel.x = lerp(vel.x, 0, 10. / game_fps);
+  vel.y = lerp(vel.y, 0, 10. / game_fps);
+  }
+
+void levitating_bubble_platform::jumped_on() {
+  auto d = get_dat();
+  vel.y += 1.5 * d.d * d.modv * m.current.jump_power;
   }
 
 void healthbubble::act() {

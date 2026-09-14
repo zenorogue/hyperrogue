@@ -317,6 +317,7 @@ struct entity {
 
   bool on_floor, fallthru, wallhug, on_bounce, is_stable;
   int on_ice;
+  moving_platform *on_floor_platform;
 
   bool destroyed;
   void kino();
@@ -402,6 +403,8 @@ struct statdata {
   int jump_control, coyote_time, hallucinating;
   ld detect_area, detect_cross, rough_detect;
   int heavy_armor, spikes, max_mageshield, stealth_bonus, dodge_value;
+  ld jump_power, gravity_value;
+  int extra_jumps, boost_max;
   void reset();
   vector<weaponmod> mods;
   vector<hr::function<void(int&)>> on_hit;
@@ -423,6 +426,7 @@ struct man : public entity {
   int facing;
   int on_floor_when;
   int dresstime;
+  int jumps_used, boost_left;
   entity *morphed = nullptr;
   vector<effect> effects;
   power *use_next_turn;
@@ -478,6 +482,7 @@ struct man : public entity {
   void launch_attack(power *p, int fac, boxfun f);
 
   virtual void hs(stater& s);
+  virtual double grav() { return entity::grav() / current.gravity_value; }
   };
 
 extern man m;
@@ -500,6 +505,40 @@ struct moving_platform : public entity {
   string get_name() override { return get_shape_name() + " platform"; }
   string get_help() override { return "Moving platforms move."; }
   bool nonstatic() override { return false; }
+  virtual void jumped_on() {}
+  };
+
+struct freemoving_platform : public moving_platform {
+  xy last_position;
+  int position_time;
+  xy location_at(ld t) override;
+  virtual void hs(stater& s) {
+    moving_platform::hs(s);
+    s.act("last_position", last_position, xy(0,0))
+     .act("position_time", position_time, 0);
+    }
+  };
+
+struct floating_bubble_platform : public freemoving_platform {
+  virtual int width() { return 1; }
+  xy siz() override { return {6.*width(), 6}; }
+  void act() override;
+  string glyph() override { return "O"; }
+  color_t color() override { return 0xC0FFFFFF; }
+  string get_name() override { return "floating bubble"; }
+  string get_help() override { return "This upward-floating bubble acts as a temporary platform."; }
+  void jumped_on() override;
+  };
+
+struct levitating_bubble_platform : public freemoving_platform {
+  virtual int width() { return 1; }
+  xy siz() override { return {6.*width(), 6}; }
+  void act() override;
+  string glyph() override { return "O"; }
+  color_t color() override { return 0xC0FFFFFF; }
+  string get_name() override { return "levitating bubble"; }
+  string get_help() override { return "This levitating bubble acts as a temporary platform."; }
+  void jumped_on() override;
   };
 
 struct ferris_platform : public moving_platform {

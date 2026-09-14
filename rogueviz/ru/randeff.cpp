@@ -35,10 +35,71 @@ randeff confux("Confusion", "Makes you unable to tell left and right.", "You fee
   });
 
 // jump powers
-randeff jump_double("Double Jump", "Lets you jump while already in air.", "You feel a strange force in your legs!", [] (data &d) { });
-randeff jump_high("High Jump", "Lets you jump higher.", "Your legs feel stronger!", [] (data &d) { });
-randeff jump_bubble("Bubble", "Lets you create bubbles to reach higher places.", "You feel strange bubbles growing in your mouth!", [] (data &d) { });
-randeff jump_light("Lightness", "Causes you to be less affected by gravity.", "You feel lighter!", [] (data &d) { });
+randeff jump_double("Double Jump", "Lets you jump while already in air.", "You feel a strange force in your legs!", [] (data &d) {
+  m.next.extra_jumps++;
+  });
+
+randeff jump_high("High Jump", "Lets you jump higher.", "Your legs feel stronger!", [] (data &d) {
+  m.next.jump_power += 0.5;
+  });
+
+randeff jump_boost("Boost", "Lets you move upwards during jump.", "Your feet feel magical!", [] (data &d) {
+  m.next.boost_max += game_fps;
+  });
+
+randeff jump_floating_bubble("Floating Bubble", "Lets you create floating bubbles to reach higher places.", "You feel strange bubbles growing in your mouth!", [] (data &d) {
+  if(d.mode == rev::start || (d.mode == rev::active && d.keystate == 1)) {
+    int bubbles_found = 0;
+    for(auto& e: current_room->entities) if(e->id == "FBUBBLE") {
+      if(e->existing) bubbles_found++;
+      e->existing = false;
+      e->destroyed = true;
+      }
+    if(bubbles_found) return;
+    // auto d = m.get_dat();
+    auto mi = std::make_unique<floating_bubble_platform>();
+    mi->id = "FBUBBLE";
+    // mi->ctr = m.where + xy(m.facing * m.get_scale() * 1.5, 0);
+    mi->hs(fountain_resetter);
+    mi->where = m.where + xy(m.facing * m.get_scale() * m.siz().y * 0.45, 0);
+    mi->vel = m.vel + xy(m.facing * d.modv, 0);
+    current_room->entities.emplace_back(std::move(mi));
+    }
+  });
+
+randeff jump_levitating_bubble("Levitating Bubble", "Lets you create levitating bubbles to reach higher places.", "You feel strange bubbles growing in your stomach!", [] (data &d) {
+
+  auto& re = *d.re;
+  auto& bubble_available = re.a;
+
+  if(d.mode == rev::start) bubble_available = false;
+
+  if(m.on_floor) bubble_available = true;
+  if(m.on_floor_platform && m.on_floor_platform->id == "LBUBBLE") bubble_available = false;
+
+  if(d.mode == rev::start || (d.mode == rev::active && d.keystate == 1)) {
+
+    int bubbles_found = 0;
+    for(auto& e: current_room->entities) if(e->id == "LBUBBLE") {
+      if(e->existing) bubbles_found++;
+      e->existing = false;
+      e->destroyed = true;
+      }
+    if(bubbles_found || !bubble_available) return;
+
+    bubble_available = false;
+    auto mi = std::make_unique<levitating_bubble_platform>();
+    mi->id = "LBUBBLE";
+    mi->hs(fountain_resetter);
+    mi->where = m.where + xy(0, m.facing * m.get_scale() * m.siz().y * 0.25);
+    mi->vel = m.vel + xy(0, d.modv * 2);
+    current_room->entities.emplace_back(std::move(mi));
+    }
+  });
+
+randeff jump_light("Lightness", "Causes you to be less affected by gravity.", "You feel lighter!", [] (data &d) {
+  m.next.gravity_value += 1;
+  });
 
 // trap powers
 randeff trap_detect("Detect traps", "Lets you see traps and secret passages in a circle around you.", "You see things you could not see before!", [] (data &d) {
@@ -308,7 +369,7 @@ void assign_potion_powers() {
   find_power("health").randeffs = relist{ pick(&health_heal, &health_regen, &health_protect, &health_vampire, &health_bubbles, &health_protect), random_powers[0] };
   find_power("the thief").randeffs = relist{ pick(&trap_detect, &trap_snake, &trap_disarm, &trap_detect_cross), random_powers[1] };
   find_power("polymorph").randeffs = relist{ pick(&morph_cat, &morph_capy), random_powers[2] };
-  find_power("reach").randeffs = relist{ pick(&jump_double, &jump_high, &jump_bubble, &jump_light), random_powers[3] };
+  find_power("reach").randeffs = relist{ pick(&jump_double, &jump_high, &jump_light, &jump_boost, &jump_floating_bubble, &jump_levitating_bubble), random_powers[3] };
   find_power("fire").randeffs = relist{ pick(&fire_spit, &fire_weapon), random_powers[4] };
   find_power("mystery").randeffs = relist{ random_powers[5], random_powers[6], random_powers[7] };
   find_power("surprise").randeffs = relist{ random_powers[8] }; // need more random powers
