@@ -2821,18 +2821,19 @@ auto hook = addHook(hooks_args, 100, readRuleArgs);
 #endif
 
 EX void convert_if_appropriate() {
-  println(hlog, "*** CONVERT TO RULEGEN");
   if(!auto_rulegen) return;
   if(!hyperbolic) return;
-  println(hlog, "converting");
+  indenter_finish icia(debug_geometry, "converting to rulegen");
   if(geometry != gArbitrary)
     arb::convert::convert();
-  println(hlog, "activating");
+
+  if(debug_geometry) println(hlog, "activating");
   arb::convert::activate();
-  println(hlog, "preparing rules");
+  
+  if(debug_geometry) println(hlog, "preparing rules");
 
   if(!prepare_rules()) return;
-  println(hlog, "success");
+  if(debug_geometry) println(hlog, "success");
   }
 
 EX }
