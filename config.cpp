@@ -2111,9 +2111,9 @@ EX void resetConfig() {
   }
 #endif
 
-#if CAP_CONFIG
-
 EX debugflag debug_init_config = {"init_config", true};
+
+#if CAP_CONFIG
 
 EX void saveConfig() {
   indenter_finish isaveconfig(debug_init_config, "saveConfig");

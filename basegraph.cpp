@@ -218,6 +218,8 @@ EX void present_screen() {
 
 #endif
 
+EX debugflag debug_init_font = {"init_font", true};
+
 #if CAP_SDLTTF
 
 EX vector<string> font_filenames = {
@@ -242,8 +244,6 @@ EX vector<pair<string, string>> font_names = {
 
 EX int last_font_id = 0;
 EX int font_id = 0;
-
-EX debugflag debug_init_font = {"init_font", true};
 
 #ifdef FONTCONFIG
 TTF_Font* findfont(int siz) {
