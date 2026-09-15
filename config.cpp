@@ -1177,7 +1177,9 @@ EX void initConfig() {
     separate_status = true;
     multi::multi_autojoy = false;
     touch_interface = true;
+    #if CAP_SAVE
     scores::scale = 1;
+    #endif
     }
 
   // basic config
@@ -1406,7 +1408,9 @@ EX void initConfig() {
     "lands per page shown in the World Overview",
     'L');
 
+  #if CAP_SAVE
   param_i(scores::scale, "scores_scale")->editable(1, 2, 1, "scores scale", "", 'S');
+  #endif
 
   param_b(startanims::enabled, "startanim", true)
   -> editable("start animations", 's');

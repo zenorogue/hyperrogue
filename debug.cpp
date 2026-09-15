@@ -702,7 +702,9 @@ int read_cheat_args() {
     shift(); vid.stereo_mode = eStereo(argi());
     }
   else if(argis("-save-cheats")) {
+    #if CAP_SAVE
     save_cheats = true;
+    #endif
     }
   else if(argis("-cmove")) {
     PHASE(3); shift();

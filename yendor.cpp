@@ -1547,8 +1547,10 @@ void mode_screen_for_current() {
 
   dialog::addBreak(100);
 
+  #if CAP_SAVE
   dialog::addSelItem(XLAT("scores recorded"), its(qty_scores_for[mc]), 's');
   dialog::add_action([] { modecode(); scores::load(); scores::which_mode = current_modecode; });
+  #endif
 
   dialog::addSelItem(XLAT("Yendor Challenge"), its(yendor::compute_tscore(mc)), 'y');
   dialog::add_action([] {
@@ -1608,8 +1610,11 @@ EX bool include_unused_modes;
 
 EX string mode_to_search;
 
+#if CAP_SAVE
 int gscore(modecode_t xc) { if(!qty_scores_for.count(xc)) return 0; return qty_scores_for[xc]; }
 int gscoreall(modecode_t xc) { return gscore(xc) * 100 + tactic::compute_tscore(xc) * 10 + yendor::compute_tscore(xc); }
+#endif
+
 string gdisplay(modecode_t xc) {
   string out = "";
   if(modename.count(xc)) out = modename[xc] + ": ";
@@ -1622,7 +1627,9 @@ EX map<modecode_t, string> modename;
 
 EX void prepare_custom() {
   modecode();
+  #if CAP_SAVE
   scores::load_only();
+  #endif
   gen_mode_list();
   pushScreen(show_custom);
   }
@@ -1642,8 +1649,10 @@ EX void set_mode_sort_order() {
   dialog::addItem(XLAT("reverse order"), 'r');
   dialog::add_action([] { reverse(mode_list.begin(), mode_list.end()); popScreen(); });
 
+  #if CAP_SAVE
   dialog::addItem(XLAT("by number of scores"), 's');
   dialog::add_action([] { stable_sort(mode_list.begin(), mode_list.end(), [] (modecode_t a, modecode_t b) { return gscore(a) > gscore(b); }); popScreen(); });
+  #endif
 
   dialog::addItem(XLAT("by Pure Tactics Mode score"), 't');
   dialog::add_action([] { stable_sort(mode_list.begin(), mode_list.end(), [] (modecode_t a, modecode_t b) { return tactic::compute_tscore(a) > tactic::compute_tscore(b); }); popScreen(); });
@@ -1671,7 +1680,9 @@ EX void list_saved_custom_modes() {
 
   for(auto m: mode_list) {
     string out;
+    #if CAP_SAVE
     if(qty_scores_for.count(m)) out += XLAT(" scores: %1", its(qty_scores_for[m]));
+    #endif
     if(yendor::bestscore.count(m)) out = XLAT(" Yendor: %1", its(yendor::compute_tscore(m)));
     if(tactic::recordsum.count(m)) out += XLAT(" tactic: %1", its(tactic::compute_tscore(m)));
     if(out == "") { unused++; if(!include_unused_modes) continue; }

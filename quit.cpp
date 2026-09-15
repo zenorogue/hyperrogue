@@ -56,10 +56,12 @@ string timeline() {
     if(display_yasc_codes)
       s += XLAT(" YASC code: ") + formatted_yasc_code();
     }
+  #if CAP_SAVE
   if(casual && loadcount >= 0 && display_semicasual) {
     ld val = exp(load_branching/scores::BRANCH_SCALE);
     s += XLAT(" saves: %1 loads: %2 branching: %3", its(savecount), its(loadcount), val < 1e6 ? format("%.0f", val) : format("%.4g", val));
     }
+  #endif
   return s;
   }
 
