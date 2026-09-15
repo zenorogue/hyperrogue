@@ -288,7 +288,7 @@ EX debugflag debug_graph = {"graph"};
 EX debugflag debug_aura = {"graph_aura"};
 
 EX void drawaura() {
-  indenter_finish(debug_aura, "drawaura");
+  indenter_finish iaura(debug_aura, "drawaura");
   if(!haveaura()) return;
   if(vid.stereo_mode) return;
   double rad = current_display->radius;
@@ -1390,7 +1390,7 @@ EX void center_multiplayer_map(const vector<hyperpoint>& hs) {
 EX debugflag debug_map = {"graph_map"};
 
 EX void drawthemap() {
-  indenter_finish(debug_map, "drawthemap");
+  indenter_finish dtm(debug_map, "drawthemap");
 
   check_cgi();
   cgi.require_shapes();
@@ -1580,7 +1580,7 @@ EX debugflag debug_calcparam = {"graph_param"};
 
 EX void calcparam() {
 
-  indenter_finish(debug_calcparam, "calcparam");
+  indenter_finish icalcparam(debug_calcparam, "calcparam");
   auto cd = current_display;
   
   cd->xtop = vid.xres * cd->xmin;
@@ -1655,7 +1655,7 @@ EX function<void()> wrap_drawfullmap = drawfullmap;
 bool force_sphere_outline = false;
 
 EX void drawfullmap() {
-  indenter_finish(debug_map, "drawfullmap");
+  indenter_finish dfm(debug_map, "drawfullmap");
 
   check_cgi();
   cgi.require_shapes();
@@ -1959,7 +1959,7 @@ EX color_t titlecolor;
 
 EX void drawscreen() {
 
-  indenter_finish(debug_map, "drawscreen");
+  indenter_finish idrawscreen(debug_map, "drawscreen");
   #if CAP_GL
   GLWRAP;
   #endif

@@ -2112,7 +2112,7 @@ EX void resetConfig() {
 EX debugflag debug_init_config = {"init_config", true};
 
 EX void saveConfig() {
-  indenter_finish(debug_init_config, "saveConfig");
+  indenter_finish isaveconfig(debug_init_config, "saveConfig");
   FILE *f = fopen(conffile.c_str(), "wt");
   if(!f) {
     addMessage(s0 + "Could not open the config file: " + conffile);
@@ -2185,7 +2185,7 @@ EX void loadNewConfig(FILE *f) {
 
 EX void loadConfig() {
  
-  indenter_finish(debug_init_config, "loadConfig");
+  indenter_finish iloadconfig(debug_init_config, "loadConfig");
   vid.xres = 9999; vid.yres = 9999; vid.framelimit = 999;
   FILE *f = fopen(conffile.c_str(), "rt");
   if(f) {

@@ -760,7 +760,7 @@ debugflag debug_movestar = {"graph_movestar"};
 
 EX void drawmovestar(double dx, double dy) {
 
-  indenter_finish(debug_movestar, "drawmovestar");
+  indenter_finish imovestar(debug_movestar, "drawmovestar");
   if(viewdists) return;
   if(GDIM == 3) return;
 

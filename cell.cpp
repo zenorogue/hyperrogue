@@ -647,7 +647,7 @@ EX debugflag debug_memory_cell = {"memory_cell"};
 
 EX void clearcell(cell *c) {
   if(!c) return;
-  indenter_finish(debug_memory_cell, hr::format("memory_cell %d %p\n", c->type, hr::voidp(c)));
+  indenter_finish iclearcell(debug_memory_cell, hr::format("memory_cell %d %p\n", c->type, hr::voidp(c)));
   for(int t=0; t<c->type; t++) if(c->move(t)) {
     if(debug_memory_cell)
       println(hlog, hr::format("mov %p [%p] S%d\n", hr::voidp(c->move(t)), hr::voidp(c->move(t)->move(c->c.spin(t))), c->c.spin(t)));

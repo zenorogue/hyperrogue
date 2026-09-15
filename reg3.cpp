@@ -1139,7 +1139,7 @@ EX namespace reg3 {
     
     
     void create_patterns() {
-      indenter_finish(debug_map_create, "creating pattern = " + its(isize(allh)));
+      indenter_finish ipatterns(debug_map_create, "creating pattern = " + its(isize(allh)));
       
       if(!PURE) {
          if(debug_errors || debug_map_create)

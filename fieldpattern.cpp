@@ -609,7 +609,7 @@ EX purehookset hooks_solve3;
 
 int fpattern::solve3() {
 
-  indenter_finish(debug_field, "fpattern::solve3");
+  indenter_finish isolve3(debug_field, "fpattern::solve3");
 
   reg3::generate_fulls();
   

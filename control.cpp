@@ -337,7 +337,7 @@ EX debugflag debug_joy = {"joy"};
 
 EX void countJoysticks() {
   #if SDLVER == 1
-  indenter_finish(debug_init_joy, "countJoysticks");
+  indenter_finish ijoy(debug_init_joy, "countJoysticks");
   int numsticks = SDL_NumJoysticks();
   sticks.resize(numsticks);
   for(int i=0; i<numsticks; i++) {
@@ -370,7 +370,7 @@ EX void delete_joystick(int instance) {
 
 EX void initJoysticks() {
 
-  indenter_finish(debug_init_joy, "initJoysticks");
+  indenter_finish ijoy(debug_init_joy, "initJoysticks");
 
   if (SDL_error_in(SDL_InitSubSystem(SDL_INIT_JOYSTICK)))
   {
@@ -391,7 +391,7 @@ EX void initJoysticks() {
   }
 
 EX void closeJoysticks() {
-  indenter_finish(debug_init_joy, "closeJoysticks");
+  indenter_finish ijoy(debug_init_joy, "closeJoysticks");
   for(auto& s: sticks) {
     #if SDLVER >= 2
     if(s.gc) SDL_GameControllerClose(s.gc); else
@@ -419,7 +419,7 @@ EX void read_joy_axes() {
   }
 
 EX void checkjoy() {
-  indenter_finish(debug_joy, "checkjoy");
+  indenter_finish ijoy(debug_joy, "checkjoy");
   if(!DEFAULTCONTROL) return;
   ld joyvalue1 = sqr(vid.joyvalue);
   ld joyvalue2 = sqr(vid.joyvalue2);
@@ -984,7 +984,7 @@ namespace deck {
 #endif
 
 EX void mainloopiter() {
-  indenter_finish(debug_control, "mainloopiter");
+  indenter_finish imainloop(debug_control, "mainloopiter");
   GLWRAP;
 
   #if !CAP_SDLGFX && !CAP_GL 
@@ -1310,7 +1310,7 @@ EX void refresh_if_needed() {
 
 EX void handle_event(SDL_Event& ev) {
   bool normal = cmode & sm::NORMAL;
-    indenter_finish(debug_control, "got event type #" + its(ev.type));
+    indenter_finish ievent(debug_control, "got event type #" + its(ev.type));
     int sym = 0;
     int uni = 0;
     shiftmul = 1;
