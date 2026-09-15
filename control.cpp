@@ -742,6 +742,7 @@ EX void handleKeyNormal(int sym, int uni) {
       sym = 0; uni = 0;
       }
     if(sym == 'f' || is_joy_index(sym, deck::key_f)) bow::switch_fire_mode();
+    #if CAP_SDLJOY
     if(sym == '`' || is_joy_index(sym, deck::enter)) {
       flashMessages();
       movepcto(joydir);
@@ -749,6 +750,7 @@ EX void handleKeyNormal(int sym, int uni) {
       joytime = -1;
       checkjoy();
       }
+    #endif
     }
 
   if(sym == SDLK_KP5 && DEFAULTCONTROL && !game_keys_scroll) movepcto(-1, 1);
@@ -1121,11 +1123,13 @@ EX void mainloopiter() {
   hiliteclick = keystate[SDLK_LALT] | keystate[SDLK_RALT];
   #endif
 
+  #if CAP_SDLJOY
   if(defaultjoy) for(auto& s: sticks) {
     if(gjoy_button(s, deck::key_control)) lctrlclick = true;
     if(gjoy_button(s, deck::key_alt)) hiliteclick = true;
     if(gjoy_button(s, deck::key_shift)) lshiftclick = true;
     }
+  #endif
 
   anyshiftclick = lshiftclick | rshiftclick;
   anyctrlclick = lctrlclick | rctrlclick;

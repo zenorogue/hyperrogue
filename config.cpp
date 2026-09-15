@@ -1589,7 +1589,7 @@ EX void initConfig() {
   -> help("Background particle effects, e.g., in the Blizzard.");
   // control
   
-  #if CAP_SDL
+  #if CAP_SDLJOY
   param_enum(joy_init, "joyinit", jiFast)
     ->editable({{"off", "do not use joysticks"}, {"fast", "do not wait until the joysticks are initialized"}, {"wait", "wait until the joysticks are initialized"}}, "joystick initialization", 'j');
   param_i(vid.joyvalue, "vid.joyvalue", 4800);
