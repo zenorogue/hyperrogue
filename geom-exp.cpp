@@ -1436,7 +1436,11 @@ int read_geom_args() {
     }
   #endif
   else if(argis("-d:quotient")) 
+    #if CAP_THREAD && MAXMDIM >= 4
     launch_dialog(WDIM == 2 ? showQuotientConfig : showQuotientConfig3);
+    #else
+    launch_dialog(showQuotientConfig );
+    #endif
   else if(argis("-uqf")) 
     fieldpattern::use_quotient_fp = true;
   #endif

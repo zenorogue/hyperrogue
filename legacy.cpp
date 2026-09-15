@@ -337,7 +337,7 @@ EX void buildBigStuff_legacy(cell *c, cell *from) {
   }
 #endif
 
-#if CAP_COMMANDLINE
+#if CAP_COMMANDLINE && CAP_LEGACY
 /* legacy options */
 int read_legacy_args() {
   using namespace arg;
