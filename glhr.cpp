@@ -55,6 +55,7 @@ EX }
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
 EX void glError(const char* GLcall, const char* file, const int line) {
+  if(!vid.usingGL) return;
   GLenum errCode = glGetError();
   if(errCode!=GL_NO_ERROR)
     rate_limited_error(hr::format("OPENGL ERROR #%i: in file %s on line %i :: %s",errCode,file, line, GLcall));
@@ -72,6 +73,7 @@ struct glwrap {
 #endif
 
 void glwrap::act(const char *when) {
+  if(!vid.usingGL) return;
   GLenum errCode = glGetError();
   if(errCode!=GL_NO_ERROR)
     rate_limited_error(hr::format("GL error %i %s: %s:%i", errCode, when, msg, line));

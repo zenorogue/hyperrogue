@@ -2548,7 +2548,7 @@ transmatrix backup_cam;
 EX void enable_flat_model(int val) {
   if(flat_on < 1 && flat_on + val >= 1) {
     #if CAP_GL
-    glClear(GL_DEPTH_BUFFER_BIT);
+    if(graphics_on && vid.usingGL) glClear(GL_DEPTH_BUFFER_BIT);
     #endif
     backup_geometry = geometry;
     backup_variation = variation;

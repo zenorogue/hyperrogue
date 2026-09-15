@@ -136,24 +136,29 @@ void geometry_information::shift(hpcshape& sh, double dx, double dy, double dz) 
   }
 
 void geometry_information::initPolyForGL() {
-#if CAP_GL
   ourshape.clear();
 
   for(auto& h: hpc)
     ourshape.push_back(glhr::pointtogl(h));
 
-  glhr::store_in_buffer(ourshape);
+#if CAP_GL
+  if(graphics_on && vid.usingGL)
+    glhr::store_in_buffer(ourshape);
 #endif
   }
 
 void geometry_information::extra_vertices() {
-#if CAP_GL
   while(isize(ourshape) < isize(hpc))
     ourshape.push_back(glhr::pointtogl(hpc[isize(ourshape)]));
-  glhr::store_in_buffer(ourshape);
-  glhr::current_vertices = NULL;
-  prehpc = isize(hpc);
+
+#if CAP_GL
+  if(graphics_on && vid.usingGL) {
+    glhr::store_in_buffer(ourshape);
+    glhr::current_vertices = NULL;
+    }
 #endif
+
+  prehpc = isize(hpc);
   }
 
 transmatrix geometry_information::ddi(int a, ld x) { return xspinpush(a * S_step, x); }

@@ -362,6 +362,7 @@ inline void reset_projection() { new_projection_needed = true; }
 EX ld lband_shift;
 
 void display_data::set_all(int ed, ld shift) {
+  if(!vid.usingGL) return;
   auto t = this;
   auto current_projection = tie(ed, pmodel, t, current_rbuffer);
   if(new_projection_needed || !glhr::current_glprogram || (next_shader_flags & GF_which) != (glhr::current_glprogram->shader_flags & GF_which) || current_projection != last_projection || shift != lband_shift) {
@@ -625,7 +626,11 @@ EX void init_glfont(int size) {
     SDL_DestroySurface(txt);
 #endif
 
+#if CAP_SDLTTF
     if(ch >= 128 && !TTF_GlyphIsProvided(cfont->font[siz], unicode_value(natchars[ch-128], 0).first)) {
+#else
+    if(ch >= 128) {
+#endif
       string s = natchars[ch - 128];
       if(s == "Ⓐ") f.reps[ch] = "(A)";
       if(s == "Ⓑ") f.reps[ch] = "(B)";
@@ -811,7 +816,8 @@ EX void resetGL() {
 
   check_cgi();
   if(currentmap) cgi.require_shapes();
-  cgi.initPolyForGL();
+
+  for(auto& c: cgis) c.second.initPolyForGL();
   #if MAXMDIM >= 4
   if(GDIM == 3 && !floor_textures) make_floor_textures();
   #endif
