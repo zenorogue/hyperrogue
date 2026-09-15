@@ -1198,6 +1198,7 @@ EX namespace mapstream {
       if(c->monst == moTortoise)
         f.write(tortoise::emap[c] = tortoise::getb(c));
       f.write_char(c->wall);
+      #if CAP_COMPLEX2
       if(dice::on(c)) {
         auto& dat = dice::data[c];
         f.write_char(dice::get_die_id(dat.which));
@@ -1205,6 +1206,7 @@ EX namespace mapstream {
         f.write_char(dat.dir);
         f.write_char(dat.mirrored);
         }
+      #endif
       f.write_char(c->item);
       if(c->item == itBabyTortoise)
         f.write(tortoise::babymap[c]);
@@ -1413,6 +1415,7 @@ EX namespace mapstream {
       if(c->monst == moTortoise && f.vernum >= 11001)
         f.read(tortoise::emap[c]);
       c->wall = (eWall) f.read_char();
+      #if CAP_COMPLEX2
       if(dice::on(c)) {
         auto& dat = dice::data[c];        
         dat.which = dice::get_by_id(f.read_char());
@@ -1424,6 +1427,7 @@ EX namespace mapstream {
         if(f.vernum >= 0xA902)
           dat.mirrored = f.read_char();
         }
+      #endif
       // c->barleft = (eLand) f.read_char();
       // c->barright = (eLand) f.read_char();
       c->item = (eItem) f.read_char();
@@ -2102,9 +2106,11 @@ EX namespace mapeditor {
           tortoise::emap[c] = tortoise::getRandomBits();
           }
         
+        #if CAP_COMPLEX2
         if(isDie(c->monst)) {
           if(!dice::generate_random(c)) c->monst = moNone;
           }
+        #endif
 
         mirror::destroyKilled();
         break;
@@ -2158,9 +2164,11 @@ EX namespace mapeditor {
           c->mondir = cdir;
           }
 
+        #if CAP_COMPLEX2
         if(isDie(c->wall)) {
           if(!dice::generate_random(c)) c->wall = waNone;
           }
+        #endif
 
         break;
         }
@@ -2190,7 +2198,9 @@ EX namespace mapeditor {
         c->wparam = copywhat->wparam;
         c->hitpoints = copywhat->hitpoints;
         c->stuntime = copywhat->stuntime; 
+        #if CAP_COMPLEX2
         if(dice::on(c)) dice::data[c] = dice::data[copywhat];
+        #endif
         if(copywhat->mondir == NODIR) c->mondir = NODIR;
         else c->mondir = gmod((where.first.mirrored == where.second.mirrored ? 1 : -1) * (copywhat->mondir - where.second.spin) + cdir, c->type);
         break;
