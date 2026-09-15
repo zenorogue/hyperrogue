@@ -705,7 +705,7 @@ union SDL_Event;
 #endif
 
 #ifndef MINIMIZE_GL_CALLS
-#ifdef EMSCRIPTEN
+#if ISWEB
 #define MINIMIZE_GL_CALLS 1
 #else  
 #define MINIMIZE_GL_CALLS 0

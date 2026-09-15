@@ -264,10 +264,8 @@ int arg::readCommon() {
   else if(argis("-no-s")) { PHASE(2); scorefile = ""; savefile_selection = false; }
   else if(argis("-rsrc")) { PHASE(1); shift(); rsrcdir = args(); }
   else if(argis("-nogui")) { PHASE(1); noGUI = true; }
-#ifndef EMSCRIPTEN
-#if CAP_SDLTTF
+#if CAP_SDLTTF && !ISWEB
   else if(argis("-font")) { PHASE(1); shift(); font_id = isize(font_filenames); font_filenames.push_back(args()); font_names.push_back({args(), "commandline"}); }
-#endif
 #endif
 
   else if(argis("-test-ach")) 
