@@ -35,6 +35,12 @@ EX void adjust_linked() {
   indenter ind(2);
   geom3::invalid = "";
   dynamicval<bool> d(linked_consequence, true);
+
+  if(!find_edit(&pconf.alpha) || !find_edit(&vid.depth) || !find_edit(&vid.camera)) {
+    printf("error: cannot adjust_linked as edits are missing\n");
+    return;
+    }
+
   if(vid.tc_alpha < vid.tc_depth && vid.tc_alpha < vid.tc_camera) {
     find_edit(&pconf.alpha)->set_cld(tan_auto(vid.depth) / tan_auto(vid.camera));
     }
