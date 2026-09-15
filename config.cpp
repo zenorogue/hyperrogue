@@ -683,7 +683,7 @@ void parameter::setup(const parameter_names& n) {
   }
 
 EX shared_ptr<float_parameter> param_f(ld& val, const parameter_names& n, ld dft) {
-  shared_ptr<float_parameter> u ( new float_parameter );
+  shared_ptr<float_parameter> u = std::make_shared<float_parameter> ();
   u->setup(n);
   u->value = &val;
   u->last_value = dft;
@@ -702,7 +702,7 @@ EX shared_ptr<float_parameter> param_f(ld& val, const parameter_names& n, ld dft
   }
 
 EX shared_ptr<float_parameter_dft> param_fd(ld& val, const parameter_names& n, ld dft IS(use_the_default_value) ) {
-  shared_ptr<float_parameter_dft> u ( new float_parameter_dft );
+  shared_ptr<float_parameter_dft> u = std::make_shared<float_parameter_dft> ();
   u->setup(n);
   u->value = &val;
   u->last_value = dft;
@@ -725,7 +725,7 @@ EX string param_esc(string s) {
   }
 
 EX shared_ptr<int_parameter> param_i(int& val, const parameter_names& n, int dft) {
-  shared_ptr<int_parameter> u ( new int_parameter );
+  shared_ptr<int_parameter> u = std::make_shared<int_parameter> ();
   u->setup(n);
   u->value = &val;
   u->last_value = dft;
@@ -745,7 +745,7 @@ EX shared_ptr<int_parameter> param_i(int& val, const parameter_names& n, int dft
 EX shared_ptr<int_parameter> param_i(int& val, const parameter_names& n) { return param_i(val, n, val); }
 
 EX shared_ptr<bool_parameter> param_b(bool& val, const parameter_names& n, bool dft) {
-  shared_ptr<bool_parameter> u ( new bool_parameter );
+  shared_ptr<bool_parameter> u = std::make_shared<bool_parameter> ();
   u->setup(n);
   u->value = &val;
   u->last_value = dft;
@@ -756,7 +756,7 @@ EX shared_ptr<bool_parameter> param_b(bool& val, const parameter_names& n, bool 
   }
 
 EX shared_ptr<color_parameter> param_color(color_t& val, const parameter_names& n, bool has_alpha, color_t dft) {
-  shared_ptr<color_parameter> u ( new color_parameter );
+  shared_ptr<color_parameter> u = std::make_shared<color_parameter> ();
   u->setup(n);
   u->value = &val;
   u->last_value = dft;
@@ -768,7 +768,7 @@ EX shared_ptr<color_parameter> param_color(color_t& val, const parameter_names& 
 
 EX shared_ptr<matrix_parameter> param_matrix(transmatrix& val0, const parameter_names& n, int dim) {
   matrix_eq& val = (matrix_eq&) val0;
-  shared_ptr<matrix_parameter> u ( new matrix_parameter );
+  shared_ptr<matrix_parameter> u = std::make_shared<matrix_parameter> ();
   u->setup(n);
   u->value = &val;
   u->last_value = val;
@@ -778,7 +778,7 @@ EX shared_ptr<matrix_parameter> param_matrix(transmatrix& val0, const parameter_
   }
 
 EX shared_ptr<char_parameter> param_char(char& val, const parameter_names& n, char dft) {
-  shared_ptr<char_parameter> u ( new char_parameter );
+  shared_ptr<char_parameter> u = std::make_shared<char_parameter> ();
   u->setup(n);
   u->value = &val;
   u->last_value = dft;
@@ -788,7 +788,7 @@ EX shared_ptr<char_parameter> param_char(char& val, const parameter_names& n, ch
   }
 
 EX shared_ptr<string_parameter> param_str(string& val, const parameter_names& n, const string dft) {
-  shared_ptr<string_parameter> u ( new string_parameter );
+  shared_ptr<string_parameter> u = std::make_shared<string_parameter> ();
   u->setup(n);
   u->value = &val;
   u->last_value = val;
@@ -805,7 +805,7 @@ EX shared_ptr<bool_parameter> param_b(bool& val, const parameter_names& n) { ret
 
 #if HDR
 template<class T> shared_ptr<enum_parameter<T>> param_enum(T& val, const parameter_names& n, T dft) {
-  shared_ptr<enum_parameter<T>> u ( new enum_parameter<T> );
+  shared_ptr<enum_parameter<T>> u = std::make_shared<enum_parameter<T>> ();
   u->setup(n);
   u->value = &val;
   u->dft = dft;
@@ -852,7 +852,7 @@ shared_ptr<parameter> float_parameter::clone(struct local_parameter_set& lps, vo
 #if HDR
 template<class T>
 shared_ptr<custom_parameter> param_custom_int(T& val, const parameter_names& n, function<void(key_type)> menuitem, key_type key) {
-  shared_ptr<custom_parameter> u ( new custom_parameter );
+  shared_ptr<custom_parameter> u = std::make_shared<custom_parameter>();
   u->setup(n);
   int dft = (int) val;
   u->last_value = dft;
@@ -862,7 +862,7 @@ shared_ptr<custom_parameter> param_custom_int(T& val, const parameter_names& n, 
   u->custom_load = [&val] (const string& s) { val = (T) parseint(s); };
   u->custom_save = [&val] { return its(int(val)); };
   u->custom_do_save = [dft, &val] { return int(val) != dft; };
-  u->custom_clone = [u] (struct local_parameter_set& lps, void *value) { auto val = (int*) value; return param_i(*val, lps.mod(&*u), *val); };
+  u->custom_clone = [&u] (struct local_parameter_set& lps, void *value) { auto val = (int*) value; return param_i(*val, lps.mod(&*u), *val); };
   u->custom_reset = [dft, &val] { val = (T) dft; };
   u->default_key = key;
   u->is_editable = true;
@@ -871,7 +871,7 @@ shared_ptr<custom_parameter> param_custom_int(T& val, const parameter_names& n, 
 #endif
 
 EX shared_ptr<custom_parameter> param_custom_ld(ld& val, const parameter_names& n, function<void(key_type)> menuitem, key_type key) {
-  shared_ptr<custom_parameter> u ( new custom_parameter );
+  shared_ptr<custom_parameter> u = std::make_shared<custom_parameter>();
   u->setup(n);
   ld dft = val;
   u->last_value = dft;
@@ -882,7 +882,7 @@ EX shared_ptr<custom_parameter> param_custom_ld(ld& val, const parameter_names& 
   u->custom_load = [&val] (const string& s) { val = parseld(s); };
   u->custom_save = [&val] { return fts(val, 10); };
   u->custom_do_save = [dft, &val] { return val != dft; };
-  u->custom_clone = [u] (struct local_parameter_set& lps, void *value) { auto val = (ld*) value; return param_f(*val, lps.mod(&*u), *val); };
+  u->custom_clone = [&u] (struct local_parameter_set& lps, void *value) { auto val = (ld*) value; return param_f(*val, lps.mod(&*u), *val); };
   u->custom_reset = [dft, &val] { val = dft; };
 
   u->default_key = key;
@@ -891,7 +891,7 @@ EX shared_ptr<custom_parameter> param_custom_ld(ld& val, const parameter_names& 
   }
 
 EX shared_ptr<custom_parameter> param_colortable(colortable& val, const parameter_names& n) {
-  shared_ptr<custom_parameter> u ( new custom_parameter );
+  shared_ptr<custom_parameter> u = std::make_shared<custom_parameter>();
   u->setup(n);
   colortable dft = val;
   u->last_value = -1;
@@ -908,7 +908,7 @@ EX shared_ptr<custom_parameter> param_colortable(colortable& val, const paramete
     return str;
     };
   u->custom_do_save = [dft, &val] { return val != dft; };
-  u->custom_clone = [u] (struct local_parameter_set& lps, void *value) { auto val = (colortable*) value; return param_colortable(*val, lps.mod(&*u)); };
+  u->custom_clone = [&u] (struct local_parameter_set& lps, void *value) { auto val = (colortable*) value; return param_colortable(*val, lps.mod(&*u)); };
   u->custom_reset = [dft, &val] { val = dft; };
 
   u->default_key = 0;
@@ -3484,7 +3484,7 @@ namespace ccolor { struct data; }
 #endif
 
 EX shared_ptr<custom_parameter> param_ccolor(ccolor::data*& val, const parameter_names& n) {
-  shared_ptr<custom_parameter> u ( new custom_parameter );
+  shared_ptr<custom_parameter> u = std::make_shared<custom_parameter> ();
   u->setup(n);
   u->custom_viewer = [] (key_type key) {};
   u->custom_value = [&val] { for(int i=0; i<isize(ccolor::all); i++) if(ccolor::all[i] == val) return i; return -1; };
@@ -3492,7 +3492,7 @@ EX shared_ptr<custom_parameter> param_ccolor(ccolor::data*& val, const parameter
   u->custom_affect = [&val] (void *v) { return &val == v; };
   u->custom_load = [&val] (const string& s) { for(auto c: ccolor::all) if(c->name == s) val = c; };
   u->custom_save = [&val] { return val->name; };
-  u->custom_clone = [u] (struct local_parameter_set& lps, void *value) { auto val = (ccolor::data**) value; return param_ccolor(*val, lps.mod(&*u)); };
+  u->custom_clone = [&u] (struct local_parameter_set& lps, void *value) { auto val = (ccolor::data**) value; return param_ccolor(*val, lps.mod(&*u)); };
   return u;
   }
 
