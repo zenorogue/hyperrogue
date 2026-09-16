@@ -321,6 +321,8 @@ struct entity {
 
   bool destroyed;
   void kino();
+  void apply_walking(ld target_velx);
+  virtual bool get_jump_control() { return false; }
   void apply_vel();
   void apply_walls();
   void apply_walls_reflect();
@@ -483,6 +485,8 @@ struct man : public entity {
 
   virtual void hs(stater& s);
   virtual double grav() { return entity::grav() / current.gravity_value; }
+
+  bool get_jump_control() override { return current.jump_control; }
   };
 
 extern man m;
@@ -506,6 +510,7 @@ struct moving_platform : public entity {
   string get_help() override { return "Moving platforms move."; }
   bool nonstatic() override { return false; }
   virtual void jumped_on() {}
+  virtual void affected_others_vel(entity *who, xy v) {}
   };
 
 struct freemoving_platform : public moving_platform {
@@ -517,6 +522,19 @@ struct freemoving_platform : public moving_platform {
     s.act("last_position", last_position, xy(0,0))
      .act("position_time", position_time, 0);
     }
+  };
+
+struct basic_box : public freemoving_platform {
+  virtual int width() { return 1; }
+  xy siz() override { return {20, 20}; }
+  void act() override;
+  string glyph() override { return "#"; }
+  color_t color() override { return 0xFFFFC0FF; }
+  string get_name() override { return "basic box"; }
+  /* copied from located_entity */
+  xy respawn;
+  xy default_where() override { return respawn; }
+  void affected_others_vel(entity *who, xy v) override;
   };
 
 struct floating_bubble_platform : public freemoving_platform {

@@ -256,6 +256,7 @@ void entity::apply_walls() {
     }
 
   if(loopcount < 100) for(auto& e: current_room->entities) if(auto p = e->as_platform()) {
+    if(p == this) continue;
     auto opw = p->location_at(gframeid-1);
     auto npw = p->location_at(gframeid);
 
@@ -299,12 +300,15 @@ void entity::apply_walls() {
         }
 
       else {
-        rvel.x = -rvel.x;
+        rvel.x = 0; // -rvel.x;
         reset = true;
-        zero_vel = zvel;
+        if(!on_floor) zero_vel = zvel;
         }
 
+      auto vel0 = vel;
       vel = (rmow + rvel - screen_ctr) * get_scale_at(npw.y) + npw - where;
+      p->affected_others_vel(this, vel - vel0);
+
       if(reset) goto again;
       }
     }
@@ -386,6 +390,17 @@ void entity::kino() {
   if(z.x + z.y < 0) delta *= 2;
   ld ndelta = 1-delta;
   gvel = ndelta * gvel + delta * (where - gwhere);
+  }
+
+void entity::apply_walking(ld target_velx) {
+  if(on_floor || get_jump_control() || wallhug) {
+    if(on_ice == 0) {
+      vel.x = target_velx;
+      }
+    if(on_ice == 1) {
+      vel.x = lerp(vel.x, target_velx, 10. / game_fps);
+      }
+    }
   }
 
 void missile::act() {
@@ -1239,6 +1254,21 @@ void fight_trader::attacked(int dmg, power *p) {
     if(where.x > m.where.x) vel.x = +abs(vel.x);
     }
   else trader::attacked(dmg, p);
+  }
+
+void basic_box::act() {
+  if(position_time == gframeid) return;
+  last_position = where;
+  position_time = gframeid;
+  stay_on_screen();
+  kino();
+
+  apply_walking(lerp(vel.x, zero_vel.x, 5. / game_fps));
+  }
+
+void basic_box::affected_others_vel(entity *who, xy v) {
+  if(who->as_platform()) vel -= v;
+  else vel -= v * .1;
   }
 
 void fight_trader::act() {

@@ -154,14 +154,7 @@ void man::act() {
   if(next.hallucinating && !current.hallucinating)
     prepare_hallucination();
 
-  if(on_floor || current.jump_control || wallhug) {
-    if(on_ice == 0) {
-      vel.x = zero_vel.x + dat.dx * dat.d * dat.modv * 2.5;
-      }
-    if(on_ice == 1) {
-      vel.x = lerp(vel.x, zero_vel.x + dat.dx * dat.d * dat.modv * 2.5, 10. / game_fps);
-      }
-    }
+  apply_walking(zero_vel.x + dat.dx * dat.d * dat.modv * 2.5);
 
   if(on_bounce) {
     vel.x += dat.dx * dat.d * dat.modv * 0.02;

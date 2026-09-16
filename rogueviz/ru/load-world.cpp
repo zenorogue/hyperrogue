@@ -331,6 +331,11 @@ void load_room(fhstream& f, cell *c) {
         b->respawn_dir = get_int();
         r.entities.emplace_back(std::move(b));
         }
+      else if(cap == "BOX") {
+        auto b = std::make_unique<basic_box>(); nam(*b);
+        b->respawn = get_xy();
+        r.entities.emplace_back(std::move(b));
+        }
       else if(cap == "NAGA") {
         auto b = std::make_unique<naga_warrior>(); nam(*b);
         b->respawn = get_xy();
