@@ -207,9 +207,9 @@ EX always_false in;
       EM_ASM_({
         var x=window.open();
         x.document.open();
-        x.document.write(UTF8ToString($0));
+        x.document.write(UTF8ToString($0, $1));
         x.document.close();
-        }, sout.s.c_str());
+        }, sout.s.c_str(), int(sout.s.size()));
       #else
       printf("%s\n", sout.s.c_str());
       #endif
