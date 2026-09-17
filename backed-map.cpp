@@ -27,6 +27,9 @@ struct backed_map {
   geometry_information *find_alt_cgip();
 
   backed_map() { current_altmap = nullptr; }
+  ~backed_map() {
+    for(int i: {0,1}) if(alt_cgip[i]) alt_cgip[i]->use_count--;
+    }
 
   void store(gamedata *gd);
   void clear();
@@ -42,6 +45,7 @@ geometry_information *backed_map::find_alt_cgip() {
   if(galt_cgip) return galt_cgip;
   check_cgi();
   cgi.require_basics();
+  cgip->use_count++;
   return galt_cgip = cgip;
   }
 
