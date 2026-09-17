@@ -1535,7 +1535,12 @@ EX void drawthemap() {
       }
     }
 
+  mark_possible_ranged_orb();
+  }
+
+EX void mark_possible_ranged_orb() {
   #if CAP_SDL
+  if(!graphics_on) return;
   const sdl_keystate_type *keystate = SDL12_GetKeyState(NULL);
   lmouseover = mouseover;
   lmouseover_distant = lmouseover;
