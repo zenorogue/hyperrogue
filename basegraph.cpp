@@ -1318,7 +1318,17 @@ EX void close_window() {
     SDL_GL_DestroyContext(s_context), s_have_context = false;
     }
   if(s_window) SDL_DestroyWindow(s_window), s_window = nullptr;
+  graphics_on = false;
+  vid.usingGL = false;
   #endif
+  }
+
+EX void close_sdl() {
+  close_window();
+  SDL_Quit();
+  sdl_on = false;
+  graphics_on = false;
+  vid.usingGL = false;
   }
 
 EX void apply_screen_settings() {
