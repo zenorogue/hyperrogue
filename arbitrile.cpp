@@ -1068,6 +1068,9 @@ EX void load(const string& fname, bool load_as_slided IS(false), bool keep_slide
     else if(ep.eat("star.")) {
       c.is_star = true;
       }
+    else if(ep.eat("legacysign.")) {
+      hprintln("note: legacysign command used");
+      }
     else if(ep.eat("combinatorial.")) {
       c.is_combinatorial = true;
       }
