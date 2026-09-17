@@ -2700,6 +2700,9 @@ EX void draw_model_elements() {
   if(sphere && pconf.alpha <= 1 && pmodel == mdDisk)
     queuecircle(current_display->xcenter, current_display->ycenter, current_display->xsize + current_display->ysize, ringcolor, PPR::OUTCIRCLE, modelcolor);
 
+  if(euclid && pmodel == mdDisk)
+    queuecircle(current_display->xcenter, current_display->ycenter, current_display->xsize + current_display->ysize, ringcolor, PPR::OUTCIRCLE, modelcolor);
+
   dynamicval<ld> lw(vid.linewidth, vid.linewidth * vid.multiplier_ring);
   switch(pmodel) {
   
