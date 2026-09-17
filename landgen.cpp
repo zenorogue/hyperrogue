@@ -16,6 +16,17 @@ EX int explore[10], exploreland[10][landtypes], landcount[landtypes];
 
 EX bool safety = false;
 
+EX int alt_BARLEV;
+
+EX int get_BARLEV() {
+  if(alt_BARLEV) return alt_BARLEV;
+  int d = getDistLimit();
+  bool lowmem = ISANDROID||ISIOS||ISFAKEMOBILE;
+  if(d<4) return 8;
+  if(lowmem || d < 7) return 9;
+  return 10;
+  }
+
 EX eLand lastland;
 
 EX int lastexplore;

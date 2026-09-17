@@ -1790,7 +1790,10 @@ EX int auto_compute_range(cell *c) {
   return ginf[geometry].distlimit[0] = cgi.base_distlimit = d;
   }
 
+EX int alt_distlimit = UNKNOWN;
+
 EX int getDistLimit() {
+  if(alt_distlimit != UNKNOWN) return alt_distlimit;
   auto& res = cgi.base_distlimit;
   if(res) return res;
   if(arb::in() && arb::current.range)

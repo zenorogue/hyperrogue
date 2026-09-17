@@ -573,7 +573,7 @@ typedef function<int(struct cell*)> cellfunction;
 #define INFD 60
 #define PINFD 125
 #ifndef BARLEV
-#define BARLEV ((ISANDROID||ISIOS||ISFAKEMOBILE||getDistLimit()<7)?(getDistLimit()<4?8:9):10)
+#define BARLEV hr::get_BARLEV()
 #endif
 #define BUGLEV 15
 // #define BARLEV 9
