@@ -117,7 +117,7 @@ struct sagdist_t {
     size_t offset = 0;
     while(offset < fsize) {
       ssize_t block = read(fd, ((char*)tab)+offset, fsize-offset);
-      #ifdef LINUX
+      #if ISLINUX || ISWEB
       println(hlog, "read ", hr::format("%zd/%zd", block, fsize-offset), "B");
       #else
       println(hlog, "read ", hr::format("%lld/%lld", block, fsize-offset), "B");
