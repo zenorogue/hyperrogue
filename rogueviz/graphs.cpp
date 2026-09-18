@@ -659,8 +659,10 @@ void draw_edge(const shiftmatrix &V, cell *c, edgeinfo *ei) {
   else if(sl2)
     twist::queueline_correct(h1, h2, col, 2 + vid.linequality, PPR::STRUCT0);
 
+  #if CAP_SOLV
   else if(sol && !fat_edges)
     sn::queueline_lie(h1, h2, col, 2 + vid.linequality, PPR::STRUCT0);
+  #endif
 
   else if(pmodel && !fat_edges && !sol) {
     queueline(h1, h2, col, 2 + vid.linequality).prio = PPR::STRUCT0;
