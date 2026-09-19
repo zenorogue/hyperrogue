@@ -41,6 +41,11 @@ void symmetrize() {
     }
   }
 
+int skiplines = 0;
+
+int nodes_skiplines;
+string nodes_fname;
+
 void read_edgelist(const string& fname) {
 
   rogueviz::init(RV_GRAPH);
@@ -54,14 +59,43 @@ void read_edgelist(const string& fname) {
   ensure_edge();
   indenter_finish ind(true, "Reading edgelist...");
 
+  if(nodes_fname != "") {
+    indenter_finish ind(true, "Reading preinit nodes...");
+    fhstream f(nodes_fname, "rt");
+    if(!f.f) return file_error(fname);
+
+    char buf[1000];
+    for(int i=0; i<nodes_skiplines; i++) fgets(buf, 1000, f.f);
+
+    while(true) {
+      int i = rogueviz::readLabel(f);
+      if(i == -1) break;
+      }
+
+    println(hlog, "found nodes = ", isize(rogueviz::vdata));
+    }
+
   fhstream f(fname, "rt");
   if(!f.f) return file_error(fname);
 
   set<pair<int, int>> edgesets;
 
+  char buf[1000];
+  for(int i=0; i<skiplines; i++) fgets(buf, 1000, f.f);
+
+  shstream s1;
   while(true) {
-    int i = rogueviz::readLabel(f), j = rogueviz::readLabel(f);
-    if(i == -1 || j == -1) break;
+    if(feof(f.f)) break;
+    string str = scanline_noblank(f);
+    if(str[0] == '#') continue;
+    if(str == "") continue;
+    if(str.size() >= 9000) throw hr_exception("too long lines not supported");
+
+    char buf1[10000], buf2[10000];
+    sscanf(str.c_str(), "%s%s", buf1, buf2);
+    int i = rogueviz::getid(buf1), j = rogueviz::getid(buf2);
+    if(i == -1 && j == -1) continue;
+    if(i == -1 || j == -1) throw hr_exception("weird line");
 
     sizeto(directed_edges, i);
     sizeto(directed_edges, j);
@@ -171,6 +205,9 @@ int a = arg::add3("-edgelist", [] { arg::shift(); read_edgelist(arg::args()); })
   + arg::add3("-missing-edges-env", [] { auto env = std::getenv("MISSING_EDGES"); if(env) set_missing_edges(atof(env)); })
   + arg::add3("-el-rv", [] { if(rogueviz::rv_quality == 0) force_rvgraph(); current = std::make_shared<rv_embedding> (); })
   + arg::add3("-render-radius", [] { arg::shift_arg_formula(render_radius); })
+  + arg::add3("-el-skiplines", [] { arg::shift(); skiplines = arg::argi(); })
+  + arg::add3("-el-nodelist", [] { arg::shift(); nodes_fname = arg::argi(); arg::shift(); nodes_skiplines = arg::args(); })
+  + arg::add3("-el-symmetrize", [] { symmetrize(); })
   + arg::add3("-edge-arrow", [] {
     arg::shift(); any->arrow_scale = arg::argf();
     });
