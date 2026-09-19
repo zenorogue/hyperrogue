@@ -30,7 +30,10 @@ EX namespace inforder {
 
       h1->s = hsA;
       h1->distance = h->distance + (par ? -1 : 1);
-      h1->c7 = newCell(deg, h1);
+      if(h->c7)
+        h1->c7 = newCell(deg, h1);
+      else
+        h1->c7 = nullptr;
 
       return h1;
       }
