@@ -206,7 +206,7 @@ int a = arg::add3("-edgelist", [] { arg::shift(); read_edgelist(arg::args()); })
   + arg::add3("-el-rv", [] { if(rogueviz::rv_quality == 0) force_rvgraph(); current = std::make_shared<rv_embedding> (); })
   + arg::add3("-render-radius", [] { arg::shift_arg_formula(render_radius); })
   + arg::add3("-el-skiplines", [] { arg::shift(); skiplines = arg::argi(); })
-  + arg::add3("-el-nodelist", [] { arg::shift(); nodes_fname = arg::argi(); arg::shift(); nodes_skiplines = arg::args(); })
+  + arg::add3("-el-nodelist", [] { arg::shift(); nodes_skiplines = arg::argi(); arg::shift(); nodes_fname = arg::args(); })
   + arg::add3("-el-symmetrize", [] { symmetrize(); })
   + arg::add3("-edge-arrow", [] {
     arg::shift(); any->arrow_scale = arg::argf();
