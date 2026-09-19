@@ -647,21 +647,21 @@ EX debugflag debug_memory_cell = {"memory_cell"};
 
 EX void clearcell(cell *c) {
   if(!c) return;
-  indenter_finish iclearcell(debug_memory_cell, hr::format("memory_cell %d %p\n", c->type, hr::voidp(c)));
+  indenter_finish iclearcell(debug_memory_cell, hr::format("memory_cell %d %p", c->type, hr::voidp(c)));
   for(int t=0; t<c->type; t++) if(c->move(t)) {
     if(debug_memory_cell)
       println(hlog, hr::format("mov %p [%p] S%d\n", hr::voidp(c->move(t)), hr::voidp(c->move(t)->move(c->c.spin(t))), c->c.spin(t)));
     if(c->move(t)->move(c->c.spin(t)) != NULL &&
       c->move(t)->move(c->c.spin(t)) != c) {
         if(debug_errors || debug_memory_cell)
-          println(hlog, hr::format("cell error: type = %d %d -> %d\n", c->type, t, c->c.spin(t)));
+          println(hlog, hr::format("cell error: type = %d %d -> %d", c->type, t, c->c.spin(t)));
         if(worst_precision_error < 1e-3)
           throw hr_exception("clearcell");
         }
     c->move(t)->move(c->c.spin(t)) = NULL;
     }
   if(debug_memory_cell)
-    println(hlog, hr::format("DEL %p\n", hr::voidp(c)));
+    println(hlog, hr::format("DEL %p", hr::voidp(c)));
   gp::delete_mapped(c);
   destroy_cell(c);
   }
@@ -705,16 +705,18 @@ EX void clear_heptagon(heptagon *at) {
 
 EX void clearfrom(heptagon *at) {
   if(!at) return;
+  indenter_finish iclearfrom(debug_memory_cell, "clearfrom");
   queue<heptagon*> q;
   unlink_cdata(at);
   q.push(at);
   at->alt = &deletion_marker;
+
 //int maxq = 0;
   while(!q.empty()) {
     at = q.front(); 
 //  if(q.size() > maxq) maxq = q.size();
     q.pop();
-    if(debug_memory_cell) println(hlog, "from %p", at);
+    if(debug_memory_cell) println(hlog, "from ", at, " c7=", at->c7, " alt=", at->alt);
     if(!at->c7 && !ls::voronoi_structure()) {
       heptagon *h = dynamic_cast<heptagon*> ((cdata_or_heptagon*) at->cdata);
       if(h) {
