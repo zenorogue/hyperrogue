@@ -1215,6 +1215,8 @@ enum eMovementAnimation {
   };
 #endif
 
+EX ld rotations_per_period = 1;
+
 EX eMovementAnimation ma;
 
 EX trans23 movement_angle;
@@ -1391,7 +1393,7 @@ EX void apply() {
     case maRotation:
       if(GDIM == 3) shift_view(ztangent(-rotation_distance));
       rotate_view(rot_inverse(movement_angle.get()));
-      rotate_view(spin(TAU * t / period));
+      rotate_view(spin(TAU * rotations_per_period * t / period));
       rotate_view(movement_angle.get());
       if(GDIM == 3) shift_view(ztangent(rotation_distance));
       moved();
@@ -1876,6 +1878,7 @@ auto animhook = addHook(hooks_frame, 100, display_animation)
     param_b(wallopt, "wallopt");
     param_b(clearup, "anim_clearup");
     param_b(env_shmup, "anim_shmup");
+    param_f(rotations_per_period, "rotations_per_period", 1);
     param_color(circle_display_color, "circle_display_color", true);
     param_enum(anims::ma, parameter_names("ma", "movement_animation"), maNone)
     -> editable({{"none", ""}, {"translation", ""}, {"rotation", ""}, {"circle", ""}, {"parabolic", ""}, {"translation+rotation", ""}}, "movement animation", 'a')
