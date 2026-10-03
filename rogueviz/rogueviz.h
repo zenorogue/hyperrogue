@@ -105,7 +105,11 @@ namespace rogueviz {
     #endif
     colorpair(color_t col = 0xC0C0C0FF) { shade = 0; color1 = color2 = col; color_border = 0; border_type = 0; }
     bool operator == (const colorpair& cp) {
+      #if CAP_TEXTURE
       return tie(color1, color2, shade, img) == tie(cp.color1, cp.color2, cp.shade, cp.img);
+      #else
+      return tie(color1, color2, shade) == tie(cp.color1, cp.color2, cp.shade);
+      #endif
       }
     bool operator != (const colorpair& cp) { return !(self == cp); }
     };
