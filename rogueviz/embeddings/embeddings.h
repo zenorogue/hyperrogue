@@ -121,6 +121,7 @@ inline ld get_node_rendered(int i) { if(node_rendered.empty()) return true; else
 
 void symmetrize();
 
+extern edgetype *any;
 }
 }
 
