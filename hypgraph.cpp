@@ -217,6 +217,7 @@ EX ld find_zlev(hyperpoint& H) {
 
   if(spatial_graphics) {
     ld zlev = zlevel(H);
+    if(isnan(zlev)) return 1;
     if(zlev > 1-1e-9 && zlev < 1+1e-9) return 1;
     H /= zlev;
     return zlev;
