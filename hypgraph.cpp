@@ -2643,9 +2643,14 @@ EX shiftmatrix atscreenpos(ld x, ld y, ld size) {
   return V;
   }
 
+/** set to 0 to use the default circle */
+EX ld fixed_circle_radius = 0;
+EX bool fixed_circle_center = false;
+
 void circle_around_center(ld radius, color_t linecol, color_t fillcol, PPR prio) {
   #if CAP_QUEUE
-  if(among(pmodel, mdDisk, mdEquiarea, mdEquidistant, mdFisheye, mdFisheye2) && !(pmodel == mdDisk && hyperbolic && pconf.alpha <= -1) && models::camera_straight) {
+  if(among(pmodel, mdDisk, mdEquiarea, mdEquidistant, mdFisheye, mdFisheye2) && models::camera_straight && !fixed_circle_center &&
+     !(pmodel == mdDisk && hyperbolic && pconf.alpha <= -1)) {
     hyperpoint ret;
     applymodel(shiftless(xpush0(radius)), ret);
     ld r = hypot_d(2, ret);
@@ -2654,10 +2659,8 @@ void circle_around_center(ld radius, color_t linecol, color_t fillcol, PPR prio)
     }  
   #endif
   #if CAP_QUEUE
-  ld rad = 10;
-  if(euclid) rad = 1000;
-  for(int i=0; i<=36000; i+=10) curvepoint(xspinpush0(i * degree / 100., rad));
-  auto& c = queuecurve(shiftless(Id), linecol, fillcol, prio);
+  for(int i=0; i<=36000; i+=10) curvepoint(xspinpush0(i * degree / 100., radius));
+  auto& c = queuecurve(fixed_circle_center ? ggmatrix(currentmap->gamestart()) : shiftless(Id), linecol, fillcol, prio);
   if(pmodel == mdDisk && hyperbolic && pconf.alpha <= -1)
     c.flags |= POLY_FORCE_INVERTED;
   if(pmodel == mdJoukowsky)
@@ -2696,12 +2699,6 @@ EX void draw_model_elements() {
   #if CAP_VR
   if(vrhr::active() && models::is_hyperboloid(pmodel)) return;
   #endif
-
-  if(sphere && pconf.alpha <= 1 && pmodel == mdDisk)
-    queuecircle(current_display->xcenter, current_display->ycenter, current_display->xsize + current_display->ysize, ringcolor, PPR::OUTCIRCLE, modelcolor);
-
-  if(euclid && pmodel == mdDisk)
-    queuecircle(current_display->xcenter, current_display->ycenter, current_display->xsize + current_display->ysize, ringcolor, PPR::OUTCIRCLE, modelcolor);
 
   dynamicval<ld> lw(vid.linewidth, vid.linewidth * vid.multiplier_ring);
   switch(pmodel) {
@@ -2918,7 +2915,7 @@ EX void draw_boundary(int w) {
     }
 
   if(w == 1) return;
-  if(nonisotropic || (euclid && !among(pmodel, mdFisheye, mdFisheye2, mdConformalSquare, mdHemisphere)) || gproduct) return;
+  if(nonisotropic || gproduct) return;
   #if CAP_VR
   if(vrhr::active() && pmodel == mdHyperboloid) return;
   #endif
@@ -2933,7 +2930,7 @@ EX void draw_boundary(int w) {
   if(lc == 0 && fc == 0) return;
   if(pmodel == mdRotatedHyperboles) return;
   
-  ld fakeinf = sphere ? M_PI-1e-5 : hyperbolic ? 10 : exp(10);
+  ld fakeinf = fixed_circle_radius ? fixed_circle_radius : sphere ? M_PI-1e-5 : hyperbolic ? 10 : exp(10);
   
   #if CAP_SVG
   dynamicval<ld> dw(vid.linewidth, vid.linewidth * (svg::in ? svg::divby : 1));
@@ -3006,6 +3003,7 @@ EX void draw_boundary(int w) {
       if(sphere && !bndband) {
         dynamicval<ld> d(vid.linewidth, vid.linewidth * periodwidth);
         queuestraight(T * xpush0(xperiod), 2, periodcolor, 0, PPR::CIRCLE);
+        queuecircle(current_display->xcenter, current_display->ycenter, current_display->xsize + current_display->ysize, lc, p, fc);
         }
       if(sphere && bndband) {
         dynamicval<ld> d(vid.linewidth, vid.linewidth * periodwidth);
@@ -3187,13 +3185,11 @@ EX void draw_boundary(int w) {
       break;
     }
 
-  if(sphere && pmodel == mdDisk && pconf.alpha > 1) {
-    double rad = current_display->radius / sqrt(pconf.alpha*pconf.alpha - 1);
+  if(sphere && pmodel == mdDisk && !fixed_circle_radius) {
+    double rad = pconf.alpha > 1 ? current_display->radius / sqrt(pconf.alpha*pconf.alpha - 1) : current_display->xsize + current_display->ysize;
     queuecircle(current_display->xcenter, current_display->ycenter, rad, lc, p, fc);
-    return;
     }
 
-  if(sphere && !among(pmodel, mdEquidistant, mdEquiarea)) return;
   circle_around_center(fakeinf, lc, fc, p);
   }
 #endif

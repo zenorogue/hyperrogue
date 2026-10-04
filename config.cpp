@@ -1626,6 +1626,8 @@ EX void initConfig() {
   param_color(bordcolor, "color:borders", false);
   param_color(ringcolor, "color:ring", true);
   param_f(vid.multiplier_ring, parameter_names("mring", "mult:ring"), 1);
+  param_f(fixed_circle_radius, "fixed_circle_radius", 0);
+  param_b(fixed_circle_center, "fixed_circle_center", false);
   param_color(modelcolor, "color:model", true);
   param_color(periodcolor, "color:period", true);
   param_color(stdgridcolor, "color:stdgrid", true);
