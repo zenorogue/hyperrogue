@@ -215,7 +215,7 @@ void enable() {
   }
 
 auto shot_hooks = arg::add2("-gears", enable) + arg::add2("-rands", [] { arg::shift(); int q = arg::argi(); for(int i=0; i<q; i++) hrand(10); })
-  + arg::add2("-gear-speed", [] { arg::shift(); speed = arg::argi(); arg::shift(); anims::rot_multiplier = arg::argi(); });
+  + arg::add2("-gear-speed", [] { arg::shift(); speed = arg::argi(); arg::shift(); anims::rotations_per_period = arg::argi(); });
 
 }
 }
