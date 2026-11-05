@@ -630,7 +630,7 @@ EX void handlePanning(int sym, int uni) {
   #endif
     
 #if !ISPANDORA
-  if(!smooth_scrolling) {
+  if(!smooth_scrolling && !rug::finger_center) {
     if(sym == SDLK_END) full_forward_camera(-0.2*shiftmul);
     if(sym == SDLK_HOME) full_forward_camera(0.2*shiftmul);
     if(sym == SDLK_RIGHT) full_rotate_camera(0, -0.2*shiftmul);
@@ -639,7 +639,7 @@ EX void handlePanning(int sym, int uni) {
     if(sym == SDLK_DOWN) full_rotate_camera(1, -0.2*shiftmul);
     }
 #endif
-  if(!smooth_scrolling && !tour::on) {
+  if(!smooth_scrolling && !tour::on && !rug::finger_center) {
     if(sym == SDLK_PAGEUP) full_rotate_view(1, cgi.S_step*shiftmul);
     if(sym == SDLK_PAGEDOWN) full_rotate_view(-1, -cgi.S_step*shiftmul);
     if(sym == SDLK_PAGEUP || sym == SDLK_PAGEDOWN) 
@@ -1204,7 +1204,7 @@ EX void mainloopiter() {
     #endif
     }
   
-  if(smooth_scrolling && !shmup::on && (cmode & (sm::NORMAL | sm::PANNING))) {
+  if(smooth_scrolling && !shmup::on && (cmode & (sm::NORMAL | sm::PANNING)) && !rug::finger_center) {
     rug::using_rugview urv;
     auto& lastticks = sc_ticks;
     ld t = (ticks - lastticks) * shiftmul / 1000.;
