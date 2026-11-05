@@ -312,6 +312,11 @@ int arg::readCommon() {
     println(hlog, "View is set to ", View);
     current_display->which_copy = View * inverse(T) * current_display->which_copy;
     }
+  else if(argis("-srugview")) {
+    PHASE(3);  start_game();
+    playermoved = false;
+    shift(); rug::rugView = parsematrix(args());
+    }
   else if(argis("-rotate-up")) {
     start_game();
     shiftmatrix S = ggmatrix(cwt.at->master->move(0)->c7);
