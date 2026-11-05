@@ -21,6 +21,8 @@ EX namespace rug {
 
 EX bool mouse_control_rug = false;
 
+EX bool crystal_rotation = false;
+
 EX transmatrix rugView;
 
 EX ld lwidth = 2;
@@ -1122,11 +1124,13 @@ EX GLuint alternate_texture;
 
 EX bool rug_control() { return rug::rugged; }
 
+EX bool rug_fixed_yz = false;
+
 #if HDR
 
 struct using_rugview {
-  using_rugview() { if(rug_control()) swap(View, rugView), swap(geometry, gwhere); }
-  ~using_rugview() { if(rug_control()) swap(View, rugView), swap(geometry, gwhere); }
+  using_rugview() { if(rug_control()) swap(View, rugView), swap(geometry, gwhere), swap(vid.fixed_yz, rug_fixed_yz); }
+  ~using_rugview() { if(rug_control()) swap(View, rugView), swap(geometry, gwhere), swap(vid.fixed_yz, rug_fixed_yz); }
   };
 
 #endif
@@ -1628,6 +1632,8 @@ EX void show_crystal_settings() {
   #if CAP_SURFACE
   surface::shape_option(surface::dsCrystal, 'u', false);
   #endif
+
+  dialog::addBoolItem_action("high-dim crystal rotation", crystal_rotation, 'r');
 
   if(rug::in_crystal()) {
     dialog::addItem("next home orientation", 'h');

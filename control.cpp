@@ -572,7 +572,7 @@ EX void full_rotate_camera(int dir, ld val) {
   else if(GDIM == 3 && rshiftclick)
     shift_view(ctangent(dir, -val * camera_speed)), didsomething = true, playermoved = false; /* -val because shift reverses */
   #if CAP_CRYSTAL && CAP_RUG
-  else if(rug::rug_control() && rug::in_crystal())
+  else if(rug::rug_control() && rug::in_crystal() && rug::crystal_rotation)
     crystal::apply_rotation(cspin(dir, 2, val * camera_rot_speed));
   #endif
   else if(GDIM == 3) {

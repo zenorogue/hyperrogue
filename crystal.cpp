@@ -1164,6 +1164,7 @@ EX void flip_z() {
 hyperpoint coord_to_flat(ldcoord co, int dim = 3) {
   auto& cs = crystal_map()->cs;
   hyperpoint res = Hypc;
+  res[3] = 1;
   co = co - rug_center;
   for(int a=0; a<cs.dim; a++)
     for(int b=0; b<dim; b++)
