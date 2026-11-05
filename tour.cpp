@@ -1140,11 +1140,19 @@ EX }
 
 EX vector<reaction_t> cleanup;
 
-EX void do_cleanup() {
-  while(!cleanup.empty()) {
+EX size_t get_cleanup_state() {
+  return cleanup.size();
+  }
+
+EX void cleanup_to(size_t i) {
+  while(cleanup.size() > i) {
     cleanup.back()();
     cleanup.pop_back();
     }
+  }
+
+EX void do_cleanup() {
+  cleanup_to(0);
   }
 
 EX void on_cleanup_or_next(const reaction_t& del) {
