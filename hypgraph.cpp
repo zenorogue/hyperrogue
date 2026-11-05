@@ -2653,6 +2653,7 @@ void circle_around_center(ld radius, color_t linecol, color_t fillcol, PPR prio)
   if(among(pmodel, mdDisk, mdEquiarea, mdEquidistant, mdFisheye, mdFisheye2) && models::camera_straight && !fixed_circle_center &&
      !(pmodel == mdDisk && hyperbolic && pconf.alpha <= -1)) {
     hyperpoint ret;
+    dynamicval<bool> sg(spatial_graphics, false);
     applymodel(shiftless(xpush0(radius)), ret);
     ld r = hypot_d(2, ret);
     queuecircle(current_display->xcenter, current_display->ycenter, r * current_display->radius, linecol, prio, fillcol);
@@ -2660,6 +2661,7 @@ void circle_around_center(ld radius, color_t linecol, color_t fillcol, PPR prio)
     }  
   #endif
   #if CAP_QUEUE
+  if(spatial_graphics) queueaction(prio, [] { spatial_graphics = false; });
   for(int i=0; i<=36000; i+=10) curvepoint(xspinpush0(i * degree / 100., radius));
   auto& c = queuecurve(fixed_circle_center ? ggmatrix(currentmap->gamestart()) : shiftless(Id), linecol, fillcol, prio);
   if(pmodel == mdDisk && hyperbolic && pconf.alpha <= -1)
@@ -2668,6 +2670,7 @@ void circle_around_center(ld radius, color_t linecol, color_t fillcol, PPR prio)
     c.flags |= POLY_FORCE_INVERTED;
   c.flags |= POLY_ALWAYS_IN;
   c.flags |= POLY_FORCEWIDE;
+  if(spatial_graphics) queueaction(prio, [] { spatial_graphics = true; });
   #endif
   }
 
