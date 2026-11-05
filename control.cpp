@@ -1719,9 +1719,6 @@ EX int get_direction_key(int sym, int uni) {
   }
 
 EX bool gmodekeys(int sym, int uni) {
-  #if CAP_RUG
-  if(rug::rugged && rug::handlekeys(sym, uni)) return true;
-  #endif
 
   if(NUMBERKEY == '6') { vid.grid = !vid.grid; return true; }
   if(NUMBERKEY == '7') { vid.darkhepta = !vid.darkhepta; return true; }

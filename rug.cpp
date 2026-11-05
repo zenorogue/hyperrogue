@@ -32,6 +32,7 @@ bool computed = false;
 #if HDR
   struct edge {
     struct rugpoint *target;
+    struct rugpoint *os, *ot;
     ld len;
     };
   
@@ -282,10 +283,10 @@ EX rugpoint *findOrAddRugpoint(shiftpoint h, double dist) {
   return r ? r : addRugpoint(h, dist);
   }
 
-void addNewEdge(rugpoint *e1, rugpoint *e2, ld len = 1) {
+void addNewEdge(rugpoint *e1, rugpoint *e2, rugpoint *os, rugpoint *ot, ld len = 1) {
   edge e; e.len = len;
-  e.target = e2; e1->edges.push_back(e);
-  e.target = e1; e2->edges.push_back(e);
+  e.target = e2; e.os = os; e.ot = ot; e1->edges.push_back(e);
+  e.target = e1; e.os = ot; e.ot = os; e2->edges.push_back(e);
   }
 
 EX bool edge_exists(rugpoint *e1, rugpoint *e2) {
@@ -295,9 +296,9 @@ EX bool edge_exists(rugpoint *e1, rugpoint *e2) {
   return false;
   }
 
-void addEdge(rugpoint *e1, rugpoint *e2, ld len = 1) {
+void addEdge(rugpoint *e1, rugpoint *e2, rugpoint *os, rugpoint *ot, ld len = 1) {
   if(!edge_exists(e1, e2))
-    addNewEdge(e1, e2, len);
+    addNewEdge(e1, e2, os, ot, len);
   }
 
 void add_anticusp_edge(rugpoint *e1, rugpoint *e2, ld len = 1) {
@@ -309,9 +310,16 @@ void add_anticusp_edge(rugpoint *e1, rugpoint *e2, ld len = 1) {
   }
 
 EX void addTriangle(rugpoint *t1, rugpoint *t2, rugpoint *t3, ld len IS(1)) {
-  addEdge(t1->getglue(), t2->getglue(), len); 
-  addEdge(t2->getglue(), t3->getglue(), len); 
-  addEdge(t3->getglue(), t1->getglue(), len);
+  addEdge(t1->getglue(), t2->getglue(), t1, t2, len);
+  addEdge(t2->getglue(), t3->getglue(), t2, t3, len);
+  addEdge(t3->getglue(), t1->getglue(), t3, t1, len);
+  triangles.push_back(triangle(t1,t2,t3));
+  }
+
+EX void addTriangleCalc(rugpoint *t1, rugpoint *t2, rugpoint *t3) {
+  addEdge(t1->getglue(), t2->getglue(), t1, t2, hdist(t1->h, t2->h) * modelscale);
+  addEdge(t2->getglue(), t3->getglue(), t2, t3, hdist(t2->h, t3->h) * modelscale);
+  addEdge(t3->getglue(), t1->getglue(), t3, t1, hdist(t3->h, t1->h) * modelscale);
   triangles.push_back(triangle(t1,t2,t3));
   }
 
@@ -427,7 +435,7 @@ ld clifford_torus::compute_mx() {
   return mx;
   }
 
-#if MAXMDIM >= 4
+#if MAXMDIM >= 4 && CAP_SURFACE
 EX void buildTorusRug() {
 
   calcparam_rug();
@@ -448,6 +456,7 @@ EX void buildTorusRug() {
     hyperpoint onscreen;
     shiftpoint h1 = gmatrix[gs] * ct.torus_to_actual(h);
     applymodel(h1, onscreen);
+    r->h = h1;
     r->x1 = onscreen[0];
     r->y1 = onscreen[1];
     
@@ -507,8 +516,8 @@ EX void buildTorusRug() {
     
     for(int yy=0; yy<rugmax; yy++)
     for(int xx=0; xx<rugmax; xx++)
-      addTriangle(rugarr[yy][xx], rugarr[yy+1][xx], rugarr[yy+1][xx+1], modelscale/rugmax),
-      addTriangle(rugarr[yy][xx+1], rugarr[yy][xx], rugarr[yy+1][xx+1], modelscale/rugmax);
+      addTriangleCalc(rugarr[yy][xx], rugarr[yy+1][xx], rugarr[yy+1][xx+1]),
+      addTriangleCalc(rugarr[yy][xx+1], rugarr[yy][xx], rugarr[yy+1][xx+1]);
     }
   
   double maxz = 0;
@@ -556,12 +565,16 @@ void comp(cell*& minimum, cell *next) {
     minimum = next;
   }
 
+EX bool torus_available() {
+  return euclid && closed_manifold;
+  }
+
 EX void buildRug() {
 
   need_mouseh = true;
   good_shape = false;
-  #if MAXMDIM >= 4
-  if(euclid && closed_manifold) {
+  #if MAXMDIM >= 4 && CAP_SURFACE
+  if(surface::sh == surface::dsTorus) {
     good_shape = true;
     buildTorusRug();
     return;
@@ -1200,8 +1213,7 @@ EX void init_model() {
   precision_increases = 0;
   
   #if CAP_CRYSTAL
-  if(cryst && surface::sh == surface::dsNone) {
-    surface::sh = surface::dsCrystal;
+  if(cryst && surface::sh == surface::dsCrystal) {
     crystal::init_rotation();
     good_shape = true;
     return;
@@ -1272,47 +1284,18 @@ ld protractor = 0;
 
 #define CAP_HOLDKEYS (CAP_SDL && !ISWEB)
 
-EX bool handlekeys(int sym, int uni) {
-  USING_NATIVE_GEOMETRY;
-  if(NUMBERKEY == '2') {
-    ld bdist = 1e12;
-    if(finger_center) 
-      finger_center = NULL;
-    else {
-      for(auto p: points) {
-        ld cdist = hdist(p->getglue()->h, mouseh);
-        if(cdist < bdist)
-          bdist = cdist, finger_center = p->getglue();
-        }
+EX void activate_finger() {
+  ld bdist = 1e12;
+  if(finger_center)
+    finger_center = NULL;
+  else {
+    for(auto p: points) {
+      ld cdist = hdist(p->getglue()->h, mouseh);
+      if(cdist < bdist)
+        bdist = cdist, finger_center = p->getglue();
       }
-    if(renderonce) renderlate+=10;
-    return true;
     }
-  else if(NUMBERKEY == '3') {
-    #if CAP_CRYSTAL
-    if(in_crystal())
-      crystal::switch_z_coordinate();
-    else
-    #endif
-      rotate_view(cspin180(0, 2));
-    return true;
-    }
-  else if(NUMBERKEY == '4') {
-    #if CAP_CRYSTAL
-    if(in_crystal())
-      crystal::flip_z();
-    else
-    #endif
-      rotate_view(cspin90(0, 2));
-    return true;
-    }
-  #if CAP_CRYSTAL
-  else if(sym == SDLK_HOME && in_crystal()) {
-    crystal::next_home_orientation();
-    return true;
-    }
-  #endif
-  else return false;
+  if(renderonce) renderlate+=10;
   }
 
 EX void finger_on(int coord, ld val) {
@@ -1374,8 +1357,10 @@ EX void actDraw() {
 
 int besti;
 
+#if HDR
 static constexpr ld RADAR_INF = 1e12;
-ld radar_distance = RADAR_INF;
+#endif
+EX ld radar_distance = RADAR_INF;
 
 EX shiftpoint gethyper(ld x, ld y) {
   
@@ -1552,195 +1537,254 @@ EX void rug_geometry_choice() {
   dialog::display();
   }
 
-EX void show() {
+EX void init_rug_page(const string& s) {
   cmode = sm::SIDE | sm::MAYDARK | sm::PANNING;
   gamescreen();
-  dialog::init(XLAT("hypersian rug mode"), iinf[itPalace].color, 150, 100);
-  
-  dialog::addBoolItem(XLAT("enable the Hypersian Rug mode"), rug::rugged, 'u');
-  
-  dialog::addBoolItem(XLAT("render the texture only once"), (renderonce), 'o');
-  #if CAP_SDL
-  dialog::addBoolItem(XLAT("render texture without OpenGL"), (rendernogl), 'g');
-  #else
-  rendernogl = false;
-  #endif
-  dialog::addSelItem(XLAT("texture size"), its(texturesize)+"x"+its(texturesize), 's');
+  dialog::init(s, iinf[itPalace].color, 150, 100);
+  }
 
-  dialog::addSelItem(XLAT("vertex limit"), its(vertex_limit), 'v');
-  if(rug::rugged)
-    dialog::lastItem().value += " (" + its(qvalid) + ")";
-  
-  dialog::addSelItem(XLAT("model distance"), fts(model_distance), 'd');
-  if(rug::rugged) {
-    dialog::addSelItem(XLAT("projection"), models::get_model_name(rconf.model), 'p'); 
-    }
-  else dialog::addBreak(100);
+EX void close_rug_page() {
+  dialog::addBreak(50);
+  dialog::addBack();
+  dialog::display();
+  }
+
+EX void show_hyperrug_settings() {
+
+  init_rug_page("Hypersian Rug");
+
+  #if CAP_SURFACE
+  surface::shape_option(surface::dsHypersian, 'u', false);
+  #else
+  dialog::addBoolItem(XLAT("enable"), rug::rugged, 'u');
+  dialog::add_action([] {
+    if(rug::rugged) rug::close();
+    else rug::init();
+    });
+  #endif
   if(!rug::rugged) {
     dynamicval<eGeometry> g(geometry, gwhere);
     dialog::addSelItem(XLAT("native geometry"), geometry_name(), 'n');
     if(gwhere == rgElliptic) dialog::lastItem().value += " (e)";
+    #if MAXMDIM >= 4
+    dialog::add_action([] { if(!rug::rugged) pushScreen(rug_geometry_choice); });
+    #endif
     }
-  else
-    dialog::addSelItem(XLAT("radar"), radar_distance == RADAR_INF ? "∞" : fts(radar_distance, 4), 'r');
-  dialog::addSelItem(XLAT("model scale factor"), fts(modelscale), 'm');
+  else dialog::addBreak(100);
+  dialog::addSelItem(XLAT("maximum error"), fts(err_zero), 'e');
+  if(rug::rugged)
+    dialog::lastItem().value += " (" + fts(err_zero_current) + ")";
+  dialog::add_action([] {
+    if(good_shape) good_shape = false;
+    dialog::editNumber(err_zero, 1e-9, 1, .1, 1e-3, XLAT("maximum error"),
+      XLAT("New points are added when the current error in the model is smaller than this value.")
+      );
+    dialog::scaleLog();
+    dialog::get_di().reaction = [] () { err_zero_current = err_zero; };
+    });
   if(rug::rugged)
     dialog::addSelItem(XLAT("model iterations"), its(queueiter), 0);
-  dialog::addItem(XLAT("stereo vision config"), 'f');
-  // dialog::addSelItem(XLAT("protractor"), fts(protractor / degree) + "°", 'f');
-  if(!good_shape) {
-    dialog::addSelItem(XLAT("maximum error"), fts(err_zero), 'e');
-    if(rug::rugged)
-      dialog::lastItem().value += " (" + fts(err_zero_current) + ")";
-    }
-  #if ISMOBILE
-  dialog::addSelItem(XLAT("move on touch"), fts(move_on_touch), 'G');
-  #endif
   dialog::addSelItem(XLAT("anti-crossing"), fts(anticusp_factor), 'A');
-  dialog::addBoolItem(XLAT("3D monsters/walls on the surface"), spatial_rug, 'S');
-  dialog::add_action([] () { spatial_rug = !spatial_rug; });
-  edit_levellines('L');
+  dialog::add_action([] {
+    dialog::editNumber(anticusp_factor, 0, 1.5, .1, 0, XLAT("anti-crossing"),
+      XLAT("The anti-crossing algorithm prevents the model from crossing itself, "
+        "by preventing points which should not be close from being close. "
+        "The bigger number, the more sensitive it is, but the embedding is slower. Set 0 to disable.")
+      );
+    });
 
-#if CAP_SURFACE  
-  if(hyperbolic)
-    dialog::addItem(XLAT("smooth surfaces"), 'c');
-  else
-    dialog::addBreak(100);
-#endif
-
-  dialog::addBreak(50);
   dialog::addHelp();
-  dialog::addBack();
+  dialog::add_action([] { gotoHelp(makehelp()); });
 
-  dialog::display();
-  keyhandler = [] (int sym, int uni) {
-    handlePanning(sym, uni);
-    dialog::handleNavigation(sym, uni);
+  close_rug_page();
+  }
 
-    if(uni == 'h' || uni == SDLK_F1) gotoHelp(makehelp());
-    else if(uni == 'u') {
-      if(rug::rugged) rug::close();
-      else { 
-        #if CAP_SURFACE
-        surface::sh = surface::dsNone; 
-        #endif
-        rug::init(); 
+EX void show_torus_settings() {
+  init_rug_page("conformal torus");
+  #if CAP_SURFACE
+  surface::shape_option(surface::dsTorus, 'u', false);
+  #else
+  dialog::addBoolItem(XLAT("enable"), rug::rugged, 'u');
+  dialog::add_action([] {
+    if(rug::rugged) rug::close();
+    else rug::init();
+    });
+  #endif
+  if(!rug::rugged) {
+    dynamicval<eGeometry> g(geometry, gwhere);
+    dialog::addSelItem(XLAT("native geometry"), geometry_name(), 'n');
+    if(gwhere == rgElliptic) dialog::lastItem().value += " (e)";
+    #if MAXMDIM >= 4
+    dialog::add_action([] { if(!rug::rugged) pushScreen(rug_geometry_choice); });
+    #endif
+    }
+  else dialog::addBreak(100);
+
+  close_rug_page();
+  }
+
+EX void show_crystal_settings() {
+  init_rug_page("crystal viewer");
+  #if CAP_SURFACE
+  surface::shape_option(surface::dsCrystal, 'u', false);
+  #endif
+
+  if(rug::in_crystal()) {
+    dialog::addItem("next home orientation", 'h');
+    dialog::add_action(crystal::next_home_orientation);
+
+    dialog::addItem("switch Z coordinate", 's');
+    dialog::add_action(crystal::switch_z_coordinate);
+
+    dialog::addItem("flip Z coordinate", 'f');
+    dialog::add_action(crystal::flip_z);
+    }
+
+  rug::close_rug_page();
+  }
+
+EX void show_gfx_settings() {
+
+  init_rug_page("rug mode settings");
+
+  dialog::addBoolItem_action(XLAT("render the texture only once"), (renderonce), 'o');
+  #if CAP_SDL
+  if(!rug::rugged) dialog::addBoolItem_action(XLAT("render texture without OpenGL"), (rendernogl), 'g');
+  #else
+  rendernogl = false;
+  #endif
+  dialog::addSelItem(XLAT("texture size"), its(texturesize)+"x"+its(texturesize), 's');
+  dialog::add_action([] {
+    texturesize *= 2; if(texturesize == 8192) texturesize = 64;
+    change_texturesize();
+    });
+  dialog::addSelItem(XLAT("vertex limit"), its(vertex_limit), 'v');
+  if(rug::rugged)
+    dialog::lastItem().value += " (" + its(qvalid) + ")";
+  dialog::add_action([] {
+    dialog::editNumber(vertex_limit, 0, 50000, 500, 3000, ("vertex limit"),
+      XLAT("The more vertices, the more accurate the Hypersian Rug model is. "
+      "However, a number too high might make the model slow to compute and render.")
+      );
+    dialog::get_ne().reaction = [] () { err_zero_current = err_zero; };
+    });
+  dialog::addSelItem(XLAT("model distance"), fts(model_distance), 'd');
+  dialog::add_action([] {
+    dialog::editNumber(model_distance, -10, 10, .1, 1, XLAT("model distance"),
+      XLAT("In the perspective projection, this sets the distance from the camera to the center of the model. "
+      "In the orthogonal projection this just controls the scale.")
+      );
+    old_distance = model_distance;
+    dialog::get_di().reaction = [] () {
+      if(rug::rugged && perspective()) {
+        using_rugview rv;
+        shift_view(ztangent(old_distance - model_distance));
         }
-      }
-    else if(uni == 'R')
-      dialog::editNumber(finger_range, 0, 1, .01, .1, XLAT("finger range"),
-        XLAT("Press 1 to enable the finger mode.")
-        );
-    else if(uni == 'F')
-      dialog::editNumber(finger_force, 0, 1, .01, .1, XLAT("finger force"),
-        XLAT("Press 1 to enable the finger force.")
-        );
-    else if(uni == 'o')
-      renderonce = !renderonce;
-    else if(uni == 'G') {
-      dialog::editNumber(move_on_touch, -1, 1, .1, 0, XLAT("move on touch"), "");
-      dialog::get_ne().extra_options = anims::rug_angle_options;
-      }
-    else if(uni == 'A') {
-      dialog::editNumber(anticusp_factor, 0, 1.5, .1, 0, XLAT("anti-crossing"),
-        XLAT("The anti-crossing algorithm prevents the model from crossing itself, "
-          "by preventing points which should not be close from being close. "
-          "The bigger number, the more sensitive it is, but the embedding is slower. Set 0 to disable.")
-        );
-      }
-    else if(uni == 'v') {
-      dialog::editNumber(vertex_limit, 0, 50000, 500, 3000, ("vertex limit"), 
-        XLAT("The more vertices, the more accurate the Hypersian Rug model is. "
-        "However, a number too high might make the model slow to compute and render.")
-        );
-      dialog::get_ne().reaction = [] () { err_zero_current = err_zero; };
-      }
-    else if(uni == 'r') 
-      addMessage(XLAT("This just shows the 'z' coordinate of the selected point."));
-    else if(uni == 'm') {
-      dialog::editNumber(modelscale, 0.1, 10, rugged ? .01 : .1, 1, XLAT("model scale factor"), 
-        XLAT("This is relevant when the native geometry is not Euclidean. "
-        "For example, if the native geometry is spherical, and scale < 1, a 2d sphere will be rendered as a subsphere; "
-        "if the native geometry is hyperbolic, and scale > 1, a hyperbolic plane will be rendered as an equidistant surface. ")
-        );
-      dialog::scaleLog();
-      if(rug::rugged) {
-        static bool adjust_points = true;
-        static bool camera_center = false;
-        static bool adjust_edges = true;
-        static bool adjust_distance = true;
-        static ld last;
-        last = modelscale;
-        dialog::get_ne().extra_options = [] () {
-          dialog::addBoolItem_action(XLAT("adjust points"), adjust_points, 'P');
-          if(adjust_points)
-            dialog::addBoolItem_action(XLAT("center on camera"), camera_center, 'C');
-          else
-            dialog::addBreak(100);
-          dialog::addBoolItem_action(XLAT("adjust edges"), adjust_edges, 'E');
-          dialog::addBoolItem_action(XLAT("adjust distance"), adjust_distance, 'D');
-          };
-        dialog::get_ne().reaction = [] () {
-          if(!last || !modelscale) return;
-          if(!camera_center) push_all_points(2, model_distance);
-          for(auto p:points) {
-            if(adjust_edges) for(auto& e: p->edges) e.len *= modelscale / last;
-            if(adjust_points) p->native *= modelscale / last;
-            enqueue(p);
-            }
-          if(adjust_distance) model_distance = model_distance * modelscale / last;
-          last = modelscale;
-          good_shape = false;
-          if(!camera_center) push_all_points(2, -model_distance);
-          };
-        }
-      }
-    else if(uni == 'p') {
-      pushScreen(models::model_menu);
-      }
-    else if(uni == 'd') {
-      dialog::editNumber(model_distance, -10, 10, .1, 1, XLAT("model distance"), 
-        XLAT("In the perspective projection, this sets the distance from the camera to the center of the model. "
-        "In the orthogonal projection this just controls the scale.")
-        );
       old_distance = model_distance;
-      dialog::get_di().reaction = [] () {
-        if(rug::rugged && perspective()) {
-          using_rugview rv;
-          shift_view(ztangent(old_distance - model_distance));
+      };
+    });
+  dialog::addSelItem(XLAT("model scale factor"), fts(modelscale), 'm');
+  dialog::add_action([] {
+    dialog::editNumber(modelscale, 0.1, 10, rugged ? .01 : .1, 1, XLAT("model scale factor"),
+      XLAT("This is relevant when the native geometry is not Euclidean. "
+      "For example, if the native geometry is spherical, and scale < 1, a 2d sphere will be rendered as a subsphere; "
+      "if the native geometry is hyperbolic, and scale > 1, a hyperbolic plane will be rendered as an equidistant surface. ")
+      );
+    dialog::scaleLog();
+    if(rug::rugged) {
+      static bool adjust_points = true;
+      static bool camera_center = false;
+      static bool adjust_edges = true;
+      static bool adjust_distance = true;
+      static ld last;
+      last = modelscale;
+      dialog::get_ne().extra_options = [] () {
+        dialog::addBoolItem_action(XLAT("adjust points"), adjust_points, 'P');
+        if(adjust_points)
+          dialog::addBoolItem_action(XLAT("center on camera"), camera_center, 'C');
+        else
+          dialog::addBreak(100);
+        dialog::addBoolItem_action(XLAT("adjust edges"), adjust_edges, 'E');
+        dialog::addBoolItem_action(XLAT("adjust distance"), adjust_distance, 'D');
+        };
+      dialog::get_ne().reaction = [] () {
+        if(!last || !modelscale) return;
+        if(!camera_center) push_all_points(2, model_distance);
+        for(auto p:points) {
+          if(adjust_edges) for(auto& e: p->edges) e.len *= modelscale / last;
+          if(adjust_points) p->native *= modelscale / last;
+          enqueue(p);
           }
-        old_distance = model_distance;
+        if(adjust_distance) model_distance = model_distance * modelscale / last;
+        last = modelscale;
+        good_shape = false;
+        if(!camera_center) push_all_points(2, -model_distance);
         };
       }
-    else if(uni == 'e') {
-      dialog::editNumber(err_zero, 1e-9, 1, .1, 1e-3, XLAT("maximum error"), 
-        XLAT("New points are added when the current error in the model is smaller than this value.")
-        );
-      dialog::scaleLog();
-      dialog::get_di().reaction = [] () { err_zero_current = err_zero; };
-      }
-    else if(uni == 'f') 
-      pushScreen(showStereo);
-    #if MAXMDIM >= 4
-    else if(uni == 'n' && !rug::rugged) 
-      pushScreen(rug_geometry_choice);
+    });
+  if(rug::rugged) {
+    dialog::addSelItem(XLAT("projection"), models::get_model_name(rconf.model), 'p');
+    dialog::add_action_push(models::model_menu);
+    }
+  else dialog::addBreak(100);
+  
+  dialog::addItem(XLAT("stereo vision config"), 'f');
+  dialog::add_action_push(showStereo);
+
+  #if ISMOBILE
+  dialog::addSelItem(XLAT("move on touch"), fts(move_on_touch), 'G');
+  dialog::add_action([] {
+    dialog::editNumber(move_on_touch, -1, 1, .1, 0, XLAT("move on touch"), "");
+    dialog::get_ne().extra_options = anims::rug_angle_options;
+    });
+  #endif
+  dialog::addBoolItem_action(XLAT("3D monsters/walls on the surface"), spatial_rug, 'S');
+  edit_levellines('L');
+
+  close_rug_page();
+  }
+
+EX void show() {
+  init_rug_page("hypersian rug mode");
+
+  #if CAP_SURFACE
+  if(!rug::rugged && torus_available()) surface::sh = surface::dsTorus;
+  surface::shape_option(surface::sh, 'u');
+  dialog::addBreak(100);
+  #endif
+
+  dialog::addItem("Hypersian Rug settings", 'r');
+  dialog::add_action_push(show_hyperrug_settings);
+
+  if(torus_available()) {
+    dialog::addItem("torus settings", 't');
+    dialog::add_action_push(show_torus_settings);
+    }
+
+  if(cryst) {
+    dialog::addItem("Crystal settings", 'C');
+    dialog::add_action_push(show_crystal_settings);
+    }
+
+  if(hyperbolic) {
+    #if CAP_SURFACE
+    dialog::addItem("constant curvature surfaces", 'c');
+    dialog::add_action_push(surface::show_smooth);
+
+    dialog::addItem("Hilbert Rug", 'i');
+    dialog::add_action_push(surface::show_hilbert);
     #endif
-#if CAP_SDL
-    else if(uni == 'g' && !rug::rugged)
-      rendernogl = !rendernogl;
-#endif
-    else if(uni == 's') {
-      texturesize *= 2;
-      if(texturesize == 8192) texturesize = 64;
-      change_texturesize();
-      }
-#if CAP_SURFACE
-    else if(uni == 'c') 
-      pushScreen(surface::show_surfaces);
-#endif
-    else if(handlekeys(sym, uni)) ;
-    else if(doexiton(sym, uni)) popScreen();
-    };
+    }
+
+  dialog::addItem("general settings", 'g');
+  dialog::add_action_push(show_gfx_settings);
+
+  #if CAP_SURFACE
+  dialog::addItem("other features", 'o');
+  dialog::add_action_push(surface::show_other);
+  #endif
+
+  dialog::display();
   }
 
 EX void select() {

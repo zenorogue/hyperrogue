@@ -16,11 +16,11 @@ EX namespace surface {
 ld sech(ld d) { return 1 / cosh(d); }
 
 #if HDR
-enum eShape { dsNone, dsTractricoid, dsDini, dsKuen, dsHyperlike, dsHyperboloid, dsHemisphere, dsCrystal };
+enum eShape { dsHypersian, dsTorus, dsTractricoid, dsDini, dsKuen, dsHyperlike, dsHyperboloid, dsHemisphere, dsCrystal, dsHilbert };
 #endif
 
-string shape_name[] = { "hypersian rug", "tractricoid", "Dini's surface", "Kuen surface", "concave barrel",
-  "hyperboloid", "hemisphere", "crystal" };
+string shape_name[] = { "hypersian rug", "conformal torus", "tractricoid", "Dini's surface", "Kuen surface", "concave barrel",
+  "hyperboloid", "hemisphere", "crystal", "Hilbert rug" };
   
 EX eShape sh;
 
@@ -367,7 +367,8 @@ int dexp_comb_colors[16] = {
   0x123456, 0x123456, 0x123456, 0x123456, 0x123456, 0x123456, 0x123456
    };
 
-int coverage_style;
+EX int coverage_style;
+EX bool approx_quality;
 EX vector<pair<hyperpoint, int> > coverage;
 
 #if CAP_KUEN_MAP
@@ -409,7 +410,7 @@ void draw_kuen_map() {
   }
 #endif
 
-void full_mesh() {
+EX void full_mesh() {
   rug::clear_model();
   rug::buildRug();
   rug::qvalid = 0;
@@ -596,21 +597,24 @@ void run_other() {
   }
 
 EX void run_shape(eShape s) {
+  if(s == sh && rug::rugged) { rug::close(); return; }
   coverage.clear();
   need_mouseh = true;
   sh = s;
   
   if(rug::rugged) rug::close();
-  rug::gwhere = rug::rgEuclid;
+  if(!among(s, dsHypersian, dsTorus, dsCrystal)) rug::gwhere = rug::rgEuclid;
 
   rug::init();
   // if(!rug::rugged) rug::reopen();
   
   pushScreen(history::progress_screen);
-  if(sh != dsNone) rug::good_shape = true;
+  if(sh != dsHypersian) rug::good_shape = true;
 
   switch(sh) {
-    case dsNone:
+    case dsHypersian:
+    case dsTorus:
+    case dsCrystal:
       break;
       
     case dsKuen:
@@ -631,16 +635,19 @@ EX void run_shape(eShape s) {
 
     case dsHemisphere:
       run_function([] (hyperpoint h) { h = h / h[2]; h[2] = sqrt(1 - sqhypot_d(2, h)); return h; });
-      break;      
+      break;
+
+    case dsHilbert:
+      run_hilbert();
     }
 
-  if(sh != dsNone) rug::good_shape = true;
+  if(sh != dsHypersian) rug::good_shape = true;
   
   rug::qvalid = 0;
   
   popScreen();
   
-  if(sh != dsHyperboloid && sh != dsHemisphere && sh != dsNone) {
+  if(sh != dsHyperboloid && sh != dsHemisphere && sh != dsHypersian) {
 
     ld minx = 1e9, maxx = -1e9;
   
@@ -660,7 +667,7 @@ EX void run_shape(eShape s) {
 
 void cancel_shape() {
   if(sh) {
-    sh = dsNone;
+    sh = dsHypersian;
     rug::good_shape = false;
     rug::qvalid = 0;
     for(auto p: rug::points) 
@@ -674,108 +681,136 @@ void cancel_shape() {
 cell *coverage_center;
 transmatrix coverage_matrix;
 
-EX void show_surfaces() {
-  cmode = sm::SIDE;
-  gamescreen();
-  dialog::init(XLAT("constant curvature surfaces"), iinf[itPalace].color, 150, 0);
-  
-  bool b = rug::rugged || coverage_style;
+// approximations
 
-  dialog::addBoolItem(XLAT("tractricoid"), b && sh == dsTractricoid, '1');
-  dialog::addBoolItem(XLAT("concave barrel"), b && sh == dsHyperlike, '2');
-  dialog::addSelItem("     " + XLAT("parameter"), fts(hyper_b), '@');
-  dialog::addBoolItem(XLAT("Dini's surface"), b && sh == dsDini, '3');
-  dialog::addSelItem("     " + XLAT("parameter") + " ", fts(dini_b), '#');
-  dialog::addBoolItem(XLAT("Kuen surface"), b && sh == dsKuen, '4');
-  
-  dialog::addBreak(50);
-  
-  dialog::addTitle(XLAT("other 3D models"), iinf[itPalace].color, 150);
+hyperpoint hilbert_at(hyperpoint s, hyperpoint e, hyperpoint d, hyperpoint as, hyperpoint ae, ld steps, ld t) {
+  hyperpoint ctr = (e+d)/2;
+  hyperpoint f = e+(d-s);
+  if(steps == 0) return as * (1-t) * (1-t) + ae * t * t + ctr * (1 - t*t - (1-t) * (1-t));
+  if(steps < 1) return lerp(hilbert_at(s, e, d, as, ae, 0, t), hilbert_at(s, e, d, as, ae, 1, t), steps);
+  t *= 4;
+  int ti = int(t);
+  if(ti == 4) ti = 3;
+  t -= ti;
+  if(ti == 0) return hilbert_at(s, (s+d)/2, (s+e)/2, (s+as)/2, (s+d+e+d)/4, steps-1, t);
+  if(ti == 1) return hilbert_at((s+d)/2, ctr, d, (s+d+e+d)/4, (e+d+d+f)/4, steps-1, t);
+  if(ti == 2) return hilbert_at(ctr, (s+d)/2 + (e-s), d + (e-s)/2, (e+d+d+f)/4, (e+d+f+e)/4, steps-1, t);
+  if(ti == 3) return hilbert_at((s+d)/2 + (e-s), e, ctr, (e+d+f+e)/4, (e+ae)/2, steps-1, t);
+  throw hr_exception("hilbert_at error");
+  }
 
-  dialog::addBoolItem(XLAT("Hypersian Rug"), b && sh == dsNone, '5');
-  dialog::addBoolItem(XLAT("Minkowski hyperboloid"), b && sh == dsHyperboloid, '6');
-  dialog::addBoolItem(XLAT("hemisphere"), b && sh == dsHemisphere, '7');
+ld approx_length_at(ld s) {
+  if(s < 0.5) s -= (s - 0.5) / 2;
+  return exp(0.5) * pow(2, s);;
+  }
 
-  dialog::addBreak(100);
+ld approx_length_to_s(ld len) {
+  ld s = log(len / exp(0.5)) / log(2);
+  if(s < 0.5) s += (s - 0.5);
+  return s;
+  }
+
+bool circular = false;
+int qty = 7;
+ld hscale = 1;
+
+EX void run_hilbert() {
+  full_mesh();
+  rug::good_shape = true;
+  rug::qvalid = 0;
+
+  for(auto p: rug::points) {
+    hyperpoint& pt = p->native;
+    hyperpoint h = p->h.h;
+
+    if(circular) {
+      ld r = hdist0(h);
+      ld phi = atan2(h);
+
+      ld length_factor = r == 0 ? 1 : sinh(r) / r;
+      ld s = approx_length_to_s((approx_length_at(0.0) * length_factor));
+
+      ld t = phi * qty / TAU;
+      ld tz = floor(t);
+      ld x0 = -1 + 2 * tz;
+      ld x1 = +1 + 2 * tz;
+      hyperpoint h = hilbert_at(point3(x0,-1,1), point3(x1,-1,1), point3(x0,1,1), point3(x0,0,1), point3(x1,0,1), s, t-tz);
+      h *= TAU / (2 * qty);
+      pt = cspin(0, 1, h[0]) * cspin(1, 2, h[1]) * point3(0, 1, 0) * r;
+      }
+    else {
+      ld y = asin_auto(h[1]);
+      ld x = asin_auto_clamp(h[0] / cos_auto(y));
+
+      ld length_factor = cos_auto(y);
+      ld s = approx_length_to_s((approx_length_at(0.5) * length_factor));
+
+      ld t = x / approx_length_at(0.5) / hscale + .5;
+      ld tz = floor(t);
+      ld x0 = -1 + 2 * tz;
+      ld x1 = +1 + 2 * tz;
+      pt = hilbert_at(point3(x0,-1,1), point3(x1,-1,1), point3(x0,1,1), point3(x0,0,1), point3(x1,0,1), s, t-tz);
+
+      pt[0] *= hscale;
+      pt[1] *= hscale;
+      pt[2] = y;
+      }
+
+    pt *= rug::modelscale;
+
+    pt[3] = 1;
+
+    p->valid = true;
+    }
+  }
+
+// menu
+
+EX void shape_option(eShape s, char c, bool named IS(true)) {
+  bool b = rug::rugged || coverage_style || approx_quality;
+  dialog::addBoolItem(named ? XLAT(shape_name[s]) : XLAT("enable"), b && sh == s, c);
+  dialog::add_action([s] { run_shape(s); });
+  }
+
+EX void show_smooth() {
+  rug::init_rug_page(XLAT("constant curvature surfaces"));
+
+  shape_option(dsTractricoid, 't');
+
+  shape_option(dsHyperlike, 'b');
+  dialog::addSelItem("     " + XLAT("parameter"), fts(hyper_b), 'B');
+  dialog::add_action([] {
+    dialog::editNumber(hyper_b, -1, 1, .05, 1, XLAT("parameter"),
+      XLAT("Controls the inner radius.")
+      );
+    dialog::get_ne().reaction = [] () {
+      if(sh == dsHyperlike) run_shape(sh);
+      };
+    });
+
+  shape_option(dsDini, 'd');
+  dialog::addSelItem("     " + XLAT("parameter") + " ", fts(dini_b), 'D');
+  dialog::add_action([] {
+    dialog::editNumber(dini_b, -1, 1, .05, .15, XLAT("parameter"),
+      XLAT("The larger the number, the more twisted it is.")
+      );
+    });
+
+  shape_option(dsKuen, 'k');
 
   dialog::addSelItem(XLAT("precision"), its(precision), 'p');
+  dialog::add_action([] {
+    dialog::editNumber(precision, 1, 10000, 0, 100, XLAT("precision"),
+      XLAT("Computing these models involves integrals and differential equations, which are currently solved numerically. This controls the precision.")
+      );
+    dialog::get_ne().step = .1;
+    dialog::scaleLog();
+    });
+
   string cstyles[4] = { "OFF", "on surface", "on H² (static)", "on H² (dynamic)" };
-  if((rug::rugged && sh && sh != dsHyperboloid && sh != dsHemisphere) || coverage_style)
+  if((rug::rugged && sh && sh != dsHyperboloid && sh != dsHemisphere) || coverage_style) {
     dialog::addSelItem(XLAT("display coverage"), cstyles[coverage_style], 'c');
-  else dialog::addBreak(100);
-  
-  #if CAP_FILES
-  if(rug::rugged)
-    dialog::addItem(XLAT("save the current embedding"), 's');
-  else
-    dialog::addItem(XLAT("load a saved embedding"), 's');
-  #endif
-
-  dialog::addHelp();
-  dialog::addBack();
-  
-  dialog::display();
-  keyhandler = [] (int sym, int uni) {
-    dialog::handleNavigation(sym, uni);
-
-    if(uni == 'h' || uni == SDLK_F1) 
-      gotoHelp(XLAT(
-        "In this menu you can choose from several known smooth surfaces of constant negative curvature. "
-        "Since the curvature of hyperbolic plane is also constant negative, these surfaces "
-        "are great to draw hyperbolic tesselations on. While they look great, only a small part "
-        "of the hyperbolic plane can be visibly represented in this way, so they are not "
-        "good for playing HyperRogue; however, the coverage extends far away in specific directions, "
-        "so first increasing sight range in graphics config and texture size in hypersian rug settings may improve the effect. "
-        "For convenience, you can also choose other 3D models from this menu."
-        ));
-
-    #if CAP_FILES
-    else if(uni == 's') {
-      static string rugname = "saved.rug";
-      if(rug::rugged) 
-        dialog::openFileDialog(rugname, XLAT("save embedding to:"), ".rug", [] () { rug::rug_save(rugname); return true; });
-      else 
-        dialog::openFileDialog(rugname, XLAT("load embedding from:"), ".rug", [] () { rug::init(); rug::rug_load(rugname); return true; });
-      }
-    #endif
-    else if(uni == '1')
-      run_shape(dsTractricoid);
-    else if(uni == '2')
-      run_shape(dsHyperlike);
-    else if(uni == '3')
-      run_shape(dsDini);
-    else if(uni == '4')
-      run_shape(dsKuen);
-    else if(uni == '5')
-      run_shape(dsNone);
-    else if(uni == '6')
-      run_shape(dsHyperboloid);
-    else if(uni == '7')
-      run_shape(dsHemisphere);
-
-    else if(uni == '@') {
-      dialog::editNumber(hyper_b, -1, 1, .05, 1, XLAT("parameter"),
-        XLAT("Controls the inner radius.")
-        );
-      dialog::get_ne().reaction = [] () {
-        if(sh == dsHyperlike) run_shape(sh);
-        };
-      }
-    else if(uni == 'x')
-      for(auto p: rug::points)
-        p->native = p->surface_point.params;
-    else if(uni == '#')
-      dialog::editNumber(dini_b, -1, 1, .05, .15, XLAT("parameter"),
-        XLAT("The larger the number, the more twisted it is.")
-        );
-    else if(uni == 'p') {
-      dialog::editNumber(precision, 1, 10000, 0, 100, XLAT("precision"),
-        XLAT("Computing these models involves integrals and differential equations, which are currently solved numerically. This controls the precision.")
-        );
-      dialog::get_ne().step = .1;
-      dialog::scaleLog();
-      }
-    else if(uni == 'c') {
+    dialog::add_action([] {
       coverage_style = (1 + coverage_style) % 4;
       if(coverage_style == 0) {
         rug::reopen();
@@ -784,10 +819,135 @@ EX void show_surfaces() {
         if(rug::rugged) rug::close();
         }
       coverage_matrix = inverse(unshift(ggmatrix(coverage_center = cwt.at)));
+      });
+    }
+  else dialog::addBreak(100);
+
+  dialog::addHelp();
+  dialog::add_action([] {
+    gotoHelp(XLAT(
+      "In this menu you can choose from several known smooth surfaces of constant negative curvature. "
+      "Since the curvature of hyperbolic plane is also constant negative, these surfaces "
+      "are great to draw hyperbolic tesselations on. While they look great, only a small part "
+      "of the hyperbolic plane can be visibly represented in this way, so they are not "
+      "good for playing HyperRogue; however, the coverage extends far away in specific directions, "
+      "so first increasing sight range in graphics config and texture size in hypersian rug settings may improve the effect."
+      ));
+    });
+
+  rug::close_rug_page();
+  }
+
+EX void display_approx() {
+  dialog::addBoolItem_action(XLAT("approximation quality"), approx_quality, 'A');
+  dialog::addCustom(50, [] {
+    if(approx_quality) {
+      int mid = (dialog::top + dialog::tothei) / 2;
+      int siz = vid.fsize / 2;
+      for(int s=0; s<=10; s++) {
+        ld r = exp(lerp(log(v_approx_min), log(v_approx_max), s/10.));
+        color_t col = rainbow_color(1, s / 10.);
+        displaystr(dialog::dcenter + (dialog::dialogwidth - 3 * vid.fsize) * lerp(-0.5, 0.5, s/10.), mid, 0, siz, format("%.3f", r), col, 8);
+        }
       }
-    else if(rug::handlekeys(sym, uni)) ;
-    else if(doexiton(sym, uni)) popScreen();
-    };
+    });
+  if(approx_quality) {
+    dialog::addSelItem(XLAT("set scale to"), format("%lf..%lf", approx_min, approx_max), 'S');
+    dialog::add_action([] { v_approx_max = approx_max; v_approx_min = approx_min; });
+    }
+  else dialog::addBreak(100);
+  }
+
+EX void show_hilbert() {
+  rug::init_rug_page(XLAT("Hilbert Rug"));
+
+  shape_option(dsHilbert, 'u', false);
+
+  dialog::addBoolItem(XLAT("circular mode"), circular, 'C');
+  dialog::add_action([] { circular = !circular; if(sh == dsHilbert) run_shape(dsHilbert); });
+
+  if(circular) {
+    dialog::addSelItem(XLAT("scale"), its(qty), 'Q');
+    dialog::add_action([] {
+      dialog::editNumber(qty, 1, 100, 1, 7, XLAT("scale"),
+        XLAT("The smaller the number, the flatter it is.")
+        );
+      dialog::get_ne().reaction = [] { if(sh == dsHilbert) run_shape(dsHilbert); };
+      });
+    }
+  else {
+    dialog::addSelItem(XLAT("scale"), fts(hscale), 'S');
+    dialog::add_action([] {
+      dialog::editNumber(hscale, 1e-3, 1e3, .05, 1, XLAT("scale"),
+        XLAT("The smaller the number, the flatter it is.")
+        );
+      dialog::get_ne().reaction = [] { if(sh == dsHilbert) run_shape(dsHilbert); };
+      });
+    }
+
+  rug::close_rug_page();
+  }
+
+string finger_help =
+  "Press 1 while mouse is over the surface to enable the finger force. In this mode, "
+  "pressing arrow keys affects the shape of the surface (simulated pulling).";
+
+EX void show_other() {
+  rug::init_rug_page(XLAT("other features"));
+
+  dialog::addTitle(XLAT("other 3D models"), iinf[itPalace].color, 150);
+
+  shape_option(dsHyperboloid, 'h');
+  shape_option(dsHemisphere, 's');
+
+  dialog::addBreak(100);
+
+  #if CAP_FILES
+  if(rug::rugged)
+    dialog::addItem(XLAT("save the current embedding"), 's');
+  else
+    dialog::addItem(XLAT("load a saved embedding"), 's');
+  dialog::add_action([] {
+    static string rugname = "saved.rug";
+    if(rug::rugged)
+      dialog::openFileDialog(rugname, XLAT("save embedding to:"), ".rug", [] () { rug::rug_save(rugname); return true; });
+    else
+      dialog::openFileDialog(rugname, XLAT("load embedding from:"), ".rug", [] () { rug::init(); rug::rug_load(rugname); return true; });
+    });
+  #endif
+
+  if(rug::rugged) {
+    dialog::addSelItem(XLAT("radar"), rug::radar_distance == rug::RADAR_INF ? "∞" : fts(rug::radar_distance, 4), 'r');
+    dialog::add_action([] {
+      addMessage(XLAT("This just shows the 'z' coordinate of the selected point."));
+      });
+    }
+  else dialog::addBreak(100);
+
+  dialog::addItem(XLAT("surface_point to native"), 'x');
+  dialog::add_action([] {
+   for(auto p: rug::points)
+     p->native = p->surface_point.params;
+    });
+
+  display_approx();
+
+  dialog::add_key_action('1', rug::activate_finger);
+
+  dialog::addSelItem(XLAT("finger range"), fts(rug::finger_range), 'R');
+  dialog::add_action([] {
+    dialog::editNumber(rug::finger_range, 0, 1, .01, .1, XLAT("finger range"),
+      XLAT(finger_help)
+      );
+    });
+  dialog::addSelItem(XLAT("finger force"), fts(rug::finger_force), 'F');
+  dialog::add_action([] {
+    dialog::editNumber(rug::finger_force, 0, 1, .01, .1, XLAT("finger force"),
+      XLAT(finger_help)
+      );
+    });
+
+  rug::close_rug_page();
   }
 
 #if CAP_COMMANDLINE
@@ -835,8 +995,10 @@ int surface_args() {
     run_shape(dsHyperboloid);
     }
 
-  else if(argis("-d:surface")) 
-    launch_dialog(show_surfaces);
+  else if(argis("-d:surface")) {
+    launch_dialog(rug::show);
+    launch_dialog(show_smooth);
+    }
 
   else return 1;
   return 0;
@@ -847,7 +1009,12 @@ int surface_args() {
 auto surface_hook = addHook(hooks_args, 100, surface_args);
 #endif
 
-void display_coverage() {
+EX ld approx_min;
+EX ld approx_max;
+EX ld v_approx_min = 0.5;
+EX ld v_approx_max = 1.5;
+
+void display_coverage_and_approx_quality() {
 
   shiftmatrix M = 
     coverage_style == 3 ? ggmatrix(coverage_center) * coverage_matrix
@@ -858,9 +1025,32 @@ void display_coverage() {
       queuestr(M * p.first, 10, s0+char(p.second), dexp_comb_colors[(p.second >> 8) & 15]);
 /*      if(p->valid && p->surface_point.remaining_distance == 0)
         queuestr(p->h, 10, "x", dexp_colors[p->dexp_id]); */
+
+  if(approx_quality) {
+    vid.linewidth *= 4;
+    approx_min = INF, approx_max = 0;
+    for(auto p: rug::points) {
+      for(auto& e: p->edges) {
+        if(e.os > e.ot) continue;
+        if(!e.os->valid || !e.ot->valid) continue;
+        ld d;
+        if(1) {
+          USING_NATIVE_GEOMETRY;
+          d = hdist(e.ot->native, e.os->native);
+          }
+        ld ratio = d / e.len;
+        if(ratio < approx_min) approx_min = ratio;
+        if(ratio > approx_max) approx_max = ratio;
+        ld z = log(ratio) / log(v_approx_max / v_approx_min);
+        color_t col = (rainbow_color(1, z) << 8) | 0xFF;
+        queueline(e.ot->h, e.os->h, col, 0);
+        }
+      }
+    vid.linewidth /= 4;
+    }
   }
 
-auto surface_hook2 = addHook(hooks_frame, 0, display_coverage);
+auto surface_hook2 = addHook(hooks_frame, 0, display_coverage_and_approx_quality);
 
 EX }
 #endif

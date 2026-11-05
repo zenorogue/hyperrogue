@@ -6737,8 +6737,7 @@ S(
   "are great to draw hyperbolic tesselations on. While they look great, only a small part "
   "of the hyperbolic plane can be visibly represented in this way, so they are not "
   "good for playing HyperRogue; however, the coverage extends far away in specific directions, "
-  "so first increasing sight range in graphics config and texture size in hypersian rug settings may improve the effect. "
-  "For convenience, you can also choose other 3D models from this menu.",
+  "so first increasing sight range in graphics config and texture size in hypersian rug settings may improve the effect.",
   
   "W tym trybie możesz wybrać spośród kilku znanych powierzchni o stałej ujemnej krzywiźnie. "
   "Krzywizna płaszczyzny hiperbolicznej jest również stała ujemna, także powierzchnie te "
@@ -6746,8 +6745,7 @@ S(
   "płaszczyzny hiperbolicznej może być pokazana w ten sposób, także nie nadają się "
   "one zbyt dobrze do grania w HyperRogue; pokrycie zato wybiega daleko w określonych kierunkach, "
   "także powiększenie pola widzenia w konfiguracji grafiki oraz rozmiaru tekstury w ustawieniach "
-  "hiperskiego dywanu może poprawić efekt. Dla wygody możesz również wybrać inne tryby 3D "
-  "z tego menu."
+  "hiperskiego dywanu może poprawić efekt."
   )
 
 // coverage
