@@ -969,6 +969,7 @@ EX bool is_joy_index(int sym, int index) {
 
 #if !CAP_SDL
 EX bool is_joy_index(int sym, int index) { return false; }
+EX bool is_joy_any(int sym) { return false; }
 #endif
 
 #if HDR
