@@ -1077,6 +1077,7 @@ EX purehookset hooks_configfile;
 
 EX ld mapfontscale = 100;
 
+#if CAP_SDL
 EX vector<int> get_display_modes(char which) {
   set<int> seen;
 
@@ -1119,6 +1120,7 @@ EX vector<int> get_display_modes(char which) {
   for(auto s: seen) v.push_back(s);
   return v;
   }
+#endif
 
 #if CAP_SDLTTF
 EX void font_reaction() {
@@ -1480,14 +1482,18 @@ EX void initConfig() {
   param_i(vid.fullscreen_x, "fullscreen_x", 1280)
   -> editable(640, 3840, 1, "fullscreen resolution to use (X)", "", 'x')
   -> set_sets([] {
+    #if CAP_SDL
     dialog::scale_given(get_display_modes('x'));
+    #endif
     dialog::bound_low(dialog::get_ne().vmin);
     dialog::get_di().reaction_final = do_request_resolution_change; });
   
   param_i(vid.fullscreen_y, "fullscreen_y", running_on_deck ? 800 : 1024)
   -> editable(480, 2160, 1, "fullscreen resolution to use (Y)", "", 'x')
   -> set_sets([] {
+    #if CAP_SDL
     dialog::scale_given(get_display_modes('y'));
+    #endif
     dialog::bound_low(dialog::get_ne().vmin);
     dialog::get_di().reaction_final = do_request_resolution_change; });
 

@@ -997,12 +997,16 @@ EX namespace dialog {
   EX void handle_actions(int &sym, int &uni) {
     if(key_actions.count(uni)) {
       key_actions[uni]();
+      #if CAP_SDL
       if(uni >= ' ' && uni <= 127) ignore_textinput = true;
+      #endif
       sym = uni = 0;
       return;
       }
     if(key_actions.count(sym)) {
+      #if CAP_SDL
       if(sym >= ' ' && sym <= 127) ignore_textinput = true;
+      #endif
       key_actions[sym]();
       sym = uni = 0;
       return;

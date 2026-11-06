@@ -965,6 +965,12 @@ EX bool is_joy_index(int sym, int index) {
   return is_joy_any(sym) && (sym & (JOY_ID - 1)) == index;
   }
 
+#endif
+
+#if !CAP_SDL
+EX bool is_joy_index(int sym, int index) { return false; }
+#endif
+
 #if HDR
 // default meaning of Steam Deck buttons
 
@@ -985,6 +991,7 @@ namespace deck {
   }
 #endif
 
+#if CAP_SDL
 EX void mainloopiter() {
   indenter_finish imainloop(debug_control, "mainloopiter");
   GLWRAP;

@@ -1325,7 +1325,9 @@ EX void close_window() {
 
 EX void close_sdl() {
   close_window();
+  #if CAP_SDL
   SDL_Quit();
+  #endif
   sdl_on = false;
   graphics_on = false;
   vid.usingGL = false;
