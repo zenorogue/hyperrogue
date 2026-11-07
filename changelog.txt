@@ -5729,3 +5729,20 @@ Bug fixes:
 - in PTM minimal, the 'gold medal' is shown at 50 as intended, not 5
 - switching LOS or hardcore during a PTM/YC/PrC run now resets the run
 - fixed a possible crash
+
+2026-08-05 15:12 Update 13.1o:
+- fixed incorrect values of altitudes of sub-floor levels
+- music reset modes: you can now choose to not reset music if it is the same
+- changed line-of-sight blocking rules for: Orb of Fish users, Yendorian trunks, Lost Mountain, Round Table
+- line-of-sight fixed in shmup (works against enemies, takes precise position into account) and in multiplayer
+- in PTM minimal, the 'gold medal' is shown at 50 as intended, not 5
+- switching LOS or hardcore during a PTM/YC/PrC run now resets the run
+- fixed a possible crash
+
+2026-11-07 09:00 Update 13.1p "Fifteen Years of HyperRogue":
+- An update to the Android version that hopefully improves it on newer versions of Android (crash when paused, part of screen to use, no longer use bold font)
+- Redesigned the menus in the Hypersian Rug mode, including a new approximately isometric embedding "Hilbert Rug"
+- fixed crashes in infinite-order tilings and "backed" tilings
+- Orb of the Fish is not useless in Cursed Canyon (thanks to Jeroen Demeyer)
+- Free Fall treasure generation now depends on correct kills (thanks to Jeroen Demeyer)
+- other minor fixes/new options
