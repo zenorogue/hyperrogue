@@ -212,8 +212,43 @@ int a = arg::add3("-edgelist", [] { arg::shift(); read_edgelist(arg::args()); })
     arg::shift(); any->arrow_scale = arg::argf();
     });
 
-}
+bool use_cells_to_draw;
+std::unordered_set<cell*> cells_to_draw;
 
+void rv_enable_cells_to_draw() {
+  cells_to_draw.clear();
+  rv_hook(hooks_do_draw, 100, [] (cell *c, const shiftmatrix& V) { if(!use_cells_to_draw) return 0; if(c == centerover) return 1; return cells_to_draw.count(c) ? 1 : -1; });
+  rv_hook(hooks_o_key, 80, [] (o_funcs& v) { v.push_back(named_functionality("switch use_cells_to_draw", [] { use_cells_to_draw = !use_cells_to_draw; })); });
+  }
+
+void add_to_cells_to_draw(cell *c) {
+  if(cells_to_draw.count(c)) return;
+  cells_to_draw.insert(c);
+  forCellEx(c1, c) if(celldist(c1) < celldist(c) && celldist(c1) >= 0) add_to_cells_to_draw(c1);
+  }
+
+void rv_draw_embedding_cells() {
+  for(auto& vd: vdata) add_to_cells_to_draw(vd.m->base);
+  }
+
+void set_auto_scale(ld bonus, ld base, ld minmul, ld bonus_clip) {
+  ld maxsize = 0;
+  vector<hyperpoint> ts;
+  for(int i=0; i<8; i++) ts.push_back(xspinpush0(i*45._deg, bonus));
+  if(GDIM == 3) ts.push_back(zpush0(bonus)), ts.push_back(zpush0(-bonus));
+
+  for(auto v: vdata) for(auto& t: ts) {
+    hyperpoint ret;
+    applymodel(ggmatrix(v.m->base)*v.m->at*t, ret);
+    ld size = hypot(hypot(ret[0], ret[1]), ret[2]);
+    if(size > maxsize) maxsize = size;
+    }
+  pconf.scale = base / maxsize;
+  pconf.clip_min = -maxsize * minmul - bonus_clip;
+  pconf.clip_max = maxsize + bonus_clip;
+  }
+
+}
 }
 
 #include "polar.cpp"

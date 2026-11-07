@@ -127,6 +127,12 @@ inline ld get_node_rendered(int i) { if(node_rendered.empty()) return true; else
 
 void symmetrize();
 
+extern bool use_cells_to_draw;
+extern std::unordered_set<cell*> cells_to_draw;
+void rv_enable_cells_to_draw();
+void rv_draw_embedding_cells();
+void set_auto_scale(ld bonus = 0.5, ld base = 0.95, ld minmul = 3, ld bonus_clip = 0.1);
+
 extern edgetype *any;
 }
 }
