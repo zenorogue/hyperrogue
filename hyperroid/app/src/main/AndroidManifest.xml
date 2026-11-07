@@ -15,6 +15,7 @@
                   android:windowSoftInputMode="adjustResize"
                   android:configChanges="orientation|keyboardHidden|screenSize"
                   android:name=".HyperRogue"
+                  android:theme="@style/AppTheme"
                   android:launchMode="singleTask" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -41,3 +42,5 @@
          android:exported="true"/>
     </application>
 </manifest> 
+<!-- to do when targetting Android 16: android:windowOptOutEdgeToEdgeEnforcement stops working, need to use smaller size
+-->
