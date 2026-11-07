@@ -30,7 +30,7 @@ public class ForegroundService extends Service {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return "";
         String NOTIFICATION_CHANNEL_ID = "com.roguetemple.hyperrogue";
         String channelName = "HyperRogue game in progress";
-        NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_NONE);
+        NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_LOW);
         chan.setLightColor(Color.BLUE);
         chan.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
         NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -41,7 +41,9 @@ public class ForegroundService extends Service {
 
   @Override
  public int onStartCommand(Intent intent, int flags, int startId) {
-   if (intent.getAction().equals(STARTFOREGROUND_ACTION)) {
+   if (intent == null || intent.getAction() == null)
+     stopSelf();
+   else if (intent.getAction().equals(STARTFOREGROUND_ACTION)) {
 
      Intent notificationIntent = new Intent(this, HyperRogue.class);
 

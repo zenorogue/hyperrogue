@@ -6,6 +6,8 @@
 <!--    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />         -->
 <!--    <uses-sdk android:minSdkVersion="9" android:targetSdkVersion="9" /> -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <application android:label="@string/app_name"
                  android:icon="@drawable/icon"
                  android:allowBackup="true">
@@ -25,7 +27,12 @@
                   android:name=".HyperSettings">
         </activity>
 
-        <service android:name=".ForegroundService" android:exported="false">
+        <service android:name=".ForegroundService" android:exported="false"
+                 android:foregroundServiceType="specialUse"
+        >
+<property
+        android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+        android:value="Keep the game process running while the user temporarily switches to another application." />
         </service>
         
        <provider
