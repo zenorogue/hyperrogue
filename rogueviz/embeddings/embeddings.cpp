@@ -65,7 +65,7 @@ void read_edgelist(const string& fname) {
     if(!f.f) return file_error(fname);
 
     char buf[1000];
-    for(int i=0; i<nodes_skiplines; i++) fgets(buf, 1000, f.f);
+    for(int i=0; i<nodes_skiplines; i++) hr::ignore(fgets(buf, 1000, f.f));
 
     while(true) {
       int i = rogueviz::readLabel(f);
@@ -81,7 +81,7 @@ void read_edgelist(const string& fname) {
   set<pair<int, int>> edgesets;
 
   char buf[1000];
-  for(int i=0; i<skiplines; i++) fgets(buf, 1000, f.f);
+  for(int i=0; i<skiplines; i++) hr::ignore(fgets(buf, 1000, f.f));
 
   shstream s1;
   while(true) {
