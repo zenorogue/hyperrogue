@@ -865,7 +865,7 @@ EX bool displaychr(int x, int y, int shift, int size, char chr, color_t col) {
 
 void gdpush_utf8(const string& s) {
   int g = (int) graphdata.size(), q = 0;
-  gdpush((int) s.size()); for(int i=0; i<isize(s); i++) {
+  gdpush((int) s.size()); for(int i=0; i<isize(s);) {
     int u;
     tie(u, i) = unicode_value(s, i);
     gdpush(u); q++;
