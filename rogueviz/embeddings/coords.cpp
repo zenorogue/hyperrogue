@@ -3,8 +3,6 @@ namespace rogueviz {
 
 namespace embeddings {
 
-  enum class fmt { hyperb, poincare, bhyper, bhyper_reduced };
-  
   string format_names[4] = { "hyperboloid trailing", "Poincare", "hyperboloid leading", "hyperboloid leading reduced" };
 
   fmt coord_format;

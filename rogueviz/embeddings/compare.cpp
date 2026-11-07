@@ -196,7 +196,7 @@ struct dmercator_embedding : untiled_embedding {
   };
 
 
-void read_dmercator(string fname, bool only_read = false) {
+void read_dmercator(string fname, bool only_read) {
   auto me = make_shared<dmercator_embedding> ();
   int N = get_n();
 

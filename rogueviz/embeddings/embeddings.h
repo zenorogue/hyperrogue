@@ -93,6 +93,12 @@ int count_directed_edges();
 void read_edgelist(const string& fn);
 void read_polar(const string& fn);
 
+enum class fmt { hyperb, poincare, bhyper, bhyper_reduced };
+extern fmt coord_format;
+void read_coord(const string& fn);
+void read_dmercator(string fname, bool only_read = false);
+void read_poincare(string fname, int dim);
+
 struct rankinfo {
   ld ranks = 0, rby = 0, map = 0, n = 0;
   };
