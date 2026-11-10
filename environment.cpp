@@ -1028,11 +1028,13 @@ EX void create_los() {
         }
       }
     }
-  int magicrange = 0;
-  for(auto c: dcal) if(!in_line_of_sight(c) && in_line_of_sight_for_player(c)) magicrange = c->cpdist;
-  if(magicrange > 3) markOrb(itOrbInvis);
-  else if(magicrange > 2) markOrb(itOrbFrog), markOrb(itOrbDash), markOrb(itOrbPhasing);
-  else markOrb(itOrbAether);
+  if(lineofsight != los::none) {
+    int magicrange = 0;
+    for(auto c: dcal) if(!in_line_of_sight(c) && in_line_of_sight_for_player(c)) magicrange = c->cpdist;
+    if(magicrange > 3) markOrb(itOrbInvis);
+    else if(magicrange > 2) markOrb(itOrbFrog), markOrb(itOrbDash), markOrb(itOrbPhasing);
+    else markOrb(itOrbAether);
+    }
   recompute_los = false;
   }
 
