@@ -2451,7 +2451,7 @@ extern bool lshiftclick, lctrlclick;
 
 EX void reverse_transparent_walls() {
   int pt = int(PPR::TRANSPARENT_WALL);
-  reverse(&ptds[qp0[pt]], &ptds[qp[pt]]);
+  reverse(ptds.data() + qp0[pt], ptds.data() + qp[pt]);
   }
 
 EX void set_vr_sphere() {
@@ -2641,7 +2641,7 @@ EX void drawqueue() {
       auto& ap = (dqi_poly&) *ptds[i];
       ap.cache = xintval(ap.V * ap.intester);
       }
-    sort(&ptds[qp0[pp]], &ptds[qp[pp]], 
+    sort(ptds.data() + qp0[pp], ptds.data() + qp[pp],
       [] (const unique_ptr<drawqueueitem>& p1, const unique_ptr<drawqueueitem>& p2) {
         auto& ap1 = (dqi_poly&) *p1;
         auto& ap2 = (dqi_poly&) *p2;
