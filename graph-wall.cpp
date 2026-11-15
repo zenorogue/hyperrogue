@@ -442,6 +442,8 @@ EX void queue_transparent_wall(const shiftmatrix& V, hpcshape& sh, color_t color
     }
   }
 
+EX int canvas_sky_style = 3;
+
 #if MAXMDIM >= 4
 EX int ceiling_category(cell *c) {
   switch(c->land) {
@@ -545,8 +547,8 @@ EX int ceiling_category(cell *c) {
       return 3;
 
     case laCanvas:
-      if(canvas_default_wall == waInvisibleFloor) return 0;
-      return 3;
+      if(canvas_default_wall == waInvisibleFloor && canvas_sky_style == 3) return 0;
+      return canvas_sky_style;
     
     case laPalace:
     case laPrincessQuest:

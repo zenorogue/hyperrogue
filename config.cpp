@@ -1227,6 +1227,7 @@ EX void initConfig() {
   -> editable("display grid", 'g');
   param_b(models::desitter_projections, "desitter_projections", false);
   param_b(nonisotropic_weird_transforms, "nonisotropic_weird_transforms", false);
+  param_i(grid_layers, "grid_layers");
 
   param_b(arb::apeirogon_consistent_coloring, "apeirogon_consistent_coloring", true)
   -> editable("apeirogon: consistent coloring", 'c')
@@ -3576,6 +3577,7 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
   #if MAXMDIM >= 4
   param_enum(draw_sky, "draw_sky", skyAutomatic)
   -> editable({{"NO", "do not draw sky"}, {"automatic", ""}, {"skybox", "works only in Euclidean"}, {"always", "might be glitched in some settings"}}, "sky rendering", 's');
+  param_i(canvas_sky_style, "canvas_sky_style");
   param_b(use_euclidean_infinity, "use_euclidean_infinity", true)
   -> editable("infinite sky", 'i');
   #endif

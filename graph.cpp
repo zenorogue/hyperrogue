@@ -789,6 +789,8 @@ EX bool fat_edges = false;
 
 EX bool gridbelow;
 
+EX int grid_layers = 3;
+
 EX void gridline(const shiftmatrix& V1, const hyperpoint h1, const shiftmatrix& V2, const hyperpoint h2, color_t col, int prec) {
   transmatrix U2 = unshift(V2, V1.shift);
 
@@ -845,8 +847,8 @@ EX void gridline(const shiftmatrix& V1, const hyperpoint h1, const shiftmatrix& 
 #if MAXMDIM >= 4
   if(WDIM == 2 && GDIM == 3) {
     ld eps = cgi.human_height/100;
-    queueline(V1*orthogonal_move(h1,cgi.FLOOR+eps), V2*orthogonal_move(h2,cgi.FLOOR+eps), col, prec);
-    queueline(V1*orthogonal_move(h1,cgi.WALL-eps), V2*orthogonal_move(h2,cgi.WALL-eps), col, prec);
+    if(grid_layers & 1) queueline(V1*orthogonal_move(h1,cgi.FLOOR+eps), V2*orthogonal_move(h2,cgi.FLOOR+eps), col, prec);
+    if(grid_layers & 2) queueline(V1*orthogonal_move(h1,cgi.WALL-eps), V2*orthogonal_move(h2,cgi.WALL-eps), col, prec);
     }
   else
 #endif
