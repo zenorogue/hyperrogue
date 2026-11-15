@@ -212,7 +212,8 @@ void backed_map::swapdim() {
   alt_cgip[0] = nullptr;
   alt_cgip[1] = nullptr;
 
-  dynamicval<geometry_information*> gi(cgip, find_alt_cgip());
+  dynamicval<geometry_information*> gi1(cgip, cgip);
+  cgip = find_alt_cgip();
 
   for(auto& p: what_at) for(auto& pp: p.second) swapmatrix(pp.second);
   for(auto& p: where) swapmatrix(p.second.second);
