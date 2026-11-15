@@ -1935,6 +1935,7 @@ EX void save_if_needed() {
   }
 
 EX void finishAll() {
+  if(tour::on) tour::stop_tour();
   achievement_final(!items[itOrbSafety]);
 
   save_if_needed();
