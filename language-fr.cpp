@@ -6626,8 +6626,7 @@ S(
   "are great to draw hyperbolic tesselations on. While they look great, only a small part "
   "of the hyperbolic plane can be visibly represented in this way, so they are not "
   "good for playing HyperRogue; however, the coverage extends far away in specific directions, "
-  "so first increasing sight range in graphics config and texture size in hypersian rug settings may improve the effect. "
-  "For convenience, you can also choose other 3D models from this menu.",
+  "so first increasing sight range in graphics config and texture size in hypersian rug settings may improve the effect.",
   
   "Dans ce menu vous pouvez choisir plusieurs surfaces lisses de courbure négative constante. "
   "Comme la courbure d'un plan hyperbolique est aussi une constante négative, ces surfaces "
@@ -6635,8 +6634,7 @@ S(
   "une petite partie du plan hyperbolique peut être représenté de cette manière, donc ils ne sont "
   "pas pratiques pour jouer à HyperRogue ; cependant la représentation s'étend loin dans des directions, "
   "spécifiées, donc augmenter d'abord la distance de vue dans la configuration graphique et taille de "
-  "texture dans les réglages du tapis hypersan peut augmenter l'effet. Vous pouvez aussi choisir d'autres "
-  "modèles 3D depuis ce menu."
+  "texture dans les réglages du tapis hypersan peut augmenter l'effet."
   )
 
 // coverage

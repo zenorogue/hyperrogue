@@ -3,9 +3,6 @@ namespace dhrg {
 ll rtally[MAXDIST];
 int redgetally[MAXDIST];
 
-using rogueviz::embeddings::directed_edges;
-
-
 void tallydiredgesof(int i, int delta, mycell *mc) {
   for(auto j: directed_edges[i]) {
     whichedgetally[quickdist(mc, vertices[j], 0)] += delta;
@@ -14,7 +11,7 @@ void tallydiredgesof(int i, int delta, mycell *mc) {
 
 void dhrg_ranks() {
 
-  int N = isize(rogueviz::vdata);
+  int N = get_n();
   /*
   print(hlog, "check tally = ");
   for(int j=0; j<MAXDIST; j++)

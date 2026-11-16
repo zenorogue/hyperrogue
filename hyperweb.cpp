@@ -1,3 +1,5 @@
+#ifndef HYPERWEB_ONLY_FUNCTIONS
+
 // Hyperbolic Rogue
 // This is the main file when the online version of HyperRogue is compiled with Emscripten.
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
@@ -53,6 +55,7 @@ namespace hr {
 #include "hyper.cpp"
 #else
 #include "hyper.h"
+#endif
 #endif
 
 namespace hr {

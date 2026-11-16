@@ -54,6 +54,7 @@ namespace rogueviz {
     double visible_from_hi;
     unsigned color, color_hi;
     string name;
+    double arrow_scale = 0;
     };
 
   edgetype *add_edgetype(const string& name);
@@ -96,20 +97,33 @@ namespace rogueviz {
 
   struct colorpair {
     color_t color1, color2;
+    color_t color_border;
+    char border_type;
     char shade;
     #if CAP_TEXTURE
     shared_ptr<rvimage> img;
     #endif
-    colorpair(color_t col = 0xC0C0C0FF) { shade = 0; color1 = color2 = col; }
+    colorpair(color_t col = 0xC0C0C0FF) { shade = 0; color1 = color2 = col; color_border = 0; border_type = 0; }
     bool operator == (const colorpair& cp) {
+      #if CAP_TEXTURE
       return tie(color1, color2, shade, img) == tie(cp.color1, cp.color2, cp.shade, cp.img);
+      #else
+      return tie(color1, color2, shade) == tie(cp.color1, cp.color2, cp.shade);
+      #endif
       }
     bool operator != (const colorpair& cp) { return !(self == cp); }
     };
   
+  struct titleline {
+    string text;
+    ld x, y, size;
+    int align;
+    };
+
   struct vertexdata {
     int id;
     vector<pair<int, edgeinfo*> > edges;
+    vector<titleline> title;
     string name;
     colorpair cp;
     bool special;
@@ -135,6 +149,7 @@ namespace rogueviz {
   extern bool rvwarp;
 
   extern colorpair dftcolor;
+  extern ld labelshift;
   
   inline hookset<void(vertexdata&, cell*, shmup::monster*, int)> hooks_drawvertex;
   inline hookset<bool(edgeinfo*, bool store)> hooks_alt_edges;
@@ -143,6 +158,7 @@ namespace rogueviz {
   inline hookset<bool(int&, string&, FILE*)> hooks_readcolor;
   
   void readcolor(const string& cfname);
+  void readtitles(const string& cfname);
 
   void close();
   extern bool showlabels;
@@ -175,7 +191,6 @@ template<class T, class U> function<void(presmode)> roguevizslide(char c, const 
   
     if(mode == 3 || mode == pmGeometry || mode == pmGeometryReset) {
       rogueviz::close();
-      shmup::clearMonsters();
       if(mode == pmGeometryReset && !(slides[currentslide].flags & QUICKGEO)) t();
       }
   
@@ -198,7 +213,6 @@ function<void(presmode)> roguevizslide_action(char c, const T& t, const U& act) 
 
     if(mode == pmStop || mode == pmGeometry || mode == pmGeometryReset) {
       rogueviz::close();
-      shmup::clearMonsters();
       if(mode == pmGeometryReset && !(slides[currentslide].flags & QUICKGEO)) t();
       }
   

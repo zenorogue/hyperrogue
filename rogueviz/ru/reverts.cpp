@@ -12,6 +12,11 @@ room *find_room_by_name(string s) {
   throw hr_name_error("find_room");
   }
 
+room *may_find_room_by_id(string s) {
+  for(auto& [c,r]: rooms) if(r.id == s) return &r;
+  return nullptr;
+  }
+
 entity* find_entity_by_id(string s) {
   auto e = entity_by_id[s];
   if(!e) throw hr_name_error("find_entity");

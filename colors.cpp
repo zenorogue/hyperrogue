@@ -129,7 +129,7 @@ EX color_t align(color_t col) {
 enum class eNeon { none, neon, no_boundary, neon2, illustration};
 #endif
 
-EX eNeon neon_mode;
+EX eNeon neon_mode, neon_magic_vision = eNeon::neon2;
 EX bool neon_nofill;
 
 EX void apply_neon(color_t& col, int& r) {

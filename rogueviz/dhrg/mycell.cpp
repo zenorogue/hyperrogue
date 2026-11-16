@@ -210,7 +210,7 @@ vector<mycell*> allchildren(mycell *m, int dir=0) {
     mycell *f = mroot->leftchild;
     int origtype = cgi.expansion->rootid;
     for(int i: cgi.expansion->children[origtype]) {
-      ignore(i);
+      hr::ignore(i);
       res.push_back(f);
       f = f->rightsibling;
       }      

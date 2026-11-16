@@ -16,9 +16,24 @@ EX int explore[10], exploreland[10][landtypes], landcount[landtypes];
 
 EX bool safety = false;
 
+EX int alt_BARLEV;
+
+EX int get_BARLEV() {
+  if(alt_BARLEV) return alt_BARLEV;
+  int d = getDistLimit();
+  bool lowmem = ISANDROID||ISIOS||ISFAKEMOBILE;
+  if(d<4) return 8;
+  if(lowmem || d < 7) return 9;
+  return 10;
+  }
+
 EX eLand lastland;
 
 EX int lastexplore;
+
+EX void update_lastexplore() {
+  lastexplore = shmup::on ? shmup::curtime : turncount;
+  }
 
 EX bool randomPatternsMode = false;
 EX int randompattern[landtypes];
@@ -229,8 +244,16 @@ EX bool is_zebra_trapdoor(cell *c) {
     return (y&1);
     }
   #if CAP_ARCM
-  else 
+  else
     if(arcm::in()) return hrand(2);
+  #endif
+  else
+    if(arb::in()) return hrand(2);
+  else
+    if(S3 >= OINF) return hrand(2);
+  #if CAP_BT
+  else
+    if(bt::in()) return c->master->distance & 1;
   #endif
   else
     return (randomPatternsMode ? RANDPAT : (zebra40(c)&2));
@@ -305,7 +328,7 @@ EX void clear_item(cell *c) {
   }
 
 EX void giantLandSwitch(cell *c, int d, cell *from) {
-  bool fargen = d == 9;
+  bool fargen = d == 9 || (d == 8 && BARLEV == 8);
   switch(c->land) {
 
     case laPrairie: // -------------------------------------------------------------
@@ -838,7 +861,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           }
         else if(WDIM == 3 && hyperbolic && !bt::in())
           c->wall = (c->master->zebraval & 2) ? waVinePlant : waNone;
-        else if(a4 || sphere || arcm::in() || bt::in() || S3 >= OINF)
+        else if(a4 || sphere || arcm::in() || bt::in() || arb::in() || S3 >= OINF)
           c->wall = hrand(100) < 50 ? waNone : waVinePlant;
         else {
           int v = emeraldval(c);
@@ -1803,7 +1826,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
         }  
       if(d == 7 && c->wall == waSea && hrand_monster(10000) < 20 + items[itPirate] + 2 * yendor::hardness() && !safety)
         c->monst = moCShark;  
-      if(d == 7 && c->wall == waCTree && hrand_monster(GDIM == 2 ? 5000 : 50000) < 100 + items[itPirate] + yendor::hardness())
+      if(d == 7 && c->wall == waCTree && hrand_monster(GDIM == 2 ? 5000 : 50000) < 100 + items[itPirate] + yendor::hardness() && !safety)
         c->monst = moParrot;    
       ONEMPTY {
         if(hrand(1500) < 4 && celldistAlt(c) <= -5 && peace::on && !cryst)
@@ -2916,7 +2939,9 @@ EX void setland_randomwalk(cell *c) {
   }
 
 EX eLand random_land() {
-  return hrand_elt(isize(cheatdest_list) ? cheatdest_list : currentlands);
+  eLand l = hrand_elt(isize(cheatdest_list) ? cheatdest_list : currentlands);
+  if(l == laElementalWall) l = randomElementalLandWeighted();
+  return l;
   }
 
 EX void share_land(cell *c, cell *c2) {
@@ -3026,7 +3051,7 @@ EX void setdist(cell *c, int d, cell *from) {
       }
     }
 
-  if(d <= 10 - getDistLimit()) lastexplore = shmup::on ? shmup::curtime : turncount;
+  if(d <= 10 - getDistLimit()) update_lastexplore();
   
   if(mhybrid) {
     auto wc = hybrid::get_where(c).first;
@@ -3112,10 +3137,13 @@ EX void setdist(cell *c, int d, cell *from) {
       exploreland[d][c->land]++;
       }
     
-    if(d < BARLEV) for(int i=0; i<c->type; i++) {
-      
-      setdist(createMov(c, i), d+1, c);
-      if(buggyGeneration) return;
+    if(d < BARLEV) {
+      apply_precision_policy(c, from);
+      bool rev = (precision_policy & 1) && currentmap->get_backmap() && hrand(2);
+      for(int i=0; i<c->type; i++) {
+        setdist(createMov(c, rev ? (c->type-1-i) : i), d+1, c);
+        if(buggyGeneration) return;
+        }
       }
     
     int eqlevel = max(BARLEV-2, 7);

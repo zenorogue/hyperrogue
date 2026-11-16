@@ -6040,10 +6040,9 @@ S(
   "are great to draw hyperbolic tesselations on. While they look great, only a small part "
   "of the hyperbolic plane can be visibly represented in this way, so they are not "
   "good for playing HyperRogue; however, the coverage extends far away in specific directions, "
-  "so first increasing sight range in graphics config and texture size in hypersian rug settings may improve the effect. "
-  "For convenience, you can also choose other 3D models from this menu.",
+  "so first increasing sight range in graphics config and texture size in hypersian rug settings may improve the effect.",
   
-  "在该菜单中你可以选择多种负曲率的已知光滑曲面。由于双曲面的曲率也是负常数，这些曲面很适合用于绘制双曲密铺。虽然看起来不错，但只有一些双曲面能以这种方式表示出来，并不适合游玩HyperRogue；不过，在某些特定方向的覆盖会延伸很远，因此在图形设置中增加视野范围并在超波斯地毯设置中增加纹理尺寸可能会提升效果。出于方便考虑，你也可以在该菜单选择其他3D模型。"
+  "在该菜单中你可以选择多种负曲率的已知光滑曲面。由于双曲面的曲率也是负常数，这些曲面很适合用于绘制双曲密铺。虽然看起来不错，但只有一些双曲面能以这种方式表示出来，并不适合游玩HyperRogue；不过，在某些特定方向的覆盖会延伸很远，因此在图形设置中增加视野范围并在超波斯地毯设置中增加纹理尺寸可能会提升效果。"
   )
 
 // coverage

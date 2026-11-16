@@ -255,7 +255,7 @@ EX void buildCredits() {
     "Triple_Agent_AAA, bluetailedgnat, Allalinor, Shitford, KittyTac, Christopher King, KosGD, TravelDemon, Bubbles, rdococ, frozenlake, MagmaMcFry, "
     "Snakebird Priestess, roaringdragon2, Stopping Dog, bengineer8, Sir Light IJIJ, ShadeBlade, Saplou, shnourok, Ralith, madasa, 6% remaining, Chimera245, Remik Pi, alien foxcat thing, "
     "Piotr Grochowski, Ann, still-flow, tyzone, Paradoxica, LottieRatWorld, aismallard, albatross, EncodedSpirit, Jacob Mandelson, CrashTuvai, cvoight, jennlbw, Kali Ranya, spiritbackup, Dylan, L_Lord, AntiRogue, "
-    "masonlgreen, A human, Pasu4, inbetween selves, CodeParade, Existentialistic, blejanre, Esme, Joshua Murphy, josephcsible, googobbug"
+    "masonlgreen, A human, Pasu4, inbetween selves, CodeParade, Existentialistic, blejanre, Esme, Joshua Murphy, josephcsible, googobbug, garnet420, wlatendresse, jdemeyer, swooboo, pengvado"
     );
 #ifdef EXTRALICENSE
   help += EXTRALICENSE;
@@ -357,6 +357,24 @@ string power_help =
   "collected. This also affects the mirrorings which happened before "
   "collecting the Powerstones.";
 
+EX string ranged_click_help() {
+  string s;
+#if ISMOBILE
+  if(vid.shifttarget&2)
+    s = XLAT("\nRanged Orbs can be targeted by long touching the desired location.");
+  else
+    s = XLAT("\nRanged Orbs can be targeted by touching the desired location.");
+#else
+  if(vid.shifttarget&1)
+    s = XLAT("\nRanged Orbs can be targeted by shift-clicking the desired location. ");
+  else
+    s = XLAT("\nRanged Orbs can be targeted by clicking the desired location. ");
+  if(DEFAULTCONTROL)
+    s += XLAT("You can also scroll to the desired location and then press 't'.");
+#endif
+  return s;
+  }
+
 EX string generateHelpForItem(eItem it) {
 
    string help = helptitle(XLATN(iinf[it].name), iinf[it].color);
@@ -401,19 +419,8 @@ EX string generateHelpForItem(eItem it) {
 #endif
 
    if(isRangedOrb(it)) {
-     help += XLAT("\nThis is a ranged Orb. ");
-#if ISMOBILE   
-     if(vid.shifttarget&2)
-       help += XLAT("\nRanged Orbs can be targeted by long touching the desired location.");
-     else
-       help += XLAT("\nRanged Orbs can be targeted by touching the desired location.");
-#else
-     if(vid.shifttarget&1)
-       help += XLAT("\nRanged Orbs can be targeted by shift-clicking the desired location. ");
-     else
-       help += XLAT("\nRanged Orbs can be targeted by clicking the desired location. ");
-     help += XLAT("You can also scroll to the desired location and then press 't'.");
-#endif
+     help += XLAT("\nThis is a ranged Orb. \n");
+     help += ranged_click_help();
      help += XLAT("\nYou can never target cells which are adjacent to the player character, or ones out of the sight range.");
      }
 
@@ -822,6 +829,9 @@ EX string generateHelpForLand(eLand l) {
   if(l == laWildWest)
     s += XLAT("Bonus land, available only in some special modes.\n");
   
+  if(among(l, laBlizzard, laVolcano) && windmap::wind_failed)
+    s += XLAT("Failed to construct a wind/lava pattern. This land will not work correctly.\n");
+
   if(l == laWhirlpool)
     s += XLAT("Orbs of Safety always appear here, and may be used to escape.\n");
 
@@ -929,6 +939,12 @@ EX void describeMouseover() {
   cell *c = mousing ? mouseover : playermoved ? NULL : centerover;
   string& out = mouseovers;
   if(!c || instat || getcstat != '-') { }
+  else if(!in_line_of_sight_for_player(c)) {
+    out = XLAT("you cannot see this place");
+    help = XLAT("You cannot currently see this tile.\n\nThis also means that most enemies will not try to reach you through this tile.\n\n");
+    help += XLAT("Enemies which ignore this restriction:");
+    help += XLAT("ice wolves, ghosts, demon sharks, hyperbugs");
+    }
   else if(c->wall != waInvisibleFloor) {
     out = XLAT1(linf[c->land].name);
     set_help_to(c->land);
@@ -1107,7 +1123,8 @@ EX void describeMouseover() {
       if(!c->monst) set_help_to(c->item);
       }
     
-    if(isPlayerOn(c) && !shmup::on) out += XLAT(", you"), help = generateHelpForMonster(moPlayer);
+    if(isPlayerOn(c) && !shmup::on && mapeditor::drawplayer)
+      out += XLAT(", you"), help = generateHelpForMonster(moPlayer);
 
     shmup::addShmupHelp(out);
 
@@ -1125,13 +1142,18 @@ EX void describeMouseover() {
     if(isWarped(c) && !isWarpedType(c->land))
       out += ", warped";
 
+    if(!in_line_of_sight(c)) {
+      out += " (magical vision)";
+      appendHelp("\n\nWhile you magically know what is there, most enemies won't track you through here.");
+      }
+
     if(isWarped(c)) {
       appendHelp(string("\n\n") + XLAT(warpdesc));
 
       if(S7 != 7 || !BITRUNCATED) if(c->item != itOrb37)
         appendHelp("\n\n" + other_geometry() + forbidden_unmarked());
       }
-    
+
     if(isElectricLand(c) || isElectricLand(cwt.at->land)) {
       using namespace elec;
       eCharge ch = getCharge(c);

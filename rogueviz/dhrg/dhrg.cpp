@@ -64,7 +64,7 @@ void clear() {
 void dhrg_init() {
   if(!mroot) {
     println(hlog, "DHRG version " DHRGVER "\n");
-    rogueviz::rv_hook(hooks_handleKey, 100, dhrg_animate);
+    // rogueviz::rv_hook(hooks_handleKey, 100, dhrg_animate);
     regular_info();
     generate_root();
     }
@@ -106,6 +106,7 @@ int dhrgArgs() {
     embedder_loop(argi());
     next_timestamp++;
     ts_vertices = next_timestamp;
+    rogueviz::embeddings::reenable_embedding();
     }
 
   else if(argis("-dorestart")) {
@@ -180,6 +181,12 @@ auto hook =
 #if CAP_SDL
 #include "visualize.cpp"
 #endif
+
+void launch_dhrg() {
+  dhrg_init(); graph_from_rv();
+  ts_vertices = ts_rbase;
+  rogueviz::embeddings::reenable_embedding();
+  }
 
 }
 

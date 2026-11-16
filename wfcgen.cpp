@@ -168,24 +168,19 @@ wfc_data renumerate(const wfc_data& d, int sides) {
   return res;
   }
 
-wfc_data& eclectic_data() {
+wfc_data& eclectic_data(cell *c) {
+  if(!use_eclectic) return probs;
   static wfc_data d = gen_decompressed(deserialize<wfc_data>(decompress_string(eclectic_c)));
   if(geometry == gNormal && !PURE) return d;
-  if(geometry == gNormal && PURE) {
-    static wfc_data dpure = renumerate(d, 7);
-    return dpure;
-    }
-  if(geometry == gEuclid) {
-    static wfc_data deuc = renumerate(d, 6);
-    return deuc;
-    }
-  return d;
+  static wfc_data renumerated[FULL_EDGE+1];
+  auto& d1 = renumerated[int(c->type)];
+  if(d1.empty()) d1 = renumerate(d, c->type);
+  return d1;
   }
 
 EX bool use_eclectic = true;
 
 EX void invoke() {
-  wfc_data& d = use_eclectic ? eclectic_data() : probs;
 
   while(isize(centers)) {
     int pos = -1;
@@ -194,8 +189,8 @@ EX void invoke() {
       cell *c = centers[p];
       int total;
       
-      auto picks = gen_picks(c, total, d);
-      
+      auto picks = gen_picks(c, total, eclectic_data(c));
+
       ld entropy = 0;
       for(auto p: picks) entropy += p->second * log(total * 1. / p->second) / total;
       
@@ -209,9 +204,10 @@ EX void invoke() {
     // println(hlog, "chosen ", c, " at entropy ", best_entropy, " in distance ", c->mpdist);
 
     int total;
-    auto picks = gen_picks(c, total, d);
+    auto picks = gen_picks(c, total, eclectic_data(c));
 
     if(total) total = hrand(total);
+
     for(auto pp: picks) {
       auto& p = *pp;
       total -= p.second;

@@ -8,11 +8,14 @@ struct data {
   double d;
   ld modv;
   ld moda;
-  int dx;
+  ld dx;
   struct power *p;
   struct randeff *re;
   rev mode;
+  flagtype flags;
   };
+
+flagtype DO_NOT_DRINK = 1;
 
 using powerfun = hr::function<void(data&)>;
 
@@ -24,12 +27,14 @@ struct randeff {
   power *which_weapon;
   int qty, a, b, c, d;
   powerfun act;
+  powerfun unact;
   randeff (string name, string desc, string effect, powerfun act);
   void hs(struct stater& s);
   };
 
 struct power {
   int key;
+  int shifted;
   string id;
   string name;
   string desc;
@@ -40,14 +45,15 @@ struct power {
   int id_status;
   int qty_filled;
   int qty_owned;
-  int flags;
+  flagtype flags;
   int random_value;
   vector<struct randeff*> randeffs;
+  set<struct room*> active_in_rooms;
   void init();
   vector<struct weaponmod> mods;
   hr::function<void(data&)> act, paused_act, dead_act;
-  hr::function<string()> get_name;
-  hr::function<string()> get_desc;
+  hr::function<string(struct item*)> get_name;
+  hr::function<string(struct item*)> get_desc;
   hr::function<string()> get_glyph;
   hr::function<color_t()> get_color;
   hr::function<void(int)> picked_up;
@@ -60,9 +66,11 @@ struct power {
   power& while_dead();
   power& identified_name(string, string);
   power& be_wearable(string wear_effect, string remove_effect, string worn = " (worn)");
+  power& be_armor(const vector<vector<string>>& v);
   power& be_jewelry(string jtype, string desc);
   power& be_potion();
   power& gain(int qf, int qo) { qty_filled += qf; qty_owned += qo; return self; }
+  power& add_flags(flagtype f) { flags |= f; return self; }
   void hs(struct stater& s);
   };
 
@@ -71,8 +79,10 @@ extern power *extra_life;
 
 flagtype IDENTIFIED = Flag(1);
 flagtype ACTIVE = Flag(2);
-flagtype PARTIAL = Flag(4);
-flagtype WEAPON = Flag(8);
+flagtype PARTIAL = Flag(3);
+flagtype WEAPON = Flag(4);
+flagtype ARMOR = Flag(5);
+flagtype WEAPON_AXE = Flag(6);
 
 struct bbox {
   int minx, miny, maxx, maxy;
@@ -93,6 +103,9 @@ struct room {
   renderbuffer *rbuf;
   cell *where;
   array<array<short, room_x>, room_y> block_at, orig_block_at;
+
+  array<array<ld, room_x>, room_y> water_pressure, current_x, current_y;
+
   bool fov[room_y][room_x];
   bool which_map_rendered;
 
@@ -104,6 +117,7 @@ struct room {
   int timed_orb_end;
 
   vector<unique_ptr<struct entity>> entities;
+  vector<unique_ptr<struct room_mod>> room_mods;
 
   eWall at(int x, int y) {
     return eWall(block_at[y][x] >> 3);
@@ -161,6 +175,12 @@ struct room {
     place_block_full(x, y, b);
     }
   
+  void replace_block_death(int x, int y, eWall w) {
+    auto orig = at(x, y);
+    replace_block(x, y, w);
+    add_revert(death_revert, {"BLOCK", id, its(x), its(y), its(orig)});
+    }
+
   void replace_block_frev(int x, int y, eWall w) {
     auto orig = at(x, y);
     replace_block(x, y, w);
@@ -172,6 +192,7 @@ struct room {
   void generate();
 
   void reveal(int cx, int cy);
+  void unreveal(int cx, int cy);
   void reveal_around(int cx, int cy);
   void fov_from(int sx, int sy);
 
@@ -179,6 +200,9 @@ struct room {
 
   using bfs_progress = hr::function<bool(intxy)>;
   vector<intxy> bfs(intxy start, const bfs_progress& f);
+
+  void physics_init();
+  void physics_act();
   };
 
 struct xy {
@@ -227,8 +251,13 @@ struct stater {
   virtual stater& act(const string& s, color_t& c, color_t _c) = 0;
   virtual stater& act(const string& s, intxy& xy, intxy _xy) { act(s+".x", xy.x, _xy.x); act(s+".y", xy.y, _xy.y); return self; }
   virtual stater& act(const string& s, xy& p, xy _p) { act(s+".x", p.x, _p.x); act(s+".y", p.y, _p.y); return self; }
+  virtual stater& act(const string& s, flagtype& f, flagtype _f) { int u = f; act(s, u, (int)_f); f = u; return self; }
   virtual stater& only_full() { return self; }
   };
+
+/* reduce_hp flags */
+constexpr flagtype NON_DODGEABLE = 1;
+constexpr flagtype SPIKES = 2;
 
 struct entity {
   string id;
@@ -286,10 +315,14 @@ struct entity {
 
   virtual double grav() { return 0.1; }  
 
-  bool on_floor, fallthru, on_ice, wallhug, on_bounce, is_stable;
+  bool on_floor, fallthru, wallhug, on_bounce, is_stable;
+  int on_ice;
+  moving_platform *on_floor_platform;
 
   bool destroyed;
   void kino();
+  void apply_walking(ld target_velx);
+  virtual bool get_jump_control() { return false; }
   void apply_vel();
   void apply_walls();
   void apply_walls_reflect();
@@ -308,11 +341,14 @@ struct entity {
 
   virtual void draw();
 
-  virtual void attacked(int s) {}
+  virtual void attacked(int s, power *p) {}
 
   virtual void spiked() {
-    reduce_hp(10);
+    reduce_hp(10, nullptr, NON_DODGEABLE);
+    spike_message();
     }
+
+  virtual void spike_message() {}
 
   virtual string glyph() = 0;
   virtual color_t color() = 0;
@@ -332,7 +368,7 @@ struct entity {
 
   virtual int invinc_time() { return 150; }
 
-  virtual bool reduce_hp(int x) {
+  virtual bool reduce_hp(int x, entity *attacker = nullptr, flagtype flags = 0) {
     if(hp < 0) return false;
     if(gframeid < invinc_end) return false;
     hp -= x;
@@ -350,6 +386,10 @@ struct entity {
   virtual void on_reset_all() {}
 
   entity *hal();
+
+  virtual bool nonstatic() { return true; }
+
+  virtual void preact() {}
   };
 
 struct weaponmod {
@@ -364,6 +404,9 @@ struct statdata {
   statarray<ld> stats;
   int jump_control, coyote_time, hallucinating;
   ld detect_area, detect_cross, rough_detect;
+  int heavy_armor, spikes, max_mageshield, stealth_bonus, dodge_value;
+  ld jump_power, gravity_value;
+  int extra_jumps, boost_max;
   void reset();
   vector<weaponmod> mods;
   vector<hr::function<void(int&)>> on_hit;
@@ -374,21 +417,25 @@ using boxfun = hr::function<bbox(int)>;
 
 struct effect {
   power *p;
-  int attack_facing;
-  int attack_when;
+  int facing;
+  int when;
+  int length;
+  hr::function<void(color_t&, int)> cf;
   boxfun f;
   };
 
 struct man : public entity {
   int facing;
-  int attack_facing;
-  int attack_when;
   int on_floor_when;
+  int dresstime;
+  int jumps_used, boost_left;
   entity *morphed = nullptr;
   vector<effect> effects;
+  power *use_next_turn;
 
   int last_action;
 
+  int gameseed;
   int experience;
   stat profession;
   string backstory;
@@ -399,6 +446,9 @@ struct man : public entity {
 
   virtual int max_hp() { return 10 * current.stats[stat::con]; }
 
+  int current_mageshield, mageshield_recharge_time;
+
+  void handle_morph(entity *m);
   bool can_see(entity& e);
   man();
   xy siz() override {
@@ -423,16 +473,20 @@ struct man : public entity {
 
   bool hit_by_missile(missile *m) override { return true; }
 
-  virtual void spiked() {
-    entity::spiked();
+  virtual void spike_message() override {
     addMessage("OUCH! These spikes hurt!");
     }
 
-  bool reduce_hp(int x) override;
+  double stealth_ratio() { return 3 / (3. + current.stealth_bonus); }
+
+  bool reduce_hp(int x, entity *attacker = nullptr, flagtype flags = 0) override;
 
   void launch_attack(power *p, int fac, boxfun f);
 
   virtual void hs(stater& s);
+  virtual double grav() { return entity::grav() / current.gravity_value; }
+
+  bool get_jump_control() override { return current.jump_control; }
   };
 
 extern man m;
@@ -451,11 +505,62 @@ struct moving_platform : public entity {
   void draw() override;
   void act() override;
   virtual moving_platform* as_platform() { return this; }
-  string get_name() override { return "moving platform"; }
+  virtual string get_shape_name() { return "moving"; }
+  string get_name() override { return get_shape_name() + " platform"; }
   string get_help() override { return "Moving platforms move."; }
-};
+  bool nonstatic() override { return false; }
+  virtual void jumped_on() {}
+  virtual void affected_others_vel(entity *who, xy v) {}
+  };
+
+struct freemoving_platform : public moving_platform {
+  xy last_position;
+  int position_time;
+  xy location_at(ld t) override;
+  virtual void hs(stater& s) {
+    moving_platform::hs(s);
+    s.act("last_position", last_position, xy(0,0))
+     .act("position_time", position_time, 0);
+    }
+  };
+
+struct basic_box : public freemoving_platform {
+  virtual int width() { return 1; }
+  xy siz() override { return {20, 20}; }
+  void act() override;
+  string glyph() override { return "#"; }
+  color_t color() override { return 0xFFFFC0FF; }
+  string get_name() override { return "basic box"; }
+  /* copied from located_entity */
+  xy respawn;
+  xy default_where() override { return respawn; }
+  void affected_others_vel(entity *who, xy v) override;
+  };
+
+struct floating_bubble_platform : public freemoving_platform {
+  virtual int width() { return 1; }
+  xy siz() override { return {6.*width(), 6}; }
+  void act() override;
+  string glyph() override { return "O"; }
+  color_t color() override { return 0xC0FFFFFF; }
+  string get_name() override { return "floating bubble"; }
+  string get_help() override { return "This upward-floating bubble acts as a temporary platform."; }
+  void jumped_on() override;
+  };
+
+struct levitating_bubble_platform : public freemoving_platform {
+  virtual int width() { return 1; }
+  xy siz() override { return {6.*width(), 6}; }
+  void act() override;
+  string glyph() override { return "O"; }
+  color_t color() override { return 0xC0FFFFFF; }
+  string get_name() override { return "levitating bubble"; }
+  string get_help() override { return "This levitating bubble acts as a temporary platform."; }
+  void jumped_on() override;
+  };
 
 struct ferris_platform : public moving_platform {
+  ld period;
   xy location_at(ld t) override;
   string get_name() override { return "Ferris platform"; }
   string get_help() override { return "Ferris wheel platforms, powered by some ancient mechanism. They always go in perfect circles, with constant velocity."; }
@@ -465,8 +570,18 @@ struct pendulum_platform : public moving_platform {
   xy a, b;
   ld period, shift;
   xy location_at(ld t) override;
-  string get_name() override { return "pendulum platform"; }
-  string get_help() override { return "These pendulum platforms go back and forth between two locations, taking the shortest path possible."; }
+  string get_shape_name() override { return "pendulum"; }
+  string get_help() override { return "Pendulums go back and forth between two locations, taking the shortest path possible."; }
+  };
+
+struct ellipse_platform : public moving_platform {
+  xy a, b;
+  ld ratio, period, shift;
+  vector<hyperpoint> points;
+  vector<ld> lengthsum;
+  xy location_at(ld t) override;
+  string get_shape_name() override { return "ellipse"; }
+  string get_help() override { return "There are two focal points, and the sum of distances from them remains constant."; }
   };
 
 struct rope_platform : public moving_platform {
@@ -480,10 +595,94 @@ struct rope_platform : public moving_platform {
   void draw() override;
   };
 
+struct horoplatform : public moving_platform {
+  xy a, b;
+  ld period, shift;
+  xy location_at(ld t) override;
+  string get_shape_name() override { return a.y == b.y ? "horo" : "equi"; }
+  string get_help() override { return
+    a.y == b.y ?
+      "Go back and forth between two locations, on a horocyclic path."
+    : "Go back and forth between two locations, on an equidistant path.";
+    }
+  };
+
+struct length_platform : public moving_platform {
+  unique_ptr<moving_platform> base; int len;
+  virtual int width() { return len; }
+  xy location_at(ld t) { return base->location_at(t); }
+  string get_name() override { return "short " + base->get_name(); }
+  string get_help() override { return base->get_help(); }
+  };
+
+struct cycloid_platform : public moving_platform {
+  moving_platform *base;
+  ld period, shift;
+  xy location_at(ld t) override;
+  string get_shape_name() override { return "cycloid"; }
+  string get_help() override { return "These go in a circle around another moving object."; }
+  };
+
+struct saw: public entity {
+  unique_ptr<moving_platform> base;
+  moving_platform& mp() { return (moving_platform&)(*base); }
+  string glyph() override { return "*"; }
+  color_t color() override { return walls[wWall].color; }
+  xy siz() override { return {18, 18}; }
+  string get_name() override { return mp().get_shape_name() + " circular saw"; }
+  void act() override;
+  };
+
+struct tinysaw: public saw {
+  xy siz() override { return {8, 8}; }
+  string get_name() override { return "tiny " + mp().get_shape_name() + " circular saw"; }
+  };
+
+struct weaksaw : public saw {
+  color_t color() override { return walls[wWeakWall].color; }
+  string get_name() override { return mp().get_shape_name() + " weak saw"; }
+  void attacked(int s, power *p) override;
+  };
+
+struct woodsaw  : public saw {
+  color_t color() override { return walls[wWoodWall].color; }
+  string get_name() override { return mp().get_shape_name() + " wooden saw"; }
+  void attacked(int s, power *p) override;
+  };
+
+struct fakesaw : public saw {
+  void attacked(int s, power *p) override;
+  void act() override;
+  };
+
+struct room_mod {
+  virtual void draw() {}
+  virtual void act() {}
+  };
+
+struct reflector : public room_mod {
+  xy pos1, pos2;
+  void draw() override;
+  void act() override;
+  };
+
 /* entities with a defined 'respawn' location */
 struct located_entity : public entity {
   xy respawn;
   xy default_where() override { return respawn; }
+  };
+
+struct rollingsaw: public located_entity {
+  string glyph() override { return "*"; }
+  color_t color() override { return walls[wWall].color; }
+  xy siz() override { return {8, 8}; }
+  string get_name() override { return "rolling saw"; }
+  void act() override;
+  int dir, respawn_dir;
+  xy default_vel() override {
+    auto dat = get_dat(); return {dat.d * dat.modv * dir, 0};
+    }
+  virtual void hs(stater& s) override { s.act("dir", dir, respawn_dir); located_entity::hs(s); }
   };
 
 struct timed_orb : public located_entity {
@@ -491,13 +690,39 @@ struct timed_orb : public located_entity {
   xy siz() override { return {18, 18}; }
   string glyph() override { return "O"; }
   color_t color() override {
-    println(hlog, tie(gframeid, current_room->timed_orb_end));
     if(gframeid > current_room->timed_orb_end) return 0x8080FFFF;
     return gradient(0x404080FF, 0x8080FFFF, -1, cos((gframeid - current_room->timed_orb_end) * TAU * 5 / game_fps), 1);
     }
   void act() override;
   string get_name() override { return "time orb"; }
   string get_help() override { return "These orbs activate mechanisms for a limited time."; }
+  };
+
+struct dark_orb : public located_entity {
+  int duration;
+  bbox box;
+  xy siz() override { return {18, 18}; }
+  string glyph() override { return "O"; }
+  color_t color() override { return 0x303030FF; }
+  void preact() override;
+  string get_name() override { return "dark orb"; }
+  string get_help() override { return "These orbs make it impossible to map a part of room."; }
+  };
+
+struct switch_event {
+  bbox box;
+  eWall wall;
+  };
+
+struct mapswitch : public located_entity {
+  vector<switch_event> events;
+  string text, name;
+  xy siz() override { return {18, 18}; }
+  string glyph() override { return "!"; }
+  color_t color() override { return 0xA06000FF; }
+  void act() override;
+  string get_name() override { return name; }
+  string get_help() override { return text; }
   };
 
 struct npc_or_trader : public located_entity {
@@ -525,6 +750,16 @@ struct trader : public npc_or_trader {
   void act() override;
   string get_help() override { return "Stay awhile and listen. Or use gold to pay."; }
   virtual struct trader* as_trader() { return this; }
+  void attacked(int s, power *p) override;
+  };
+
+struct fight_trader : public trader {
+  int dir;
+  bool angered;
+  void draw() override;
+  void act() override;
+  void attacked(int s, power *p) override;
+  virtual void hs(stater& s) override { trader::hs(s); s.act("angered", angered, false); s.act("dir", dir, 1); }
   };
 
 struct enemy : public located_entity {
@@ -539,7 +774,7 @@ struct enemy : public located_entity {
     if(!avoided) score();
     }
   virtual void hs(stater& s) override { located_entity::hs(s); s.only_full().act("kills", num_kills, 0); s.act("avoided", avoided, false); }
-  void attacked(int s) override;
+  void attacked(int s, power *p) override;
   virtual int base_xp() { return 0; }
   bool hit_by_missile(missile *m) override { return true; }
   enemy* as_enemy() override { return this; }
@@ -585,7 +820,7 @@ struct boar : public enemy {
   string glyph() override { return "B"; }
   color_t color() override { return 0x804000FF; }
   void act() override;
-  void attacked(int s) override;
+  void attacked(int s, power *p) override;
   string get_name() override { return "giant boar"; }
   string get_help() override { return "Beware their tusks."; }
   int base_xp() { return 60; }
@@ -600,7 +835,7 @@ struct frog : public enemy {
   ld maxrange() { return 50; }
   color_t color() override { return 0x208020FF; }
   void act() override;
-  void attacked(int s) override;
+  void attacked(int s, power *p) override;
   string get_name() override { return "frog"; }
   string get_help() override { return "What a nice frog."; }
   int base_xp() { return 30; }
@@ -643,7 +878,7 @@ struct snake : public enemy {
   string glyph() override { return "S"; }
   color_t color() override { return 0x20D020FF; }
   void act() override;
-  void attacked(int s) override;
+  void attacked(int s, power *p) override;
   string get_name() override { return "snake"; }
   string get_help() override { return "A nasty dungeon snake."; }
   int base_xp() override { return 10; }
@@ -679,7 +914,7 @@ struct naga_warrior : public snake {
   int max_hp() override { return 500; }
   xy siz() override { return {25, 25}; }
   void act() override;
-  void attacked(int s) override;
+  void attacked(int s, power *p) override;
   void draw() override;
   virtual int chop() { return 32; }
   };
@@ -690,12 +925,25 @@ struct kestrel : public enemy {
   string glyph() override { return "K"; }
   color_t color() override { return 0xD0A0A0FF; }
   void act() override;
-  void attacked(int s) override;
+  void attacked(int s, power *p) override;
   string get_name() override { return "kestrel"; }
   string get_help() override { return "A standard dungeon kestrel."; }
-  int base_xp() { return 30; }
-  int max_hp() { return 30; }
+  int base_xp() override { return 30; }
+  int max_hp() override { return 30; }
   xy default_vel() override { return respawn_vel; }
+  virtual int chop() { return 15; }
+  };
+
+struct butterfly : public kestrel {
+  color_t col;
+  xy siz() override { return {8, 8}; }
+  string glyph() override { return "i"; }
+  color_t color() override { return col; }
+  string get_name() override { return "butterfly"; }
+  string get_help() override { return "Dungeon butterflies come in many colors."; }
+  int base_xp() override { return 40; }
+  int max_hp() override { return 45; }
+  int chop() override { return 20; }
   };
 
 struct healthbubble : public entity {
@@ -728,7 +976,7 @@ struct bat : public enemy {
   string glyph() override { return "B"; }
   color_t color() override { return 0xD0A0A0FF; }
   void act() override;
-  void attacked(int s) override;
+  void attacked(int s, power *p) override;
   string get_name() override { return "bat"; }
   string get_help() override { return "A cave bat."; }
   int base_xp() { return 10; }
@@ -745,7 +993,7 @@ struct guineapig : public enemy {
   string glyph() override { return "G"; }
   color_t color() override { return 0xD0A0A0FF; }
   void act() override;
-  void attacked(int s) override;
+  void attacked(int s, power *p) override;
   string get_name() override { return "guinea pig"; }
   string get_help() override { return "A standard dungeon guinea pig."; }
   int base_xp() { return 30; }
@@ -807,12 +1055,12 @@ struct item : public located_entity {
       existing = false;
       }
     }
-  string get_name() override { return p->name; }
-  string get_help() override { return p->get_desc(); }
+  string get_name() override { return p->get_name(this); }
+  string get_help() override { return p->get_desc(this); }
   };
 
 struct shopitem : public item {
-  int qty1;
+  int pre_owned, pre_filled, post_owned, post_filled;
   int price;
   bool bought;
   string glyph() override;
@@ -821,15 +1069,37 @@ struct shopitem : public item {
   void act() override {
     kino();
     bool next_intersect = intersect(get_pixel_bbox(), m.get_pixel_bbox());
-    if(next_intersect && !last_intersect) {
-      addMessage("This costs " + its(price) + " gold.");
+    if(next_intersect && !last_intersect && !bought) {
+      addMessage("This costs " + its(price) + " gold: " + get_name());
       }
     last_intersect = next_intersect;
     }
   string get_name() override { if(bought) return its(price) + " gold"; return item::get_name(); }
   string get_help() override { if(bought) return "You have bought something from this shop. The trader has stored the gold here."; return item::get_help() + "\n\nPrice: " + its(price); }
   shopitem* as_shopitem() override { return this; }
-  virtual void hs(stater& s) override { item::hs(s); s.act("bought", bought, false).act("last_intersect", last_intersect, 0); }
+  virtual void hs(stater& s) override {
+    item::hs(s);
+    s.act("bought", bought, false).act("last_intersect", last_intersect, 0)
+    .act("pre_owned", pre_owned, 0).act("pre_filled", pre_filled, 0)
+    .act("post_owned", pre_owned, 0).act("post_filled", pre_filled, 0);
+    }
+  };
+
+struct non_spatial_entity : public entity {
+  virtual xy siz() { return {0,0}; }
+  virtual string glyph() { return "?"; }
+  virtual color_t color() { return 0xC04040FF; }
+  virtual void draw() override {}
+  virtual void act() override {}
+  virtual bool hidden() override { return true; }
+  };
+
+struct guard_event : non_spatial_entity {
+  entity *item, *monster;
+  string monster_name;
+  bool active;
+  virtual void act() override;
+  virtual void hs(stater& s) override { entity::hs(s); s.act("active", active, false); }
   };
 
 struct loot : public item {
@@ -898,4 +1168,5 @@ struct vision : public entity {
 
 vector<unique_ptr<vision>> visions;
 
+extern int statseed;
 }

@@ -20,7 +20,7 @@ void tallyedgesof(int i, int delta, mycell *mc) {
 
 void counttallies() {
   using namespace rogueviz;
-  int N = isize(rogueviz::vdata);
+  int N = get_n();
   
   {
   progressbar pb(N, "Tallying pairs");
@@ -48,7 +48,7 @@ void counttallies() {
   }
 
 void destroytallies() {
-  int N = isize(rogueviz::vdata);
+  int N = get_n();
   progressbar pb(N, "Destroying tallies");
   for(int i=0; i<N; i++) add_to_set(vertices[i], -1, 0), pb++;
   for(int i=0; i<MAXDIST; i++)
@@ -68,7 +68,7 @@ ld loglik_placement() {
   mycell *root = mroot;
   ld placement_loglik = 0;  
   auto seg = getsegment(root,root,0);
-  int N = isize(rogueviz::vdata);
+  int N = get_n();
   for(int j=0; j<BOXSIZE; j++) {
     int qj = seg->qty[j];
     if(!qj) continue;
@@ -145,7 +145,7 @@ ld loglik_chosen() {
 void writestats() {
   indenter_finish im("writestats");
   memoryInfo();
-  int N = isize(rogueviz::vdata);
+  int N = get_n();
   println(hlog, "Vertices by distance (N = ", N, "):");
   mycell *root = mroot;
   for(int j=0; j<BOXSIZE; j++) {

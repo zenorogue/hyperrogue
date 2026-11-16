@@ -430,6 +430,7 @@ void celldrawer::draw_ceiling() {
           break;
 
         case laFrog:
+        case laDice:
           col = 0x4040FF;
           skycol = 0x8080FF;
           if(zebra40(c) / 4 == 1) draw_star(V, cgi.shSun, 0xFFFF00FF);

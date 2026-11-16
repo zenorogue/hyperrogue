@@ -210,7 +210,7 @@ Java_com_roguetemple_hyperroid_HyperRogue_setFilesDir(MOBPAR_FORMAL, jstring dir
   picfile = nativeString; picfile += "/hyperrogue.pic"; 
   conffile = sconffile.c_str();
   chmod(scorefile.c_str(), 0777);
-  chmod(conffile, 0777);
+  chmod(conffile.c_str(), 0777);
   chmod(nativeString, 0777);
   chmod((string(nativeString)+"/..").c_str(), 0777);
   env->ReleaseStringUTFChars(dir, nativeString);

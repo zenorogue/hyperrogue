@@ -515,6 +515,8 @@ EX string mode_description() {
   if(multi::players > 1) md += " P" + its(multi::players);
   if(pureHardcore()) md += " hardcore";
   else if(hardcore) md += " partial hardcore";
+  if(lineofsightAt >= PURELOS_LEVEL) md += "partial lineofsight";
+  else if(lineofsight != los::none) md += " lineofsight";
   if(daily::on) md += " strange";
   if(bow::crossbow_mode()) md += " b/" + bow::bowName[bow::style];
   if(land_structure != default_land_structure())

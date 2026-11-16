@@ -3,8 +3,8 @@
 # Environmental vairables:
 #   If you want to build with Glew, set
 #     HYPERROGUE_USE_GLEW=1
-#   If you want to use libpng, set
-#     HYPERROGUE_USE_PNG=1
+#   If you do not want to use libpng, set
+#     HYPERROGUE_USE_PNG=0
 #
 # For Mac OS X:
 #   Run `brew install sdl12-compat sdl_gfx sdl_mixer sdl_ttf`
@@ -130,7 +130,7 @@ else
   CXXFLAGS_EARLY += -DCAP_GLEW=0
 endif
 
-ifeq (${HYPERROGUE_USE_PNG},1)
+ifneq (${HYPERROGUE_USE_PNG},0)
   CXXFLAGS_EARLY += -DCAP_PNG=1
   hyper_LDFLAGS += $(LDFLAGS_PNG)
   hyper_OBJS += savepng$(OBJ_EXTENSION)
@@ -168,7 +168,7 @@ makeh$(EXE_EXTENSION): makeh.cpp
 	$(CXX) -O2 makeh.cpp -o $@
 
 autohdr.h: makeh$(EXE_EXTENSION) language-data.cpp *.cpp
-	./makeh classes.cpp locations.cpp colors.cpp hyperpoint.cpp geometry.cpp embeddings.cpp goldberg.cpp init.cpp floorshapes.cpp cell.cpp multi.cpp shmup.cpp pattern2.cpp mapeditor.cpp graph.cpp textures.cpp hprint.cpp language.cpp util.cpp complex.cpp multigame.cpp arbitrile.cpp rulegen.cpp *.cpp > autohdr.h
+	./makeh classes.cpp locations.cpp colors.cpp hyperpoint.cpp geometry.cpp embeddings.cpp goldberg.cpp init.cpp floorshapes.cpp cell.cpp multi.cpp shmup.cpp pattern2.cpp mapeditor.cpp graph.cpp textures.cpp hprint.cpp language.cpp util.cpp complex.cpp multigame.cpp backed-map.cpp arbitrile.cpp rulegen.cpp *.cpp > autohdr.h
 
 language-data.cpp: langen$(EXE_EXTENSION)
 	./langen -o language-data.cpp

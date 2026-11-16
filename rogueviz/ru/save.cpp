@@ -49,6 +49,7 @@ void save_as(string fname) {
   // list current powers
   for(auto& p: powers) {
     save_via_stater(f, p, "POWER", isize(p.randeffs));
+    for(auto& r: p.active_in_rooms) println(f, "ACTIVE-IN ", r->id);
     for(auto& r: p.randeffs) save_via_stater(f, *r, "EFFECT", true);
     }
 
@@ -73,7 +74,7 @@ void save_as(string fname) {
     for(int x=0; x<room_y; x++) if(r.block_at[y][x] != r.orig_block_at[y][x])
       println(f, "AT ", y, " ", x, " ", r.block_at[y][x]);
 
-    for(auto& e: r.entities) save_via_stater(f, *e, "ENTITY");
+    for(auto& e: r.entities) if(e->nonstatic()) save_via_stater(f, *e, "ENTITY");
 
     if(r.timed_orb_end >= gframeid) println(f, "TIMER ", r.timed_orb_end);
     println(f);
@@ -212,12 +213,18 @@ void load_from(string fname) {
       current_power = nullptr;
       try {
         current_power = &find_power_by_id(param);
+        current_power->active_in_rooms.clear();
         load_hs(f, *current_power);
         current_power->randeffs = {};
         }
       catch(hr_name_error& e) {
         println(hlog, "warning: unknown power: ", param);
         }
+      }
+    else if(cap == "ACTIVE-IN") {
+      auto r = may_find_room_by_id(param);
+      if(!r) println(hlog, "warning: active in a room that does not exist");
+      current_power->active_in_rooms.insert(r);
       }
     else if(cap == "EFFECT") {
       if(!all_effects->count(param)) {

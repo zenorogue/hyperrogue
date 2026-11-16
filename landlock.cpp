@@ -477,6 +477,18 @@ EX eLand pickluck(eLand l1, eLand l2) {
     l == laPrairie || l == laHalloween;
   } */
 
+EX eLand get_superland(eLand l) {
+  if(l == laMountain) return laJungle;
+  if(l == laHaunted) return laGraveyard;
+  if(l == laCamelot || isCrossroads(l)) return laCrossroads;
+  if(l == laTemple) return laRlyeh;
+  if(l == laPrincessQuest) return laPalace;
+  if(l == laClearing) return laOvergrown;
+  if(l == laMirrorWall || l == laMirrored || l == laMirrorWall2) return laMirror;
+  if(l == laBrownian || l == laWhirlpool) return laOcean;
+  return l;
+  }
+
 EX eLand getNewSealand(eLand old) {
   for(int it=0; it<100; it++) {
     eLand p = pick(laOcean, pick(laCaribbean, laLivefjord, laWarpSea, laKraken, laDocks));
@@ -846,6 +858,7 @@ EX bool isLandIngame(eLand l) {
   if((eubinary || sol) && isCyclic(l) && l != specialland) return false;
   if(l == laCamelot && hyperbolic && WDIM == 3) return false;
   if(!(land_validity(l).flags & lv::appears_in_full)) return false;
+  if(among(l, laBlizzard, laVolcano) && windmap::wind_failed) return false;
   return landAccessibleFromIngame(l);
   }
 
@@ -1112,6 +1125,14 @@ EX land_validity_t& land_validity(eLand l) {
 
   if(l == laDice && WDIM == 3)
     return dont_work;
+
+  #if CAP_ARCM
+  if(l == laDice && arcm::in() && !arcm::support_dice(3) && !arcm::support_dice(4) && !arcm::support_dice(5))
+    return dont_work;
+  #endif
+
+  if(l == laDice && arb::in() && !arb::support_dice(3) && !arb::support_dice(4) && !arb::support_dice(5))
+    return dont_work;
   
   if(old_daily_id < frog_when && among(l, laFrog, laEclectic, laWet))
     return not_implemented;
@@ -1211,6 +1232,10 @@ EX land_validity_t& land_validity(eLand l) {
     if(isCyclic(l)) return not_implemented;
     }
   #endif
+
+  if(arb::in()) {
+    if(among(l, laPower, laZebra, laFrog, laWineyard) && arb::current.have_line) return lv::pattern_defined;
+    }
 
   #if CAP_CRYSTAL
   if(cryst) {
@@ -1323,9 +1348,9 @@ EX land_validity_t& land_validity(eLand l) {
     return dont_work;
   #endif
     
-  if(arcm::in() && l == laPrairie) return dont_work;
+  if((arcm::in() || arb::in()) && l == laPrairie) return dont_work;
 
-  if((IRREGULAR || arcm::in()) && among(l, laBlizzard, laVolcano) && !sphere)
+  if((IRREGULAR || arcm::in() || arb::in()) && among(l, laBlizzard, laVolcano) && !sphere)
     return dont_work;
 
   if(arcm::in() && DUAL && l == laCrossroads4)
@@ -1422,10 +1447,6 @@ EX land_validity_t& land_validity(eLand l) {
   if((l == laBlizzard || l == laVolcano) && elliptic && S7 < 5 && !arcm::in())
     return not_enough_space;
   
-  // ... and it works in gp only partially
-  if((l == laBlizzard || l == laVolcano) && GOLDBERG && (old_daily_id < 33 || !sphere))
-    return partially_implemented;
-
   // Kraken does not really work on odd-sided cells;
   // a nice football pattern will solve the problem by forbidding the Kraken to go there
   // (but we do have to allow it in non-bitrunc standard)
@@ -1550,9 +1571,13 @@ EX land_validity_t& land_validity(eLand l) {
   if(l == laCrossroads4 && quotient)
     return some0;
 
+  if(among(l, laZebra, laFrog) && bt::in()) return pattern_defined;
+
+  if(among(l, laZebra, laFrog) && (S3 >= OINF || arcm::in() || arb::in())) return pattern_not_implemented_random;
+
   if(among(l, laZebra, laFrog) && quotient && geometry != gZebraQuotient && !randomPatternsMode)
     return pattern_incompatibility;
-  
+
   if(among(l, laZebra, laFrog) && !(stdeucx || (a4 && !BITRUNCATED) || a46 || (geometry == gZebraQuotient && old_daily_id > 106)) && !randomPatternsMode)
     return pattern_not_implemented_weird;
   

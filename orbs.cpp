@@ -603,15 +603,20 @@ EX void activateLightning() {
 // roMouse/roKeyboard: 
 //    return orb type if successful, eItem(-1) if do nothing, 0 otherwise
 
-EX bool haveRangedTarget() {
+EX map<eItem, cell*> orb_used_where;
+
+EX bool haveRangedTarget(bool complete) {
+  orb_used_where.clear();
   if(!haveRangedOrb())
     return false;
   for(int i=0; i<isize(dcal); i++) {
     cell *c = dcal[i];
-    if(targetRangedOrb(c, roCheck)) {
-      return true;
+    if(eItem it = targetRangedOrb(c, roCheck)) {
+      if(complete && !orb_used_where.count(it)) orb_used_where[it] = c;
+      else return true;
       }
     }
+  if(complete) return orb_used_where.size();
   return false;
   }
 
@@ -619,7 +624,7 @@ void checkmoveO() {
   bow::bowpath_map.clear();
   if(multi::players > 1 && multi::activePlayers() == 1)
     multi::checklastmove();
-  if(multi::players == 1) checkmove();
+  if(multi::players == 1) checkmove(false);
   }
 
 int teleportAction() {
@@ -679,6 +684,7 @@ EX void teleportTo(cell *dest) {
   movecost(from, dest, 2);
   #if CAP_COMPLEX2
   mine::auto_teleport_charges();
+  if(mine::in_minesweeper()) ++turncount;
   #endif
   }
 
@@ -1166,9 +1172,9 @@ void poly_attack(cell *dest) {
   dest->monst = target;
   if(!dest->stuntime) dest->stuntime = 1;
 
-  if(orig == moPair) {
+  if(is_paired(orig)) {
     cell *dest2 = dest->move(dest->mondir);
-    if(dest2->monst == moPair) {
+    if(is_paired(dest2->monst)) {
       dest2->monst = dest->monst;
       if(!dest2->stuntime) dest2->stuntime = 1;
       }
@@ -1397,6 +1403,11 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
         addMessage(XLAT("You cannot target that far away!"));
       return itNone;
       }
+    if(!in_line_of_sight_for_player(c)) {
+      if(!isWeakCheck(a))
+        addMessage(XLAT("You cannot target what you cannot see!"));
+      return itNone;
+      }
     }
   
   vector<string> orb_error_messages;
@@ -1482,7 +1493,7 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
         if(c->monst ? (
           CHK(canAttack(cf, moFriendlyIvy, c, c->monst, f), XLAT("Cannot attack there!"))
           ) : (
-          CHK(passable(c, cf, P_ISFRIEND | P_MONSTER), XLAT("Cannot grow there!")) &&
+          CHK(passable(c, cf, P_ISFRIEND | P_MONSTER | P_IVY), XLAT("Cannot grow there!")) &&
           CHK(!strictlyAgainstGravity(c, cf, false, MF_IVY), XLAT("Cannot grow against gravity!"))
           ))
           dirs.push_back(d);

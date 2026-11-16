@@ -167,7 +167,7 @@ template<class T> double kendall(vector<pair<int, T>> allp) {
   tau -= K;
 
   double par = K * (K-1.);
-  println(hr::hlog, tau, " / ", par);
+  hr::hprintln(tau, " / ", par);
   return tau / par;
   }
 
@@ -175,16 +175,16 @@ template<class T> double kendall(vector<pair<int, T>> allp) {
 void test_kendall() {
   if(1) {
     vector<pair<int, int>> p = { {1,1}, {2,2}, {3,3}, {4,4} };
-    println(hlog, "p = ", stats::kendall(p));
+    hprintln("p = ", stats::kendall(p));
 
     vector<pair<int, int>> q = { {1,1}, {2,2}, {3,3}, {4,3} };
-    println(hlog, "q = ", stats::kendall(q));
+    hprintln("q = ", stats::kendall(q));
 
     vector<pair<int, int>> r = { {1,1}, {2,2}, {3,4}, {4,3} };
-    println(hlog, "r = ", stats::kendall(r));
+    hprintln("r = ", stats::kendall(r));
 
     vector<pair<int, int>> s = { {1,1}, {2,2}, {3,3}, {3,4} };
-    println(hlog, "s = ", stats::kendall(s));
+    hprintln("s = ", stats::kendall(s));
     }
   }
 #endif

@@ -414,12 +414,12 @@ EX bool handleKeyTour(int sym, int uni) {
     popScreenAll();
     if(items[itOrbTeleport]) goto give_aether;
     items[itOrbTeleport] = 1;
-    checkmove();
+    checkmove(false);
     if(!canmove) {
       if(items[itOrbAether]) goto give_flash;
       give_aether:
       items[itOrbAether] = 10;
-      checkmove();
+      checkmove(false);
       if(!canmove) {
         give_flash:
         activateFlash();
@@ -1106,7 +1106,6 @@ EX slide default_slides[] = {
         resetview();
         }
       if(mode == 3) {
-        shmup::clearMonsters();
         gamestack::pop();
         }    
       }
@@ -1141,11 +1140,19 @@ EX }
 
 EX vector<reaction_t> cleanup;
 
-EX void do_cleanup() {
-  while(!cleanup.empty()) {
+EX size_t get_cleanup_state() {
+  return cleanup.size();
+  }
+
+EX void cleanup_to(size_t i) {
+  while(cleanup.size() > i) {
     cleanup.back()();
     cleanup.pop_back();
     }
+  }
+
+EX void do_cleanup() {
+  cleanup_to(0);
   }
 
 EX void on_cleanup_or_next(const reaction_t& del) {

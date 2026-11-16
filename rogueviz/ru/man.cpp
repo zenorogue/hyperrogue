@@ -44,28 +44,42 @@ void statdata::reset() {
   detect_area = 0;
   detect_cross = 0;
   rough_detect = 0;
+
+  heavy_armor = 0;
+  spikes = 0;
+  max_mageshield = 0;
+  stealth_bonus = 0;
+  dodge_value = 0;
   hallucinating = false;
   mods.clear();
   on_hit.clear();
   status_strings.clear();
+
+  jump_power = 1;
+  gravity_value = 1;
+  extra_jumps = 0;
+  boost_max = 0;
   }
 
 man::man() {
   id = "Alchemist";
-  facing = 1; attack_facing = 1;
+  facing = 1;
   for(auto s: allstats) base_stats[s] = 10;
   next.reset(); current.reset();
   hs(fountain_resetter);
+  use_next_turn = nullptr;
   }
 
 void man::hs(stater& s) {
   auto& s1 = s.only_full();
   s1.act("facing", facing, 1)
-   .act("attack_facing", attack_facing, 1)
-   .act("attack_when", attack_when, 0)
    .act("on_floor_when", on_floor_when, 0)
    .act("xp", experience, 0)
-   .act("last_action", last_action, 0);
+   .act("last_action", last_action, 0)
+   .act("gameseed", gameseed, 0)
+   .act("dresstime", dresstime, 0)
+   .act("current_mageshield", current_mageshield, 0)
+   .act("mageshield_recharge_time", mageshield_recharge_time, 0);
   sact(s1, "hair", hair);
   sact(s1, "eyes", eye);
   string z = unspace(backstory);
@@ -73,6 +87,9 @@ void man::hs(stater& s) {
   backstory = respace(z);
   int prof = (int) profession; s1.act("profession", prof, -1); profession = (stat) prof;
   for(auto st: allstats) s1.act(statinfos[st].name, base_stats[st], 10);
+
+  s1.act("jumps_used", jumps_used, 0);
+  s1.act("boost_left", boost_left, 0);
 
   auto sdata = [&s1] (statdata& sd, string prefix) {
     for(auto st: allstats) s1.act(prefix + statinfos[st].name, sd.stats[st], 10);
@@ -82,6 +99,17 @@ void man::hs(stater& s) {
     s1.act(prefix + "detect_area", sd.detect_area, 0);
     s1.act(prefix + "detect_cross", sd.detect_cross, 0);
     s1.act(prefix + "rough_detect", sd.rough_detect, 0);
+
+    s1.act(prefix + "heavy_armor", sd.heavy_armor, 0);
+    s1.act(prefix + "spikes", sd.spikes, 0);
+    s1.act(prefix + "max_mageshield", sd.max_mageshield, 0);
+    s1.act(prefix + "stealth_bonus", sd.stealth_bonus, 0);
+    s1.act(prefix + "dodge_value", sd.dodge_value, 0);
+
+    s1.act(prefix + "jump_power", sd.jump_power, 1);
+    s1.act(prefix + "gravity_value", sd.gravity_value, 1);
+    s1.act(prefix + "extra_jumps", sd.extra_jumps, 0);
+    s1.act(prefix + "boost_max", sd.boost_max, 0);
     };
 
   sdata(current, "curr.");
@@ -107,6 +135,16 @@ void man::act() {
     hp = randround(1. * hp * max_hp() / h);
   auto dat = get_dat();
 
+  if(dresstime) {
+    dresstime--;
+    if(dresstime == 0) { addMessage("You finish redressing."); mageshield_recharge_time = game_fps * 5; }
+    }
+
+  if(current_mageshield > current.max_mageshield) current.max_mageshield = 0;
+
+  if(mageshield_recharge_time) mageshield_recharge_time--;
+  else if(current_mageshield < current.max_mageshield) current_mageshield++;
+
   if(on_floor) on_floor_when = gframeid;
 
   fallthru = false;
@@ -116,9 +154,7 @@ void man::act() {
   if(next.hallucinating && !current.hallucinating)
     prepare_hallucination();
 
-  if((on_floor || current.jump_control || wallhug) && !on_ice) {
-    vel.x = zero_vel.x + dat.dx * dat.d * dat.modv * 2.5;
-    }
+  apply_walking(zero_vel.x + dat.dx * dat.d * dat.modv * 2.5);
 
   if(on_bounce) {
     vel.x += dat.dx * dat.d * dat.modv * 0.02;
@@ -133,11 +169,15 @@ void man::act() {
   check_fountains();
   }
 
-bool man::reduce_hp(int x) {
+bool man::reduce_hp(int x, entity *attacker, flagtype flags) {
+  if(m.current.dodge_value > 0 && rand() % 100 < m.current.dodge_value && !(flags & NON_DODGEABLE)) { x = 1; }
+  if(m.current_mageshield > 0) { int q = min(m.current_mageshield, x); x -= q; m.current_mageshield -= q; m.mageshield_recharge_time = game_fps * 5; }
+  if(m.current.heavy_armor > 0) { x = max((x+4)/5, x - m.current.heavy_armor); }
+  if(attacker && m.current.spikes > 0 && !(flags & SPIKES)) attacker->reduce_hp(m.current.spikes, this, SPIKES);
   if(gframeid >= invinc_end)
     for(auto& f: m.current.on_hit)
       f(x);
-  return entity::reduce_hp(x);
+  return entity::reduce_hp(x, attacker, flags);
   }
 
 bool man::can_see(entity& e) {
@@ -180,27 +220,82 @@ void man::launch_attack(power *p, int fac, boxfun f) {
   effects.emplace_back();
   auto& e = effects.back();
   e.p = p;
-  e.attack_facing = fac;
-  e.attack_when = gframeid;
+  e.facing = fac;
+  e.when = gframeid;
   e.f = f;
+  e.length = 50;
+  e.cf = [&] (color_t col, int t) {
+    auto& alpha = part(col, 0);
+    alpha = max<int> (0, alpha - 5 * t);
+    };
+
   auto pb = f(0);
   auto bb = pixel_to_block(pb);
   for(auto& e: current_room->entities)
     if(e->existing && intersect(e->get_pixel_bbox(), pb)) {
       int sav = e->invinc_end;
       int dam = (m.current.stats[stat::str] + 1) * 3 / 2;
-      e->attacked(dam);
+      e->attacked(dam, p);
       for(auto& md: p->mods) md.action(&*e, dam, sav);
       }
   for(int y=bb.miny; y<bb.maxy; y++)
   for(int x=bb.minx; x<bb.maxx; x++) {
     int b = current_room->at(x, y);
+    if(b == wWeakWall && (p->flags & WEAPON_AXE)) {
+      current_room->replace_block_frev(x, y, wSmashedDoor);
+      addMessage("You smash the wall!");
+      }
+    if(b == wDoor && (p->flags & WEAPON_AXE)) {
+      current_room->replace_block_frev(x, y, wSmashedDoor);
+      addMessage("You SMASH the door!");
+      }
     if(b == wDoor) {
       current_room->replace_block_frev(x, y, wSmashedDoor);
       addMessage("You smash the door!");
       }
     for(auto& md: p->mods) md.map_action(x, y);
     }
+  }
+
+void man::handle_morph(entity *m) {
+  auto pre_size = get_pixel_bbox();
+  swap(m, morphed);
+  auto at = where;
+  if(on_floor) {
+    do {
+      where.y += 1;
+      }
+    while(get_pixel_bbox().maxy < pre_size.maxy);
+    do {
+      where.y -= 1;
+      }
+    while(get_pixel_bbox().maxy > pre_size.maxy);
+    }
+  println(hlog, "where moved from ", at.y, " to ", where.y);
+  auto bb = pixel_to_block(get_pixel_bbox());
+  println(hlog, "bblock is ", bb);
+  bool ok = true;
+  for(int x = bb.minx; x < bb.maxx; x++) for(int y = bb.miny; y < bb.maxy; y++) {
+    eWall b = current_room->at(x, y);
+    if(walls[b].flags & W_BLOCK) ok = false;
+    }
+  for(auto& e: current_room->entities) if(auto p = e->as_platform()) {
+    auto pb = p->get_pixel_bbox();
+    if(intersect(pb, bb)) ok = false;
+    }
+  if(ok) {
+    if(morphed) {
+      string adj = morphed->id == "capy" ? "lovely " : "";
+      addMessage("You morph into a " + adj + morphed->get_name() + "!");
+      }
+    else
+      addMessage("You morph back into a human.");
+    }
+  else {
+    swap(m, morphed); where = at;
+    addMessage("Not enough space here to morph!");
+    }
+  if(m) delete m;
   }
 
 }

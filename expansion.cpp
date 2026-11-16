@@ -936,6 +936,29 @@ int expansion_readArgs() {
     shift(); for(int i=0; i<argi(); i++)
       printf("%s / %s\n", expansion.get_descendants(i).get_str(1000).c_str(), expansion.get_descendants(i, expansion.diskid).get_str(1000).c_str());  
     }
+  else if(argis("-csolve-fraction")) {
+    PHASEFROM(2);
+    start_game();
+    auto& expansion = get_expansion();
+    map<int, ld> curr;
+    if(!expansion.N) expansion.preliminary_grouping(), expansion.reduce_grouping();
+
+    curr[expansion.rootid] = 1;
+    for(int d=0; d<50; d++) {
+      ld total = 0;
+      map<int, ld> curr2;
+      for(auto iq: curr) {
+        total += iq.second;
+        for(auto j: expansion.children[iq.first]) curr2[j] += iq.second;
+        }
+      print(hlog, "radius ", d, " : total = ", total);
+      for(auto iq: curr) {
+        print(hlog, " [", iq.first, ":", expansion.samples[iq.first]->type, "] = ", iq.second / total);
+        }
+      println(hlog);
+      curr = std::move(curr2);
+      }
+    }
   else if(argis("-csolve")) { 
     PHASEFROM(2); 
     start_game();

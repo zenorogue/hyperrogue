@@ -50,6 +50,7 @@ struct entity *current_target;
 struct ruwall {
   string name;
   string glyph;
+  char default_map_symbol;
   color_t color;
   flagtype flags;
   string help;
@@ -58,8 +59,16 @@ struct ruwall {
 enum eWall {
   wAir, wWall, wBouncy, wSpike, wWater, wFrozen, wDoor, wSmashedDoor,
   wLockedDoor, wFountain, wBluePortal, wOrangePortal, wPlatform, wStaircase,
-  wColumn, wForge, wWoodWall, wShopDoor, wSecretPassage, wSign, wWallSign, wTimeDoor, 
-  wBottomSpike, wRogueWallHidden, wRogueWall, wRightSlope, wLeftSlope, wLeftSlopedRoof, wRightSlopedRoof, wGUARD };
+  wColumn, wForge, wWoodWall, wShopDoor,
+  wSecretPassageVHidden, wSecretPassageV,
+  wSecretPassageUHidden, wSecretPassageU,
+  wSecretPassageHHidden, wSecretPassageH,
+  wSign, wWallSign, wTimeDoor,
+  wBottomSpike, wRogueWallHidden, wRogueWall, wRightSlope, wLeftSlope, wLeftSlopedRoof, wRightSlopedRoof,
+  wWeakWall, wStrangeSign, wWalkSpikes, wHyperBouncy,
+  wArenaDoor, wGlassWall,
+  wWetWall, wIcyWall, wWetPlatform, wIcyPlatform,
+  wGUARD };
 
 flagtype W_BLOCK = 1;
 flagtype W_TRANS = 2;
@@ -72,39 +81,70 @@ flagtype W_BLOCKBIRD = 128;
 flagtype W_STABLE = 256;
 flagtype W_DOWNWARD = 512;
 flagtype W_SLOPE = 1024;
+flagtype W_PAIN_DOWN = 2048;
+flagtype W_HYPERBOUNCY = 4096;
+flagtype W_SLIPPERY = 8192;
 
 constexpr int qwall = int(wGUARD);
 
+ruwall r_wall = {"wall", "#", '#', 0xFFFFFFFF, W_BLOCK | W_STABLE, "These kinds of tough walls can never be destroyed."};
+
+vector<pair<eWall, eWall>> hidden_unhidden = {
+  {wSecretPassageHHidden, wSecretPassageH},
+  {wSecretPassageVHidden, wSecretPassageV},
+  {wSecretPassageUHidden, wSecretPassageU},
+  {wRogueWallHidden, wRogueWall}
+  };
+
+vector<pair<eWall, eWall>> base_changed = {
+  {wDoor, wSmashedDoor}
+  };
+
 ruwall walls[qwall] = {
-  {"air", ".", 0x40404080, W_TRANS, "Looks like an empty space, but actually necessary for survival."},
-  {"wall", "#", 0xFFFFFFFF, W_BLOCK | W_STABLE, "These kinds of tough walls can never be destroyed."},
-  {"bouncy wall", "#", 0x80FF80FF, W_BLOCK | W_BOUNCY, "Like walls, but things bounce off them."},
-  {"spike", "^", 0xC08080FF, W_TRANS | W_PAIN | W_BLOCKBIRD, "Dangerous!"},
-  {"water", "~", 0x0000FFFF, W_BLOCK | W_TRANS | W_BLOCKBIRD, "Not used yet."},
-  {"frozen water", "#", 0xC0C0FFFF, W_BLOCK | W_FROZEN, "Water magically turned into a slippery wall."},
-  {"door", "+", 0xC06000FF, W_BLOCK, "Attack the doors with your weapon to open them."},
-  {"smashed door", "'", 0xC06000FF, W_TRANS, "This door has been already opened."},
-  {"locked door", "+", 0xA05000FF, W_BLOCK, "What is behind this door is not your business."},
-  {"magic fountain", "!", 0x8080C0FF, W_TRANS, "Wow! A magic fountain!"},
-  {"blue portal", "=", 0x4040C0FF, W_TRANS, "Blue portal."},
-  {"orange portal", "=", 0xC08040FF, W_TRANS, "Orange portal."},
-  {"platform", "-", 0xFFFFFFFF, W_PLATFORM | W_TRANS | W_BLOCKBIRD, "You can fall down through such platforms."},
-  {"staircase", "-", 0xFFFF80FF, W_PLATFORM | W_TRANS | W_STAIRCASE, "You can climb staircases and ladders." },
-  {"column", "|", 0x90909080, W_TRANS | W_BLOCKBIRD, "A background decoration." },
-  {"forge", "&", 0xB0202080, W_TRANS | W_PAIN, "Used by runesmiths."},
-  {"wooden wall", "#", 0xFF8000FF, W_BLOCK | W_STABLE, "These kinds of tough walls can be destroyed with fire."},
-  {"shop door", "#", 0xFFD500FF, W_TRANS, "A powerful door, to protect against shoplifters."},
-  {"secret passage", "#", 0xFFFF40FF, W_PLATFORM | W_BLOCKBIRD, "You have discovered a secret passage from the other side."},
-  {"sign", "X", 0xFFFF40FF, W_TRANS, "You need to wait close to this sign to read it."},
-  {"wall sign", "X", 0xFFFFC0FF, W_BLOCK, "You need to wait close to this sign to read it."},
-  {"time door", "#", 0x8080FFFF, W_BLOCK | W_STABLE, "A powerful door, opened by a mechanism."},
-  {"bottom spike", "v", 0xC08080FF, W_TRANS | W_PAIN | W_BLOCKBIRD | W_DOWNWARD, "A downward-pointing spike. You can fall from above through it safely, but otherwise, it is very dangerous."},
-  {"wall", "#", 0xFFFFFFFF, W_BLOCK | W_STABLE, "These kinds of tough walls can never be destroyed."},
-  {"fake wall", "#", 0x404080FF, W_PLATFORM | W_STABLE | W_BLOCKBIRD, "Your rogueish senses have discovered that this wall is fake."},
-  {"right slope", "/", 0xFFFFFFFF, W_STABLE | W_SLOPE, "Slope here."},
-  {"left slope", "\\", 0xFFFFFFFF, W_STABLE | W_SLOPE, "Slope here."},
-  {"left sloped roof", "/", 0xC0C0C0FF, W_BLOCK, "Sloped roof."},
-  {"right sloped roof", "\\", 0xC0C0C0FF, W_BLOCK, "Sloped roof."},
+  {"air", ".", '.', 0x40404080, W_TRANS, "Looks like an empty space, but actually necessary for survival."},
+  r_wall,
+  {"bouncy wall", "#", 'B', 0x80FF80FF, W_BLOCK | W_BOUNCY, "Like walls, but things bounce off them."},
+  {"spike", "^", '^', 0xC08080FF, W_TRANS | W_PAIN | W_BLOCKBIRD, "Dangerous!"},
+  {"water", "~", '~', 0x0000FFFF, W_TRANS | W_BLOCKBIRD, "Not used yet."},
+  {"frozen water", "#", 'F', 0xC0C0FFFF, W_BLOCK | W_FROZEN, "Water magically turned into a very slippery wall."},
+  {"door", "+", '+', 0xC06000FF, W_BLOCK, "Attack the doors with your weapon to open them."},
+  {"smashed door", "'", '?', 0xC06000FF, W_TRANS, "This door has been already opened."},
+  {"locked door", "+", 'L', 0xA05000FF, W_BLOCK, "What is behind this door is not your business."},
+  {"magic fountain", "!", '!', 0x8080C0FF, W_TRANS, "Wow! A magic fountain!"},
+  {"blue portal", "=", '?', 0x4040C0FF, W_TRANS, "Blue portal."},
+  {"orange portal", "=", '?', 0xC08040FF, W_TRANS, "Orange portal."},
+  {"platform", "-", 'p', 0xFFFFFFFF, W_PLATFORM | W_TRANS | W_BLOCKBIRD, "You can fall down through such platforms."},
+  {"staircase", "-", 's', 0xFFFF80FF, W_PLATFORM | W_TRANS | W_STAIRCASE, "You can climb staircases and ladders." },
+  {"column", "|", '|', 0x90909080, W_TRANS | W_BLOCKBIRD, "A background decoration." },
+  {"forge", "&", 'f', 0xB0202080, W_TRANS | W_PAIN, "Used by runesmiths."},
+  {"wooden wall", "#", 'W', 0xFF8000FF, W_BLOCK | W_STABLE, "These kinds of tough walls can be destroyed with fire."},
+  {"shop door", "#", '$', 0xFFD500FF, W_TRANS, "A powerful door, to protect against shoplifters."},
+  r_wall,
+  {"secret trapdoor", "#", 'T', 0xFFFF40FF, W_PLATFORM | W_BLOCKBIRD, "A secret passage that becomes obvious once you see it from above and below."},
+  r_wall,
+  {"secret tunnel", "#", 'U', 0xFFFF40FF, W_PLATFORM | W_BLOCKBIRD, "A secret passage that becomes obvious once you see it from below."},
+  r_wall,
+  {"secret door", "#", 'D', 0xFFFF40FF, W_BLOCKBIRD, "A secret passage that becomes obvious once you see it both from left and right."},
+  {"sign", "X", 'X', 0xFFFF40FF, W_TRANS, "You need to wait close to this sign to read it."},
+  {"wall sign", "X", 'Y', 0xFFFFC0FF, W_BLOCK, "You need to wait close to this sign to read it."},
+  {"time door", "#", 't', 0x8080FFFF, W_BLOCK | W_STABLE, "A powerful door, opened by a mechanism."},
+  {"bottom spike", "v", 'v', 0xC08080FF, W_TRANS | W_PAIN | W_BLOCKBIRD | W_DOWNWARD, "A downward-pointing spike. You can fall from above through it safely, but otherwise, it is very dangerous."},
+  r_wall,
+  {"fake wall", "#", 'f', 0x404080FF, W_PLATFORM | W_STABLE | W_BLOCKBIRD, "Your rogueish senses have discovered that this wall is fake."},
+  {"right slope", "/", '/', 0xFFFFFFFF, W_STABLE | W_SLOPE, "Slope here."},
+  {"left slope", "\\", '\\', 0xFFFFFFFF, W_STABLE | W_SLOPE, "Slope here."},
+  {"left sloped roof", "/", 'x', 0xC0C0C0FF, W_BLOCK, "Sloped roof."},
+  {"right sloped roof", "\\", 'y', 0xC0C0C0FF, W_BLOCK, "Sloped roof."},
+  {"weak wall", "#", 'w', 0xC08080FF, W_BLOCK | W_STABLE, "These walls are quite weak, and can be destroyed with a weapon powerful enough, for example, an axe."},
+  {"strange sign", "X", 's', 0x90909080, W_TRANS, "A strange sign is drawn in the background."},
+  {"walkable spikes", "|", 'w', 0xC08080FF, W_TRANS | W_PAIN_DOWN, "You can walk through these spikes, but falling into them would hurt."},
+  {"hyper-bouncy wall", "#", 'H', 0xC04040FF, W_BLOCK | W_BOUNCY | W_HYPERBOUNCY, "Like walls, but things really bounce off them."},
+  {"arena door", "+", 'A', 0x50A000FF, W_BLOCK, "You need to defeat all monsters here to open this door."},
+  {"glass wall", "#", 'G', 0xA0A0FFFF, W_BLOCK | W_STABLE | W_TRANS, "This wall is tough, but transparent."},
+  {"wet wall", "#", 'W', 0x404080FF, W_BLOCK | W_SLIPPERY, "This wall is wet. Be careful!"},
+  {"icy wall", "#", 'I', 0xD0D0FFFF, W_BLOCK | W_FROZEN, "This wall is covered with ice. Be very careful!"},
+  {"wet platform", "-", 'x', 0x404080FF, W_PLATFORM | W_TRANS | W_BLOCKBIRD | W_SLIPPERY, "This wall is wet. Be careful!"},
+  {"icy platform", "-", 'j', 0xD0D0FFFF, W_PLATFORM | W_TRANS | W_BLOCKBIRD | W_SLIPPERY, "This wall is covered with ice. Be very careful!"},
   };
 
 int sel = 1;
@@ -193,5 +233,9 @@ extern vector<unique_ptr<struct entity>> new_entities;
 
 string unspace(const string& s);
 string respace(const string& s);
+
+extern map<string, entity*> entity_by_id;
+
+extern power *fire_power, *ice_power, *thief_power;
 
 }

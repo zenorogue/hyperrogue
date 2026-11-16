@@ -22,6 +22,7 @@ EX bool targetclick, hiliteclick, forcetarget, numlock_on;
 EX bool gtouched;
 
 EX bool holdmouse;
+EX int mouse_state; // 0 = default, 1 = press, 3 = hold, 2 = release
 
 EX int getcstat, lgetcstat;
 EX ld getcshift;
@@ -199,6 +200,9 @@ enum class tmode { move, info, drag, fire, ranged };
 #endif
 
 EX bool touch_interface;
+EX ld drag_sensitivity;
+EX shiftpoint drag_start;
+EX bool not_started_dragging;
 EX tmode touchmode;
 EX vector<string> touch_description = { "touch to move", "touch for info", "touch to drag", "touch to aim", "touch for ranged" };
 
@@ -333,7 +337,7 @@ EX debugflag debug_joy = {"joy"};
 
 EX void countJoysticks() {
   #if SDLVER == 1
-  indenter_finish(debug_init_joy, "countJoysticks");
+  indenter_finish ijoy(debug_init_joy, "countJoysticks");
   int numsticks = SDL_NumJoysticks();
   sticks.resize(numsticks);
   for(int i=0; i<numsticks; i++) {
@@ -366,7 +370,7 @@ EX void delete_joystick(int instance) {
 
 EX void initJoysticks() {
 
-  indenter_finish(debug_init_joy, "initJoysticks");
+  indenter_finish ijoy(debug_init_joy, "initJoysticks");
 
   if (SDL_error_in(SDL_InitSubSystem(SDL_INIT_JOYSTICK)))
   {
@@ -387,7 +391,7 @@ EX void initJoysticks() {
   }
 
 EX void closeJoysticks() {
-  indenter_finish(debug_init_joy, "closeJoysticks");
+  indenter_finish ijoy(debug_init_joy, "closeJoysticks");
   for(auto& s: sticks) {
     #if SDLVER >= 2
     if(s.gc) SDL_GameControllerClose(s.gc); else
@@ -415,7 +419,7 @@ EX void read_joy_axes() {
   }
 
 EX void checkjoy() {
-  indenter_finish(debug_joy, "checkjoy");
+  indenter_finish ijoy(debug_joy, "checkjoy");
   if(!DEFAULTCONTROL) return;
   ld joyvalue1 = sqr(vid.joyvalue);
   ld joyvalue2 = sqr(vid.joyvalue2);
@@ -568,7 +572,7 @@ EX void full_rotate_camera(int dir, ld val) {
   else if(GDIM == 3 && rshiftclick)
     shift_view(ctangent(dir, -val * camera_speed)), didsomething = true, playermoved = false; /* -val because shift reverses */
   #if CAP_CRYSTAL && CAP_RUG
-  else if(rug::rug_control() && rug::in_crystal())
+  else if(rug::rug_control() && rug::in_crystal() && rug::crystal_rotation)
     crystal::apply_rotation(cspin(dir, 2, val * camera_rot_speed));
   #endif
   else if(GDIM == 3) {
@@ -626,7 +630,7 @@ EX void handlePanning(int sym, int uni) {
   #endif
     
 #if !ISPANDORA
-  if(!smooth_scrolling) {
+  if(!smooth_scrolling && !rug::finger_center) {
     if(sym == SDLK_END) full_forward_camera(-0.2*shiftmul);
     if(sym == SDLK_HOME) full_forward_camera(0.2*shiftmul);
     if(sym == SDLK_RIGHT) full_rotate_camera(0, -0.2*shiftmul);
@@ -635,7 +639,7 @@ EX void handlePanning(int sym, int uni) {
     if(sym == SDLK_DOWN) full_rotate_camera(1, -0.2*shiftmul);
     }
 #endif
-  if(!smooth_scrolling && !tour::on) {
+  if(!smooth_scrolling && !tour::on && !rug::finger_center) {
     if(sym == SDLK_PAGEUP) full_rotate_view(1, cgi.S_step*shiftmul);
     if(sym == SDLK_PAGEDOWN) full_rotate_view(-1, -cgi.S_step*shiftmul);
     if(sym == SDLK_PAGEUP || sym == SDLK_PAGEDOWN) 
@@ -738,6 +742,7 @@ EX void handleKeyNormal(int sym, int uni) {
       sym = 0; uni = 0;
       }
     if(sym == 'f' || is_joy_index(sym, deck::key_f)) bow::switch_fire_mode();
+    #if CAP_SDLJOY
     if(sym == '`' || is_joy_index(sym, deck::enter)) {
       flashMessages();
       movepcto(joydir);
@@ -745,6 +750,7 @@ EX void handleKeyNormal(int sym, int uni) {
       joytime = -1;
       checkjoy();
       }
+    #endif
     }
 
   if(sym == SDLK_KP5 && DEFAULTCONTROL && !game_keys_scroll) movepcto(-1, 1);
@@ -809,16 +815,32 @@ EX void handleKeyNormal(int sym, int uni) {
     do {
       touchmode = (tmode) gmod(1 + int(touchmode), 5);
       invalid = touchmode == tmode::fire && !bow::crossbow_mode();
+      if(!mapeditor::drawplayer && touchmode == tmode::ranged) invalid=true;
+      if(game_keys_scroll && touchmode == tmode::move) invalid=true;
+      if(drag_sensitivity && touchmode == tmode::drag) invalid=true;
       }
     while(invalid);
     }
 
   if(sym == '-' || sym == PSEUDOKEY_WHEELDOWN) {
     actonrelease = false;
-
     
     multi::cpid = 0;
-    if(touchmode == tmode::drag) {
+    bool adr = drag_sensitivity && !vid.quickmouse && mouse_state != 2;
+    if(adr) {
+      if(holdmouse && not_started_dragging) {
+        ld d = hdist(drag_start, mouseh);
+        if(d < 1/drag_sensitivity) actonrelease = true;
+        else panning(drag_start, mouseh), not_started_dragging = false;
+        }
+      else if(holdmouse) {
+        panning(mouseoh, mouseh);
+        }
+      else if(!holdmouse)
+        drag_start = mouseh, not_started_dragging = true, actonrelease = true;
+      holdmouse = true;
+      }
+    else if(touchmode == tmode::drag) {
       if(holdmouse) panning(mouseoh, mouseh);
       holdmouse = true;
       }
@@ -943,6 +965,13 @@ EX bool is_joy_index(int sym, int index) {
   return is_joy_any(sym) && (sym & (JOY_ID - 1)) == index;
   }
 
+#endif
+
+#if !CAP_SDL
+EX bool is_joy_index(int sym, int index) { return false; }
+EX bool is_joy_any(int sym) { return false; }
+#endif
+
 #if HDR
 // default meaning of Steam Deck buttons
 
@@ -963,8 +992,9 @@ namespace deck {
   }
 #endif
 
+#if CAP_SDL
 EX void mainloopiter() {
-  indenter_finish(debug_control, "mainloopiter");
+  indenter_finish imainloop(debug_control, "mainloopiter");
   GLWRAP;
 
   #if !CAP_SDLGFX && !CAP_GL 
@@ -976,12 +1006,12 @@ EX void mainloopiter() {
   vrhr::vr_shift();
   #endif
 
-  check_cgi();
+  if(!outoffocus) check_cgi();
   cgi.require_basics();
 
-  optimizeview();
+  if(!outoffocus) optimizeview();
   
-  models::configure();
+  if(!outoffocus) models::configure();
 
   lastt = ticks;
   ticks = SDL_GetTicks();
@@ -991,10 +1021,11 @@ EX void mainloopiter() {
 
   cframelimit = vid.framelimit;
   if(stillscreen && cframelimit > 10) cframelimit = 10;
+  if(outoffocus && cframelimit > 10) cframelimit = 10;
   
   bool normal = cmode & sm::NORMAL;
   
-  shmup::turn(ticks - lastt);
+  if(!outoffocus) shmup::turn(ticks - lastt);
     
   if(!shmup::on && (multi::alwaysuse || multi::players > 1) && normal)
     timetowait = 0, multi::handleMulti(ticks - lastt);
@@ -1100,11 +1131,13 @@ EX void mainloopiter() {
   hiliteclick = keystate[SDLK_LALT] | keystate[SDLK_RALT];
   #endif
 
+  #if CAP_SDLJOY
   if(defaultjoy) for(auto& s: sticks) {
     if(gjoy_button(s, deck::key_control)) lctrlclick = true;
     if(gjoy_button(s, deck::key_alt)) hiliteclick = true;
     if(gjoy_button(s, deck::key_shift)) lshiftclick = true;
     }
+  #endif
 
   anyshiftclick = lshiftclick | rshiftclick;
   anyctrlclick = lctrlclick | rctrlclick;
@@ -1179,7 +1212,7 @@ EX void mainloopiter() {
     #endif
     }
   
-  if(smooth_scrolling && !shmup::on && (cmode & (sm::NORMAL | sm::PANNING))) {
+  if(smooth_scrolling && !shmup::on && (cmode & (sm::NORMAL | sm::PANNING)) && !rug::finger_center) {
     rug::using_rugview urv;
     auto& lastticks = sc_ticks;
     ld t = (ticks - lastticks) * shiftmul / 1000.;
@@ -1289,10 +1322,11 @@ EX void refresh_if_needed() {
 
 EX void handle_event(SDL_Event& ev) {
   bool normal = cmode & sm::NORMAL;
-    indenter_finish(debug_control, "got event type #" + its(ev.type));
+    indenter_finish ievent(debug_control, "got event type #" + its(ev.type));
     int sym = 0;
     int uni = 0;
     shiftmul = 1;
+    mouse_state = 0;
     
 /*    if(ev.type == SDL_JOYDEVICEADDED || ev.type == SDL_JOYDEVICEREMOVED) {
       joyx = joyy = 0;
@@ -1484,8 +1518,12 @@ EX void handle_event(SDL_Event& ev) {
       bool up = ev.type == SDL_EVENT_MOUSE_BUTTON_UP;
       
       bool act = false;
+      mouse_state = down ? 1 : up ? 2 : 0;
+
+      bool startdrag = getcstat == '-' &&
+        (touchmode == tmode::drag || (!vid.quickmouse && drag_sensitivity && !was_holdmouse));
       
-      if(vid.quickmouse || getcstat == PSEUDOKEY_LIST_SLIDER || (getcstat == '-' && touchmode == tmode::drag)) {
+      if(vid.quickmouse || getcstat == PSEUDOKEY_LIST_SLIDER || startdrag) {
         act = down;
         }
       else {
@@ -1567,7 +1605,7 @@ EX void handle_event(SDL_Event& ev) {
       
       need_mouseh = true;
 
-      if(holdmouse && getcstat == '-') sym = uni = getcstat, fix_mouseh();
+      if(holdmouse && getcstat == '-') sym = uni = getcstat, fix_mouseh(), mouse_state = 3;
 
       if(((SDL_GetMouseState(NULL, NULL) & SDL_BUTTON_MMASK)) && !mouseout2()) {
         fix_mouseh();
@@ -1689,9 +1727,6 @@ EX int get_direction_key(int sym, int uni) {
   }
 
 EX bool gmodekeys(int sym, int uni) {
-  #if CAP_RUG
-  if(rug::rugged && rug::handlekeys(sym, uni)) return true;
-  #endif
 
   if(NUMBERKEY == '6') { vid.grid = !vid.grid; return true; }
   if(NUMBERKEY == '7') { vid.darkhepta = !vid.darkhepta; return true; }

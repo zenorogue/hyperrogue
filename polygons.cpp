@@ -136,24 +136,29 @@ void geometry_information::shift(hpcshape& sh, double dx, double dy, double dz) 
   }
 
 void geometry_information::initPolyForGL() {
-#if CAP_GL
   ourshape.clear();
 
   for(auto& h: hpc)
     ourshape.push_back(glhr::pointtogl(h));
 
-  glhr::store_in_buffer(ourshape);
+#if CAP_GL
+  if(graphics_on && vid.usingGL)
+    glhr::store_in_buffer(ourshape);
 #endif
   }
 
 void geometry_information::extra_vertices() {
-#if CAP_GL
   while(isize(ourshape) < isize(hpc))
     ourshape.push_back(glhr::pointtogl(hpc[isize(ourshape)]));
-  glhr::store_in_buffer(ourshape);
-  glhr::current_vertices = NULL;
-  prehpc = isize(hpc);
+
+#if CAP_GL
+  if(graphics_on && vid.usingGL) {
+    glhr::store_in_buffer(ourshape);
+    glhr::current_vertices = NULL;
+    }
 #endif
+
+  prehpc = isize(hpc);
   }
 
 transmatrix geometry_information::ddi(int a, ld x) { return xspinpush(a * S_step, x); }
@@ -1604,6 +1609,12 @@ void geometry_information::prepare_shapes() {
   bshape(shBunnyEar, PPR::MONSTER_HEAD, scalefactor, 437);
   bshape(shBunnyTail, PPR::MONSTER_BODY, scalefactor, 438);
 
+  bshape(shDonkeyHead, PPR::MONSTER_HEAD, scalefactor, 439);
+  bshape(shDonkeyEar, PPR::MONSTER_HEAD, scalefactor, 440);
+  bshape(shDonkeyEye, PPR::MONSTER_HEAD, scalefactor, 441);
+  bshape(shDonkeyNose, PPR::MONSTER_HEAD, scalefactor, 442);
+  bshape(shDonkeyNose1, PPR::MONSTER_HEAD, scalefactor, 443);
+
   bshape(shFamiliarHead, PPR::MONSTER_HEAD, scalefactor, 141);
   bshape(shFamiliarEye, PPR::MONSTER_EYE1, scalefactor, 142);
   bshape(shCatHead, PPR::MONSTER_HEAD, scalefactor, 143);
@@ -2589,6 +2600,17 @@ NEWSHAPE, 437, 1, 1, 0.0826431, 0.0110191,  0.0685843, 0.0150185,  0.0575504, 0.
 
 // shBunnyTail
 NEWSHAPE, 438, 1, 2, -0.146275, -0.00452397,  -0.135622, -0.0105484,  -0.149835, -0.0100561,  -0.145778, -0.0180966,  -0.158996, -0.0100631,  -0.159013, -0.0231475,  -0.164607, -0.013088,  -0.187654, -0.0257267,  -0.184047, -0.0176483,  -0.195877, -0.0267564,  -0.195345, -0.0186764,  -0.205659, -0.0242546,  -0.203064, -0.0161643,  -0.21598, -0.0187149,  -0.20873, -0.00960259,  -0.221145, -0.0101211,  -0.21441, -0.00455116,  -0.224251, -0.000506209,
+
+// shDonkeyHead
+NEWSHAPE, 439, 1, 2, 0.141885, -0.00274332,  0.144278, -0.0370474,  0.159392, -0.0525318,  0.183785, -0.0674361,  0.218544, -0.0733929,  0.249519, -0.0754558,  0.289387, -0.067464,  0.320447, -0.0572191,  0.344632, -0.0467354,  0.367791, -0.0365713,  0.379818, -0.0306014,  0.388846, -0.0243753,  0.397776, -0.0112394,
+// shDonkeyEar
+NEWSHAPE, 440, 1, 1, 0.171061, -0.0482674,  0.149489, -0.0613995,  0.139544, -0.0914065,  0.144359, -0.114972,  0.167865, -0.152457,  0.178229, -0.158325,  0.195798, -0.143858,  0.196623, -0.110976,  0.195014, -0.0686527,  0.194023, -0.0384967,
+// shDonkeyEye
+NEWSHAPE, 441, 1, 1, 0.243631, -0.0507072,  0.262267, -0.0626241,  0.27915, -0.0563335,  0.284712, -0.0528977,  0.285417, -0.0445066,  0.27623, -0.0358126,  0.261109, -0.0361227,  0.25035, -0.040157,
+// shDonkeyNose
+NEWSHAPE, 442, 1, 2, 0.347879, -0.00441473,  0.352974, -0.0161136,  0.360187, -0.0325723,  0.374383, -0.038211,  0.392379, -0.0355181,  0.41147, -0.0282191,  0.416974, -0.0205207,  0.417167, -0.0176551,  0.417904, -0.0159756,
+// shDonkeyNose1
+NEWSHAPE, 443, 1, 1, 0.377805, -0.0161794,  0.382946, -0.0211042,  0.392107, -0.0217376,  0.395905, -0.0202777,  0.39504, -0.0150657,  0.392388, -0.00917143,  0.385029, -0.00925563,
 
 NEWSHAPE, NEWSHAPE
 };

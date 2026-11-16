@@ -288,7 +288,7 @@ EX debugflag debug_graph = {"graph"};
 EX debugflag debug_aura = {"graph_aura"};
 
 EX void drawaura() {
-  indenter_finish(debug_aura, "drawaura");
+  indenter_finish iaura(debug_aura, "drawaura");
   if(!haveaura()) return;
   if(vid.stereo_mode) return;
   double rad = current_display->radius;
@@ -500,7 +500,11 @@ EX color_t stdgridcolor = 0x202020FF;
 EX int gridcolor(cell *c1, cell *c2) {
   if(cmode & sm::DRAW && !mapeditor::drawing_tool) return Dark(forecolor);
   if(!c2)
-    return 0x202020 >> darken;
+    return Dark(0x202020);
+
+  if(!in_line_of_sight(c1) || !in_line_of_sight(c2))
+    return Dark(0x808080);
+
   int rd1 = rosedist(c1), rd2 = rosedist(c2);
   if(rd1 != rd2) {
     int r = rd1+rd2;
@@ -785,6 +789,8 @@ EX bool fat_edges = false;
 
 EX bool gridbelow;
 
+EX int grid_layers = 3;
+
 EX void gridline(const shiftmatrix& V1, const hyperpoint h1, const shiftmatrix& V2, const hyperpoint h2, color_t col, int prec) {
   transmatrix U2 = unshift(V2, V1.shift);
 
@@ -841,8 +847,8 @@ EX void gridline(const shiftmatrix& V1, const hyperpoint h1, const shiftmatrix& 
 #if MAXMDIM >= 4
   if(WDIM == 2 && GDIM == 3) {
     ld eps = cgi.human_height/100;
-    queueline(V1*orthogonal_move(h1,cgi.FLOOR+eps), V2*orthogonal_move(h2,cgi.FLOOR+eps), col, prec);
-    queueline(V1*orthogonal_move(h1,cgi.WALL-eps), V2*orthogonal_move(h2,cgi.WALL-eps), col, prec);
+    if(grid_layers & 1) queueline(V1*orthogonal_move(h1,cgi.FLOOR+eps), V2*orthogonal_move(h2,cgi.FLOOR+eps), col, prec);
+    if(grid_layers & 2) queueline(V1*orthogonal_move(h1,cgi.WALL-eps), V2*orthogonal_move(h2,cgi.WALL-eps), col, prec);
     }
   else
 #endif
@@ -962,6 +968,20 @@ EX void drawMarkers() {
   viewmat();
   #endif
   
+  if(ticks < movehints_ticks) {
+    if(legalmoves[cwt.at->type] && !vid.mobilecompasssize) queuecircleat(cwt.at, 0.5 + 0.25 * sintick(75), darkena(0xFFFFFF, 0, 0xFF));
+    for(auto& p: orb_used_where) if(gmatrix.count(p.second))
+      queuestr(gmatrix[p.second], mapfontscale/100, "X", gradient(0, iinf[p.first].color, -1, sintick(75), 1));
+    if(bowtarget && gmatrix.count(bowtarget) && bowtarget->cpdist >= 2) {
+      auto V = gmatrix[bowtarget];
+      queuestr(V, mapfontscale/100, "X", gradient(0, iinf[itCrossbow].color, -1, sintick(75), 1));
+      poly_outline = gradient(0, getcs().bowcolor, -1, sintick(75), 1);
+      queuepolyat(V, cgi.shCrossbowIcon, 0, PPR::LINE);
+      poly_outline = gradient(0, getcs().bowcolor2, -1, sintick(75), 1);
+      queuepolyat(V, cgi.shCrossbowstringIcon, 0, PPR::LINE);
+      }
+    }
+
   #if CAP_QUEUE
   for(cell *c1: crush_now) 
     queuecircleat(c1, .8, darkena(minf[moCrusher].color, 0, 0xFF));
@@ -1037,9 +1057,16 @@ EX void drawMarkers() {
     #endif
 
 #if CAP_SDLJOY && CAP_QUEUE
-    if(joydir.d >= 0 && WDIM == 2) 
-      queuecircleat(cwt.at->modmove(joydir.d+cwt.spin), .78 - .02 * sintick(199), 
-        darkena(0x00FF00, 0, 0xFF));
+    if(joydir.d >= 0 && WDIM == 2) {
+      cell *c = (cwt + joydir.d).cpeek();
+      ld size = .78 - .02 * sintick(199);
+      queuecircleat(c, size, getcs().uicolor);
+
+      if((c->type & 1) && (isStunnable(c->monst) || isPushable(c->wall))) {
+        cell *c1 = (cwt + joydir.d + wstep - (joydir.subdir * c->type/2)).cpeek();
+        queuecircleat(c1, size, getcs().uicolor);
+        }
+      }
 #endif
 
     bool m = true;
@@ -1057,7 +1084,12 @@ EX void drawMarkers() {
       multi::cpid = i;
       if(multi::players == 1) multi::player[i] = cwt;
       cell *ctgt = multi::multiPlayerTarget(i);
-      queuecircleat(ctgt, .40 - .06 * sintick((!multi::multi_autojoy && !multi::accepted[i]) ? 500 : 200, i / numplayers()), getcs().uicolor);
+      ld size = .40 - .06 * sintick((!multi::multi_autojoy && !multi::accepted[i]) ? 500 : 200, i / numplayers());
+      queuecircleat(ctgt, size, getcs().uicolor);
+      if(ctgt && (ctgt->type & 1) && (isStunnable(ctgt->monst) || isPushable(ctgt->wall))) {
+        cell *c2 = (multi::player[i] + multi::whereto[i].d + wstep - (multi::whereto[i].subdir * ctgt->type/2)).cpeek();
+        queuecircleat(c2, size, getcs().uicolor);
+        }
       }
     #endif
 
@@ -1360,7 +1392,7 @@ EX void center_multiplayer_map(const vector<hyperpoint>& hs) {
 EX debugflag debug_map = {"graph_map"};
 
 EX void drawthemap() {
-  indenter_finish(debug_map, "drawthemap");
+  indenter_finish dtm(debug_map, "drawthemap");
 
   check_cgi();
   cgi.require_shapes();
@@ -1505,7 +1537,12 @@ EX void drawthemap() {
       }
     }
 
+  mark_possible_ranged_orb();
+  }
+
+EX void mark_possible_ranged_orb() {
   #if CAP_SDL
+  if(!graphics_on) return;
   const sdl_keystate_type *keystate = SDL12_GetKeyState(NULL);
   lmouseover = mouseover;
   lmouseover_distant = lmouseover;
@@ -1550,7 +1587,7 @@ EX debugflag debug_calcparam = {"graph_param"};
 
 EX void calcparam() {
 
-  indenter_finish(debug_calcparam, "calcparam");
+  indenter_finish icalcparam(debug_calcparam, "calcparam");
   auto cd = current_display;
   
   cd->xtop = vid.xres * cd->xmin;
@@ -1625,7 +1662,7 @@ EX function<void()> wrap_drawfullmap = drawfullmap;
 bool force_sphere_outline = false;
 
 EX void drawfullmap() {
-  indenter_finish(debug_map, "drawfullmap");
+  indenter_finish dfm(debug_map, "drawfullmap");
 
   check_cgi();
   cgi.require_shapes();
@@ -1830,13 +1867,15 @@ EX void show_menu_button() {
     displayButton(vid.xres-8, vid.yres-vid.fsize, dialog::never_keys() ? XLAT("tour menu") : XLAT("(ESC) tour menu"), SDLK_ESCAPE, 16);
 #endif
   else if(dialog::never_keys())
-    displayButton(vid.xres-8, vid.yres-vid.fsize, separate_status ? XLAT("quest") : XLAT("menu"), SDLK_ESCAPE, 16);
+    displayButton(vid.xres-8, vid.yres-vid.fsize, (separate_status && mapeditor::drawplayer) ? XLAT("quest") : XLAT("menu"), mapeditor::drawplayer ? int(SDLK_ESCAPE) : 'v', 16);
   else
     displayButton(vid.xres-8, vid.yres-vid.fsize, XLAT("(v) menu"), 'v', 16);
 
   if(touch_interface)
    displayButton(vid.xres - 8, vid.yres - 3 * vid.fsize, XLAT(touch_description[(int) touchmode]), PSEUDOKEY_TOUCH, 16);
   }
+
+EX hookset<bool()> hooks_normalscreen;
 
 EX void normalscreen() {
   help = "@";
@@ -1851,6 +1890,9 @@ EX void normalscreen() {
   cmode = sm::NORMAL | sm::DOTOUR | sm::CENTER;
   if(viewdists && show_distance_lists) cmode |= sm::SIDE | sm::MAYDARK;
   if(tour::on && (tour::slides[tour::currentslide].flags & tour::SIDE)) cmode |= sm::SIDE;
+
+  if(callhandlers(false, hooks_normalscreen)) return;
+
   gamescreen(); drawStats();
 
   show_menu_button();
@@ -1912,6 +1954,7 @@ namespace sm {
   static constexpr flagtype MOUSEAIM = Flag(28); // mouse aiming active here
   static constexpr flagtype DIALOG_OFFMAP = Flag(29); // try hard to keep dialogs off the map
   static constexpr flagtype NO_EXIT = Flag(30); // do not allow to exit the current dialog
+  static constexpr flagtype EDIT_RULER = Flag(31); // in mapeditor::rulers::
   }
 #endif
 
@@ -1923,7 +1966,7 @@ EX color_t titlecolor;
 
 EX void drawscreen() {
 
-  indenter_finish(debug_map, "drawscreen");
+  indenter_finish idrawscreen(debug_map, "drawscreen");
   #if CAP_GL
   GLWRAP;
   #endif

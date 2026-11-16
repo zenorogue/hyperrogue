@@ -5645,3 +5645,104 @@ Other bugfixes:
 - improved Deck UI information in help and tour
 - when you press e.g. 'b' to enter a text dialog, 'b' is not sent to this dialog
 - pressing left/right in the fullscreen resolution dialog now uses the list of actual supported resolutions; also hopefully fixed the resize screen loop
+
+2026-05-02 10:54 Update 13.1l:
+Game:
+- after 3 illegal moves, provide some suggestions regarding possible skip-moves and Orb uses
+- Ivy can now grow through single-tile wide chasms
+- fixed Vine Spirits sometimes considering some halfvine-related moves illegal
+- no more parrots placed near the player after using Orb of Safety
+- going back towards the Orb of Yendor now keeps the timer ghosts away
+- replaced "it is a shame to cheat" with a less judgemental "cheaters never win"
+
+Features:
+- compass-and-ruler functionality in the drawing tool (and other graphics tools)
+- more intuitive dragging on touchscreens (controlled by the `drag_sensitivity` setting)
+
+Bugfixes:
+- female Rogue can now change her dress
+- reset-special-modes now also resets texture mode and drawplayer off
+- fixed some shmup crashes
+- in "local scores", fixed dragging, and doubly-displayed time
+- disabling yendor/tactics now correctly sets the land to Ice
+- pressing yendor/tactic mode in the menu now, when active, automatically disables the mode
+- less CPU usage when out of focus
+
+Experiment with geometry:
+- in 'arbitrary file' and Archimedean tilings, the "strict tree maps" system is now used by default for hyperbolic tilings. This allows more complex land generation (horocycles) and
+  avoids precision errors. In case of any problems, the 'auto_rulegen' setting can be switched off. If switched off, the 'backed' system is reimplemented, and options to study the
+  precision issues are added to the 'experiment with geometry' menu.
+- fixed the distance computation in bitruncated {4,5}
+- field patterns (Blizzard, Wasteland) now work correctly in Goldberg/unrectified/untruncated geometries
+- fixed missing generation in some lands in some geometries
+- fixed Hunting Ground in quickly expanding geometries
+- fixed dice generated immobile in some geometries such as {5,4} bitruncated
+- fixed a crash when displaying a compass in binary tiling
+- disabled more patterned lands in 'strict tree maps'
+- provided an alternate unlock for Burial Grounds
+- zebra patterns: binary-tiling (parity), oox3 (random)
+
+Commandline fixes:
+- better at finding the HyperRogue files when launched from another directory
+- better `-help`, `-vizs` option for smooth visualization
+- in Linux, HyperRogue ini/log files are now created according to the XDG standard
+
+RogueViz:
+- fix a crash in Seuphorica
+- don't crash if file not found
+- many improvements to 'embeddings'
+- added triangle centers visualization
+- fixed some links in presentations
+
+2026-08-01 12:13 Update 13.1m:
+- line-of-sight mode: walls block sight, both for you and for your enemies
+- in PTM, added the 'minimal' mode which shows just the one best run
+
+Bug fixes:
+- fixed Elemental Planes in some land structures
+- fixed a crash in World Overview if all lands have been disabled in custom mode
+- fixed the 'all on one page' layout in PTM and World Overview
+- in shmup, don't waste all energy at once with flash+energy, also don't shoot at once
+- in shmup, don't crash on safety
+- fixed how the closed gates are displayed in 3D, also improved the pseudo-3D style in 2D
+- improved the open/close plate z levels so that z-fighting is less likely
+- fixed missing ceiling configuration for CR6, MCR, DR and CC
+- [donkey implemented], [morph both poles]
+
+2026-08-02 10:11 Update 13.1n:
+- fixed the crash after trying some complex modes involving the line-of-sight mode
+- fixed not recognizing los as separate mode in some cases
+- mimics and pushables now display hints for alt-keyboard and controller users
+- the controller target color is now based on the UI color configured for the player
+- adjacent thumpers and barrels no longer block visibility
+- display changed LOS immediately after the mode is switched
+- the score to get the gold medal for Camelot in PTM Minimal fixed to be 8
+- fixed the name of 'neon_magic_vision' option
+- help now mentions ice wolves as ignoring vision
+- a CLI option (`-deck 0`, `-deck 1`) to override SteamDeck detection
+
+2026-08-05 15:12 Update 13.1o:
+- fixed incorrect values of altitudes of sub-floor levels
+- music reset modes: you can now choose to not reset music if it is the same
+- changed line-of-sight blocking rules for: Orb of Fish users, Yendorian trunks, Lost Mountain, Round Table
+- line-of-sight fixed in shmup (works against enemies, takes precise position into account) and in multiplayer
+- in PTM minimal, the 'gold medal' is shown at 50 as intended, not 5
+- switching LOS or hardcore during a PTM/YC/PrC run now resets the run
+- fixed a possible crash
+
+2026-08-05 15:12 Update 13.1o:
+- fixed incorrect values of altitudes of sub-floor levels
+- music reset modes: you can now choose to not reset music if it is the same
+- changed line-of-sight blocking rules for: Orb of Fish users, Yendorian trunks, Lost Mountain, Round Table
+- line-of-sight fixed in shmup (works against enemies, takes precise position into account) and in multiplayer
+- in PTM minimal, the 'gold medal' is shown at 50 as intended, not 5
+- switching LOS or hardcore during a PTM/YC/PrC run now resets the run
+- fixed a possible crash
+
+2026-11-07 09:00 Update 13.1p "Fifteen Years of HyperRogue":
+- An update to the Android version that hopefully improves it on newer versions of Android (crash when paused, part of screen to use, no longer use bold font)
+- Redesigned the menus in the Hypersian Rug mode, including a new approximately isometric embedding "Hilbert Rug"
+- fixed crashes in infinite-order tilings and "backed" tilings
+- Orb of the Fish is not useless in Cursed Canyon (thanks to Jeroen Demeyer)
+- Free Fall treasure generation now depends on correct kills (thanks to Jeroen Demeyer)
+- other minor fixes/new options

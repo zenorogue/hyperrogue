@@ -82,6 +82,8 @@ EX void showOverview() {
     lstart += dialog::handlePage(nl, nlm, lands_per_page, numpages);
     }
   else nlm = nl;
+
+  if(nlm <= 0) nlm = 1;
   
   int vf = min((vid.yres-64-vid.fsize*2) / nlm + (not_in_game ? 1 : 0), vid.xres/40);
 
@@ -96,7 +98,7 @@ EX void showOverview() {
   
   for(int i=0; i<nl; i++) {
     eLand l = displayed_landlist[lstart + i];
-    int xr = vid.xres / 64;
+    int xr = min(vid.xres / 64, vf);
     int i0 = 56 + vid.fsize + i * vf;
     color_t col;
     if(landUnlocked(l)) col = linf[l].color; else col = 0x404040;
@@ -152,7 +154,7 @@ EX void showOverview() {
       }
     }
 
-  dialog::displayPageButtons(3, numpages);
+  dialog::display_bottom_buttons(numpages, dialog::DB_BACK | dialog::DB_HELP);
   
   keyhandler = [numpages] (int sym, int uni) {
     int umod = uni % 1000;
@@ -200,7 +202,7 @@ EX void showOverview() {
         dialog::helpToEdit(items[umod], 0, 200, 10, 10);
         dialog::get_ne().reaction = [] () {
           if(hardcore) canmove = true;
-          else checkmove();
+          else checkmove(false);
           cheater++;
           };
         dialog::bound_low(0);
@@ -302,6 +304,11 @@ EX void switchHardcore_quiet() {
   else { hardcore = true; canmove = true; hardcoreAt = turncount; }
   }
 
+EX void switchLOS_quiet() {
+  lineofsightAt = turncount;
+  create_los();
+  }
+
 EX void switchHardcore() {
   switchHardcore_quiet();
   if(hardcore)
@@ -339,7 +346,7 @@ EX void showCreative() {
     dialog::cheat_if_confirmed([] {
       cheater++;
       pushScreen(mapeditor::showMapEditor);
-      lastexplore = shmup::on ? shmup::curtime : turncount;
+      update_lastexplore();
       addMessage(XLAT("You activate your terraforming powers!"));
       });
     });
@@ -835,12 +842,15 @@ EX void showChangeMode() {
     clearMessages();
     if(yendor::everwon || autocheat || unlock_all)
       pushScreen(yendor::showMenu);
+    else if(yendor::on) restart_game(rg::yendor);
     else gotoHelp(yendor::chelp);
     });
 #if CAP_RACING
   dialog::addBoolItem(XLAT("racing mode"), racing::on, 'R');
   dialog::add_action(racing::configure_race);
-#endif  
+#endif
+
+  add_edit(lineofsight);
 
   show_achievement_eligibility();
 

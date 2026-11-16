@@ -13,8 +13,8 @@
 #define _HYPER_H_
 
 // version numbers
-#define VER "13.1k"
-#define VERNUM_HEX 0xAA2B
+#define VER "13.1p"
+#define VERNUM_HEX 0xAA30
 
 #include "sysconfig.h"
 
@@ -126,8 +126,8 @@ void addMessage(string s, char spamtype = 0);
 
 #define S7 cginf.sides
 #define S3 cginf.vertex
-#define hyperbolic_37 (S7 == 7 && S3 == 3 && !bt::in() && !arcm::in())
-#define hyperbolic_not37 ((S7 > 7 || S3 > 3 || bt::in() || arcm::in()) && hyperbolic)
+#define hyperbolic_37 (S7 == 7 && S3 == 3 && !bt::in() && !arcm::in() && !arb::in())
+#define hyperbolic_not37 ((S7 > 7 || S3 > 3 || bt::in() || arcm::in() || arb::in()) && hyperbolic)
 #define weirdhyperbolic ((S7 > 7 || S3 > 3 || !STDVAR || bt::in() || arcm::in() || arb::in()) && hyperbolic)
 #define stdhyperbolic (S7 == 7 && S3 == 3 && STDVAR && !bt::in() && !arcm::in() && !arb::in())
 
@@ -573,7 +573,7 @@ typedef function<int(struct cell*)> cellfunction;
 #define INFD 60
 #define PINFD 125
 #ifndef BARLEV
-#define BARLEV ((ISANDROID||ISIOS||ISFAKEMOBILE||getDistLimit()<7)?(getDistLimit()<4?8:9):10)
+#define BARLEV hr::get_BARLEV()
 #endif
 #define BUGLEV 15
 // #define BARLEV 9
@@ -810,7 +810,9 @@ string XLAT(string);
 #define DKEY (get_direction_key(sym, uni))
 #define DIRECTIONKEY (interpret_as_direction(sym, uni) ? uni : 0)
 
+#if CAP_SAVE
 namespace scores { void load(); void load_only(); extern int which_mode; }
+#endif
 
 #if ISMOBILE
 namespace leader { void showMenu(); void handleKey(int sym, int uni); }

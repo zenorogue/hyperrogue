@@ -362,10 +362,10 @@ int mycanvas(cell *c) {
     
     case 10: /* house */ {
       d[0]--;
-      int is0 = 0, is1 = 0, is2 = 0, ismore = 0;
+      int is1 = 0, is2 = 0, ismore = 0;
       for(int a=0; a<dim; a++) {
         int v = abs(d[a]);
-        if(v == 0) is0++;
+        if(v == 0) ;
         else if(v == 1) is1++;
         else if(v == 2) is2++;
         else if(v > 2) ismore++;

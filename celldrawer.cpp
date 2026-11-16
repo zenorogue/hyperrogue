@@ -57,7 +57,6 @@ struct celldrawer {
   void draw();
   bool cell_clipped();
   void draw_fallanims();
-  bool draw_shmup_monster();
   void draw_gravity_particles();
 
   void set_land_floor(const shiftmatrix& Vf);
@@ -187,7 +186,7 @@ void celldrawer::setcolors() {
       fcol = wcol;
     }
   
-  else if(c->wall == waShallow) 
+  else if(c->wall == waShallow || (c->wall == waStrandedBoat && c->land == laOcean && c->landparam >= tidalphase2))
     fcol = 0x40C0C0;
 
   // floor colors for all the lands
@@ -780,9 +779,22 @@ void celldrawer::draw_wall() {
     int hdir = 0;
     for(int i=0; i<c->type; i++) if(c->move(i) && c->move(i)->wall == waClosedGate)
       hdir = i;
-    shiftmatrix V2 = orthogonal_move_fol(V, wmspatial?cgi.WALL:1) * ddspin180(c, hdir); // to test
+    shiftmatrix V1 = V * ddspin180(c, hdir);
+
+    if(wmspatial) {
+      queuepolyat(V1, cgi.shPalaceGate, darkena(wcol, 0, 0xFF), wmspatial?PPR::WALL_DECO:PPR::WALL);
+      const int layers = 2 << detaillevel;
+      for(int z=1; z<layers; z++) {
+        double zg = zgrad0(0, geom3::actual_wall_height(), z, layers);
+        queuepolyat(xyzscale(V1, zg, zg), cgi.shPalaceGate, darkena(wcol, 0, 0xFF), wmspatial?PPR::WALL_DECO:PPR::WALL);
+        }
+      }
+
+    shiftmatrix V2 = orthogonal_move_fol(V1, wmspatial?cgi.WALL:1);
+
     queuepolyat(V2, cgi.shPalaceGate, darkena(wcol, 0, 0xFF), wmspatial?PPR::WALL_DECO:PPR::WALL);
     starcol = 0;
+    return;
     }
   
   hpcshape& shThisWall = isGrave(c->wall) ? cgi.shCross : cgi.shWall[ct6];
@@ -988,9 +1000,7 @@ void celldrawer::draw_grid_edge(int t, color_t col, int prec) {
 
 void celldrawer::draw_halfvine() {
 
-  int i =-1;
-  for(int t=0;t<6; t++) if(c->move(t) && c->move(t)->wall == c->wall)
-    i = t;
+  int i = halfvine_direction(c);
 
   qfi.spin = ddspin(c, i, M_PI/S3);
   shiftmatrix V2 = V * qfi.spin;
@@ -1557,8 +1567,8 @@ void celldrawer::draw_features() {
       if(wmescher && geosupport_football() == 2 && pseudohept(c) && c->land == laPalace) V2 = V * spin(M_PI / c->type);
       if(GDIM == 3) {
         #if MAXMDIM >= 4
-        draw_shapevec(c, V2 * lzpush(-cgi.human_height/40), cgi.shMFloor.levels[SIDE::FLOOR], darkena(winf[c->wall].color, 0, 0xFF));
-        draw_shapevec(c, V2 * lzpush(-cgi.human_height/35), cgi.shMFloor2.levels[SIDE::FLOOR], (!wmblack) ? darkena(fcol, 1, 0xFF) : darkena(0,1,0xFF));
+        draw_shapevec(c, V2 * lzpush(-cgi.human_height/60), cgi.shMFloor.levels[SIDE::FLOOR], darkena(winf[c->wall].color, 0, 0xFF));
+        draw_shapevec(c, V2 * lzpush(-cgi.human_height/30), cgi.shMFloor2.levels[SIDE::FLOOR], (!wmblack) ? darkena(fcol, 1, 0xFF) : darkena(0,1,0xFF));
         #endif
         }
       else {
@@ -2907,8 +2917,13 @@ void celldrawer::draw() {
   
   checkTide(c);
   
-  if(1) {
-  
+  int seen = in_line_of_sight_for_player(c);
+
+  if(seen) {
+
+    dynamicval<eNeon> b(neon_mode, neon_mode);
+    if(!in_line_of_sight(c)) neon_mode = neon_magic_vision;
+
     if(inmirror(c)) {
       if(inmirrorcount >= 10) return;
       cellwalker cw(c);
@@ -2975,7 +2990,7 @@ void celldrawer::draw() {
     
     Vboat = Vd;
       
-    draw_shmup_monster();
+    FOR_LIST(li, c->contents) li->draw(self);
 
     poly_outline = OUTLINE_DEFAULT;    
 
@@ -3048,23 +3063,24 @@ void celldrawer::draw() {
         queuestrn(V, mapfontscale / 100, s, darkenedby(asciicol, darken), 2);
       }
     
-    draw_grid();
-
     if(onradar && WDIM == 2 && GDIM == 3) addradar(V, asciichar, darkenedby(asciicol, darken), 0);
     
-    if(WDIM == 2 && GDIM == 3) radar_grid();
     #endif
-    
-    check_rotations();
-
-    #if CAP_EDIT
-    if(!inHighQual) mapeditor::drawGhosts(c, V, c->type);
-    #endif
-    
-#if CAP_MODEL
-    netgen::buildVertexInfo(c, unshift(V));
-#endif
     }
+
+  draw_grid();
+
+  if(WDIM == 2 && GDIM == 3) radar_grid();
+
+  check_rotations();
+
+  #if CAP_EDIT
+  if(!inHighQual) mapeditor::drawGhosts(c, V, c->type);
+  #endif
+    
+  #if CAP_MODEL
+  netgen::buildVertexInfo(c, unshift(V));
+  #endif
   }
 
 void celldrawer::set_towerfloor(const cellfunction& cf) {

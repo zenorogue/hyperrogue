@@ -25,7 +25,7 @@ EX void destroycellcontents(cell *c) {
   c->land = laMemory;
   c->wall = waChasm;
   c->item = itNone;
-  if(!isMultitile(c->monst) && c->monst != moPair)
+  if(!isMultitile(c->monst) && !is_paired(c->monst))
     c->monst = moNone;
   }
 

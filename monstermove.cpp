@@ -534,7 +534,7 @@ EX int moveval(cell *c1, cell *c2, int d, flagtype mf) {
   int bonus = 0;
   if(m == moBrownBug && snakelevel(c2) < snakelevel(c1)) bonus = -10;
 
-  if(hunt && (mf & MF_PATHDIST) && c2->pathdist < c1->pathdist && !peace::on) return 1500 + bonus; // good move
+  if(hunt && (mf & MF_PATHDIST) && c2->pathdist < c1->pathdist && !peace::on) return 1500 + bonus + (c1->pathdist - c2->pathdist); // good move
   
   // prefer straight direction when wandering
   int dd = angledist(c1, c1->mondir, d);
@@ -632,6 +632,9 @@ EX int pickMoveDirection(cell *c, flagtype mf) {
     if(val == bestval) global_posdir.push_back(d);
     }
   
+  if(c->monst == moDonkey && isize(global_posdir) > 1)
+    return -1;
+
   if(c->monst == moRagingBull) 
     determinizeBull(c, global_posdir);
     
@@ -1041,7 +1044,7 @@ EX void moveivy() {
             }
           continue;
           }
-        if(c2 && c2->pathdist < pd && passable(c2, c, 0) && !strictlyAgainstGravity(c2, c, false, MF_IVY))
+        if(c2 && c2->pathdist < pd && ivy_passable(c2, c))
           mi = movei(c, j), pd = c2->pathdist;
         }
       c = c->move(c->mondir);
@@ -1215,6 +1218,8 @@ EX void groupmove(eMonster movtype, flagtype mf) {
   
   for(int i=0; i<isize(gendfs); i++) {
     cell *c = gendfs[i];
+    if(!in_line_of_sight(c)) continue;
+
     vector<int> dirtable;
     
     forCellIdAll(c2,t,c) dirtable.push_back(t);
@@ -1437,7 +1442,7 @@ EX void movemutant() {
       
       if(isPlayerOn(c2)) continue;
 
-      if((c2->land == laOvergrown || !pseudohept(c2)) && passable(c2, c, 0)) {
+      if((c2->land == laOvergrown || !pseudohept(c2)) && ivy_passable(c2, c)) {
         if(c2->land == laClearing && !closed_or_bounded && c2->mpdist > 7) continue;
         c2->monst = moMutant;
         c2->mondir = c->c.spin(j);
@@ -1903,7 +1908,7 @@ EX void specialMoves() {
       c->stuntime = 1;
       }
     
-    else if(m == moPyroCultist && !peace::on) {
+    else if(m == moPyroCultist && !peace::on && in_line_of_sight(c)) {
       bool shot = false;
       bool dont_approach = false;
       // smaller range on the sphere
@@ -1925,7 +1930,7 @@ EX void specialMoves() {
       if(shot || dont_approach) c->stuntime = 1;
       }
 
-    else if(m == moHexer && c->item && (classflag(c->item) & IF_CURSE) && !peace::on) {
+    else if(m == moHexer && c->item && (classflag(c->item) & IF_CURSE) && !peace::on && in_line_of_sight(c)) {
       // bool dont_approach = false;
       // smaller range on the sphere
       int firerange = (sphere || getDistLimit() < 5) ? 2 : 4;

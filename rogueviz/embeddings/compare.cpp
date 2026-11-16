@@ -10,21 +10,24 @@ int count_directed_edges() {
   return M;
   }
 
+evaltype eval;
+
 void full_evaluation() {
 
   println(hlog, "evaluating embedding: " + current->name());
+  eval.current = true;
 
   try {
-    ld maxradius = 0;  
-    for(int i=0; i<isize(rogueviz::vdata); i++) maxradius = max(maxradius, current->zero_distance(i));
-    println(hlog, "maximum radius = ", maxradius);
+    eval.maxradius = 0;
+    for(int i=0; i<get_n(); i++) eval.maxradius = max(eval.maxradius, current->zero_distance(i));
+    println(hlog, "maximum radius = ", eval.maxradius);
     }
   catch(hr_exception&) {}
 
-  bool symmetric = count_directed_edges() == 2 * isize(edgeinfos);
-  if(symmetric) full_routing();
-  continuous_ranks();
-  analyze_mdl_symmetric(symmetric);
+  eval.symmetric = count_directed_edges() == 2 * isize(edgeinfos);
+  if(eval.symmetric) eval.routing = full_routing();
+  eval.rank = continuous_ranks();
+  eval.li = analyze_mdl_symmetric(eval.symmetric);
   }
 
 struct abstract_embedding : embedding {
@@ -58,7 +61,7 @@ struct landscape_embedding : abstract_embedding {
 
 void landscape_build(int dim) {
   rogueviz::embeddings::init_landscape(columns = landscape_dim = dim);
-  int N = isize(rogueviz::vdata);
+  int N = get_n();
   landscape_weights.resize(N);
   if(1) {
     progressbar pb(N, "compute landscape");
@@ -73,7 +76,7 @@ void landscape_build(int dim) {
 
 void landscape_output(string shape, ld target_dist, string fname) {
   ld max_dist = 0;
-  int N = isize(rogueviz::vdata);
+  int N = get_n();
   for(int i=0; i<N; i++) {
     ld tot = 0;
     for(int d=0; d<columns; d++) tot += pow(landscape_weights[i][d], 2);
@@ -121,7 +124,7 @@ struct zdisttable_embedding : disttable_embedding {
 
 void read_disttable(string nodelist_fname, string disttable_fname) {
   auto de = make_shared<disttable_embedding> ();
-  int N = isize(rogueviz::vdata);
+  int N = get_n();
 
   fhstream g(nodelist_fname, "rt");
   vector<int> our_index;
@@ -159,7 +162,7 @@ struct mercator_coord {
   array<ld, 3> h;
   };
 
-struct dmercator_embedding : abstract_embedding {
+struct dmercator_embedding : untiled_embedding {
   vector<mercator_coord> mcs;
   virtual string name() override { return "dmercator"; }
   eGeometryClass get_geometry() override { return gcHyperbolic; }
@@ -193,9 +196,9 @@ struct dmercator_embedding : abstract_embedding {
   };
 
 
-void read_dmercator(string fname, bool only_read = false) {
+void read_dmercator(string fname, bool only_read) {
   auto me = make_shared<dmercator_embedding> ();
-  int N = isize(rogueviz::vdata);
+  int N = get_n();
 
   me->mcs.resize(N);
 
@@ -232,7 +235,7 @@ struct euclid_embedding : zdisttable_embedding {
 
 void read_euclid(string fname, int dim) {
   auto ee = make_shared<euclid_embedding> ();
-  int N = isize(rogueviz::vdata);
+  int N = get_n();
 
   println(hlog, "Open file ", fname);
   fhstream g(fname, "rt");
@@ -274,7 +277,7 @@ struct poincare_embedding : zdisttable_embedding {
 
 void read_poincare(string fname, int dim) {
   auto pe = make_shared<poincare_embedding>();
-  int N = isize(rogueviz::vdata);
+  int N = get_n();
 
   println(hlog, "Open file ", fname);
   fhstream g(fname, "rt");

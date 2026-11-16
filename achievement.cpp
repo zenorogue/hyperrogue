@@ -116,6 +116,8 @@ EX int score_default(int id);
 EX void improveItemScores();
 EX void upload_score(int id, int v);
 
+EX bool is_steamdeck();
+
 EX string achievementMessage[3];
 EX int achievementTimer;
 /** achievements received this game */
@@ -137,6 +139,7 @@ EX bool wrongMode(char flags) {
     }
   if(ineligible_starting_land && !flags) return true;
   if(use_custom_land_list) return true;
+  if(lineofsight != los::none || lineofsightAt >= PURELOS_LEVEL) return true;
 
   if(shmup::on != (flags == rg::shmup || flags == rg::racing)) return true;
   if(racing::on != (flags == rg::racing)) return true;

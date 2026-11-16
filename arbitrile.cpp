@@ -1068,6 +1068,9 @@ EX void load(const string& fname, bool load_as_slided IS(false), bool keep_slide
     else if(ep.eat("star.")) {
       c.is_star = true;
       }
+    else if(ep.eat("legacysign.")) {
+      hprintln("note: legacysign command used");
+      }
     else if(ep.eat("combinatorial.")) {
       c.is_combinatorial = true;
       }
@@ -1396,11 +1399,7 @@ geometryinfo1& arbi_tiling::get_geometry() {
   return ginf[gEuclid].g;
   }
 
-map<heptagon*, vector<pair<heptagon*, transmatrix> > > altmap;
-
-EX map<heptagon*, pair<heptagon*, transmatrix>> arbi_matrix;
-
-EX hrmap *current_altmap;
+EX backed_map bm;
 
 heptagon *build_child(heptspin p, pair<int, int> adj);
 
@@ -1533,36 +1532,20 @@ struct hrmap_arbi : hrmap {
   heptagon *origin;
   heptagon *getOrigin() override { return origin; }
 
+  backed_map* get_backmap() override { return &bm; }
+
   hrmap_arbi() {
     dynamicval<hrmap*> curmap(currentmap, this);
     origin = init_heptagon(current.shapes[0].size());
     origin->s = hsOrigin;
     origin->c7 = newCell(origin->type, origin);
 
-    heptagon *alt = NULL;
-    
-    if(mhyperbolic) {
-      dynamicval<eGeometry> g(geometry, gNormal); 
-      alt = init_heptagon(S7);
-      alt->s = hsOrigin;
-      alt->alt = alt;
-      current_altmap = newAltMap(alt); 
-      }
-    
-    transmatrix T = lxpush(.01241) * spin(1.4117) * lxpush(0.1241) * Id;
-    arbi_matrix[origin] = make_pair(alt, T);
-    altmap[alt].emplace_back(origin, T);
+    bm.initialize(origin);
     }
 
   ~hrmap_arbi() {
     clearfrom(origin);
-    altmap.clear();
-    arbi_matrix.clear();
-    if(current_altmap) {
-      dynamicval<eGeometry> g(geometry, gNormal);       
-      delete current_altmap;
-      current_altmap = NULL;
-      }
+    bm.clear();
     }
   void verify() override { }
 
@@ -1619,28 +1602,16 @@ struct hrmap_arbi : hrmap {
       return h1;
       }
 
-    const auto& p = arbi_matrix[h];
+    const auto& p = bm.where[h];
     
     heptagon *alt = p.first;
     
     transmatrix T = p.second * adj(h, d);
     
-    if(mhyperbolic) {
-      dynamicval<eGeometry> g(geometry, gNormal); 
-      dynamicval<hrmap*> cm(currentmap, current_altmap);
-      // transmatrix U = T;
-      current_altmap->virtualRebase(alt, T);
-      // U = U * inverse(T);
-      }
+    bm.rebase(alt, T);
     fixmatrix(T);
 
-    if(meuclid) {
-      /* hash the rough coordinates as heptagon* alt */
-      size_t s = size_t(T[0][LDIM]+.261) * 124101 + size_t(T[1][LDIM]+.261) * 82143;
-      alt = (heptagon*) s;
-      }
-
-    for(auto& p2: altmap[alt]) if(id_of(p2.first) == co.sid) {
+    for(auto& p2: bm.what_at[alt]) if(id_of(p2.first) == co.sid) {
       connection_t co1 = co;
       if(find_connection(T, p2.second, co1)) {
         if(p2.first->move(co1.eid)) {
@@ -1658,8 +1629,7 @@ struct hrmap_arbi : hrmap {
     h1->emeraldval = h->emeraldval ^ co.mirror;
     h->c.connect(d, h1, co.eid, co.mirror);
     
-    arbi_matrix[h1] = make_pair(alt, T);
-    altmap[alt].emplace_back(h1, T);    
+    bm.assign(h1, alt, T);
     return h1;
     }
   
@@ -1696,6 +1666,7 @@ EX void run_raw(string fname) {
   ginf[gArbitrary].tiling_name = current.name;
   tes = fname;
   convert::base_geometry = gArbitrary;
+  if(!current.have_tree) rulegen::convert_if_appropriate();
   }
 
 EX void launch_connection_debugger(eGeometry g, const arbi_tiling& t, eGeometryClass c, int id) {
@@ -1740,6 +1711,8 @@ EX void run(string fname) {
   catch(connection_debug_request& cr) {
     launch_connection_debugger(g, t, cr.c, cr.id);
     }
+  if(!t.have_tree) rulegen::rules_known_for = "unknown";
+  if(!t.have_tree) rulegen::convert_if_appropriate();
   start_game();
   }
 
@@ -2057,6 +2030,7 @@ EX void convert() {
   auto& ac = arb::current;
   ac.order++; 
   ac.filename = full_geometry_name();
+  ac.name = "CONVERTED: " + full_geometry_name();
   ac.comment = "converted from: " + ac.filename;
   ac.cscale = cgi.scalefactor;
   ac.boundary_ratio = 1;
@@ -2146,6 +2120,14 @@ EX void activate() {
     stop_game();
     geometry = gArbitrary;
     variation = eVariation::pure;
+    }
+  }
+
+EX void deactivate() {
+  if(in()) {
+    println(hlog, "*** DEACTIVATING");
+    geometry = base_geometry;
+    variation = base_variation;
     }
   }
 
@@ -2262,12 +2244,15 @@ EX void swap_vertices() {
   }
 
 #if MAXMDIM >= 4
-auto hooksw = addHook(hooks_swapdim, 100, [] {
-  swap_vertices();
-  for(auto& p: altmap) for(auto& pp: p.second) swapmatrix(pp.second);
-  for(auto& p: arbi_matrix) swapmatrix(p.second.second);
-  });
+auto hooksw = addHook(hooks_swapdim, 100, [] { swap_vertices(); bm.swapdim(); });
 #endif
+
+EX bool support_dice(int x) {
+  for(auto& s: current.shapes) if(gcd(s.size(), x) > 1)
+    for(auto& t: s.connections) if(gcd(current.shapes[t.sid].size(), x) > 1)
+      return true;
+  return false;
+  }
 
 EX }
 }

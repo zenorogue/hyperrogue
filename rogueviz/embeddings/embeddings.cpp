@@ -9,7 +9,20 @@ std::shared_ptr<embedding> current;
 
 vector<vector<int> > directed_edges;
 
+// keep this correct
+// note: isize(vdata) may be not correct because of the extra 'legend' nodes
+int get_n() {
+  return isize(directed_edges);
+  }
+
 rogueviz::edgetype *any;
+
+edgetype *ensure_edge() {
+  if(!any) any = add_edgetype("embedded edge");
+  return any;
+  }
+
+vector<ld> importance;
 
 struct rv_embedding : public tiled_embedding {
   virtual string name() override { return "RogueViz internal representation"; }
@@ -18,6 +31,21 @@ struct rv_embedding : public tiled_embedding {
     }
   };
 
+void symmetrize() {
+  int n = get_n();
+  directed_edges.clear();
+  directed_edges.resize(n);
+  for(auto& e: edgeinfos) {
+    directed_edges[e->i].push_back(e->j);
+    directed_edges[e->j].push_back(e->i);
+    }
+  }
+
+int skiplines = 0;
+
+int nodes_skiplines;
+string nodes_fname;
+
 void read_edgelist(const string& fname) {
 
   rogueviz::init(RV_GRAPH);
@@ -25,19 +53,49 @@ void read_edgelist(const string& fname) {
   rv_hook(hooks_clearmemory, 100, [] {
     directed_edges.clear();
     current = nullptr;
+    any = nullptr;
     });
 
-  any = rogueviz::add_edgetype("embedded edges");
+  ensure_edge();
   indenter_finish ind(true, "Reading edgelist...");
+
+  if(nodes_fname != "") {
+    indenter_finish ind(true, "Reading preinit nodes...");
+    fhstream f(nodes_fname, "rt");
+    if(!f.f) return file_error(fname);
+
+    char buf[1000];
+    for(int i=0; i<nodes_skiplines; i++) hr::ignore(fgets(buf, 1000, f.f));
+
+    while(true) {
+      int i = rogueviz::readLabel(f);
+      if(i == -1) break;
+      }
+
+    println(hlog, "found nodes = ", isize(rogueviz::vdata));
+    }
 
   fhstream f(fname, "rt");
   if(!f.f) return file_error(fname);
 
   set<pair<int, int>> edgesets;
 
+  char buf[1000];
+  for(int i=0; i<skiplines; i++) hr::ignore(fgets(buf, 1000, f.f));
+
+  shstream s1;
   while(true) {
-    int i = rogueviz::readLabel(f), j = rogueviz::readLabel(f);
-    if(i == -1 || j == -1) break;
+    if(feof(f.f)) break;
+    string str = scanline_noblank(f);
+    if(str[0] == '#') continue;
+    if(str == "") continue;
+    if(str.size() >= 9000) throw hr_exception("too long lines not supported");
+
+    char buf1[10000], buf2[10000];
+    sscanf(str.c_str(), "%s%s", buf1, buf2);
+    int i = rogueviz::getid(buf1), j = rogueviz::getid(buf2);
+    if(i == -1 && j == -1) continue;
+    if(i == -1 || j == -1) throw hr_exception("weird line");
 
     sizeto(directed_edges, i);
     sizeto(directed_edges, j);
@@ -74,18 +132,46 @@ void write_edgelist(const string &fname) {
   }
 
 void force_rvgraph() {
-  for(auto& v: vdata) {
+  for(auto& v: vdata) if(v.id < get_n()) {
     auto p = current->as_location(v.id);
-    v.be(p.first, rgpushxto0(p.second));
+    if(get_node_rendered(v.id))
+      v.be(p.first, rgpushxto0(p.second));
+    else
+      v.be_nowhere();
+    }
+  }
+
+vector<ld> node_importance;
+vector<bool> node_rendered;
+ld render_radius;
+
+void recompute_rendered() {
+  if(render_radius > 0) {
+    int N = get_n();
+    vector<int> order;
+    for(int i=0; i<N; i++) order.push_back(i);
+    sort(order.begin(), order.end(), [] (int i, int j) { return pair(get_node_importance(i), i) < pair(get_node_importance(j), j); });
+    vector<hyperpoint> sofar;
+    node_rendered.resize(N);
+    for(auto i: order) {
+      bool ok = true;
+      auto h1 = current->as_hyperpoint(i);
+      for(auto h0: sofar) if(hdist(h0, h1) < render_radius) { ok = false; break; }
+      node_rendered[i] = ok;
+      if(ok) sofar.push_back(h1);
+      }
     }
   }
 
 void reenable_embedding() {
+  eval.current = false;
+  recompute_rendered();
   if(rogueviz::rv_quality >= 1 && among(current->get_dimension(), 2, 3) && current->get_dimension() <= WDIM) force_rvgraph();
   }
 
 void enable_embedding(std::shared_ptr<embedding> pe) {
   current = std::move(pe);
+  eval.current = false;
   reenable_embedding();
   }
 
@@ -117,10 +203,52 @@ int a = arg::add3("-edgelist", [] { arg::shift(); read_edgelist(arg::args()); })
   + arg::add3("-esaveas", [] { arg::shift(); esave(arg::args()); })
   + arg::add3("-missing-edges", [] { arg::shift(); set_missing_edges(arg::argf()); })
   + arg::add3("-missing-edges-env", [] { auto env = std::getenv("MISSING_EDGES"); if(env) set_missing_edges(atof(env)); })
-  + arg::add3("-el-rv", [] { if(rogueviz::rv_quality == 0) force_rvgraph(); current = std::make_shared<rv_embedding> (); });
+  + arg::add3("-el-rv", [] { if(rogueviz::rv_quality == 0) force_rvgraph(); current = std::make_shared<rv_embedding> (); })
+  + arg::add3("-render-radius", [] { arg::shift_arg_formula(render_radius); })
+  + arg::add3("-el-skiplines", [] { arg::shift(); skiplines = arg::argi(); })
+  + arg::add3("-el-nodelist", [] { arg::shift(); nodes_skiplines = arg::argi(); arg::shift(); nodes_fname = arg::args(); })
+  + arg::add3("-el-symmetrize", [] { symmetrize(); })
+  + arg::add3("-edge-arrow", [] {
+    arg::shift(); any->arrow_scale = arg::argf();
+    });
+
+bool use_cells_to_draw;
+std::unordered_set<cell*> cells_to_draw;
+
+void rv_enable_cells_to_draw() {
+  cells_to_draw.clear();
+  rv_hook(hooks_do_draw, 100, [] (cell *c, const shiftmatrix& V) { if(!use_cells_to_draw) return 0; if(c == centerover) return 1; return cells_to_draw.count(c) ? 1 : -1; });
+  rv_hook(hooks_o_key, 80, [] (o_funcs& v) { v.push_back(named_functionality("switch use_cells_to_draw", [] { use_cells_to_draw = !use_cells_to_draw; })); });
+  }
+
+void add_to_cells_to_draw(cell *c) {
+  if(cells_to_draw.count(c)) return;
+  cells_to_draw.insert(c);
+  forCellEx(c1, c) if(celldist(c1) < celldist(c) && celldist(c1) >= 0) add_to_cells_to_draw(c1);
+  }
+
+void rv_draw_embedding_cells() {
+  for(auto& vd: vdata) add_to_cells_to_draw(vd.m->base);
+  }
+
+void set_auto_scale(ld bonus, ld base, ld minmul, ld bonus_clip) {
+  ld maxsize = 0;
+  vector<hyperpoint> ts;
+  for(int i=0; i<8; i++) ts.push_back(xspinpush0(i*45._deg, bonus));
+  if(GDIM == 3) ts.push_back(zpush0(bonus)), ts.push_back(zpush0(-bonus));
+
+  for(auto v: vdata) for(auto& t: ts) {
+    hyperpoint ret;
+    applymodel(ggmatrix(v.m->base)*v.m->at*t, ret);
+    ld size = hypot(hypot(ret[0], ret[1]), ret[2]);
+    if(size > maxsize) maxsize = size;
+    }
+  pconf.scale = base / maxsize;
+  pconf.clip_min = -maxsize * minmul - bonus_clip;
+  pconf.clip_max = maxsize + bonus_clip;
+  }
 
 }
-
 }
 
 #include "polar.cpp"
@@ -131,3 +259,4 @@ int a = arg::add3("-edgelist", [] { arg::shift(); read_edgelist(arg::args()); })
 #include "maprank.cpp"
 #include "mdl.cpp"
 #include "compare.cpp"
+#include "visualize.cpp"

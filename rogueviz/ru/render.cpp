@@ -131,6 +131,8 @@ void compute_scrm() {
   scrm.T[2][2] = 1;
   }
 
+bool final_view = false;
+
 void render_room_walls(room *r) {
   initquickqueue();
   bool af = should_apply_fov();
@@ -142,21 +144,45 @@ void render_room_walls(room *r) {
     if(af && !r->fov[y][x]) continue;
     int c = r->block_at[y][x];
 
+    if(!af && final_view) {
+      int x1 = x-1, y1 = y-1, x2 = x+2, y2 = y+2;
+      if(c&4) x2++, y2++;
+      if(c&1) x1--, x2--;
+      if(c&2) y1--, y2--;
+      if(x1<0) x1=0; if(y1<0) y1=0; if(x2>room_x) x2=room_x; if(y2>room_y) y2=room_y;
+      for(int ax=x1; ax<x2; ax++) for(int ay=y1; ay<y2; ay++) if(walls[r->at(ax, ay)].flags & W_TRANS) goto ok;
+      continue;
+      }
+    ok:
+
     // ld sx = 1.5;
     // ld sy = 1.3;
 
     int cc = c >> 3;
 
-    if(r == current_room && cc == wSecretPassage && r->at(x, y-1) == wWall) {
-      r->replace_block(x, y, wAir);
-      r->replace_block(x, y-1, wSecretPassage);
+    if(!af) for(auto [hid, unh]: hidden_unhidden) if(cc == int(hid)) cc = int(unh);
+
+    if(r == current_room && cc == wSecretPassageVHidden && r->fov[y+1][x] && r->fov[y-1][x]) {
+      r->replace_block(x, y, wSecretPassageV);
       }
 
+    if(r == current_room && cc == wSecretPassageUHidden && r->fov[y+1][x]) {
+      r->replace_block(x, y, wSecretPassageU);
+      }
+
+    if(r == current_room && cc == wSecretPassageHHidden && r->fov[y][x-1] && r->fov[y][x+1]) {
+      r->replace_block(x, y, wSecretPassageH);
+      }
+
+    string* glyph = &walls[cc].glyph;
+    static string dot = ".";
+    if(eWall(cc) == wWater && r->water_pressure[y][x] < 0.1) glyph = &dot;
+
     if((c & 7) == 0)
-      asciiletter(x*block_x, y*block_y, (x+1)*block_x, (y+1)*block_y, walls[cc].glyph, walls[cc].color);
+      asciiletter(x*block_x, y*block_y, (x+1)*block_x, (y+1)*block_y, *glyph, walls[cc].color);
 
     if((c & 7) == 4)
-      asciiletter(x*block_x, y*block_y, (x+2)*block_x, (y+2)*block_y, walls[cc].glyph, walls[cc].color);
+      asciiletter(x*block_x, y*block_y, (x+2)*block_x, (y+2)*block_y, *glyph, walls[cc].color);
 
     if(gravision) {
       int minx = x*block_x, maxx = (x+1)*block_x;
@@ -250,16 +276,16 @@ void man::draw() {
   auto efs = effects.begin();
 
   for(auto& e: effects) {
-    ld t = gframeid - e.attack_when;
-    if(t < 50) {
+    ld t = gframeid - e.when;
+    if(t < e.length) {
       auto col = e.p->get_color();
-      auto& alpha = part(col, 0);
-      alpha = max<int> (0, alpha - 5 * t);
+      e.cf(col, t);
       auto box = e.f(t);
       asciiletter(
         box.minx, box.miny, // where.x + af * ds.x - ds.x/2, where.y - ds.y/2,
         box.maxx, box.maxy, // where.x + af * ds.x + ds.x/2, where.y + ds.y/2,
-        e.attack_facing == -1 ? "(" : ")", col
+        (e.p->flags & ARMOR) ? ( e.facing == -1 ? "[" : "]" ) :
+        e.facing == -1 ? "(" : ")", col
         );
       *(efs++) = e;
       }
@@ -342,6 +368,7 @@ void man::draw() {
 void render_room_objects(room *r) {
   initquickqueue();
   if(r == current_room && m.visible_inv() && m.existing) m.draw();
+  for(auto& e: r->room_mods) e->draw();
   for(auto& e: r->entities)
     if(e->existing && (cmode == mode::editmap || (e->visible(r) && e->visible_inv()))) {
       if(e->hidden() && !m.can_see(*e)) continue;

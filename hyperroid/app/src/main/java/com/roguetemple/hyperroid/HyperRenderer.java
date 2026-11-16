@@ -108,7 +108,7 @@ public class HyperRenderer implements GLSurfaceView.Renderer {
   
 		
                glText = new GLText( new Shader() );
-               glText.load(Typeface.DEFAULT_BOLD, 48, 2, 2 );  // Create Font (Height: 48 Pixels / X+Y Padding 2 Pixels)
+               glText.load(Typeface.DEFAULT, 48, 2, 2 );  // Create Font (Height: 48 Pixels / X+Y Padding 2 Pixels)
                initialized = false;
 	}
 	

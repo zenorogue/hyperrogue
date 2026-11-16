@@ -87,10 +87,53 @@ std::vector<int> path(int src);
 int get_actual(int src);
 void prepare_goal(int goal);
 
+int get_n();
 int count_directed_edges();
 
 void read_edgelist(const string& fn);
 void read_polar(const string& fn);
+
+enum class fmt { hyperb, poincare, bhyper, bhyper_reduced };
+extern fmt coord_format;
+void read_coord(const string& fn);
+void read_dmercator(string fname, bool only_read = false);
+void read_poincare(string fname, int dim);
+
+struct rankinfo {
+  ld ranks = 0, rby = 0, map = 0, n = 0;
+  };
+
+struct loglik_info {
+  ld loglik, control;
+  long long N, N1, M;
+  bool symmetric;
+  };
+
+extern struct evaltype {
+  bool current;
+  ld maxradius;
+  iddata routing;
+  rankinfo rank;
+  loglik_info li;
+  bool symmetric;
+  } eval;
+
+extern vector<ld> node_importance;
+extern vector<bool> node_rendered;
+extern ld render_radius;
+
+inline ld get_node_importance(int i) { if(node_importance.empty()) return 0; else return node_importance[i]; }
+inline ld get_node_rendered(int i) { if(node_rendered.empty()) return true; else return node_rendered[i]; }
+
+void symmetrize();
+
+extern bool use_cells_to_draw;
+extern std::unordered_set<cell*> cells_to_draw;
+void rv_enable_cells_to_draw();
+void rv_draw_embedding_cells();
+void set_auto_scale(ld bonus = 0.5, ld base = 0.95, ld minmul = 3, ld bonus_clip = 0.1);
+
+extern edgetype *any;
 }
 }
 

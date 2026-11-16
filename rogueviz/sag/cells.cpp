@@ -117,7 +117,7 @@ struct sagdist_t {
     size_t offset = 0;
     while(offset < fsize) {
       ssize_t block = read(fd, ((char*)tab)+offset, fsize-offset);
-      #ifdef LINUX
+      #if ISLINUX || ISWEB
       println(hlog, "read ", hr::format("%zd/%zd", block, fsize-offset), "B");
       #else
       println(hlog, "read ", hr::format("%lld/%lld", block, fsize-offset), "B");
@@ -392,7 +392,14 @@ void compute_creq_neighbors() {
 
 vector<vector<pair<ld, subcell>>> dijkstra_edges;
 
+color_t sag_cellcolor = 0x101010;
+
+void activate_cellcolor() {
+  for(cell *c: all_disk_cells_sorted) c->mpdist = 0, c->land = laCanvas, c->landparam = sag_cellcolor, c->wall = waNone;
+  }
+
 void find_cells() {
+  if(!game_active) start_game();
   DEBBI(debug_init_sag, ("find_cells with ", cellcount, " cells"));
   ensure_subcell_points();
   struct qitem {
@@ -476,7 +483,7 @@ void find_cells() {
 
   all_disk_cells_sorted = {};
   for(auto p: ids) if(all_disk_cells_sorted.empty() || p.first.first != all_disk_cells_sorted.back()) all_disk_cells_sorted.push_back(p.first.first);
-  for(cell *c: all_disk_cells_sorted) c->mpdist = 0, c->land = laCanvas, c->landparam = 0x101010, c->wall = waNone;
+  activate_cellcolor();
   }
 
 void init_cell_request() {
@@ -694,9 +701,12 @@ int cell_read_args() {
   else if(argis("-subcellpoints-off")) {
     subcell_points.clear();
     }
+  else if(argis("-sag-cellcolor")) {
+    shift(); sag_cellcolor = argcolor(24);
+    }
   /* to viz only subcellpoints */
   else if(argis("-sag-clear")) {
-    shmup::monstersAt.clear();
+    for(auto& vd: vdata) vd.be_nowhere();
     }
   else return 1;  
 #endif

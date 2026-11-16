@@ -43,7 +43,15 @@ void straight_line_viz_rocks(presmode mode) {
     items[itOrbLife] = 3; if(shmup::pc[0]) shmup::pc[0]->dead = false;
     }
   if(mode == pmKey) {
-    for(auto [c, mo]: shmup::monstersAt) if(mo->type == moAsteroid) mo->dead = true;
+    for(auto c: dcal) {
+      auto p = &c->contents;
+      while(*p) {
+        if(shmup::monster *m = (*p)->as_monster()) {
+          if(m->type == moAsteroid) m->dead = true;
+          }
+        p = &((*p)->next);
+        }
+      }
     auto pc = shmup::pc[0];
     for(int r: {1, 2, 3})
     for(int i=0; i<36*r; i++) {

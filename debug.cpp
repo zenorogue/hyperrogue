@@ -189,7 +189,7 @@ vector<cheatkey> cheats = {
   cheatkey{'R'-64, "advance the rose wave", buildRosemap},
   #if CAP_EDIT
   cheatkey{'A', "start the Map Editor", [] {
-    lastexplore = shmup::on ? shmup::curtime : turncount;
+    update_lastexplore();
     pushScreen(mapeditor::showMapEditor);
     }},
   cheatkey{'A'-64, "start the Vector Graphics Editor", [] {
@@ -702,7 +702,9 @@ int read_cheat_args() {
     shift(); vid.stereo_mode = eStereo(argi());
     }
   else if(argis("-save-cheats")) {
+    #if CAP_SAVE
     save_cheats = true;
+    #endif
     }
   else if(argis("-cmove")) {
     PHASE(3); shift();

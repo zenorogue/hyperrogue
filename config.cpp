@@ -35,6 +35,12 @@ EX void adjust_linked() {
   indenter ind(2);
   geom3::invalid = "";
   dynamicval<bool> d(linked_consequence, true);
+
+  if(!find_edit(&pconf.alpha) || !find_edit(&vid.depth) || !find_edit(&vid.camera)) {
+    printf("error: cannot adjust_linked as edits are missing\n");
+    return;
+    }
+
   if(vid.tc_alpha < vid.tc_depth && vid.tc_alpha < vid.tc_camera) {
     find_edit(&pconf.alpha)->set_cld(tan_auto(vid.depth) / tan_auto(vid.camera));
     }
@@ -618,6 +624,7 @@ void color_parameter::show_edit_option(key_type key) {
     dialog::openColorDialog(*value);
     dialog::colorAlpha = has_alpha;
     dialog::get_di().dialogflags |= sm::SIDE;
+    if(sets) sets();
     });
   }
 
@@ -682,7 +689,7 @@ void parameter::setup(const parameter_names& n) {
   }
 
 EX shared_ptr<float_parameter> param_f(ld& val, const parameter_names& n, ld dft) {
-  shared_ptr<float_parameter> u ( new float_parameter );
+  shared_ptr<float_parameter> u = std::make_shared<float_parameter> ();
   u->setup(n);
   u->value = &val;
   u->last_value = dft;
@@ -701,7 +708,7 @@ EX shared_ptr<float_parameter> param_f(ld& val, const parameter_names& n, ld dft
   }
 
 EX shared_ptr<float_parameter_dft> param_fd(ld& val, const parameter_names& n, ld dft IS(use_the_default_value) ) {
-  shared_ptr<float_parameter_dft> u ( new float_parameter_dft );
+  shared_ptr<float_parameter_dft> u = std::make_shared<float_parameter_dft> ();
   u->setup(n);
   u->value = &val;
   u->last_value = dft;
@@ -724,7 +731,7 @@ EX string param_esc(string s) {
   }
 
 EX shared_ptr<int_parameter> param_i(int& val, const parameter_names& n, int dft) {
-  shared_ptr<int_parameter> u ( new int_parameter );
+  shared_ptr<int_parameter> u = std::make_shared<int_parameter> ();
   u->setup(n);
   u->value = &val;
   u->last_value = dft;
@@ -744,7 +751,7 @@ EX shared_ptr<int_parameter> param_i(int& val, const parameter_names& n, int dft
 EX shared_ptr<int_parameter> param_i(int& val, const parameter_names& n) { return param_i(val, n, val); }
 
 EX shared_ptr<bool_parameter> param_b(bool& val, const parameter_names& n, bool dft) {
-  shared_ptr<bool_parameter> u ( new bool_parameter );
+  shared_ptr<bool_parameter> u = std::make_shared<bool_parameter> ();
   u->setup(n);
   u->value = &val;
   u->last_value = dft;
@@ -755,7 +762,7 @@ EX shared_ptr<bool_parameter> param_b(bool& val, const parameter_names& n, bool 
   }
 
 EX shared_ptr<color_parameter> param_color(color_t& val, const parameter_names& n, bool has_alpha, color_t dft) {
-  shared_ptr<color_parameter> u ( new color_parameter );
+  shared_ptr<color_parameter> u = std::make_shared<color_parameter> ();
   u->setup(n);
   u->value = &val;
   u->last_value = dft;
@@ -767,7 +774,7 @@ EX shared_ptr<color_parameter> param_color(color_t& val, const parameter_names& 
 
 EX shared_ptr<matrix_parameter> param_matrix(transmatrix& val0, const parameter_names& n, int dim) {
   matrix_eq& val = (matrix_eq&) val0;
-  shared_ptr<matrix_parameter> u ( new matrix_parameter );
+  shared_ptr<matrix_parameter> u = std::make_shared<matrix_parameter> ();
   u->setup(n);
   u->value = &val;
   u->last_value = val;
@@ -777,7 +784,7 @@ EX shared_ptr<matrix_parameter> param_matrix(transmatrix& val0, const parameter_
   }
 
 EX shared_ptr<char_parameter> param_char(char& val, const parameter_names& n, char dft) {
-  shared_ptr<char_parameter> u ( new char_parameter );
+  shared_ptr<char_parameter> u = std::make_shared<char_parameter> ();
   u->setup(n);
   u->value = &val;
   u->last_value = dft;
@@ -787,7 +794,7 @@ EX shared_ptr<char_parameter> param_char(char& val, const parameter_names& n, ch
   }
 
 EX shared_ptr<string_parameter> param_str(string& val, const parameter_names& n, const string dft) {
-  shared_ptr<string_parameter> u ( new string_parameter );
+  shared_ptr<string_parameter> u = std::make_shared<string_parameter> ();
   u->setup(n);
   u->value = &val;
   u->last_value = val;
@@ -804,7 +811,7 @@ EX shared_ptr<bool_parameter> param_b(bool& val, const parameter_names& n) { ret
 
 #if HDR
 template<class T> shared_ptr<enum_parameter<T>> param_enum(T& val, const parameter_names& n, T dft) {
-  shared_ptr<enum_parameter<T>> u ( new enum_parameter<T> );
+  shared_ptr<enum_parameter<T>> u = std::make_shared<enum_parameter<T>> ();
   u->setup(n);
   u->value = &val;
   u->dft = dft;
@@ -851,7 +858,7 @@ shared_ptr<parameter> float_parameter::clone(struct local_parameter_set& lps, vo
 #if HDR
 template<class T>
 shared_ptr<custom_parameter> param_custom_int(T& val, const parameter_names& n, function<void(key_type)> menuitem, key_type key) {
-  shared_ptr<custom_parameter> u ( new custom_parameter );
+  shared_ptr<custom_parameter> u = std::make_shared<custom_parameter>();
   u->setup(n);
   int dft = (int) val;
   u->last_value = dft;
@@ -861,7 +868,7 @@ shared_ptr<custom_parameter> param_custom_int(T& val, const parameter_names& n, 
   u->custom_load = [&val] (const string& s) { val = (T) parseint(s); };
   u->custom_save = [&val] { return its(int(val)); };
   u->custom_do_save = [dft, &val] { return int(val) != dft; };
-  u->custom_clone = [u] (struct local_parameter_set& lps, void *value) { auto val = (int*) value; return param_i(*val, lps.mod(&*u), *val); };
+  u->custom_clone = [&u] (struct local_parameter_set& lps, void *value) { auto val = (int*) value; return param_i(*val, lps.mod(&*u), *val); };
   u->custom_reset = [dft, &val] { val = (T) dft; };
   u->default_key = key;
   u->is_editable = true;
@@ -870,7 +877,7 @@ shared_ptr<custom_parameter> param_custom_int(T& val, const parameter_names& n, 
 #endif
 
 EX shared_ptr<custom_parameter> param_custom_ld(ld& val, const parameter_names& n, function<void(key_type)> menuitem, key_type key) {
-  shared_ptr<custom_parameter> u ( new custom_parameter );
+  shared_ptr<custom_parameter> u = std::make_shared<custom_parameter>();
   u->setup(n);
   ld dft = val;
   u->last_value = dft;
@@ -881,7 +888,7 @@ EX shared_ptr<custom_parameter> param_custom_ld(ld& val, const parameter_names& 
   u->custom_load = [&val] (const string& s) { val = parseld(s); };
   u->custom_save = [&val] { return fts(val, 10); };
   u->custom_do_save = [dft, &val] { return val != dft; };
-  u->custom_clone = [u] (struct local_parameter_set& lps, void *value) { auto val = (ld*) value; return param_f(*val, lps.mod(&*u), *val); };
+  u->custom_clone = [&u] (struct local_parameter_set& lps, void *value) { auto val = (ld*) value; return param_f(*val, lps.mod(&*u), *val); };
   u->custom_reset = [dft, &val] { val = dft; };
 
   u->default_key = key;
@@ -890,7 +897,7 @@ EX shared_ptr<custom_parameter> param_custom_ld(ld& val, const parameter_names& 
   }
 
 EX shared_ptr<custom_parameter> param_colortable(colortable& val, const parameter_names& n) {
-  shared_ptr<custom_parameter> u ( new custom_parameter );
+  shared_ptr<custom_parameter> u = std::make_shared<custom_parameter>();
   u->setup(n);
   colortable dft = val;
   u->last_value = -1;
@@ -907,7 +914,7 @@ EX shared_ptr<custom_parameter> param_colortable(colortable& val, const paramete
     return str;
     };
   u->custom_do_save = [dft, &val] { return val != dft; };
-  u->custom_clone = [u] (struct local_parameter_set& lps, void *value) { auto val = (colortable*) value; return param_colortable(*val, lps.mod(&*u)); };
+  u->custom_clone = [&u] (struct local_parameter_set& lps, void *value) { auto val = (colortable*) value; return param_colortable(*val, lps.mod(&*u)); };
   u->custom_reset = [dft, &val] { val = dft; };
 
   u->default_key = 0;
@@ -918,7 +925,7 @@ EX shared_ptr<custom_parameter> param_colortable(colortable& val, const paramete
 EX ld bounded_mine_percentage = 0.1;
 EX int bounded_mine_quantity, bounded_mine_max;
 
-EX const char *conffile = "hyperrogue.ini";
+EX string conffile = "hyperrogue.ini";
 
 /* extra space if more geometries are added */
 EX array<ld, gGUARD+64> sightranges;
@@ -1070,6 +1077,7 @@ EX purehookset hooks_configfile;
 
 EX ld mapfontscale = 100;
 
+#if CAP_SDL
 EX vector<int> get_display_modes(char which) {
   set<int> seen;
 
@@ -1094,7 +1102,7 @@ EX vector<int> get_display_modes(char which) {
     }
 
   #else
-  SDL_Rect **modes = SDL_ListModes(nullptr, 0);
+  SDL_Rect **modes = SDL_ListModes(nullptr, SDL_FULLSCREEN);
   if(!modes)
     println(hlog, "SDL_ListModes: No modes available!");
   else if(modes == (SDL_Rect**)-1)
@@ -1112,6 +1120,7 @@ EX vector<int> get_display_modes(char which) {
   for(auto s: seen) v.push_back(s);
   return v;
   }
+#endif
 
 #if CAP_SDLTTF
 EX void font_reaction() {
@@ -1125,34 +1134,55 @@ EX void font_reaction() {
   }
 #endif
 
+EX bool running_on_deck = false;
+EX bool detect_deck = true;
+
+EX bool mode_demands_consistency() {
+  return tactic::on || yendor::on || princess::challenge;
+  }
+
 EX void initConfig() {
   
   DEBBI(debug_init_config, ("initconfig"));
 
   bool qm = !ISPANDORA;
-  bool deck = false;
 
   #if ISLINUX
-  if(1) {
-    fhstream f("/sys/devices/virtual/dmi/id/board_name", "rt");
-    if(f.f) {
-      string s = scanline_noblank(f);
-      deck = s.find("Jupiter") != string::npos;
-      if(deck) {
-        centered_menus = true;
-        lands_per_page = 18;
-        dialog::onscreen_keyboard = true;
-        dialog::dialog_font_scale = 3;
-        dialog::display_keys = 3;
-        qm = false;
-        separate_status = true;
-        multi::multi_autojoy = false;
-        touch_interface = true;
-        scores::scale = 1;
-        }
+  if(detect_deck) {
+    string name = "", vendor = "";
+    if(1) {
+      fhstream f("/sys/devices/virtual/dmi/id/board_name", "rt");
+      if(f.f) name = scanline_noblank(f);
       }
+    if(1) {
+      fhstream f("/sys/devices/virtual/dmi/id/board_vendor", "rt");
+      if(f.f) vendor = scanline_noblank(f);
+      }
+    if(vendor.find("Valve") != string::npos && (name.find("Jupiter") != string::npos || name.find("Galileo") != string::npos))
+      running_on_deck = true;
     }
   #endif
+
+  #if ISSTEAM
+  if(detect_deck && is_steamdeck()) running_on_deck = true;
+  #endif
+
+  detect_deck = false;
+
+  if(running_on_deck) {
+    centered_menus = true;
+    lands_per_page = 18;
+    dialog::onscreen_keyboard = true;
+    dialog::dialog_font_scale = 3;
+    dialog::display_keys = 3;
+    qm = false;
+    separate_status = true;
+    multi::multi_autojoy = false;
+    touch_interface = true;
+    #if CAP_SAVE
+    scores::scale = 1;
+    #endif
+    }
 
   // basic config
   param_i(vid.flashtime, "flashtime", 8);
@@ -1197,6 +1227,7 @@ EX void initConfig() {
   -> editable("display grid", 'g');
   param_b(models::desitter_projections, "desitter_projections", false);
   param_b(nonisotropic_weird_transforms, "nonisotropic_weird_transforms", false);
+  param_i(grid_layers, "grid_layers");
 
   param_b(arb::apeirogon_consistent_coloring, "apeirogon_consistent_coloring", true)
   -> editable("apeirogon: consistent coloring", 'c')
@@ -1380,7 +1411,9 @@ EX void initConfig() {
     "lands per page shown in the World Overview",
     'L');
 
+  #if CAP_SAVE
   param_i(scores::scale, "scores_scale")->editable(1, 2, 1, "scores scale", "", 'S');
+  #endif
 
   param_b(startanims::enabled, "startanim", true)
   -> editable("start animations", 's');
@@ -1437,9 +1470,9 @@ EX void initConfig() {
   ->editable("vsync", 'v');
   #endif
   
-  param_b(vid.want_fullscreen, "fullscreen", deck ? true : false)
+  param_b(vid.want_fullscreen, "fullscreen", running_on_deck ? true : false)
   ->editable("fullscreen mode", 'f');
-  param_b(vid.change_fullscr, "fullscreen_change", deck ? true : false)
+  param_b(vid.change_fullscr, "fullscreen_change", running_on_deck ? true : false)
   ->editable("use specific fullscreen resolution", 'g');
   param_b(vid.relative_window_size, "window_relative", true)
   ->editable("specify relative window size", 'g');
@@ -1450,14 +1483,18 @@ EX void initConfig() {
   param_i(vid.fullscreen_x, "fullscreen_x", 1280)
   -> editable(640, 3840, 1, "fullscreen resolution to use (X)", "", 'x')
   -> set_sets([] {
+    #if CAP_SDL
     dialog::scale_given(get_display_modes('x'));
+    #endif
     dialog::bound_low(dialog::get_ne().vmin);
     dialog::get_di().reaction_final = do_request_resolution_change; });
   
-  param_i(vid.fullscreen_y, "fullscreen_y", deck ? 800 : 1024)
+  param_i(vid.fullscreen_y, "fullscreen_y", running_on_deck ? 800 : 1024)
   -> editable(480, 2160, 1, "fullscreen resolution to use (Y)", "", 'x')
   -> set_sets([] {
+    #if CAP_SDL
     dialog::scale_given(get_display_modes('y'));
+    #endif
     dialog::bound_low(dialog::get_ne().vmin);
     dialog::get_di().reaction_final = do_request_resolution_change; });
 
@@ -1465,15 +1502,15 @@ EX void initConfig() {
   -> editable(160, 3840, 40, "window resolution to use (X)", "", 'x')
   -> set_sets([] { dialog::bound_low(160); dialog::get_di().reaction_final = do_request_resolution_change; });
 
-  param_i(vid.window_y, "window_y", deck ? 800 : 1024)
+  param_i(vid.window_y, "window_y", running_on_deck ? 800 : 1024)
   -> editable(120, 2160, 40, "window resolution to use (Y)", "", 'x')
   -> set_sets([] { dialog::bound_low(120); dialog::get_di().reaction_final = do_request_resolution_change; });
 
-  param_f(vid.window_rel_x, "window_rel_x", deck ? 1 : .9)
+  param_f(vid.window_rel_x, "window_rel_x", running_on_deck ? 1 : .9)
   -> editable(.1, 1, .1, "screen size percentage to use (X)", "", 'x')
   -> set_sets([] { dialog::bound_low(.1); dialog::get_di().reaction_final = do_request_resolution_change; });
 
-  param_f(vid.window_rel_y, "window_rel_y", deck ? 1 : .9)
+  param_f(vid.window_rel_y, "window_rel_y", running_on_deck ? 1 : .9)
   -> editable(.1, 1, .1, "screen size percentage to use (Y)", "", 'x')
   -> set_sets([] { dialog::bound_low(.1); dialog::get_di().reaction_final = do_request_resolution_change; });
 
@@ -1485,6 +1522,16 @@ EX void initConfig() {
     param_color(lp->color, "lpcolor-" + lp->lpname, true, lp->color);
     param_f(lp->multiplier, "lpwidth-" + lp->lpname);
     }
+
+  auto display_the_ruler = [] { rulers::active = true; dialog::get_di().dialogflags |= sm::DRAW; };
+
+  // ruler settings
+  param_color(rulers::ruler_color, "ruler_color", true)->editable("ruler color", "", 'C')
+  -> set_sets(display_the_ruler);
+  param_f(rulers::ruler_width, "ruler_width")->editable(0, 10, 0.1, "ruler width", "", 'W')
+  -> set_sets(display_the_ruler);
+  param_f(rulers::measuring_unit, "ruler_measure")->editable(0, 5, 0.1, "measuring unit", "A mark is displayed on the ruler, on every multiple of this distance, and a bigger one every 10 multiples. Set to 0 to disable.", 'M')
+  -> set_sets(display_the_ruler);
   
   // special graphics
 
@@ -1549,7 +1596,7 @@ EX void initConfig() {
   -> help("Background particle effects, e.g., in the Blizzard.");
   // control
   
-  #if CAP_SDL
+  #if CAP_SDLJOY
   param_enum(joy_init, "joyinit", jiFast)
     ->editable({{"off", "do not use joysticks"}, {"fast", "do not wait until the joysticks are initialized"}, {"wait", "wait until the joysticks are initialized"}}, "joystick initialization", 'j');
   param_i(vid.joyvalue, "vid.joyvalue", 4800);
@@ -1567,6 +1614,8 @@ EX void initConfig() {
   vid.killreduction = 0;
   
   param_b(vid.skipstart, "skip the start menu", false);
+  param_f(drag_sensitivity, "drag_sensitivity", 0)
+  ->editable(0, 100, 1, "drag threshold", "Drag automatically on touch movement. Only if quick mouse is off. Set to 0 to disable, large numbers are more sensitive.", 'T');
   param_b(vid.quickmouse, "quick mouse", qm)
   -> help("Buttons activate when they are pressed (by clicking), not when they are released.");
   
@@ -1584,6 +1633,8 @@ EX void initConfig() {
   param_color(bordcolor, "color:borders", false);
   param_color(ringcolor, "color:ring", true);
   param_f(vid.multiplier_ring, parameter_names("mring", "mult:ring"), 1);
+  param_f(fixed_circle_radius, "fixed_circle_radius", 0);
+  param_b(fixed_circle_center, "fixed_circle_center", false);
   param_color(modelcolor, "color:model", true);
   param_color(periodcolor, "color:period", true);
   param_color(stdgridcolor, "color:stdgrid", true);
@@ -1617,7 +1668,9 @@ EX void initConfig() {
   // modes
     
   param_b(shmup::on, "mode-shmup", false)->be_non_editable();
-  param_b(hardcore, "mode-hardcore", false)->set_reaction([] { hardcore = !hardcore; switchHardcore_quiet(); });
+  param_b(hardcore, "mode-hardcore", false)
+  ->set_pre_reaction([] { if(mode_demands_consistency()) stop_game(); })
+  ->set_reaction([] {hardcore = !hardcore; switchHardcore_quiet(); if(!delayed_start) start_game(); });
   param_enum(land_structure, "mode-chaos", lsNiceWalls)->be_non_editable();
   #if CAP_INV
   param_b(inv::on, "mode-Orb Strategy")->be_non_editable();
@@ -1648,11 +1701,31 @@ EX void initConfig() {
     }, "stereo/high-FOV mode", 'm')
   ->set_reaction(reset_all_shaders);
 
+  param_enum(lineofsight, "mode-lineofsight", los::none)
+   ->editable({
+     {"OFF", "You see everything in range, but also everything in range sees you!"},
+     {"geodesic", "Graph geodesic: any sequence of tiles is OK for line-of-sight as long as there are no shortcuts"},
+     {"geometric", "Approximations of geometric straight lines."}},
+     "line-of-sight mode", 'v')
+   ->add_extra([] { add_edit(neon_magic_vision); })
+   ->set_pre_reaction([] { if(mode_demands_consistency()) stop_game(); })
+   ->set_reaction([] { switchLOS_quiet(); if(!delayed_start) start_game(); });
+
+  param_b(lineofsight_cheat, "lineofsight_cheat", false)
+  ->help("If the cheat mode is active while in line-of-sight mode, you still see everything using 'magic vision'.");
+
   param_f(vid.plevel_factor, "plevel_factor", 0.7);
 
   param_b(nohud, "no-hud", false);
   param_b(nomap, "nomap", false);
   param_b(nofps, "no-fps", false);
+
+  param_enum(music_reset, "music_reset", music_reset_t::always)
+   ->editable({
+     {"always", "even if both lands use the same music"},
+     {"non-subland", "except sublands using the same music"},
+     {"if different", "only if lands use different music"}},
+     "reset music when land changes", 'r');
   
   #if CAP_IRR
   param_f(irr::density, "irregular-density", 2);
@@ -1844,12 +1917,13 @@ EX void initConfig() {
   param_i(nilv::nilperiod[0], "nilperiod_x");
   param_i(nilv::nilperiod[1], "nilperiod_y");
   param_i(nilv::nilperiod[2], "nilperiod_z");
+
+  vector<pair<string, string>> neon_options = {{"OFF", ""}, {"standard", ""}, {"no boundary mode", ""}, {"neon mode II", ""}, {"illustration mode", ""}};
   
-  param_enum(neon_mode, "neon_mode", neon_mode)
-    ->editable(
-        {{"OFF", ""}, {"standard", ""}, {"no boundary mode", ""}, {"neon mode II", ""}, {"illustration mode", ""}}, 
-        "neon mode", 'M'
-        );
+  param_enum(neon_mode, "neon_mode", neon_mode)->editable(neon_options, "neon mode", 'M');
+
+  param_enum(neon_magic_vision, "neon_magic_vision", neon_magic_vision)->editable(neon_options, "neon mode in magic vision", 'V')
+  ->add_extra([] { dialog::addHelp("Some Orbs let you see tiles you would not normally see. Such tiles can be shown differently."); });
 
   param_enum(bow::weapon, "pc_class", bow::weapon)
     -> editable({{"blade", "Standard Rogue weapon. Bump into a monster to hit. Most monsters attack you the same way."},
@@ -2025,7 +2099,12 @@ EX void resetModes(char leave IS('c')) {
 
   set_geometry(gNormal);
   set_variation(leave == rg::heptagons ? eVariation::pure : eVariation::bitruncated);
-  
+
+#if CAP_TEXTURE
+  texture::config.tstate = texture::tsOff;
+#endif
+
+  mapeditor::drawplayer = true;
   start_game();
   }
 
@@ -2041,13 +2120,13 @@ EX void resetConfig() {
   }
 #endif
 
-#if CAP_CONFIG
-
 EX debugflag debug_init_config = {"init_config", true};
 
+#if CAP_CONFIG
+
 EX void saveConfig() {
-  indenter_finish(debug_init_config, "saveConfig");
-  FILE *f = fopen(conffile, "wt");
+  indenter_finish isaveconfig(debug_init_config, "saveConfig");
+  FILE *f = fopen(conffile.c_str(), "wt");
   if(!f) {
     addMessage(s0 + "Could not open the config file: " + conffile);
     return;
@@ -2087,6 +2166,7 @@ map<string, shared_ptr<parameter> > allconfigs;
 
 EX void parseline(const string& str) {
   if(str[0] == '#') return;
+  DEBBI(debug_init_config, ("config line: ", str));
   for(int i=0; i<isize(str); i++) if(str[i] == '=') {
     string cname = str.substr(0, i);
     if(!allconfigs.count(cname)) {
@@ -2118,9 +2198,9 @@ EX void loadNewConfig(FILE *f) {
 
 EX void loadConfig() {
  
-  indenter_finish(debug_init_config, "loadConfig");
+  indenter_finish iloadconfig(debug_init_config, "loadConfig");
   vid.xres = 9999; vid.yres = 9999; vid.framelimit = 999;
-  FILE *f = fopen(conffile, "rt");
+  FILE *f = fopen(conffile.c_str(), "rt");
   if(f) {
     int err;
     int fs;
@@ -2649,6 +2729,7 @@ EX void configureOther() {
 #if CAP_AUDIO
   add_edit(musicvolume);
   add_edit(effvolume);
+  add_edit(music_reset);
 #endif
 
   menuitem_sightrange('r');
@@ -3422,7 +3503,7 @@ namespace ccolor { struct data; }
 #endif
 
 EX shared_ptr<custom_parameter> param_ccolor(ccolor::data*& val, const parameter_names& n) {
-  shared_ptr<custom_parameter> u ( new custom_parameter );
+  shared_ptr<custom_parameter> u = std::make_shared<custom_parameter> ();
   u->setup(n);
   u->custom_viewer = [] (key_type key) {};
   u->custom_value = [&val] { for(int i=0; i<isize(ccolor::all); i++) if(ccolor::all[i] == val) return i; return -1; };
@@ -3430,7 +3511,7 @@ EX shared_ptr<custom_parameter> param_ccolor(ccolor::data*& val, const parameter
   u->custom_affect = [&val] (void *v) { return &val == v; };
   u->custom_load = [&val] (const string& s) { for(auto c: ccolor::all) if(c->name == s) val = c; };
   u->custom_save = [&val] { return val->name; };
-  u->custom_clone = [u] (struct local_parameter_set& lps, void *value) { auto val = (ccolor::data**) value; return param_ccolor(*val, lps.mod(&*u)); };
+  u->custom_clone = [&u] (struct local_parameter_set& lps, void *value) { auto val = (ccolor::data**) value; return param_ccolor(*val, lps.mod(&*u)); };
   return u;
   }
 
@@ -3480,6 +3561,7 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
   param_b(vid.fixed_facing, "fixed facing", 0);
   param_f(vid.fixed_facing_dir, "fixed facing dir", 90);
   param_b(vid.fixed_yz, "fixed YZ", true);
+  param_b(rug::rug_fixed_yz, "rug fixed YZ", false);
   param_b(frustum_culling, "frustum_culling");
   param_b(numerical_minefield, "numerical_minefield")
   -> editable("toggle numerical display", 'n');
@@ -3495,6 +3577,7 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
   #if MAXMDIM >= 4
   param_enum(draw_sky, "draw_sky", skyAutomatic)
   -> editable({{"NO", "do not draw sky"}, {"automatic", ""}, {"skybox", "works only in Euclidean"}, {"always", "might be glitched in some settings"}}, "sky rendering", 's');
+  param_i(canvas_sky_style, "canvas_sky_style");
   param_b(use_euclidean_infinity, "use_euclidean_infinity", true)
   -> editable("infinite sky", 'i');
   #endif
@@ -3630,11 +3713,11 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
     "Note that, in exponentially expanding spaces, too high values could cause rendering issues. So "
     "if you want infinity, values of 5 or similar should be used -- there is no visible difference "
     "from infinity and glitches are avoided.";
-  param_f(vid.lake_top, parameter_names("lake_top", "3D lake top"), .25 / 0.3)
+  param_f(vid.lake_top, parameter_names("lake_top", "3D lake top"), .25)
     ->editable(0, 1, .1, "Level of water surface", unitwarn, 'l');
-  param_f(vid.lake_shallow, parameter_names("lake_shallow", "3D lake shallow"), .4 / 0.3)
+  param_f(vid.lake_shallow, parameter_names("lake_shallow", "3D lake shallow"), .4)
     ->editable(0, 1, .1, "Level of shallow water", unitwarn, 's');
-  param_f(vid.lake_bottom, parameter_names("lake_bottom", "3D lake bottom"), .9 / 0.3)
+  param_f(vid.lake_bottom, parameter_names("lake_bottom", "3D lake bottom"), .9)
     ->editable(0, 1, .1, "Level of water bottom", unitwarn, 'k');
   param_f(vid.wall_height2, "wall_height2", 2)
     ->editable(0, 5, .1, "ratio of high walls to normal walls", unitwarn, '2');
@@ -3862,7 +3945,7 @@ EX void showCustomizeChar() {
     dialog::addColorItem(XLAT("bowstring color"), cs.bowcolor2, 'c');
     }
   
-  if(id != pshRogue) dialog::addColorItem(XLAT("dress color"), cs.dresscolor, 'd');
+  if(id != pshRogue || cs.charid == 1) dialog::addColorItem(XLAT("dress color"), cs.dresscolor, 'd');
   else dialog::addBreak(100);
   if(cs.charid == 3 || id == pshRatling) dialog::addColorItem(XLAT("dress color II"), cs.dresscolor2, 'f');
   else dialog::addBreak(100);
@@ -4174,7 +4257,7 @@ EX void resetConfigMenu() {
 
     if(uni == 'd') { 
       resetConfig();
-      unlink(conffile);
+      unlink(conffile.c_str());
       popScreen();
       }
     else if(uni == 'y') {
@@ -4279,11 +4362,13 @@ EX void configureMouse() {
   dialog::addBoolItem_action(XLAT("quick mouse"), vid.quickmouse, 'M');
   #endif
 
+  add_edit(drag_sensitivity);
+
   dialog::addSelItem(XLAT("move by clicking on compass"), its(vid.mobilecompasssize), 'C');
   dialog::add_action([] {
     dialog::editNumber(vid.mobilecompasssize, 0, 100, 10, 20, XLAT("compass size"), XLAT("0 to disable"));
     // we need to check the moves
-    dialog::get_di().reaction = checkmove;
+    dialog::get_di().reaction = [] { checkmove(false); };
     dialog::bound_low(0);
     });
 
@@ -4428,7 +4513,7 @@ void list_parameter::show_edit_option(key_type key) {
     if(need_list >= 2) dialog::start_list(1500, 1500, 'a');
     for(int i=0; i<q; i++) {
       dialog::addBoolItem(XLAT(options[i].first), get_value() == i, need_list >= 2 ? dialog::list_fake_key++ : 'a' + i);
-      auto action = [this, i, need_list] { set_value(i); if(need_list == 0) popScreen(); if(manual_reaction) manual_reaction(); if(reaction) reaction(); };
+      auto action = [this, i, need_list] { if(pre_reaction) pre_reaction(); set_value(i); if(need_list == 0) popScreen(); if(manual_reaction) manual_reaction(); if(reaction) reaction(); };
       if(needs_confirm)
         dialog::add_action_confirmed(action);
       else

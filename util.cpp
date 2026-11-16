@@ -1051,6 +1051,13 @@ EX string find_file(string s) {
 #ifdef FHS
   if(file_exists(s1 = "/usr/share/hyperrogue/" + s)) return s1;
 #endif
+#if SDLVER >= 2
+  char *path = SDL_GetBasePath();
+  if(path) {
+    string bpath = path;
+    if(file_exists(s1 = bpath + s)) return s1;
+    }
+#endif
   return s;
   }
 

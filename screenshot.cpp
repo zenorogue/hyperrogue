@@ -22,11 +22,7 @@ EX always_false in;
 #endif
 
 #if CAP_SVG
-  #if ISWEB
-  shstream f;
-  #else
-  fhstream f;
-  #endif
+  hstream *svgf;
   
   EX bool in = false;
 
@@ -63,7 +59,7 @@ EX always_false in;
       }
     }
   
-  char* stylestr(color_t fill, color_t stroke, ld width=1) {
+  char* stylestr(color_t fill, color_t stroke, ld width=1, string extrastyle = "") {
     fixgamma(fill);
     fixgamma(stroke);
     static char buf[600];
@@ -78,10 +74,11 @@ EX always_false in;
       else fill = 0xFFFFFFFF;
       }
     
-    snprintf(buf, 600, "style=\"stroke:#%06x;stroke-opacity:%.3" PLDF ";stroke-width:%" PLDF "px;fill:#%06x;fill-opacity:%.3" PLDF "\"",
+    snprintf(buf, 600, "style=\"stroke:#%06x;stroke-opacity:%.3" PLDF ";stroke-width:%" PLDF "px;fill:#%06x;fill-opacity:%.3" PLDF "%s\"",
       (stroke>>8) & 0xFFFFFF, cta(stroke),
       width/divby,
-      (fill>>8) & 0xFFFFFF, cta(fill)
+      (fill>>8) & 0xFFFFFF, cta(fill),
+      extrastyle.c_str()
       );
     return buf;
     }
@@ -89,23 +86,25 @@ EX always_false in;
   EX void circle(int x, int y, int size, color_t col, color_t fillcol, double linewidth) {
     if(!invisible(col) || !invisible(fillcol)) {
       if(pconf.stretch == 1)
-        println(f, "<circle cx='", coord(x), "' cy='", coord(y), "' r='", coord(size), "' ", stylestr(fillcol, col, linewidth), "/>");
+        println(*svgf, "<circle cx='", coord(x), "' cy='", coord(y), "' r='", coord(size), "' ", stylestr(fillcol, col, linewidth), "/>");
       else
-        println(f, "<ellipse cx='", coord(x), "' cy='", coord(y), "' rx='", coord(size), "' ry='", coord(size*pconf.stretch), "' ", stylestr(fillcol, col), "/>");
+        println(*svgf, "<ellipse cx='", coord(x), "' cy='", coord(y), "' rx='", coord(size), "' ry='", coord(size*pconf.stretch), "' ", stylestr(fillcol, col), "/>");
       }
     }
   
   EX string link;
   
   void startstring() {
-    if(link != "") print(f, "<a xlink:href=\"", link, "\" xlink:show=\"replace\">");
+    if(link != "") print(*svgf, "<a xlink:href=\"", link, "\" xlink:show=\"replace\">");
     }
 
   void stopstring() {
-    if(link != "") print(f, "</a>");
+    if(link != "") print(*svgf, "</a>");
     }
 
   string font = "Times";
+  string fontstyle = "";
+  string tspan = "";
   
   ld text_width_multiplier = 1/40.;
   int min_text = 3;
@@ -139,16 +138,18 @@ EX always_false in;
         else str2 += str[i];
       if(uselatex) str2 = string("\\myfont{")+coord(size)+"}{" + str2 + "}";  
       
-      print(f, "<text x='", coord(x), "' y='", coord(y+size*.4), "' text-anchor='", align == 8 ? "middle" :
+      print(*svgf, "<text x='", coord(x), "' y='", coord(y+size*.4), "' text-anchor='", align == 8 ? "middle" :
         align < 8 ? "start" :
         "end", "' ");
       if(!uselatex)
-        print(f, "font-family='", font, "' font-size='", coord(size), "' ");
-      print(f, 
-        stylestr(col, frame ? 0x0000000FF : 0, (1<<get_sightrange())*dfc*text_width_multiplier), 
+        print(*svgf, "font-family='", font, "' font-size='", coord(size), "' ");
+      if(tspan != "") str2 =
+        "<tspan style=\"" + tspan + "\">" + str2 + "</tspan>";
+      print(*svgf, 
+        stylestr(col, frame ? 0x0000000FF : 0, (1<<get_sightrange())*dfc*text_width_multiplier, fontstyle),
         ">", str2, "</text>");
       stopstring();
-      println(f);
+      println(*svgf);
       }
     }
   
@@ -168,43 +169,54 @@ EX always_false in;
     startstring();
     for(int i=0; i<polyi; i++) {
       if(i == 0)
-        print(f, "<path d=\"M ");
+        print(*svgf, "<path d=\"M ");
       else
-        print(f, " L ");
-      print(f, coord(polyx[i]), " ", coord(polyy[i]));
+        print(*svgf, " L ");
+      print(*svgf, coord(polyx[i]), " ", coord(polyy[i]));
       }
     
-    print(f, "\" ", stylestr(col, outline, (hyperbolic ? current_display->radius : current_display->scrsize) * linewidth/256), "/>");
+    print(*svgf, "\" ", stylestr(col, outline, (hyperbolic ? current_display->radius : current_display->scrsize) * linewidth/256), "/>");
     stopstring();
-    println(f);
+    println(*svgf);
     }
   
+  // 0: file, 1: string, 2: web
+  EX int svg_mode = ISWEB ? 2 : 0;
+
+  EX shstream sout;
+  fhstream sfile;
+
   EX void render(const string& fname, const function<void()>& what IS(shot::default_screenshot_content)) {
+
+    if(svg_mode) svgf = &sout;
+    else { svgf = &sfile; sfile.f = fopen(fname.c_str(), "wt"); if(!sfile.f) { printf("could not open the file\n"); return; } }
+
     dynamicval<bool> v2(in, true);
     dynamicval<bool> v3(vid.usingGL, false);
-    
-    #if ISWEB
-    f.s = "";
-    #else
-    f.f = fopen(fname.c_str(), "wt");
-    #endif
 
-    println(f, "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" width=\"", coord(vid.xres), "\" height=\"", coord(vid.yres), "\">");
+    println(hlog, "started rendering file ", fname, " with svg_mode = ", svg_mode);
+
+    println(*svgf, "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" width=\"", coord(vid.xres), "\" height=\"", coord(vid.yres), "\">");
     if(!shot::transparent)
-      println(f, "<rect width=\"", coord(vid.xres), "\" height=\"", coord(vid.yres), "\" ", stylestr((backcolor << 8) | 0xFF, 0, 0), "/>");
+      println(*svgf, "<rect width=\"", coord(vid.xres), "\" height=\"", coord(vid.yres), "\" ", stylestr((backcolor << 8) | 0xFF, 0, 0), "/>");
     what();
-    println(f, "</svg>");
+    println(*svgf, "</svg>");
     
-    #if ISWEB
-    EM_ASM_({
-      var x=window.open();
-      x.document.open();
-      x.document.write(UTF8ToString($0));
-      x.document.close();
-      }, f.s.c_str());
-    #else
-    fclose(f.f); f.f = NULL;
-    #endif
+    if(svg_mode == 2) {
+      #if ISWEB
+      EM_ASM_({
+        var x=window.open();
+        x.document.open();
+        x.document.write(UTF8ToString($0, $1));
+        x.document.close();
+        }, sout.s.c_str(), int(sout.s.size()));
+      #else
+      printf("%s\n", sout.s.c_str());
+      #endif
+      sout.s = "";
+      }
+
+    if(sfile.f) fclose(sfile.f), sfile.f = nullptr;
     }
 
 #if CAP_COMMANDLINE && CAP_SHOT
@@ -216,6 +228,14 @@ int read_args() {
     }
   else if(argis("-svgfont")) {
     shift(); svg::font = args();
+    // note: use '-svgfont latex' to produce text output as: \myfont{size}{text}
+    // (this is helpful with Inkscape's PDF+TeX output feature; define \myfont yourself)
+    }
+  else if(argis("-svgtspan")) {
+    shift(); svg::tspan = args();
+    }
+  else if(argis("-svgfontstyle")) {
+    shift(); svg::fontstyle = args();
     // note: use '-svgfont latex' to produce text output as: \myfont{size}{text}
     // (this is helpful with Inkscape's PDF+TeX output feature; define \myfont yourself)
     }
@@ -648,7 +668,7 @@ void IMAGESAVE(SDL_Surface *s, const char *fname) {
 #if CAP_SHOT
 EX namespace shot {
 
-purehookset hooks_hqshot;
+EX purehookset hooks_hqshot;
 
 #if HDR
 enum screenshot_format { png, svg, wrl, rawfile };
@@ -678,9 +698,11 @@ void set_shotx() {
 
 EX int shot_aa = 1;
 
+EX bool gamescreen_in_shots = true;
+
 EX void default_screenshot_content() {
 
-  gamescreen();
+  if(gamescreen_in_shots) gamescreen();
 
   if(caption != "")
     displayfr(vid.xres/2, vid.fsize+vid.fsize/4, 3, vid.fsize*2, caption, forecolor, 8);
@@ -1193,6 +1215,8 @@ enum eMovementAnimation {
   };
 #endif
 
+EX ld rotations_per_period = 1;
+
 EX eMovementAnimation ma;
 
 EX trans23 movement_angle;
@@ -1369,7 +1393,7 @@ EX void apply() {
     case maRotation:
       if(GDIM == 3) shift_view(ztangent(-rotation_distance));
       rotate_view(rot_inverse(movement_angle.get()));
-      rotate_view(spin(TAU * t / period));
+      rotate_view(spin(TAU * rotations_per_period * t / period));
       rotate_view(movement_angle.get());
       if(GDIM == 3) shift_view(ztangent(rotation_distance));
       moved();
@@ -1854,6 +1878,7 @@ auto animhook = addHook(hooks_frame, 100, display_animation)
     param_b(wallopt, "wallopt");
     param_b(clearup, "anim_clearup");
     param_b(env_shmup, "anim_shmup");
+    param_f(rotations_per_period, "rotations_per_period", 1);
     param_color(circle_display_color, "circle_display_color", true);
     param_enum(anims::ma, parameter_names("ma", "movement_animation"), maNone)
     -> editable({{"none", ""}, {"translation", ""}, {"rotation", ""}, {"circle", ""}, {"parabolic", ""}, {"translation+rotation", ""}}, "movement animation", 'a')

@@ -394,6 +394,8 @@ hpcshape
 
   hpcshape shBunnyBody, shBunnyHead, shBunnyEar, shBunnyTail;
 
+  hpcshape shDonkeyHead, shDonkeyEar, shDonkeyEye, shDonkeyNose, shDonkeyNose1;
+
   hpcshape shReserved[16];
   
   int orb_inner_ring; //< for shDisk* shapes, the number of vertices in the inner ring
@@ -567,6 +569,7 @@ hpcshape
     int area;
     int pshid[3][8][GOLDBERG_LIMIT][GOLDBERG_LIMIT][8];
     vector<array<int, 5>> id_to_params;
+    map<vector<int>, int> field_data;
     };
   shared_ptr<gpdata_t> gpdata = nullptr;
   #endif
@@ -649,6 +652,7 @@ void geometry_information::generate_faces() {
 void geometry_information::prepare_basics() {
 
   indenter_finish dif(debug_geometry, "prepare_basics");
+  if(debug_geometry) println(hlog, "geometry: ", full_geometry_name());
   
   hexshift = 0;
 
@@ -793,7 +797,7 @@ void geometry_information::prepare_basics() {
     }
   
   if(debug_geometry) println(hlog,
-    hr::format("S7=%d S6=%d hexf = " LDF" hcross = " LDF" tessf = " LDF" hexshift = " LDF " hexhex = " LDF " hexv = " LDF "\n", S7, S6, hexf, hcrossf, tessf, hexshift, 
+    hr::format("S7=%d S6=%d hexf = " LDF" hcross = " LDF" tessf = " LDF" hexshift = " LDF " hexhex = " LDF " hexv = " LDF, S7, S6, hexf, hcrossf, tessf, hexshift, 
     hexhexdist, hexvdist));
   
   hybrid_finish:
@@ -959,8 +963,11 @@ void geometry_information::prepare_basics() {
   #endif
 
   prepare_compute3();
-  if(hyperbolic && &currfp != &fieldpattern::fp_invalid)
-    currfp.analyze(); 
+
+  auto& c = currfp; /* note: this can actually build the fpattern */
+
+  if(hyperbolic && &c != &fieldpattern::fp_invalid && variation != c.current_variation)
+    c.analyze();
 
   heptmove.resize(S7);
   hexmove.resize(S7);
@@ -985,6 +992,27 @@ void geometry_information::prepare_basics() {
   }
 
 EX purehookset hooks_swapdim;
+
+#if HDR
+extern struct dim_listener *dl_list;
+
+struct dim_listener {
+  dim_listener *next, **prev;
+  dim_listener() {
+    if(dl_list) dl_list->prev = &next;
+    next = dl_list;
+    dl_list = this;
+    prev = &dl_list;
+    }
+  ~dim_listener() {
+    if(next) next->prev = prev;
+    *prev = next;
+    }
+  virtual void on_dim_change() {}
+  };
+#endif
+
+dim_listener *dl_list;
 
 EX hookset<void(geometry_information*)> hooks_scalefactor;
 
@@ -1210,7 +1238,7 @@ EX namespace geom3 {
     swapmatrix_view(NLP, View);
     swapmatrix_view(NLP, current_display->which_copy);
     callhooks(hooks_swapdim);
-    for(auto m: allmaps) m->on_dim_change();
+    auto dl = dl_list; while(dl) { dl->on_dim_change(); dl = dl->next; }
     }
 
   #if MAXMDIM >= 4
@@ -1453,8 +1481,8 @@ EX void check_cgi() {
   if(mhybrid) hybrid::underlying_cgip->timestamp = ntimestamp;
   if(fake::in() || (mhybrid && PIU(fake::in()))) fake::underlying_cgip->timestamp = ntimestamp;
   #if CAP_ARCM
-  if(arcm::alt_cgip[0]) arcm::alt_cgip[0]->timestamp = ntimestamp;
-  if(arcm::alt_cgip[1]) arcm::alt_cgip[1]->timestamp = ntimestamp;
+  if(arcm::bm.alt_cgip[0]) arcm::bm.alt_cgip[0]->timestamp = ntimestamp;
+  if(arcm::bm.alt_cgip[1]) arcm::bm.alt_cgip[1]->timestamp = ntimestamp;
   #endif
   
   int limit = 3;

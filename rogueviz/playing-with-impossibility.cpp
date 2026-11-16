@@ -1157,7 +1157,7 @@ slide dmv_slides[] = {
         pic_exists = file_exists("rogueviz/nil/emty-ring.png");
         video_exists = file_exists("rogueviz/nil/emty-ring.mp4");
         }
-      slide_url(mode, 'i', "Instagram link", "https://www.instagram.com/p/B756GCynErw/");
+      slide_url(mode, 'i', "Instagram link", "https://www.instagram.com/emty01/reel/CNZ6nn0n0_n");
       empty_screen(mode);
       if(video_exists)
         show_animation(mode, "rogueviz/nil/emty-ring.mp4", 720, 900, 300, 30);

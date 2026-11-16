@@ -125,7 +125,8 @@ EX int compassDist(cell *c) {
 /** identify the compass target that compassDist is talking about */
 EX const void *whichCompass(cell *c) {
   if(sphere || quotient) return nullptr;
-  if(eubinary || c->master->alt) return c->master->alt->alt;
+  if(eubinary) return nullptr;
+  if(c->master->alt) return c->master->alt->alt;
   if(isHaunted(c->land) || c->land == laGraveyard) return &linf[laHaunted];
   return &NOCOMPASS;
   }
@@ -2004,7 +2005,10 @@ EX bool openplains(cell *c) {
     }
   int dlimit = getDistLimit();
   if(arcm::in()) dlimit--;
-  if(dlimit < 7) {
+  if(getDistLimit() < 4) {
+    return true;
+    }
+  else if(dlimit < 7) {
     celllister cl(c, dlimit, 1000000, NULL);
     int bad = 0;
     for(cell *c: cl.lst) { 

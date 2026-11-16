@@ -310,12 +310,15 @@ bool knowgood;
 hyperpoint goodpoint;
 vector<pair<int, hyperpoint>> tofix;
 
+EX hookset<int()> hooks_two_sided_model;
+
 EX bool two_sided_model() {
   #if CAP_VR
   bool in_vr = vrhr::rendering();
   #else
   constexpr bool in_vr = false;
   #endif
+  auto i = callhandlers(0, hooks_two_sided_model); if(i) return i > 0;
   if(GDIM == 3) return false;
   if(in_vr_sphere) return true;
   if(pmodel == mdHemisphere || pmodel == mdHyperboloid) return !in_vr;
@@ -328,7 +331,11 @@ EX bool two_sided_model() {
   return false;
   }
 
+EX hookset<int(const hyperpoint& H)> hooks_get_side;
+
 EX int get_side(const hyperpoint& H) {
+  int i = callhandlers(0, hooks_get_side, H);
+  if(i) return i;
   #if CAP_VR
   if(in_vr_sphere) {
     hyperpoint Hscr;
@@ -2121,11 +2128,14 @@ void dqi_poly::draw() {
   
   #if CAP_SVG
     if(svg::in) {
+      if(isize(glcoords) > POLYMAX) continue;
+
       bool bad = false;
-      for(int i=0; i<polyi; i++) if(isnan(glcoords[i][0]) || isnan(glcoords[i][1]) || isnan(glcoords[i][2])) bad = true;
+      for(int i=0; i<isize(glcoords); i++) if(isnan(glcoords[i][0]) || isnan(glcoords[i][1]) || isnan(glcoords[i][2])) bad = true;
       if(bad) continue;
 
       coords_to_poly();
+
       color_t col = color;
       if(poly_flags & POLY_INVERSE) col = 0;
       if(poly_flags & POLY_TRIANGLES) {
@@ -2441,7 +2451,7 @@ extern bool lshiftclick, lctrlclick;
 
 EX void reverse_transparent_walls() {
   int pt = int(PPR::TRANSPARENT_WALL);
-  reverse(&ptds[qp0[pt]], &ptds[qp[pt]]);
+  reverse(ptds.data() + qp0[pt], ptds.data() + qp[pt]);
   }
 
 EX void set_vr_sphere() {
@@ -2462,8 +2472,12 @@ EX void set_vr_sphere() {
 
 EX int hemi_side = 0;
 
+EX hookset<bool()> hooks_draw_main;
+
 EX void draw_main() {
   DEBBI(debug_graph, ("draw_main"));
+
+  if(callhandlers(false, hooks_draw_main)) return;
   
   if(pconf.back_and_front == 1 && vid.consider_shader_projection) {
     dynamicval<int> pa(pconf.back_and_front);
@@ -2627,7 +2641,7 @@ EX void drawqueue() {
       auto& ap = (dqi_poly&) *ptds[i];
       ap.cache = xintval(ap.V * ap.intester);
       }
-    sort(&ptds[qp0[pp]], &ptds[qp[pp]], 
+    sort(ptds.data() + qp0[pp], ptds.data() + qp[pp],
       [] (const unique_ptr<drawqueueitem>& p1, const unique_ptr<drawqueueitem>& p2) {
         auto& ap1 = (dqi_poly&) *p1;
         auto& ap2 = (dqi_poly&) *p2;

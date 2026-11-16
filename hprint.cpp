@@ -263,9 +263,11 @@ struct logger : hstream {
   void flush() override { fflush(stdout); }
   };
 
-extern logger hlog;
-template<class... T> void println_log(T... t) { println(hlog, t...); }
-template<class... T> void print_log(T... t) { print(hlog, t...); }
+extern logger *hlog_ptr;
+#define hlog (*hlog_ptr)
+
+template<class... T> void hprintln(T... t) { println(hlog, t...); }
+template<class... T> void hprint(T... t) { print(hlog, t...); }
 
 #ifdef __GNUC__
 __attribute__((__format__ (__printf__, 1, 2)))
@@ -406,8 +408,6 @@ EX string itsh(unsigned long long i) {
   else return itsh(i0);
   }
 
-EX logger hlog;
-
 // kz: utility for printing
 // if it is close to 0, assume it is floating errors
 
@@ -525,9 +525,9 @@ EX string as_nice_cstring(string o) {
 #define DEBB0(r,x)
 #define DEBBI(r,x)
 #else
-#define DEBB(r,x) { if(r) { println_log x; } }
-#define DEBB0(r,x) { if(r) { print_log x; } }
-#define DEBBI(r,x) { if(r) { println_log x; } } indenter_finish _debbi(r);
+#define DEBB(r,x) { if(r) { hprintln x; } }
+#define DEBB0(r,x) { if(r) { hprint x; } }
+#define DEBBI(r,x) { if(r) { hprintln x; } } indenter_finish _debbi(r);
 #endif
 #endif
 
@@ -574,14 +574,15 @@ EX void rate_limited_error(const string& s, const string& t IS("")) {
   }
 
 #if HDR
-struct progressbar : indenter_finish {
+struct progressbar {
   string name;
   static constexpr int PBSIZE = 64;
-  int step = -1, total, drawat = 0, count = -1;
+  int step = -1, total, drawat = 0, count = -1, tstart;
 
   void operator ++ (int) {
     step++;
     while(step >= drawat && total) {
+      fflush(stdout);
       count++;
       drawat = (total * (count+(long long) 1)) / PBSIZE;
       fprintf(stderr, "%s [", get_stamp().c_str());
@@ -593,11 +594,21 @@ struct progressbar : indenter_finish {
     }
 
   ~progressbar() {
-    fprintf(stderr, "\x1b[K");
+    fflush(stdout); fprintf(stderr, "\x1b[K"); fflush(stderr);
     }
 
-  progressbar(int t, string n) : indenter_finish(n), name(n) { hlog.indentation -= 2; hlog.indentation += 2; total = t; (*this)++; }
+  int clear_time() {
+    fflush(stdout); fprintf(stderr, "\x1b[K"); fflush(stderr);
+    return SDL_GetTicks() - tstart;
+    }
+
+  progressbar(int t, string n) : name(n) { total = t; (*this)++; tstart = SDL_GetTicks(); }
   };
+
 #endif
+
+logger actual_hlog;
+
+logger *hlog_ptr = &actual_hlog;
 
 }

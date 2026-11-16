@@ -56,7 +56,7 @@ namespace embeddings {
       pe->coords.resize(N);
       for(int i=0; i<N; i++) {
         auto h = current->as_hyperpoint(i);
-        pe->coords[i] = { hdist0(h), atan2(h) };
+        pe->coords[i] = { hdist0(h), -atan2(h) };
         }
       return enable_embedding(pe);
       }

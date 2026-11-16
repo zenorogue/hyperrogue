@@ -210,7 +210,7 @@ EX namespace westwall {
   EX void switchTreasure(cell *c) {
     c->item = itNone;
     if(safety) return;
-    if(hrand(5000) < PT(100 + 2 * (kills[moAirElemental] + kills[moWindCrow]), 200) && c->landparam >= 5 + items[itWest])
+    if(hrand(5000) < PT(100 + 2 * (kills[moWestHawk] + kills[moFallingDog]), 200) && c->landparam >= 5 + items[itWest])
       c->item = itWest;
     else if(hrand(5000) < 20*PRIZEMUL)
       placeLocalOrbs(c);
@@ -1014,13 +1014,13 @@ EX namespace dice {
     dd.which = ds;
     vector<int> dirs;
     for(int i=0; i<c->type; i++) createMov(c, i);
-    for(int i=0; i<c->type; i++) 
+    for(int i=0; i<c->type * ds->facesides; i++)
     for(int j=0; j<c->type; j++) if(can_roll(ds->facesides, i, movei(c, j)))
       dirs.push_back(i);
     if(dirs.empty())
-      dd.dir = hrand(c->type) * ds->facesides;
+      dd.dir = hrand(c->type * ds->facesides);
     else
-      dd.dir = hrand_elt(dirs) * ds->facesides;
+      dd.dir = hrand_elt(dirs);
     vector<int> sides;
     for(int i=0; i<ds->faces; i++) 
       if(ds->hardness[i] >= min_hardness && ds->hardness[i] <= max_hardness)
@@ -1440,7 +1440,9 @@ EX namespace dice {
             cx = (face[j2] - face[j]) / 2;
             cy = face[j1] - (face[j] + face[j2]) / 4;
             }
-          write_in_space(V1, max_glfont_size, -1.2, its(1+dw->sides[q][j]), 0xFFFFFFFF, 0, 8, prio, pf);
+          ld scale = -1.2;
+          if(getDistLimit() < 4) scale /= 3;
+          write_in_space(V1, max_glfont_size, scale, its(1+dw->sides[q][j]), 0xFFFFFFFF, 0, 8, prio, pf);
           }
         }
       else {
@@ -1449,7 +1451,9 @@ EX namespace dice {
         if(fid == 6) s = "6.";
         else if(fid == 9) s = "9.";
         else s = its(fid);
-        write_in_space(V1, max_glfont_size, dw->faces < 10 ? -1.2 : -.75, s, 0xFFFFFFFF, 0, 8, prio, pf);
+        ld scale = dw->faces < 10 ? -1.2 : -.75;
+        if(getDistLimit() < 4) scale /= 2.5;
+        write_in_space(V1, max_glfont_size, scale, s, 0xFFFFFFFF, 0, 8, prio, pf);
         }
       #endif
       #endif

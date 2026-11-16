@@ -419,7 +419,7 @@ EX void initgame() {
     timerstart = time(NULL); turncount = 0; lastexplore = 0; rosewave = 0; rosephase = 0;
     tickstart = ticks;
     noiseuntil = 0;
-    sagephase = 0; hardcoreAt = 0;
+    sagephase = 0; hardcoreAt = 0; lineofsightAt = 0;
     timerstopped = false;
     savecount = 0; savetime = 0;
     loadcount = 0; current_loadcount = 0; load_branching = 0;
@@ -455,7 +455,7 @@ EX void initgame() {
 
   lastsafety = gold();
   bfs();
-  checkmove();
+  checkmove(false);
   playermoved = true;
 
   if(quotient || sphere)
@@ -485,7 +485,7 @@ EX namespace scores {
 /** \brief the amount of boxes reserved for each hr::score item */
 #define MAXBOX 500
 /** \brief currently used boxes in hr::score */
-#define POSSCORE 421
+#define POSSCORE 423
 /** \brief a struct to keep local score from an earlier game */
 struct score {
   /** \brief version used */
@@ -1062,6 +1062,11 @@ EX void applyBoxes() {
   setprio(bpWeirdStat);
   applyBoxNum(current_loadcount, "current load count");
 
+  setprio(bpMode);
+  applyBoxEnum(lineofsight, "lineofsight");
+  setprio(bpMode);
+  applyBoxNum(lineofsightAt, "@lineofsightAt");
+
   if(POSSCORE != boxid) printf("ERROR: %d boxes\n", boxid);
   if(isize(invorb)) { println(hlog, "ERROR: Orbs not taken into account"); exit(1); }
   }
@@ -1533,6 +1538,7 @@ EX void stop_game() {
   #endif
   // items[itGreenStone] = 100;
   game_active = false;
+  movehints_ticks = 0;
   clearMemory();
 #if CAP_DAILY
   if(daily::on)
@@ -1613,6 +1619,7 @@ EX void set_variation(eVariation target) {
     if(target != eVariation::pure) {
       if(bt::in() || sol || aperiodic || WDIM == 3) if(!mproduct) geometry = gNormal;
       }
+    arb::convert::deactivate();
     auto& cd = ginf[gCrystal];
     if(target == eVariation::bitruncated && cryst && cd.sides == 8 && cd.vertex == 4) {
       cd.vertex = 3;
@@ -1683,7 +1690,7 @@ EX void switch_game_mode(char switchWhat) {
       randomPatternsMode = false;
       land_structure = lsNiceWalls;
       racing::on = false;
-      if(!yendor::on) firstland = laIce;
+      if(!yendor::on) firstland = specialland = laIce;
       dual::disable();
       break;
 
@@ -1709,7 +1716,7 @@ EX void switch_game_mode(char switchWhat) {
       princess::challenge = false;
       racing::on = false;
       land_structure = tactic::on ? lsSingle : lsNiceWalls;
-      if(!tactic::on) firstland = laIce;
+      if(!tactic::on) firstland = specialland = laIce;
       dual::disable();
       break;
 
@@ -1928,6 +1935,7 @@ EX void save_if_needed() {
   }
 
 EX void finishAll() {
+  if(tour::on) tour::stop_tour();
   achievement_final(!items[itOrbSafety]);
 
   save_if_needed();

@@ -602,6 +602,7 @@ EX void show_dialog() {
   }
 
 auto aqhook =
+#if CAP_COMMANDLINE
   arg::add3("-aq-auto", [] { displaying = false; running = true; arg::shift(); auto_create(arg::argi()); })
 + arg::add3("-aq-enable", [] { arg::shift(); enable_by_id(arg::argi()); })
 + arg::add3("-aq-export", [] { arg::shift(); export_tes(arg::args()); })
@@ -626,6 +627,7 @@ auto aqhook =
     param_b(dedup_mirror, "aq_dedup_mirror")
     -> editable("dedup mirror", 'o');
     })
+#endif
 + addHook(hooks_clearmemory, 0, [] { preunify.clear(); })
 + addHook(hooks_newmap, 0, [] {
     if(geometry == gArbitrary && quotient) {

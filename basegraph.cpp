@@ -218,6 +218,8 @@ EX void present_screen() {
 
 #endif
 
+EX debugflag debug_init_font = {"init_font", true};
+
 #if CAP_SDLTTF
 
 EX vector<string> font_filenames = {
@@ -242,8 +244,6 @@ EX vector<pair<string, string>> font_names = {
 
 EX int last_font_id = 0;
 EX int font_id = 0;
-
-EX debugflag debug_init_font = {"init_font", true};
 
 #ifdef FONTCONFIG
 TTF_Font* findfont(int siz) {
@@ -362,6 +362,7 @@ inline void reset_projection() { new_projection_needed = true; }
 EX ld lband_shift;
 
 void display_data::set_all(int ed, ld shift) {
+  if(!vid.usingGL) return;
   auto t = this;
   auto current_projection = tie(ed, pmodel, t, current_rbuffer);
   if(new_projection_needed || !glhr::current_glprogram || (next_shader_flags & GF_which) != (glhr::current_glprogram->shader_flags & GF_which) || current_projection != last_projection || shift != lband_shift) {
@@ -625,7 +626,11 @@ EX void init_glfont(int size) {
     SDL_DestroySurface(txt);
 #endif
 
+#if CAP_SDLTTF
     if(ch >= 128 && !TTF_GlyphIsProvided(cfont->font[siz], unicode_value(natchars[ch-128], 0).first)) {
+#else
+    if(ch >= 128) {
+#endif
       string s = natchars[ch - 128];
       if(s == "Ⓐ") f.reps[ch] = "(A)";
       if(s == "Ⓑ") f.reps[ch] = "(B)";
@@ -811,7 +816,8 @@ EX void resetGL() {
 
   check_cgi();
   if(currentmap) cgi.require_shapes();
-  cgi.initPolyForGL();
+
+  for(auto& c: cgis) c.second.initPolyForGL();
   #if MAXMDIM >= 4
   if(GDIM == 3 && !floor_textures) make_floor_textures();
   #endif
@@ -859,7 +865,7 @@ EX bool displaychr(int x, int y, int shift, int size, char chr, color_t col) {
 
 void gdpush_utf8(const string& s) {
   int g = (int) graphdata.size(), q = 0;
-  gdpush((int) s.size()); for(int i=0; i<isize(s); i++) {
+  gdpush((int) s.size()); for(int i=0; i<isize(s);) {
     int u;
     tie(u, i) = unicode_value(s, i);
     gdpush(u); q++;
@@ -1113,8 +1119,8 @@ EX void drawmessage(const string& s, int& y, color_t col) {
     }
 
   for(int i=1; i<isize(s); i++)
-    if(s[i-1] == ' ' && textwidth(vid.fsize, "..."+s.substr(i)) <= space) {    
-      displayfr(0, y, 1, vid.fsize, "..."+s.substr(i), col, 0);
+    if(s[i-1] == ' ' && textwidth(vid.fsize, "... "+s.substr(i)) <= space) {    
+      displayfr(0, y, 1, vid.fsize, "... "+s.substr(i), col, 0);
       y -= vid.fsize;
       drawmessage(s.substr(0, i-1), y, col);
       return;
@@ -1312,7 +1318,19 @@ EX void close_window() {
     SDL_GL_DestroyContext(s_context), s_have_context = false;
     }
   if(s_window) SDL_DestroyWindow(s_window), s_window = nullptr;
+  graphics_on = false;
+  vid.usingGL = false;
   #endif
+  }
+
+EX void close_sdl() {
+  close_window();
+  #if CAP_SDL
+  SDL_Quit();
+  sdl_on = false;
+  #endif
+  graphics_on = false;
+  vid.usingGL = false;
   }
 
 EX void apply_screen_settings() {

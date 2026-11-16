@@ -215,7 +215,7 @@ EX bool activateRecall() {
   if(shmup::on) shmup::recall();
   if(multi::players > 1) multi::recall();
   bfs();
-  checkmove();
+  checkmove(false);
   drawSafety();
   addMessage(XLAT("You are recalled!"));
   return true;

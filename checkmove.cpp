@@ -341,7 +341,6 @@ EX void create_yasc_message() {
   bool in_ctx = true;
 
   set<string> blocks;
-  int index = 0;
   for(auto c: all) {
     if(c.type == miENTITY && !captures.count({c.where, blocking_monster_name(c)})) blocks.insert(blocking_monster_name(c));
     else if(c.type == miWALL && c.subtype == siMONSTER && !captures.count({c.where, blocking_monster_name(c)})) blocks.insert(blocking_monster_name(c));
@@ -361,7 +360,6 @@ EX void create_yasc_message() {
       else if(c.where && c.where->wall != cwt.at->wall) blocks.insert(dnameof(c.where->wall));
       }
     else if(c.type == siWARP) blocks.insert("warp");
-    index++;
     }
 
   if(!blocks.empty()) {
@@ -404,8 +402,10 @@ int yasc_recode(int x) {
   return yasc_recode(x / 10) * 100 + (x % 10);
   };
 
-EX void checkmove() {
+EX cell *bowtarget = nullptr;
 
+EX void checkmove(bool complete) {
+  if(!complete) { attempts = 0; movehints_ticks = 0; }
   if(dual::state == 2) return;
   if(shmup::on) return;
 
@@ -421,7 +421,7 @@ EX void checkmove() {
   legalmoves.clear(); legalmoves.resize(cwt.at->type+1, false);
   move_issues.clear(); move_issues.resize(cwt.at->type);
 
-  canmove = haveRangedTarget();
+  canmove = haveRangedTarget(complete);
   items[itWarning]+=2;
   if(movepcto(-1, 0, true))
     canmove = legalmoves[cwt.at->type] = true;
@@ -450,7 +450,9 @@ EX void checkmove() {
   for(int i=0; i<cwt.at->type; i++)
     yasc_code += yasc_recode(move_issues[i].type);
 
-  if(!canmove && bow::crossbow_mode() && !items[itCrossbow]) canmove = bow::have_bow_target();
+  bowtarget = (!canmove || complete) ? bow::have_bow_target() : nullptr;
+
+  if(bowtarget) canmove = true;
 
 #if CAP_INV  
   if(inv::on && !canmove && !inv::incheck) {
@@ -458,7 +460,7 @@ EX void checkmove() {
       canmove = true;
     else {
       inv::check(1);
-      checkmove();
+      checkmove(complete);
       inv::check(-1);
       }
     if(canmove)

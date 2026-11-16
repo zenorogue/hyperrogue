@@ -104,7 +104,7 @@ EX void animateAttack(const movei& m, int layer) {
   }
 
 EX void animateCorrectAttack(const movei& m, int layer, eMonster who) {
-  if(among(who, moPlayer, moMimic, moIllusion, moShadow) && (getcs().charid/2) == pshSpaceship) {
+  if(looks_like_player(who) && (getcs().charid/2) == pshSpaceship) {
     animate_item_throw(m.s, m.t, itNone, moBullet);
     return;
     }

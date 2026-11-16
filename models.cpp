@@ -741,10 +741,7 @@ EX namespace models {
         #if CAP_RUG
         dialog::addItem(XLAT("Hypersian Rug"), 'u');
         dialog::add_action([] {  
-          if(rug::rugged) pushScreen(rug::show);
-          else {
-            pconf.alpha = 1, pconf.scale = 1; if(!rug::rugged) rug::init(); popScreen(); 
-            }
+          pushScreen(rug::show);
           });
         #endif
         }

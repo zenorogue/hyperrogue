@@ -534,10 +534,10 @@ struct shmup_configurer {
         }
       else dialog::addBreak(100);
       }
+
+    add_edit(joy_init);
   #endif
   
-    add_edit(joy_init);
-
     if(haveconfig && !shmup::on) add_edit(multi::multi_autojoy);
 
     dialog::addBreak(50);
@@ -1024,7 +1024,7 @@ EX void handleInput(int delta, config &scfg) {
       }
     if(multi::activePlayers() == 1) {
       multi::checkonly = true;
-      checkmove();
+      checkmove(false);
       multi::checkonly = false;
       }
     }

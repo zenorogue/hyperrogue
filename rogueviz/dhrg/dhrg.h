@@ -41,5 +41,8 @@ void graph_from_rv();
 ld loglikopt();
 int quickdist(mycell *c1, mycell *c2, int setid=0);
 extern ll tally[MAXDIST];
+
+using rogueviz::embeddings::directed_edges;
+using rogueviz::embeddings::get_n;
 }
 #endif

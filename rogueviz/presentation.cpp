@@ -177,6 +177,7 @@ texture::texture_data& get_texture(string s, flagtype flags = 0) {
 
 void sub_picture(string s, flagtype flags, ld dx, ld dy, ld scale) {
   auto& tex = get_texture(s);
+  if(tex.textureid == 0) return;
   flat_model_enabler fme;
   draw_texture(tex, dx, dy, scale);
   }
@@ -226,7 +227,12 @@ string gen_latex(presmode mode, string s, int res, flagtype flags) {
         "\\end{document}\n", latex_packages.c_str(), s.c_str());
       fclose(f);
       hr::ignore(system("cd latex-cache; pdflatex rogueviz-latex.tex"));
-      bool has_working_pdftopng = system("pdftopng -v > /dev/null 2>&1") == 0;
+      int test_pdftopng = system("pdftopng -v > /dev/null 2>&1");
+// in MinGW there is no WEXITSTATUS, the value is returned directly
+#ifndef WEXITSTATUS
+#define WEXITSTATUS(x) x
+#endif
+      bool has_working_pdftopng = test_pdftopng == 0 || WEXITSTATUS(test_pdftopng) == 99;
       string pdftopng_command = has_working_pdftopng ? "pdftopng" : "pdftoppm -png";
       string pngline = 
         (flags & LATEX_COLOR) && has_working_pdftopng ?

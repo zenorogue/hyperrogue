@@ -225,7 +225,7 @@ void shapedata::compute_shape() {
   
   cells = {starter};
   
-  int tree_edges = 0;
+  // int tree_edges = 0;
   int face_edges = 0;
 
   bool first_zebra_phase = geometry == gZebraQuotient && sett.funmode == 3 && PURE;
@@ -248,7 +248,7 @@ void shapedata::compute_shape() {
         }
       gm[c2] = gm[c] * rel(cw);
       be_connected(cw);
-      tree_edges++;
+      // tree_edges++;
       cells.push_back(c2);
       }
     }

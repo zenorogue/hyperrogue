@@ -13,6 +13,7 @@ import javax.microedition.khronos.egl.EGLDisplay;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.ForegroundServiceStartNotAllowedException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -33,6 +34,7 @@ import android.net.Uri;
 import android.opengl.GLSurfaceView;
 import android.opengl.GLSurfaceView.EGLConfigChooser;
 import android.os.Bundle;
+import android.os.Build;
 import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.text.ClipboardManager;
@@ -371,11 +373,23 @@ public class HyperRogue extends Activity implements SensorEventListener {
         if (keep) {
             Intent startIntent = new Intent(HyperRogue.this, ForegroundService.class);
             startIntent.setAction(ForegroundService.STARTFOREGROUND_ACTION);
-            startService(startIntent);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                try {
+                    startForegroundService(startIntent);
+                } catch (ForegroundServiceStartNotAllowedException e) {
+                    Log.e("HyperRogue", "Cannot start foreground service", e);
+                }
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(startIntent);
+            } else {
+                startService(startIntent);
+            }
         } else {
-            Intent stopIntent = new Intent(HyperRogue.this, ForegroundService.class);
-            stopIntent.setAction(ForegroundService.STOPFOREGROUND_ACTION);
-            startService(stopIntent);
+            // Intent stopIntent = new Intent(HyperRogue.this, ForegroundService.class);
+            // stopIntent.setAction(ForegroundService.STOPFOREGROUND_ACTION);
+            // startService(stopIntent);
+            stopService(new Intent(HyperRogue.this, ForegroundService.class));
         }
 
         if (backgroundmusic != null) backgroundmusic.stop();

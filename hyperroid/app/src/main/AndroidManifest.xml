@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="com.roguetemple.hyperroid"
-      android:versionCode="13105" android:versionName="13.1e"
+      android:versionCode="13116" android:versionName="13.1p"
       android:installLocation="auto">
 <!--    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />         -->
 <!--    <uses-sdk android:minSdkVersion="9" android:targetSdkVersion="9" /> -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <application android:label="@string/app_name"
                  android:icon="@drawable/icon"
                  android:allowBackup="true">
@@ -13,6 +15,7 @@
                   android:windowSoftInputMode="adjustResize"
                   android:configChanges="orientation|keyboardHidden|screenSize"
                   android:name=".HyperRogue"
+                  android:theme="@style/AppTheme"
                   android:launchMode="singleTask" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -25,7 +28,12 @@
                   android:name=".HyperSettings">
         </activity>
 
-        <service android:name=".ForegroundService" android:exported="false">
+        <service android:name=".ForegroundService" android:exported="false"
+                 android:foregroundServiceType="specialUse"
+        >
+<property
+        android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+        android:value="Keep the game process running while the user temporarily switches to another application." />
         </service>
         
        <provider
@@ -34,3 +42,5 @@
          android:exported="true"/>
     </application>
 </manifest> 
+<!-- to do when targetting Android 16: android:windowOptOutEdgeToEdgeEnforcement stops working, need to use smaller size
+-->

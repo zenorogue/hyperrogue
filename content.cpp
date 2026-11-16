@@ -1384,7 +1384,7 @@ LAND( 0x804020, "Burial Grounds", laBurial, ZERO, itBarrow, RESERVED,
     "ancient jewelry buried in the graves."
     )
   NATIVE(m == moDraugr ? 1 : 0)
-  REQ(ITEMS(itKraken, U10))
+  REQ(IFINGAME(laKraken, ITEMS(itKraken, U10), GOLD(R60)))
 
 LAND( 0x90A548, "Trollheim", laTrollheim, ZERO, itTrollEgg, RESERVED, 
     "Many clans of Trolls spend their lives in this kingdom. You can find many "
@@ -1761,6 +1761,8 @@ ITEM('}', 0xFFFF80, "Crossbow", itCrossbow, IC_NAI, ZERO, RESERVED, osNone,
   "Your crossbow. Press 'f' or click it in the inventory to toggle firing mode. In firing mode, select a tile to see the trajectory, then "
   "click again to fire. After firing, the crossbow takes some time to reload."
   )
+
+MONSTER('D', 0xA0A0A0, "Donkey", moDonkey, CF_FACE_SIDE | CF_FACING, RESERVED, moYeti, "A donkey never moves if two potential moves are equally good.")
 
 //shmupspecials
 MONSTER( '@', 0xC0C0C0, "Rogue", moPlayer, CF_FACE_UP | CF_PLAYER, RESERVED, moNone, "In the Shoot'em Up mode, you are armed with thrown Knives.")

@@ -40,6 +40,7 @@ Have fun!
 #include "randeff.cpp"
 #include "reverts.cpp"
 #include "save.cpp"
+#include "physics.cpp"
 
 namespace rogue_unlike {
 
@@ -98,6 +99,7 @@ void editmap_frame() {
     dialog::display();
     });
   if(keypressed('f')) floodfill_pick(mousepx / block_x, mousepy / block_y);
+  if(keypressed('x')) final_view = !final_view;
   if(keypressed('t')) { m.where = xy(mousepx, mousepy); m.vel = xy(0, 0); current_room->edited = true; m.existing = true; m.hp = m.max_hp(); }
   }
 
@@ -148,15 +150,32 @@ tuple<xy, ld, int> get_next_room(xy w, room *r, int which) {
 vector<unique_ptr<struct entity>> new_entities;
 
 void playing_frame() {
-  m.act();
-
   auto& ents = current_room->entities;
+
+  for(auto& e: current_room->room_mods) e->act();
+
+  for(auto& e: ents) if(e->existing) e->preact();
+
+  m.act();
 
   for(auto& e: ents) if(e->existing) e->act(); else e->unact();
 
   auto mb = ents.begin();
   for(auto& e: ents) if(!e->destroyed) *(mb++) = std::move(e);
   ents.resize(mb - ents.begin());
+
+  int enemies = 0;
+  for(auto& e: ents) if(e->as_enemy() && e->existing) enemies++;
+  if(enemies > 0) {
+    walls[wArenaDoor].glyph = '+';
+    walls[wArenaDoor].flags = W_BLOCK | W_BLOCKBIRD;
+    }
+  else {
+    walls[wArenaDoor].glyph = '\'';
+    walls[wArenaDoor].flags = W_TRANS;
+    }
+
+  current_room->physics_act();
 
   for(auto &e: new_entities) ents.push_back(std::move(e));
   new_entities.clear();
@@ -291,6 +310,11 @@ void run() {
         shstream ss;
         print(ss, "HP ", m.hp, "/", m.max_hp());
         for(auto& sts: m.current.status_strings) sts(ss);
+        if(m.current.max_mageshield) print(ss, " SH ", m.current_mageshield, "/", m.current.max_mageshield);
+        if(m.current.dodge_value) print(ss, " DV ", m.current.dodge_value, "%");
+        if(m.current.heavy_armor) print(ss, " PV ", m.current.heavy_armor, "%");
+        if(m.current.spikes) print(ss, " SP ", m.current.spikes);
+        if(m.current.boost_max) print(ss, " B ", m.boost_left, "/", m.current.boost_max);
         displayfr(vid.fsize, vid.fsize, 2, vid.fsize, ss.s, titlecolor, 0);
         if(current_target && current_target->existing)
         displayfr(vid.xres - vid.fsize, vid.fsize, 2, vid.fsize, "HP " + its(current_target->hp) + "/" + its(current_target->max_hp()) + " " + current_target->get_name(), titlecolor, 16);
@@ -318,9 +342,11 @@ void run() {
         if(!help_entity && x >= 0 && y >= 0 && x < room_x && y < room_y) {
           if(!current_room->fov[y][x]) mouseovers = "invisible", helpstr = "You need to explore to see what is there.";
           else {
-            auto&w = walls[current_room->block_at[y][x] >> 3];
+            auto wtype = current_room->block_at[y][x] >> 3;
+            auto&w = walls[wtype];
             mouseovers = w.name;
             helpstr = w.help;
+            if(eWall(wtype) == wWater) mouseovers += " pressure: " + format("%lf", current_room->water_pressure[y][x]);
             }
           }
 
@@ -336,6 +362,7 @@ void run() {
       dialog::addTitle("Fountains of Alchemy", 0x4040C0, 150);
       dialog::addItem("return to game", 'v');
       dialog::add_action([] { cmode = mode::playing; });
+      inventory_page = 0;
 
       dialog::addItem("inventory", 'i');
       dialog::add_action_push(draw_inventory);
@@ -398,6 +425,8 @@ string parse_markup(string s) {
 
 void enable() {
 
+  if(powers.size()) throw hr_exception("error: ru doubly-enabled");
+
   stop_game();
   geometry = gBinary4;
   showstartmenu = false;
@@ -406,6 +435,7 @@ void enable() {
   set_sval();
   init_scales();
   gen_powers();
+  gen_randeffs();
   shuffle_all();
   
   hyperpoint aleft = deparabolic13(to_hyper(l_margin_at, yctr));
@@ -476,6 +506,12 @@ void add_platf_hooks() {
 
   rogueviz::rv_hook(hooks_drawcell, 90, draw_room_on_map);
 
+  rogueviz::rv_change(shot::gamescreen_in_shots, false);
+  rogueviz::rv_hook(shot::hooks_hqshot, 100, [] {
+    render_room(current_room);
+    draw_room();
+    });
+
   rogueviz::rv_hook(mapstream::hooks_savemap, 100, [] (hstream& f) {
     f.write<int>(67);
     for(auto& p: rooms) {
@@ -508,6 +544,13 @@ auto chk = arg::add3("-ru", enable)
   + arg::add3("-ru-start", start_new_game)
   + arg::add3("-ru-load", [] { arg::shift(); enable(); load_from(arg::args()); })
   + arg::add3("-ru-cheat", [] { arg::shift(); load_cheat(arg::args()); })
+  + arg::add3("-ru-see-all", [] {
+     for(auto& [w, r]: rooms)
+     for(int y=0; y<room_y; y++)
+     for(int x=0; x<room_x; x++)
+       if(walls[r.at(x,y)].flags & W_TRANS)
+         r.reveal_around(x, y);
+     })
   + addHook(mapstream::hooks_loadmap, 100, [] (hstream& f, int id) {
     if(id == 67) {
       println(hlog, "loading platformer");

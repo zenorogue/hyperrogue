@@ -676,7 +676,7 @@ EX string full_geometry_name() {
 void action_change_variation() {
   if(0) ;
   #if CAP_ARCM
-  else if(arcm::in()) arcm::next_variation();
+  else if(arcm::in_or_converted()) arcm::next_variation();
   #endif
   #if MAXMDIM >= 4
   else if(reg3::in() || geometry == gCubeTiling) reg3::configure_variation();
@@ -988,6 +988,16 @@ EX void showEuclideanMenu() {
 
   dialog::init(XLAT("experiment with geometry"));
 
+  dynamicval<eGeometry> d1(geometry, geometry);
+  dynamicval<eVariation> d2(variation, variation);
+
+  bool converted = false;
+  if(arb::convert::in() && rulegen::auto_rulegen) {
+    converted = true;
+    geometry = arb::convert::base_geometry;
+    variation = arb::convert::base_variation;
+    }
+
   dialog::addSelItem(XLAT("geometry"), geometry_name(), 'd');
   dialog::add_action([] { pushScreen(ge_select_tiling); pushScreen(ge_select_filter); });
 
@@ -1021,7 +1031,7 @@ EX void showEuclideanMenu() {
     }
   #endif
   
-  if(fake::available()) {
+  if(fake::available() && !converted) {
     dialog::addItem(XLAT("fake curvature"), '4');
     
     dialog::add_action([] {
@@ -1194,6 +1204,8 @@ EX void showEuclideanMenu() {
 
   dialog::addSelItem(XLAT("size of the world"), gd.size_str, '3');
   add_size_action();
+
+  if(currentmap->get_backmap()) add_edit(precision_policy);
 
   if(closed_manifold) {
     dialog::addSelItem(XLAT("Euler characteristics"), gd.euler == UNKNOWN ? "?" : its(gd.euler), 0);
@@ -1424,7 +1436,11 @@ int read_geom_args() {
     }
   #endif
   else if(argis("-d:quotient")) 
+    #if CAP_THREAD && MAXMDIM >= 4
     launch_dialog(WDIM == 2 ? showQuotientConfig : showQuotientConfig3);
+    #else
+    launch_dialog(showQuotientConfig );
+    #endif
   else if(argis("-uqf")) 
     fieldpattern::use_quotient_fp = true;
   #endif

@@ -9,7 +9,6 @@
 namespace rogueviz {
 namespace sag {
 
-enum eSagMethod { smClosest, smLogistic, smMatch };
 eSagMethod method;
 
 vector<string> method_names = {"closest", "logistic", "match"};

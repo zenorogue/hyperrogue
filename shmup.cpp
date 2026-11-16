@@ -33,8 +33,13 @@ ld sqdist(shiftpoint a, shiftpoint b) {
 
 EX namespace shmup {
 
+EX hookset<void(struct monster*)> hooks_destroy_monster;
+
 #if HDR
-struct monster {
+
+extern struct monster *mousetarget, *lmousetarget;
+
+struct monster : cell_content, dim_listener {
   eMonster type;
   cell *base;      ///< on which base cell this monster currently is
   cell *torigin;   ///< tortoises: origin, butterflies: last position
@@ -59,18 +64,19 @@ struct monster {
   bool isVirtual;    ///< off the screen: gmatrix is unknown, and pat equals at
   hyperpoint inertia;///< for frictionless lands
   
-  int refs;         ///< +1 for every reference (parent, lists of active monsters)
-
   int split_owner;  ///< in splitscreen mode, which player handles this
   int split_tick;   ///< in which tick was split_owner computed
 
   void reset();
-  
+
+  monster *as_monster() override { return this; }
+  void draw(celldrawer &cd) override;
+
   monster() {
     reset();
-    refs = 1; split_tick = -1; split_owner = -1;
+    split_tick = -1; split_owner = -1;
     no_targetting = false;
-    dead = false; inBoat = false; parent = NULL;
+    dead = false; inBoat = false; parent = nullptr;
     }
 
   eMonster get_parenttype() { return parent ? parent->type : moNone; }
@@ -83,16 +89,16 @@ struct monster {
 
   void rebasePat(const shiftmatrix& new_pat, cell *tgt);
   
-  void remove_reference();
-  
+  ~monster();
+
   void set_parent(monster *par) {
-    if(parent == par) return;
-    if(parent) parent->remove_reference();
+    if(parent) parent->unref();
     parent = par;
     parent->refs++;
     }
 
-  };  
+  void on_dim_change() override { swapmatrix(at); }
+  };
 #endif
 
 void monster::reset() {
@@ -115,21 +121,16 @@ EX eLand delayed_safety_land;
 
 bool lastdead = false;
 
-EX multimap<cell*, monster*> monstersAt;
+EX cell_content_list active;
 
-#if HDR
-typedef multimap<cell*, monster*>::iterator mit;
-#endif
+EX vector<monster*> nonvirtual, additional;
 
-EX vector<monster*> active, nonvirtual, additional;
-
-void monster::remove_reference() {
-  refs--;
-  if(!refs) {
-    if(parent) parent->remove_reference();
-    nonvirtual.erase(std::remove(nonvirtual.begin(), nonvirtual.end(), this), nonvirtual.end());
-    delete this;
-    }
+monster::~monster() {
+  if(mousetarget == this) mousetarget = nullptr;
+  if(lmousetarget == this) lmousetarget = nullptr;
+  callhooks(hooks_destroy_monster, this);
+  if(parent) parent->unref();
+  nonvirtual.erase(std::remove(nonvirtual.begin(), nonvirtual.end(), this), nonvirtual.end());
   }
 
 cell *findbaseAround(shiftpoint p, cell *around, int maxsteps) {
@@ -168,9 +169,7 @@ cell *findbaseAround(const shiftmatrix& H, cell *around, int maxsteps) {
   return asinh(h[2]);
   } */
 
-void monster::store() {
-  monstersAt.insert(make_pair(base, this));
-  }
+void monster::store() { add_to_list(base->contents); }
 
 void monster::findpat() {
   isVirtual = !gmatrix.count(base) || invalid_matrix(gmatrix[base].T);
@@ -336,7 +335,7 @@ EX void popmonsters() {
         m->dead = true; // already killed
         // also kill all the other monsters pushed there
         for(int j=0; j<i; j++) {
-          monster *m2 = active[j];
+          monster *m2 = nonvirtual[j];
           if(m2->base == m->base && !m2->notpushed) 
             killMonster(m2, moNone);
           }
@@ -1412,22 +1411,26 @@ void movePlayer(monster *m, int delta) {
   
   if(shotkey && canmove && curtime >= m->nextshot && !stunned) {
 
+    bool newshotkey = act[pcFire].pressed() || act[pcFaceFire].pressed();
+
     visibleFor(500);
-    if(items[itOrbFlash]) {
+    if(items[itOrbFlash] && newshotkey) {
       pushmonsters();
       killMonster(m->base, moNone);
       cwt.at = m->base;
       activateFlash();
       popmonsters();
+      m->nextshot = curtime + 100;
       return;
       }
     
-    if(items[itOrbLightning]) {
+    if(items[itOrbLightning] && newshotkey) {
       pushmonsters();
       killMonster(m->base, moLightningBolt);
       cwt.at = m->base;
       activateLightning();
       popmonsters();
+      m->nextshot = curtime + 100;
       return;
       }
     
@@ -1563,8 +1566,10 @@ EX bool verifyTeleport() {
   return true;
   }
 
+#define FOR_MONSTERS_IN_LIST(it, m, ml) FOR_LIST(it, ml) if(monster *m = it->as_monster())
+
 void destroyMimics() {
-  for(monster *m: active)
+  FOR_MONSTERS_IN_LIST(it, m, active)
     if(isMimic(m->type)) 
       m->dead = true;
   }
@@ -2566,15 +2571,11 @@ void moveMonster(monster *m, int delta) {
     }
   }
 
-void activateMonstersAt(cell *c) {
-  pair<mit, mit> p = 
-    monstersAt.equal_range(c);
-  for(mit it = p.first; it != p.second;) {
-    mit itplus = it;
-    itplus++;
-    active.push_back(it->second);
-    monstersAt.erase(it);
-    it = itplus;
+void activate_monsters_at(cell *c) {
+  auto p = &c->contents;
+  while(*p) {
+    if(monster *m = (*p)->as_monster()) m->add_to_list(active);
+    else p = &((*p)->next);
     }
   if(c->monst && isMimic(c->monst)) c->monst = moNone;
   // mimics are awakened by awakenMimics
@@ -2594,20 +2595,8 @@ void activateMonstersAt(cell *c) {
       enemy->inertia = random_spin() * point2(SCALE/3000., 0);
       }
     c->monst = moNone;
-    active.push_back(enemy);
+    enemy->add_to_list(active);
     }
-  }
-
-EX void fixStorage() {
-
-  vector<monster*> restore;
-
-  for(auto it = monstersAt.begin(); it != monstersAt.end(); it++) 
-    restore.push_back(it->second);
-
-  monstersAt.clear();
-
-  for(monster *m: restore) m->store();
   }
 
 EX hookset<bool(int)> hooks_turn;
@@ -2685,28 +2674,24 @@ EX void turn(int delta) {
 
   // detect active monsters
   if(doall)
-    for(cell *c: currentmap->allcells()) activateMonstersAt(c);
+    for(cell *c: currentmap->allcells()) activate_monsters_at(c);
   else
     for(auto& p: gmatrix)
-      activateMonstersAt(p.first);
-  
-  /* printf("size: gmatrix = %ld, active = %ld, monstersAt = %ld, delta = %d\n", 
-    gmatrix.size(), active.size(), monstersAt.size(),
-    delta); */
+      activate_monsters_at(p.first);
   
   bool exists[motypes];
   
   for(int i=0; i<motypes; i++) exists[i] = false;
 
-  nonvirtual.clear();
-  for(monster *m: active) {
+  nonvirtual.clear();  
+  FOR_MONSTERS_IN_LIST(it, m, active) {
     m->findpat();
     if(m->isVirtual) continue;
     else nonvirtual.push_back(m);
     exists[movegroup(m->type)] = true;
     }
   
-  for(monster *m: active) {
+  FOR_MONSTERS_IN_LIST(it, m, active) {
     
     switch(m->type) {
       case moPlayer: 
@@ -2722,7 +2707,7 @@ EX void turn(int delta) {
       }
     }
 
-  for(monster *m: active) {
+  FOR_MONSTERS_IN_LIST(it, m, active) {
     if(isMimic(m->type))
       moveMimic(m);
     }
@@ -2743,6 +2728,7 @@ EX void turn(int delta) {
       if(d == PINFD-1) continue;
       for(int i=0; i<c->type; i++) {
         cell *c2 = c->move(i);
+        if(!in_line_of_sight(c2)) continue;
         // printf("i=%d cd=%d\n", i, c->move(i)->cpdist);
         if(c2 && c2->pathdist == PINFD && gmatrix.count(c2) && 
           (passable_for(eMonster(t), c, c2, P_CHAIN | P_ONPLAYER) || c->wall == waThumperOn)) {
@@ -2884,27 +2870,21 @@ EX void turn(int delta) {
       }
     }
   
-  for(monster *m: additional) 
-    active.push_back(m);
+  for(monster *m: additional) m->add_to_list(active);
   additional.clear();
   
-  if(delayed_safety) { 
+  while(active) {
+    auto *m = (monster*) active;
+    if(m->dead && m->type != moPlayer)
+      m->unlist_and_unref();
+    else
+      m->store();
+    }
+
+  if(delayed_safety) {
     activateSafety(delayed_safety_land);
     delayed_safety = false;
     }
-
-  // deactivate all monsters
-  for(monster *m: active)
-    if(m->dead && m->type != moPlayer) {
-      if(m == mousetarget) mousetarget = NULL;
-      if(m == lmousetarget) lmousetarget = NULL;
-      m->remove_reference();
-      }
-    else {
-      m->store();
-      }
-    
-  active.clear();
   }
 
 EX void recall() {
@@ -2952,29 +2932,13 @@ EX void init() {
   }
 
 EX bool boatAt(cell *c) {
-  pair<mit, mit> p = 
-    monstersAt.equal_range(c);
-  for(mit it = p.first; it != p.second; it++) {
-    monster* m = it->second;
-    if(m->inBoat) return true;
-    }
+  FOR_MONSTERS_IN_LIST(it, m, c->contents) if(m->inBoat) return true;
   return false;
   }
 
 EX hookset<bool(const shiftmatrix&, cell*, shmup::monster*)> hooks_draw;
 
-EX void clearMonsters() {
-  for(mit it = monstersAt.begin(); it != monstersAt.end(); it++)
-    delete(it->second);
-  for(monster *m: active) m->remove_reference();
-  mousetarget = NULL;
-  lmousetarget = NULL;
-  monstersAt.clear();
-  active.clear();
-  }
-
 EX void clearMemory() {
-  clearMonsters();
   while(!traplist.empty()) traplist.pop();
   curtime = 0;
   speed_saving = 0;
@@ -2993,7 +2957,6 @@ void gamedata(hr::gamedata* gd) {
     gd->store(nextdragon);
     gd->store(visibleAt);
     gd->store(traplist);
-    gd->store(monstersAt);
     gd->store(active);
     gd->store(mousetarget);
     gd->store(lmousetarget);
@@ -3016,7 +2979,7 @@ EX bool playerInBoat(int i) {
   }
 
 EX void destroyBoats(cell *c) {
-  for(monster *m: active)
+  FOR_MONSTERS_IN_LIST(it, m, active)
     if(m->base == c && m->inBoat)
       m->inBoat = false;
   }
@@ -3037,17 +3000,7 @@ EX void addShmupHelp(string& out) {
   }
 
 auto hooks = addHook(hooks_clearmemory, 0, shmup::clearMemory) +
-  addHook(hooks_gamedata, 0, shmup::gamedata) +
-  addHook(hooks_removecells, 0, [] () {
-    for(mit it = monstersAt.begin(); it != monstersAt.end();) {
-      if(is_cell_removed(it->first)) {
-        monstersAt.insert(make_pair(nullptr, it->second));
-        auto it0 = it; it++;
-        monstersAt.erase(it0);
-        }
-      else it++;
-      }
-    });
+  addHook(hooks_gamedata, 0, shmup::gamedata);
 
 EX void switch_shmup() { 
   stop_game();
@@ -3056,12 +3009,6 @@ EX void switch_shmup() {
   start_game();
   }
 
-#if MAXMDIM >= 4
-auto hooksw = addHook(hooks_swapdim, 100, [] {
-  for(auto& p: monstersAt) swapmatrix(p.second->at);
-  });
-#endif
-    
 EX shiftmatrix at_missile_level(const shiftmatrix& T) {
   if(WDIM == 3) return T;
   if(GDIM == 3) return orthogonal_move(T, cgi.BODY);
@@ -3075,21 +3022,19 @@ EX void draw_collision_debug() {
 
 EX }
 
-bool celldrawer::draw_shmup_monster() {
-  using namespace shmup;
+void shmup::monster::draw(struct hr::celldrawer& cd) {
   #if CAP_SHAPES
+  using namespace shmup;
 
-  pair<mit, mit> p = 
-    monstersAt.equal_range(c);
-    
-  if(p.first == p.second) return false;
+  auto m = this;
+  cell *c = cd.c;
+  auto& Vd = cd.Vd;
+  auto& V = cd.V;
+  auto& Vboat = cd.Vboat;
+
   ld zlev = -geom3::factor_to_lev(zlevel(tC0(Vd.T)));
    
-  vector<monster*> monsters;
-
-  for(mit it = p.first; it != p.second; it++) {
-    monster* m = it->second;
-    if(c != m->base) continue; // may happen in RogueViz Collatz
+  if(1) {
     m->pat = ggmatrix(m->base) * m->at;
     shiftmatrix view = V * m->at;
 
@@ -3101,7 +3046,7 @@ bool celldrawer::draw_shmup_monster() {
 
     bool half_elliptic = elliptic && GDIM == 3 && WDIM == 2;
     bool mirrored = det(view.T) > 0;
-    if(half_elliptic && mirrored) continue;
+    if(half_elliptic && mirrored) return;
     
     if(!mouseout()) {
       if(m->no_targetting) ; else
@@ -3137,7 +3082,7 @@ bool celldrawer::draw_shmup_monster() {
     int q = isize(ptds);
     if(q != isize(ptds) && !m->inBoat) pushdown(c, q, view, zlev, true, false);
 
-    if(callhandlers(false, hooks_draw, V, c, m)) continue;
+    if(callhandlers(false, hooks_draw, V, c, m)) return;
 
     switch(m->type) {
       case moPlayer: {
@@ -3288,7 +3233,6 @@ bool celldrawer::draw_shmup_monster() {
     }
 
   #endif
-  return false;
   }
 
 }

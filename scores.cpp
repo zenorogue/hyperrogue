@@ -61,6 +61,9 @@ int modediff(score *S) {
   if(S->box[196] != (int) land_structure) diff += 32;
   if(S->box[119] != shmup::on) diff += 64;
   if(pureHardcore() && !isHardcore(S)) diff += 128;
+  if((S->box[422] < PURELOS_LEVEL) != (lineofsightAt < PURELOS_LEVEL)) diff += 8;
+  else if(S->box[421] != int(lineofsight)) diff += 8;
+
   if(g != gNormal && S->box[120] != specialland) 
     diff += 256;
   if(g != geometry) {
@@ -84,6 +87,9 @@ string modedesc(score *S) {
   if(S->box[197] > 1) s += "/P" + its(S->box[197]);
   if(S->box[306]) s += "/i";
   if(isHardcore(S)) s += "/h";
+  if(S->box[421] == 1 && S->box[422] < PURELOS_LEVEL) s += "/l1";
+  if(S->box[421] == 2 && S->box[422] < PURELOS_LEVEL) s += "/l2";
+  if(S->box[422] >= PURELOS_LEVEL) s += "/l?";
   return s;
   }
 
@@ -93,7 +99,7 @@ string displayfor(int scoredisplay, score* S, bool shorten = false) {
     if(scoredisplay == POSSCORE) return "mode";
     string str = XLATN(boxname[scoredisplay]);
     if(!shorten) return str;
-    if(scoredisplay == 0 || scoredisplay == 65) return XLAT("time");
+    if(scoredisplay == 65) return XLAT("time");
     if(scoredisplay == 2) return "$$$";
     if(scoredisplay == 3) return XLAT("kills");
     if(scoredisplay == 4) return XLAT("turns");
@@ -104,7 +110,7 @@ string displayfor(int scoredisplay, score* S, bool shorten = false) {
     if(scoredisplay == 68) return XLAT("where");
     return csub(str, 5);
     }
-  if(scoredisplay == 0 || scoredisplay == 65) {
+  if(scoredisplay == 65) {
     char buf[20];
     int t = S->box[0];
     if(t >= 3600) 
@@ -139,7 +145,7 @@ void showPickScores() {
 
   scorerev = false;
 
-  for(int i=0; i<=POSSCORE; i++) {
+  for(int i=1; i<=POSSCORE; i++) {
     int scoredisplay = i;
     if(!fakebox[scoredisplay]) {
       string s = displayfor(scoredisplay, NULL);
@@ -161,7 +167,7 @@ void showPickScores() {
     dialog::addItem(vi.first, dialog::list_fake_key++);
     dialog::add_action([&vi] {
       int scoredisplay = vi.second;
-      for(int i=0; i<=POSSCORE; i++)
+      for(int i=1; i<=POSSCORE; i++)
         if(columns[i] == scoredisplay) swap(columns[i], columns[curcol]);
       popScreen();
       });
@@ -188,7 +194,7 @@ void show() {
     columns.push_back(POSSCORE);
 
     for(int j=0; j<(int) scores::bpGUARD; j++)
-    for(int i=0; i<POSSCORE; i++) if(!fakebox[i] && boxprio[i] == j) {
+    for(int i=1; i<POSSCORE; i++) if(!fakebox[i] && boxprio[i] == j) {
       columns.push_back(i);
       }
     }
@@ -314,24 +320,24 @@ void show() {
         }
       }
     else if(doexiton(sym, uni)) popScreen();
-
-    static int scoredragy;
-    static bool lclicked;
-    
-    if(mousepressed) {
-      if(!lclicked) {
-        // scoredragx = mousex;
-        scoredragy = mousey;
-        }
-  
-      else {
-        while(mousey > scoredragy + vid.fsize) scoredragy += vid.fsize, scorefrom--;
-        while(mousey < scoredragy - vid.fsize) scoredragy -= vid.fsize, scorefrom++;
-        }
-
-      lclicked = mousepressed;
-      }
     };
+
+  static int scoredragy;
+  static bool lclicked;
+  if(mousepressed) {
+    if(!lclicked) {
+      // scoredragx = mousex;
+      scoredragy = mousey;
+      }
+
+    else {
+      while(mousey > scoredragy + vid.fsize) scoredragy += vid.fsize, scorefrom--;
+      while(mousey < scoredragy - vid.fsize) scoredragy -= vid.fsize, scorefrom++;
+      }
+
+    lclicked = mousepressed;
+    }
+  else lclicked = false;
   }
 
 void load_only() {

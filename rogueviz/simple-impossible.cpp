@@ -151,8 +151,7 @@ void draw_ro() {
     transmatrix S = Id;
     if(spinning) S = cspin(0, 1, ticks * TAU / anims::period);
 
-    int bid = 0;
-    for(auto& b: bricks) { bid++;
+    for(auto& b: bricks) {
       transmatrix V = eupush(b.location);
 
       int which = b.walls;

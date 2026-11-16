@@ -238,8 +238,10 @@ EX void computePathdist(eMonster param, bool include_allies IS(true)) {
       cellwalker cw1 = cw + j;
       // printf("i=%d cd=%d\n", i, c->move(i)->cpdist);
       cell *c2 = cw1.peek();
+      if(!in_line_of_sight(c2)) continue;
       
       flagtype f = P_MONSTER;
+      if(param == moIvyRoot) f |= P_IVY;
       if(param == moTameBomberbird) f |= P_FLYING | P_ISFRIEND;
       if(isPrincess(param)) f |= P_ISFRIEND | P_USEBOAT | P_CHAIN;
       if(param == moGolem) f |= P_ISFRIEND;
@@ -251,7 +253,7 @@ EX void computePathdist(eMonster param, bool include_allies IS(true)) {
         
         if(qb >= qtarg) {
           if(param == moTortoise && nogoSlow(c, c2)) continue;
-          if(param == moIvyRoot  && strictlyAgainstGravity(c, c2, false, MF_IVY)) continue;
+          if(param == moIvyRoot  && !ivy_passable(c, c2)) continue;
           if(param == moWorm && (cellUnstable(c) || cellEdgeUnstable(c) || prairie::no_worms(c))) continue;
           if(!isFriendly(param) && items[itOrbLava] && c2->cpdist <= 5 && pseudohept(c) && makeflame(c2, 1, true))
             continue;
@@ -545,6 +547,8 @@ EX void bfs() {
   for(auto& t: tempmonsters) t.first->monst = t.second;
   
   buildAirmap();
+
+  create_los();
   }
 
 EX void moverefresh(bool turn IS(true)) {
@@ -900,7 +904,7 @@ EX void monstersTurn() {
       checkFreedom(pc);
 
   DEBB(debug_turn, ("check"));
-  checkmove();
+  checkmove(false);
   if(canmove) elec::checklightningfast();
 
 
@@ -908,6 +912,8 @@ EX void monstersTurn() {
   for(cell *pc: player_positions())
     history::movehistory.push_back(pc);
 #endif
+
+  if(recompute_los) create_los();
   }
 
 /** check if whirlline is looped, if yes, remove the repeat; may not detect loops immediately */
@@ -929,6 +935,107 @@ EX bool looped(vector<cell*>& whirlline) {
     return true;
     }
   return false;
+  }
+
+/*-- lineofsight --*/
+
+#if HDR
+enum class los { none, geodesic, geometric };
+#define PURELOS_LEVEL 10
+#endif
+
+EX los lineofsight;
+/** when did we switch the lineofsight mode */
+EX int lineofsightAt;
+EX bool recompute_los = false;
+EX bool lineofsight_cheat = false;
+
+EX map<cell*, int> current_fov; // 1 == seen, 2 = see through
+
+EX bool blocks_sight(cell *c, cell *last) {
+  if(inmirror(c)) {
+    cellwalker cw(c, neighborId(c, last));
+    auto cw2 = mirror::reflect(cw);
+    return blocks_sight(cw2.at, cw2.cpeek());
+    }
+  if(invisfish && !isWateryOrBoat(c)) return true;
+  if(c->monst == passive_switch) return true;
+  if(among(c->wall, waBigStatue, waMirror, waCloud, waThumperOff, waThumperOn, waExplosiveBarrel)) return c->cpdist > 1;
+  if(snakelevel(c) == 3 && !(c->cpdist == 1 && snakelevel(cwt.at) >= 2)) return true;
+  if(c->wall == waTrunk && last && last->wall != waTrunk && c->cpdist > 1) return true;
+  if(c->land == laMountain && last->land == laMountain) {
+    int d = celldistAlt(last);
+    if(celldistAlt(c) > d && (cwt.at->land != laMountain || celldistAlt(cwt.at) > d)) return true;
+    }
+  return (isWall(c) && !among(c->wall, waFreshGrave, waAncientGrave, waClosedGate, waMirrorWall, waSmallTree, waShrub, waRoundTable)) || thruVine(c, last);
+  }
+
+EX bool in_line_of_sight(cell *c) {
+  if(lineofsight == los::none) return true;
+  return current_fov[c];
+  }
+
+EX bool in_line_of_sight_for_player(cell *c) {
+  if(in_line_of_sight(c)) return true;
+  if(cheater && lineofsight_cheat) return true;
+  int range = 0;
+  if(items[itOrbAether]) range = 2;
+  if(items[itOrbDash] || items[itOrbFrog] || items[itOrbPhasing]) range = 3;
+  if(items[itOrbInvis]) range = 999999;
+  return c->cpdist <= range;
+  }
+
+EX void create_los() {
+  current_fov.clear();
+  if(lineofsight == los::geodesic) {
+    for(auto c: dcal) {
+      if(c->cpdist == 0) current_fov[c] |= 3;
+      forCellEx(c1, c) if(c1->cpdist < c->cpdist && (current_fov[c1] & 2))
+        current_fov[c] |= blocks_sight(c, c1) ? 1 : 3;
+      }
+    }
+  if(lineofsight == los::geometric) for(int p=0; p<numplayers(); p++) if(multi::playerActive(p)) {
+    auto cp = playerpos(p);
+    current_fov[cp] = 3;
+
+    for(auto c: dcal) {
+      transmatrix R = currentmap->relative_matrix(c, cp, C0);
+      hyperpoint h = tC0(R);
+      transmatrix T = spintox(h);
+      if(shmup::on) T = iso_inverse(shmup::pc[p]->at) * T;
+      cellwalker at = cp;
+
+      while(true) {
+        int best_i = -1;
+        ld best_y = HUGE_VAL;
+        for(int i=0; i<at.at->type; i++) {
+          cellwalker at1 = at + i;
+          if(at1.cpeek()->cpdist != at.at->cpdist + 1) continue;
+          transmatrix U = T * currentmap->adj(at.at, at1.spin);
+          hyperpoint U0 = tC0(U);
+          hyperpoint T0 = tC0(T);
+          if(U0[0] < T0[0] + 1e-6) continue;
+          ld y;
+          if(GDIM == 3) y = hypot(U0[1], U0[2]); else y = abs(U0[1]) + (U0[1] > 0 ? 1e-6 : 0);
+          if(y < best_y) { best_y = y; best_i = i; }
+          }
+        if(best_i < 0) break;
+        at = at + best_i;
+        T = T * currentmap->adj(at.at, at.spin);
+        at = at + wstep;
+        if(blocks_sight(at.at, at.cpeek())) { current_fov[at.at] |= 1; break; }
+        current_fov[at.at] |= 3;
+        }
+      }
+    }
+  if(lineofsight != los::none) {
+    int magicrange = 0;
+    for(auto c: dcal) if(!in_line_of_sight(c) && in_line_of_sight_for_player(c)) magicrange = c->cpdist;
+    if(magicrange > 3) markOrb(itOrbInvis);
+    else if(magicrange > 2) markOrb(itOrbFrog), markOrb(itOrbDash), markOrb(itOrbPhasing);
+    else markOrb(itOrbAether);
+    }
+  recompute_los = false;
   }
 
 }

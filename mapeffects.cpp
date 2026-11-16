@@ -757,9 +757,9 @@ EX void checkTide(cell *c) {
 EX bool makeNoMonster(cell *c) {
   changes.ccell(c);
   if(isAnyIvy(c->monst)) killMonster(c, moPlayer, 0);
-  else if(c->monst == moPair) {
+  else if(is_paired(c->monst)) {
     changes.ccell(c->move(c->mondir));
-    if(c->move(c->mondir)->monst == moPair)
+    if(is_paired(c->move(c->mondir)->monst))
       c->move(c->mondir)->monst = moNone;
     }
   else if(isWorm(c->monst)) {

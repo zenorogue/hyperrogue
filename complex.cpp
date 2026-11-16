@@ -430,6 +430,7 @@ EX namespace elec {
       drawLightning();
       for(int i=2; i<isize(charges); i++) if(charges[i].fire)
         affect(charges[i].c);
+      recompute_los = true;
       }
     }
   
@@ -2199,7 +2200,7 @@ EX namespace heat {
             int v = (windmap::at(ct) - windmap::at(c)) & 255;
             if(v > 128) v -= 256;
             if(v < windmap::NOWINDFROM && v > -windmap::NOWINDFROM)
-              hdiff = hdiff * (1 - v * 5. / windmap::NOWINDFROM);
+              hdiff = hdiff * (1 - v * 5 / windmap::NOWINDFROM);
             }
           #endif
 
@@ -2491,6 +2492,7 @@ EX void livecaves() {
 
   for(int i=0; i<dcs; i++) {
     cell *c = allcells[i];
+    auto old = c->wall;
     if(!doall && c->cpdist > gr+1) break;
     int hv = heatvals[i];
 
@@ -2520,6 +2522,8 @@ EX void livecaves() {
       if(hv < 0 && c->wall == waBoat) c->wall = waStrandedBoat;
       if(hv < 0 && c->wall == waSea) c->wall = waNone;
       }
+
+    if(c->wall != old) recompute_los = true;
     }
   
   for(int i=0; i<isize(bringlife); i++) {
@@ -3659,6 +3663,8 @@ EX namespace windmap {
       }
     }
 
+  EX int wind_failed = 0;
+
   EX void create() {
     if(disable_bigstuff) return;
     if(cgflags & qPORTALSPACE) return;
@@ -3672,12 +3678,7 @@ EX namespace windmap {
       // cw.spin = 0;
       neighbors.emplace_back();
       auto &v = neighbors.back();
-      if(NONSTDVAR && !sphere && !arcm::in() && !mhybrid && !INVERSE && WDIM == 2 && geometry != gOctTet3)
-        for(int l=0; l<S7; l++) {
-          v.push_back(getId(cw + cth + l + wstep + cth));
-          }
-      else
-        for(int l=0; l<cw.at->type; l++) v.push_back(getId(cw+l+wstep));
+      for(int l=0; l<cw.at->type; l++) v.push_back(getId(cw+l+wstep));
       }
     
     int N = isize(samples);
@@ -3706,9 +3707,15 @@ EX namespace windmap {
     vector<int> tocheck;
     for(int i=0; i<N; i++) tocheck.push_back(i);
     hrandom_shuffle(tocheck);
-    
+
+    wind_failed = 0;
+
     for(int a=0; a<isize(tocheck); a++) {
-      if(a >= 200*N) { printf("does not converge\n"); break; }
+      if(a >= 200*N) {
+        println(hlog, "does not converge");
+        wind_failed |= 1;
+        break;
+        }
       int bestval = 1000000000, best = 0;
       int i = tocheck[a];
       for(int k=0; k<256; k++) {
@@ -3737,8 +3744,10 @@ EX namespace windmap {
       if(tries < maxtries) goto tryagain;
       }
     if(debug_geometry) println(hlog, "windmap: tries = ", tries, " N = ", N);
-    if(tries >= maxtries && maxtries >= 20) {
-      addMessage("Failed to generate an interesting wind/lava pattern.");
+    if(tries >= maxtries) {
+      if(maxtries >= 20)
+        addMessage("Failed to generate an interesting wind/lava pattern.");
+      wind_failed |= 2;
       }
     else if(false) {
       printf("tocheck size = %d\n", isize(tocheck));

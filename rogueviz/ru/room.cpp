@@ -102,6 +102,17 @@ void room::reveal(int cx, int cy) {
     if(b&1) cx--;
     if(b&2) cy--;
     fov[cy][cx+1] = fov[cy+1][cx] = fov[cy+1][cx+1] = fov[cy][cx] = true;
+    }
+  }
+
+void room::unreveal(int cx, int cy) {
+  if(cx < 0 || cy < 0 || cx >= room_x || cy >= room_y) return;
+  fov[cy][cx] = 0;
+  auto b = block_at[cy][cx];
+  if(b & 4) {
+    if(b&1) cx--;
+    if(b&2) cy--;
+    fov[cy][cx+1] = fov[cy+1][cx] = fov[cy+1][cx+1] = fov[cy][cx] = 0;
     }   
   }
 

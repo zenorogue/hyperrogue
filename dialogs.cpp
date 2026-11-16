@@ -36,15 +36,16 @@ EX namespace dialog {
   
   struct scaler {
     function<ld(ld)> direct, inverse;
-    bool positive, int_slider;
+    bool positive, int_slider, zerify;
     };
 
   static inline ld identity_f(ld x) { return x; }
   
-  const static scaler identity = {identity_f, identity_f, false, true};
-  const static scaler logarithmic = { (ld (*) (ld)) log, (ld (*) (ld)) exp, true, false};
-  const static scaler asinhic = { (ld (*) (ld)) asinh, (ld (*) (ld)) sinh, false, false};
-  const static scaler asinhic100 = {[] (ld x) { return asinh(x*100); }, [] (ld x) { return sinh(x)/100; }, false, false};
+  const static scaler identity = {identity_f, identity_f, false, true, true};
+  const static scaler logarithmic = { (ld (*) (ld)) log, (ld (*) (ld)) exp, true, false, false};
+  const static scaler asinhic = { (ld (*) (ld)) asinh, (ld (*) (ld)) sinh, false, false, false};
+  const static scaler asinhic100 = {[] (ld x) { return asinh(x*100); }, [] (ld x) { return sinh(x)/100; }, false, false, false};
+  const static scaler asinhic_big = {[] (ld x) { return asinh(x*1e15); }, [] (ld x) { return sinh(x)/1e15; }, false, false, false};
  
   /** extendable dialog */
   struct extdialog : funbase {
@@ -101,6 +102,7 @@ EX namespace dialog {
   EX void scaleLog() { get_ne().sc = logarithmic; }
   EX void scaleSinh() { get_ne().sc = asinhic; }
   EX void scaleSinh100() { get_ne().sc = asinhic100; }
+  EX void scaleSinh_big() { get_ne().sc = asinhic_big; }
 
   EX void scale_given(vector<int> v) {
     get_ne().vmin = v[0];
@@ -995,12 +997,16 @@ EX namespace dialog {
   EX void handle_actions(int &sym, int &uni) {
     if(key_actions.count(uni)) {
       key_actions[uni]();
+      #if CAP_SDL
       if(uni >= ' ' && uni <= 127) ignore_textinput = true;
+      #endif
       sym = uni = 0;
       return;
       }
     if(key_actions.count(sym)) {
+      #if CAP_SDL
       if(sym >= ' ' && sym <= 127) ignore_textinput = true;
+      #endif
       key_actions[sym]();
       sym = uni = 0;
       return;
@@ -1567,7 +1573,7 @@ EX namespace dialog {
           (*ne.editwhat)++;
         else
           *ne.editwhat = ne.sc.inverse(ne.sc.direct(*ne.editwhat) + shiftmul * ne.step);
-        if(abs(*ne.editwhat) < ne.step * 1e-6 && !ne.intval) *ne.editwhat = 0;
+        if(abs(*ne.editwhat) < ne.step * 1e-6 && !ne.intval && ne.sc.zerify) *ne.editwhat = 0;
         apply_slider();
         }
       else if(DKEY == SDLK_LEFT) {
@@ -1575,7 +1581,7 @@ EX namespace dialog {
           (*ne.editwhat)--;
         else
           *ne.editwhat = ne.sc.inverse(ne.sc.direct(*ne.editwhat) - shiftmul * ne.step);
-        if(abs(*ne.editwhat) < ne.step * 1e-6 && !ne.intval) *ne.editwhat = 0;
+        if(abs(*ne.editwhat) < ne.step * 1e-6 && !ne.intval && ne.sc.zerify) *ne.editwhat = 0;
         apply_slider();
         }
   #endif
@@ -1684,34 +1690,74 @@ EX namespace dialog {
     return ret;
     }
   
-  EX void displayPageButtons(int i, int numpages) {
+  #if HDR
+  constexpr flagtype DB_BACK = 1;
+  constexpr flagtype DB_HELP = 2;
+  constexpr flagtype DB_EXIT = 4;
+  constexpr flagtype DB_PLAIN = 8;
+  constexpr flagtype DB_ACTIVATE = 16;
+  constexpr flagtype DB_EXPLAIN = 32;
+  constexpr flagtype DB_MINIMAL = 64;
+  constexpr flagtype DB_MINIMAL_OFF = 128;
+  #endif
+
+  EX void display_bottom_buttons(int numpages, flagtype flags) {
+
+    struct button {
+      int key;
+      string text;
+      color_t col;
+      int width;
+      bool digits;
+      };
+    vector<button> buttons;
+    auto add_button = [&] (int k, string t, color_t c) {
+      buttons.emplace_back();
+      buttons.back().key = k;
+      buttons.back().text = t;
+      buttons.back().col = c;
+      buttons.back().digits = false;
+      };
+
+    if(numpages == 2) {
+      add_button('1', XLAT("page") + " 1", nlpage == 1 ? 0xD8D8C0 : dialogcolor);
+      add_button('2', XLAT("page") + " 2", nlpage == 2 ? 0xD8D8C0 : dialogcolor);
+      add_button('3', XLAT("all"), nlpage == 0 ? 0xD8D8C0 : dialogcolor);
+      }
+    else if(numpages > 2) {
+      add_button('1', XLAT("last page"), nlpage == 1 ? 0xD8D8C0 : dialogcolor);
+      add_button('2', XLAT("next page"), nlpage == numpages ? 0xD8D8C0 : dialogcolor);
+      add_button('3', nlpage ? its(nlpage) + "/" + its(numpages) : XLAT("all"), nlpage == 0 ? 0xD8D8C0 : dialogcolor);
+      buttons.back().digits = true;
+      }
+    else if(numpages == 0) {
+      if(flags & DB_PLAIN) add_button('1', XLAT("plain"), dialogcolor);
+      if(flags & DB_ACTIVATE) add_button('2', XLAT("touch to activate"), dialogcolor);
+      if(flags & DB_EXPLAIN) add_button('2', XLAT("touch to explain"), dialogcolor);
+      }
+    if(flags & DB_MINIMAL) add_button('4', XLAT("minimal OFF"), dialogcolor);
+    if(flags & DB_MINIMAL_OFF) add_button('4', XLAT("minimal ON"), dialogcolor);
+    if(flags & DB_BACK) add_button(SDLK_ESCAPE, XLAT("go back"), dialogcolor);
+    if(flags & DB_HELP) add_button(SDLK_F1, XLAT("help"), dialogcolor);
+    if(flags & DB_EXIT) add_button('0', XLAT("exit mode"), dialogcolor);
+
+    int total_w = 0;
+
+    for(auto& b: buttons) {
+      string t = keyname(b.key) + " - " + b.text;
+      total_w += b.width = textwidth(vid.fsize, t);
+      }
+
+    int hole = (vid.xres - total_w) / (isize(buttons) + 1);
+
     int i0 = vid.yres - vid.fsize;
-    int xr = vid.xres / 80;
-
-    if(numpages == 2) if(displayfrZH(xr*8, i0, 1, vid.fsize, IFM("1 - ") + XLAT("page") + " 1", nlpage == 1 ? 0xD8D8C0 : dialogcolor, 8))
-      getcstat = '1';
-    if(numpages == 2) if(displayfrZH(xr*24, i0, 1, vid.fsize, IFM("2 - ") + XLAT("page") + " 2", nlpage == 1 ? 0xD8D8C0 : dialogcolor, 8))
-      getcstat = '2';
-    if(numpages == 2) if(displayfrZH(xr*40, i0, 1, vid.fsize, IFM("3 - ") + XLAT("all"), nlpage == 0 ? 0xD8D8C0 : dialogcolor, 8))
-      getcstat = '3';
-
-    if(numpages > 2) if(displayfrZH(xr*8, i0, 1, vid.fsize, IFM("1 - ") + XLAT("last page"), nlpage == 1 ? 0xD8D8C0 : dialogcolor, 8))
-      getcstat = '1';
-    if(numpages > 2) if(displayfrZH(xr*24, i0, 1, vid.fsize, IFM("2 - ") + XLAT("next page"), nlpage == numpages ? 0xD8D8C0 : dialogcolor, 8))
-      getcstat = '2';
-    if(numpages > 2) if(displayfrZH(xr*40, i0, 1, vid.fsize, nlpage ? its(nlpage) + "/" + its(numpages) : IFM("3 - ") + XLAT("all"), nlpage == 0 ? 0xD8D8C0 : dialogcolor, 8))
-      getcstat = '3';
-
-    if(i&1) if(displayfrZH(xr*56, i0, 1, vid.fsize, IFM(keyname(SDLK_ESCAPE) + " - ") + XLAT("go back"), dialogcolor, 8))
-      getcstat = '0';
-    if(i&2) if(displayfrZH(xr*72, i0, 1, vid.fsize, IFM("F1 - ") + XLAT("help"), dialogcolor, 8))
-      getcstat = SDLK_F1;
-    if(i&4) if(displayfrZH(xr*8, i0, 1, vid.fsize, IFM("1 - ") + XLAT("plain"), dialogcolor, 8))
-      getcstat = '1';
-    if(i&8) if(displayfrZH(xr*24, i0, 1, vid.fsize, IFM("2 - ") + XLAT("touch to activate"), dialogcolor, 8))
-      getcstat = '2';
-    if(i&16) if(displayfrZH(xr*24, i0, 1, vid.fsize, IFM("2 - ") + XLAT("touch to explain"), dialogcolor, 8))
-      getcstat = '2';
+    int x = 0;
+    for(auto& b: buttons) {
+      string t = IFM(keyname(b.key) + " - ") + b.text;
+      x += b.width + hole;
+      if(displayfrZH(x, i0, 1, vid.fsize, t, b.col, 16))
+        getcstat = b.key;
+      }
     }
   
   EX bool handlePageButtons(int sym, int uni, bool dkeys, int numpages) {

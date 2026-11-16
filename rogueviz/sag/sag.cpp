@@ -11,6 +11,9 @@ namespace rogueviz {
 
 namespace sag {
 
+debugflag debug_sag("sag");
+debugflag debug_init_sag("init_sag", true);
+
 flagtype state;
 
 // std::mt19937 los;
@@ -289,12 +292,9 @@ void viz_longpath() {
 void unoptimize() {
   use_cells_to_draw = true;
   drawthemap();
-  for(int i=0; i<isize(vdata); i++) {
-    vdata[i].m->at = inverse_shift(ggmatrix(cwt.at), ggmatrix(vdata[i].m->base)) * vdata[i].m->at;
-    vdata[i].m->base = cwt.at;
-    }
+  for(int i=0; i<isize(vdata); i++)
+    vdata[i].be(cwt.at, inverse_shift(ggmatrix(cwt.at), ggmatrix(vdata[i].m->base)) * vdata[i].m->at);
   use_cells_to_draw = false;
-  shmup::fixStorage();
   rogueviz::rv_change(dont_optimize, true);
   rogueviz::rv_change(frustum_culling, false);
   }
@@ -325,7 +325,9 @@ int readArgs() {
   else if(argis("-sag-unoptimize")) {
     unoptimize();
     }
-
+  else if(argis("-sag-edge-arrow")) {
+    shift(); ensure_sag_edge()->arrow_scale = arg::argf();
+    }
   else return 1;
 #endif
   return 0;
@@ -346,7 +348,7 @@ void init() {
 
   weight_label = "min weight";
   temperature = 0; sagmode = sagOff;
-  sag_edge = add_edgetype("SAG edge");
+  ensure_sag_edge();
   }
 
 void clear() {
@@ -359,9 +361,9 @@ void clear() {
   cell_matrix.clear();
   cellpoint.clear();
   sagdist.clear();
-  sag_edge = nullptr;
   state = 0;
   qon.clear(); qsf.clear();
+  sag_edge = nullptr;
   }
 
 string cname() {

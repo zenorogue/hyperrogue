@@ -435,14 +435,14 @@ void game_frame() {
   vel_y = next_y - where_y;
   
   if(on_floor) {
-    if(keystate[SDLK_LEFT]) vel_x = -d * modv;
-    else if(keystate[SDLK_RIGHT]) vel_x = d * modv;
+    if(keystate[SDL12(SDLK_LEFT, SDL_SCANCODE_LEFT)]) vel_x = -d * modv;
+    else if(keystate[SDL12(SDLK_RIGHT, SDL_SCANCODE_RIGHT)]) vel_x = d * modv;
     else vel_x = 0;
-    if(keystate[SDLK_UP]) vel_y = -4 * d * modv;
+    if(keystate[SDL12(SDLK_UP, SDL_SCANCODE_UP)]) vel_y = -4 * d * modv;
     }
   else {
-    if(keystate[SDLK_LEFT]) vel_x += -d * .01 * moda;
-    else if(keystate[SDLK_RIGHT]) vel_x += d * .01 * moda;
+    if(keystate[SDL12(SDLK_LEFT, SDL_SCANCODE_LEFT)]) vel_x += -d * .01 * moda;
+    else if(keystate[SDL12(SDLK_RIGHT, SDL_SCANCODE_RIGHT)]) vel_x += d * .01 * moda;
     vel_y += d * grav * moda;
     }
   

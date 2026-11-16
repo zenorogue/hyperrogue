@@ -172,10 +172,12 @@ struct hrmap_spherical : hrmap_standard {
     return Id;
     }
   
-  void on_dim_change() override {
-    hrmap_standard::on_dim_change();
+  void reinit() override {
+    hrmap_standard::reinit();
     where.clear();
     }
+
+  void on_dim_change() override { reinit(); }
 
   transmatrix relative_matrixc(cell *c2, cell *c1, const hyperpoint& hint) override {
     if(IRREGULAR) return relative_matrix_via_masters(c2, c1, hint);
