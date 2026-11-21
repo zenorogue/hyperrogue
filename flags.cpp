@@ -351,7 +351,7 @@ EX spatial_info get_spatial_info(cell *c) {
     return spatial_info{SIDE::WATERLEVEL, SIDE::DEEP, F(DEEP), 0};
   if(c->wall == waReptile)
     return spatial_info{SIDE::FLOOR, SIDE::FLOOR, F(FLOOR) | F(DEEP), 0};
-  if(c->wall == waShallow)
+  if(c->wall == waShallow || (c->wall == waStrandedBoat && c->land == laOcean && c->landparam >= tidalphase2))
     return spatial_info{SIDE::WATERLEVEL, SIDE::SHALLOW, F(SHALLOW) | F(DEEP), 0};
   if(isWateryOrBoat(c) || isChasmy(c))
     return spatial_info{SIDE::WATERLEVEL, SIDE::DEEP, F(DEEP), 0};

@@ -186,7 +186,7 @@ void celldrawer::setcolors() {
       fcol = wcol;
     }
   
-  else if(c->wall == waShallow) 
+  else if(c->wall == waShallow || (c->wall == waStrandedBoat && c->land == laOcean && c->landparam >= tidalphase2))
     fcol = 0x40C0C0;
 
   // floor colors for all the lands

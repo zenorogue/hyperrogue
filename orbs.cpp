@@ -684,6 +684,7 @@ EX void teleportTo(cell *dest) {
   movecost(from, dest, 2);
   #if CAP_COMPLEX2
   mine::auto_teleport_charges();
+  if(mine::in_minesweeper()) ++turncount;
   #endif
   }
 
