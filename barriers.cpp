@@ -302,7 +302,7 @@ EX void setbarrier(cell *c, eLand l1, eLand l2, bool setbar) {
     c->land = laElementalWall;
     c->wall = getElementalWall(l1);
     }
-  else if(l1 == laHaunted || l2 == laHaunted) {
+  else if(!honestHauntedWoods && (l1 == laHaunted || l2 == laHaunted)) {
     c->land = laHauntedWall;
     }
   else if(l1 == laMirrored2 || l2 == laMirrored2)
