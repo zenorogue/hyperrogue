@@ -2661,6 +2661,7 @@ EX void turn(int delta) {
 
   collisions.clear();
 
+  int old_curtime = curtime;
   curtime += delta;
   if(items[itOrbSpeed]) {
     curtime += speed_saving / 2;
@@ -2766,6 +2767,9 @@ EX void turn(int delta) {
       groupmove(moDragonHead, 0);
       nextdragon = curtime + 1500;
       }
+
+    if(items[itOrbSpeed] && curtime >= nextmove - 500 && old_curtime < nextmove - 500)
+      reduceOrbPowers();
   
     if(tick) {
       nextmove += 1000;

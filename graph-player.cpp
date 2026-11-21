@@ -169,7 +169,10 @@ EX void drawPlayerEffects(const shiftmatrix& V, const shiftmatrix& Vparam, cell 
   if(items[itOrbShield] > (shmup::on ? 0 : ORBBASE)) drawShield(V, itOrbShield);
   if(items[itOrbShell] > (shmup::on ? 0 : ORBBASE)) drawShield(V, itOrbShell);
 
-  if(items[itOrbSpeed]) drawSpeed(V, (items[itOrbSpeed] % 2) ? 1.1 : 0.8);
+  if(items[itOrbSpeed]) {
+    auto size = shmup::on ? lerp(0.8, 1.1, (shmup::nextmove - shmup::curtime)/1000.) : (items[itOrbSpeed] % 2) ? 1.1 : 0.8;
+    drawSpeed(V, size);
+    }
   if(items[itCurseGluttony]) drawCurse(V, itCurseGluttony); 
   if(items[itCurseRepulsion]) drawCurse(V, itCurseRepulsion); 
 
