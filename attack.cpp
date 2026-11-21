@@ -793,7 +793,7 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
     }
   if(m == moSlime) { 
     pcount = 0;
-    drawParticles(c, winf[c->wall].color, 80, 200);
+    drawParticles(c, winf[conditional_flip_slime(det(View) < 0, c->wall)].color, 80, 200);
     playSound(c, "splash" + pick12());
     c->monst = moNone; 
     spill(c, c->wall, 2); 
