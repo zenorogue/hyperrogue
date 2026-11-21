@@ -794,10 +794,6 @@ EX int grid_layers = 3;
 EX void gridline(const shiftmatrix& V1, const hyperpoint h1, const shiftmatrix& V2, const hyperpoint h2, color_t col, int prec) {
   transmatrix U2 = unshift(V2, V1.shift);
 
-  int c1 = safe_classify_ideals(h1);
-  int c2 = safe_classify_ideals(h2);
-  ld d = (c1 <= 0 || c2 <= 0) ? 99 : hdist(V1.T*h1, U2*h2);
-  
   #if MAXMDIM >= 4
   if(GDIM == 3 && fat_edges) {
     if(nonisotropic) {
@@ -808,15 +804,30 @@ EX void gridline(const shiftmatrix& V1, const hyperpoint h1, const shiftmatrix& 
       return;
       }
 
-    shiftmatrix T = V1 * rgpushxto0(h1);
-    transmatrix S = rspintox(inverse_shift(T, V2) * h2);
-    transmatrix U = rspintoc(inverse_shift(T*S, shiftless(C0)), 2, 1);
-    auto& p = queuepoly(T * S * U, cgi.get_pipe_iso(d, vid.linewidth, ePipeEnd::ball), col);
-    p.intester = xpush0(d/2);
+    auto piper = [&] (hyperpoint p1, hyperpoint p2) {
+      shiftmatrix T = V1 * rgpushxto0(p1);
+      transmatrix S = rspintox(inverse_shift(T, V2) * p2);
+      transmatrix U = rspintoc(inverse_shift(T*S, shiftless(C0)), 2, 1);
+      ld d = hdist(V1.T*p1, U2*p2);
+      auto& p = queuepoly(T * S * U, cgi.get_pipe_iso(d, vid.linewidth, ePipeEnd::ball), col);
+      p.intester = xpush0(d/2);
+      };
+
+    if(WDIM == 2) {
+      ld eps = cgi.human_height/100;
+      if(grid_layers & 1) piper(orthogonal_move(h1,cgi.FLOOR+eps), orthogonal_move(h2,cgi.FLOOR+eps));
+      if(grid_layers & 2) piper(orthogonal_move(h1,cgi.WALL-eps), orthogonal_move(h2,cgi.WALL-eps));
+      }
+    else piper(h1, h2);
+
     return;
     }
   #endif
 
+  int c1 = safe_classify_ideals(h1);
+  int c2 = safe_classify_ideals(h2);
+
+  ld d = (c1 <= 0 || c2 <= 0) ? 99 : hdist(V1.T*h1, U2*h2);
   while(d > precise_width && d < 100 && grid_depth < 10) { 
     if(V1.shift != V2.shift || !eqmatrix(V1.T, V2.T, 1e-6)) { gridline(V1, h1, V1, inverse_shift(V1, V2) * h2, col, prec); return; }
     hyperpoint h;
