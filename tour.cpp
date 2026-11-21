@@ -184,7 +184,7 @@ EX void presentation(presmode mode) {
 
   cheater = 0;
   
-  if(mode == pmStart) tourhelp = XLAT(slides[currentslide].name);
+  if(mode == pmStart) tourhelp = XLAT(get_slidename(slides[currentslide].name));
   
   if(sickmode && !items[itOrbTeleport]) items[itOrbTeleport] = 1;
   if(mode == pmStart) slidecommand = "";
@@ -203,7 +203,7 @@ string parent_folder(const string& s) {
   return "";
   }
 
-string get_slidename(const string& s) {
+EX string get_slidename(const string& s) {
   int i = 0;
   for(int k=0; k<isize(s); k++) if(s[k] == '/') i = k+1;
   return s.substr(i);
