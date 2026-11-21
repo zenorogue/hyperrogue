@@ -199,9 +199,25 @@ string latex_packages =
   "\\usepackage[T1]{fontenc}\n"
   "\\usepackage{color}\n"
   "\\usepackage{graphicx}\n"
-  "\\usepackage{url}\n"
+  "\\usepackage{url}\n";
+
+string latex_defs =
   "\\definecolor{remph}{rgb}{0,0.5,0}\n"
   "\\renewcommand{\\labelitemi}{{\\color{remph}$\\blacktriangleright$}}\n";
+
+set<string> packages_added;
+
+void add_latex_package(const string& s) {
+  if(packages_added.count(s)) return;
+  packages_added.insert(s);
+  latex_packages += s;
+  }
+
+void add_latex_def(const string& s) {
+  if(packages_added.count(s)) return;
+  packages_added.insert(s);
+  latex_defs += s;
+  }
 
 string latex_cachename(string s, flagtype flags) {
   unsigned hash = 0;
@@ -219,12 +235,12 @@ string gen_latex(presmode mode, string s, int res, flagtype flags) {
       FILE *f = fopen("latex-cache/rogueviz-latex.tex", "w");
       fprintf(f,
         "\\documentclass[border=2pt]{standalone}\n"
-        "%s"
+        "%s%s"
         "\\begin{document}\n"
         "\\begin{varwidth}{\\linewidth}\n"
         "%s"
         "\\end{varwidth}\n"
-        "\\end{document}\n", latex_packages.c_str(), s.c_str());
+        "\\end{document}\n", latex_packages.c_str(), latex_defs.c_str(), s.c_str());
       fclose(f);
       hr::ignore(system("cd latex-cache; pdflatex rogueviz-latex.tex"));
       int test_pdftopng = system("pdftopng -v > /dev/null 2>&1");

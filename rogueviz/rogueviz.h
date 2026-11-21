@@ -174,6 +174,10 @@ namespace rogueviz {
 
     extern map<string, texture::texture_data> textures;
 
+    extern string latex_packages, latex_defs;
+    void add_latex_package(const string&);
+    void add_latex_def(const string&);
+
 inline void setCanvasChar(presmode mode, char c) {
   if(c == '0') {
     setCanvasColor(mode, 0x101010, [] {});
@@ -270,6 +274,7 @@ function<void(presmode)> roguevizslide_action(char c, const T& t, const U& act) 
   void latex_in_space(const shiftmatrix& V, ld scale, string s, color_t col, flagtype flags);
   
   inline purehookset hooks_latex_slide, hooks_post_latex_slide;
+  extern string latex_s;
 
   inline ld angle = 0;
   inline int dir = -1;
