@@ -238,7 +238,7 @@ void wfc() {
     v.pop_back();
     int changes = 0;
     for(int i=1; i<isize(v); i++) if(v[i] == 1 && v[i-1] == 0) changes++;
-    if(v[0] == 1 && v.back() == 0) changes++;
+    if(isize(v) > 1 && v[0] == 1 && v.back() == 0) changes++;
     int nes = 0;
     for(int vv: v) nes += vv;
     
