@@ -1658,7 +1658,7 @@ EX void playerMoveEffects(movei mi) {
   if(c2->land == laOcean && c2->wall == waBoat && c2->landparam < 30 && markOrb(itOrbWater))
     c2->landparam = 40;
   
-  if((c2->land == laHauntedWall || c2->land == laHaunted) && !hauntedWarning) {
+  if((c2->land == laHauntedWall || c2->land == laHaunted) && !hauntedWarning && (!honestHauntedWoods || getHauntedDepth(c2) > HAUNTED_RADIUS)) {
     changes.value_set(hauntedWarning, true);
     addMessage(XLAT("You become a bit nervous..."));
     addMessage(XLAT("Better not to let your greed make you stray from your path."));

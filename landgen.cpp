@@ -2596,7 +2596,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           if(hrand_monster(4000) < 10 + items[itLotus] + yendor::hardness() && !safety) 
             c->monst = moGhost;
             
-          int depth = getHauntedDepth(c);
+          int depth = getHauntedDepth(c) - (honestHauntedWoods ? HAUNTED_RADIUS : 0);
           
           if(hrand(500 + depth) < depth - items[itLotus] && !safety && !peace::on)
             c->item = itLotus;
@@ -3159,7 +3159,7 @@ EX void setdist(cell *c, int d, cell *from) {
     }
   
   if(d <= 7 && (c->land == laGraveyard || c->land == laHauntedBorder) && !in_s2xe()) {
-    c->land = (c->landparam >= 1 && c->landparam <= HAUNTED_RADIUS) ? laHauntedBorder : laGraveyard;
+    c->land = (!honestHauntedWoods && c->landparam >= 1 && c->landparam <= HAUNTED_RADIUS) ? laHauntedBorder : laGraveyard;
     }
 
   if(d == 8 && isGravityLand(c->land)) {

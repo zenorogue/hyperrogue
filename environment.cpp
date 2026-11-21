@@ -395,7 +395,7 @@ EX void bfs() {
           c2->item = itNone;
           }
         
-        if(c2->item == itLotus && c2->cpdist == distlimit && items[itLotus] >= getHauntedDepth(c2)) {
+        if(c2->item == itLotus && c2->cpdist == distlimit && items[itLotus] >= getHauntedDepth(c2) - (honestHauntedWoods ? HAUNTED_RADIUS : 0)) {
           c2->item = itNone;
           }
         

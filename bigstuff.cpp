@@ -694,6 +694,8 @@ EX cell *buildAnotherEquidistant(cell *c, int radius) {
   return c2;
   }
 
+EX bool honestHauntedWoods;
+
 EX void buildAnotherEquidistant(cell *c) {
   //printf("building another coast\n");
   
@@ -701,7 +703,7 @@ EX void buildAnotherEquidistant(cell *c) {
 
   generatingEquidistant = true;
   
-  int radius = c->land == laOcean ? 30 : HAUNTED_RADIUS + 5;
+  int radius = c->land == laOcean ? 30 : honestHauntedWoods ? 5 : HAUNTED_RADIUS + 5;
 
   buildAnotherEquidistant(c, radius);
   
@@ -1026,7 +1028,7 @@ EX void buildEquidistant(cell *c) {
   if(c->landparam > 30 && b == laOcean && !generatingEquidistant && !mhybrid && hrand(10) < 5 && chance)
     buildAnotherEquidistant(c);
 
-  if(c->landparam > HAUNTED_RADIUS+5 && b == laGraveyard && !generatingEquidistant && !mhybrid && hrand(100) < (PURE?25:5) && landUnlockedIngame(laHaunted) && chance)
+  if(c->landparam > (honestHauntedWoods ? 5 : HAUNTED_RADIUS+5) && b == laGraveyard && !generatingEquidistant && !mhybrid && hrand(100) < (PURE?25:5) && landUnlockedIngame(laHaunted) && chance)
     buildAnotherEquidistant(c);
   }
 
@@ -1686,9 +1688,9 @@ EX bool deep_ocean_at(cell *c, cell *from) {
     if(!from) return true;
     else for(int i=0; i<from->type; i++) {
       cell *c2 = from->move(i);
-      if(c2 && c2->landparam > HAUNTED_RADIUS+5)
+      if(c2 && c2->landparam > (honestHauntedWoods ? 5 : HAUNTED_RADIUS+5))
         return true;
-      if(c2) forCellEx(c3, c2) if(c3 && c3->land == laGraveyard && c3->landparam > HAUNTED_RADIUS+5)
+      if(c2) forCellEx(c3, c2) if(c3 && c3->land == laGraveyard && c3->landparam > (honestHauntedWoods ? 5 : HAUNTED_RADIUS+5))
         return true;
       }
     }

@@ -3768,6 +3768,9 @@ EX namespace mapeditor {
     dialog::addBoolItem_action(XLAT("safety generation"), safety, 's');
     dialog::addInfo(XLAT("(no treasure, no dangers)"));
 
+    dialog::addBoolItem_action(XLAT("honest Haunted Woods"), honestHauntedWoods, 'y');
+    dialog::addInfo(XLAT("(normal Great Wall border instead of equidistant)"));
+
     dialog::addBoolItem(XLAT("god mode"), autocheat, 'G');
     dialog::add_action([] () { autocheat = true; });
     dialog::addInfo(XLAT("(unlock all, allow cheats, normal character display, cannot be turned off!)"));
