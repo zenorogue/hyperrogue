@@ -2008,7 +2008,7 @@ EX void convert() {
   vector<int> old_shvids;
   map<int, int> old_to_new;
 
-  int root_target = -1; // get_identification(cwt.at).target;
+  int root_target = get_identification(cwt.at).target;
 
   /* keep root_target first, to ensure starting the game on the expected type */
   old_to_new[root_target] = 0;
