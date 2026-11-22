@@ -1168,6 +1168,7 @@ EX void drawmessages() {
   }
 
 EX void drawCircle(int x, int y, int size, color_t color, color_t fillcolor IS(0)) {
+  if(size == 0) return;
   if(size < 0) size = -size;
   #if CAP_GL && CAP_POLY
   if(vid.usingGL) {
