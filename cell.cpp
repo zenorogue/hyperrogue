@@ -1767,6 +1767,16 @@ EX int valence() {
   return S3;
   }
 
+EX int approx_max_degree() {
+  if(IRREGULAR) return 15;
+  if(!PURE) return max(S7, 6);
+  #if CAP_ARCM
+  if(arcm::in()) return arcm::max_degree();
+  #endif
+  if(arb::in()) return arb::current.max_degree;
+  return S7;
+  }
+
 /** portalspaces are not defined outside of a boundary */
 EX bool is_boundary(cell *c) {
   if(c == &out_of_bounds) return true;

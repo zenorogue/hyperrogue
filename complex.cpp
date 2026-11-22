@@ -2132,10 +2132,9 @@ EX namespace heat {
     
     vector<ld> hmods(dcs, 0);
     
-    int divby = 10;
-    if(S7 > 10) divby *= 2;
-    if(arcm::in()) divby *= 2;
-    if(WDIM == 3) divby *= 2;
+    int md = approx_max_degree();
+    int divby = max(10, md * 5/4);
+    println(hlog, "md = ", md, " divby = ", divby);
     
     for(int i=0; i<dcs; i++) {
       cell *c = allcells[i];

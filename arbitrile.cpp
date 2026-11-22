@@ -158,7 +158,7 @@ struct arbi_tiling {
   
   vector<string> options;
 
-  int min_valence, max_valence;
+  int min_valence, max_valence, max_degree;
   bool is_football_colorable;
   bool was_unmirrored;
   bool was_split_for_football;
@@ -734,12 +734,14 @@ EX void compute_vertex_valence(arb::arbi_tiling& ac) {
   if(generic ? compute_vertex_valence_generic(ac) : compute_vertex_valence_flat(ac)) goto recompute;
   ac.have_valence = true;
 
-  ac.min_valence = UNKNOWN; ac.max_valence = 0;
-  for(auto& sh: ac.shapes) 
+  ac.min_valence = UNKNOWN; ac.max_valence = 0; ac.max_degree = 0;
+  for(auto& sh: ac.shapes) {
+    if(sh.size() > ac.max_degree) ac.max_degree = sh.size();
     for(auto& val: sh.vertex_valence) {
       if(val < ac.min_valence) ac.min_valence = val;
       if(val > ac.max_valence) ac.max_valence = val;
-      }      
+      }
+    }
   }
 
 EX bool extended_football = true;

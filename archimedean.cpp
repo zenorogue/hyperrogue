@@ -1625,6 +1625,14 @@ EX bool support_dice(int x) {
   return false;
   }
 
+EX int max_degree() {
+  if(DUAL) return isize(current.faces);
+  int mx = 0;
+  for(auto& x: current.faces) if(x > mx) mx = x;
+  if(PURE) return mx;
+  return max(2*mx, isize(current.faces));
+  }
+
 #endif
 
 EX }
