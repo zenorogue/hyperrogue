@@ -2007,8 +2007,15 @@ EX void convert() {
   reidentify:
   vector<int> old_shvids;
   map<int, int> old_to_new;
+
+  int root_target = -1; // get_identification(cwt.at).target;
+
+  /* keep root_target first, to ensure starting the game on the expected type */
+  old_to_new[root_target] = 0;
+  old_shvids.push_back(root_target);
+
   for(auto id: identification)
-    if(id.first == id.second.target) {
+    if(id.first == id.second.target && id.first != root_target) {
       old_to_new[id.first] = isize(old_shvids);
       old_shvids.push_back(id.first);
       }
@@ -2100,6 +2107,11 @@ EX void convert() {
       println(hlog, "angles=", sh.angles);
       }
     }
+
+  // push hash, so that non-determinism will not cause a reordered conversion to be considered the same
+  shstream ss;
+  for(auto& sh: ac.shapes) print(ss, sh.edges, sh.angles, sh.connections);
+  ac.name += format(" [%zd]", std::hash<string>()(ss.s));
   
   arb::compute_vertex_valence(ac);
 
