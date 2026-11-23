@@ -28,6 +28,7 @@ elif [[ "$GH_OS" == "macos-latest" ]]; then
   (cd /usr/local/include && ln -sf SDL/SDL.h)
 elif [[ "$GH_OS" == "windows-latest" ]]; then
   pacboy -Sy --noconfirm --needed $GH_DEPS_MINGW64
+  sed -i'.orig' 's/<SDL.h>/"SDL.h"/' /ucrt64/include/SDL/SDL_gfxPrimitives.h
 else
   echo 'unknown OS'
   exit 1
