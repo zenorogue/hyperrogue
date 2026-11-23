@@ -1527,11 +1527,8 @@ EX void set_euland3(cell *c, int co10, int co11, int alt, int hash) {
 
 // the main big stuff function
 
-EX bool easy_to_find_specialland = false;
-
 EX bool quickfind(eLand l) {
   if(l == cheatdest) return true;
-  if(l == specialland && easy_to_find_specialland) return true;
 #if CAP_TOUR
   if(tour::on && tour::quickfind(l)) return true;
 #endif
