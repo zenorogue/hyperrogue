@@ -62,7 +62,7 @@ ifeq (${OS},linux)
 endif
 
 ifeq (${OS},mingw)
-  CXXFLAGS_EARLY += -DWINDOWS -mwindows -D_A_VOLID=8 -I/ucrt64/include/SDL -D__USE_MINGW_ANSI_STDIO
+  CXXFLAGS_EARLY += -DWINDOWS -mwindows -D_A_VOLID=8 -I/ucrt64/include/SDL -Wno-error=format -Wno-error=format-extra-args
   EXE_EXTENSION := .exe
   LDFLAGS_GL := -lopengl32
   LDFLAGS_GLEW := -lglew32

@@ -98,10 +98,10 @@ void set_mac() {
 void set_mingw64() {
   mingw64 = true;
   preprocessor = "g++ -E";
-  compiler = "g++ -mwindows -W -Wall -Wextra -Wno-unused-parameter -Wno-invalid-offsetof -Wno-implicit-fallthrough -Wno-maybe-uninitialized -c";
+  compiler = "g++ -mwindows -W -Wall -Wextra -Wno-unused-parameter -Wno-invalid-offsetof -Wno-implicit-fallthrough -Wno-maybe-uninitialized -Wno-error=format -Wno-error=format-extra-args -c";
   linker = "g++";
   default_exec_name = "hyper";
-  opts = "-DWINDOWS -DCAP_GLEW=1 -DCAP_PNG=1 -D__USE_MINGW_ANSI_STDIO";
+  opts = "-DWINDOWS -DCAP_GLEW=1 -DCAP_PNG=1";
   libs = " hyper.res -lopengl32 -lSDL -lSDL_gfx -lSDL_mixer -lSDL_ttf -lpthread -lz -lglew32 -lpng";
   setvbuf(stdout, NULL, _IONBF, 0); // MinGW is quirky with output buffering
   }
