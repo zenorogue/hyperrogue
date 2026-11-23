@@ -2133,8 +2133,8 @@ EX namespace heat {
     vector<ld> hmods(dcs, 0);
     
     int md = approx_max_degree();
-    int divby = max(10, md * 5/4);
-    println(hlog, "md = ", md, " divby = ", divby);
+    ld divby = max(10, md * 5/4.);
+    ld multiplier = 1 / divby;
     
     for(int i=0; i<dcs; i++) {
       cell *c = allcells[i];
@@ -2192,7 +2192,7 @@ EX namespace heat {
             continue;
             }
           ld hdiff = absheat(ct) - absheat(c);
-          hdiff /= divby;
+          hdiff *= multiplier;
 
           #if CAP_FIELD
           if(ct->land == laBlizzard && c->land == laBlizzard) {
