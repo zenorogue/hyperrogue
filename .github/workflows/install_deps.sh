@@ -3,7 +3,7 @@ set -x -e o pipefail
 
 GH_DEPS_UBUNTU="$GH_COMPILER libsdl1.2-dev libsdl-ttf2.0-dev libsdl-gfx1.2-dev libsdl-mixer1.2-dev"
 GH_DEPS_MACOS="sdl sdl_gfx sdl_mixer sdl_ttf"
-GH_DEPS_MINGW64="$GH_COMPILER:x SDL:x SDL_ttf:x SDL_gfx:x SDL_mixer:x make gdb:x"
+GH_DEPS_MINGW64="$GH_COMPILER:x SDL:x sdl-ttf:x sdl-gfx:x sdl-mixer:x make gdb:x"
 
 if [[ "$GH_HYP_GLEW" == "glew_1" ]]; then
   GH_DEPS_UBUNTU+=" libglew-dev"
@@ -27,7 +27,6 @@ elif [[ "$GH_OS" == "macos-latest" ]]; then
   # work around https://stackoverflow.com/questions/51034399/ for now
   (cd /usr/local/include && ln -sf SDL/SDL.h)
 elif [[ "$GH_OS" == "windows-latest" ]]; then
-  pacman -Syu --noconfirm
   pacboy -Sy --noconfirm --needed $GH_DEPS_MINGW64
   sed -i'.orig' 's/<SDL.h>/"SDL.h"/' /mingw64/include/SDL/SDL_gfxPrimitives.h
 else
