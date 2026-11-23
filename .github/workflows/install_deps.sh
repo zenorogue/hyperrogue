@@ -27,6 +27,7 @@ elif [[ "$GH_OS" == "macos-latest" ]]; then
   # work around https://stackoverflow.com/questions/51034399/ for now
   (cd /usr/local/include && ln -sf SDL/SDL.h)
 elif [[ "$GH_OS" == "windows-latest" ]]; then
+  pacman -Syu --noconfirm
   pacboy -Sy --noconfirm --needed $GH_DEPS_MINGW64
   sed -i'.orig' 's/<SDL.h>/"SDL.h"/' /mingw64/include/SDL/SDL_gfxPrimitives.h
 else
