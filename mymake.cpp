@@ -101,7 +101,7 @@ void set_mingw64() {
   compiler = "g++ -mwindows -W -Wall -Wextra -Wno-unused-parameter -Wno-invalid-offsetof -Wno-implicit-fallthrough -Wno-maybe-uninitialized -c";
   linker = "g++";
   default_exec_name = "hyper";
-  opts = "-DWINDOWS -DCAP_GLEW=1 -DCAP_PNG=1";
+  opts = "-DWINDOWS -DCAP_GLEW=1 -DCAP_PNG=1 -D__USE_MINGW_ANSI_STDIO";
   libs = " hyper.res -lopengl32 -lSDL -lSDL_gfx -lSDL_mixer -lSDL_ttf -lpthread -lz -lglew32 -lpng";
   setvbuf(stdout, NULL, _IONBF, 0); // MinGW is quirky with output buffering
   }
