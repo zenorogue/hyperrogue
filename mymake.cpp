@@ -98,7 +98,7 @@ void set_mac() {
 void set_mingw64() {
   mingw64 = true;
   preprocessor = "g++ -E";
-  compiler = "g++ -mwindows -W -Wall -Wextra -Wno-unused-parameter -Wno-invalid-offsetof -Wno-implicit-fallthrough -Wno-maybe-uninitialized -Wno-error=format -Wno-error=format-extra-args -c";
+  compiler = "g++ -mwindows -W -Wall -Wextra -Wno-unused-parameter -Wno-invalid-offsetof -Wno-implicit-fallthrough -Wno-maybe-uninitialized -c";
   linker = "g++";
   default_exec_name = "hyper";
   opts = "-DWINDOWS -DCAP_GLEW=1 -DCAP_PNG=1";
