@@ -2133,7 +2133,7 @@ EX namespace heat {
     vector<ld> hmods(dcs, 0);
     
     int md = approx_max_degree();
-    ld divby = max(10, md * 5/4.);
+    ld divby = max(10., md * 5/4.);
     ld multiplier = 1 / divby;
     
     for(int i=0; i<dcs; i++) {

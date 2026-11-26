@@ -270,7 +270,11 @@ template<class... T> void hprintln(T... t) { println(hlog, t...); }
 template<class... T> void hprint(T... t) { print(hlog, t...); }
 
 #ifdef __GNUC__
+#ifdef __MINGW_PRINTF_FORMAT
+__attribute__((__format__ (__MINGW_PRINTF_FORMAT, 1, 2)))
+#else
 __attribute__((__format__ (__printf__, 1, 2)))
+#endif
 #endif
 inline string format(const char *fmt, ...) {
   char buf[1000];
