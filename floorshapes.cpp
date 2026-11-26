@@ -171,11 +171,11 @@ void generate_matrices(matrixlist& matrices, const mesher& o, const mesher& n) {
 
 int nsym0;
 
-void generate_matrices_scale(ld scale, int noft) {
+void generate_matrices_scale(ld scale, int noft, int sides) {
   mesher ohex = msh(gNormal, 6, 0.329036, 0.566256, 0.620672, 0, 1);
   mesher ohept = msh(gNormal, 7, hexf7, hcrossf7, hcrossf7, M_PI/7, 1);
   if(!BITRUNCATED) {
-    mesher nall = msh(geometry, S7, cgi.rhexf, cgi.tessf, cgi.tessf, -M_PI, scale);
+    mesher nall = msh(geometry, sides, cgi.rhexf, cgi.tessf, cgi.tessf, -M_PI, scale);
     bool use = geosupport_football() < 2;
     if(use && noft == 1) {
       mesher opure = msh(gNormal, 7, 0.620672, 1.090550, 1.090550, M_PI/7, 1);
@@ -619,7 +619,7 @@ void geometry_information::generate_floorshapes_for(int id, cell *c) {
     if(STDVAR && standard_tiling()) {
       for(auto ii: {0, 1}) {
         auto& tgt = (ii ? fsh.shadow : fsh.b)[id];
-        generate_matrices_scale(fsh.scale, fsh.noftype * (ii ? SHADMUL : 1));
+        generate_matrices_scale(fsh.scale, fsh.noftype * (ii ? SHADMUL : 1), inforder::mixed() ? c->type : S7);
         if(sidir & 1)
           for(auto& m: hex_matrices.v) for(auto& m2: m.second) m2 = spin180() * m2;
         if(PURE && geosupport_football() < 2) {
@@ -633,7 +633,7 @@ void geometry_information::generate_floorshapes_for(int id, cell *c) {
       }
     
     else {
-      generate_matrices_scale(fsh.scale, fsh.noftype);
+      generate_matrices_scale(fsh.scale, fsh.noftype, S7);
 
       auto& m = (!siid && geosupport_football() == 2) ? hex_matrices : hept_matrices;
       

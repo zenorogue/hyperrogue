@@ -600,9 +600,9 @@ hyperpoint hrmap_standard::get_corner(cell *c, int cid, ld cf) {
   #endif
   if(PURE) {
     if(cgi.emb->is_euc_in_noniso()) {
-      return lspinpush0(spin_angle(c, cid) + M_PI/S7, cgi.hcrossf * 3 / cf);
+      return lspinpush0(spin_angle(c, cid) + M_PI/c->type, cgi.hcrossf * 3 / cf);
       }
-    return ddspin(c,cid,M_PI/S7) * lxpush0(cgi.hcrossf * 3 / cf);
+    return ddspin(c,cid,M_PI/c->type) * lxpush0(cgi.hcrossf * 3 / cf);
     }
   if(BITRUNCATED) {
     if(!ishept(c))
