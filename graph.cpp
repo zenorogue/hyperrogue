@@ -1596,6 +1596,8 @@ EX ld get_stereo_param() {
 
 EX debugflag debug_calcparam = {"graph_param"};
 
+EX bool side_on_squareish;
+
 EX void calcparam() {
 
   indenter_finish icalcparam(debug_calcparam, "calcparam");
@@ -1624,6 +1626,8 @@ EX void calcparam() {
     }
   else {
     bool ok = !vrhr::active();
+    if(side_on_squareish && vid.xres > vid.yres && (cmode & sm::SIDE))
+      current_display->sidescreen = true;
     if(vid.xres > vid.yres * 4/3+16 && (cmode & sm::SIDE) && ok && !((cmode & sm::MAYDARK) && centered_menus))
       current_display->sidescreen = true;
 #if CAP_TOUR
