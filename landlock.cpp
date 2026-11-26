@@ -1122,6 +1122,9 @@ EX land_validity_t& land_validity(eLand l) {
 
   if(S3 >= OINF && among(l, laIvoryTower, laEndorian)) return not_implemented;
 
+  if(l == laWestWall && S3 >= OINF)
+    return dont_work;
+
   if(l == laDice && geometry == gNormal && PURE)
     return dont_work;
 
