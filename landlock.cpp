@@ -1119,7 +1119,9 @@ EX land_validity_t& land_validity(eLand l) {
     if(l == laElementalWall) return dont_work;
     if(l == laDragon) return not_in_full_game;
     }
-  
+
+  if(S3 >= OINF && among(l, laIvoryTower, laEndorian)) return not_implemented;
+
   if(l == laDice && geometry == gNormal && PURE)
     return dont_work;
 
