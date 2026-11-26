@@ -1652,13 +1652,18 @@ EX vector<adj_data> adj_minefield_cells_full(cell *c) {
     cw += wstep;
     cw++;
     cellwalker cw1 = cw;
+    while(cw.cpeek() == c && same_point_may_warn(T*currentmap->adj(cw.at,cw.spin)*tile_center(), tile_center())) {
+      cw++; if(cw == cw1) return {adj_data{cw.at, cw.mirrored, T}};
+      }
+    cw1 = cw;
     do {
       res.emplace_back(adj_data{cw.at, cw.mirrored, T});
       cw.cpeek();
       T = T * currentmap->adj(cw.at, cw.spin);
       cw += wstep;
       cw++;
-      if(cw.cpeek() == c) cw++;
+      while(cw.cpeek() == c && same_point_may_warn(T*currentmap->adj(cw.at,cw.spin)*tile_center(), tile_center()))
+        cw++;
       }
     while(cw != cw1);
     }
