@@ -679,7 +679,7 @@ EX void mode_higlights() {
     }));
 
   #if CAP_CRYSTAL
-  if(hiitemsMax(itHolyGrail) || cheater || autocheat) {
+  if(hiitemsMax(itHolyGrail) || unlock_all || cheater || autocheat) {
     dialog::addItem(XLAT("Knight of the 16-Cell Table"), '1');
     dialog::add_action(dialog::add_confirmation([] {
       popScreenAll();
